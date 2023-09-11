@@ -3,10 +3,11 @@
     public class Category
     {
         public int Id { get; set; }
-        public string userId { get; set; }
-        public string name { get; set; }
-        public DateTime date { get; set; }
-        public decimal budget { get; set; }
-        public decimal currentSpend { get; set; }
+        public string UserId { get; set; }
+        public string Name { get; set; }
+        public DateTime Date { get; set; }
+        public decimal Budget { get; set; }
+        public decimal CurrentSpend { get; set; }
+        public List<Expense>? Expenses { get; set; }
     }
 }
