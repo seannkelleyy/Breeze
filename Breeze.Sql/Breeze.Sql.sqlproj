@@ -57,4 +57,12 @@
   <ItemGroup>
     <Folder Include="Properties" />
   </ItemGroup>
+  <ItemGroup>
+    <Build Include="user.sql" />
+    <Build Include="expense.sql" />
+    <Build Include="category.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="Breeze.Sql.refactorlog" />
+  </ItemGroup>
 </Project>
