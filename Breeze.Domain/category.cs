@@ -8,6 +8,7 @@
         public DateTime Date { get; set; }
         public decimal Budget { get; set; }
         public decimal CurrentSpend { get; set; }
+        public int BudgetId { get; set; }
         public List<Expense>? Expenses { get; set; }
     }
 }

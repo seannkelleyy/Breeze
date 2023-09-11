@@ -7,7 +7,9 @@ namespace Breeze.Data
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Expense> Expenses { get; set; }
+        public DbSet<Income> Incomes { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Budget> Budgets { get; set; }
 
         public BreezeContext(DbContextOptions<BreezeContext> options) : base
             (options)
@@ -17,9 +19,11 @@ namespace Breeze.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
-            modelBuilder.Entity<Category>().ToTable("Category");
             modelBuilder.Entity<User>().ToTable("User");
+            modelBuilder.Entity<Category>().ToTable("Category");
             modelBuilder.ApplyConfiguration(new ExpenseConfiguration());
+            modelBuilder.ApplyConfiguration(new IncomeConfiguration());
+            modelBuilder.ApplyConfiguration(new BudgetConfiguration());
 
         }
     }
