@@ -7,4 +7,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="categoryId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ea80d186-2d11-4bbe-b199-18b3bf0e2381" ChangeDateTime="09/11/2023 17:10:17">
+    <Property Name="ElementName" Value="[dbo].[Income].[Use]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Income]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="userId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="046298e6-a75d-49b0-9b45-3c91a41647eb" ChangeDateTime="09/11/2023 18:02:00">
+    <Property Name="ElementName" Value="[dbo].[Income].[categoryId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Income]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="budgetId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9123bd9f-6902-4f0b-95e7-4c22980d68ed" ChangeDateTime="09/11/2023 18:04:00">
+    <Property Name="ElementName" Value="[dbo].[Budget].[string]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Budget]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="userId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ed66654b-3a20-4409-929d-4e88a275eef7" ChangeDateTime="09/11/2023 18:13:27">
+    <Property Name="ElementName" Value="[dbo].[Expense].[Cost]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Expense]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Amount" />
+  </Operation>
 </Operations>
