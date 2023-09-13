@@ -12,6 +12,13 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="RequestResponseObjects\Expenses\" />
+    <Folder Include="RequestResponseObjects\Incomes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Breeze.Data\Breeze.Data.csproj" />
+    <ProjectReference Include="..\Breeze.Domain\Breeze.Domain.csproj" />
   </ItemGroup>
 
 </Project>
