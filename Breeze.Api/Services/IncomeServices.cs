@@ -17,7 +17,7 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public IncomeResponse GetIncomeByBudgetId(int budgetId)
+        public List<IncomeResponse> GetIncomeByBudgetId(int budgetId)
         {
             return db.Incomes
                 .Where(income => income.BudgetId == budgetId)
@@ -30,7 +30,7 @@ namespace Breeze.Api.Services
                     BudgetId = income.BudgetId,
                     Amount = income.Amount,
                 })
-                .First();
+                .ToList();
         }
 
         public void CreateIncome(IncomeRequest newIncome)
