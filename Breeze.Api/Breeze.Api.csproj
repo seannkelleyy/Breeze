@@ -13,7 +13,6 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="RequestResponseObjects\Expenses\" />
-    <Folder Include="RequestResponseObjects\Incomes\" />
   </ItemGroup>
 
   <ItemGroup>

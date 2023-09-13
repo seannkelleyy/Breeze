@@ -18,10 +18,10 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public CategoryResponse GetCategoryById(int id)
+        public CategoryResponse GetCategoryByBudgetId(int budgetId)
         {
             return db.Categories
-                .Where(category => category.Id == id)
+                .Where(category => category.BudgetId == budgetId)
                 .Select(category => new CategoryResponse
                 {
                     Id = category.Id,
