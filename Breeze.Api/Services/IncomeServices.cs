@@ -33,26 +33,30 @@ namespace Breeze.Api.Services
                 .ToList();
         }
 
-        public void CreateIncome(IncomeRequest newIncome)
+        public int CreateIncome(IncomeRequest newIncome)
         {
+            Income income;
             try
             {
-                db.Incomes.Add(new Income
+                income = new Income
                 {
                     UserId = newIncome.UserId,
                     Name = newIncome.Name,
                     Date = DateTime.Now,
                     BudgetId = newIncome.BudgetId,
                     Amount = newIncome.Amount,
-                });
+                };
+                db.Incomes.Add(income);
                 db.SaveChanges();
+                return income.Id;
             }catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return -1;
             }
         }
 
-        public void UpdateIncome(IncomeRequest updatedIncome)
+        public int UpdateIncome(IncomeRequest updatedIncome)
         {
             var income = db.Incomes.Find(updatedIncome.Id);
             try
@@ -62,17 +66,20 @@ namespace Breeze.Api.Services
                 income.Date = updatedIncome.Date;
                 db.Incomes.Update(income);
                 db.SaveChanges();
+                return income.Id;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return -1;
             }
         }
 
-        public void DeleteIncome(int incomeId)
+        public int DeleteIncome(int incomeId)
         {
             db.Incomes.Remove(db.Incomes.Find(incomeId));
             db.SaveChanges();
+            return incomeId;
         }
 
         public void DeleteIncomesForBudget(int budgetId)
