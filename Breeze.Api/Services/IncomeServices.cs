@@ -20,14 +20,14 @@ namespace Breeze.Api.Services
         public List<IncomeResponse> GetIncomeByBudgetId(int budgetId)
         {
             return db.Incomes
-                .Where(income => income.BudgetId == budgetId)
+                .Where(income => income.Budget.Id == budgetId)
                 .Select(income => new IncomeResponse
                 {
                     Id = income.Id,
                     UserId = income.UserId,
                     Name = income.Name,
                     Date = DateTime.Now,
-                    BudgetId = income.BudgetId,
+                    BudgetId = income.Budget.Id,
                     Amount = income.Amount,
                 })
                 .ToList();
@@ -38,18 +38,20 @@ namespace Breeze.Api.Services
             Income income;
             try
             {
+                var budget = db.Budgets.Find(newIncome.BudgetId);
                 income = new Income
                 {
                     UserId = newIncome.UserId,
                     Name = newIncome.Name,
                     Date = DateTime.Now,
-                    BudgetId = newIncome.BudgetId,
+                    Budget = budget,
                     Amount = newIncome.Amount,
                 };
                 db.Incomes.Add(income);
                 db.SaveChanges();
                 return income.Id;
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return -1;
@@ -86,7 +88,7 @@ namespace Breeze.Api.Services
         {
             db.Incomes
                 .RemoveRange(db.Incomes
-                .Where(income => income.BudgetId == budgetId));
+                .Where(income => income.Budget.Id == budgetId));
             db.SaveChanges();
         }
     }

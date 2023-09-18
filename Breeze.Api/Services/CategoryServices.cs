@@ -51,13 +51,14 @@ namespace Breeze.Api.Services
                 db.Categories.Add(category);
                 db.SaveChanges();
                 return category.Id;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return -1;
             }
         }
-         
+
         public int UpdateCategory(CategoryRequest updatedCategory)
         {
             var category = db.Categories.Find(updatedCategory.Id);
@@ -69,7 +70,8 @@ namespace Breeze.Api.Services
                 db.Categories.Update(category);
                 db.SaveChanges();
                 return category.Id;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return -1;

@@ -20,10 +20,10 @@ namespace Breeze.Api.Services
         public BudgetResponse GetBudget(string userId, DateTime date)
         {
             return db.Budgets
-                .Where(budget => budget.UserId == userId && budget.Date.Month == date.Month && budget.Date.Year == date.Year)
+                .Where(budget => budget.User.UserId == userId && budget.Date.Month == date.Month && budget.Date.Year == date.Year)
                 .Select(budget => new BudgetResponse
                 {
-                    UserId = budget.UserId,
+                    UserId = budget.User.UserId,
                     Date = budget.Date,
                     MonthlyIncome = budget.MonthlyIncome,
                     MonthlySaving = budget.MonthlySaving,
@@ -33,13 +33,14 @@ namespace Breeze.Api.Services
                 .First();
         }
 
-        public DateOnly? CreateBudget (BudgetRequest newBudget)
+        public DateOnly? CreateBudget(BudgetRequest newBudget)
         {
             try
             {
+                var user = db.Users.Where(user => user.UserId == newBudget.UserId).FirstOrDefault();
                 db.Budgets.Add(new Budget
                 {
-                    UserId = newBudget.UserId,
+                    User = user,
                     Date = newBudget.Date,
                     MonthlyIncome = newBudget.MonthlyIncome,
                     MonthlySaving = newBudget.MonthlySaving,
@@ -47,14 +48,15 @@ namespace Breeze.Api.Services
                 });
                 db.SaveChanges();
                 return new DateOnly(newBudget.Date.Year, newBudget.Date.Month, newBudget.Date.Day);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return null;
             }
         }
 
-        public DateOnly? UpdateBudget (BudgetRequest updatedBudget)
+        public DateOnly? UpdateBudget(BudgetRequest updatedBudget)
         {
             var existingBudget = db.Budgets.Find(updatedBudget.Id);
             try
@@ -63,7 +65,8 @@ namespace Breeze.Api.Services
                 existingBudget.MonthlySaving = updatedBudget.MonthlySaving;
                 db.Budgets.Update(existingBudget);
                 return new DateOnly(updatedBudget.Date.Year, updatedBudget.Date.Month, updatedBudget.Date.Day);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return null;

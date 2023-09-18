@@ -30,7 +30,8 @@ namespace Breeze.Api.Controllers
             try
             {
                 return Ok(budgets.GetBudget(UserId, date));
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return BadRequest();
@@ -43,7 +44,8 @@ namespace Breeze.Api.Controllers
             try
             {
                 return Ok(budgets.CreateBudget(budgetRequest));
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return BadRequest();
@@ -56,7 +58,8 @@ namespace Breeze.Api.Controllers
             try
             {
                 return Ok(budgets.UpdateBudget(budgetRequest));
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return BadRequest();
@@ -71,7 +74,8 @@ namespace Breeze.Api.Controllers
                 incomes.DeleteIncomesForBudget(budgetId);
                 categories.DeleteCategoriesForBudget(budgetId);
                 return Ok(budgets.DeleteBudget(budgetId));
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return BadRequest();
