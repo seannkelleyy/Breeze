@@ -1,6 +1,6 @@
 ﻿using Breeze.Api.RequestResponseObjects.Expenses;
-using Breeze.Domain;
 using Breeze.Data;
+using Breeze.Domain;
 
 namespace Breeze.Api.Services
 {
@@ -17,42 +17,48 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public List<ExpenseResponse> GetExpenseByCategory(int CategoryId)
+        public List<ExpenseResponse> GetExpenseByCategoryId(int CategoryId)
         {
             return db.Expenses
-                .Where(expense => expense.CategoryId == CategoryId)
+                .Where(expense => expense.Category.Id == CategoryId)
                 .Select(expense => new ExpenseResponse
-                    {
-                        Id = expense.CategoryId,
-                        UserId = expense.UserId,
-                        Name = expense.Name,
-                        Date = expense.Date,
-                        CategoryId = CategoryId,
-                        Amount  = expense.Amount,
-                    })
+                {
+                    Id = expense.Category.Id,
+                    UserId = expense.UserId,
+                    Name = expense.Name,
+                    Date = expense.Date,
+                    CategoryId = CategoryId,
+                    Amount = expense.Amount,
+                })
                 .ToList();
         }
 
-        public void CreateExpense(ExpenseRequest newExpense)
+        public int CreateExpense(ExpenseRequest newExpense)
         {
             try
             {
-                db.Expenses.Add(new Expense
+                var category = db.Categories.Find(newExpense.CategoryId);
+                Expense expense = new Expense
                 {
                     UserId = newExpense.UserId,
                     Name = newExpense.Name,
                     Date = newExpense.Date,
-                    CategoryId = newExpense.CategoryId,
+                    Category = category,
                     Amount = newExpense.Amount,
-                });
+                };
+
+                db.Expenses.Add(expense);
                 db.SaveChanges();
-            } catch (Exception ex)
+                return expense.Id;
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return -1;
             }
         }
 
-        public void UpdateExpense(ExpenseRequest existingExpense)
+        public int UpdateExpense(ExpenseRequest existingExpense)
         {
             var expense = db.Expenses.Find(existingExpense.Id);
             try
@@ -63,23 +69,27 @@ namespace Breeze.Api.Services
 
                 db.Expenses.Update(expense);
                 db.SaveChanges();
-            } catch (Exception ex)
+                return expense.Id;
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return -1;
             }
         }
 
-        public void DeleteExpense(int expenseId)
+        public int DeleteExpense(int expenseId)
         {
-            db.Expenses.Remove(db.Expenses.Find(expenseId)); 
+            db.Expenses.Remove(db.Expenses.Find(expenseId));
             db.SaveChanges();
+            return expenseId;
         }
 
         public void DeleteExpenseForCategory(int categoryId)
-        { 
+        {
             db.Expenses
                 .RemoveRange(db.Expenses
-                .Where(expense => expense.CategoryId == categoryId));
+                .Where(expense => expense.Category.Id == categoryId));
             db.SaveChanges();
         }
     }

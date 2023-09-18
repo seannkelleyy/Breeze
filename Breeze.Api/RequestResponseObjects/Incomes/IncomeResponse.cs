@@ -1,6 +1,4 @@
-﻿using Breeze.Domain;
-
-namespace Breeze.Api.RequestResponseObjects.Incomes
+﻿namespace Breeze.Api.RequestResponseObjects.Incomes
 {
     public class IncomeResponse
     {

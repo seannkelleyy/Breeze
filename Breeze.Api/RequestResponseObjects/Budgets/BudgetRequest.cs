@@ -1,6 +1,4 @@
-﻿using Breeze.Domain;
-
-namespace Breeze.Api.RequestResponseObjects.Budgets
+﻿namespace Breeze.Api.RequestResponseObjects.Budgets
 {
     public class BudgetRequest
     {

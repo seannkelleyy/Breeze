@@ -20,39 +20,45 @@ namespace Breeze.Api.Services
         public List<IncomeResponse> GetIncomeByBudgetId(int budgetId)
         {
             return db.Incomes
-                .Where(income => income.BudgetId == budgetId)
+                .Where(income => income.Budget.Id == budgetId)
                 .Select(income => new IncomeResponse
                 {
                     Id = income.Id,
                     UserId = income.UserId,
                     Name = income.Name,
                     Date = DateTime.Now,
-                    BudgetId = income.BudgetId,
+                    BudgetId = income.Budget.Id,
                     Amount = income.Amount,
                 })
                 .ToList();
         }
 
-        public void CreateIncome(IncomeRequest newIncome)
+        public int CreateIncome(IncomeRequest newIncome)
         {
+            Income income;
             try
             {
-                db.Incomes.Add(new Income
+                var budget = db.Budgets.Find(newIncome.BudgetId);
+                income = new Income
                 {
                     UserId = newIncome.UserId,
                     Name = newIncome.Name,
                     Date = DateTime.Now,
-                    BudgetId = newIncome.BudgetId,
+                    Budget = budget,
                     Amount = newIncome.Amount,
-                });
+                };
+                db.Incomes.Add(income);
                 db.SaveChanges();
-            }catch (Exception ex)
+                return income.Id;
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return -1;
             }
         }
 
-        public void UpdateIncome(IncomeRequest updatedIncome)
+        public int UpdateIncome(IncomeRequest updatedIncome)
         {
             var income = db.Incomes.Find(updatedIncome.Id);
             try
@@ -62,24 +68,27 @@ namespace Breeze.Api.Services
                 income.Date = updatedIncome.Date;
                 db.Incomes.Update(income);
                 db.SaveChanges();
+                return income.Id;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return -1;
             }
         }
 
-        public void DeleteIncome(int incomeId)
+        public int DeleteIncome(int incomeId)
         {
             db.Incomes.Remove(db.Incomes.Find(incomeId));
             db.SaveChanges();
+            return incomeId;
         }
 
         public void DeleteIncomesForBudget(int budgetId)
         {
             db.Incomes
                 .RemoveRange(db.Incomes
-                .Where(income => income.BudgetId == budgetId));
+                .Where(income => income.Budget.Id == budgetId));
             db.SaveChanges();
         }
     }

@@ -1,6 +1,4 @@
-﻿using Breeze.Domain;
-
-namespace Breeze.Api.RequestResponseObjects.Expenses
+﻿namespace Breeze.Api.RequestResponseObjects.Expenses
 {
     public class ExpenseRequest
     {

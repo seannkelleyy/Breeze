@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Breeze.Domain;
+﻿using Breeze.Domain;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Breeze.Data

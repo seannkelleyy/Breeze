@@ -3,7 +3,7 @@
     public class Budget
     {
         public int Id { get; set; }
-        public string UserId { get; set; }
+        public User User { get; set; }
         public DateTime Date { get; set; }
         public decimal MonthlyIncome { get; set; }
         public decimal MonthlySaving { get; set; }
