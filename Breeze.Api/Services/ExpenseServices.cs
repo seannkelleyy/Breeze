@@ -17,7 +17,7 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public List<ExpenseResponse> GetExpenseByCategory(int CategoryId)
+        public List<ExpenseResponse> GetExpenseByCategoryId(int CategoryId)
         {
             return db.Expenses
                 .Where(expense => expense.CategoryId == CategoryId)
@@ -33,26 +33,30 @@ namespace Breeze.Api.Services
                 .ToList();
         }
 
-        public void CreateExpense(ExpenseRequest newExpense)
+        public int CreateExpense(ExpenseRequest newExpense)
         {
             try
             {
-                db.Expenses.Add(new Expense
+                Expense expense = new Expense
                 {
                     UserId = newExpense.UserId,
                     Name = newExpense.Name,
                     Date = newExpense.Date,
                     CategoryId = newExpense.CategoryId,
                     Amount = newExpense.Amount,
-                });
+                };
+
+                db.Expenses.Add(expense);
                 db.SaveChanges();
+                return expense.Id;
             } catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return -1;
             }
         }
 
-        public void UpdateExpense(ExpenseRequest existingExpense)
+        public int UpdateExpense(ExpenseRequest existingExpense)
         {
             var expense = db.Expenses.Find(existingExpense.Id);
             try
@@ -63,16 +67,19 @@ namespace Breeze.Api.Services
 
                 db.Expenses.Update(expense);
                 db.SaveChanges();
+                return expense.Id;
             } catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return -1;
             }
         }
 
-        public void DeleteExpense(int expenseId)
+        public int DeleteExpense(int expenseId)
         {
             db.Expenses.Remove(db.Expenses.Find(expenseId)); 
             db.SaveChanges();
+            return expenseId;
         }
 
         public void DeleteExpenseForCategory(int categoryId)

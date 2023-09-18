@@ -1,4 +1,4 @@
-﻿using Breeze.Api.RequestResponseObjects.Incomes;
+﻿using Breeze.Api.RequestResponseObjects.Expenses;
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -7,23 +7,23 @@ namespace Breeze.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class IncomeController : ControllerBase
+    public class ExpenseController : ControllerBase
     {
-        private readonly IncomeService incomes;
-        private readonly ILogger<IncomeController> _logger;
+        private readonly ExpenseService expenses;
+        private readonly ILogger<ExpenseController> _logger;
 
-        public IncomeController(IConfiguration config, ILogger<IncomeController> logger, BreezeContext breezeContext)
+        public ExpenseController(IConfiguration config, ILogger<ExpenseController> logger, BreezeContext breezeContext)
         {
-            incomes = new IncomeService(config, breezeContext, logger);
+            expenses = new ExpenseService(config, breezeContext, logger);
             _logger = logger;
         }
 
         [HttpGet]
-        public IActionResult GetIncome(int BudgetId)
+        public IActionResult GetExpsense(int CategoryId)
         {
             try
             {
-                return Ok(incomes.GetIncomeByBudgetId(BudgetId));
+                return Ok(expenses.GetExpenseByCategoryId(CategoryId));
             }
             catch (Exception ex)
             {
@@ -33,11 +33,11 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult PostIncome(IncomeRequest incomeRequest)
+        public IActionResult PostExpsense(ExpenseRequest expenseRequest)
         {
             try
             {
-                return Ok(incomes.CreateIncome(incomeRequest));
+                return Ok(expenses.CreateExpense(expenseRequest));
             }
             catch (Exception ex)
             {
@@ -47,11 +47,11 @@ namespace Breeze.Api.Controllers
 
         [HttpPatch]
 
-        public async Task<IActionResult> PatchIncome(int id, [FromBody] IncomeRequest incomeRequest)
+        public async Task<IActionResult> PatchExpsense(int id, [FromBody] ExpenseRequest expenseRequest)
         {
             try
             {
-                return Ok(incomes.UpdateIncome(incomeRequest));
+                return Ok(expenses.UpdateExpense(expenseRequest));
             }
             catch (Exception ex)
             {
@@ -60,11 +60,11 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpDelete]
-        public IActionResult DeleteIncome(int id)
+        public IActionResult DeleteExpsense(int id)
         {
             try
             {
-                return Ok(incomes.DeleteIncome(id));
+                return Ok(expenses.DeleteExpense(id));
             }
             catch (Exception ex)
             {
@@ -73,11 +73,11 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpDelete]
-        public IActionResult DeleteIncomesForBudget(int budgetId)
+        public IActionResult DeleteExpsensesForCategory(int categoryId)
         {
             try
             {
-                incomes.DeleteIncomesForBudget(budgetId);
+                expenses.DeleteExpenseForCategory(categoryId);
                 return Ok();
             }
             catch (Exception ex)
