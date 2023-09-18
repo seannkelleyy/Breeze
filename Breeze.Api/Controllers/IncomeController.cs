@@ -19,11 +19,11 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetIncome(int BudgetId)
+        public IActionResult GetIncome(int budgetId)
         {
             try
             {
-                return Ok(incomes.GetIncomeByBudgetId(BudgetId));
+                return Ok(incomes.GetIncomeByBudgetId(budgetId));
             }
             catch (Exception ex)
             {
@@ -47,7 +47,7 @@ namespace Breeze.Api.Controllers
 
         [HttpPatch]
 
-        public async Task<IActionResult> PatchIncome(int id, [FromBody] IncomeRequest incomeRequest)
+        public async Task<IActionResult> PatchIncome([FromBody] IncomeRequest incomeRequest)
         {
             try
             {

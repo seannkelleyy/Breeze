@@ -70,13 +70,14 @@ namespace Breeze.Api.Services
             }
         }
 
-        public void DeleteBudget(int budgetId)
+        public int DeleteBudget(int budgetId)
         {
 
             //call function that removes all incomes with this budget id
             //call function that removes all categories with this budget id
             db.Budgets.Remove(db.Budgets.Find(budgetId));
             db.SaveChanges();
+            return budgetId;
         }
     }
 }

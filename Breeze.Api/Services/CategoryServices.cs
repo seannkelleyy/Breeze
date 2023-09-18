@@ -34,11 +34,11 @@ namespace Breeze.Api.Services
                 .First();
         }
 
-        public void CreateCategory(CategoryRequest newCategory)
+        public int CreateCategory(CategoryRequest newCategory)
         {
             try
             {
-                db.Categories.Add(new Category
+                Category category = new Category
                 {
                     UserId = newCategory.UserId,
                     Name = newCategory.Name,
@@ -46,15 +46,19 @@ namespace Breeze.Api.Services
                     Budget = newCategory.Budget,
                     CurrentSpend = newCategory.CurrentSpend,
                     BudgetId = newCategory.BudgetId,
-                });
+                };
+
+                db.Categories.Add(category);
                 db.SaveChanges();
+                return category.Id;
             } catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return -1;
             }
         }
          
-        public void UpdateCategory(CategoryRequest updatedCategory)
+        public int UpdateCategory(CategoryRequest updatedCategory)
         {
             var category = db.Categories.Find(updatedCategory.Id);
             try
@@ -64,24 +68,28 @@ namespace Breeze.Api.Services
                 category.CurrentSpend = updatedCategory.CurrentSpend;
                 db.Categories.Update(category);
                 db.SaveChanges();
+                return category.Id;
             } catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return -1;
             }
         }
 
-        public void DeleteCategory(int categoryId)
+        public int DeleteCategory(int categoryId)
         {
             db.Categories.Remove(db.Categories.Find(categoryId));
             db.SaveChanges();
+            return categoryId;
         }
 
-        public void DeleteCategoriesForBudget(int budgetId)
+        public int DeleteCategoriesForBudget(int budgetId)
         {
             db.Categories
                 .RemoveRange(db.Categories
                 .Where(category => category.BudgetId == budgetId));
             db.SaveChanges();
+            return budgetId;
         }
     }
 }
