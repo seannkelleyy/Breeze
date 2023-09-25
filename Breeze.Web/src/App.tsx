@@ -1,4 +1,5 @@
 import LandingPage from './components/landing/LandingPage'
+import HomePage from './components/homePage/HomePage'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import './App.css'
@@ -12,8 +13,8 @@ const App = () => {
 					element={<LandingPage />}
 				/>
 				<Route
-					path='/LandingPage'
-					element={<LandingPage />}
+					path='/Breeze'
+					element={<HomePage />}
 				/>
 			</Routes>
 		</BrowserRouter>
@@ -21,4 +22,3 @@ const App = () => {
 }
 
 export default App
-

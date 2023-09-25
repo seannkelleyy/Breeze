@@ -10,11 +10,10 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 			domain='dev-r15wsyccxyjfwrqm.us.auth0.com'
 			clientId='Osw8qGrmXjQe3kYYcL0ca3FdUqB9LeVd'
 			authorizationParams={{
-				redirect_uri: window.location.origin,
+				redirect_uri: 'http://localhost:5173/Breeze',
 			}}
 		>
 			<App />
 		</Auth0Provider>
 	</React.StrictMode>,
 )
-
