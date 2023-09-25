@@ -1,0 +1,44 @@
+.home-page{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow-y: hidden;
+    height: 100vh;
+    gap: 1rem;
+}
+
+.item-container{
+    color: black;
+    background-color: rgb(255, 255, 255);
+    border-radius: .75rem;
+    padding: 1rem;
+    font-weight: 600;
+}
+
+.item-container ul{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border-radius: .75rem;
+}
+
+.expense-button{
+    background-color: white;
+    color: black;
+    font-size: 2rem;
+    border-radius: .75rem;
+    padding: 1rem;
+    cursor: pointer;
+}
+
+.income-button{
+    background-color: white;
+    color: black;
+    font-size: 1.5rem;
+    border-radius: .75rem;
+    padding: 1rem;
+    cursor: pointer;
+}
