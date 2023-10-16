@@ -1,8 +1,8 @@
 #root {
-  max-width: 1280px;
   padding: 0 1rem;
   text-align: center;
   overflow-y: hidden;
+  display: flex;
 }
 
 .page{
