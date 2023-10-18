@@ -5,6 +5,7 @@ export const GetBudget = async (date: Date): Promise<Budget> => {
 	const res = await axios.get<Budget>('https://localhost:7152/Budgets/' + date.toISOString()).then((response) => {
 		return response.data
 	})
+
 	return res
 }
 
