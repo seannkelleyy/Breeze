@@ -8,7 +8,7 @@ type categoryItemProps = {
 const CategoryItem = (props: categoryItemProps) => {
 	const [seeExpeneses, setSeeExpenses] = useState<boolean>(false)
 	return (
-		<div className='category-item'>
+		<div className='std-box'>
 			<div className='category-item-info'>
 				<h2>{props.category.name}</h2>
 				<h3>
@@ -23,9 +23,9 @@ const CategoryItem = (props: categoryItemProps) => {
 					}}
 				/>
 			</div>
-			<h3>Amount Left: ${props.category.budget - props.category.curentSpend}</h3>
+			<h3>Remaining: ${props.category.budget - props.category.curentSpend}</h3>
 			<button
-				className='category-item-button'
+				className='std-button'
 				onClick={() => setSeeExpenses(!seeExpeneses)}
 			>
 				See Expenses

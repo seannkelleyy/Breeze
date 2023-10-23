@@ -8,7 +8,7 @@ const Header = () => {
 			<h1 className='title'>
 				<u>BREEZE</u>
 			</h1>
-			<section className='item-container'>
+			<section className='date'>
 				<h2>
 					{today.getDate() + ' '}
 					{getMonthAsString(today.getMonth()) + ' '}

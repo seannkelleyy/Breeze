@@ -9,9 +9,19 @@
     gap: 1rem;
 }
 
+.date {
+    color: var(--darkText);
+    background-color: var(--neutral100);
+    width: auto;
+    border-radius: .75rem;
+    padding: 1rem;
+    font-weight: 600;
+}
+
 .item-container{
-    color: black;
-    background-color: rgb(255, 255, 255);
+    color: var(--darkText);
+    background-color: var(--neutral100);
+    width: 250px;
     border-radius: .75rem;
     padding: 1rem;
     font-weight: 600;
@@ -26,19 +36,25 @@
 }
 
 .expense-button{
-    background-color: white;
-    color: black;
-    font-size: 2rem;
+    background-color: var(--neutral100);
+    color: var(--darkText);
+    border: 2px solid var(--blue500);
+    font-size: 1.75rem;
     border-radius: .75rem;
     padding: 1rem;
     cursor: pointer;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
 }
 
 .income-button{
-    background-color: white;
-    color: black;
-    font-size: 1.5rem;
+    background-color: var(--neutral100);
+    color: var(--darkText);
+    border: 2px solid var(--blue500);
+    font-size: 1.75rem;
     border-radius: .75rem;
     padding: 1rem;
     cursor: pointer;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
 }
