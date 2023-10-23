@@ -35,6 +35,18 @@ h1 {
   line-height: 1.1;
 }
 
+h2 {
+  margin: .5rem;
+}
+
+h3 {
+  margin: .25rem;
+}
+
+h4 {
+  margin: .125rem;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
