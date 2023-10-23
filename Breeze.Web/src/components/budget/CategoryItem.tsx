@@ -30,17 +30,22 @@ const CategoryItem = (props: categoryItemProps) => {
 			>
 				See Expenses
 			</button>
-			{seeExpeneses
-				? props.category.expenses
-					? props.category.expenses.map((expense, index) => (
-							<div key={index}>
-								<h4>Name: {expense.name}</h4>
-								<h4>Amount: ${expense.amount}</h4>
-								<h4>Date: {expense.date.toLocaleDateString()}</h4>
-							</div>
-					  ))
-					: null
-				: null}
+			<section className='category-item-expenses'>
+				{seeExpeneses
+					? props.category.expenses
+						? props.category.expenses.map((expense, index) => (
+								<div
+									className='expense'
+									key={index}
+								>
+									<h4>Name: {expense.name}</h4>
+									<h4>Amount: ${expense.amount}</h4>
+									<h4>Date: {expense.date.toLocaleDateString()}</h4>
+								</div>
+						  ))
+						: null
+					: null}
+			</section>
 		</div>
 	)
 }

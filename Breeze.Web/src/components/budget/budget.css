@@ -10,6 +10,7 @@
 .budget-date {
     display: flex;
     justify-content: center;
+    align-items: center;
     flex-direction: row;
     gap: 1rem;
 }
@@ -36,6 +37,14 @@
     margin: auto;
     border-radius: .75rem;
     background-color: #747272;
+}
+
+.category-item-expenses {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: .5rem;
 }
 
 .category-item-info {
@@ -66,4 +75,11 @@
     color: black;
     height: 2rem;
     padding: 0rem .5rem ;
+}
+
+.expense {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+    border-radius: .5rem;
 }
