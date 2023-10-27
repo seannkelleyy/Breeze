@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { getMonthAsString } from '../../utils/GetMonth'
 import { FakeBudget } from '../../services/FakeData'
 import CategoryItem from './CategoryItem'
+import { Link, useNavigate } from 'react-router-dom'
 import './budget.css'
 // import { GetBudget } from '../../services/BudgetServices'
 //import { Budget } from '../../models/budget'
@@ -57,7 +58,17 @@ const CategorySection = () => {
 					/>
 				</button>
 			</div>
-			<div>{!budget ? <button className='std-button'>Create Budget</button> : <button className='std-button'>Edit Budget</button>}</div>
+			<div>
+				{!budget ? (
+					<Link to='/AddBudget'>
+						<button className='std-button'>Create Budget</button>
+					</Link>
+				) : (
+					<Link to='/AddBudget'>
+						<button className='std-button'>Edit Budget</button>
+					</Link>
+				)}
+			</div>
 			<div className='std-box'>
 				<h2>This month at a glance</h2>
 				<h3>Total income: ${budget?.monthlyIncome}</h3>
