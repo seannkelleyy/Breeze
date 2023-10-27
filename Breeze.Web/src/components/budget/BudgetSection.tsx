@@ -1,10 +1,10 @@
 import { useState } from 'react'
-// import { GetBudget } from '../../services/BudgetServices'
 import { getMonthAsString } from '../../utils/GetMonth'
-//import { Budget } from '../../models/budget'
+import { FakeBudget } from '../../services/FakeData'
 import CategoryItem from './CategoryItem'
 import './budget.css'
-import { FakeBudget } from '../../services/FakeData'
+// import { GetBudget } from '../../services/BudgetServices'
+//import { Budget } from '../../models/budget'
 
 const CategorySection = () => {
 	const [budgetDate, setBudgetDate] = useState<Date>(new Date(Date.now()))
@@ -31,7 +31,7 @@ const CategorySection = () => {
 	}
 
 	return (
-		<>
+		<div className='budget'>
 			<div className='budget-date'>
 				<button
 					className='change-budget-button'
@@ -43,9 +43,9 @@ const CategorySection = () => {
 					/>
 				</button>
 				<div className='budget-date-box'>
-					<h2>
+					<h3>
 						{getMonthAsString(budgetDate.getMonth())} {budgetDate.getFullYear()}
-					</h2>
+					</h3>
 				</div>
 				<button
 					className='change-budget-button'
@@ -57,12 +57,14 @@ const CategorySection = () => {
 					/>
 				</button>
 			</div>
-			<div className='budget-highlight'>
-				<h2>Total spent this month: ${budget ? budget.monthlyIncome - budget.monthlySavings : 0}</h2>
-				<h2>Total saved this month: ${budget?.monthlySavings}</h2>
-				<h2>Total income this month: ${budget?.monthlyIncome}</h2>
+			<div>{!budget ? <button className='std-button'>Create Budget</button> : <button className='std-button'>Edit Budget</button>}</div>
+			<div className='std-box'>
+				<h2>This month at a glance</h2>
+				<h3>Total income: ${budget?.monthlyIncome}</h3>
+				<h3>Total spent: ${budget ? budget.monthlyIncome - budget.monthlySavings : 0}</h3>
+				<h3>Total saved: ${budget?.monthlySavings}</h3>
 			</div>
-			<div className='budget'>
+			<div className='categories'>
 				{budget?.categories.map((category, index) => (
 					<CategoryItem
 						key={index}
@@ -70,7 +72,7 @@ const CategorySection = () => {
 					/>
 				))}
 			</div>
-		</>
+		</div>
 	)
 }
 
