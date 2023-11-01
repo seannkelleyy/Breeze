@@ -1,8 +1,8 @@
 export type Expense = {
-	id: number
+	id?: number
 	name: string
 	amount: number
 	date: Date
 	categoryId: number
-	userId: string
+	userId?: string
 }

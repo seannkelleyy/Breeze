@@ -1,12 +1,11 @@
 import { Expense } from './expense'
 
 export type Category = {
-	id: number
+	id?: number
 	name: string
-	userId: string
-	budgetId: number
+	userId?: string
+	budgetId?: number
 	curentSpend: number
 	budget: number
-	date: Date
 	expenses: Expense[]
 }

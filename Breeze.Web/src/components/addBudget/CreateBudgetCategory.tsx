@@ -1,45 +1,39 @@
 import { useState } from 'react'
+import { Category } from '../../models/category'
+import { Budget } from '../../models/budget'
 
 type BudgetCategoryProps = {
-	createBudgetCategory: (budgetCategory: any) => void
-	addExpenese: (expense: any) => void
-	budgetId: number
+	budget: Budget
+	addTotalExpenses: (number: number) => void
 }
 
 export const BudgetCategory = (props: BudgetCategoryProps) => {
-	const [budgetCategory, setBudgetCategory] = useState({
-		name: '',
-		amount: 0,
-		budgetId: props.budgetId,
-	})
+	const [categoryName, setCategoryName] = useState<string>('')
+	const [categoryAmount, setCategoryAmount] = useState<number>(0)
 
-	const handleChange = (event: any) => {
-		setBudgetCategory({
-			...budgetCategory,
-			[event.target.name]: event.target.value,
-		})
+	const newCategory: Category = {
+		name: categoryName,
+		curentSpend: 0,
+		budget: categoryAmount,
+		expenses: [],
 	}
 
-	const handleSubmit = (event: any) => {
-		event.preventDefault()
-		props.createBudgetCategory(budgetCategory)
-		setBudgetCategory({
-			name: '',
-			amount: 0,
-			budgetId: props.budgetId,
-		})
+	const handleBlur = () => {
+		props.budget.categories.push(newCategory)
+		props.addTotalExpenses(categoryAmount)
 	}
-
 	return (
 		<div>
-			<form onSubmit={handleSubmit}>
+			<form onBlur={handleBlur}>
 				<label>
 					Name:
 					<input
 						type='text'
 						name='name'
-						value={budgetCategory.name}
-						onChange={handleChange}
+						value={categoryName}
+						onChange={(e) => {
+							setCategoryName(e.target.value)
+						}}
 					/>
 				</label>
 				<label>
@@ -47,8 +41,10 @@ export const BudgetCategory = (props: BudgetCategoryProps) => {
 					<input
 						type='number'
 						name='amount'
-						value={budgetCategory.amount}
-						onChange={handleChange}
+						value={categoryAmount}
+						onChange={(e) => {
+							setCategoryAmount(parseFloat(e.target.value))
+						}}
 					/>
 				</label>
 			</form>

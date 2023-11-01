@@ -1,7 +1,7 @@
 import LandingPage from './components/landing/LandingPage'
 import HomePage from './components/homePage/HomePage'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { AddBudgetPage } from './components/addBudget/addBudget'
+import { AddBudgetPage } from './components/addBudget/AddBudgetPage'
 
 const App = () => {
 	return (
@@ -16,7 +16,7 @@ const App = () => {
 					element={<HomePage />}
 				/>
 				<Route
-					path='/AddBudget'
+					path='/Breeze/AddBudget'
 					element={<AddBudgetPage />}
 				/>
 			</Routes>
