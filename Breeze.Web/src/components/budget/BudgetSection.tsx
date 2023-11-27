@@ -60,28 +60,29 @@ const CategorySection = () => {
 			</div>
 			<div>
 				{!budget ? (
-					<Link to='/AddBudget'>
+					<Link to='/Breeze/AddBudget'>
 						<button className='std-button'>Create Budget</button>
 					</Link>
 				) : (
-					<Link to='/AddBudget'>
+					<Link to='/Breeze/AddBudget'>
 						<button className='std-button'>Edit Budget</button>
 					</Link>
 				)}
 			</div>
 			<div className='std-box'>
 				<h2>This month at a glance</h2>
-				<h3>Total income: ${budget?.monthlyIncome}</h3>
+				<h3>Total income: ${budget ? budget.monthlyIncome : 0}</h3>
 				<h3>Total spent: ${budget ? budget.monthlyIncome - budget.monthlySavings : 0}</h3>
-				<h3>Total saved: ${budget?.monthlySavings}</h3>
+				<h3>Total saved: ${budget ? budget.monthlySavings : 0}</h3>
 			</div>
 			<div className='categories'>
-				{budget?.categories.map((category, index) => (
-					<CategoryItem
-						key={index}
-						category={category}
-					/>
-				))}
+				{budget &&
+					budget.categories.map((category, index) => (
+						<CategoryItem
+							key={index}
+							category={category}
+						/>
+					))}
 			</div>
 		</div>
 	)

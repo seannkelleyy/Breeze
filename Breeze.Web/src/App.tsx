@@ -1,7 +1,7 @@
 import LandingPage from './components/landing/LandingPage'
 import HomePage from './components/homePage/HomePage'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { AddBudgetPage } from './components/addBudget/AddBudgetPage'
+import { AddBudgetPage } from './components/addBudget/AddBudget'
 
 const App = () => {
 	return (

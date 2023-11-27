@@ -1,5 +1,3 @@
-import React, { useState } from 'react'
-
 type BudgetIncomeProps = {
 	setTotalIncome: (income: number) => void
 }

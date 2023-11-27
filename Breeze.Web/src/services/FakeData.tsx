@@ -14,7 +14,6 @@ export const FakeBudget: Budget = {
 			budgetId: 1,
 			curentSpend: 1000,
 			budget: 1000,
-			date: new Date(Date.now()),
 			expenses: [
 				{
 					id: 6,
@@ -33,7 +32,6 @@ export const FakeBudget: Budget = {
 			budgetId: 1,
 			curentSpend: 250,
 			budget: 500,
-			date: new Date(Date.now()),
 			expenses: [
 				{
 					id: 4,
@@ -60,7 +58,6 @@ export const FakeBudget: Budget = {
 			budgetId: 1,
 			curentSpend: 100,
 			budget: 130,
-			date: new Date(Date.now()),
 			expenses: [
 				{
 					id: 3,
@@ -79,7 +76,6 @@ export const FakeBudget: Budget = {
 			budgetId: 1,
 			curentSpend: 300,
 			budget: 350,
-			date: new Date(Date.now()),
 			expenses: [
 				{
 					id: 1,

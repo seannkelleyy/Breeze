@@ -10,3 +10,12 @@ export type Budget = {
 	categories: Category[]
 	incomes: Income[]
 }
+
+export const emptyBudget: Budget = {
+	userId: '',
+	date: new Date(),
+	monthlyIncome: 0,
+	monthlySavings: 0,
+	categories: [],
+	incomes: [],
+}
