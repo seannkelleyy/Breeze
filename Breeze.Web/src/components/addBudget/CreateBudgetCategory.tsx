@@ -23,11 +23,13 @@ export const BudgetCategory = (props: BudgetCategoryProps) => {
 		props.addTotalExpenses(categoryAmount)
 	}
 	return (
-		<div>
+		<section className='section-add-container'>
+			<h3>Category</h3>
 			<form onBlur={handleBlur}>
 				<label>
 					Name:
 					<input
+						className='breeze-input'
 						type='text'
 						name='name'
 						value={categoryName}
@@ -39,6 +41,7 @@ export const BudgetCategory = (props: BudgetCategoryProps) => {
 				<label>
 					Amount:
 					<input
+						className='breeze-input'
 						type='number'
 						name='amount'
 						value={categoryAmount}
@@ -48,6 +51,6 @@ export const BudgetCategory = (props: BudgetCategoryProps) => {
 					/>
 				</label>
 			</form>
-		</div>
+		</section>
 	)
 }

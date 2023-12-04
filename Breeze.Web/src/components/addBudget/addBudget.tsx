@@ -13,6 +13,7 @@ export const AddBudgetPage = () => {
 	const [totalIncome, setTotalIncome] = useState<number>(0)
 	const [totalExpenses, setTotalExpenses] = useState<number>(0)
 	const [numberOfCategories, setNumberOfCategories] = useState<number>(0)
+	const [numberOfIncomes, setNumberOfIncomes] = useState<number>(0)
 	const [budgetMonth, setBudgetMonth] = useState<string>(getMonthAsString(today.getMonth()))
 	const [budgetYear, setBudgetYear] = useState<number>(today.getFullYear())
 
@@ -29,12 +30,14 @@ export const AddBudgetPage = () => {
 					<h3>Income: ${totalIncome}</h3>
 					<h3>Expenses: ${totalExpenses}</h3>
 					<h3>Amount left to allocate: ${totalIncome - totalExpenses}</h3>
-					<h3>Number of Categories: ${numberOfCategories}</h3>
 					<h3>
-						Data: ${budgetMonth} {budgetYear}
+						Date: {budgetMonth} {budgetYear}
 					</h3>
 				</section>
-				<form onSubmit={handleSubmit}>
+				<form
+					className={'categories'}
+					onSubmit={handleSubmit}
+				>
 					<section className='budget-date'>
 						<label htmlFor='budget-month'>Month</label>
 						<select
@@ -64,7 +67,13 @@ export const AddBudgetPage = () => {
 						</select>
 					</section>
 					<section className='budget-income-creation'>
-						<BudgetIncome setTotalIncome={setTotalIncome} />
+						{Array.from({ length: numberOfIncomes }).map((_, index) => (
+							<BudgetIncome
+								key={index}
+								setTotalIncome={setTotalIncome}
+							/>
+						))}
+						<button onClick={() => setNumberOfIncomes(numberOfIncomes + 1)}>Add Income</button>
 					</section>
 					<section className='budget-category-creation'>
 						{Array.from({ length: numberOfCategories }).map((_, index) => (
