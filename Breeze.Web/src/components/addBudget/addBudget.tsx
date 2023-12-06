@@ -35,7 +35,7 @@ export const AddBudgetPage = () => {
 					</h3>
 				</section>
 				<form
-					className={'categories'}
+					className='categories'
 					onSubmit={handleSubmit}
 				>
 					<section className='budget-date'>
