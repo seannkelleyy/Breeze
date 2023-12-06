@@ -16,7 +16,7 @@ const App = () => {
 					element={<HomePage />}
 				/>
 				<Route
-					path='/Breeze/AddBudget'
+					path='/Breeze/AddBudget/:year/:month'
 					element={<AddBudgetPage />}
 				/>
 			</Routes>

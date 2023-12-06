@@ -4,6 +4,7 @@ import { FakeBudget } from '../../services/FakeData'
 import CategoryItem from './CategoryItem'
 import { Link, useNavigate } from 'react-router-dom'
 import './budget.css'
+import { months } from '../../utils/months'
 // import { GetBudget } from '../../services/BudgetServices'
 //import { Budget } from '../../models/budget'
 
@@ -58,17 +59,9 @@ const CategorySection = () => {
 					/>
 				</button>
 			</div>
-			<div>
-				{!budget ? (
-					<Link to='/Breeze/AddBudget'>
-						<button className='std-button'>Create Budget</button>
-					</Link>
-				) : (
-					<Link to='/Breeze/AddBudget'>
-						<button className='std-button'>Edit Budget</button>
-					</Link>
-				)}
-			</div>
+			<Link to={`/Breeze/AddBudget/${budgetDate.getFullYear()}/${months[budgetDate.getMonth()]}`}>
+				<button className='std-button'>Edit Budget</button>
+			</Link>
 			<div className='std-box'>
 				<h2>This month at a glance</h2>
 				<h3>Total income: ${budget ? budget.monthlyIncome : 0}</h3>
