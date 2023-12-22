@@ -9,10 +9,8 @@ export const AddBudgetPage = () => {
 	const { year, month } = useParams<{ year: string; month: string }>()
 	const budget = useBudget()
 	const updateBudget = useBudgetUpdate()
-	const [totalIncome, setTotalIncome] = useState<number>(0)
-	const [totalExpenses, setTotalExpenses] = useState<number>(0)
-	const [numberOfCategories, setNumberOfCategories] = useState<number>(0)
-	const [numberOfIncomes, setNumberOfIncomes] = useState<number>(0)
+	const [totalIncome, setTotalIncome] = useState<number>(10)
+	const [totalExpenses, setTotalExpenses] = useState<number>(90)
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -24,37 +22,19 @@ export const AddBudgetPage = () => {
 			<div className='page'>
 				<h1>Add Budget</h1>
 				<section className='budget-creation-progress'>
-					<h3>Income: ${totalIncome}</h3>
-					<h3>Expenses: ${totalExpenses}</h3>
-					<h3>Amount left to allocate: ${totalIncome - totalExpenses}</h3>
 					<h3>
 						Date: {month} {year}
 					</h3>
+					<h3>Income: ${totalIncome ? totalIncome : 0}</h3>
+					<h3>Expenses: ${totalExpenses ? totalExpenses : 0}</h3>
+					<div className={totalIncome - totalExpenses >= 0 ? 'amount-left-positive' : 'amount-left-negative'}>
+						<h3>Amount left to allocate: ${totalIncome && totalExpenses ? totalIncome - totalExpenses : 0}</h3>
+					</div>
 				</section>
 				<form
-					className='categories'
+					className='budget-creation-form'
 					onSubmit={handleSubmit}
-				>
-					<section className='budget-income-creation'>
-						{Array.from({ length: numberOfIncomes }).map((_, index) => (
-							<BudgetIncome
-								key={index}
-								setTotalIncome={setTotalIncome}
-							/>
-						))}
-						<button onClick={() => setNumberOfIncomes(numberOfIncomes + 1)}>Add Income</button>
-					</section>
-					<section className='budget-category-creation'>
-						{Array.from({ length: numberOfCategories }).map((_, index) => (
-							<BudgetCategory
-								key={index}
-								addTotalExpenses={setTotalExpenses}
-								budget={budget}
-							/>
-						))}
-						<button onClick={() => setNumberOfCategories(numberOfCategories + 1)}>Add Category</button>
-					</section>
-				</form>
+				></form>
 			</div>
 		</BudgetProvider>
 	)

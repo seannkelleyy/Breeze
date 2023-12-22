@@ -1,20 +1,30 @@
 .breeze-input {
     width: 100%;
     height: 40px;
-    border: 1px solid #ccc;
+    border: 1px solid back;
     border-radius: 4px;
     padding: 0 10px;
     font-size: 14px;
     box-sizing: border-box;
+    background-color: var(--blue300);
     margin-bottom: 10px;
 }
 
-.section-add-container {
+.budget-creation-progress {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    width: 90%;
+    outline: solid var(--border) 2px;
+    border-radius: .5em;
+}
+.section-add-container {
+    display: flex;
+    flex-direction: row;
     align-items: flex-start;
+    gap: 1em;
     width: 100%;
-    border: 2px solid #000000;
+    border: var(--border) solid 2px;
     border-radius: 8px;
     padding: .5em;
     margin-top: 1.5em;
@@ -25,4 +35,14 @@
     flex-direction: column;
     justify-content: space-between;
     width: 100%;
+}
+
+.amount-left-positive {
+    background-color: var(--green500);
+    border-radius: .25em;
+}
+
+.amount-left-negative {
+    background-color: var(--red500);
+    border-radius: .25em;
 }

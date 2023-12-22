@@ -4,5 +4,5 @@ export type Income = {
 	name: string
 	date: Date
 	amount: number
-	budgetId: number
+	budgetId?: number
 }
