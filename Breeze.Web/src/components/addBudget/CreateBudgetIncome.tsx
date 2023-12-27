@@ -9,7 +9,7 @@ type BudgetIncomeProps = {
 	Year: string
 }
 
-const BudgetIncome = (props: BudgetIncomeProps) => {
+export const BudgetIncome = (props: BudgetIncomeProps) => {
 	const [income, setIncome] = useState<Income>({
 		name: '',
 		date: new Date(),
@@ -44,5 +44,3 @@ const BudgetIncome = (props: BudgetIncomeProps) => {
 		</section>
 	)
 }
-
-export default BudgetIncome

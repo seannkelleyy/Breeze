@@ -20,7 +20,7 @@
   --blue300: #48cae4;
   --green500: #45b96d;
   --red500: #b84f4f;
-  --neutral100: #e0e0e0;
+  --neutral100: #f9f9f9;
   --neutral200: #c4c4c4;
   --neutral300: #9a9a9a;
   --neutral500: #5a5a5a;
@@ -29,7 +29,7 @@
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 3em;
   line-height: 1.1;
 }
 
@@ -66,6 +66,10 @@ button {
   width: auto;
 }
 
+.page-title {
+  position: relative;
+  left: -10%;
+}
 .std-box {
   display: flex;
   flex-direction: column;
