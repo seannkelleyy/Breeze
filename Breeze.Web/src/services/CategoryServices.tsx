@@ -2,6 +2,21 @@ import axios from 'axios'
 import { Category } from '../models/category'
 import { useEffect, useState } from 'react'
 
+export const GetCategory = (budgetId: number, categoryId: number): Category => {
+	const [result, setResult] = useState<Category>({} as Category)
+
+	useEffect(() => {
+		const fetchCategories = async () => {
+			const response = await axios.get<Category>(`https://localhost:7152/Categories/${budgetId}/${categoryId}}`)
+			setResult(response.data)
+		}
+
+		fetchCategories()
+	}, [budgetId, categoryId])
+
+	return result
+}
+
 export const GetCategories = (budgetId: number): Category[] => {
 	const [result, setResult] = useState<Category[]>([])
 

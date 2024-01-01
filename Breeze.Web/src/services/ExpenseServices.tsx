@@ -22,7 +22,7 @@ export const PostExpense = (expense: Expense) => {
 
 	useEffect(() => {
 		const postExpense = async () => {
-			const response = await axios.post<Expense>('https://localhost:7152/Expenses', expense)
+			const response = await axios.post<Expense>(`https://localhost:7152/${expense.categoryId}/Expenses/`)
 			if (response.status === 200) {
 				setResult(expense.id)
 			} else {
