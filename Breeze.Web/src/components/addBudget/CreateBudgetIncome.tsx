@@ -2,14 +2,8 @@ import { useState } from 'react'
 import { Income } from '../../models/income'
 import { useBudget } from '../budget/budgetContext/BudgetContext'
 
-type BudgetIncomeProps = {
-	setTotalIncome: (income: number) => void
-	onSubmit?: (income: Income) => void
-	Month: string
-	Year: string
-}
-
-export const BudgetIncome = (props: BudgetIncomeProps) => {
+export const BudgetIncome = () => {
+	const budget = useBudget()
 	const [income, setIncome] = useState<Income>({
 		name: '',
 		date: new Date(),
@@ -17,10 +11,6 @@ export const BudgetIncome = (props: BudgetIncomeProps) => {
 		budgetId: useBudget().id,
 	})
 
-	const handleIncomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setIncome({ ...income, amount: parseInt(e.target.value) })
-		props.setTotalIncome(parseInt(e.target.value))
-	}
 	return (
 		<section className='section-add-container'>
 			<input
@@ -37,10 +27,13 @@ export const BudgetIncome = (props: BudgetIncomeProps) => {
 				type='number'
 				id='income-amount'
 				placeholder='Income Amount'
-				onChange={(e) => {
-					handleIncomeChange(e)
+				onBlur={(e) => {
+					setIncome({ ...income, amount: parseInt(e.target.value) })
+					budget.monthlyIncome += income.amount
+					budget.incomes.push(income)
 				}}
 			/>
+			<p>{budget.monthlyIncome}</p>
 		</section>
 	)
 }

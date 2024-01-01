@@ -1,42 +1,75 @@
 import axios from 'axios'
 import { Income } from '../models/income'
+import { useEffect, useState } from 'react'
 
-export const GetIncomes = async (budgetId: number): Promise<Income[]> => {
-	const res = await axios.get<Income[]>('https://localhost:7152/Incomes/' + budgetId).then((response) => {
-		return response.data
-	})
-	return res
+export const GetIncomes = (budgetId: number): Income[] => {
+	const [result, setResult] = useState<Income[]>([])
+
+	useEffect(() => {
+		const fetchIncomes = async () => {
+			const response = await axios.get<Income[]>(`https://localhost:7152/Incomes/${budgetId}`)
+			setResult(response.data)
+		}
+
+		fetchIncomes()
+	}, [budgetId])
+
+	return result
 }
 
-export const PostIncome = async (income: Income) => {
-	const res = await axios.post<Income>('https://localhost:7152/Incomes', income).then((response) => {
-		if (response.status === 200) {
-			return income.id
-		} else {
-			return response.data
+export const PostIncome = (income: Income) => {
+	const [result, setResult] = useState<number | undefined>(undefined)
+
+	useEffect(() => {
+		const postIncome = async () => {
+			const response = await axios.post<Income>('https://localhost:7152/Incomes', income)
+			if (response.status === 200) {
+				setResult(income.id)
+			} else {
+				setResult(-1)
+			}
 		}
-	})
-	return res
+
+		postIncome()
+	}, [income])
+
+	return result
 }
 
-export const UpdateIncome = async (income: Income) => {
-	const res = await axios.put<Income>('https://localhost:7152/Incomes', income).then((response) => {
-		if (response.status === 200) {
-			return income.id
-		} else {
-			return response.data
+export const UpdateIncome = (income: Income) => {
+	const [result, setResult] = useState<number | undefined>(undefined)
+
+	useEffect(() => {
+		const updateIncome = async () => {
+			const response = await axios.put<Income>('https://localhost:7152/Incomes', income)
+			if (response.status === 200) {
+				setResult(income.id)
+			} else {
+				setResult(-1)
+			}
 		}
-	})
-	return res
+
+		updateIncome()
+	}, [income])
+
+	return result
 }
 
-export const DeleteIncome = async (id: number) => {
-	const res = await axios.delete<Income>('https://localhost:7152/Incomes/' + id).then((response) => {
-		if (response.status === 200) {
-			return id
-		} else {
-			return response.data
+export const DeleteIncome = (id: number) => {
+	const [result, setResult] = useState<number | undefined>(undefined)
+
+	useEffect(() => {
+		const deleteIncome = async () => {
+			const response = await axios.delete<Income>(`https://localhost:7152/Incomes/${id}`)
+			if (response.status === 200) {
+				setResult(id)
+			} else {
+				setResult(-1)
+			}
 		}
-	})
-	return res
+
+		deleteIncome()
+	}, [id])
+
+	return result
 }

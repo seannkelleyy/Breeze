@@ -6,3 +6,9 @@ export type Income = {
 	amount: number
 	budgetId?: number
 }
+
+export const emptyIncome: Income = {
+	name: '',
+	date: new Date(),
+	amount: 0,
+}

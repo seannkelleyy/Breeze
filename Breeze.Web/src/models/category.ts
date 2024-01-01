@@ -9,3 +9,10 @@ export type Category = {
 	budget: number
 	expenses: Expense[]
 }
+
+export const emptyCategory: Category = {
+	name: '',
+	curentSpend: 0,
+	budget: 0,
+	expenses: [],
+}
