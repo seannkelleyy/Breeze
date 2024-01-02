@@ -3,12 +3,12 @@ import { Income } from '../../models/income'
 import { useBudget } from '../budget/budgetContext/BudgetContext'
 
 export const BudgetIncome = () => {
-	const budget = useBudget()
+	const budgetContext = useBudget()
 	const [income, setIncome] = useState<Income>({
 		name: '',
 		date: new Date(),
 		amount: 0,
-		budgetId: useBudget().id,
+		budgetId: budgetContext.budget.id,
 	})
 
 	return (
@@ -29,11 +29,11 @@ export const BudgetIncome = () => {
 				placeholder='Income Amount'
 				onBlur={(e) => {
 					setIncome({ ...income, amount: parseInt(e.target.value) })
-					budget.monthlyIncome += income.amount
-					budget.incomes.push(income)
+					budgetContext.budget.monthlyIncome += income.amount
+					budgetContext.budget.incomes.push(income)
 				}}
 			/>
-			<p>{budget.monthlyIncome}</p>
+			<p>{budgetContext.budget.monthlyIncome}</p>
 		</section>
 	)
 }

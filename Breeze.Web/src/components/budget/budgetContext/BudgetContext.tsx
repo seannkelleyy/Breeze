@@ -9,8 +9,8 @@ import { DeleteIncome, GetIncomes, PostIncome, UpdateIncome } from '../../../ser
 import { DeleteExpense, GetExpenses, PostExpense, UpdateExpense } from '../../../services/ExpenseServices'
 import { DeleteCategory, GetCategories, PostCategory, UpdateCategory } from '../../../services/CategoryServices'
 
-type BudgetsContextType = {
-	budget: Budget | undefined
+type BudgetContextType = {
+	budget: Budget
 	getBudget: (date: Date) => void
 	getBudgetIncomes: (budgetId: number) => void
 	getBudgetCategories: (budgetId: number) => void
@@ -29,10 +29,10 @@ type BudgetsContextType = {
 	deleteExpense: (id: number) => void
 }
 
-const BudgetsContext = React.createContext<BudgetsContextType | Budget>(emptyBudget)
+const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContextType)
 
 export const useBudget = () => {
-	return useContext(BudgetsContext)
+	return useContext(BudgetContext)
 }
 
 export const BudgetsProvider = (children: React.ReactNode[] | React.ReactNode, date: Date) => {
@@ -107,7 +107,7 @@ export const BudgetsProvider = (children: React.ReactNode[] | React.ReactNode, d
 	}
 
 	return (
-		<BudgetsContext.Provider
+		<BudgetContext.Provider
 			value={{
 				budget,
 				getBudget,
@@ -129,6 +129,6 @@ export const BudgetsProvider = (children: React.ReactNode[] | React.ReactNode, d
 			}}
 		>
 			{children}
-		</BudgetsContext.Provider>
+		</BudgetContext.Provider>
 	)
 }
