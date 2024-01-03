@@ -14,12 +14,12 @@
     font-size: 1em;
     font-weight: 500;
     font-family: inherit;
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 8px;
     cursor: pointer;
 }
 
 .breeze-input {
-    width: 100%;
+    width: 10ch;
     height: 40px;
     border: 1px solid back;
     border-radius: 4px;
@@ -30,3 +30,11 @@
     margin-bottom: 10px;
 }
 
+.breeze-text {
+    text-wrap: nowrap;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--darkText);
+    margin-bottom: 0.5em;
+}

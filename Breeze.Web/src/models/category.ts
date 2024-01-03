@@ -6,13 +6,13 @@ export type Category = {
 	userId?: string
 	budgetId?: number
 	curentSpend: number
-	budget: number
+	amount: number
 	expenses: Expense[]
 }
 
 export const emptyCategory: Category = {
-	name: '',
+	name: 'Category Name',
 	curentSpend: 0,
-	budget: 0,
+	amount: 0,
 	expenses: [],
 }

@@ -8,7 +8,7 @@ export type Income = {
 }
 
 export const emptyIncome: Income = {
-	name: '',
+	name: 'Income Name',
 	date: new Date(),
 	amount: 0,
 }

@@ -6,12 +6,13 @@ type BreezeButtonProps = {
 }
 
 export const BreezeButton = (props: BreezeButtonProps) => {
+	const { text, onClick } = props
 	return (
 		<button
 			className='breeze-button'
-			onClick={props.onClick}
+			onClick={onClick}
 		>
-			{props.text}
+			{text}
 		</button>
 	)
 }

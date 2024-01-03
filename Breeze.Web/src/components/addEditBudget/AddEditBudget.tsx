@@ -1,8 +1,9 @@
 import { useParams } from 'react-router-dom'
-import { BudgetCategory } from './AddCategory'
-import { BudgetIncome } from './AddIncome'
+import { CategoryItem } from './CategoryItem'
+import { IncomeItem } from './IncomeItem'
 import './addEditBudget.css'
 import { BudgetProvider, useBudget } from '../../services/budgetContext/BudgetContext'
+import { IncomeItemsBox } from './IncomeItemsBox'
 
 export const AddBudgetPage = () => {
 	const { year, month } = useParams<{ year: string; month: string }>()
@@ -34,11 +35,12 @@ export const AddBudgetPage = () => {
 					className='budget-creation-form'
 					onSubmit={handleSubmit}
 				>
-					{budgetContext.budget.incomes.map((income) => (
-						<BudgetIncome key={income.id} />
-					))}
+					<IncomeItemsBox incomeItems={budgetContext.budget.incomes} />
 					{budgetContext.budget.categories.map((category) => (
-						<BudgetIncome key={category.id} />
+						<CategoryItem
+							key={category.id}
+							categoryItem={category}
+						/>
 					))}
 				</form>
 			</div>
