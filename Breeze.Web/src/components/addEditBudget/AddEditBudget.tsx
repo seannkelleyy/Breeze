@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
-import { BudgetCategory } from './CreateBudgetCategory'
-import { BudgetIncome } from './CreateBudgetIncome'
-import './addBudget.css'
+import { BudgetCategory } from './AddCategory'
+import { BudgetIncome } from './AddIncome'
+import './addEditBudget.css'
 import { BudgetProvider, useBudget } from '../../services/budgetContext/BudgetContext'
 
 export const AddBudgetPage = () => {

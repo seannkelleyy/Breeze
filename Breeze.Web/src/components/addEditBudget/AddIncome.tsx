@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { Income } from '../../models/income'
 import { useBudget } from '../../services/budgetContext/BudgetContext'
+import { BreezeButton } from '../shared/BreezeButton'
 
 export const BudgetIncome = () => {
 	const budgetContext = useBudget()
@@ -12,12 +13,16 @@ export const BudgetIncome = () => {
 		budgetId: budgetContext.budget.id,
 	})
 
+	const handleAdd = () => {
+		budgetContext.budget.monthlyIncome += income.amount
+		budgetContext.budget.incomes.push(income)
+	}
+
 	return (
 		<section className='section-add-container'>
 			<input
 				className='breeze-input'
 				type='text'
-				id='income-name'
 				placeholder='Income Name'
 				onChange={(e) => {
 					setIncome({ ...income, name: e.target.value })
@@ -26,7 +31,6 @@ export const BudgetIncome = () => {
 			<input
 				className='breeze-input'
 				type='number'
-				id='income-amount'
 				placeholder='Income Amount'
 				onChange={(e) => {
 					oldValue.current = budgetContext.budget.monthlyIncome
@@ -36,6 +40,12 @@ export const BudgetIncome = () => {
 				}}
 			/>
 			<p>{budgetContext.budget.monthlyIncome}</p>
+			<BreezeButton
+				text='Add'
+				onClick={() => {
+					handleAdd
+				}}
+			/>
 		</section>
 	)
 }
