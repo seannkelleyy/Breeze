@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Income } from '../../models/income'
-import { useBudget } from '../budget/budgetContext/BudgetContext'
+import { useBudget } from '../../services/budgetContext/BudgetContext'
 
 export const BudgetIncome = () => {
 	const budgetContext = useBudget()
+	const oldValue = useRef(budgetContext.budget.monthlyIncome)
 	const [income, setIncome] = useState<Income>({
 		name: '',
 		date: new Date(),
@@ -27,7 +28,8 @@ export const BudgetIncome = () => {
 				type='number'
 				id='income-amount'
 				placeholder='Income Amount'
-				onBlur={(e) => {
+				onChange={(e) => {
+					oldValue.current = budgetContext.budget.monthlyIncome
 					setIncome({ ...income, amount: parseInt(e.target.value) })
 					budgetContext.budget.monthlyIncome += income.amount
 					budgetContext.budget.incomes.push(income)

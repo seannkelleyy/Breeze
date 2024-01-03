@@ -1,14 +1,17 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useContext, useState } from 'react'
-import { Budget, emptyBudget } from '../../../models/budget'
-import { Income } from '../../../models/income'
-import { Category } from '../../../models/category'
-import { Expense } from '../../../models/expense'
-import { DeleteBudget, GetBudget, PostBudget, UpdateBudget } from '../../../services/BudgetServices'
-import { DeleteIncome, GetIncomes, PostIncome, UpdateIncome } from '../../../services/IncomeServices'
-import { DeleteExpense, GetExpenses, PostExpense, UpdateExpense } from '../../../services/ExpenseServices'
-import { DeleteCategory, GetCategories, PostCategory, UpdateCategory } from '../../../services/CategoryServices'
+import { Budget, emptyBudget } from '../../models/budget'
+import { Income } from '../../models/income'
+import { Category } from '../../models/category'
+import { Expense } from '../../models/expense'
+import { DeleteBudget, GetBudget, PostBudget, UpdateBudget } from '../BudgetServices'
+import { DeleteIncome, GetIncomes, PostIncome, UpdateIncome } from '../IncomeServices'
+import { DeleteExpense, GetExpenses, PostExpense, UpdateExpense } from '../ExpenseServices'
+import { DeleteCategory, GetCategories, PostCategory, UpdateCategory } from '../CategoryServices'
 
+type BudgetProviderProps = {
+	children: React.ReactNode[] | React.ReactNode
+}
 type BudgetContextType = {
 	budget: Budget
 	getBudget: (date: Date) => void
@@ -29,13 +32,13 @@ type BudgetContextType = {
 	deleteExpense: (id: number) => void
 }
 
-const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContextType)
+const BudgetContext = React.createContext<BudgetContextType>({ budget: emptyBudget } as BudgetContextType)
 
 export const useBudget = () => {
 	return useContext(BudgetContext)
 }
 
-export const BudgetsProvider = (children: React.ReactNode[] | React.ReactNode, date: Date) => {
+export const BudgetProvider = (props: BudgetProviderProps, date: Date) => {
 	const [budget, setBudget] = useState<Budget>(GetBudget(date) || emptyBudget)
 
 	// make it so budget is retrieved every 5 or so seconds??
@@ -128,7 +131,7 @@ export const BudgetsProvider = (children: React.ReactNode[] | React.ReactNode, d
 				deleteExpense,
 			}}
 		>
-			{children}
+			{props.children}
 		</BudgetContext.Provider>
 	)
 }
