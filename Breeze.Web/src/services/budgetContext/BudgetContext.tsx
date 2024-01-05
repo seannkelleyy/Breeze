@@ -1,23 +1,25 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { Budget, emptyBudget } from '../../models/budget'
 import { Income } from '../../models/income'
 import { Category } from '../../models/category'
 import { Expense } from '../../models/expense'
-import { DeleteBudget, GetBudget, PostBudget, UpdateBudget } from '../BudgetServices'
+import { DeleteBudget, useGetBudget, PostBudget, UpdateBudget } from '../BudgetServices'
 import { DeleteIncome, GetIncomes, PostIncome, UpdateIncome } from '../IncomeServices'
 import { DeleteExpense, GetExpenses, PostExpense, UpdateExpense } from '../ExpenseServices'
 import { DeleteCategory, GetCategories, PostCategory, UpdateCategory } from '../CategoryServices'
+import { FakeBudget } from '../FakeData'
 
 type BudgetProviderProps = {
 	children: React.ReactNode[] | React.ReactNode
 }
+
 type BudgetContextType = {
 	budget: Budget
-	getBudget: (date: Date) => void
-	getBudgetIncomes: (budgetId: number) => void
-	getBudgetCategories: (budgetId: number) => void
-	getCetegoryExpenses: (categoryId: number) => void
+	GetBudget: (date: Date) => Budget
+	getBudgetIncomes: (budgetId: number) => Income[]
+	getBudgetCategories: (budgetId: number) => Category[]
+	getCetegoryExpenses: (categoryId: number) => Expense[]
 	addBudget: (budget: Budget) => void
 	addIncome: (income: Income) => void
 	addCategory: (category: Category) => void
@@ -32,18 +34,27 @@ type BudgetContextType = {
 	deleteExpense: (id: number) => void
 }
 
-const BudgetContext = React.createContext<BudgetContextType>({ budget: emptyBudget } as BudgetContextType)
+const BudgetContext = React.createContext<BudgetContextType>(emptyBudget as unknown as BudgetContextType)
 
-export const useBudget = () => {
-	return useContext(BudgetContext)
+export const useBudget = (date: Date) => {
+	const [budget, setBudget] = useState<Budget>(emptyBudget)
+
+	const FetchBudget = async () => {
+		const response = await useGetBudget(date)
+		if (!response) return
+		setBudget(response)
+	}
+
+	FetchBudget()
+
+	return budget
 }
 
-export const BudgetProvider = (props: BudgetProviderProps, date: Date) => {
-	const [budget, setBudget] = useState<Budget>(GetBudget(date) || emptyBudget)
+export const BudgetProvider = (props: BudgetProviderProps) => {
+	const [budget, setBudget] = useState<Budget>(FakeBudget)
 
-	// make it so budget is retrieved every 5 or so seconds??
-	const getBudget = (date: Date) => {
-		const budget = GetBudget(date)
+	const GetBudget = (date: Date): Budget => {
+		const budget = useGetBudget(date)
 		if (!budget) return emptyBudget
 		setBudget(budget)
 		return budget
@@ -113,7 +124,7 @@ export const BudgetProvider = (props: BudgetProviderProps, date: Date) => {
 		<BudgetContext.Provider
 			value={{
 				budget,
-				getBudget,
+				GetBudget,
 				getBudgetIncomes,
 				getBudgetCategories,
 				getCetegoryExpenses,

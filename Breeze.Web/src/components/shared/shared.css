@@ -4,7 +4,7 @@
     background: var(--neutral100);
     color: var(--darkText);
     border-radius: .5rem;
-    padding: 0 1rem 1rem 1rem;
+    padding: 0 1em 1em 1em;
 }
 
 .breeze-button {
@@ -15,19 +15,25 @@
     font-weight: 500;
     font-family: inherit;
     box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 8px;
+    align-self: center;
     cursor: pointer;
 }
 
 .breeze-input {
     width: 10ch;
-    height: 40px;
-    border: 1px solid back;
-    border-radius: 4px;
-    padding: 0 10px;
-    font-size: 14px;
+    height: 2.5em;
+    border: none;
+    border-radius: .25em;
+    padding: 0 .5em;
+    font-size: 1em;
     box-sizing: border-box;
-    background-color: var(--neutral100);
-    margin-bottom: 10px;
+    color: var(--darkText);
+    background-color: var(--background);
+}
+
+.breeze-input:focus {
+    outline: none;
+    color: var(--focusText);
 }
 
 .breeze-text {
@@ -36,5 +42,5 @@
     font-weight: 500;
     font-family: inherit;
     color: var(--darkText);
-    margin-bottom: 0.5em;
+    margin: 0;
 }

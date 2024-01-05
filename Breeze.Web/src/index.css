@@ -14,6 +14,7 @@
   --background: #DAEAEF;
   --lightText: #e9e9e9;
   --darkText: #242424;
+  --focusText: #071225;
   --blue700: #0077b6;
   --blue500: #0096c7;
   --blue400: #00b4d8;
@@ -26,6 +27,10 @@
   --neutral500: #5a5a5a;
   --border: rgb(91,85,85, .5) ;
 
+}
+
+::placeholder {
+    color: var(--darkText);
 }
 
 h1 {
@@ -48,7 +53,6 @@ h4 {
 .page {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   text-align: center;
   padding: 0 1rem;

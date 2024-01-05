@@ -14,7 +14,7 @@ export const CategoryItem = (props: CategoryItemProps) => {
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.amount)
 
 	return (
-		<section className='section-add-container'>
+		<section className='budget-item'>
 			<BreezeText text={categoryItem.name} />
 			<BreezeInput
 				title='Income Amount'

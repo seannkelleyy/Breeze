@@ -1,20 +1,23 @@
+/* eslint-disable react-refresh/only-export-components */
 import axios from 'axios'
 import { Budget } from '../models/budget'
 import { useEffect, useState } from 'react'
+import { FakeBudget } from './FakeData'
 
-export const GetBudget = (date: Date): Budget | undefined => {
-	const [result, setResult] = useState<Budget | undefined>(undefined)
+export const useGetBudget = (date: Date) => {
+	const [budget, setBudget] = useState<Budget | undefined>(undefined)
 
 	useEffect(() => {
 		const fetchBudget = async () => {
 			const response = await axios.get<Budget>(`https://localhost:7152/Budgets/${date.toISOString()}`)
-			setResult(response.data)
+			setBudget(response.data)
 		}
 
 		fetchBudget()
 	}, [date])
 
-	return result
+	// change to budget when DB is set up
+	return FakeBudget
 }
 
 export const PostBudget = (budget: Budget) => {

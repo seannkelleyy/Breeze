@@ -1,26 +1,15 @@
 import { useState } from 'react'
-import { getMonthAsString } from '../../utils/GetMonth'
-import { FakeBudget } from '../../services/FakeData'
-import CategoryItem from './CategoryItem'
-import { Link, useNavigate } from 'react-router-dom'
+import { getMonthAsString } from '../../../utils/GetMonth'
+import { CategoryOverview } from './CategoryOverview'
+import { Link } from 'react-router-dom'
 import './budget.css'
-import { months } from '../../utils/months'
-// import { GetBudget } from '../../services/BudgetServices'
-//import { Budget } from '../../models/budget'
+import { months } from '../../../utils/months'
+import { BreezeButton } from '../../shared/BreezeButton'
+import { useBudget } from '../../../services/budgetContext/BudgetContext'
 
 const CategorySection = () => {
 	const [budgetDate, setBudgetDate] = useState<Date>(new Date(Date.now()))
-	const budget = FakeBudget
-	// const [budget, setBudget] = useState<Budget>()
-
-	// useEffect(() => {
-	// 	const fetchBudget = async () => {
-	// 		const result = await GetBudget(budgetDate)
-	// 		setBudget(result)
-	// 		console.log(result)
-	// 	}
-	// 	fetchBudget()
-	// }, [budgetDate])
+	const budget = useBudget(budgetDate)
 
 	const changeBudgetDate = (date: Date, direction: boolean) => {
 		const newDate = new Date(date)
@@ -59,19 +48,23 @@ const CategorySection = () => {
 					/>
 				</button>
 			</div>
-			<Link to={`/Breeze/AddBudget/${budgetDate.getFullYear()}/${months[budgetDate.getMonth()]}`}>
-				<button className='std-button'>Edit Budget</button>
+			<Link to={`/Breeze/Budget/${budgetDate.getFullYear()}/${months[budgetDate.getMonth()]}`}>
+				<BreezeButton
+					text='Edit Budget'
+					onClick={() => console.log('edit budget')}
+				/>
 			</Link>
 			<div className='std-box'>
 				<h2>This month at a glance</h2>
 				<h3>Total income: ${budget ? budget.monthlyIncome : 0}</h3>
 				<h3>Total spent: ${budget ? budget.monthlyIncome - budget.monthlySavings : 0}</h3>
 				<h3>Total saved: ${budget ? budget.monthlySavings : 0}</h3>
+				<h3>Check : {budget.id}</h3>
 			</div>
 			<div className='categories'>
 				{budget &&
 					budget.categories.map((category, index) => (
-						<CategoryItem
+						<CategoryOverview
 							key={index}
 							category={category}
 						/>
