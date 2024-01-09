@@ -1,6 +1,7 @@
 import { Goal } from '../../models/goal'
 import { goals } from '../../services/data/goals'
 import { BreezeCard } from '../shared/BreezeCard'
+import { BreezeList } from '../shared/BreezeList'
 import { BreezeText } from '../shared/BreezeText'
 import './homePage.css'
 
@@ -14,12 +15,11 @@ export const Goals = () => {
 				text='Goals'
 				type='small-heading'
 			/>
-			{/* TODO: Create and change this to BreezeList */}
-			<ul>
+			<BreezeList>
 				{goals.map((goal: Goal) => (
 					<li key={goal.id}>{goal.goal}</li>
 				))}
-			</ul>
+			</BreezeList>
 		</BreezeCard>
 	)
 }

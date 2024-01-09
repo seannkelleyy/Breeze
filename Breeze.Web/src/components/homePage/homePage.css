@@ -9,32 +9,6 @@
 	gap: 1rem;
 }
 
-.date {
-	color: var(--darkText);
-	background-color: var(--neutral100);
-	width: auto;
-	border-radius: 0.75rem;
-	padding: 1rem;
-	font-weight: 600;
-}
-
-.item-container {
-	color: var(--darkText);
-	background-color: var(--neutral100);
-	width: 250px;
-	border-radius: 0.75rem;
-	padding: 1rem;
-	font-weight: 600;
-}
-
-.item-container ul {
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-	border-radius: 0.75rem;
-}
-
 .add-buttons {
 	display: flex;
 	flex-direction: column;

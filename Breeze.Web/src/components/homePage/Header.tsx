@@ -3,6 +3,9 @@ import { getMonthAsString } from '../../services/utils/GetMonth'
 import { BreezeText } from '../shared/BreezeText'
 import { BreezeCard } from '../shared/BreezeCard'
 
+/**
+ * The header of the home page. Shows title and date.
+ */
 export const Header = () => {
 	const today = new Date()
 

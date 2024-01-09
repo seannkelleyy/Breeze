@@ -31,11 +31,12 @@
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	gap: 0.75rem;
 	background: var(--neutral100);
 	color: var(--darkText);
 	border-radius: 0.75rem;
 	padding: 1em;
-	max-width: 85%;
+	max-width: 90%;
 }
 
 .breeze-input {
@@ -53,6 +54,32 @@
 .breeze-input:focus {
 	outline: none;
 	color: var(--focusText);
+}
+
+.breeze-list {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+.breeze-list li {
+	font-size: 1.1em;
+}
+
+.breeze-progress-bar {
+	background-color: var(--neutral200);
+	border-radius: 0.5rem;
+	height: 1rem;
+	box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+	width: 100%;
+}
+
+.breeze-progress-bar-fill {
+	background-color: var(--blue500);
+	border-radius: 0.5rem;
+	height: 1rem;
+	width: 100%;
 }
 
 .breeze-text-small {

@@ -3,51 +3,83 @@ import { useState } from 'react'
 import { Category } from '../../../models/category'
 import { BreezeCard } from '../../shared/BreezeCard'
 import { BreezeButton } from '../../shared/BreezeButton'
+import { BreezeBox } from '../../shared/BreezeBox'
+import { BreezeText } from '../../shared/BreezeText'
+import { BreezeProgressBar } from '../../shared/BreezeProgressBar'
 
 type categoryItemProps = {
 	category: Category
 }
 
+/**
+ * Component that gives an overview of a category, including the name, amount, current spend, and expenses.
+ * @param props.category: The category to give an overview of.
+ */
 export const CategoryOverview = (props: categoryItemProps) => {
 	const { category } = props
 	const [seeExpeneses, setSeeExpenses] = useState<boolean>(false)
 	return (
-		<BreezeCard title='Category Overview'>
-			<div className='category-item-info'>
-				<h2>{category.name}</h2>
-				<h3>
-					${category.curentSpend} of ${category.amount}
-				</h3>
-			</div>
-			<div className='category-item-info-bar'>
-				<div
-					className='category-item-info-bar-fill'
-					style={{
-						width: `${(category.curentSpend / category.amount) * 100}%`,
-					}}
+		<BreezeCard
+			title='Category Overview'
+			style={{
+				width: '100%',
+			}}
+		>
+			<BreezeBox
+				title='category-item-info'
+				direction='row'
+			>
+				<BreezeText
+					text={category.name}
+					type='small-heading'
 				/>
-			</div>
-			<h3>Remaining: ${category.amount - category.curentSpend}</h3>
+				<BreezeText
+					text={`$${category.curentSpend} of $${category.amount}`}
+					type='large'
+				/>
+			</BreezeBox>
+			<BreezeProgressBar
+				title='Category Progress Bar'
+				percentage={(category.curentSpend / category.amount) * 100}
+			/>
+			<BreezeText
+				text={`Remaining: $${category.amount - category.curentSpend}`}
+				type='medium'
+			/>
 			<BreezeButton
 				text='See Expenses'
 				onClick={() => setSeeExpenses(!seeExpeneses)}
 			/>
-			<section className='category-item-expenses'>
+			<BreezeBox title='Category Item Expenses'>
 				{seeExpeneses
 					? category.expenses
 						? category.expenses.map((expense, index) => (
-								<div
-									className='expense'
+								<BreezeBox
+									title='Expense'
 									key={index}
+									style={{
+										borderBottom: '1px solid var(--border)',
+										width: '120%',
+										padding: '0.5rem',
+									}}
 								>
-									<h4>Name: {expense.name}</h4>
-									<h4>Amount: ${expense.amount}</h4>
-									<h4>Date: {expense.date.toLocaleDateString()}</h4>
-								</div>
+									<BreezeText
+										text={`Name: ${expense.name}`}
+										type='medium'
+									/>
+									<BreezeText
+										text={`Amount: $${expense.amount}`}
+										type='medium'
+									/>
+									<BreezeText
+										text={`Date: ${expense.date.toLocaleDateString()}`}
+										type='medium'
+									/>
+								</BreezeBox>
 						  ))
 						: null
 					: null}
-			</section>
+			</BreezeBox>
 		</BreezeCard>
 	)
 }

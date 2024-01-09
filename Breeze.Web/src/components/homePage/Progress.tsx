@@ -7,7 +7,12 @@ import './homePage.css'
  */
 export const Progress = () => {
 	return (
-		<BreezeCard title='Progress'>
+		<BreezeCard
+			title='Progress'
+			style={{
+				width: '80%',
+			}}
+		>
 			<BreezeText
 				text="Great Work! You're on pace to make your budget!"
 				type='medium'
