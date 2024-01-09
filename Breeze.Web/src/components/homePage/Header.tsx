@@ -1,22 +1,25 @@
 import './homePage.css'
 import { getMonthAsString } from '../../services/utils/GetMonth'
-const Header = () => {
+import { BreezeText } from '../shared/BreezeText'
+import { BreezeCard } from '../shared/BreezeCard'
+
+export const Header = () => {
 	const today = new Date()
 
 	return (
 		<>
-			<h1 className='title'>
-				<u>BREEZE</u>
-			</h1>
-			<section className='date'>
-				<h2>
-					{today.getDate() + ' '}
-					{getMonthAsString(today.getMonth()) + ' '}
-					{today.getFullYear()}
-				</h2>
-			</section>
+			<BreezeText
+				text={<u>BREEZE</u>}
+				type='title'
+			/>
+			<BreezeCard title='Date'>
+				<BreezeText
+					text={`${today.getDate() + ' '}
+					${getMonthAsString(today.getMonth()) + ' '}
+					${today.getFullYear()}`}
+					type='small-heading'
+				/>
+			</BreezeCard>
 		</>
 	)
 }
-
-export default Header

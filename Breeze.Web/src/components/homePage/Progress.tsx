@@ -1,14 +1,17 @@
+import { BreezeCard } from '../shared/BreezeCard'
+import { BreezeText } from '../shared/BreezeText'
 import './homePage.css'
 
 /**
  * This is a future feature that will calculate the user's progess towards their budget.
  */
-const Progress = () => {
+export const Progress = () => {
 	return (
-		<section className='item-container'>
-			<p>Great Work! You're on pace to make your budget!</p>
-		</section>
+		<BreezeCard title='Progress'>
+			<BreezeText
+				text="Great Work! You're on pace to make your budget!"
+				type='medium'
+			/>
+		</BreezeCard>
 	)
 }
-
-export default Progress

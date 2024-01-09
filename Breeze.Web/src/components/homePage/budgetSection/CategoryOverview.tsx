@@ -1,7 +1,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { useState } from 'react'
 import { Category } from '../../../models/category'
-import { BreezeBox } from '../../shared/BreezeBox'
+import { BreezeCard } from '../../shared/BreezeCard'
 import { BreezeButton } from '../../shared/BreezeButton'
 
 type categoryItemProps = {
@@ -12,7 +12,7 @@ export const CategoryOverview = (props: categoryItemProps) => {
 	const { category } = props
 	const [seeExpeneses, setSeeExpenses] = useState<boolean>(false)
 	return (
-		<BreezeBox title='Category Overview'>
+		<BreezeCard title='Category Overview'>
 			<div className='category-item-info'>
 				<h2>{category.name}</h2>
 				<h3>
@@ -48,6 +48,6 @@ export const CategoryOverview = (props: categoryItemProps) => {
 						: null
 					: null}
 			</section>
-		</BreezeBox>
+		</BreezeCard>
 	)
 }

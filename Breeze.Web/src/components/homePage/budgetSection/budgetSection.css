@@ -1,77 +1,44 @@
-.budget {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    gap: 1rem;
-    color: var(--darkText);
-    border-radius: .5rem;
-    padding: 1rem;
-    width: 300px;
-}
-
-.budget-date {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: row;
-    width: 300px;
-    gap: 1rem;
-}
-
-.budget-date-box {
-    border: 1px solid var(--darkText);
-    border-radius: .5rem;
-    background-color: var(--neutral100);
-    padding: .25rem .5rem ;
-}
-
-.categories {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
 .category-item-expenses {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: .5rem 0 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 0.5rem 0 0 0;
 }
 
 .category-item-info {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    height: 4rem;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	height: 4rem;
 }
 
 .change-budget-button {
-    border-radius: 5px;
-    background-color: var(--neutral100);
-    color: var(--darkText);
-    border: 1px solid var(--darkText);
-    height: 2rem;
-    padding: 0rem .5rem ;
+	border-radius: 5px;
+	background-color: var(--neutral100);
+	color: var(--darkText);
+	border: 1px solid var(--darkText);
+	height: 2rem;
+	padding: 0rem 0.5rem;
 }
 
 .expense {
-    display: flex;
-    flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 /* ------- Progress Bar ------- */
 .category-item-info-bar {
-    background-color: var(--neutral200);
-    border-radius: .5rem;
-    height: 1rem;
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-    width: 100%;
+	background-color: var(--neutral200);
+	border-radius: 0.5rem;
+	height: 1rem;
+	box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+	width: 100%;
 }
 
 .category-item-info-bar-fill {
-    background-color: var(--blue500);
-    border-radius: .5rem;
-    height: 1rem;
-    width: 100%;
+	background-color: var(--blue500);
+	border-radius: 0.5rem;
+	height: 1rem;
+	width: 100%;
 }

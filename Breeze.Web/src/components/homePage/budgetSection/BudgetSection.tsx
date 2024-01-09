@@ -4,13 +4,16 @@ import { CategoryOverview } from './CategoryOverview'
 import { Link } from 'react-router-dom'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { useBudget } from '../../../services/budgetContext/BudgetContext'
+import { BreezeCard } from '../../shared/BreezeCard'
 import './budgetSection.css'
+import { BreezeBox } from '../../shared/BreezeBox'
+import { BreezeText } from '../../shared/BreezeText'
 
 /**
  * This is the category section view of that home page that gives a brief
  * overview of the current budget.
  */
-const CategorySection = () => {
+export const BudgetSection = () => {
 	const [budgetDate, setBudgetDate] = useState<Date>(new Date(Date.now()))
 	const budget = useBudget(budgetDate)
 
@@ -25,46 +28,62 @@ const CategorySection = () => {
 	}
 
 	return (
-		<div className='budget'>
-			<div className='budget-date'>
-				<button
-					className='change-budget-button'
+		<BreezeBox title='budget'>
+			<BreezeBox
+				title='budget-date'
+				direction='row'
+			>
+				<BreezeButton
+					text={
+						<img
+							src='./arrow-left.svg'
+							alt='arrow-left'
+						/>
+					}
 					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, false))}
-				>
-					<img
-						src='./arrow-left.svg'
-						alt='arrow-left'
+				/>
+
+				<BreezeCard title='Budegt Date'>
+					<BreezeText
+						type='large'
+						text={`${getMonthAsString(budgetDate.getMonth())} ${budgetDate.getFullYear()}`}
 					/>
-				</button>
-				<div className='budget-date-box'>
-					<h3>
-						{getMonthAsString(budgetDate.getMonth())} {budgetDate.getFullYear()}
-					</h3>
-				</div>
-				<button
-					className='change-budget-button'
+				</BreezeCard>
+				<BreezeButton
+					text={
+						<img
+							src='./arrow-right.svg'
+							alt='arrow-right'
+						/>
+					}
 					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, true))}
-				>
-					<img
-						src='./arrow-right.svg'
-						alt='arrow-right'
-					/>
-				</button>
-			</div>
+				/>
+			</BreezeBox>
 			<Link to={`/Breeze/Budget/${budgetDate.getFullYear()}/${getMonthAsString(budgetDate.getMonth())}`}>
 				<BreezeButton
 					text='Edit Budget'
 					onClick={() => console.log('edit budget')}
 				/>
 			</Link>
-			<div className='std-box'>
-				<h2>This month at a glance</h2>
-				<h3>Total income: ${budget ? budget.monthlyIncome : 0}</h3>
-				<h3>Total spent: ${budget ? budget.monthlyIncome - budget.monthlySavings : 0}</h3>
-				<h3>Total saved: ${budget ? budget.monthlySavings : 0}</h3>
-				<h3>Check : {budget.id}</h3>
-			</div>
-			<div className='categories'>
+			<BreezeCard title='Glance'>
+				<BreezeText
+					type='small-heading'
+					text='This month at a glance'
+				/>
+				<BreezeText
+					type='large'
+					text={`Total income: ${budget ? budget.monthlyIncome : 0}`}
+				/>
+				<BreezeText
+					type='large'
+					text={`Total spent: ${budget ? budget.monthlyIncome - budget.monthlySavings : 0}`}
+				/>
+				<BreezeText
+					type='large'
+					text={`Total saved: ${budget ? budget.monthlySavings : 0}`}
+				/>
+			</BreezeCard>
+			<BreezeBox title='categories'>
 				{budget &&
 					budget.categories.map((category, index) => (
 						<CategoryOverview
@@ -72,9 +91,7 @@ const CategorySection = () => {
 							category={category}
 						/>
 					))}
-			</div>
-		</div>
+			</BreezeBox>
+		</BreezeBox>
 	)
 }
-
-export default CategorySection

@@ -1,17 +1,16 @@
-import { ReactNode } from 'react'
-import './shared.css'
-
 type BreezeBoxProps = {
-	children: ReactNode[] | ReactNode
 	title: string
+	direction?: 'row' | 'column'
+	children: React.ReactNode
 }
 
 export const BreezeBox = (props: BreezeBoxProps) => {
-	const { children, title } = props
+	const { title, children, direction } = props
+	const className = direction ? `breeze-box-${direction}` : 'breeze-box-column'
 	return (
 		<section
-			className='breeze-box'
 			title={title}
+			className={className}
 		>
 			{children}
 		</section>

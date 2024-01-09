@@ -1,15 +1,19 @@
 import LoginButton from '../auth0/Login'
-import './LandingPage.css'
+import { BreezeBox } from '../shared/BreezeBox'
+import { BreezeText } from '../shared/BreezeText'
 
-const LandingPage = () => {
+/**
+ * This is the page that the user is taken to when they first visit the site.
+ * They are prompted to login and then taken to the home page.
+ */
+export const LandingPage = () => {
 	return (
-		<div>
-			<h1 className='title'>
-				<u>BREEZE</u>
-			</h1>
+		<BreezeBox title='LandingPage'>
+			<BreezeText
+				text={<u>BREEZE</u>}
+				type='title'
+			/>
 			<LoginButton />
-		</div>
+		</BreezeBox>
 	)
 }
-
-export default LandingPage

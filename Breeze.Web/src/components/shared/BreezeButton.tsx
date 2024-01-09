@@ -1,7 +1,8 @@
+import { ReactNode } from 'react'
 import './shared.css'
 
 type BreezeButtonProps = {
-	text: string
+	text: string | ReactNode
 	onClick: () => void
 }
 
