@@ -1,39 +1,40 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { useState } from 'react'
-import { Category } from '../../models/category'
+import { Category } from '../../../models/category'
+import { BreezeBox } from '../../shared/BreezeBox'
+import { BreezeButton } from '../../shared/BreezeButton'
 
 type categoryItemProps = {
 	category: Category
 }
-const CategoryItem = (props: categoryItemProps) => {
+export const CategoryOverview = (props: categoryItemProps) => {
+	const { category } = props
 	const [seeExpeneses, setSeeExpenses] = useState<boolean>(false)
 	return (
-		<div className='std-box'>
+		<BreezeBox title='Category Overview'>
 			<div className='category-item-info'>
-				<h2>{props.category.name}</h2>
+				<h2>{category.name}</h2>
 				<h3>
-					${props.category.curentSpend} of ${props.category.budget}
+					${category.curentSpend} of ${category.amount}
 				</h3>
 			</div>
 			<div className='category-item-info-bar'>
 				<div
 					className='category-item-info-bar-fill'
 					style={{
-						width: `${(props.category.curentSpend / props.category.budget) * 100}%`,
+						width: `${(category.curentSpend / category.amount) * 100}%`,
 					}}
 				/>
 			</div>
-			<h3>Remaining: ${props.category.budget - props.category.curentSpend}</h3>
-			<button
-				className='std-button'
+			<h3>Remaining: ${category.amount - category.curentSpend}</h3>
+			<BreezeButton
+				text='See Expenses'
 				onClick={() => setSeeExpenses(!seeExpeneses)}
-			>
-				See Expenses
-			</button>
+			/>
 			<section className='category-item-expenses'>
 				{seeExpeneses
-					? props.category.expenses
-						? props.category.expenses.map((expense, index) => (
+					? category.expenses
+						? category.expenses.map((expense, index) => (
 								<div
 									className='expense'
 									key={index}
@@ -46,8 +47,6 @@ const CategoryItem = (props: categoryItemProps) => {
 						: null
 					: null}
 			</section>
-		</div>
+		</BreezeBox>
 	)
 }
-
-export default CategoryItem

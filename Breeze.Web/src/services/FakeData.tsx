@@ -5,6 +5,7 @@ export const FakeBudget: Budget = {
 	userId: '12ads2',
 	date: new Date(Date.now()),
 	monthlyIncome: 4000,
+	monthlyExpenses: 2500,
 	monthlySavings: 1000,
 	categories: [
 		{
@@ -13,8 +14,7 @@ export const FakeBudget: Budget = {
 			userId: '12ads2',
 			budgetId: 1,
 			curentSpend: 1000,
-			budget: 1000,
-			date: new Date(Date.now()),
+			amount: 1000,
 			expenses: [
 				{
 					id: 6,
@@ -32,8 +32,7 @@ export const FakeBudget: Budget = {
 			userId: '12ads2',
 			budgetId: 1,
 			curentSpend: 250,
-			budget: 500,
-			date: new Date(Date.now()),
+			amount: 500,
 			expenses: [
 				{
 					id: 4,
@@ -59,8 +58,7 @@ export const FakeBudget: Budget = {
 			userId: '12ads2',
 			budgetId: 1,
 			curentSpend: 100,
-			budget: 130,
-			date: new Date(Date.now()),
+			amount: 130,
 			expenses: [
 				{
 					id: 3,
@@ -78,8 +76,7 @@ export const FakeBudget: Budget = {
 			userId: '12ads2',
 			budgetId: 1,
 			curentSpend: 300,
-			budget: 350,
-			date: new Date(Date.now()),
+			amount: 350,
 			expenses: [
 				{
 					id: 1,

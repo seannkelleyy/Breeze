@@ -1,0 +1,50 @@
+.amount-left-positive {
+    background-color: var(--green500);
+    border-radius: .25em;
+}
+
+.amount-left-negative {
+    background-color: var(--red500);
+    border-radius: .25em;
+}
+
+.budget-creation-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    border-radius: .5em;
+    padding: .25em;
+}
+
+.budget-creation-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    outline: solid var(--border) 2px;
+    border-radius: .5em;
+    padding: .25em;
+}
+
+.budget-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    border-bottom: 1px solid var(--border);
+}
+
+/*Box that goes around groups of item */
+.item-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1em;
+    width:100%;
+    border: var(--border) solid 2px;
+    border-radius: 8px;
+    padding: .5em;
+    margin-top: 1.5em;
+}

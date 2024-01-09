@@ -1,42 +1,75 @@
 import axios from 'axios'
 import { Expense } from '../models/expense'
+import { useEffect, useState } from 'react'
 
-export const GetExpenses = async (categoryId: number): Promise<Expense[]> => {
-	const res = await axios.get<Expense[]>('https://localhost:7152/Expenses/' + categoryId).then((response) => {
-		return response.data
-	})
-	return res
+export const GetExpenses = (categoryId: number): Expense[] => {
+	const [result, setResult] = useState<Expense[]>([])
+
+	useEffect(() => {
+		const fetchExpenses = async () => {
+			const response = await axios.get<Expense[]>(`https://localhost:7152/Expenses/${categoryId}`)
+			setResult(response.data)
+		}
+
+		fetchExpenses()
+	}, [categoryId])
+
+	return result
 }
 
-export const PostExpense = async (expense: Expense) => {
-	const res = await axios.post<Expense>('https://localhost:7152/Expenses', expense).then((response) => {
-		if (response.status === 200) {
-			return expense.id
-		} else {
-			return response.data
+export const PostExpense = (expense: Expense) => {
+	const [result, setResult] = useState<number | undefined>(undefined)
+
+	useEffect(() => {
+		const postExpense = async () => {
+			const response = await axios.post<Expense>(`https://localhost:7152/${expense.categoryId}/Expenses/`)
+			if (response.status === 200) {
+				setResult(expense.id)
+			} else {
+				setResult(-1)
+			}
 		}
-	})
-	return res
+
+		postExpense()
+	}, [expense])
+
+	return result
 }
 
-export const UpdateExpense = async (expense: Expense) => {
-	const res = await axios.put<Expense>('https://localhost:7152/Expenses', expense).then((response) => {
-		if (response.status === 200) {
-			return expense.id
-		} else {
-			return response.data
+export const UpdateExpense = (expense: Expense) => {
+	const [result, setResult] = useState<number | undefined>(undefined)
+
+	useEffect(() => {
+		const updateExpense = async () => {
+			const response = await axios.put<Expense>('https://localhost:7152/Expenses', expense)
+			if (response.status === 200) {
+				setResult(expense.id)
+			} else {
+				setResult(-1)
+			}
 		}
-	})
-	return res
+
+		updateExpense()
+	}, [expense])
+
+	return result
 }
 
-export const DeleteExpense = async (id: number) => {
-	const res = await axios.delete<Expense>('https://localhost:7152/Expenses/' + id).then((response) => {
-		if (response.status === 200) {
-			return id
-		} else {
-			return response.data
+export const DeleteExpense = (id: number) => {
+	const [result, setResult] = useState<number | undefined>(undefined)
+
+	useEffect(() => {
+		const deleteExpense = async () => {
+			const response = await axios.delete<Expense>(`https://localhost:7152/Expenses/${id}`)
+			if (response.status === 200) {
+				setResult(id)
+			} else {
+				setResult(-1)
+			}
 		}
-	})
-	return res
+
+		deleteExpense()
+	}, [id])
+
+	return result
 }
