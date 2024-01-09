@@ -8,7 +8,6 @@ import { useDeleteBudget, useGetBudget, usePostBudget, useUpdateBudget } from '.
 import { useDeleteIncome, useGetIncomes, usePostIncome, useUpdateIncome } from '../apiHooks/IncomeServices'
 import { useDeleteExpense, useGetExpenses, usePostExpense, useUpdateExpense } from '../apiHooks/ExpenseServices'
 import { useDeleteCategory, useGetCategories, usePostCategory, useUpdateCategory } from '../apiHooks/CategoryServices'
-import { FakeBudget } from '../FakeData'
 
 // declares types used in this file
 type BudgetProviderProps = {
@@ -36,7 +35,7 @@ type BudgetContextType = {
 }
 
 // creates budget context and defaults to an empty budget
-const BudgetContext = React.createContext<BudgetContextType>(emptyBudget as unknown as BudgetContextType)
+export const BudgetContext = React.createContext<BudgetContextType>(emptyBudget as unknown as BudgetContextType)
 
 /*  this is what will be called when accessing the const
  *  ex: const budgetContext = useBudget(Date.now())
@@ -57,7 +56,7 @@ export const useBudget = (date: Date) => {
 }
 
 export const BudgetProvider = (props: BudgetProviderProps) => {
-	const [budget, setBudget] = useState<Budget>(FakeBudget)
+	const [budget, setBudget] = useState<Budget>(emptyBudget)
 
 	const GetBudget = (date: Date): Budget => {
 		const budget = useGetBudget(date)

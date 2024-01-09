@@ -2,6 +2,9 @@ import { Goal } from '../../models/goal'
 import { goals } from '../../services/data/goals'
 import './homePage.css'
 
+/**
+ * This is a future component that will display the user's goals.
+ */
 const Goals = () => {
 	return (
 		<section className='item-container'>

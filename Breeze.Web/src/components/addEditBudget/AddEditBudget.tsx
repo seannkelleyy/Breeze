@@ -1,16 +1,19 @@
 import { useParams } from 'react-router-dom'
-import './addEditBudget.css'
 import { useBudget } from '../../services/budgetContext/BudgetContext'
-import { IncomeItemsBox } from './IncomeItemsBox'
-import { CategoryItemsBox } from './CategoryItemBox'
-import { emptyBudget } from '../../models/budget'
+import { IncomeItemsBox } from './income/IncomeItemsBox'
+import { CategoryItemsBox } from './category/CategoryItemBox'
+import './addEditBudget.css'
 
+/**
+ * This is the page that allows a user to add or edit a budget.
+ */
 export const AddBudgetPage = () => {
 	const { year, month } = useParams<{ year: string; month: string }>()
 	const date = new Date(parseInt(year as string), parseInt(month as string))
 	const budgetContext = useBudget(date)
-	const budget = budgetContext ? budgetContext : emptyBudget
+	const budget = budgetContext
 
+	// TODO: Add handleSubmit function
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		console.log(e)

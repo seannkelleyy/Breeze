@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom'
-import { Category } from '../../models/category'
-import { BreezeButton } from '../shared/BreezeButton'
-import { BreezeText } from '../shared/BreezeText'
+import { Category } from '../../../models/category'
+import { BreezeButton } from '../../shared/BreezeButton'
+import { BreezeText } from '../../shared/BreezeText'
 import { CategoryItem } from './CategoryItem'
-import './addEditBudget.css'
 
 type CategoryItemsBoxProps = {
 	CategoryItems: Category[]

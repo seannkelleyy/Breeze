@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { Category } from '../../models/category'
-import { useBudget } from '../../services/budgetContext/BudgetContext'
-import { BreezeInput } from '../shared/BreezeInput'
-import { BreezeText } from '../shared/BreezeText'
+import { useContext, useState } from 'react'
+import { Category } from '../../../models/category'
+import { BreezeInput } from '../../shared/BreezeInput'
+import { BreezeText } from '../../shared/BreezeText'
+import { BudgetContext } from '../../../services/budgetContext/BudgetContext'
 
 type CategoryItemProps = {
 	categoryItem: Category
@@ -10,7 +10,8 @@ type CategoryItemProps = {
 
 export const CategoryItem = (props: CategoryItemProps) => {
 	const { categoryItem } = props
-	const budgetContext = useBudget()
+	const budgetContext = useContext(BudgetContext)
+	const { UpdateCategory } = budgetContext
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.amount)
 
 	return (
@@ -22,7 +23,7 @@ export const CategoryItem = (props: CategoryItemProps) => {
 				placeholder={categoryAmount.toString()}
 				onChange={(e) => setCategoryAmount(e.target.value as unknown as number)}
 				onBlur={() => {
-					budgetContext.updateCategory(categoryItem)
+					UpdateCategory(categoryItem)
 				}}
 			/>
 		</section>

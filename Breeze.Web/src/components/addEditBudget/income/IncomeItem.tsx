@@ -1,15 +1,16 @@
-import { useState } from 'react'
-import { Income } from '../../models/income'
-import { useBudget } from '../../services/budgetContext/BudgetContext'
-import { BreezeInput } from '../shared/BreezeInput'
-import { BreezeText } from '../shared/BreezeText'
+import { useContext, useState } from 'react'
+import { Income } from '../../../models/income'
+import { BreezeInput } from '../../shared/BreezeInput'
+import { BreezeText } from '../../shared/BreezeText'
+import { BudgetContext } from '../../../services/budgetContext/BudgetContext'
 
 type IncomeItemProps = {
 	incomeItem: Income
 }
 export const IncomeItem = (props: IncomeItemProps) => {
 	const { incomeItem } = props
-	const budgetContext = useBudget()
+	const budgetContext = useContext(BudgetContext)
+	const { UpdateIncome } = budgetContext
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)
 
 	return (
@@ -21,7 +22,7 @@ export const IncomeItem = (props: IncomeItemProps) => {
 				placeholder={incomeAmount.toString()}
 				onChange={(e) => setIncomeAmount(e.target.value as unknown as number)}
 				onBlur={() => {
-					budgetContext.updateIncome(incomeItem)
+					UpdateIncome(incomeItem)
 				}}
 			/>
 		</section>

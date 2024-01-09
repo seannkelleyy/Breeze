@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom'
-import { Income } from '../../models/income'
-import { BreezeButton } from '../shared/BreezeButton'
-import { BreezeText } from '../shared/BreezeText'
+import { Income } from '../../../models/income'
+import { BreezeButton } from '../../shared/BreezeButton'
+import { BreezeText } from '../../shared/BreezeText'
 import { IncomeItem } from './IncomeItem'
-import './addEditBudget.css'
 
 type IncomeItemsBoxProps = {
 	incomeItems: Income[]
