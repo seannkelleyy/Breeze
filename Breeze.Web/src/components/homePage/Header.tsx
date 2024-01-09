@@ -1,5 +1,5 @@
 import './homePage.css'
-import { getMonthAsString } from '../../utils/GetMonth'
+import { getMonthAsString } from '../../services/utils/GetMonth'
 const Header = () => {
 	const today = new Date()
 

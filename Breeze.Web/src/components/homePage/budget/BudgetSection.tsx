@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { getMonthAsString } from '../../../utils/GetMonth'
+import { getMonthAsString } from '../../../services/utils/GetMonth'
 import { CategoryOverview } from './CategoryOverview'
 import { Link } from 'react-router-dom'
 import './budget.css'
-import { months } from '../../../utils/months'
+import { months } from '../../../services/utils/months'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { useBudget } from '../../../services/budgetContext/BudgetContext'
 
