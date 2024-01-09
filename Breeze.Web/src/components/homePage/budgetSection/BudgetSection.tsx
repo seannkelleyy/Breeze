@@ -2,10 +2,14 @@ import { useState } from 'react'
 import { getMonthAsString } from '../../../services/utils/GetMonth'
 import { CategoryOverview } from './CategoryOverview'
 import { Link } from 'react-router-dom'
-import './budget.css'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { useBudget } from '../../../services/budgetContext/BudgetContext'
+import './budgetSection.css'
 
+/**
+ * This is the category section view of that home page that gives a brief
+ * overview of the current budget.
+ */
 const CategorySection = () => {
 	const [budgetDate, setBudgetDate] = useState<Date>(new Date(Date.now()))
 	const budget = useBudget(budgetDate)

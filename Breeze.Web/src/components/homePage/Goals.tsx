@@ -1,3 +1,5 @@
+import { Goal } from '../../models/goal'
+import { goals } from '../../services/data/goals'
 import './homePage.css'
 
 const Goals = () => {
@@ -5,9 +7,9 @@ const Goals = () => {
 		<section className='item-container'>
 			<h2>Goals</h2>
 			<ul>
-				<li>Pay Off House</li>
-				<li>Save 15% of income for retirement</li>
-				<li>Save $5,000 for vacation in Italy</li>
+				{goals.map((goal: Goal) => (
+					<li key={goal.id}>{goal.goal}</li>
+				))}
 			</ul>
 		</section>
 	)

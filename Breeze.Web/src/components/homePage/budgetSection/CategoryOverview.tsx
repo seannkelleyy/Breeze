@@ -7,6 +7,7 @@ import { BreezeButton } from '../../shared/BreezeButton'
 type categoryItemProps = {
 	category: Category
 }
+
 export const CategoryOverview = (props: categoryItemProps) => {
 	const { category } = props
 	const [seeExpeneses, setSeeExpenses] = useState<boolean>(false)
