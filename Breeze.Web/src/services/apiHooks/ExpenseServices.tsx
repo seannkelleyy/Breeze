@@ -1,13 +1,15 @@
+/* eslint-disable react-refresh/only-export-components */
 import axios from 'axios'
-import { Expense } from '../models/expense'
+import { Expense } from '../../models/expense'
 import { useEffect, useState } from 'react'
+import { BREEZE_ENV } from '../environment'
 
-export const GetExpenses = (categoryId: number): Expense[] => {
+export const useGetExpenses = (categoryId: number): Expense[] => {
 	const [result, setResult] = useState<Expense[]>([])
 
 	useEffect(() => {
 		const fetchExpenses = async () => {
-			const response = await axios.get<Expense[]>(`https://localhost:7152/Expenses/${categoryId}`)
+			const response = await axios.get<Expense[]>(`${BREEZE_ENV.BASE_URL}/Expenses/${categoryId}`)
 			setResult(response.data)
 		}
 
@@ -17,12 +19,12 @@ export const GetExpenses = (categoryId: number): Expense[] => {
 	return result
 }
 
-export const PostExpense = (expense: Expense) => {
+export const usePostExpense = (expense: Expense) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const postExpense = async () => {
-			const response = await axios.post<Expense>(`https://localhost:7152/${expense.categoryId}/Expenses/`)
+			const response = await axios.post<Expense>(`${BREEZE_ENV.BASE_URL}/${expense.categoryId}/Expenses/`)
 			if (response.status === 200) {
 				setResult(expense.id)
 			} else {
@@ -36,12 +38,12 @@ export const PostExpense = (expense: Expense) => {
 	return result
 }
 
-export const UpdateExpense = (expense: Expense) => {
+export const useUpdateExpense = (expense: Expense) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const updateExpense = async () => {
-			const response = await axios.put<Expense>('https://localhost:7152/Expenses', expense)
+			const response = await axios.put<Expense>(`${BREEZE_ENV.BASE_URL}/Expenses`, expense)
 			if (response.status === 200) {
 				setResult(expense.id)
 			} else {
@@ -55,12 +57,12 @@ export const UpdateExpense = (expense: Expense) => {
 	return result
 }
 
-export const DeleteExpense = (id: number) => {
+export const useDeleteExpense = (id: number) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const deleteExpense = async () => {
-			const response = await axios.delete<Expense>(`https://localhost:7152/Expenses/${id}`)
+			const response = await axios.delete<Expense>(`${BREEZE_ENV.BASE_URL}/Expenses/${id}`)
 			if (response.status === 200) {
 				setResult(id)
 			} else {

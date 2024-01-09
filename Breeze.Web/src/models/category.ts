@@ -10,6 +10,7 @@ export type Category = {
 	expenses: Expense[]
 }
 
+// This is used to inialize a new category
 export const emptyCategory: Category = {
 	name: 'Category Name',
 	curentSpend: 0,

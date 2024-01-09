@@ -4,12 +4,13 @@ import { Budget, emptyBudget } from '../../models/budget'
 import { Income } from '../../models/income'
 import { Category } from '../../models/category'
 import { Expense } from '../../models/expense'
-import { DeleteBudget, useGetBudget, PostBudget, UpdateBudget } from '../BudgetServices'
-import { DeleteIncome, GetIncomes, PostIncome, UpdateIncome } from '../IncomeServices'
-import { DeleteExpense, GetExpenses, PostExpense, UpdateExpense } from '../ExpenseServices'
-import { DeleteCategory, GetCategories, PostCategory, UpdateCategory } from '../CategoryServices'
+import { useDeleteBudget, useGetBudget, usePostBudget, useUpdateBudget } from '../apiHooks/BudgetServices'
+import { useDeleteIncome, useGetIncomes, usePostIncome, useUpdateIncome } from '../apiHooks/IncomeServices'
+import { useDeleteExpense, useGetExpenses, usePostExpense, useUpdateExpense } from '../apiHooks/ExpenseServices'
+import { useDeleteCategory, useGetCategories, usePostCategory, useUpdateCategory } from '../apiHooks/CategoryServices'
 import { FakeBudget } from '../FakeData'
 
+// declares types used in this file
 type BudgetProviderProps = {
 	children: React.ReactNode[] | React.ReactNode
 }
@@ -17,25 +18,30 @@ type BudgetProviderProps = {
 type BudgetContextType = {
 	budget: Budget
 	GetBudget: (date: Date) => Budget
-	getBudgetIncomes: (budgetId: number) => Income[]
-	getBudgetCategories: (budgetId: number) => Category[]
-	getCetegoryExpenses: (categoryId: number) => Expense[]
-	addBudget: (budget: Budget) => void
-	addIncome: (income: Income) => void
-	addCategory: (category: Category) => void
-	addExpense: (expense: Expense) => void
-	updateBudget: (budget: Budget) => void
-	updateIncome: (income: Income) => void
-	updateCategory: (category: Category) => void
-	updateExpense: (expense: Expense) => void
-	deleteBudget: (id: number) => void
-	deleteIncome: (id: number) => void
-	deleteCategory: (id: number) => void
-	deleteExpense: (id: number) => void
+	GetBudgetIncomes: (budgetId: number) => Income[]
+	GetBudgetCategories: (budgetId: number) => Category[]
+	GetCetegoryExpenses: (categoryId: number) => Expense[]
+	AddBudget: (budget: Budget) => void
+	AddIncome: (income: Income) => void
+	AddCategory: (category: Category) => void
+	AddExpense: (expense: Expense) => void
+	UpdateBudget: (budget: Budget) => void
+	UpdateIncome: (income: Income) => void
+	UpdateCategory: (category: Category) => void
+	UpdateExpense: (expense: Expense) => void
+	DeleteBudget: (id: number) => void
+	DeleteIncome: (id: number) => void
+	DeleteCategory: (id: number) => void
+	DeleteExpense: (id: number) => void
 }
 
+// creates budget context and defaults to an empty budget
 const BudgetContext = React.createContext<BudgetContextType>(emptyBudget as unknown as BudgetContextType)
 
+/*  this is what will be called when accessing the const
+ *  ex: const budgetContext = useBudget(Date.now())
+ *  this will return the budget for the date provided or an empty budget
+ */
 export const useBudget = (date: Date) => {
 	const [budget, setBudget] = useState<Budget>(emptyBudget)
 
@@ -60,64 +66,64 @@ export const BudgetProvider = (props: BudgetProviderProps) => {
 		return budget
 	}
 
-	const getBudgetCategories = (budgetId: number) => {
-		return GetCategories(budgetId)
+	const GetBudgetCategories = (budgetId: number) => {
+		return useGetCategories(budgetId)
 	}
 
-	const getBudgetIncomes = (budgetId: number) => {
-		return GetIncomes(budgetId)
+	const GetBudgetIncomes = (budgetId: number) => {
+		return useGetIncomes(budgetId)
 	}
 
-	const getCetegoryExpenses = (categoryId: number) => {
-		return GetExpenses(categoryId)
+	const GetCetegoryExpenses = (categoryId: number) => {
+		return useGetExpenses(categoryId)
 	}
 
-	const addBudget = (budget: Budget) => {
-		PostBudget(budget)
+	const AddBudget = (budget: Budget) => {
+		usePostBudget(budget)
 	}
 
-	const addIncome = (income: Income) => {
-		PostIncome(income)
+	const AddIncome = (income: Income) => {
+		usePostIncome(income)
 	}
 
-	const addCategory = (category: Category) => {
-		PostCategory(category)
+	const AddCategory = (category: Category) => {
+		usePostCategory(category)
 	}
 
-	const addExpense = (expense: Expense) => {
-		PostExpense(expense)
+	const AddExpense = (expense: Expense) => {
+		usePostExpense(expense)
 	}
 
-	const updateBudget = (budget: Budget) => {
-		UpdateBudget(budget)
+	const UpdateBudget = (budget: Budget) => {
+		useUpdateBudget(budget)
 	}
 
-	const updateIncome = (income: Income) => {
-		UpdateIncome(income)
+	const UpdateIncome = (income: Income) => {
+		useUpdateIncome(income)
 	}
 
-	const updateCategory = (category: Category) => {
-		UpdateCategory(category)
+	const UpdateCategory = (category: Category) => {
+		useUpdateCategory(category)
 	}
 
-	const updateExpense = (expense: Expense) => {
-		UpdateExpense(expense)
+	const UpdateExpense = (expense: Expense) => {
+		useUpdateExpense(expense)
 	}
 
-	const deleteBudget = (id: number) => {
-		DeleteBudget(id)
+	const DeleteBudget = (id: number) => {
+		useDeleteBudget(id)
 	}
 
-	const deleteIncome = (id: number) => {
-		DeleteIncome(id)
+	const DeleteIncome = (id: number) => {
+		useDeleteIncome(id)
 	}
 
-	const deleteCategory = (id: number) => {
-		DeleteCategory(id)
+	const DeleteCategory = (id: number) => {
+		useDeleteCategory(id)
 	}
 
-	const deleteExpense = (id: number) => {
-		DeleteExpense(id)
+	const DeleteExpense = (id: number) => {
+		useDeleteExpense(id)
 	}
 
 	return (
@@ -125,21 +131,21 @@ export const BudgetProvider = (props: BudgetProviderProps) => {
 			value={{
 				budget,
 				GetBudget,
-				getBudgetIncomes,
-				getBudgetCategories,
-				getCetegoryExpenses,
-				addBudget,
-				addIncome,
-				addCategory,
-				addExpense,
-				updateBudget,
-				updateIncome,
-				updateCategory,
-				updateExpense,
-				deleteBudget,
-				deleteIncome,
-				deleteCategory,
-				deleteExpense,
+				GetBudgetIncomes,
+				GetBudgetCategories,
+				GetCetegoryExpenses,
+				AddBudget,
+				AddIncome,
+				AddCategory,
+				AddExpense,
+				UpdateBudget,
+				UpdateIncome,
+				UpdateCategory,
+				UpdateExpense,
+				DeleteBudget,
+				DeleteIncome,
+				DeleteCategory,
+				DeleteExpense,
 			}}
 		>
 			{props.children}

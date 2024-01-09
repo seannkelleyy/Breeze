@@ -1,13 +1,14 @@
 import axios from 'axios'
-import { Income } from '../models/income'
+import { Income } from '../../models/income'
 import { useEffect, useState } from 'react'
+import { BREEZE_ENV } from '../environment'
 
-export const GetIncomes = (budgetId: number): Income[] => {
+export const useGetIncomes = (budgetId: number): Income[] => {
 	const [result, setResult] = useState<Income[]>([])
 
 	useEffect(() => {
 		const fetchIncomes = async () => {
-			const response = await axios.get<Income[]>(`https://localhost:7152/Incomes/${budgetId}`)
+			const response = await axios.get<Income[]>(`${BREEZE_ENV.BASE_URL}/Incomes/${budgetId}`)
 			setResult(response.data)
 		}
 
@@ -17,12 +18,12 @@ export const GetIncomes = (budgetId: number): Income[] => {
 	return result
 }
 
-export const PostIncome = (income: Income) => {
+export const usePostIncome = (income: Income) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const postIncome = async () => {
-			const response = await axios.post<Income>('https://localhost:7152/Incomes', income)
+			const response = await axios.post<Income>(`${BREEZE_ENV.BASE_URL}/Incomes/`, income)
 			if (response.status === 200) {
 				setResult(income.id)
 			} else {
@@ -36,12 +37,12 @@ export const PostIncome = (income: Income) => {
 	return result
 }
 
-export const UpdateIncome = (income: Income) => {
+export const useUpdateIncome = (income: Income) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const updateIncome = async () => {
-			const response = await axios.put<Income>('https://localhost:7152/Incomes', income)
+			const response = await axios.put<Income>(`${BREEZE_ENV.BASE_URL}/Incomes/`, income)
 			if (response.status === 200) {
 				setResult(income.id)
 			} else {
@@ -55,12 +56,12 @@ export const UpdateIncome = (income: Income) => {
 	return result
 }
 
-export const DeleteIncome = (id: number) => {
+export const useDeleteIncome = (id: number) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const deleteIncome = async () => {
-			const response = await axios.delete<Income>(`https://localhost:7152/Incomes/${id}`)
+			const response = await axios.delete<Income>(`${BREEZE_ENV.BASE_URL}/Incomes/${id}`)
 			if (response.status === 200) {
 				setResult(id)
 			} else {

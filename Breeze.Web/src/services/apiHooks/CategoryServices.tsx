@@ -1,13 +1,15 @@
+/* eslint-disable react-refresh/only-export-components */
 import axios from 'axios'
-import { Category } from '../models/category'
+import { Category } from '../../models/category'
 import { useEffect, useState } from 'react'
+import { BREEZE_ENV } from '../environment'
 
-export const GetCategory = (budgetId: number, categoryId: number): Category => {
+export const useGetCategory = (budgetId: number, categoryId: number): Category => {
 	const [result, setResult] = useState<Category>({} as Category)
 
 	useEffect(() => {
 		const fetchCategories = async () => {
-			const response = await axios.get<Category>(`https://localhost:7152/Categories/${budgetId}/${categoryId}}`)
+			const response = await axios.get<Category>(`${BREEZE_ENV.BASE_URL}/Categories/${budgetId}/${categoryId}}`)
 			setResult(response.data)
 		}
 
@@ -17,12 +19,12 @@ export const GetCategory = (budgetId: number, categoryId: number): Category => {
 	return result
 }
 
-export const GetCategories = (budgetId: number): Category[] => {
+export const useGetCategories = (budgetId: number): Category[] => {
 	const [result, setResult] = useState<Category[]>([])
 
 	useEffect(() => {
 		const fetchCategories = async () => {
-			const response = await axios.get<Category[]>(`https://localhost:7152/Categories/${budgetId}`)
+			const response = await axios.get<Category[]>(`${BREEZE_ENV.BASE_URL}/Categories/${budgetId}`)
 			setResult(response.data)
 		}
 
@@ -32,12 +34,12 @@ export const GetCategories = (budgetId: number): Category[] => {
 	return result
 }
 
-export const PostCategory = (category: Category) => {
+export const usePostCategory = (category: Category) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const postCategory = async () => {
-			const response = await axios.post<Category>('https://localhost:7152/Categories', category)
+			const response = await axios.post<Category>(`${BREEZE_ENV.BASE_URL}/Categories/`, category)
 			if (response.status === 200) {
 				setResult(category.id)
 			} else {
@@ -51,12 +53,12 @@ export const PostCategory = (category: Category) => {
 	return result
 }
 
-export const UpdateCategory = (category: Category) => {
+export const useUpdateCategory = (category: Category) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const updateCategory = async () => {
-			const response = await axios.put<Category>('https://localhost:7152/Categories', category)
+			const response = await axios.put<Category>(`${BREEZE_ENV.BASE_URL}/Categories/`, category)
 			if (response.status === 200) {
 				setResult(category.id)
 			} else {
@@ -70,12 +72,12 @@ export const UpdateCategory = (category: Category) => {
 	return result
 }
 
-export const DeleteCategory = (id: number) => {
+export const useDeleteCategory = (id: number) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const deleteCategory = async () => {
-			const response = await axios.delete<Category>(`https://localhost:7152/Categories/${id}`)
+			const response = await axios.delete<Category>(`${BREEZE_ENV.BASE_URL}/Categories/${id}`)
 			if (response.status === 200) {
 				setResult(id)
 			} else {

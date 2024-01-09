@@ -3,7 +3,6 @@ import { getMonthAsString } from '../../../services/utils/GetMonth'
 import { CategoryOverview } from './CategoryOverview'
 import { Link } from 'react-router-dom'
 import './budget.css'
-import { months } from '../../../services/utils/months'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { useBudget } from '../../../services/budgetContext/BudgetContext'
 
@@ -48,7 +47,7 @@ const CategorySection = () => {
 					/>
 				</button>
 			</div>
-			<Link to={`/Breeze/Budget/${budgetDate.getFullYear()}/${months[budgetDate.getMonth()]}`}>
+			<Link to={`/Breeze/Budget/${budgetDate.getFullYear()}/${getMonthAsString(budgetDate.getMonth())}`}>
 				<BreezeButton
 					text='Edit Budget'
 					onClick={() => console.log('edit budget')}
