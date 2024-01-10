@@ -1,6 +1,9 @@
 import { useAuth0 } from '@auth0/auth0-react'
 import { BreezeButton } from '../shared/BreezeButton'
 
+/**
+ * Simple logout button from Auth0 docs.
+ */
 const LogoutButton = () => {
 	const { logout } = useAuth0()
 

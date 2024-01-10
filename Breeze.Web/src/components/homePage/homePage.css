@@ -8,11 +8,3 @@
 	height: 100vh;
 	gap: 1rem;
 }
-
-.add-buttons {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	align-items: center;
-	gap: 1rem;
-}

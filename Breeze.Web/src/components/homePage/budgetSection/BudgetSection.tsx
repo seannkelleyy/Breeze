@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { useBudget } from '../../../services/budgetContext/BudgetContext'
 import { BreezeCard } from '../../shared/BreezeCard'
-import './budgetSection.css'
 import { BreezeBox } from '../../shared/BreezeBox'
 import { BreezeText } from '../../shared/BreezeText'
 

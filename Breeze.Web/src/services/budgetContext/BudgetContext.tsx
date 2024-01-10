@@ -55,6 +55,12 @@ export const useBudget = (date: Date) => {
 	return budget
 }
 
+/**
+ * Budget provider that provides the budget context to all children
+ * Example to access functions:
+ * const budgetContext = useContext(BudgetContext)
+ * const { UpdateCategory } = budgetContext
+ */
 export const BudgetProvider = (props: BudgetProviderProps) => {
 	const [budget, setBudget] = useState<Budget>(emptyBudget)
 

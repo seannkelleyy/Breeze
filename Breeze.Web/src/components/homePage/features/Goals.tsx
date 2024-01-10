@@ -1,8 +1,8 @@
-import { Goal } from '../../models/goal'
-import { goals } from '../../services/data/goals'
-import { BreezeCard } from '../shared/BreezeCard'
-import { BreezeList } from '../shared/BreezeList'
-import { BreezeText } from '../shared/BreezeText'
+import { Goal } from '../../../models/goal'
+import { goals } from '../../../services/data/goals'
+import { BreezeCard } from '../../shared/BreezeCard'
+import { BreezeList } from '../../shared/BreezeList'
+import { BreezeText } from '../../shared/BreezeText'
 import './homePage.css'
 
 /**

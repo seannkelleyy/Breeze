@@ -1,3 +1,4 @@
+import { BreezeBox } from '../shared/BreezeBox'
 import { BreezeButton } from '../shared/BreezeButton'
 import './homePage.css'
 
@@ -13,10 +14,7 @@ export const AddButtons = () => {
 		console.log('New Income')
 	}
 	return (
-		<section
-			title='Add Buttons'
-			className='add-buttons'
-		>
+		<BreezeBox title='Add Buttons'>
 			<BreezeButton
 				onClick={handleNewExpense}
 				text='Add New Expense'
@@ -27,6 +25,6 @@ export const AddButtons = () => {
 				text='Add New Income'
 				// TODO: Make large size
 			/>
-		</section>
+		</BreezeBox>
 	)
 }

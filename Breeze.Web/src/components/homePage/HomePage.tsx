@@ -1,8 +1,8 @@
 import { AddButtons } from './AddButtons'
-import { Goals } from './Goals'
+import { Goals } from './features/Goals'
 import { Header } from './Header'
 import { BudgetSection } from './budgetSection/BudgetSection'
-import { Progress } from './Progress'
+import { Progress } from './features/Progress'
 import './HomePage.css'
 import { BreezeBox } from '../shared/BreezeBox'
 

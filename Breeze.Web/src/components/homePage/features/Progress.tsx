@@ -1,5 +1,5 @@
-import { BreezeCard } from '../shared/BreezeCard'
-import { BreezeText } from '../shared/BreezeText'
+import { BreezeCard } from '../../shared/BreezeCard'
+import { BreezeText } from '../../shared/BreezeText'
 import './homePage.css'
 
 /**
