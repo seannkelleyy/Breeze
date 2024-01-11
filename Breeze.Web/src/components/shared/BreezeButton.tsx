@@ -4,6 +4,7 @@ import './shared.css'
 type BreezeButtonProps = {
 	text: string | ReactNode
 	onClick: () => void
+	size?: 'small' | 'medium' | 'large'
 	style?: React.CSSProperties
 }
 
@@ -14,11 +15,14 @@ type BreezeButtonProps = {
  * @param props.style: - Optional - The style of the button.
  */
 export const BreezeButton = (props: BreezeButtonProps) => {
-	const { text, onClick } = props
+	const { text, onClick, style, size } = props
+	const className = size ? 'breeze-button-' + size : 'breeze-button'
+
 	return (
 		<button
-			className='breeze-button'
+			className={className}
 			onClick={onClick}
+			style={style}
 		>
 			{text}
 		</button>

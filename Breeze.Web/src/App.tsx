@@ -1,7 +1,7 @@
 import { LandingPage } from './components/landing/LandingPage'
 import { HomePage } from './components/homePage/HomePage'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { EditBudgetPage } from './components/addEditBudget/EditBudget'
+import { EditBudgetPage } from './components/editBudget/EditBudget'
 import { BudgetProvider } from './services/budgetContext/BudgetContext'
 
 const App = () => {

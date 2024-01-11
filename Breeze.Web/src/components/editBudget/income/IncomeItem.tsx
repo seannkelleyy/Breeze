@@ -13,6 +13,7 @@ export const IncomeItem = (props: IncomeItemProps) => {
 	const budgetContext = useContext(BudgetContext)
 	const { UpdateIncome } = budgetContext
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)
+	const [incomeName, setIncomeName] = useState<string>(incomeItem.name)
 
 	return (
 		<BreezeBox
@@ -20,9 +21,18 @@ export const IncomeItem = (props: IncomeItemProps) => {
 			direction='row'
 			style={{ justifyContent: 'space-between', width: '100%', borderBottom: '1px solid var(--border)' }}
 		>
-			<BreezeText
-				type='medium'
-				text={incomeItem.name}
+			<BreezeInput
+				title='Income Name'
+				type='string'
+				placeholder={incomeName}
+				onChange={(e) => setIncomeName(e.target.value)}
+				onBlur={() => {
+					UpdateIncome(incomeItem)
+				}}
+				style={{
+					textAlign: 'left',
+					width: '75%',
+				}}
 			/>
 			<BreezeInput
 				title='Income Amount'

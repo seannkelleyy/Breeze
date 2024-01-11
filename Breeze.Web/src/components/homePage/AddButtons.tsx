@@ -1,6 +1,5 @@
 import { BreezeBox } from '../shared/BreezeBox'
 import { BreezeButton } from '../shared/BreezeButton'
-import './homePage.css'
 
 /**
  * Simple component that holds the add expense and add income buttons
@@ -18,12 +17,12 @@ export const AddButtons = () => {
 			<BreezeButton
 				onClick={handleNewExpense}
 				text='Add New Expense'
-				// TODO: Make large size
+				size='large'
 			/>
 			<BreezeButton
 				onClick={handleNewIncome}
 				text='Add New Income'
-				// TODO: Make large size
+				size='large'
 			/>
 		</BreezeBox>
 	)

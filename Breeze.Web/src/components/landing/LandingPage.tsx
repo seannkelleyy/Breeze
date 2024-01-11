@@ -1,4 +1,4 @@
-import LoginButton from '../auth0/Login'
+import LoginButton from '../authentication/Login'
 import { BreezeBox } from '../shared/BreezeBox'
 import { BreezeText } from '../shared/BreezeText'
 

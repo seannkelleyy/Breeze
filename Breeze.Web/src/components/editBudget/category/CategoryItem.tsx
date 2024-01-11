@@ -1,7 +1,6 @@
 import { useContext, useState } from 'react'
 import { Category } from '../../../models/category'
 import { BreezeInput } from '../../shared/BreezeInput'
-import { BreezeText } from '../../shared/BreezeText'
 import { BudgetContext } from '../../../services/budgetContext/BudgetContext'
 import { BreezeBox } from '../../shared/BreezeBox'
 
@@ -14,6 +13,7 @@ export const CategoryItem = (props: CategoryItemProps) => {
 	const budgetContext = useContext(BudgetContext)
 	const { UpdateCategory } = budgetContext
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.amount)
+	const [categoryName, setCategoryName] = useState<string>(categoryItem.name)
 
 	return (
 		<BreezeBox
@@ -21,12 +21,21 @@ export const CategoryItem = (props: CategoryItemProps) => {
 			direction='row'
 			style={{ justifyContent: 'space-between', width: '100%', borderBottom: '1px solid var(--border)' }}
 		>
-			<BreezeText
-				type='medium'
-				text={categoryItem.name}
+			<BreezeInput
+				title='Category Name'
+				type='string'
+				placeholder={categoryName}
+				onChange={(e) => setCategoryName(e.target.value)}
+				onBlur={() => {
+					UpdateCategory(categoryItem)
+				}}
+				style={{
+					textAlign: 'left',
+					width: '75%',
+				}}
 			/>
 			<BreezeInput
-				title='Income Amount'
+				title='Category Amount'
 				type='number'
 				placeholder={categoryAmount.toString()}
 				onChange={(e) => setCategoryAmount(e.target.value as unknown as number)}

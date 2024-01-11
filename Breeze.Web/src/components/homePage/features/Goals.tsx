@@ -3,7 +3,6 @@ import { goals } from '../../../services/data/goals'
 import { BreezeCard } from '../../shared/BreezeCard'
 import { BreezeList } from '../../shared/BreezeList'
 import { BreezeText } from '../../shared/BreezeText'
-import '../homePage.css'
 
 /**
  * This is a future component that will display the user's goals.
