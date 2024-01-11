@@ -3,24 +3,18 @@ import { useBudget } from '../../services/budgetContext/BudgetContext'
 import { IncomeItemsBox } from './income/IncomeItemsBox'
 import { CategoryItemsBox } from './category/CategoryItemBox'
 import { BreezeBox } from '../shared/BreezeBox'
-import './addEditBudget.css'
 import { BreezeText } from '../shared/BreezeText'
 import { BreezeCard } from '../shared/BreezeCard'
+import './editBudget.css'
 
 /**
  * This is the page that allows a user to add or edit a budget.
  */
-export const AddBudgetPage = () => {
+export const EditBudgetPage = () => {
 	const { year, month } = useParams<{ year: string; month: string }>()
 	const date = new Date(parseInt(year as string), parseInt(month as string))
 	const budgetContext = useBudget(date)
 	const budget = budgetContext
-
-	// TODO: Add handleSubmit function
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault()
-		console.log(e)
-	}
 
 	return (
 		<BreezeBox title='Edit Budget'>
@@ -48,13 +42,15 @@ export const AddBudgetPage = () => {
 					/>
 				</section>
 			</BreezeCard>
-			<form
-				className='budget-creation-form'
-				onSubmit={handleSubmit}
+			<BreezeBox
+				title='Budget Items'
+				style={{
+					width: '85%',
+				}}
 			>
 				<IncomeItemsBox incomeItems={budget.incomes} />
 				<CategoryItemsBox categoryItems={budget.categories} />
-			</form>
+			</BreezeBox>
 		</BreezeBox>
 	)
 }

@@ -26,6 +26,7 @@ export const BreezeInput = (props: BreezeInputProps) => {
 			type={type}
 			title={title}
 			placeholder={placeholder}
+			prefix='$'
 			onChange={onChange}
 			onBlur={onBlur}
 			style={style}

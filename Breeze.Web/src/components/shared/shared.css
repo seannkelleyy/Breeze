@@ -46,6 +46,7 @@
 	border-radius: 0.25em;
 	padding: 0 0.5em;
 	font-size: 1.15em;
+	text-align: right;
 	box-sizing: border-box;
 	color: var(--darkText);
 	background-color: var(--background);

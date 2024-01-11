@@ -7,13 +7,3 @@
 	background-color: var(--red500);
 	border-radius: 0.25em;
 }
-
-.budget-creation-form {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	width: 90%;
-	gap: 1em;
-	border-radius: 0.5em;
-	padding: 0.25em;
-}

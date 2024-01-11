@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { Income, emptyIncome } from '../../../models/income'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeText } from '../../shared/BreezeText'
@@ -45,7 +44,6 @@ export const IncomeItemsBox = (props: IncomeItemsBoxProps) => {
 				text='Add Income'
 				onClick={addIncome}
 			/>
-			<Link to={'/Breeze/Budget/CreateIncome'}></Link>
 		</BreezeBox>
 	)
 }

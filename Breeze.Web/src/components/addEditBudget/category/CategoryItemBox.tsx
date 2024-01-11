@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { Category, emptyCategory } from '../../../models/category'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeText } from '../../shared/BreezeText'
@@ -46,7 +45,6 @@ export const CategoryItemsBox = (props: CategoryItemsBoxProps) => {
 				text='Add Category'
 				onClick={addCategory}
 			/>
-			<Link to={'/Breeze/Budget/CreateCategory'}></Link>
 		</BreezeBox>
 	)
 }
