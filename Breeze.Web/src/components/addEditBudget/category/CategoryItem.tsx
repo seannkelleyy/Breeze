@@ -3,6 +3,7 @@ import { Category } from '../../../models/category'
 import { BreezeInput } from '../../shared/BreezeInput'
 import { BreezeText } from '../../shared/BreezeText'
 import { BudgetContext } from '../../../services/budgetContext/BudgetContext'
+import { BreezeBox } from '../../shared/BreezeBox'
 
 type CategoryItemProps = {
 	categoryItem: Category
@@ -15,8 +16,15 @@ export const CategoryItem = (props: CategoryItemProps) => {
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.amount)
 
 	return (
-		<section className='budget-item'>
-			<BreezeText text={categoryItem.name} />
+		<BreezeBox
+			title='CategoryItem'
+			direction='row'
+			style={{ justifyContent: 'space-between', width: '100%', borderBottom: '1px solid var(--border)' }}
+		>
+			<BreezeText
+				type='medium'
+				text={categoryItem.name}
+			/>
 			<BreezeInput
 				title='Income Amount'
 				type='number'
@@ -26,6 +34,6 @@ export const CategoryItem = (props: CategoryItemProps) => {
 					UpdateCategory(categoryItem)
 				}}
 			/>
-		</section>
+		</BreezeBox>
 	)
 }

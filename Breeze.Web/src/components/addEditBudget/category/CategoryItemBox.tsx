@@ -3,6 +3,7 @@ import { Category } from '../../../models/category'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeText } from '../../shared/BreezeText'
 import { CategoryItem } from './CategoryItem'
+import { BreezeBox } from '../../shared/BreezeBox'
 
 type CategoryItemsBoxProps = {
 	CategoryItems: Category[]
@@ -15,11 +16,19 @@ export const CategoryItemsBox = (props: CategoryItemsBoxProps) => {
 		console.log('add category')
 	}
 	return (
-		<section
-			title='categories'
-			className='item-box'
+		<BreezeBox
+			title='incomes'
+			style={{
+				border: 'var(--border) solid 2px',
+				padding: '0.5em',
+				borderRadius: '0.5em',
+				width: '100%',
+			}}
 		>
-			<BreezeText text='Categories' />
+			<BreezeText
+				type='small-heading'
+				text='Categories'
+			/>
 			{CategoryItems.map((Category) => (
 				<CategoryItem
 					key={Category.id}
@@ -32,6 +41,6 @@ export const CategoryItemsBox = (props: CategoryItemsBoxProps) => {
 					onClick={addCategory}
 				/>
 			</Link>
-		</section>
+		</BreezeBox>
 	)
 }

@@ -3,6 +3,7 @@ import { Income } from '../../../models/income'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeText } from '../../shared/BreezeText'
 import { IncomeItem } from './IncomeItem'
+import { BreezeBox } from '../../shared/BreezeBox'
 
 type IncomeItemsBoxProps = {
 	incomeItems: Income[]
@@ -15,11 +16,19 @@ export const IncomeItemsBox = (props: IncomeItemsBoxProps) => {
 		console.log('add income')
 	}
 	return (
-		<section
+		<BreezeBox
 			title='incomes'
-			className='item-box'
+			style={{
+				border: 'var(--border) solid 2px',
+				padding: '0.5em',
+				borderRadius: '0.5em',
+				width: '100%',
+			}}
 		>
-			<BreezeText text='Incomes' />
+			<BreezeText
+				type='small-heading'
+				text='Incomes'
+			/>
 			{incomeItems.map((income) => (
 				<IncomeItem
 					key={income.id}
@@ -32,6 +41,6 @@ export const IncomeItemsBox = (props: IncomeItemsBoxProps) => {
 					onClick={addIncome}
 				/>
 			</Link>
-		</section>
+		</BreezeBox>
 	)
 }

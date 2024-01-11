@@ -1,6 +1,6 @@
 import { BreezeCard } from '../../shared/BreezeCard'
 import { BreezeText } from '../../shared/BreezeText'
-import './homePage.css'
+import '../homePage.css'
 
 /**
  * This is a future feature that will calculate the user's progess towards their budget.

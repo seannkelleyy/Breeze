@@ -2,7 +2,10 @@ import { useParams } from 'react-router-dom'
 import { useBudget } from '../../services/budgetContext/BudgetContext'
 import { IncomeItemsBox } from './income/IncomeItemsBox'
 import { CategoryItemsBox } from './category/CategoryItemBox'
+import { BreezeBox } from '../shared/BreezeBox'
 import './addEditBudget.css'
+import { BreezeText } from '../shared/BreezeText'
+import { BreezeCard } from '../shared/BreezeCard'
 
 /**
  * This is the page that allows a user to add or edit a budget.
@@ -20,18 +23,31 @@ export const AddBudgetPage = () => {
 	}
 
 	return (
-		<div className='page'>
-			<h1 className='page-title'>Edit Budget</h1>
-			<section className='budget-creation-progress'>
-				<h3>
-					Date: {month} {year}
-				</h3>
-				<h3>Income: ${budget.monthlyIncome}</h3>
-				<h3>Expenses: ${budget.monthlyExpenses}</h3>
-				<div className={budget.monthlyIncome - budget.monthlyExpenses >= 0 ? 'amount-left-positive' : 'amount-left-negative'}>
-					<h3>Amount left to allocate: ${budget.monthlyIncome && budget.monthlyExpenses ? budget.monthlyIncome - budget.monthlyExpenses : 0}</h3>
-				</div>
-			</section>
+		<BreezeBox title='Edit Budget'>
+			<BreezeText
+				type='large-heading'
+				text='Edit Budget'
+			/>
+			<BreezeCard title='Budget Headlines'>
+				<BreezeText
+					type='large'
+					text={`Date: ${month} ${year}`}
+				/>
+				<BreezeText
+					type='large'
+					text={`Income: $${budget.monthlyIncome}`}
+				/>
+				<BreezeText
+					type='large'
+					text={`Expenses: $${budget.monthlyExpenses}`}
+				/>
+				<section className={budget.monthlyIncome - budget.monthlyExpenses >= 0 ? 'amount-left-positive' : 'amount-left-negative'}>
+					<BreezeText
+						type='large'
+						text={`Amount left to allocate: $${budget.monthlyIncome && budget.monthlyExpenses ? budget.monthlyIncome - budget.monthlyExpenses : 0}`}
+					/>
+				</section>
+			</BreezeCard>
 			<form
 				className='budget-creation-form'
 				onSubmit={handleSubmit}
@@ -39,6 +55,6 @@ export const AddBudgetPage = () => {
 				<IncomeItemsBox incomeItems={budget.incomes} />
 				<CategoryItemsBox CategoryItems={budget.categories} />
 			</form>
-		</div>
+		</BreezeBox>
 	)
 }

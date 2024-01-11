@@ -45,7 +45,7 @@
 	border: none;
 	border-radius: 0.25em;
 	padding: 0 0.5em;
-	font-size: 1em;
+	font-size: 1.15em;
 	box-sizing: border-box;
 	color: var(--darkText);
 	background-color: var(--background);
@@ -103,7 +103,7 @@
 .breeze-text-small-heading {
 	text-align: center;
 	font-size: 1.75em;
-	font-weight: 650;
+	font-weight: 600;
 	color: var(--darkText);
 	margin: 0;
 }

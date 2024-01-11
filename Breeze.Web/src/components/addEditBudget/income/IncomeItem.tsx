@@ -3,6 +3,7 @@ import { Income } from '../../../models/income'
 import { BreezeInput } from '../../shared/BreezeInput'
 import { BreezeText } from '../../shared/BreezeText'
 import { BudgetContext } from '../../../services/budgetContext/BudgetContext'
+import { BreezeBox } from '../../shared/BreezeBox'
 
 type IncomeItemProps = {
 	incomeItem: Income
@@ -14,8 +15,15 @@ export const IncomeItem = (props: IncomeItemProps) => {
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)
 
 	return (
-		<section className='budget-item'>
-			<BreezeText text={incomeItem.name} />
+		<BreezeBox
+			title='CategoryItem'
+			direction='row'
+			style={{ justifyContent: 'space-between', width: '100%', borderBottom: '1px solid var(--border)' }}
+		>
+			<BreezeText
+				type='medium'
+				text={incomeItem.name}
+			/>
 			<BreezeInput
 				title='Income Amount'
 				type='number'
@@ -25,6 +33,6 @@ export const IncomeItem = (props: IncomeItemProps) => {
 					UpdateIncome(incomeItem)
 				}}
 			/>
-		</section>
+		</BreezeBox>
 	)
 }
