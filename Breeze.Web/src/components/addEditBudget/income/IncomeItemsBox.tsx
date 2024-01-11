@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
-import { Income } from '../../../models/income'
+import { Income, emptyIncome } from '../../../models/income'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeText } from '../../shared/BreezeText'
 import { IncomeItem } from './IncomeItem'
 import { BreezeBox } from '../../shared/BreezeBox'
+import { useEffect, useState } from 'react'
 
 type IncomeItemsBoxProps = {
 	incomeItems: Income[]
@@ -11,9 +12,14 @@ type IncomeItemsBoxProps = {
 
 export const IncomeItemsBox = (props: IncomeItemsBoxProps) => {
 	const { incomeItems } = props
+	const [items, setItems] = useState<Income[]>(incomeItems)
+
+	useEffect(() => {
+		setItems(incomeItems)
+	}, [incomeItems])
 
 	const addIncome = () => {
-		console.log('add income')
+		setItems([...items, emptyIncome])
 	}
 	return (
 		<BreezeBox
@@ -29,18 +35,17 @@ export const IncomeItemsBox = (props: IncomeItemsBoxProps) => {
 				type='small-heading'
 				text='Incomes'
 			/>
-			{incomeItems.map((income) => (
+			{items.map((income) => (
 				<IncomeItem
 					key={income.id}
 					incomeItem={income}
 				/>
 			))}
-			<Link to={'/Breeze/Budget/CreateIncome'}>
-				<BreezeButton
-					text='Add Income'
-					onClick={addIncome}
-				/>
-			</Link>
+			<BreezeButton
+				text='Add Income'
+				onClick={addIncome}
+			/>
+			<Link to={'/Breeze/Budget/CreateIncome'}></Link>
 		</BreezeBox>
 	)
 }

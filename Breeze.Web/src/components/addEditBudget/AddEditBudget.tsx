@@ -53,7 +53,7 @@ export const AddBudgetPage = () => {
 				onSubmit={handleSubmit}
 			>
 				<IncomeItemsBox incomeItems={budget.incomes} />
-				<CategoryItemsBox CategoryItems={budget.categories} />
+				<CategoryItemsBox categoryItems={budget.categories} />
 			</form>
 		</BreezeBox>
 	)

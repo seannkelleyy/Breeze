@@ -1,20 +1,27 @@
 import { Link } from 'react-router-dom'
-import { Category } from '../../../models/category'
+import { Category, emptyCategory } from '../../../models/category'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeText } from '../../shared/BreezeText'
 import { CategoryItem } from './CategoryItem'
 import { BreezeBox } from '../../shared/BreezeBox'
+import { useEffect, useState } from 'react'
 
 type CategoryItemsBoxProps = {
-	CategoryItems: Category[]
+	categoryItems: Category[]
 }
 
 export const CategoryItemsBox = (props: CategoryItemsBoxProps) => {
-	const { CategoryItems } = props
+	const { categoryItems } = props
+	const [items, setItems] = useState<Category[]>(categoryItems)
+
+	useEffect(() => {
+		setItems(categoryItems)
+	}, [categoryItems])
 
 	const addCategory = () => {
-		console.log('add category')
+		setItems([...items, emptyCategory])
 	}
+
 	return (
 		<BreezeBox
 			title='incomes'
@@ -29,18 +36,17 @@ export const CategoryItemsBox = (props: CategoryItemsBoxProps) => {
 				type='small-heading'
 				text='Categories'
 			/>
-			{CategoryItems.map((Category) => (
+			{items.map((Category) => (
 				<CategoryItem
 					key={Category.id}
 					categoryItem={Category}
 				/>
 			))}
-			<Link to={'/Breeze/Budget/CreateCategory'}>
-				<BreezeButton
-					text='Add Category'
-					onClick={addCategory}
-				/>
-			</Link>
+			<BreezeButton
+				text='Add Category'
+				onClick={addCategory}
+			/>
+			<Link to={'/Breeze/Budget/CreateCategory'}></Link>
 		</BreezeBox>
 	)
 }
