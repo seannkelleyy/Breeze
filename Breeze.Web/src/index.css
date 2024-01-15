@@ -31,36 +31,3 @@
 ::placeholder {
 	color: var(--darkText);
 }
-
-h1 {
-	font-size: 3em;
-	line-height: 1.1;
-}
-
-h2 {
-	margin: 0.5rem;
-}
-
-h3 {
-	margin: 0.25rem;
-}
-
-h4 {
-	margin: 0.125rem;
-}
-
-/* 
-.page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 0 1rem;
-  width: auto;
-}
-*/
-
-.page-title {
-	position: relative;
-	left: -10%;
-}
