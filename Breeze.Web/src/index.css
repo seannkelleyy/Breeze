@@ -1,67 +1,33 @@
 :root {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
 
-  background-color: var(--background);
-  color: var(--darkText);
+	background-color: var(--background);
+	color: var(--darkText);
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: neutralscale;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: neutralscale;
 
-  --background: #DAEAEF;
-  --lightText: #e9e9e9;
-  --darkText: #242424;
-  --focusText: #071225;
-  --blue700: #0077b6;
-  --blue500: #0096c7;
-  --blue400: #00b4d8;
-  --blue300: #48cae4;
-  --green500: #45b96d;
-  --red500: #b84f4f;
-  --neutral100: #f9f9f9;
-  --neutral200: #c4c4c4;
-  --neutral300: #9a9a9a;
-  --neutral500: #5a5a5a;
-  --border: rgb(91,85,85, .5) ;
-
+	--background: #daeaef;
+	--lightText: #e9e9e9;
+	--darkText: #242424;
+	--focusText: #071225;
+	--blue700: #0077b6;
+	--blue500: #0096c7;
+	--blue400: #00b4d8;
+	--blue300: #48cae4;
+	--green500: #45b96d;
+	--red500: #b84f4f;
+	--neutral100: #f9f9f9;
+	--neutral200: #c4c4c4;
+	--neutral300: #9a9a9a;
+	--neutral500: #5a5a5a;
+	--border: rgb(91, 85, 85, 0.5);
 }
 
 ::placeholder {
-    color: var(--darkText);
+	color: var(--darkText);
 }
-
-h1 {
-  font-size: 3em;
-  line-height: 1.1;
-}
-
-h2 {
-  margin: .5rem;
-}
-
-h3 {
-  margin: .25rem;
-}
-
-h4 {
-  margin: .125rem;
-}
-
-.page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 0 1rem;
-  width: auto;
-}
-
-.page-title {
-  position: relative;
-  left: -10%;
-}
-
-

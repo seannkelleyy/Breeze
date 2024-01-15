@@ -1,24 +1,48 @@
-import AddButtons from './AddButtons'
-import Goals from './Goals'
-import Header from './Header'
-import BudgetSection from './budget/BudgetSection'
-import Progress from './Progress'
-import './HomePage.css'
+import { AddButtons } from './AddButtons'
+import { Goals } from './features/Goals'
+import { BudgetSection } from './budgetSection/BudgetSection'
+import { Progress } from './features/Progress'
+import { BreezeBox } from '../shared/BreezeBox'
+import { BreezeText } from '../../components/shared/BreezeText'
+import { BreezeCard } from '../../components/shared/BreezeCard'
+import { getMonthAsString } from '../../services/utils/GetMonth'
 
-const HomePage = () => {
+/**
+ * This is the home page component that calls the components that make up the home page.
+ * This is where the user lands after signing in.
+ */
+export const HomePage = () => {
+	const today = new Date()
+
 	return (
-		<div className='page'>
-			<div className='home-page'>
-				<Header />
+		<BreezeBox title='Home Page'>
+			<BreezeBox
+				title='Overview'
+				style={{
+					height: '100vh',
+					overflowY: 'hidden',
+					textAlign: 'center',
+				}}
+			>
+				<BreezeText
+					text={<u>BREEZE</u>}
+					type='title'
+				/>
+				<BreezeCard title='Date'>
+					<BreezeText
+						text={`${today.getDate() + ' '}
+					${getMonthAsString(today.getMonth()) + ' '}
+					${today.getFullYear()}`}
+						type='small-heading'
+					/>
+				</BreezeCard>
 				<Progress />
 				<Goals />
 				<AddButtons />
-			</div>
-			<div className='budget-section'>
+			</BreezeBox>
+			<BreezeBox title='categories'>
 				<BudgetSection />
-			</div>
-		</div>
+			</BreezeBox>
+		</BreezeBox>
 	)
 }
-
-export default HomePage

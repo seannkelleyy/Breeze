@@ -1,6 +1,10 @@
-import './homePage.css'
+import { BreezeBox } from '../shared/BreezeBox'
+import { BreezeButton } from '../shared/BreezeButton'
 
-const AddButtons = () => {
+/**
+ * Simple component that holds the add expense and add income buttons
+ */
+export const AddButtons = () => {
 	const handleNewExpense = () => {
 		console.log('New Expense')
 	}
@@ -9,21 +13,17 @@ const AddButtons = () => {
 		console.log('New Income')
 	}
 	return (
-		<>
-			<button
-				className='expense-button'
+		<BreezeBox title='Add Buttons'>
+			<BreezeButton
 				onClick={handleNewExpense}
-			>
-				Add New Expense
-			</button>
-			<button
-				className='income-button'
+				text='Add New Expense'
+				size='large'
+			/>
+			<BreezeButton
 				onClick={handleNewIncome}
-			>
-				Add New Income
-			</button>
-		</>
+				text='Add New Income'
+				size='large'
+			/>
+		</BreezeBox>
 	)
 }
-
-export default AddButtons

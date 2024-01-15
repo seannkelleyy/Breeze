@@ -1,15 +1,16 @@
 /* eslint-disable react-refresh/only-export-components */
 import axios from 'axios'
-import { Budget } from '../models/budget'
+import { Budget } from '../../models/budget'
 import { useEffect, useState } from 'react'
-import { FakeBudget } from './FakeData'
+import { FakeBudget } from '../FakeData'
+import { BREEZE_ENV } from '../environment'
 
 export const useGetBudget = (date: Date) => {
 	const [budget, setBudget] = useState<Budget | undefined>(undefined)
 
 	useEffect(() => {
 		const fetchBudget = async () => {
-			const response = await axios.get<Budget>(`https://localhost:7152/Budgets/${date.toISOString()}`)
+			const response = await axios.get<Budget>(`${BREEZE_ENV.BASE_URL}/Budgets/${date.toISOString()}`)
 			setBudget(response.data)
 		}
 
@@ -20,12 +21,12 @@ export const useGetBudget = (date: Date) => {
 	return FakeBudget
 }
 
-export const PostBudget = (budget: Budget) => {
+export const usePostBudget = (budget: Budget) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const postBudget = async () => {
-			const response = await axios.post<Budget>('https://localhost:7152/Budgets', budget)
+			const response = await axios.post<Budget>(`${BREEZE_ENV.BASE_URL}/Budgets`, budget)
 			if (response.status === 200) {
 				setResult(budget.id)
 			} else {
@@ -39,12 +40,12 @@ export const PostBudget = (budget: Budget) => {
 	return result
 }
 
-export const UpdateBudget = (budget: Budget) => {
+export const useUpdateBudget = (budget: Budget) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const updateBudget = async () => {
-			const response = await axios.put<Budget>('https://localhost:7152/Budgets', budget)
+			const response = await axios.put<Budget>(`${BREEZE_ENV.BASE_URL}/Budgets`, budget)
 			if (response.status === 200) {
 				setResult(budget.id)
 			} else {
@@ -58,12 +59,12 @@ export const UpdateBudget = (budget: Budget) => {
 	return result
 }
 
-export const DeleteBudget = (budgetId: number) => {
+export const useDeleteBudget = (budgetId: number) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
 	useEffect(() => {
 		const deleteBudget = async () => {
-			const response = await axios.delete<Budget>(`https://localhost:7152/Budgets/${budgetId}`)
+			const response = await axios.delete<Budget>(`${BREEZE_ENV.BASE_URL}/Budgets/${budgetId}`)
 			if (response.status === 200) {
 				setResult(budgetId)
 			} else {

@@ -1,9 +1,7 @@
-import LandingPage from './components/landing/LandingPage'
-import HomePage from './components/homePage/HomePage'
+import { LandingPage } from './components/landing/LandingPage'
+import { HomePage } from './components/homePage/HomePage'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { AddBudgetPage } from './components/addEditBudget/AddEditBudget'
-import { CreateIncome } from './components/addEditBudget/CreateIncome'
-import { CreateCategory } from './components/addEditBudget/CreateCategory'
+import { EditBudgetPage } from './components/editBudget/EditBudget'
 import { BudgetProvider } from './services/budgetContext/BudgetContext'
 
 const App = () => {
@@ -21,15 +19,7 @@ const App = () => {
 					/>
 					<Route
 						path='/Breeze/Budget/:year/:month'
-						element={<AddBudgetPage />}
-					/>
-					<Route
-						path='/Breeze/Budget/CreateIncome'
-						element={<CreateIncome />}
-					/>
-					<Route
-						path='/Breeze/Budget/CreateCategory'
-						element={<CreateCategory />}
+						element={<EditBudgetPage />}
 					/>
 				</Routes>
 			</BudgetProvider>
