@@ -3,6 +3,7 @@ import { HomePage } from './components/homePage/HomePage'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { EditBudgetPage } from './components/editBudget/EditBudget'
 import { BudgetProvider } from './services/budgetContext/BudgetContext'
+import Profile from './components/authentication/Profile'
 
 const App = () => {
 	return (
@@ -20,6 +21,10 @@ const App = () => {
 					<Route
 						path='/Breeze/Budget/:year/:month'
 						element={<EditBudgetPage />}
+					/>
+					<Route
+						path='/Breeze/Profile'
+						element={<Profile />}
 					/>
 				</Routes>
 			</BudgetProvider>

@@ -6,12 +6,18 @@ import { BreezeBox } from '../shared/BreezeBox'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { BreezeCard } from '../../components/shared/BreezeCard'
 import { getMonthAsString } from '../../services/utils/GetMonth'
+import { useAuth0 } from '@auth0/auth0-react'
+import { LogoutModal } from '../authentication/LogoutModal'
+import { useState } from 'react'
+import { BreezeButton } from '../shared/BreezeButton'
 
 /**
  * This is the home page component that calls the components that make up the home page.
  * This is where the user lands after signing in.
  */
 export const HomePage = () => {
+	const { user } = useAuth0()
+	const [showModal, setShowModal] = useState(false)
 	const today = new Date()
 
 	return (
@@ -24,6 +30,32 @@ export const HomePage = () => {
 					textAlign: 'center',
 				}}
 			>
+				<BreezeButton
+					text={
+						<img
+							src={user?.picture}
+							alt='Profile picture'
+							style={{
+								width: '3rem',
+								height: '3rem',
+								borderRadius: '3rem',
+							}}
+						/>
+					}
+					onClick={() => setShowModal(!showModal)}
+					style={{
+						position: 'absolute',
+						top: '1rem',
+						right: '1rem',
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+						width: '3rem',
+						height: '3rem',
+						borderRadius: '3rem',
+					}}
+				/>
+				{showModal && <LogoutModal />}
 				<BreezeText
 					text={<u>BREEZE</u>}
 					type='title'
