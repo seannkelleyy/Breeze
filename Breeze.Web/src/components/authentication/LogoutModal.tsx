@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { BreezeText } from '../shared/BreezeText'
 import { BreezeCard } from '../shared/BreezeCard'
-import LoginButton from './Login'
+import LogoutButton from './Logout'
 
 export const LogoutModal = () => {
 	return (
@@ -22,7 +22,7 @@ export const LogoutModal = () => {
 					type='medium'
 				/>
 			</Link>
-			<LoginButton />
+			<LogoutButton />
 		</BreezeCard>
 	)
 }
