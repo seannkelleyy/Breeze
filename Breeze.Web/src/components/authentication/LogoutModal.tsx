@@ -1,9 +1,15 @@
 import { Link } from 'react-router-dom'
 import { BreezeText } from '../shared/BreezeText'
 import { BreezeCard } from '../shared/BreezeCard'
+import { BreezeButton } from '../shared/BreezeButton'
 import LogoutButton from './Logout'
 
-export const LogoutModal = () => {
+type LogoutModalProps = {
+	showModal: boolean
+	setShowModal: (showModal: boolean) => void
+}
+export const LogoutModal = (props: LogoutModalProps) => {
+	const { showModal, setShowModal } = props
 	return (
 		<BreezeCard
 			title='Logout Modal'
@@ -12,14 +18,38 @@ export const LogoutModal = () => {
 				top: '1rem',
 				right: '1rem',
 				borderRadius: '1rem',
-				width: '15rem',
-				height: '10rem',
+				width: '25vw',
+				height: '12vh',
 			}}
 		>
+			<BreezeButton
+				text={
+					<img
+						src='./close.svg'
+						alt='Close'
+						style={{
+							width: '2rem',
+							height: '2rem',
+						}}
+					/>
+				}
+				onClick={() => setShowModal(!showModal)}
+				style={{
+					position: 'absolute',
+					top: '0',
+					right: '-.75rem',
+					borderRadius: '1rem',
+					background: 'none',
+					boxShadow: 'none',
+				}}
+			/>
 			<Link to='/Breeze/Profile'>
 				<BreezeText
 					text='Profile'
-					type='medium'
+					type='large'
+					style={{
+						marginTop: '1rem',
+					}}
 				/>
 			</Link>
 			<LogoutButton />

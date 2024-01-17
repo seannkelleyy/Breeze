@@ -55,7 +55,12 @@ export const HomePage = () => {
 						borderRadius: '3rem',
 					}}
 				/>
-				{showModal && <LogoutModal />}
+				{showModal && (
+					<LogoutModal
+						showModal={showModal}
+						setShowModal={setShowModal}
+					/>
+				)}
 				<BreezeText
 					text={<u>BREEZE</u>}
 					type='title'
