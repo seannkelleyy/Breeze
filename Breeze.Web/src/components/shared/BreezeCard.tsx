@@ -14,8 +14,7 @@ type BreezeCardProps = {
  * @param props.title: The title of the card.
  * @param props.style: - Optional - The style of the card.
  */
-export const BreezeCard = (props: BreezeCardProps) => {
-	const { children, title, style } = props
+export const BreezeCard = ({ children, title, style }: BreezeCardProps) => {
 	return (
 		<section
 			className='breeze-card'

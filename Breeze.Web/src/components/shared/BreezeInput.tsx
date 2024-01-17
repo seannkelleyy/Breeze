@@ -18,8 +18,7 @@ type BreezeInputProps = {
  * @param props.onChange: - Optional - The onChange function of the input.
  * @param props.style: - Optional - The style of the input.
  */
-export const BreezeInput = (props: BreezeInputProps) => {
-	const { type, title, placeholder, onBlur, onChange, style } = props
+export const BreezeInput = ({ type, title, placeholder, onBlur, onChange, style }: BreezeInputProps) => {
 	return (
 		<input
 			className='breeze-input'

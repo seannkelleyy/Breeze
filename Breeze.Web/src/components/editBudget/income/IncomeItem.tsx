@@ -1,15 +1,10 @@
 import { useContext, useState } from 'react'
 import { Income } from '../../../models/income'
 import { BreezeInput } from '../../shared/BreezeInput'
-import { BreezeText } from '../../shared/BreezeText'
 import { BudgetContext } from '../../../services/budgetContext/BudgetContext'
 import { BreezeBox } from '../../shared/BreezeBox'
 
-type IncomeItemProps = {
-	incomeItem: Income
-}
-export const IncomeItem = (props: IncomeItemProps) => {
-	const { incomeItem } = props
+export const IncomeItem = (incomeItem: Income) => {
 	const budgetContext = useContext(BudgetContext)
 	const { UpdateIncome } = budgetContext
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)

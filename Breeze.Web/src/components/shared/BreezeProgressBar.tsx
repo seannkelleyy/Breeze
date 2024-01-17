@@ -4,8 +4,7 @@ type BreezeProgressBarProps = {
 	style?: React.CSSProperties
 }
 
-export const BreezeProgressBar = (props: BreezeProgressBarProps) => {
-	const { title, percentage, style } = props
+export const BreezeProgressBar = ({ title, percentage, style }: BreezeProgressBarProps) => {
 	return (
 		<section
 			title={title}

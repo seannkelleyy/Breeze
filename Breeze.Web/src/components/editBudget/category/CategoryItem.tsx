@@ -4,12 +4,7 @@ import { BreezeInput } from '../../shared/BreezeInput'
 import { BudgetContext } from '../../../services/budgetContext/BudgetContext'
 import { BreezeBox } from '../../shared/BreezeBox'
 
-type CategoryItemProps = {
-	categoryItem: Category
-}
-
-export const CategoryItem = (props: CategoryItemProps) => {
-	const { categoryItem } = props
+export const CategoryItem = (categoryItem: Category) => {
 	const budgetContext = useContext(BudgetContext)
 	const { UpdateCategory } = budgetContext
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.amount)

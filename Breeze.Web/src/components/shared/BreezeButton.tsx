@@ -14,8 +14,7 @@ type BreezeButtonProps = {
  * @param props.onClick: The onClick function of the button.
  * @param props.style: - Optional - The style of the button.
  */
-export const BreezeButton = (props: BreezeButtonProps) => {
-	const { text, onClick, style, size } = props
+export const BreezeButton = ({ text, onClick, style, size }: BreezeButtonProps) => {
 	const className = size ? 'breeze-button-' + size : 'breeze-button'
 
 	return (

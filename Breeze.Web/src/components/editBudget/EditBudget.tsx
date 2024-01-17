@@ -48,8 +48,8 @@ export const EditBudgetPage = () => {
 					width: '85%',
 				}}
 			>
-				<IncomeItemsBox incomeItems={budget.incomes} />
-				<CategoryItemsBox categoryItems={budget.categories} />
+				<IncomeItemsBox {...budget.incomes} />
+				<CategoryItemsBox {...budget.categories} />
 			</BreezeBox>
 		</BreezeBox>
 	)

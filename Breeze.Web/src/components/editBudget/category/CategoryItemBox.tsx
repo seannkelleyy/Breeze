@@ -5,12 +5,7 @@ import { CategoryItem } from './CategoryItem'
 import { BreezeBox } from '../../shared/BreezeBox'
 import { useEffect, useState } from 'react'
 
-type CategoryItemsBoxProps = {
-	categoryItems: Category[]
-}
-
-export const CategoryItemsBox = (props: CategoryItemsBoxProps) => {
-	const { categoryItems } = props
+export const CategoryItemsBox = (categoryItems: Category[]) => {
 	const [items, setItems] = useState<Category[]>(categoryItems)
 
 	useEffect(() => {
@@ -38,7 +33,7 @@ export const CategoryItemsBox = (props: CategoryItemsBoxProps) => {
 			{items.map((Category) => (
 				<CategoryItem
 					key={Category.id}
-					categoryItem={Category}
+					{...Category}
 				/>
 			))}
 			<BreezeButton

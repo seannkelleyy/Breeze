@@ -8,8 +8,8 @@ type LogoutModalProps = {
 	showModal: boolean
 	setShowModal: (showModal: boolean) => void
 }
-export const LogoutModal = (props: LogoutModalProps) => {
-	const { showModal, setShowModal } = props
+
+export const LogoutModal = ({ showModal, setShowModal }: LogoutModalProps) => {
 	return (
 		<BreezeCard
 			title='Logout Modal'
