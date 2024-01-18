@@ -42,11 +42,15 @@ const Profile = () => {
 						}}
 					/>
 					<BreezeText
-						text={user?.name}
+						text={`Name: ${user?.name}`}
 						type='medium'
 					/>
 					<BreezeText
-						text={user?.email}
+						text={`Email: ${user?.email}`}
+						type='small'
+					/>
+					<BreezeText
+						text={`Phone: ${user?.phone_number || 'N/A'}`}
 						type='small'
 					/>
 					<BreezeText
