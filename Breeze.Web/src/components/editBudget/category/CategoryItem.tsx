@@ -8,8 +8,7 @@ type CategoryItemProps = {
 	categoryItem: Category
 }
 
-export const CategoryItem = (props: CategoryItemProps) => {
-	const { categoryItem } = props
+export const CategoryItem = ({ categoryItem }: CategoryItemProps) => {
 	const budgetContext = useContext(BudgetContext)
 	const { UpdateCategory } = budgetContext
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.amount)

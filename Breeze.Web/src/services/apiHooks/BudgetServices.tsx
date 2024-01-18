@@ -8,14 +8,14 @@ import { BREEZE_ENV } from '../environment'
 export const useGetBudget = (date: Date) => {
 	const [budget, setBudget] = useState<Budget | undefined>(undefined)
 
-	useEffect(() => {
-		const fetchBudget = async () => {
-			const response = await axios.get<Budget>(`${BREEZE_ENV.BASE_URL}/Budgets/${date.toISOString()}`)
-			setBudget(response.data)
-		}
+	// useEffect(() => {
+	// 	const fetchBudget = async () => {
+	// 		const response = await axios.get<Budget>(`${BREEZE_ENV.BASE_URL}/Budgets/${date.toISOString()}`)
+	// 		setBudget(response.data)
+	// 	}
 
-		fetchBudget()
-	}, [date])
+	// 	fetchBudget()
+	// }, [date])
 
 	// change to budget when DB is set up
 	return FakeBudget

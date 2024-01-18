@@ -12,8 +12,7 @@ type BreezeTextProps = {
  * @param props.type: The type of the text component. Ex: medium, small-heading, title.
  * @param props.style: - Optional - The style of the text component.
  */
-export const BreezeText = (props: BreezeTextProps) => {
-	const { text, type, style } = props
+export const BreezeText = ({ text, type, style }: BreezeTextProps) => {
 	return (
 		<p
 			className={`breeze-text-${type}`}

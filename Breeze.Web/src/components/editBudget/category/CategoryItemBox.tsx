@@ -8,9 +8,7 @@ import { useEffect, useState } from 'react'
 type CategoryItemsBoxProps = {
 	categoryItems: Category[]
 }
-
-export const CategoryItemsBox = (props: CategoryItemsBoxProps) => {
-	const { categoryItems } = props
+export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
 	const [items, setItems] = useState<Category[]>(categoryItems)
 
 	useEffect(() => {

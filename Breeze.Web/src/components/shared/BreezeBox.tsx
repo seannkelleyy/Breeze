@@ -12,8 +12,7 @@ type BreezeBoxProps = {
  * @param props.direction: - Optional - The direction of the breeze box. Defaults to column.
  * @param props.style: - Optional - The style of the breeze box.
  */
-export const BreezeBox = (props: BreezeBoxProps) => {
-	const { title, children, direction, style } = props
+export const BreezeBox = ({ title, children, direction, style }: BreezeBoxProps) => {
 	const className = direction ? `breeze-box-${direction}` : 'breeze-box-column'
 	return (
 		<section

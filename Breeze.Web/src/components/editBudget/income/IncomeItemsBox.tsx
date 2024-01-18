@@ -9,8 +9,7 @@ type IncomeItemsBoxProps = {
 	incomeItems: Income[]
 }
 
-export const IncomeItemsBox = (props: IncomeItemsBoxProps) => {
-	const { incomeItems } = props
+export const IncomeItemsBox = ({ incomeItems }: IncomeItemsBoxProps) => {
 	const [items, setItems] = useState<Income[]>(incomeItems)
 
 	useEffect(() => {

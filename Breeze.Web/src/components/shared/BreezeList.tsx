@@ -8,8 +8,7 @@ type BreezeListProps = {
  * @param props.children: The children of the list.
  * @param props.style: - Optional - The style of the list.
  */
-export const BreezeList = (props: BreezeListProps) => {
-	const { children, style } = props
+export const BreezeList = ({ children, style }: BreezeListProps) => {
 	return (
 		<ul
 			className='breeze-list'
