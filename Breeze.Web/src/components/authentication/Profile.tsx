@@ -2,6 +2,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { BreezeBox } from '../shared/BreezeBox'
 import { BreezeText } from '../shared/BreezeText'
 import { BreezeCard } from '../shared/BreezeCard'
+import { APP_VERSION } from '../../services/environment'
 
 const Profile = () => {
 	const { user, isAuthenticated, isLoading } = useAuth0()
@@ -18,7 +19,21 @@ const Profile = () => {
 					marginTop: '5rem',
 				}}
 			>
-				<BreezeCard title='Profile'>
+				<BreezeText
+					text='Profile'
+					type='large-heading'
+					style={{
+						position: 'relative',
+						top: '-1.5rem',
+					}}
+				/>
+				<BreezeCard
+					title='Profile'
+					style={{
+						padding: '2rem',
+						gap: '1.5rem',
+					}}
+				>
 					<img
 						src={user?.picture}
 						alt={user?.name}
@@ -33,6 +48,13 @@ const Profile = () => {
 					<BreezeText
 						text={user?.email}
 						type='small'
+					/>
+					<BreezeText
+						text={`Breeze Version: ${APP_VERSION}`}
+						type='small'
+						style={{
+							fontSize: '0.8rem',
+						}}
 					/>
 				</BreezeCard>
 			</BreezeBox>

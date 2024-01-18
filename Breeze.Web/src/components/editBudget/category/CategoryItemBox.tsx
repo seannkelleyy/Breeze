@@ -33,17 +33,12 @@ export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
 				type='small-heading'
 				text='Categories'
 			/>
-			{items.map(
-				(Category) => (
-					console.log(Category),
-					(
-						<CategoryItem
-							key={Category.id}
-							categoryItem={Category}
-						/>
-					)
-				),
-			)}
+			{items.map((Category) => (
+				<CategoryItem
+					key={Category.id}
+					categoryItem={Category}
+				/>
+			))}
 			<BreezeButton
 				text='Add Category'
 				onClick={addCategory}
