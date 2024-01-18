@@ -4,7 +4,11 @@ import { BreezeInput } from '../../shared/BreezeInput'
 import { BudgetContext } from '../../../services/budgetContext/BudgetContext'
 import { BreezeBox } from '../../shared/BreezeBox'
 
-export const IncomeItem = (incomeItem: Income) => {
+type IncomeItemProps = {
+	incomeItem: Income
+}
+
+export const IncomeItem = ({ incomeItem }: IncomeItemProps) => {
 	const budgetContext = useContext(BudgetContext)
 	const { UpdateIncome } = budgetContext
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)

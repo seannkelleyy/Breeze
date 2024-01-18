@@ -5,7 +5,10 @@ import { CategoryItem } from './CategoryItem'
 import { BreezeBox } from '../../shared/BreezeBox'
 import { useEffect, useState } from 'react'
 
-export const CategoryItemsBox = (categoryItems: Category[]) => {
+type CategoryItemsBoxProps = {
+	categoryItems: Category[]
+}
+export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
 	const [items, setItems] = useState<Category[]>(categoryItems)
 
 	useEffect(() => {
@@ -30,12 +33,17 @@ export const CategoryItemsBox = (categoryItems: Category[]) => {
 				type='small-heading'
 				text='Categories'
 			/>
-			{items.map((Category) => (
-				<CategoryItem
-					key={Category.id}
-					{...Category}
-				/>
-			))}
+			{items.map(
+				(Category) => (
+					console.log(Category),
+					(
+						<CategoryItem
+							key={Category.id}
+							categoryItem={Category}
+						/>
+					)
+				),
+			)}
 			<BreezeButton
 				text='Add Category'
 				onClick={addCategory}

@@ -5,7 +5,11 @@ import { IncomeItem } from './IncomeItem'
 import { BreezeBox } from '../../shared/BreezeBox'
 import { useEffect, useState } from 'react'
 
-export const IncomeItemsBox = (incomeItems: Income[]) => {
+type IncomeItemsBoxProps = {
+	incomeItems: Income[]
+}
+
+export const IncomeItemsBox = ({ incomeItems }: IncomeItemsBoxProps) => {
 	const [items, setItems] = useState<Income[]>(incomeItems)
 
 	useEffect(() => {
@@ -32,7 +36,7 @@ export const IncomeItemsBox = (incomeItems: Income[]) => {
 			{items.map((income) => (
 				<IncomeItem
 					key={income.id}
-					{...income}
+					incomeItem={income}
 				/>
 			))}
 			<BreezeButton
