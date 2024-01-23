@@ -44,6 +44,7 @@ export const usePostIncome = (income: Income) => {
 export const useUpdateIncome = (income: Income) => {
 	const [result, setResult] = useState<number | undefined>(undefined)
 
+	console.log('updated income: ', income)
 	useEffect(() => {
 		const updateIncome = async () => {
 			try {

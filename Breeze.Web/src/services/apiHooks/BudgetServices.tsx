@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import axios from 'axios'
 import { Budget } from '../../models/budget'
 import { useEffect, useState } from 'react'
