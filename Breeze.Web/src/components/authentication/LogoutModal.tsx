@@ -43,7 +43,7 @@ export const LogoutModal = ({ showModal, setShowModal }: LogoutModalProps) => {
 					boxShadow: 'none',
 				}}
 			/>
-			<Link to='/Breeze/Profile'>
+			<Link to='/profile'>
 				<BreezeText
 					text='Profile'
 					type='large'

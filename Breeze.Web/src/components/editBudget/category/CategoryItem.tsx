@@ -1,19 +1,22 @@
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import { Category } from '../../../models/category'
 import { BreezeInput } from '../../shared/BreezeInput'
-import { BudgetContext } from '../../../services/budgetContext/BudgetContext'
 import { BreezeBox } from '../../shared/BreezeBox'
+import { putCategory } from '../../../services/apiServices/CategoryServices'
+import { useMutation } from 'react-query'
 
 type CategoryItemProps = {
 	categoryItem: Category
 }
 
 export const CategoryItem = ({ categoryItem }: CategoryItemProps) => {
-	const budgetContext = useContext(BudgetContext)
-	const { UpdateCategory } = budgetContext
+	const mutation = useMutation((category: Category) => putCategory(category))
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.amount)
 	const [categoryName, setCategoryName] = useState<string>(categoryItem.name)
 
+	const UpdateCategory = () => {
+		mutation.mutate(categoryItem)
+	}
 	return (
 		<BreezeBox
 			title='CategoryItem'
@@ -26,7 +29,7 @@ export const CategoryItem = ({ categoryItem }: CategoryItemProps) => {
 				placeholder={categoryName}
 				onChange={(e) => setCategoryName(e.target.value)}
 				onBlur={() => {
-					UpdateCategory(categoryItem)
+					UpdateCategory()
 				}}
 				style={{
 					textAlign: 'left',
@@ -39,7 +42,7 @@ export const CategoryItem = ({ categoryItem }: CategoryItemProps) => {
 				placeholder={categoryAmount.toString()}
 				onChange={(e) => setCategoryAmount(e.target.value as unknown as number)}
 				onBlur={() => {
-					UpdateCategory(categoryItem)
+					UpdateCategory()
 				}}
 			/>
 		</BreezeBox>
