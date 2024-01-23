@@ -6,7 +6,8 @@ import { FakeBudget } from '../FakeData'
 import { BREEZE_ENV } from '../environment'
 
 export const useGetBudget = (date: Date) => {
-	const [budget, setBudget] = useState<Budget | undefined>(undefined)
+	console.log(date)
+	//const [budget, setBudget] = useState<Budget | undefined>(undefined)
 
 	// useEffect(() => {
 	// 	const fetchBudget = async () => {

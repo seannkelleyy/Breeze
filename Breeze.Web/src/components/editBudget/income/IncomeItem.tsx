@@ -14,6 +14,11 @@ export const IncomeItem = ({ incomeItem }: IncomeItemProps) => {
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)
 	const [incomeName, setIncomeName] = useState<string>(incomeItem.name)
 
+	const UpdateIncomeFunction = (income: Income) => {
+		income.amount = incomeAmount
+		income.name = incomeName
+		UpdateIncome(income)
+	}
 	return (
 		<BreezeBox
 			title='CategoryItem'
@@ -26,7 +31,7 @@ export const IncomeItem = ({ incomeItem }: IncomeItemProps) => {
 				placeholder={incomeName}
 				onChange={(e) => setIncomeName(e.target.value)}
 				onBlur={() => {
-					UpdateIncome(incomeItem)
+					UpdateIncomeFunction(incomeItem)
 				}}
 				style={{
 					textAlign: 'left',
