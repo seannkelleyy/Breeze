@@ -8,8 +8,12 @@ export const useGetIncomes = (budgetId: number): Income[] => {
 
 	useEffect(() => {
 		const fetchIncomes = async () => {
-			const response = await axios.get<Income[]>(`${BREEZE_ENV.BASE_URL}/Incomes/${budgetId}`)
-			setResult(response.data)
+			try {
+				const response = await axios.get<Income[]>(`${BREEZE_ENV.BASE_URL}/Incomes/${budgetId}`)
+				setResult(response.data)
+			} catch (error) {
+				console.error(error)
+			}
 		}
 
 		fetchIncomes()
@@ -42,11 +46,15 @@ export const useUpdateIncome = (income: Income) => {
 
 	useEffect(() => {
 		const updateIncome = async () => {
-			const response = await axios.put<Income>(`${BREEZE_ENV.BASE_URL}/Incomes/`, income)
-			if (response.status === 200) {
-				setResult(income.id)
-			} else {
-				setResult(-1)
+			try {
+				const response = await axios.put<Income>(`${BREEZE_ENV.BASE_URL}/Incomes/`, income)
+				if (response.status === 200) {
+					setResult(income.id)
+				} else {
+					setResult(-1)
+				}
+			} catch (error) {
+				console.error(error)
 			}
 		}
 

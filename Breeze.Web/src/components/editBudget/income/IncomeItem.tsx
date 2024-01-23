@@ -15,10 +15,14 @@ export const IncomeItem = ({ incomeItem }: IncomeItemProps) => {
 	const [incomeName, setIncomeName] = useState<string>(incomeItem.name)
 
 	const UpdateIncomeFunction = (income: Income) => {
-		income.amount = incomeAmount
-		income.name = incomeName
-		UpdateIncome(income)
+		const updatedIncome = {
+			...income,
+			amount: incomeAmount,
+			name: incomeName,
+		}
+		UpdateIncome(updatedIncome)
 	}
+
 	return (
 		<BreezeBox
 			title='CategoryItem'
