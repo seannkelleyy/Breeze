@@ -1,34 +1,19 @@
-import { LandingPage } from './components/landing/LandingPage'
-import { HomePage } from './components/homePage/HomePage'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { EditBudgetPage } from './components/editBudget/EditBudget'
+import { RouterProvider } from 'react-router-dom'
 import { BudgetProvider } from './services/budgetContext/BudgetContext'
-import Profile from './components/authentication/Profile'
+import { QueryClient, QueryClientProvider } from 'react-query'
+import { ReactQueryDevtools } from 'react-query/devtools'
+import { router } from './components/authentication/routes'
 
 const App = () => {
+	const queryClient = new QueryClient()
+
 	return (
-		<BrowserRouter>
-			<BudgetProvider>
-				<Routes>
-					<Route
-						path='/'
-						element={<LandingPage />}
-					/>
-					<Route
-						path='/Breeze'
-						element={<HomePage />}
-					/>
-					<Route
-						path='/Breeze/Budget/:year/:month'
-						element={<EditBudgetPage />}
-					/>
-					<Route
-						path='/Breeze/Profile'
-						element={<Profile />}
-					/>
-				</Routes>
-			</BudgetProvider>
-		</BrowserRouter>
+		<BudgetProvider>
+			<QueryClientProvider client={queryClient}>
+				<ReactQueryDevtools />
+				<RouterProvider router={router} />
+			</QueryClientProvider>
+		</BudgetProvider>
 	)
 }
 
