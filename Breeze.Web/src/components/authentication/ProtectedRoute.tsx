@@ -1,9 +1,22 @@
-import { useAuth0 } from '@auth0/auth0-react'
-import { Outlet, Navigate } from 'react-router-dom'
+import { Route, Navigate } from 'react-router-dom'
+import { LandingPage } from '../landing/LandingPage'
 
-const PrivateRoutes = () => {
-	const auth = useAuth0()
-	return auth.isAuthenticated ? <Outlet /> : <Navigate to='/login' />
+type ProtectedRouteProps = {
+	path: string
+	element: JSX.Element
 }
 
-export default PrivateRoutes
+export const ProtectedRoute = ({ path, element }: ProtectedRouteProps) => {
+	const isAuthenticated = false
+	return isAuthenticated ? (
+		<Route
+			path={path}
+			element={element}
+		/>
+	) : (
+		<Route
+			path='/login'
+			element={<LandingPage />}
+		/>
+	)
+}

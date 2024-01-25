@@ -4,7 +4,7 @@ import { BreezeText } from '../shared/BreezeText'
 import { BreezeCard } from '../shared/BreezeCard'
 import { APP_VERSION } from '../../services/environment'
 
-const Profile = () => {
+export const Profile = () => {
 	const { user, isAuthenticated, isLoading } = useAuth0()
 
 	if (isLoading) {
@@ -65,5 +65,3 @@ const Profile = () => {
 		)
 	)
 }
-
-export default Profile
