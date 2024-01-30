@@ -58,7 +58,7 @@ export const BudgetSection = () => {
 					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, true))}
 				/>
 			</BreezeBox>
-			<Link to={`/Breeze/Budget/${budgetDate.getFullYear()}/${getMonthAsString(budgetDate.getMonth())}`}>
+			<Link to={`/budget/${budgetDate.getFullYear()}/${getMonthAsString(budgetDate.getMonth())}`}>
 				<BreezeButton
 					text='Edit Budget'
 					onClick={() => console.log('edit budget')}

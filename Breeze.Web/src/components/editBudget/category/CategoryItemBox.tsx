@@ -33,9 +33,9 @@ export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
 				type='small-heading'
 				text='Categories'
 			/>
-			{items.map((Category) => (
+			{items.map((Category, index) => (
 				<CategoryItem
-					key={Category.id}
+					key={index}
 					categoryItem={Category}
 				/>
 			))}

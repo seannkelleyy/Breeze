@@ -1,26 +1,21 @@
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import { Income } from '../../../models/income'
 import { BreezeInput } from '../../shared/BreezeInput'
-import { BudgetContext } from '../../../services/budgetContext/BudgetContext'
 import { BreezeBox } from '../../shared/BreezeBox'
+import { useMutation } from 'react-query'
+import { putIncome } from '../../../services/apiServices/IncomeServices'
 
 type IncomeItemProps = {
 	incomeItem: Income
 }
 
 export const IncomeItem = ({ incomeItem }: IncomeItemProps) => {
-	const budgetContext = useContext(BudgetContext)
-	const { UpdateIncome } = budgetContext
+	const mutation = useMutation((income: Income) => putIncome(income))
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)
 	const [incomeName, setIncomeName] = useState<string>(incomeItem.name)
 
-	const UpdateIncomeFunction = (income: Income) => {
-		const updatedIncome = {
-			...income,
-			amount: incomeAmount,
-			name: incomeName,
-		}
-		UpdateIncome(updatedIncome)
+	const UpdateIncome = () => {
+		mutation.mutate(incomeItem)
 	}
 
 	return (
@@ -35,7 +30,7 @@ export const IncomeItem = ({ incomeItem }: IncomeItemProps) => {
 				placeholder={incomeName}
 				onChange={(e) => setIncomeName(e.target.value)}
 				onBlur={() => {
-					UpdateIncomeFunction(incomeItem)
+					UpdateIncome()
 				}}
 				style={{
 					textAlign: 'left',
@@ -48,7 +43,7 @@ export const IncomeItem = ({ incomeItem }: IncomeItemProps) => {
 				placeholder={incomeAmount.toString()}
 				onChange={(e) => setIncomeAmount(e.target.value as unknown as number)}
 				onBlur={() => {
-					UpdateIncome(incomeItem)
+					UpdateIncome()
 				}}
 			/>
 		</BreezeBox>
