@@ -33,12 +33,13 @@ export const IncomeItemsBox = ({ incomeItems }: IncomeItemsBoxProps) => {
 				type='small-heading'
 				text='Incomes'
 			/>
-			{items.map((income) => (
+			{items.map((income, index) => (
 				<IncomeItem
-					key={income.id}
+					key={index}
 					incomeItem={income}
 				/>
 			))}
+
 			<BreezeButton
 				text='Add Income'
 				onClick={addIncome}
