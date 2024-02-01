@@ -7,7 +7,6 @@ export type Budget = {
 	date: Date
 	monthlyIncome: number
 	monthlyExpenses: number
-	monthlySavings: number
 	categories: Category[]
 	incomes: Income[]
 }
@@ -19,7 +18,6 @@ export const emptyBudget: Budget = {
 	date: new Date(),
 	monthlyIncome: 0,
 	monthlyExpenses: 0,
-	monthlySavings: 0,
 	categories: [emptyCategory],
 	incomes: [emptyIncome],
 }

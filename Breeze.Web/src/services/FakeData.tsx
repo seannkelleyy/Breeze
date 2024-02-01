@@ -6,7 +6,6 @@ export const FakeBudget: Budget = {
 	date: new Date(Date.now()),
 	monthlyIncome: 4000,
 	monthlyExpenses: 2500,
-	monthlySavings: 1000,
 	categories: [
 		{
 			id: 1,

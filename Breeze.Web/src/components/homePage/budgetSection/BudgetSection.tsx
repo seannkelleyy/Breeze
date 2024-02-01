@@ -75,11 +75,11 @@ export const BudgetSection = () => {
 				/>
 				<BreezeText
 					type='large'
-					text={`Total spent: ${budget ? budget.monthlyIncome - budget.monthlySavings : 0}`}
+					text={`Total spent: ${budget ? budget.monthlyExpenses : 0}`}
 				/>
 				<BreezeText
 					type='large'
-					text={`Total saved: ${budget ? budget.monthlySavings : 0}`}
+					text={`Remaining: ${budget ? budget.monthlyIncome - budget.monthlyExpenses : 0}`}
 				/>
 			</BreezeCard>
 			<BreezeBox title='categories'>
