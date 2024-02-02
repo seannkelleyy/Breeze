@@ -47,7 +47,7 @@ namespace Breeze.Api.Controllers
 
         [HttpPatch]
 
-        public async Task<IActionResult> PatchExpsense(int id, [FromBody] ExpenseRequest expenseRequest)
+        public IActionResult PatchExpsense([FromBody] ExpenseRequest expenseRequest)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public IActionResult DeleteExpsense(int id)
         {
             try
@@ -72,7 +72,7 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("expense/{categoryId}")]
         public IActionResult DeleteExpsensesForCategory(int categoryId)
         {
             try

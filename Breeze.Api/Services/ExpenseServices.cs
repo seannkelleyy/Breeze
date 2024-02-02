@@ -24,7 +24,7 @@ namespace Breeze.Api.Services
                 .Select(expense => new ExpenseResponse
                 {
                     Id = expense.Category.Id,
-                    UserId = expense.UserId,
+                    UserEmail = expense.User.UserEmail,
                     Name = expense.Name,
                     Date = expense.Date,
                     CategoryId = CategoryId,
@@ -38,9 +38,14 @@ namespace Breeze.Api.Services
             try
             {
                 var category = db.Categories.Find(newExpense.CategoryId);
+                var user = db.Users.Find(newExpense.UserEmail);
+                if (category == null || user == null)
+                {
+                    return -1;
+                }
                 Expense expense = new Expense
                 {
-                    UserId = newExpense.UserId,
+                    User = user,
                     Name = newExpense.Name,
                     Date = newExpense.Date,
                     Category = category,
@@ -61,6 +66,10 @@ namespace Breeze.Api.Services
         public int UpdateExpense(ExpenseRequest existingExpense)
         {
             var expense = db.Expenses.Find(existingExpense.Id);
+            if (expense == null)
+            {
+                return -1;
+            }
             try
             {
                 expense.Name = existingExpense.Name;
@@ -80,7 +89,12 @@ namespace Breeze.Api.Services
 
         public int DeleteExpense(int expenseId)
         {
-            db.Expenses.Remove(db.Expenses.Find(expenseId));
+            var expense = db.Expenses.Find(expenseId);
+            if (expense == null)
+            {
+                return -1;
+            }
+            db.Expenses.Remove(expense);
             db.SaveChanges();
             return expenseId;
         }

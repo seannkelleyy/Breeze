@@ -16,6 +16,7 @@ namespace Breeze.Api.Controllers
         public CategoryController(IConfiguration config, ILogger<CategoryController> logger, BreezeContext breezeContext)
         {
             categories = new CategoryService(config, breezeContext, logger);
+            expenses = new ExpenseService(config, breezeContext, logger);
             _logger = logger;
         }
 
@@ -61,7 +62,7 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public IActionResult DeleteCategory(int id)
         {
             try
@@ -76,7 +77,7 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("category/{budgetId}")]
         public IActionResult DeleteCategoriesForBudget(int budgetId)
         {
             try

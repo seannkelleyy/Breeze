@@ -24,7 +24,7 @@ namespace Breeze.Api.Services
                 .Select(income => new IncomeResponse
                 {
                     Id = income.Id,
-                    UserId = income.UserId,
+                    UserEmail = income.User.UserEmail,
                     Name = income.Name,
                     Date = DateTime.Now,
                     BudgetId = income.Budget.Id,
@@ -39,9 +39,14 @@ namespace Breeze.Api.Services
             try
             {
                 var budget = db.Budgets.Find(newIncome.BudgetId);
+                var user = db.Users.Find(newIncome.UserEmail);
+                if (budget == null || user == null)
+                {
+                    return -1;
+                }
                 income = new Income
                 {
-                    UserId = newIncome.UserId,
+                    User = user,
                     Name = newIncome.Name,
                     Date = DateTime.Now,
                     Budget = budget,
@@ -61,6 +66,10 @@ namespace Breeze.Api.Services
         public int UpdateIncome(IncomeRequest updatedIncome)
         {
             var income = db.Incomes.Find(updatedIncome.Id);
+            if (income == null)
+            {
+                return -1;
+            }
             try
             {
                 income.Name = updatedIncome.Name;
@@ -79,7 +88,12 @@ namespace Breeze.Api.Services
 
         public int DeleteIncome(int incomeId)
         {
-            db.Incomes.Remove(db.Incomes.Find(incomeId));
+            var income = db.Incomes.Find(incomeId);
+            if (income == null)
+            {
+                return -1;
+            }
+            db.Incomes.Remove(income);
             db.SaveChanges();
             return incomeId;
         }

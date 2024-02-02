@@ -20,16 +20,16 @@ namespace Breeze.Api.Services
         public CategoryResponse GetCategoryByBudgetId(int budgetId)
         {
             return db.Categories
-                .Where(category => category.BudgetId == budgetId)
+                .Where(category => category.Budget.Id == budgetId)
                 .Select(category => new CategoryResponse
                 {
                     Id = category.Id,
-                    UserId = category.UserId,
+                    UserEmail = category.User.UserEmail,
                     Name = category.Name,
                     Date = DateTime.Now,
-                    Budget = category.Budget,
-                    CurrentSpend = category.CurrentSpend,
-                    BudgetId = category.BudgetId,
+                    Allocation = category.Allocation,
+                    Spent = category.Spent,
+                    BudgetId = category.Budget.Id,
                 })
                 .First();
         }
@@ -38,14 +38,20 @@ namespace Breeze.Api.Services
         {
             try
             {
+                var user = db.Users.Where(user => user.UserEmail == newCategory.UserEmail).FirstOrDefault();
+                var budget = db.Budgets.Where(budget => budget.Id == newCategory.BudgetId).FirstOrDefault();
+                if (user == null || budget == null)
+                {
+                    return -1;
+                }
                 Category category = new Category
                 {
-                    UserId = newCategory.UserId,
+                    User = user,
                     Name = newCategory.Name,
                     Date = DateTime.Now,
-                    Budget = newCategory.Budget,
-                    CurrentSpend = newCategory.CurrentSpend,
-                    BudgetId = newCategory.BudgetId,
+                    Allocation = newCategory.Allcoation,
+                    Spent = newCategory.Spent,
+                    Budget = budget,
                 };
 
                 db.Categories.Add(category);
@@ -62,11 +68,15 @@ namespace Breeze.Api.Services
         public int UpdateCategory(CategoryRequest updatedCategory)
         {
             var category = db.Categories.Find(updatedCategory.Id);
+            if (category == null)
+            {
+                return -1;
+            }
             try
             {
                 category.Name = updatedCategory.Name;
-                category.Budget = updatedCategory.Budget;
-                category.CurrentSpend = updatedCategory.CurrentSpend;
+                category.Allocation = updatedCategory.Allcoation;
+                category.Spent = updatedCategory.Spent;
                 db.Categories.Update(category);
                 db.SaveChanges();
                 return category.Id;
@@ -80,7 +90,12 @@ namespace Breeze.Api.Services
 
         public int DeleteCategory(int categoryId)
         {
-            db.Categories.Remove(db.Categories.Find(categoryId));
+            var category = db.Categories.Find(categoryId);
+            if (category == null)
+            {
+                return -1;
+            }
+            db.Categories.Remove(category);
             db.SaveChanges();
             return categoryId;
         }
@@ -89,7 +104,7 @@ namespace Breeze.Api.Services
         {
             db.Categories
                 .RemoveRange(db.Categories
-                .Where(category => category.BudgetId == budgetId));
+                .Where(category => category.Budget.Id == budgetId));
             db.SaveChanges();
             return budgetId;
         }

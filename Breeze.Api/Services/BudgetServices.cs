@@ -17,16 +17,16 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public BudgetResponse GetBudget(string userId, DateTime date)
+        public BudgetResponse GetBudget(string userId, int year, int month)
         {
             return db.Budgets
-                .Where(budget => budget.User.UserId == userId && budget.Date.Month == date.Month && budget.Date.Year == date.Year)
+                .Where(budget => budget.User.UserEmail == userId && budget.Date.Month == month && budget.Date.Year == year)
                 .Select(budget => new BudgetResponse
                 {
-                    UserId = budget.User.UserId,
+                    UserEmail = budget.User.UserEmail,
                     Date = budget.Date,
                     MonthlyIncome = budget.MonthlyIncome,
-                    MonthlySaving = budget.MonthlySaving,
+                    MonthlyExpenses = budget.MonthlyExpenses,
                     Categories = budget.Categories,
                     Income = budget.Income,
                 })
@@ -37,13 +37,17 @@ namespace Breeze.Api.Services
         {
             try
             {
-                var user = db.Users.Where(user => user.UserId == newBudget.UserId).FirstOrDefault();
+                var user = db.Users.Where(user => user.UserEmail == newBudget.UserEmail).FirstOrDefault();
+                if (user == null)
+                {
+                    return null;
+                }
                 db.Budgets.Add(new Budget
                 {
                     User = user,
                     Date = newBudget.Date,
                     MonthlyIncome = newBudget.MonthlyIncome,
-                    MonthlySaving = newBudget.MonthlySaving,
+                    MonthlyExpenses = newBudget.MonthlyExpenses,
 
                 });
                 db.SaveChanges();
@@ -56,13 +60,17 @@ namespace Breeze.Api.Services
             }
         }
 
-        public DateOnly? UpdateBudget(BudgetRequest updatedBudget)
+        public DateOnly? UpdateBudget(int budgetId, BudgetRequest updatedBudget)
         {
-            var existingBudget = db.Budgets.Find(updatedBudget.Id);
+            var existingBudget = db.Budgets.Find(budgetId);
+            if (existingBudget == null)
+            {
+                return null;
+            }
             try
             {
                 existingBudget.MonthlyIncome = updatedBudget.MonthlyIncome;
-                existingBudget.MonthlySaving = updatedBudget.MonthlySaving;
+                existingBudget.MonthlyExpenses = updatedBudget.MonthlyExpenses;
                 db.Budgets.Update(existingBudget);
                 return new DateOnly(updatedBudget.Date.Year, updatedBudget.Date.Month, updatedBudget.Date.Day);
             }
@@ -75,10 +83,12 @@ namespace Breeze.Api.Services
 
         public int DeleteBudget(int budgetId)
         {
-
-            //call function that removes all incomes with this budget id
-            //call function that removes all categories with this budget id
-            db.Budgets.Remove(db.Budgets.Find(budgetId));
+            var budget = db.Budgets.Find(budgetId);
+            if (budget == null)
+            {
+                return -1;
+            }
+            db.Budgets.Remove(budget);
             db.SaveChanges();
             return budgetId;
         }

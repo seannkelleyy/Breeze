@@ -47,7 +47,7 @@ namespace Breeze.Api.Controllers
 
         [HttpPatch]
 
-        public async Task<IActionResult> PatchIncome([FromBody] IncomeRequest incomeRequest)
+        public IActionResult PatchIncome([FromBody] IncomeRequest incomeRequest)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("id")]
         public IActionResult DeleteIncome(int id)
         {
             try
@@ -72,7 +72,7 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("income/{incomeId}")]
         public IActionResult DeleteIncomesForBudget(int budgetId)
         {
             try

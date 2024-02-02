@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Breeze.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/users/{email}/budgets")]
     public class BudgetController : ControllerBase
     {
         private readonly BudgetService budgets;
@@ -24,12 +24,12 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        public IActionResult GetBudget(string UserId, DateTime date)
+        [HttpGet("{year}/{month}")]
+        public IActionResult GetBudget([FromRoute] string email, [FromRoute] int year, [FromRoute] int month)
         {
             try
             {
-                return Ok(budgets.GetBudget(UserId, date));
+                return Ok(budgets.GetBudget(email, year, month));
             }
             catch (Exception ex)
             {
@@ -52,12 +52,12 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpPatch]
-        public IActionResult PatchBudget(BudgetRequest budgetRequest)
+        [HttpPatch("{id}")]
+        public IActionResult PatchBudget([FromRoute] int budgetId, BudgetRequest budgetRequest)
         {
             try
             {
-                return Ok(budgets.UpdateBudget(budgetRequest));
+                return Ok(budgets.UpdateBudget(budgetId, budgetRequest));
             }
             catch (Exception ex)
             {
@@ -66,8 +66,8 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
-        public IActionResult DeleteBudget(int budgetId)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteBudget([FromRoute] int budgetId)
         {
             try
             {
