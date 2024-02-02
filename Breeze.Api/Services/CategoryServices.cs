@@ -17,14 +17,14 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public CategoryResponse GetCategoryByBudgetId(int budgetId)
+        public CategoryResponse GetCategoryByBudgetId(string userId, int budgetId)
         {
             return db.Categories
-                .Where(category => category.Budget.Id == budgetId)
+                .Where(category => category.Budget.Id == budgetId && category.User.UserId.Equals(userId))
                 .Select(category => new CategoryResponse
                 {
                     Id = category.Id,
-                    UserEmail = category.User.UserEmail,
+                    UserId = category.User.UserId,
                     Name = category.Name,
                     Date = DateTime.Now,
                     Allocation = category.Allocation,
@@ -34,11 +34,11 @@ namespace Breeze.Api.Services
                 .First();
         }
 
-        public int CreateCategory(CategoryRequest newCategory)
+        public int CreateCategory(string userId, CategoryRequest newCategory)
         {
             try
             {
-                var user = db.Users.Where(user => user.UserEmail == newCategory.UserEmail).FirstOrDefault();
+                var user = db.Users.Where(user => user.UserId.Equals(userId)).FirstOrDefault();
                 var budget = db.Budgets.Where(budget => budget.Id == newCategory.BudgetId).FirstOrDefault();
                 if (user == null || budget == null)
                 {
@@ -65,10 +65,10 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int UpdateCategory(CategoryRequest updatedCategory)
+        public int UpdateCategory(string userId, CategoryRequest updatedCategory)
         {
             var category = db.Categories.Find(updatedCategory.Id);
-            if (category == null)
+            if (category == null || category.User.UserId.Equals(userId))
             {
                 return -1;
             }
@@ -88,12 +88,16 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int DeleteCategory(int categoryId)
+        public int DeleteCategory(string userId, int categoryId)
         {
             var category = db.Categories.Find(categoryId);
             if (category == null)
             {
                 return -1;
+            }
+            if (!category.User.UserId.Equals(userId))
+            {
+                return -2;
             }
             db.Categories.Remove(category);
             db.SaveChanges();

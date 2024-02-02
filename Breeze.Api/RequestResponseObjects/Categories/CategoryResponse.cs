@@ -5,7 +5,7 @@ namespace Breeze.Api.RequestResponseObjects.Categories
     public class CategoryResponse
     {
         public int Id { get; set; }
-        public string UserEmail { get; set; }
+        public string UserId { get; set; }
         public string Name { get; set; }
         public DateTime Date { get; set; }
         public decimal Allocation { get; set; }

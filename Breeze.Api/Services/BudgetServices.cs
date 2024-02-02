@@ -20,10 +20,10 @@ namespace Breeze.Api.Services
         public BudgetResponse GetBudget(string userId, int year, int month)
         {
             return db.Budgets
-                .Where(budget => budget.User.UserEmail == userId && budget.Date.Month == month && budget.Date.Year == year)
+                .Where(budget => budget.User.UserId.Equals(userId) && budget.Date.Month == month && budget.Date.Year == year)
                 .Select(budget => new BudgetResponse
                 {
-                    UserEmail = budget.User.UserEmail,
+                    UserId = budget.User.UserId,
                     Date = budget.Date,
                     MonthlyIncome = budget.MonthlyIncome,
                     MonthlyExpenses = budget.MonthlyExpenses,
@@ -33,11 +33,11 @@ namespace Breeze.Api.Services
                 .First();
         }
 
-        public DateOnly? CreateBudget(BudgetRequest newBudget)
+        public DateOnly? CreateBudget(string userId, BudgetRequest newBudget)
         {
             try
             {
-                var user = db.Users.Where(user => user.UserEmail == newBudget.UserEmail).FirstOrDefault();
+                var user = db.Users.Where(user => user.UserId.Equals(userId)).FirstOrDefault();
                 if (user == null)
                 {
                     return null;
@@ -60,10 +60,14 @@ namespace Breeze.Api.Services
             }
         }
 
-        public DateOnly? UpdateBudget(int budgetId, BudgetRequest updatedBudget)
+        public DateOnly? UpdateBudget(string userId, BudgetRequest updatedBudget)
         {
-            var existingBudget = db.Budgets.Find(budgetId);
+            var existingBudget = db.Budgets.Find(updatedBudget.Id);
             if (existingBudget == null)
+            {
+                return null;
+            }
+            if (!existingBudget.User.UserId.Equals(userId))
             {
                 return null;
             }
@@ -72,6 +76,7 @@ namespace Breeze.Api.Services
                 existingBudget.MonthlyIncome = updatedBudget.MonthlyIncome;
                 existingBudget.MonthlyExpenses = updatedBudget.MonthlyExpenses;
                 db.Budgets.Update(existingBudget);
+                db.SaveChanges();
                 return new DateOnly(updatedBudget.Date.Year, updatedBudget.Date.Month, updatedBudget.Date.Day);
             }
             catch (Exception ex)
@@ -81,16 +86,28 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int DeleteBudget(int budgetId)
+        public int DeleteBudget(string userId, int budgetId)
         {
             var budget = db.Budgets.Find(budgetId);
             if (budget == null)
             {
                 return -1;
             }
-            db.Budgets.Remove(budget);
-            db.SaveChanges();
-            return budgetId;
+            if (!budget.User.UserId.Equals(userId))
+            {
+                return -2;
+            }
+            try {
+                db.Budgets.Remove(budget);
+                db.SaveChanges();
+                return budgetId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return -1;
+            }
+          
         }
     }
 }

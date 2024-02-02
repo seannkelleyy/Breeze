@@ -12,7 +12,7 @@ namespace Breeze.Data
             modelBuilder
                 .HasOne(budget => budget.User)
                 .WithMany(user => user.Budgets)
-                .HasForeignKey("UserEmail");
+                .HasForeignKey("UserId");
             modelBuilder
                 .HasMany(budget => budget.Categories)
                 .WithOne(category => category.Budget)

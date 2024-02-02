@@ -17,14 +17,14 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public List<IncomeResponse> GetIncomeByBudgetId(int budgetId)
+        public List<IncomeResponse> GetIncomeByBudgetId(string userId, int budgetId)
         {
             return db.Incomes
-                .Where(income => income.Budget.Id == budgetId)
+                .Where(income => income.Budget.Id == budgetId && income.User.UserId.Equals(userId))
                 .Select(income => new IncomeResponse
                 {
                     Id = income.Id,
-                    UserEmail = income.User.UserEmail,
+                    UserId = income.User.UserId,
                     Name = income.Name,
                     Date = DateTime.Now,
                     BudgetId = income.Budget.Id,
@@ -33,13 +33,13 @@ namespace Breeze.Api.Services
                 .ToList();
         }
 
-        public int CreateIncome(IncomeRequest newIncome)
+        public int CreateIncome(string userId, IncomeRequest newIncome)
         {
             Income income;
             try
             {
                 var budget = db.Budgets.Find(newIncome.BudgetId);
-                var user = db.Users.Find(newIncome.UserEmail);
+                var user = db.Users.Find(userId);
                 if (budget == null || user == null)
                 {
                     return -1;
@@ -63,12 +63,16 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int UpdateIncome(IncomeRequest updatedIncome)
+        public int UpdateIncome(string userId, IncomeRequest updatedIncome)
         {
             var income = db.Incomes.Find(updatedIncome.Id);
             if (income == null)
             {
                 return -1;
+            }
+            if (income.User.UserId != userId)
+            {
+                return -2;
             }
             try
             {
@@ -86,12 +90,16 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int DeleteIncome(int incomeId)
+        public int DeleteIncome(string userId, int incomeId)
         {
             var income = db.Incomes.Find(incomeId);
             if (income == null)
             {
                 return -1;
+            }
+            if (income.User.UserId != userId)
+            {
+                return -2;
             }
             db.Incomes.Remove(income);
             db.SaveChanges();

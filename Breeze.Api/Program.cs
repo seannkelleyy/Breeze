@@ -6,11 +6,11 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var domain = $"https://{builder.Configuration["dev-r15wsyccxyjfwrqm.us.auth0.com"]}/";
+var domain = "https://dev-r15wsyccxyjfwrqm.us.auth0.com/";
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
         options.Authority = domain;
-        options.Audience = builder.Configuration["http://breezebudgeting.com"];
+        options.Audience = "http://breezebudgeting.com";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             NameClaimType = ClaimTypes.NameIdentifier
@@ -18,14 +18,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-//Establist connection string
+// Establish connection string
 builder.Services.AddDbContext<BreezeContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("breezeDb")));
 

@@ -2,11 +2,12 @@
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Breeze.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/categories")]
     public class CategoryController : ControllerBase
     {
         private readonly CategoryService categories;
@@ -20,12 +21,17 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet("{budgetId}")]
         public IActionResult GetCategoryByBudgetId(int budgetId)
         {
             try
             {
-                return Ok(categories.GetCategoryByBudgetId(budgetId));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(categories.GetCategoryByBudgetId(userId, budgetId));
             }
             catch (Exception ex)
             {
@@ -39,7 +45,12 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                return Ok(categories.CreateCategory(categoryRequest));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(categories.CreateCategory(userId, categoryRequest));
             }
             catch (Exception ex)
             {
@@ -53,7 +64,12 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                return Ok(categories.UpdateCategory(categoryRequest));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(categories.UpdateCategory(userId, categoryRequest));
             }
             catch (Exception ex)
             {
@@ -67,8 +83,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
                 expenses.DeleteExpenseForCategory(id);
-                return Ok(categories.DeleteCategory(id));
+                return Ok(categories.DeleteCategory(userId, id));
             }
             catch (Exception ex)
             {
@@ -77,11 +98,16 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete("category/{budgetId}")]
+        [HttpDelete("{budgetId}")]
         public IActionResult DeleteCategoriesForBudget(int budgetId)
         {
             try
             {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
                 return Ok(categories.DeleteCategoriesForBudget(budgetId));
             }
             catch (Exception ex)
