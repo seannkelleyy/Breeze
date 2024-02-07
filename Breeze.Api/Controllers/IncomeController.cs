@@ -75,7 +75,7 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public IActionResult DeleteIncome([FromRoute]int id)
         {
             try
