@@ -7,9 +7,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Breeze.Api", "Breeze.Api\Br
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Breeze.Domain", "Breeze.Domain\Breeze.Domain.csproj", "{BAD68959-5D4C-4A22-A9B7-728BE749B340}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Breeze.Data", "Breeze.Data\Breeze.Data.csproj", "{90361944-4CD3-4D40-B1BC-97F942E93B91}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Breeze.Data", "Breeze.Data\Breeze.Data.csproj", "{90361944-4CD3-4D40-B1BC-97F942E93B91}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Breeze.Sql", "Breeze.Sql\Breeze.Sql.sqlproj", "{28722EA8-1C05-46B9-9EEA-02DBA7264E82}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F895DE08-0C51-4CCE-ABCF-CDE0D95E50E6}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

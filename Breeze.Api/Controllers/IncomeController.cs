@@ -2,11 +2,12 @@
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Breeze.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/incomes")]
     public class IncomeController : ControllerBase
     {
         private readonly IncomeService incomes;
@@ -18,12 +19,17 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        public IActionResult GetIncome(int budgetId)
+        [HttpGet("{budgetId}")]
+        public IActionResult GetIncome([FromRoute]int budgetId)
         {
             try
             {
-                return Ok(incomes.GetIncomeByBudgetId(budgetId));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(incomes.GetIncomeByBudgetId(userId, budgetId));
             }
             catch (Exception ex)
             {
@@ -37,7 +43,12 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                return Ok(incomes.CreateIncome(incomeRequest));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(incomes.CreateIncome(userId, incomeRequest));
             }
             catch (Exception ex)
             {
@@ -47,11 +58,16 @@ namespace Breeze.Api.Controllers
 
         [HttpPatch]
 
-        public async Task<IActionResult> PatchIncome([FromBody] IncomeRequest incomeRequest)
+        public IActionResult PatchIncome([FromBody] IncomeRequest incomeRequest)
         {
             try
             {
-                return Ok(incomes.UpdateIncome(incomeRequest));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(incomes.UpdateIncome(userId, incomeRequest));
             }
             catch (Exception ex)
             {
@@ -59,12 +75,17 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
-        public IActionResult DeleteIncome(int id)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteIncome([FromRoute]int id)
         {
             try
             {
-                return Ok(incomes.DeleteIncome(id));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(incomes.DeleteIncome(userId, id));
             }
             catch (Exception ex)
             {
@@ -72,7 +93,7 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("income/{incomeId}")]
         public IActionResult DeleteIncomesForBudget(int budgetId)
         {
             try

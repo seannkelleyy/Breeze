@@ -2,17 +2,17 @@
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Breeze.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/budgets")]
     public class BudgetController : ControllerBase
     {
         private readonly BudgetService budgets;
         private readonly CategoryService categories;
         private readonly IncomeService incomes;
-        private readonly ExpenseService expenses;
         private readonly ILogger<BudgetController> _logger;
 
         public BudgetController(IConfiguration config, ILogger<BudgetController> logger, BreezeContext breezeContext)
@@ -20,16 +20,21 @@ namespace Breeze.Api.Controllers
             budgets = new BudgetService(config, breezeContext, logger);
             categories = new CategoryService(config, breezeContext, logger);
             incomes = new IncomeService(config, breezeContext, logger);
-            expenses = new ExpenseService(config, breezeContext, logger);
             _logger = logger;
         }
 
-        [HttpGet]
-        public IActionResult GetBudget(string UserId, DateTime date)
+        [HttpGet("{year}/{month}")]
+        public IActionResult GetBudget([FromRoute] int year, [FromRoute] int month)
         {
+
             try
             {
-                return Ok(budgets.GetBudget(UserId, date));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(budgets.GetBudget(userId, year, month));
             }
             catch (Exception ex)
             {
@@ -43,7 +48,12 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                return Ok(budgets.CreateBudget(budgetRequest));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(budgets.CreateBudget(userId, budgetRequest));
             }
             catch (Exception ex)
             {
@@ -53,11 +63,16 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpPatch]
-        public IActionResult PatchBudget(BudgetRequest budgetRequest)
+        public IActionResult PatchBudget( BudgetRequest budgetRequest)
         {
             try
             {
-                return Ok(budgets.UpdateBudget(budgetRequest));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(budgets.UpdateBudget(userId, budgetRequest));
             }
             catch (Exception ex)
             {
@@ -66,14 +81,19 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
-        public IActionResult DeleteBudget(int budgetId)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteBudget([FromRoute] int budgetId)
         {
             try
             {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
                 incomes.DeleteIncomesForBudget(budgetId);
                 categories.DeleteCategoriesForBudget(budgetId);
-                return Ok(budgets.DeleteBudget(budgetId));
+                return Ok(budgets.DeleteBudget(userId, budgetId));
             }
             catch (Exception ex)
             {

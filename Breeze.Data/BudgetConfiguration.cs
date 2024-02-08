@@ -13,6 +13,14 @@ namespace Breeze.Data
                 .HasOne(budget => budget.User)
                 .WithMany(user => user.Budgets)
                 .HasForeignKey("UserId");
+            modelBuilder
+                .HasMany(budget => budget.Categories)
+                .WithOne(category => category.Budget)
+                .HasForeignKey("BudgetId");
+            modelBuilder
+                .HasMany(budget => budget.Income)
+                .WithOne(income => income.Budget)
+                .HasForeignKey("BudgetId");
         }
     }
 }

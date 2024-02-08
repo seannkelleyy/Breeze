@@ -2,11 +2,12 @@
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Breeze.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/expeneses")]
     public class ExpenseController : ControllerBase
     {
         private readonly ExpenseService expenses;
@@ -18,12 +19,17 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        public IActionResult GetExpsense(int CategoryId)
+        [HttpGet("{categoryId}")]
+        public IActionResult GetExpsense([FromRoute]int CategoryId)
         {
             try
             {
-                return Ok(expenses.GetExpenseByCategoryId(CategoryId));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(expenses.GetExpenseByCategoryId(userId, CategoryId));
             }
             catch (Exception ex)
             {
@@ -37,7 +43,12 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                return Ok(expenses.CreateExpense(expenseRequest));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(expenses.CreateExpense(userId, expenseRequest));
             }
             catch (Exception ex)
             {
@@ -46,12 +57,16 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpPatch]
-
-        public async Task<IActionResult> PatchExpsense(int id, [FromBody] ExpenseRequest expenseRequest)
+        public IActionResult PatchExpsense([FromBody] ExpenseRequest expenseRequest)
         {
             try
             {
-                return Ok(expenses.UpdateExpense(expenseRequest));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(expenses.UpdateExpense(userId, expenseRequest));
             }
             catch (Exception ex)
             {
@@ -59,12 +74,17 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public IActionResult DeleteExpsense(int id)
         {
             try
             {
-                return Ok(expenses.DeleteExpense(id));
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(expenses.DeleteExpense(userId, id));
             }
             catch (Exception ex)
             {
@@ -72,11 +92,16 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{categoryId}")]
         public IActionResult DeleteExpsensesForCategory(int categoryId)
         {
             try
             {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
                 expenses.DeleteExpenseForCategory(categoryId);
                 return Ok();
             }

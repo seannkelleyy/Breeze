@@ -8,7 +8,7 @@ namespace Breeze.Api.RequestResponseObjects.Budgets
         public string UserId { get; set; }
         public DateTime Date { get; set; }
         public decimal MonthlyIncome { get; set; }
-        public decimal MonthlySaving { get; set; }
+        public decimal MonthlyExpenses { get; set; }
         public List<Category> Categories { get; set; }
         public List<Income> Income { get; set; }
     }

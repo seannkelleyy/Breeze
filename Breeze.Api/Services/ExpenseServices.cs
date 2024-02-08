@@ -17,14 +17,14 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public List<ExpenseResponse> GetExpenseByCategoryId(int CategoryId)
+        public List<ExpenseResponse> GetExpenseByCategoryId(string userId, int CategoryId)
         {
             return db.Expenses
-                .Where(expense => expense.Category.Id == CategoryId)
+                .Where(expense => expense.Category.Id == CategoryId && expense.User.Id.Equals(userId))
                 .Select(expense => new ExpenseResponse
                 {
                     Id = expense.Category.Id,
-                    UserId = expense.UserId,
+                    UserId = expense.User.UserId,
                     Name = expense.Name,
                     Date = expense.Date,
                     CategoryId = CategoryId,
@@ -33,14 +33,19 @@ namespace Breeze.Api.Services
                 .ToList();
         }
 
-        public int CreateExpense(ExpenseRequest newExpense)
+        public int CreateExpense(string userId, ExpenseRequest newExpense)
         {
             try
             {
                 var category = db.Categories.Find(newExpense.CategoryId);
+                var user = db.Users.Find(userId);
+                if (category == null || user == null)
+                {
+                    return -1;
+                }
                 Expense expense = new Expense
                 {
-                    UserId = newExpense.UserId,
+                    User = user,
                     Name = newExpense.Name,
                     Date = newExpense.Date,
                     Category = category,
@@ -58,9 +63,18 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int UpdateExpense(ExpenseRequest existingExpense)
+        public int UpdateExpense(string userId, ExpenseRequest existingExpense)
         {
             var expense = db.Expenses.Find(existingExpense.Id);
+
+            if (expense == null)
+            {
+                return -1;
+            }
+            if (!expense.User.Id.Equals(userId))
+            {
+                return -2;
+            }
             try
             {
                 expense.Name = existingExpense.Name;
@@ -78,9 +92,18 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int DeleteExpense(int expenseId)
+        public int DeleteExpense(string userId, int expenseId)
         {
-            db.Expenses.Remove(db.Expenses.Find(expenseId));
+            var expense = db.Expenses.Find(expenseId);
+            if (expense == null)
+            {
+                return -1;
+            }
+            if (!expense.User.Id.Equals(userId))
+            {
+                return -2;
+            }
+            db.Expenses.Remove(expense);
             db.SaveChanges();
             return expenseId;
         }

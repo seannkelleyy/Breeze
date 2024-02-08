@@ -20,7 +20,7 @@ namespace Breeze.Data
         {
             modelBuilder.HasDefaultSchema("dbo");
             modelBuilder.Entity<User>().ToTable("User");
-            modelBuilder.Entity<Category>().ToTable("Category");
+            modelBuilder.ApplyConfiguration(new CategoryConfiguration());
             modelBuilder.ApplyConfiguration(new ExpenseConfiguration());
             modelBuilder.ApplyConfiguration(new IncomeConfiguration());
             modelBuilder.ApplyConfiguration(new BudgetConfiguration());
