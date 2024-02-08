@@ -13,7 +13,7 @@ export const FakeBudget: Budget = {
 			userId: '12ads2',
 			budgetId: 1,
 			curentSpend: 1000,
-			amount: 1000,
+			allocation: 1000,
 			expenses: [
 				{
 					id: 6,
@@ -31,7 +31,7 @@ export const FakeBudget: Budget = {
 			userId: '12ads2',
 			budgetId: 1,
 			curentSpend: 250,
-			amount: 500,
+			allocation: 500,
 			expenses: [
 				{
 					id: 4,
@@ -57,7 +57,7 @@ export const FakeBudget: Budget = {
 			userId: '12ads2',
 			budgetId: 1,
 			curentSpend: 100,
-			amount: 130,
+			allocation: 130,
 			expenses: [
 				{
 					id: 3,
@@ -75,7 +75,7 @@ export const FakeBudget: Budget = {
 			userId: '12ads2',
 			budgetId: 1,
 			curentSpend: 300,
-			amount: 350,
+			allocation: 350,
 			expenses: [
 				{
 					id: 1,

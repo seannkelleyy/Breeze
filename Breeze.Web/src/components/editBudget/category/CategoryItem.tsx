@@ -11,7 +11,7 @@ type CategoryItemProps = {
 
 export const CategoryItem = ({ categoryItem }: CategoryItemProps) => {
 	const mutation = useMutation((category: Category) => putCategory(category))
-	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.amount)
+	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.allocation)
 	const [categoryName, setCategoryName] = useState<string>(categoryItem.name)
 
 	const UpdateCategory = () => {
