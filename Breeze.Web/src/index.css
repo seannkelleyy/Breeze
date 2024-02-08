@@ -1,5 +1,5 @@
 :root {
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	line-height: 1.5;
 	font-weight: 400;
 
@@ -30,4 +30,11 @@
 
 ::placeholder {
 	color: var(--darkText);
+}
+
+@font-face {
+	font-family: 'Inter';
+	src:
+		url('/fonts/inter/Inter-VariableFont_slnt,wght.ttf') format('woff2'),
+		url('/fonts/Inter-Regular.woff') format('woff');
 }
