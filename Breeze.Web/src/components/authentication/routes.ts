@@ -3,12 +3,15 @@ import { LandingPage } from '../landing/LandingPage'
 import { HomePage } from '../homePage/HomePage'
 import { EditBudgetPage } from '../editBudget/EditBudget'
 import { Profile } from './Profile'
+import { AddIncome } from '../addItems/AddIncome'
 
 export const PAGE = {
     HOME: '/home',
     ROOT: '/',
     BUDGET: '/budget/:year/:month',
     PROFILE: '/profile',
+    ADD_INCOME: '/add-income',
+    ADD_EXPENSE: '/add-expense',
 }
 
 export const router = createBrowserRouter([
@@ -32,6 +35,14 @@ export const router = createBrowserRouter([
     {
         path: PAGE.PROFILE,
         Component: Profile,
+    },
+    {
+        path: PAGE.ADD_INCOME,
+        Component: AddIncome
+    },
+    {
+        path: PAGE.ADD_EXPENSE,
+        Component: () => null,
     },
     {
         // redirect any invalid pages back to home

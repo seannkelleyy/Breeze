@@ -1,4 +1,4 @@
-1. Restlye category section and income section on addBudget page
+1. Restyle category section and income section on addBudget page
 2. make sure I need to use the usecontext to pass the budget into the addBudget page 
     or if I should just do a get call to get the budget
 3. Refractor css styles again (use color scheme on new files)
