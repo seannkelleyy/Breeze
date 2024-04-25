@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Category } from '../../../models/category'
+import { Category } from '../../../services/models/category'
 import { BreezeInput } from '../../shared/BreezeInput'
 import { BreezeBox } from '../../shared/BreezeBox'
-import { putCategory } from '../../../services/apiServices/CategoryServices'
+import { putCategory } from '../../../services/hooks/CategoryServices'
 import { useMutation } from 'react-query'
 
 type CategoryItemProps = {

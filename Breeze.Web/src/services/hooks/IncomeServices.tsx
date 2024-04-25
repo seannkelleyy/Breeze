@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Income } from '../../models/income'
+import { Income } from '../models/income'
 import { BASE_API_URL } from '../environment'
 
 export const getIncomes = (budgetId: number) => {

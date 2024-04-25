@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useState } from 'react'
-import { Budget, emptyBudget } from '../../models/budget'
-import { getBudget } from '../apiServices/BudgetServices'
+import { Budget, emptyBudget } from '../models/budget'
+import { getBudget } from '../hooks/BudgetServices'
 
 // declares types used in this file
 type BudgetProviderProps = {

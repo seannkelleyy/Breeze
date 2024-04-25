@@ -1,6 +1,6 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { useState } from 'react'
-import { Category } from '../../../models/category'
+import { Category } from '../../../services/models/category'
 import { BreezeCard } from '../../shared/BreezeCard'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeBox } from '../../shared/BreezeBox'

@@ -1,4 +1,4 @@
-import { Income, emptyIncome } from '../../../models/income'
+import { Income, emptyIncome } from '../../../services/models/income'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeText } from '../../shared/BreezeText'
 import { IncomeItem } from './IncomeItem'

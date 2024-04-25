@@ -1,4 +1,4 @@
-import { Budget } from '../models/budget'
+import { Budget } from './models/budget'
 
 export const FakeBudget: Budget = {
 	id: 1,

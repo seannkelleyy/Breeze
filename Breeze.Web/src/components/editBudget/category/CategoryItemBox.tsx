@@ -1,4 +1,4 @@
-import { Category, emptyCategory } from '../../../models/category'
+import { Category, emptyCategory } from '../../../services/models/category'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeText } from '../../shared/BreezeText'
 import { CategoryItem } from './CategoryItem'

@@ -2,7 +2,7 @@
  * Currently this is a static list of goals. In the future, this will be a list of goals that are stored in a database.
  */
 
-import { Goal } from "../../models/goal";
+import { Goal } from "../models/goal";
 
 export const goals: Goal[]= [
     {
