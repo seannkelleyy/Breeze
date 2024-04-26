@@ -23,7 +23,6 @@ export const IncomeItemsBox = ({ incomeItems }: IncomeItemsBoxProps) => {
 		<BreezeBox
 			title='incomes'
 			style={{
-				border: 'var(--border) solid 2px',
 				padding: '0.5em',
 				borderRadius: '0.5em',
 				width: '100%',

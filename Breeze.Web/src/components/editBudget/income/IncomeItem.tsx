@@ -22,7 +22,7 @@ export const IncomeItem = ({ incomeItem }: IncomeItemProps) => {
 		<BreezeBox
 			title='CategoryItem'
 			direction='row'
-			style={{ justifyContent: 'space-between', width: '100%', borderBottom: '1px solid var(--border)' }}
+			style={{ justifyContent: 'space-between', width: '100%' }}
 		>
 			<BreezeInput
 				title='Income Name'

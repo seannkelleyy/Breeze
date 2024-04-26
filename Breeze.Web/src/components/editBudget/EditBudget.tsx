@@ -38,6 +38,9 @@ export const EditBudgetPage = () => {
 				<section className={budget.monthlyIncome - budget.monthlyExpenses >= 0 ? 'amount-left-positive' : 'amount-left-negative'}>
 					<BreezeText
 						type='large'
+						style={{
+							padding: '.25em',
+						}}
 						text={`Amount left to allocate: $${budget.monthlyIncome && budget.monthlyExpenses ? budget.monthlyIncome - budget.monthlyExpenses : 0}`}
 					/>
 				</section>

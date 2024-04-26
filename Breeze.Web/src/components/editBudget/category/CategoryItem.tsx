@@ -21,7 +21,7 @@ export const CategoryItem = ({ categoryItem }: CategoryItemProps) => {
 		<BreezeBox
 			title='CategoryItem'
 			direction='row'
-			style={{ justifyContent: 'space-between', width: '100%', borderBottom: '1px solid var(--border)' }}
+			style={{ justifyContent: 'space-between', width: '100%' }}
 		>
 			<BreezeInput
 				title='Category Name'

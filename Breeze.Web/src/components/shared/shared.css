@@ -92,7 +92,7 @@
 	text-align: right;
 	box-sizing: border-box;
 	color: var(--darkText);
-	background-color: var(--background);
+	background-color: var(--neutral100);
 }
 
 .breeze-input:focus {
