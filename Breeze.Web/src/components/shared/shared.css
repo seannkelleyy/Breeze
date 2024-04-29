@@ -126,6 +126,24 @@
 	width: 100%;
 }
 
+.breeze-select {
+	width: 10ch;
+	height: 2.5em;
+	border: none;
+	border-radius: 0.25em;
+	padding: 0 0.5em;
+	font-size: 1.15em;
+	text-align: right;
+	box-sizing: border-box;
+	color: var(--darkText);
+	background-color: var(--neutral100);
+}
+
+.breeze-select-option {
+	font-size: 1.15em;
+	color: var(--darkText);
+}
+
 .breeze-text-small {
 	font-size: 1em;
 	color: var(--darkText);

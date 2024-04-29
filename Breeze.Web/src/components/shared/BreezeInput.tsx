@@ -11,12 +11,12 @@ type BreezeInputProps = {
 
 /**
  * Simple replacement for inputs in Breeze, comes standard with default Breeze styling.
- * @param props.type: The type of the input.
- * @param props.title: The title of the input.
- * @param props.placeholder: The placeholder of the input.
- * @param props.onBlur: - Optional - The onBlur function of the input.
- * @param props.onChange: - Optional - The onChange function of the input.
- * @param props.style: - Optional - The style of the input.
+ * @param type: The type of the input.
+ * @param title: The title of the input.
+ * @param placeholder: The placeholder of the input.
+ * @param onBlur: - Optional - The onBlur function of the input.
+ * @param onChange: - Optional - The onChange function of the input.
+ * @param style: - Optional - The style of the input.
  */
 export const BreezeInput = ({ type, title, placeholder, onBlur, onChange, style }: BreezeInputProps) => {
 	return (
