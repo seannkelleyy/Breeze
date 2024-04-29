@@ -4,8 +4,11 @@ import { BreezeInput } from '../shared/BreezeInput'
 import { BreezeText } from '../shared/BreezeText'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useBudget } from '../../services/contexts/BudgetContext'
+import { BreezeButton } from '../shared/BreezeButton'
+import { useNavigate } from 'react-router-dom'
 
 export const AddIncome = () => {
+	const navigate = useNavigate()
 	const { user } = useAuth0()
 	const [income, setIncome] = useState({
 		userId: user?.sub,
@@ -17,7 +20,22 @@ export const AddIncome = () => {
 
 	return (
 		<BreezeBox title='Add-Income'>
-			<h1>Add Income</h1>
+			<BreezeButton
+				text='<-'
+				style={{
+					position: 'absolute',
+					top: '2%',
+					left: '3%',
+				}}
+				onClick={() => {
+					navigate(-1)
+				}}
+			/>
+			<BreezeText
+				type='large-heading'
+				text='Add Income'
+				style={{ marginTop: '12.5%' }}
+			/>
 			<BreezeBox
 				title='Income Name'
 				style={{
