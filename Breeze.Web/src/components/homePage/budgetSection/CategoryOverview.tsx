@@ -1,6 +1,6 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { useState } from 'react'
-import { Category } from '../../../models/category'
+import { Category } from '../../../services/models/category'
 import { BreezeCard } from '../../shared/BreezeCard'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeBox } from '../../shared/BreezeBox'
@@ -34,16 +34,16 @@ export const CategoryOverview = (props: categoryItemProps) => {
 					type='small-heading'
 				/>
 				<BreezeText
-					text={`$${category.curentSpend} of $${category.amount}`}
+					text={`$${category.curentSpend} of $${category.allocation}`}
 					type='large'
 				/>
 			</BreezeBox>
 			<BreezeProgressBar
 				title='Category Progress Bar'
-				percentage={(category.curentSpend / category.amount) * 100}
+				percentage={(category.curentSpend / category.allocation) * 100}
 			/>
 			<BreezeText
-				text={`Remaining: $${category.amount - category.curentSpend}`}
+				text={`Remaining: $${category.allocation - category.curentSpend}`}
 				type='medium'
 			/>
 			<BreezeButton

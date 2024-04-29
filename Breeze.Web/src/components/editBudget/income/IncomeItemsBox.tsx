@@ -1,4 +1,4 @@
-import { Income, emptyIncome } from '../../../models/income'
+import { Income, emptyIncome } from '../../../services/models/income'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeText } from '../../shared/BreezeText'
 import { IncomeItem } from './IncomeItem'
@@ -23,7 +23,6 @@ export const IncomeItemsBox = ({ incomeItems }: IncomeItemsBoxProps) => {
 		<BreezeBox
 			title='incomes'
 			style={{
-				border: 'var(--border) solid 2px',
 				padding: '0.5em',
 				borderRadius: '0.5em',
 				width: '100%',

@@ -3,7 +3,7 @@ import { getMonthAsString } from '../../../services/utils/GetMonth'
 import { CategoryOverview } from './CategoryOverview'
 import { Link } from 'react-router-dom'
 import { BreezeButton } from '../../shared/BreezeButton'
-import { useBudget } from '../../../services/budgetContext/BudgetContext'
+import { useBudget } from '../../../services/contexts/BudgetContext'
 import { BreezeCard } from '../../shared/BreezeCard'
 import { BreezeBox } from '../../shared/BreezeBox'
 import { BreezeText } from '../../shared/BreezeText'
@@ -75,11 +75,11 @@ export const BudgetSection = () => {
 				/>
 				<BreezeText
 					type='large'
-					text={`Total spent: ${budget ? budget.monthlyIncome - budget.monthlySavings : 0}`}
+					text={`Total spent: ${budget ? budget.monthlyExpenses : 0}`}
 				/>
 				<BreezeText
 					type='large'
-					text={`Total saved: ${budget ? budget.monthlySavings : 0}`}
+					text={`Remaining: ${budget ? budget.monthlyIncome - budget.monthlyExpenses : 0}`}
 				/>
 			</BreezeCard>
 			<BreezeBox title='categories'>

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Category } from '../../../models/category'
+import { Category } from '../../../services/models/category'
 import { BreezeInput } from '../../shared/BreezeInput'
 import { BreezeBox } from '../../shared/BreezeBox'
-import { putCategory } from '../../../services/apiServices/CategoryServices'
+import { putCategory } from '../../../services/hooks/CategoryServices'
 import { useMutation } from 'react-query'
 
 type CategoryItemProps = {
@@ -11,7 +11,7 @@ type CategoryItemProps = {
 
 export const CategoryItem = ({ categoryItem }: CategoryItemProps) => {
 	const mutation = useMutation((category: Category) => putCategory(category))
-	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.amount)
+	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.allocation)
 	const [categoryName, setCategoryName] = useState<string>(categoryItem.name)
 
 	const UpdateCategory = () => {
@@ -21,7 +21,7 @@ export const CategoryItem = ({ categoryItem }: CategoryItemProps) => {
 		<BreezeBox
 			title='CategoryItem'
 			direction='row'
-			style={{ justifyContent: 'space-between', width: '100%', borderBottom: '1px solid var(--border)' }}
+			style={{ justifyContent: 'space-between', width: '100%' }}
 		>
 			<BreezeInput
 				title='Category Name'

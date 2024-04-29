@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import axios from 'axios'
-import { Expense } from '../../models/expense'
+import { Expense } from '../models/expense'
 import { BASE_API_URL } from '../environment'
 
 export const getExpenses = (categoryId: number) => {

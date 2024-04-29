@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Income } from '../../../models/income'
+import { Income } from '../../../services/models/income'
 import { BreezeInput } from '../../shared/BreezeInput'
 import { BreezeBox } from '../../shared/BreezeBox'
 import { useMutation } from 'react-query'
-import { putIncome } from '../../../services/apiServices/IncomeServices'
+import { putIncome } from '../../../services/hooks/IncomeServices'
 
 type IncomeItemProps = {
 	incomeItem: Income
@@ -22,7 +22,7 @@ export const IncomeItem = ({ incomeItem }: IncomeItemProps) => {
 		<BreezeBox
 			title='CategoryItem'
 			direction='row'
-			style={{ justifyContent: 'space-between', width: '100%', borderBottom: '1px solid var(--border)' }}
+			style={{ justifyContent: 'space-between', width: '100%' }}
 		>
 			<BreezeInput
 				title='Income Name'

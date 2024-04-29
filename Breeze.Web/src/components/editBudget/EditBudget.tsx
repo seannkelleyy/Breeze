@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { useBudget } from '../../services/budgetContext/BudgetContext'
+import { useBudget } from '../../services/contexts/BudgetContext'
 import { IncomeItemsBox } from './income/IncomeItemsBox'
 import { CategoryItemsBox } from './category/CategoryItemBox'
 import { BreezeBox } from '../shared/BreezeBox'
@@ -38,6 +38,9 @@ export const EditBudgetPage = () => {
 				<section className={budget.monthlyIncome - budget.monthlyExpenses >= 0 ? 'amount-left-positive' : 'amount-left-negative'}>
 					<BreezeText
 						type='large'
+						style={{
+							padding: '.25em',
+						}}
 						text={`Amount left to allocate: $${budget.monthlyIncome && budget.monthlyExpenses ? budget.monthlyIncome - budget.monthlyExpenses : 0}`}
 					/>
 				</section>

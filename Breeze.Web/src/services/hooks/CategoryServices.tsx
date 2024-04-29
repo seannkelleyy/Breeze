@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Category } from '../../models/category'
+import { Category } from '../models/category'
 import { BASE_API_URL } from '../environment'
 
 export const useGetCategory = (budgetId: number, categoryId: number) => {

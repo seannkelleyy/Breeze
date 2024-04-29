@@ -1,4 +1,4 @@
-import { Category, emptyCategory } from '../../../models/category'
+import { Category, emptyCategory } from '../../../services/models/category'
 import { BreezeButton } from '../../shared/BreezeButton'
 import { BreezeText } from '../../shared/BreezeText'
 import { CategoryItem } from './CategoryItem'
@@ -23,7 +23,6 @@ export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
 		<BreezeBox
 			title='incomes'
 			style={{
-				border: 'var(--border) solid 2px',
 				padding: '0.5em',
 				borderRadius: '0.5em',
 				width: '100%',

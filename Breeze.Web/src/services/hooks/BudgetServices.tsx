@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Budget } from '../../models/budget'
+import { Budget } from '../models/budget'
 import { FakeBudget } from '../FakeData'
 import { BASE_API_URL } from '../environment'
 

@@ -6,7 +6,7 @@ export type Category = {
 	userId?: string
 	budgetId?: number
 	curentSpend: number
-	amount: number
+	allocation: number
 	expenses: Expense[]
 }
 
@@ -14,6 +14,6 @@ export type Category = {
 export const emptyCategory: Category = {
 	name: 'Category Name',
 	curentSpend: 0,
-	amount: 0,
+	allocation: 0,
 	expenses: [],
 }
