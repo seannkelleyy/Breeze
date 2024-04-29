@@ -4,33 +4,33 @@ import { BreezeInput } from '../shared/BreezeInput'
 import { BreezeText } from '../shared/BreezeText'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useBudget } from '../../services/contexts/BudgetContext'
+import { BackButton } from '../shared/BackButton'
 import { BreezeButton } from '../shared/BreezeButton'
-import { useNavigate } from 'react-router-dom'
+import { postIncome } from '../../services/hooks/IncomeServices'
+import { Income } from '../../services/models/income'
 
 export const AddIncome = () => {
-	const navigate = useNavigate()
 	const { user } = useAuth0()
-	const [income, setIncome] = useState({
+	const [income, setIncome] = useState<Income>({
 		userId: user?.sub,
-		budget: useBudget(new Date(Date.now())),
+		budgetId: useBudget(new Date(Date.now())).id,
 		name: '',
 		amount: 0,
-		date: '',
+		date: new Date(Date.now()),
 	})
+	const [isSubmittable, setIsSubmittable] = useState(false)
+
+	const checkSubmittable = () => {
+		if (income.name !== '' && income.amount && income.date !== null) {
+			setIsSubmittable(true)
+		} else {
+			setIsSubmittable(false)
+		}
+	}
 
 	return (
 		<BreezeBox title='Add-Income'>
-			<BreezeButton
-				text='<-'
-				style={{
-					position: 'absolute',
-					top: '2%',
-					left: '3%',
-				}}
-				onClick={() => {
-					navigate(-1)
-				}}
-			/>
+			<BackButton />
 			<BreezeText
 				type='large-heading'
 				text='Add Income'
@@ -40,8 +40,8 @@ export const AddIncome = () => {
 				title='Income Name'
 				style={{
 					width: '80%',
-					flexDirection: 'row',
-					justifyContent: 'space-between',
+					flexDirection: 'column',
+					alignItems: 'flex-start',
 				}}
 			>
 				<BreezeText
@@ -51,9 +51,11 @@ export const AddIncome = () => {
 				<BreezeInput
 					type='string'
 					title='Income Name'
+					style={{ width: '100%' }}
 					placeholder='name'
 					onChange={(e) => {
 						setIncome({ ...income, name: e.target.value })
+						checkSubmittable()
 						console.log(income)
 					}}
 				/>
@@ -62,8 +64,8 @@ export const AddIncome = () => {
 				title='Income Amount'
 				style={{
 					width: '80%',
-					flexDirection: 'row',
-					justifyContent: 'space-between',
+					flexDirection: 'column',
+					alignItems: 'flex-start',
 				}}
 			>
 				<BreezeText
@@ -73,9 +75,11 @@ export const AddIncome = () => {
 				<BreezeInput
 					type='string'
 					title='Income Amount'
+					style={{ width: '100%' }}
 					placeholder='amount'
 					onChange={(e) => {
 						setIncome({ ...income, amount: parseFloat(e.target.value) })
+						checkSubmittable()
 						console.log(income)
 					}}
 				/>
@@ -84,8 +88,8 @@ export const AddIncome = () => {
 				title='Income Date'
 				style={{
 					width: '80%',
-					flexDirection: 'row',
-					justifyContent: 'space-between',
+					flexDirection: 'column',
+					alignItems: 'flex-start',
 				}}
 			>
 				<BreezeText
@@ -96,12 +100,22 @@ export const AddIncome = () => {
 					type='date'
 					title='Income Date'
 					placeholder='date'
+					style={{ width: '100%' }}
 					onChange={(e) => {
-						setIncome({ ...income, date: e.target.value })
+						setIncome({ ...income, date: new Date(e.target.value) })
+						checkSubmittable()
 						console.log(income)
 					}}
 				/>
 			</BreezeBox>
+			<BreezeButton
+				text='Add Income'
+				disabled={!isSubmittable}
+				onClick={() => {
+					console.log(income)
+					postIncome(income)
+				}}
+			/>
 		</BreezeBox>
 	)
 }
