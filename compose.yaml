@@ -5,7 +5,7 @@ services:
     ports:
       - 5173:5173
     volumes:
-      - ./Breeze.Web:/app/src
+      - ./Breeze.Web/src:/app/src
     environment:
       - CHOKIDAR_USEPOLLING=true
   webApi:
