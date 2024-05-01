@@ -18,5 +18,5 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish ./
 
-EXPOSE 5001
+EXPOSE 80
 ENTRYPOINT ["dotnet", "Breeze.Api.dll"]

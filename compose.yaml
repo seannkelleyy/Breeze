@@ -16,7 +16,7 @@ services:
       context: ./
       dockerfile: Dockerfile.api
     ports:
-      - 5001:5001
+      - 7284:80
     volumes:
       - ./Breeze.Api:/app/src/api
       - ./Breeze.Data:/app/src/api
