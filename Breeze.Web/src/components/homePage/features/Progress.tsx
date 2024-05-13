@@ -11,13 +11,9 @@ export const Progress = () => {
 	const totalBudget = useBudget(new Date()).monthlyIncome
 	const numberOfDays = getNumberOfDaysInMonth(new Date().getMonth(), new Date().getFullYear())
 	const dailyBudget = totalBudget / numberOfDays
-	const todaysDate = new Date().getDate()
 
 	const calculateProgress = (todaysDate: number, dailyBudget: number, totalSpent: number, totalBudget: number) => {
 		const projectedForToday = dailyBudget * todaysDate
-		console.log(dailyBudget)
-		console.log(projectedForToday)
-		console.log(totalSpent)
 		if (projectedForToday <= totalSpent + dailyBudget && projectedForToday >= totalSpent - dailyBudget) {
 			return "You're right on track to meet your budget!"
 		} else if (projectedForToday > totalSpent) {
@@ -36,7 +32,7 @@ export const Progress = () => {
 			}}
 		>
 			<BreezeText
-				text={calculateProgress(todaysDate, dailyBudget, totalSpent, totalBudget)}
+				text={calculateProgress(new Date().getDate(), dailyBudget, totalSpent, totalBudget)}
 				type='medium'
 			/>
 		</BreezeCard>

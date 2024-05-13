@@ -7,7 +7,7 @@ export type Expense = {
 	amount: number
 }
 
-// This is used to inialize a new expense
+// This is used to initialize a new expense
 export const emptyExpense: Expense = {
 	name: 'Expense Name',
 	date: new Date(),

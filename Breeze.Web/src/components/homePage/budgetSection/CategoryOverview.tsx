@@ -34,16 +34,16 @@ export const CategoryOverview = (props: categoryItemProps) => {
 					type='small-heading'
 				/>
 				<BreezeText
-					text={`$${category.curentSpend} of $${category.allocation}`}
+					text={`$${category.currentSpend} of $${category.allocation}`}
 					type='large'
 				/>
 			</BreezeBox>
 			<BreezeProgressBar
 				title='Category Progress Bar'
-				percentage={(category.curentSpend / category.allocation) * 100}
+				percentage={(category.currentSpend / category.allocation) * 100}
 			/>
 			<BreezeText
-				text={`Remaining: $${category.allocation - category.curentSpend}`}
+				text={`Remaining: $${category.allocation - category.currentSpend}`}
 				type='medium'
 			/>
 			<BreezeButton

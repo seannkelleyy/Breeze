@@ -5,15 +5,15 @@ export type Category = {
 	name: string
 	userId?: string
 	budgetId?: number
-	curentSpend: number
+	currentSpend: number
 	allocation: number
 	expenses: Expense[]
 }
 
-// This is used to inialize a new category
+// This is used to initialize a new category
 export const emptyCategory: Category = {
 	name: 'Category Name',
-	curentSpend: 0,
+	currentSpend: 0,
 	allocation: 0,
 	expenses: [],
 }

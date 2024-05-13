@@ -11,7 +11,7 @@ export type Budget = {
 	incomes: Income[]
 }
 
-// This is used to inialize a new budget
+// This is used to initialize a new budget
 export const emptyBudget: Budget = {
 	id: 0,
 	userId: '',

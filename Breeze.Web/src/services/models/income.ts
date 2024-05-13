@@ -7,7 +7,7 @@ export type Income = {
 	amount: number
 }
 
-// This is used to inialize a new income
+// This is used to initialize a new income
 export const emptyIncome: Income = {
 	name: 'Income Name',
 	date: new Date(),
