@@ -28,3 +28,35 @@ export const getMonthAsString = (month: number) => {
 			return ''
 	}
 }
+
+// Returns the total number of days in the month and year provided.
+export const getNumberOfDaysInMonth = (month: number, year: number) => {
+	switch (month) {
+		case 0:
+			return 31
+		case 1:
+			return year % 4 === 0 ? 29 : 28
+		case 2:
+			return 31
+		case 3:
+			return 30
+		case 4:
+			return 31
+		case 5:
+			return 30
+		case 6:
+			return 31
+		case 7:
+			return 31
+		case 8:
+			return 30
+		case 9:
+			return 31
+		case 10:
+			return 30
+		case 11:
+			return 31
+		default:
+			return 30
+	}
+}

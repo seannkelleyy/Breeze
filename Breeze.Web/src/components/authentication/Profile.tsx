@@ -3,10 +3,12 @@ import { BreezeBox } from '../shared/BreezeBox'
 import { BreezeText } from '../shared/BreezeText'
 import { BreezeCard } from '../shared/BreezeCard'
 import { APP_VERSION } from '../../services/environment'
+import { BackButton } from '../shared/BackButton'
 
 export const Profile = () => {
 	const { user, isAuthenticated, isLoading } = useAuth0()
 
+	// TODO - Add a loading spinner or skeleton loader
 	if (isLoading) {
 		return <BreezeBox title='Loading'>Loading ...</BreezeBox>
 	}
@@ -19,6 +21,7 @@ export const Profile = () => {
 					marginTop: '5rem',
 				}}
 			>
+				<BackButton />
 				<BreezeText
 					text='Profile'
 					type='large-heading'

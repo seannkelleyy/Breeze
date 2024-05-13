@@ -5,7 +5,7 @@ export const FakeBudget: Budget = {
 	userId: '12ads2',
 	date: new Date(Date.now()),
 	monthlyIncome: 4000,
-	monthlyExpenses: 2500,
+	monthlyExpenses: 1540,
 	categories: [
 		{
 			id: 1,
