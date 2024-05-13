@@ -1,29 +1,27 @@
-import './homePage.css'
+import { Link } from 'react-router-dom'
+import { BreezeBox } from '../shared/BreezeBox'
+import { BreezeButton } from '../shared/BreezeButton'
 
-const AddButtons = () => {
-	const handleNewExpense = () => {
-		console.log('New Expense')
-	}
-
-	const handleNewIncome = () => {
-		console.log('New Income')
-	}
+/**
+ * Simple component that holds the add expense and add income buttons
+ */
+export const AddButtons = () => {
 	return (
-		<>
-			<button
-				className='expense-button'
-				onClick={handleNewExpense}
-			>
-				Add New Expense
-			</button>
-			<button
-				className='income-button'
-				onClick={handleNewIncome}
-			>
-				Add New Income
-			</button>
-		</>
+		<BreezeBox title='Add Buttons'>
+			<Link to='/add-expense'>
+				<BreezeButton
+					onClick={() => console.log('Add New Expense')}
+					text='Add New Expense'
+					size='large'
+				/>
+			</Link>
+			<Link to='/add-income'>
+				<BreezeButton
+					onClick={() => console.log('Add New Income')}
+					text='Add New Income'
+					size='large'
+				/>
+			</Link>
+		</BreezeBox>
 	)
 }
-
-export default AddButtons

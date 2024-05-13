@@ -1,21 +1,19 @@
-import LandingPage from './components/landing/LandingPage'
-import HomePage from './components/homePage/HomePage'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { RouterProvider } from 'react-router-dom'
+import { BudgetProvider } from './services/contexts/BudgetContext'
+import { QueryClient, QueryClientProvider } from 'react-query'
+import { ReactQueryDevtools } from 'react-query/devtools'
+import { router } from './components/authentication/routes'
 
 const App = () => {
+	const queryClient = new QueryClient()
+
 	return (
-		<BrowserRouter>
-			<Routes>
-				<Route
-					path='/'
-					element={<LandingPage />}
-				/>
-				<Route
-					path='/Breeze'
-					element={<HomePage />}
-				/>
-			</Routes>
-		</BrowserRouter>
+		<BudgetProvider>
+			<QueryClientProvider client={queryClient}>
+				<ReactQueryDevtools />
+				<RouterProvider router={router} />
+			</QueryClientProvider>
+		</BudgetProvider>
 	)
 }
 
