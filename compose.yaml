@@ -1,0 +1,26 @@
+services:
+  webApp:
+    image: breeze-web
+    build:
+      context: ./Breeze.Web
+      dockerfile: Dockerfile.web
+    ports:
+      - 5173:5173
+    volumes:
+      - ./Breeze.Web/src:/app/src/web
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+  webApi:
+    image: breeze-api
+    build:
+      context: ./
+      dockerfile: Dockerfile.api
+    ports:
+      - 7284:80
+    volumes:
+      - ./Breeze.Api:/app/src/api
+      - ./Breeze.Data:/app/src/api
+      - ./Breeze.Domain:/app/src/api
+      - ./Breeze.Sql:/app/src/api
+    environment:
+      - CHOKIDAR_USEPOLLING=true

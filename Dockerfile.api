@@ -1,0 +1,22 @@
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+
+# Copy csproj and restore as distinct layers
+COPY *.sln .
+COPY Breeze.Api/*.csproj Breeze.Api/
+COPY Breeze.Domain/*.csproj Breeze.Domain/
+COPY Breeze.Data/*.csproj Breeze.Data/
+COPY Breeze.Sql/*.sqlproj Breeze.Sql/
+RUN dotnet restore
+
+# Copy everything else and build
+COPY . .
+WORKDIR "/src/Breeze.Api"
+RUN dotnet publish -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish ./
+
+EXPOSE 80
+ENTRYPOINT ["dotnet", "Breeze.Api.dll"]
