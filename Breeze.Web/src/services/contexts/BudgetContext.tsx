@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useState } from 'react'
 import { Budget, emptyBudget } from '../models/budget'
-import { getBudget } from '../hooks/BudgetServices'
+import { useGetBudget } from '../hooks/BudgetServices'
 
 // declares types used in this file
 type BudgetProviderProps = {
@@ -24,7 +24,7 @@ export const useBudget = (date: Date) => {
 	const [budget, setBudget] = useState<Budget>(emptyBudget)
 
 	const FetchBudget = async () => {
-		const response = await getBudget(date)
+		const response = await useGetBudget(date)
 		if (!response) return
 		setBudget(response)
 	}
@@ -44,7 +44,7 @@ export const BudgetProvider = (props: BudgetProviderProps) => {
 	const [budget, setBudget] = useState<Budget>(emptyBudget)
 
 	const GetBudget = (date: Date): Budget => {
-		const budget = getBudget(date)
+		const budget = useGetBudget(date)
 		if (!budget) return emptyBudget
 		setBudget(budget)
 		return budget

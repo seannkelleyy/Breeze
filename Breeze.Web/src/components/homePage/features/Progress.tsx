@@ -4,7 +4,7 @@ import { BreezeCard } from '../../shared/BreezeCard'
 import { BreezeText } from '../../shared/BreezeText'
 
 /**
- * This is a future feature that will calculate the user's progess towards their budget.
+ * This is a future feature that will calculate the user's progress towards their budget.
  */
 export const Progress = () => {
 	const totalSpent = useBudget(new Date()).monthlyExpenses
