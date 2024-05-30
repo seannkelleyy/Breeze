@@ -8,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 var domain = "https://dev-r15wsyccxyjfwrqm.us.auth0.com/";
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options => {
+    .AddJwtBearer(options =>
+    {
         options.Authority = domain;
         options.Audience = "http://breezebudgeting.com";
         options.TokenValidationParameters = new TokenValidationParameters
@@ -27,14 +28,29 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<BreezeContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("breezeDb")));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("localhost", policy =>
+    {
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:*");
+    });
+    options.AddPolicy("production", policy =>
+    {
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://breeze-apiapp.azurewebsites.net/");
+    });
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseCors("production");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("localhost");
 }
+
 
 app.UseHttpsRedirection();
 

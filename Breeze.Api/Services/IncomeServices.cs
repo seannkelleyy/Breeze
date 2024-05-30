@@ -17,6 +17,20 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
+        public IncomeResponse GetIncomeById(string userId, int incomeId)
+        {
+            return db.Incomes
+                .Where(income => income.Id == incomeId && income.User.UserId.Equals(userId))
+                .Select(income => new IncomeResponse
+                {
+                    Id = income.Id,
+                    UserId = income.User.UserId,
+                    Name = income.Name,
+                    Date = DateTime.Now,
+                    BudgetId = income.Budget.Id,
+                    Amount = income.Amount,
+                }).First();
+        }
         public List<IncomeResponse> GetIncomeByBudgetId(string userId, int budgetId)
         {
             return db.Incomes

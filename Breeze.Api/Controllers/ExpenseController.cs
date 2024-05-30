@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace Breeze.Api.Controllers
 {
     [ApiController]
-    [Route("/expeneses")]
+    [Route("/budgets/{budgetId}/categories/{categoryId}/expenses")]
     public class ExpenseController : ControllerBase
     {
         private readonly ExpenseService expenses;
@@ -19,8 +19,27 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{categoryId}")]
-        public IActionResult GetExpsense([FromRoute]int CategoryId)
+        [HttpGet("{id}")]
+        public IActionResult GetExpense([FromRoute] int id)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(expenses.GetExpenseById(userId, id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to get Expense, error code: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetExpsenses([FromRoute] int CategoryId)
         {
             try
             {
@@ -92,8 +111,8 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete("{categoryId}")]
-        public IActionResult DeleteExpsensesForCategory(int categoryId)
+        [HttpDelete]
+        public IActionResult DeleteExpsensesForCategory([FromRoute] int categoryId)
         {
             try
             {

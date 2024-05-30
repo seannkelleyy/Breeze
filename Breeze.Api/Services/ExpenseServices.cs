@@ -17,6 +17,21 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
+        public ExpenseResponse GetExpenseById(string userId, int expenseId)
+        {
+            return db.Expenses
+                .Where(expense => expense.Id == expenseId && expense.User.Id.Equals(userId))
+                .Select(expense => new ExpenseResponse
+                {
+                    Id = expense.Id,
+                    UserId = expense.User.UserId,
+                    Name = expense.Name,
+                    Date = expense.Date,
+                    CategoryId = expense.Category.Id,
+                    Amount = expense.Amount,
+                }).First();
+        }
+
         public List<ExpenseResponse> GetExpenseByCategoryId(string userId, int CategoryId)
         {
             return db.Expenses

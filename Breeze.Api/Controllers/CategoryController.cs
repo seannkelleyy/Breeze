@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace Breeze.Api.Controllers
 {
     [ApiController]
-    [Route("/categories")]
+    [Route("/budgets/{budgetId}/categories")]
     public class CategoryController : ControllerBase
     {
         private readonly CategoryService categories;
@@ -21,8 +21,8 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{budgetId}")]
-        public IActionResult GetCategoryByBudgetId(int budgetId)
+        [HttpGet("{id}")]
+        public IActionResult GetCategory([FromRoute] int id)
         {
             try
             {
@@ -31,7 +31,26 @@ namespace Breeze.Api.Controllers
                 {
                     return Unauthorized();
                 }
-                return Ok(categories.GetCategoryByBudgetId(userId, budgetId));
+                return Ok(categories.GetCategory(userId, id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetCategories([FromRoute] int budgetId)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(categories.GetCategories(userId, budgetId));
             }
             catch (Exception ex)
             {
@@ -98,7 +117,7 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete("{budgetId}")]
+        [HttpDelete]
         public IActionResult DeleteCategoriesForBudget(int budgetId)
         {
             try

@@ -32,6 +32,7 @@ namespace Breeze.Api.Controllers
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (userId == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 return Ok(budgets.GetBudget(userId, year, month));
@@ -51,6 +52,7 @@ namespace Breeze.Api.Controllers
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (userId == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 return Ok(budgets.CreateBudget(userId, budgetRequest));
@@ -63,7 +65,7 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpPatch]
-        public IActionResult PatchBudget( BudgetRequest budgetRequest)
+        public IActionResult PatchBudget(BudgetRequest budgetRequest)
         {
             try
             {

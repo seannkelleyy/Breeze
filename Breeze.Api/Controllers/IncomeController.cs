@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace Breeze.Api.Controllers
 {
     [ApiController]
-    [Route("/incomes")]
+    [Route("/budgets/{budgetId}/incomes")]
     public class IncomeController : ControllerBase
     {
         private readonly IncomeService incomes;
@@ -19,8 +19,28 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{budgetId}")]
-        public IActionResult GetIncome([FromRoute]int budgetId)
+        [HttpGet("{id}")]
+        public IActionResult GetIncome([FromRoute] int id)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(incomes.GetIncomeById(userId, id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to get Income, error code: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet]
+        public IActionResult GetIncomes([FromRoute] int budgetId)
         {
             try
             {
@@ -76,7 +96,7 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteIncome([FromRoute]int id)
+        public IActionResult DeleteIncome([FromRoute] int id)
         {
             try
             {
@@ -93,7 +113,7 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete("income/{incomeId}")]
+        [HttpDelete]
         public IActionResult DeleteIncomesForBudget(int budgetId)
         {
             try

@@ -17,10 +17,12 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public CategoryResponse GetCategoryByBudgetId(string userId, int budgetId)
+
+
+        public CategoryResponse GetCategory(string userId, int categoryId)
         {
             return db.Categories
-                .Where(category => category.Budget.Id == budgetId && category.User.UserId.Equals(userId))
+                .Where(category => category.Id == categoryId && category.User.UserId.Equals(userId))
                 .Select(category => new CategoryResponse
                 {
                     Id = category.Id,
@@ -34,6 +36,22 @@ namespace Breeze.Api.Services
                 .First();
         }
 
+        public List<CategoryResponse> GetCategories(string userId, int budgetId)
+        {
+            return db.Categories
+                .Where(category => category.Budget.Id == budgetId && category.User.UserId.Equals(userId))
+                .Select(category => new CategoryResponse
+                {
+                    Id = category.Id,
+                    UserId = category.User.UserId,
+                    Name = category.Name,
+                    Date = DateTime.Now,
+                    Allocation = category.Allocation,
+                    Spent = category.Spent,
+                    BudgetId = category.Budget.Id,
+                })
+                .ToList();
+        }
         public int CreateCategory(string userId, CategoryRequest newCategory)
         {
             try
