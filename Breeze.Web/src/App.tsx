@@ -1,8 +1,7 @@
-import { RouterProvider } from 'react-router-dom'
 import { BudgetProvider } from './services/contexts/BudgetContext'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
-import { router } from './config/routing/routes'
+import { AppRoutes } from './config/routing/Routes'
 
 const App = () => {
 	const queryClient = new QueryClient()
@@ -11,7 +10,7 @@ const App = () => {
 		<BudgetProvider>
 			<QueryClientProvider client={queryClient}>
 				<ReactQueryDevtools />
-				<RouterProvider router={router} />
+				<AppRoutes />
 			</QueryClientProvider>
 		</BudgetProvider>
 	)

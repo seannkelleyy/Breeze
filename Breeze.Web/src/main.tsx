@@ -1,13 +1,15 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import App from './App'
 import './index.css'
 import { Auth0Provider } from '@auth0/auth0-react'
-import { useEnvironmentVariables } from './config/environment/useEnvironmentVariables.ts'
+import { useEnvironmentVariables } from './config/environment/useEnvironmentVariables'
 
-const Main = () => {
+// eslint-disable-next-line react-refresh/only-export-components
+const Root = () => {
 	const { authClientId, authDomain, baseUrl } = useEnvironmentVariables()
-	ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+
+	return (
 		<React.StrictMode>
 			<Auth0Provider
 				clientId={authClientId}
@@ -18,8 +20,12 @@ const Main = () => {
 			>
 				<App />
 			</Auth0Provider>
-		</React.StrictMode>,
+		</React.StrictMode>
 	)
 }
 
-export default Main
+const rootElement = document.getElementById('root')
+if (rootElement) {
+	const root = ReactDOM.createRoot(rootElement)
+	root.render(<Root />)
+}
