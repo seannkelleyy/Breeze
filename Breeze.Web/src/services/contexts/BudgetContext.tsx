@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { useState } from 'react'
-import { Budget, emptyBudget } from '../models/budget'
-import { useGetBudget } from '../hooks/BudgetServices'
+import React, { useEffect, useState } from 'react'
+import { Budget, EmptyBudget, useBudgets } from '../hooks/BudgetServices'
 
 // declares types used in this file
 type BudgetProviderProps = {
@@ -10,26 +9,29 @@ type BudgetProviderProps = {
 
 type BudgetContextType = {
 	budget: Budget
-	GetBudget: (date: Date) => Budget
+	GetBudget: (date: Date) => Promise<Budget>
 }
 
 // creates budget context and defaults to an empty budget
-export const BudgetContext = React.createContext<BudgetContextType>(emptyBudget as unknown as BudgetContextType)
+export const BudgetContext = React.createContext<BudgetContextType>(EmptyBudget as unknown as BudgetContextType)
 
 /*  this is what will be called when accessing the const
  *  ex: const budgetContext = useBudget(Date.now())
  *  this will return the budget for the date provided or an empty budget
  */
 export const useBudget = (date: Date) => {
-	const [budget, setBudget] = useState<Budget>(emptyBudget)
+	const { getBudget } = useBudgets()
+	const [budget, setBudget] = useState<Budget>(EmptyBudget)
 
-	const FetchBudget = async () => {
-		const response = await useGetBudget(date)
-		if (!response) return
-		setBudget(response)
-	}
+	useEffect(() => {
+		const FetchBudget = async () => {
+			const response = await getBudget(date)
+			if (!response) return
+			setBudget(response)
+		}
 
-	FetchBudget()
+		FetchBudget()
+	}, [date, getBudget])
 
 	return budget
 }
@@ -41,11 +43,13 @@ export const useBudget = (date: Date) => {
  * const { UpdateCategory } = budgetContext
  */
 export const BudgetProvider = (props: BudgetProviderProps) => {
-	const [budget, setBudget] = useState<Budget>(emptyBudget)
+	const { getBudget } = useBudgets()
 
-	const GetBudget = (date: Date): Budget => {
-		const budget = useGetBudget(date)
-		if (!budget) return emptyBudget
+	const [budget, setBudget] = useState<Budget>(EmptyBudget)
+
+	const GetBudget = async (date: Date): Promise<Budget> => {
+		const response = await getBudget(date)
+		const budget = response
 		setBudget(budget)
 		return budget
 	}

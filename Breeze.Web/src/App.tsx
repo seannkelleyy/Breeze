@@ -2,7 +2,7 @@ import { RouterProvider } from 'react-router-dom'
 import { BudgetProvider } from './services/contexts/BudgetContext'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
-import { router } from './components/authentication/routes'
+import { router } from './config/routing/routes'
 
 const App = () => {
 	const queryClient = new QueryClient()
