@@ -12,6 +12,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.Authority = domain;
         options.Audience = "http://breezebudgeting.com";
+        options.Audience = "http://localhost:5173";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             NameClaimType = ClaimTypes.NameIdentifier
@@ -32,23 +33,31 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("localhost", policy =>
     {
-        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:*");
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
     });
     options.AddPolicy("production", policy =>
     {
-        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://breeze-apiapp.azurewebsites.net/");
+        // TODO Add frontend uri when its created
+        //policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://breeze-apiapp.azurewebsites.net/");
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
+
+    });
+    options.AddPolicy("OpenCorsPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
 
-app.UseCors("production");
+app.UseCors("OpenCorsPolicy");
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseCors("localhost");
 }
 
 
