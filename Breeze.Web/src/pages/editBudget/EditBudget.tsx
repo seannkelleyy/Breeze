@@ -1,20 +1,24 @@
 import { useParams } from 'react-router-dom'
-import { useBudget } from '../../services/contexts/BudgetContext'
+import { useBudgetContext } from '../../services/contexts/BudgetContext'
 import { IncomeItemsBox } from './income/IncomeItemsBox'
 import { CategoryItemsBox } from './category/CategoryItemBox'
 import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { BreezeCard } from '../../components/shared/BreezeCard'
 import './editBudget.css'
+import { useEffect } from 'react'
 
 /**
  * This is the page that allows a user to add or edit a budget.
  */
 export const EditBudgetPage = () => {
 	const { year, month } = useParams<{ year: string; month: string }>()
-	const date = new Date(parseInt(year as string), parseInt(month as string))
-	const budgetContext = useBudget(date)
-	const budget = budgetContext
+	const { budget, getBudgetForDate } = useBudgetContext()
+
+	useEffect(() => {
+		const date = new Date(parseInt(year as string), parseInt(month as string))
+		getBudgetForDate(date)
+	}, [year, month, getBudgetForDate])
 
 	return (
 		<BreezeBox title='Edit Budget'>

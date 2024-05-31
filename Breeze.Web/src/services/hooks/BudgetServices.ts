@@ -1,27 +1,16 @@
-import { Category, EmptyCategory } from './CategoryServices'
-import { Income, EmptyIncome } from './IncomeServices'
+import { Category } from './CategoryServices'
+import { Income } from './IncomeServices'
 import useHttp from './useHttp'
 
 export type Budget = {
 	id: number
-	userId?: string
-	date: Date
+	userEmail: string
 	monthlyIncome: number
 	monthlyExpenses: number
+	year: number
+	month: number
 	categories: Category[]
 	incomes: Income[]
-}
-
-// This is used to initialize a new budget
-// eslint-disable-next-line react-refresh/only-export-components
-export const EmptyBudget: Budget = {
-	id: 0,
-	userId: '',
-	date: new Date(),
-	monthlyIncome: 0,
-	monthlyExpenses: 0,
-	categories: [EmptyCategory],
-	incomes: [EmptyIncome],
 }
 
 export const useBudgets = () => {

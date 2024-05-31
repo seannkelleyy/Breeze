@@ -3,7 +3,7 @@ import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeInput } from '../../components/shared/BreezeInput'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useBudget } from '../../services/contexts/BudgetContext'
+import { useBudgetContext } from '../../services/contexts/BudgetContext'
 import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { Income, useIncomes } from '../../services/hooks/IncomeServices'
@@ -11,17 +11,21 @@ import { Income, useIncomes } from '../../services/hooks/IncomeServices'
 export const AddIncome = () => {
 	const { user } = useAuth0()
 	const { postIncome } = useIncomes()
+	const { budget } = useBudgetContext()
+
 	const [income, setIncome] = useState<Income>({
-		userId: user?.sub,
-		budgetId: useBudget(new Date(Date.now())).id,
+		userEmail: user?.email ?? '',
+		budgetId: budget.id,
 		name: '',
 		amount: 0,
-		date: new Date(Date.now()),
+		year: new Date(Date.now()).getFullYear(),
+		month: new Date(Date.now()).getMonth(),
+		day: new Date(Date.now()).getDate(),
 	})
 	const [isSubmittable, setIsSubmittable] = useState(false)
 
 	const checkSubmittable = () => {
-		if (income.name !== '' && income.amount && income.date !== null) {
+		if (income.name !== '' && income.amount && income.year && income.month && income.day) {
 			setIsSubmittable(true)
 		} else {
 			setIsSubmittable(false)
@@ -102,7 +106,7 @@ export const AddIncome = () => {
 					placeholder='date'
 					style={{ width: '100%' }}
 					onChange={(e) => {
-						setIncome({ ...income, date: new Date(e.target.value) })
+						setIncome({ ...income, year: new Date(e.target.value).getFullYear(), month: new Date(e.target.value).getMonth(), day: new Date(e.target.value).getDate() })
 						checkSubmittable()
 						console.log(income)
 					}}

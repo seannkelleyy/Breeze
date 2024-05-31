@@ -12,7 +12,7 @@ const handleError = (error: AxiosError) => {
 const useHttp =  () => {
     const { getAccessTokenSilently } = useAuth0();
     const [accessToken, setAccessToken] = useState<string>(null as unknown as string)
-    const {hostedApi} = useEnvironmentVariables()
+    const { hostedApi } = useEnvironmentVariables()
 
     const fetchToken = async () => {
         const token = await getAccessTokenSilently();

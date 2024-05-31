@@ -3,20 +3,12 @@ import useHttp from './useHttp'
 
 export type Category = {
 	id?: number
+	userEmail: string
 	name: string
-	userId?: string
 	budgetId?: number
 	currentSpend: number
 	allocation: number
 	expenses: Expense[]
-}
-
-// This is used to initialize a new category
-export const EmptyCategory: Category = {
-	name: 'Category Name',
-	currentSpend: 0,
-	allocation: 0,
-	expenses: [],
 }
 
 export const useCategories = () => {

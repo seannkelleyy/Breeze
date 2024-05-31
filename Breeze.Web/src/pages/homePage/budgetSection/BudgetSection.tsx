@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getMonthAsString } from '../../../services/utils/GetMonth'
 import { CategoryOverview } from './CategoryOverview'
 import { Link } from 'react-router-dom'
 import { BreezeButton } from '../../../components/shared/BreezeButton'
-import { useBudget } from '../../../services/contexts/BudgetContext'
+import { useBudgetContext } from '../../../services/contexts/BudgetContext'
 import { BreezeCard } from '../../../components/shared/BreezeCard'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
@@ -14,7 +14,11 @@ import { BreezeText } from '../../../components/shared/BreezeText'
  */
 export const BudgetSection = () => {
 	const [budgetDate, setBudgetDate] = useState<Date>(new Date(Date.now()))
-	const budget = useBudget(budgetDate)
+	const { budget, getBudgetForDate } = useBudgetContext()
+
+	useEffect(() => {
+		getBudgetForDate(budgetDate)
+	}, [budgetDate, getBudgetForDate])
 
 	const changeBudgetDate = (date: Date, direction: boolean) => {
 		const newDate = new Date(date)

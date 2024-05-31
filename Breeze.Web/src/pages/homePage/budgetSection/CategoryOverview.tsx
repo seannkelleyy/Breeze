@@ -72,7 +72,7 @@ export const CategoryOverview = (props: categoryItemProps) => {
 										type='medium'
 									/>
 									<BreezeText
-										text={`Date: ${expense.date.toLocaleDateString()}`}
+										text={`Date: ${expense.year}-${expense.month}-${expense.day}`}
 										type='medium'
 									/>
 								</BreezeBox>

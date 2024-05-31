@@ -2,18 +2,13 @@ import useHttp from './useHttp'
 
 export type Income = {
 	id?: number
-	userId?: string
-	budgetId?: number
+	userEmail: string
+	budgetId: number
 	name: string
-	date: Date
 	amount: number
-}
-
-// This is used to initialize a new income
-export const EmptyIncome: Income = {
-	name: 'Income Name',
-	date: new Date(),
-	amount: 0,
+	year: number
+	month: number
+	day: number
 }
 
 export const useIncomes = () => {

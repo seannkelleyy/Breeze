@@ -1,67 +1,54 @@
-/* eslint-disable react-refresh/only-export-components */
-import React, { useEffect, useState } from 'react'
-import { Budget, EmptyBudget, useBudgets } from '../hooks/BudgetServices'
+import React, { useEffect, useState, useContext } from 'react'
+import { Budget, useBudgets } from '../hooks/BudgetServices'
+import { useAuth0 } from '@auth0/auth0-react'
 
-// declares types used in this file
-type BudgetProviderProps = {
-	children: React.ReactNode[] | React.ReactNode
-}
+type BudgetProviderProps = { children: React.ReactNode }
+type BudgetContextType = { budget: Budget; getBudgetForDate: (date: Date) => Promise<Budget> }
 
-type BudgetContextType = {
-	budget: Budget
-	GetBudget: (date: Date) => Promise<Budget>
-}
+// Context creation with default value
+const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContextType)
 
-// creates budget context and defaults to an empty budget
-export const BudgetContext = React.createContext<BudgetContextType>(EmptyBudget as unknown as BudgetContextType)
-
-/*  this is what will be called when accessing the const
- *  ex: const budgetContext = useBudget(Date.now())
- *  this will return the budget for the date provided or an empty budget
- */
+// Custom hook to access budget data
+// eslint-disable-next-line react-refresh/only-export-components
 export const useBudget = (date: Date) => {
+	const { user } = useAuth0()
 	const { getBudget } = useBudgets()
-	const [budget, setBudget] = useState<Budget>(EmptyBudget)
+	const [budget, setBudget] = useState<Budget>({
+		id: 0,
+		userEmail: user?.email ?? '',
+		monthlyIncome: 0,
+		monthlyExpenses: 0,
+		year: date.getFullYear(),
+		month: date.getMonth() + 1,
+		categories: [],
+		incomes: [],
+	})
 
 	useEffect(() => {
-		const FetchBudget = async () => {
+		const fetchBudget = async () => {
 			const response = await getBudget(date)
-			if (!response) return
-			setBudget(response)
+			if (response) setBudget(response)
 		}
-
-		FetchBudget()
+		fetchBudget()
 	}, [date, getBudget])
 
 	return budget
 }
 
-/**
- * Budget provider that provides the budget context to all children
- * Example to access functions:
- * const budgetContext = useContext(BudgetContext)
- * const { UpdateCategory } = budgetContext
- */
-export const BudgetProvider = (props: BudgetProviderProps) => {
+// Context provider component
+export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 	const { getBudget } = useBudgets()
+	const [budget, setBudget] = useState<Budget>({} as Budget)
 
-	const [budget, setBudget] = useState<Budget>(EmptyBudget)
-
-	const GetBudget = async (date: Date): Promise<Budget> => {
+	const getBudgetForDate = async (date: Date) => {
 		const response = await getBudget(date)
-		const budget = response
-		setBudget(budget)
-		return budget
+		setBudget(response || ({} as Budget))
+		return response || ({} as Budget)
 	}
 
-	return (
-		<BudgetContext.Provider
-			value={{
-				budget,
-				GetBudget,
-			}}
-		>
-			{props.children}
-		</BudgetContext.Provider>
-	)
+	return <BudgetContext.Provider value={{ budget, getBudgetForDate }}>{children}</BudgetContext.Provider>
 }
+
+// Hook to access the context
+// eslint-disable-next-line react-refresh/only-export-components
+export const useBudgetContext = () => useContext(BudgetContext)

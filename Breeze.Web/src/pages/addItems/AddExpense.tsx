@@ -3,7 +3,7 @@ import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeInput } from '../../components/shared/BreezeInput'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useBudget } from '../../services/contexts/BudgetContext'
+import { useBudgetContext } from '../../services/contexts/BudgetContext'
 import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { BreezeSelect } from '../../components/shared/BreezeSelect'
@@ -12,18 +12,21 @@ import { Expense, useExpenses } from '../../services/hooks/ExpenseServices'
 export const AddExpense = () => {
 	const { user } = useAuth0()
 	const { postExpense } = useExpenses()
+	const { budget } = useBudgetContext()
 	const [expense, setExpense] = useState<Expense>({
-		userId: user?.sub,
+		userEmail: user?.email ?? '',
 		categoryId: -1,
 		name: '',
 		amount: 0,
-		date: new Date(Date.now()),
+		year: new Date(Date.now()).getFullYear(),
+		month: new Date(Date.now()).getMonth(),
+		day: new Date(Date.now()).getDate(),
 	})
-	const categories = useBudget(new Date(Date.now())).categories
+	const categories = budget.categories
 	const [isSubmittable, setIsSubmittable] = useState(false)
 
 	const checkSubmittable = () => {
-		if (expense.name !== '' && expense.categoryId !== -1 && expense.amount && expense.date !== (null || undefined)) {
+		if (expense.name !== '' && expense.categoryId !== -1 && expense.amount && expense.year && expense.month && expense.day) {
 			setIsSubmittable(true)
 		} else {
 			setIsSubmittable(false)
@@ -78,7 +81,7 @@ export const AddExpense = () => {
 					options={categories.map((category) => category.name)}
 					onChange={(e) => {
 						const category = categories.find((category) => category.name === e.target.value)
-						if (category) {
+						if (category?.id) {
 							setExpense({ ...expense, categoryId: category.id })
 							checkSubmittable()
 						}
@@ -127,7 +130,7 @@ export const AddExpense = () => {
 					placeholder='date'
 					style={{ width: '100%' }}
 					onChange={(e) => {
-						setExpense({ ...expense, date: new Date(e.target.value) })
+						setExpense({ ...expense, year: new Date(e.target.value).getFullYear(), month: new Date(e.target.value).getMonth(), day: new Date(e.target.value).getDate() })
 						checkSubmittable()
 					}}
 				/>
