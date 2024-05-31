@@ -10,10 +10,6 @@ namespace Breeze.Data
         {
             modelBuilder.ToTable("Budget");
             modelBuilder
-                .HasOne(budget => budget.User)
-                .WithMany(user => user.Budgets)
-                .HasForeignKey("UserId");
-            modelBuilder
                 .HasMany(budget => budget.Categories)
                 .WithOne(category => category.Budget)
                 .HasForeignKey("BudgetId");

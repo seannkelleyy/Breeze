@@ -6,17 +6,29 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var domain = "https://dev-r15wsyccxyjfwrqm.us.auth0.com/";
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = domain;
-        options.Audience = "http://breezebudgeting.com";
-        options.Audience = "http://localhost:5173";
+        options.Authority = "https://dev-r15wsyccxyjfwrqm.us.auth0.com/";
+        options.Audience = "breeze-apiapp.azurewebsites.net/";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             NameClaimType = ClaimTypes.NameIdentifier
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                if (claimsIdentity != null)
+                {
+                    string userEmail = claimsIdentity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+
     });
 
 // Add services to the container.
@@ -46,18 +58,19 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
 var app = builder.Build();
 
 app.UseCors("OpenCorsPolicy");
+app.UseSwagger();
+app.UseSwaggerUI();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
 }
 
 

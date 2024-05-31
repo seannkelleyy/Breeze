@@ -19,56 +19,52 @@ namespace Breeze.Api.Services
 
 
 
-        public CategoryResponse GetCategory(string userId, int categoryId)
+        public CategoryResponse GetCategory(string userEmail, int categoryId)
         {
             return db.Categories
-                .Where(category => category.Id == categoryId && category.User.UserId.Equals(userId))
+                .Where(category => category.Id == categoryId && category.UserEmail.Equals(userEmail))
                 .Select(category => new CategoryResponse
                 {
                     Id = category.Id,
-                    UserId = category.User.UserId,
+                    UserEmail = category.UserEmail,
                     Name = category.Name,
-                    Date = DateTime.Now,
                     Allocation = category.Allocation,
-                    Spent = category.Spent,
+                    CurrentSpend = category.CurrentSpend,
                     BudgetId = category.Budget.Id,
                 })
                 .First();
         }
 
-        public List<CategoryResponse> GetCategories(string userId, int budgetId)
+        public List<CategoryResponse> GetCategories(string userEmail, int budgetId)
         {
             return db.Categories
-                .Where(category => category.Budget.Id == budgetId && category.User.UserId.Equals(userId))
+                .Where(category => category.Budget.Id == budgetId && category.UserEmail.Equals(userEmail))
                 .Select(category => new CategoryResponse
                 {
                     Id = category.Id,
-                    UserId = category.User.UserId,
+                    UserEmail = category.UserEmail,
                     Name = category.Name,
-                    Date = DateTime.Now,
                     Allocation = category.Allocation,
-                    Spent = category.Spent,
+                    CurrentSpend = category.CurrentSpend,
                     BudgetId = category.Budget.Id,
                 })
                 .ToList();
         }
-        public int CreateCategory(string userId, CategoryRequest newCategory)
+        public int CreateCategory(string userEmail, CategoryRequest newCategory)
         {
             try
             {
-                var user = db.Users.Where(user => user.UserId.Equals(userId)).FirstOrDefault();
                 var budget = db.Budgets.Where(budget => budget.Id == newCategory.BudgetId).FirstOrDefault();
-                if (user == null || budget == null)
+                if (budget == null)
                 {
                     return -1;
                 }
                 Category category = new Category
                 {
-                    User = user,
+                    UserEmail = userEmail,
                     Name = newCategory.Name,
-                    Date = DateTime.Now,
                     Allocation = newCategory.Allcoation,
-                    Spent = newCategory.Spent,
+                    CurrentSpend = newCategory.CurrentSpend,
                     Budget = budget,
                 };
 
@@ -83,10 +79,10 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int UpdateCategory(string userId, CategoryRequest updatedCategory)
+        public int UpdateCategory(string userEmail, CategoryRequest updatedCategory)
         {
             var category = db.Categories.Find(updatedCategory.Id);
-            if (category == null || category.User.UserId.Equals(userId))
+            if (category == null || category.UserEmail.Equals(userEmail))
             {
                 return -1;
             }
@@ -94,7 +90,7 @@ namespace Breeze.Api.Services
             {
                 category.Name = updatedCategory.Name;
                 category.Allocation = updatedCategory.Allcoation;
-                category.Spent = updatedCategory.Spent;
+                category.CurrentSpend = updatedCategory.CurrentSpend;
                 db.Categories.Update(category);
                 db.SaveChanges();
                 return category.Id;
@@ -106,14 +102,14 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int DeleteCategory(string userId, int categoryId)
+        public int DeleteCategory(string userEmail, int categoryId)
         {
             var category = db.Categories.Find(categoryId);
             if (category == null)
             {
                 return -1;
             }
-            if (!category.User.UserId.Equals(userId))
+            if (!category.UserEmail.Equals(userEmail))
             {
                 return -2;
             }

@@ -2,17 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Breeze.Data
+public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {
-    internal class CategoryConfiguration : IEntityTypeConfiguration<Category>
+    public void Configure(EntityTypeBuilder<Category> builder)
     {
-        public void Configure(EntityTypeBuilder<Category> modelBuilder)
-        {
-            modelBuilder.ToTable("Category");
-            modelBuilder
-                .HasOne(income => income.User)
-                .WithMany(user => user.Categories)
-                .HasForeignKey("UserId");
-        }
+        builder.ToTable("Category");
     }
 }

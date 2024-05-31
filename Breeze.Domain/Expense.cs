@@ -3,10 +3,12 @@
     public class Expense
     {
         public int Id { get; set; }
-        public User User { get; set; }
-        public string Name { get; set; }
-        public DateTime Date { get; set; }
+        public string UserEmail { get; set; }
         public Category Category { get; set; }
+        public string Name { get; set; }
         public decimal Amount { get; set; }
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public int Day { get; set; }
     }
 }

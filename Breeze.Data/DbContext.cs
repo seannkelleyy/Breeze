@@ -5,7 +5,6 @@ namespace Breeze.Data
 {
     public class BreezeContext : DbContext
     {
-        public DbSet<User> Users { get; set; }
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<Income> Incomes { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -19,11 +18,10 @@ namespace Breeze.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
-            modelBuilder.Entity<User>().ToTable("User");
+            modelBuilder.ApplyConfiguration(new BudgetConfiguration());
             modelBuilder.ApplyConfiguration(new CategoryConfiguration());
             modelBuilder.ApplyConfiguration(new ExpenseConfiguration());
             modelBuilder.ApplyConfiguration(new IncomeConfiguration());
-            modelBuilder.ApplyConfiguration(new BudgetConfiguration());
 
         }
     }

@@ -20,38 +20,35 @@ namespace Breeze.Api.Services
         public BudgetResponse GetBudget(string userId, int year, int month)
         {
             return db.Budgets
-                .Where(budget => budget.User.UserId.Equals(userId) && budget.Date.Month == month && budget.Date.Year == year)
+                .Where(budget => budget.UserEmail.Equals(userId) && budget.Month == month && budget.Year == year)
                 .Select(budget => new BudgetResponse
                 {
-                    UserId = budget.User.UserId,
-                    Date = budget.Date,
+                    UserEmail = budget.UserEmail,
                     MonthlyIncome = budget.MonthlyIncome,
                     MonthlyExpenses = budget.MonthlyExpenses,
+                    Year = budget.Year,
+                    Month = budget.Month,
                     Categories = budget.Categories,
                     Income = budget.Income,
                 })
                 .First();
         }
 
-        public DateOnly? CreateBudget(string userId, BudgetRequest newBudget)
+        public DateOnly? CreateBudget(string userEmail, BudgetRequest newBudget)
         {
             try
             {
-                var user = db.Users.Where(user => user.UserId.Equals(userId)).FirstOrDefault();
-                if (user == null)
-                {
-                    return null;
-                }
                 db.Budgets.Add(new Budget
                 {
-                    User = user,
-                    Date = newBudget.Date,
+                    UserEmail = userEmail,
                     MonthlyIncome = newBudget.MonthlyIncome,
                     MonthlyExpenses = newBudget.MonthlyExpenses,
+                    Year = newBudget.Year,
+                    Month = newBudget.Month
 
                 });
                 db.SaveChanges();
-                return new DateOnly(newBudget.Date.Year, newBudget.Date.Month, newBudget.Date.Day);
+                return new DateOnly(newBudget.Year, newBudget.Month, 1);
             }
             catch (Exception ex)
             {
@@ -60,14 +57,14 @@ namespace Breeze.Api.Services
             }
         }
 
-        public DateOnly? UpdateBudget(string userId, BudgetRequest updatedBudget)
+        public DateOnly? UpdateBudget(string userEmail, BudgetRequest updatedBudget)
         {
             var existingBudget = db.Budgets.Find(updatedBudget.Id);
             if (existingBudget == null)
             {
                 return null;
             }
-            if (!existingBudget.User.UserId.Equals(userId))
+            if (!existingBudget.UserEmail.Equals(userEmail))
             {
                 return null;
             }
@@ -77,7 +74,7 @@ namespace Breeze.Api.Services
                 existingBudget.MonthlyExpenses = updatedBudget.MonthlyExpenses;
                 db.Budgets.Update(existingBudget);
                 db.SaveChanges();
-                return new DateOnly(updatedBudget.Date.Year, updatedBudget.Date.Month, updatedBudget.Date.Day);
+                return new DateOnly(updatedBudget.Year, updatedBudget.Month, new DateOnly().Day);
             }
             catch (Exception ex)
             {
@@ -86,18 +83,19 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int DeleteBudget(string userId, int budgetId)
+        public int DeleteBudget(string userEmail, int budgetId)
         {
             var budget = db.Budgets.Find(budgetId);
             if (budget == null)
             {
                 return -1;
             }
-            if (!budget.User.UserId.Equals(userId))
+            if (!budget.UserEmail.Equals(userEmail))
             {
                 return -2;
             }
-            try {
+            try
+            {
                 db.Budgets.Remove(budget);
                 db.SaveChanges();
                 return budgetId;
@@ -105,9 +103,9 @@ namespace Breeze.Api.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return -1;
+                return -3;
             }
-          
+
         }
     }
 }

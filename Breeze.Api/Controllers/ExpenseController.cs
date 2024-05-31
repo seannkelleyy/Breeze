@@ -24,12 +24,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(expenses.GetExpenseById(userId, id));
+                return Ok(expenses.GetExpenseById(userEmail, id));
             }
             catch (Exception ex)
             {
@@ -43,12 +44,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(expenses.GetExpenseByCategoryId(userId, CategoryId));
+                return Ok(expenses.GetExpenseByCategoryId(userEmail, CategoryId));
             }
             catch (Exception ex)
             {
@@ -62,12 +64,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(expenses.CreateExpense(userId, expenseRequest));
+                return Ok(expenses.CreateExpense(userEmail, expenseRequest));
             }
             catch (Exception ex)
             {
@@ -80,12 +83,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(expenses.UpdateExpense(userId, expenseRequest));
+                return Ok(expenses.UpdateExpense(userEmail, expenseRequest));
             }
             catch (Exception ex)
             {
@@ -98,12 +102,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(expenses.DeleteExpense(userId, id));
+                return Ok(expenses.DeleteExpense(userEmail, id));
             }
             catch (Exception ex)
             {
@@ -116,9 +121,10 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 expenses.DeleteExpenseForCategory(categoryId);

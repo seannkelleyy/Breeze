@@ -17,52 +17,57 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public IncomeResponse GetIncomeById(string userId, int incomeId)
+        public IncomeResponse GetIncomeById(string userEmail, int incomeId)
         {
             return db.Incomes
-                .Where(income => income.Id == incomeId && income.User.UserId.Equals(userId))
+                .Where(income => income.Id == incomeId && income.UserEmail.Equals(userEmail))
                 .Select(income => new IncomeResponse
                 {
                     Id = income.Id,
-                    UserId = income.User.UserId,
+                    UserId = income.UserEmail,
                     Name = income.Name,
-                    Date = DateTime.Now,
+                    Year = income.Year,
+                    Month = income.Month,
+                    Day = income.Day,
                     BudgetId = income.Budget.Id,
                     Amount = income.Amount,
                 }).First();
         }
-        public List<IncomeResponse> GetIncomeByBudgetId(string userId, int budgetId)
+        public List<IncomeResponse> GetIncomeByBudgetId(string userEmail, int budgetId)
         {
             return db.Incomes
-                .Where(income => income.Budget.Id == budgetId && income.User.UserId.Equals(userId))
+                .Where(income => income.Budget.Id == budgetId && income.UserEmail.Equals(userEmail))
                 .Select(income => new IncomeResponse
                 {
                     Id = income.Id,
-                    UserId = income.User.UserId,
+                    UserId = income.UserEmail,
                     Name = income.Name,
-                    Date = DateTime.Now,
+                    Year = income.Year,
+                    Month = income.Month,
+                    Day = income.Day,
                     BudgetId = income.Budget.Id,
                     Amount = income.Amount,
                 })
                 .ToList();
         }
 
-        public int CreateIncome(string userId, IncomeRequest newIncome)
+        public int CreateIncome(string userEmail, IncomeRequest newIncome)
         {
             Income income;
             try
             {
                 var budget = db.Budgets.Find(newIncome.BudgetId);
-                var user = db.Users.Find(userId);
-                if (budget == null || user == null)
+                if (budget == null)
                 {
                     return -1;
                 }
                 income = new Income
                 {
-                    User = user,
+                    UserEmail = userEmail,
                     Name = newIncome.Name,
-                    Date = DateTime.Now,
+                    Year = newIncome.Year,
+                    Month = newIncome.Month,
+                    Day = newIncome.Day,
                     Budget = budget,
                     Amount = newIncome.Amount,
                 };
@@ -77,14 +82,14 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int UpdateIncome(string userId, IncomeRequest updatedIncome)
+        public int UpdateIncome(string userEmail, IncomeRequest updatedIncome)
         {
             var income = db.Incomes.Find(updatedIncome.Id);
             if (income == null)
             {
                 return -1;
             }
-            if (income.User.UserId != userId)
+            if (income.UserEmail != userEmail)
             {
                 return -2;
             }
@@ -92,7 +97,9 @@ namespace Breeze.Api.Services
             {
                 income.Name = updatedIncome.Name;
                 income.Amount = updatedIncome.Amount;
-                income.Date = updatedIncome.Date;
+                income.Year = updatedIncome.Year;
+                income.Month = updatedIncome.Month;
+                income.Day = updatedIncome.Day;
                 db.Incomes.Update(income);
                 db.SaveChanges();
                 return income.Id;
@@ -104,14 +111,14 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int DeleteIncome(string userId, int incomeId)
+        public int DeleteIncome(string userEmail, int incomeId)
         {
             var income = db.Incomes.Find(incomeId);
             if (income == null)
             {
                 return -1;
             }
-            if (income.User.UserId != userId)
+            if (income.UserEmail != userEmail)
             {
                 return -2;
             }

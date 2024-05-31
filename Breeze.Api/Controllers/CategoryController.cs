@@ -26,12 +26,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(categories.GetCategory(userId, id));
+                return Ok(categories.GetCategory(userEmail, id));
             }
             catch (Exception ex)
             {
@@ -45,12 +46,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(categories.GetCategories(userId, budgetId));
+                return Ok(categories.GetCategories(userEmail, budgetId));
             }
             catch (Exception ex)
             {
@@ -64,12 +66,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(categories.CreateCategory(userId, categoryRequest));
+                return Ok(categories.CreateCategory(userEmail, categoryRequest));
             }
             catch (Exception ex)
             {
@@ -83,12 +86,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(categories.UpdateCategory(userId, categoryRequest));
+                return Ok(categories.UpdateCategory(userEmail, categoryRequest));
             }
             catch (Exception ex)
             {
@@ -102,13 +106,14 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 expenses.DeleteExpenseForCategory(id);
-                return Ok(categories.DeleteCategory(userId, id));
+                return Ok(categories.DeleteCategory(userEmail, id));
             }
             catch (Exception ex)
             {
@@ -122,9 +127,10 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail == null)
                 {
+                    _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 return Ok(categories.DeleteCategoriesForBudget(budgetId));

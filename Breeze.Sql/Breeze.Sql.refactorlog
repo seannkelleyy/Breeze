@@ -126,4 +126,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="UserId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ddaed7c7-1d20-48e6-b919-d81b0cfcaa69" ChangeDateTime="05/31/2024 15:28:51">
+    <Property Name="ElementName" Value="[dbo].[Expense].[MONTH]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Expense]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Month" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a93a1484-0bfa-4cde-b0ae-6dd298c96953" ChangeDateTime="05/31/2024 15:28:53">
+    <Property Name="ElementName" Value="[dbo].[Expense].[DAY]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Expense]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Day" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8151e075-33b1-4841-84f7-8ae2c9b9d1ca" ChangeDateTime="05/31/2024 15:29:01">
+    <Property Name="ElementName" Value="[dbo].[Income].[MONTH]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Income]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Month" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="88706b78-c3ea-4c8c-9879-97699c70c11e" ChangeDateTime="05/31/2024 15:29:03">
+    <Property Name="ElementName" Value="[dbo].[Income].[DAY]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Income]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Day" />
+  </Operation>
 </Operations>

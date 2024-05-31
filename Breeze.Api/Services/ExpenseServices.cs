@@ -17,52 +17,57 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public ExpenseResponse GetExpenseById(string userId, int expenseId)
+        public ExpenseResponse GetExpenseById(string userEmail, int expenseId)
         {
             return db.Expenses
-                .Where(expense => expense.Id == expenseId && expense.User.Id.Equals(userId))
+                .Where(expense => expense.Id == expenseId && expense.UserEmail.Equals(userEmail))
                 .Select(expense => new ExpenseResponse
                 {
                     Id = expense.Id,
-                    UserId = expense.User.UserId,
+                    UserEmail = expense.UserEmail,
                     Name = expense.Name,
-                    Date = expense.Date,
+                    Year = expense.Year,
+                    Month = expense.Month,
+                    Day = expense.Day,
                     CategoryId = expense.Category.Id,
                     Amount = expense.Amount,
                 }).First();
         }
 
-        public List<ExpenseResponse> GetExpenseByCategoryId(string userId, int CategoryId)
+        public List<ExpenseResponse> GetExpenseByCategoryId(string userEmail, int CategoryId)
         {
             return db.Expenses
-                .Where(expense => expense.Category.Id == CategoryId && expense.User.Id.Equals(userId))
+                .Where(expense => expense.Category.Id == CategoryId && expense.UserEmail.Equals(userEmail))
                 .Select(expense => new ExpenseResponse
                 {
                     Id = expense.Category.Id,
-                    UserId = expense.User.UserId,
+                    UserEmail = expense.UserEmail,
                     Name = expense.Name,
-                    Date = expense.Date,
+                    Year = expense.Year,
+                    Month = expense.Month,
+                    Day = expense.Day,
                     CategoryId = CategoryId,
                     Amount = expense.Amount,
                 })
                 .ToList();
         }
 
-        public int CreateExpense(string userId, ExpenseRequest newExpense)
+        public int CreateExpense(string userEmail, ExpenseRequest newExpense)
         {
             try
             {
                 var category = db.Categories.Find(newExpense.CategoryId);
-                var user = db.Users.Find(userId);
-                if (category == null || user == null)
+                if (category == null)
                 {
                     return -1;
                 }
                 Expense expense = new Expense
                 {
-                    User = user,
+                    UserEmail = userEmail,
                     Name = newExpense.Name,
-                    Date = newExpense.Date,
+                    Year = newExpense.Year,
+                    Month = newExpense.Month,
+                    Day = newExpense.Day,
                     Category = category,
                     Amount = newExpense.Amount,
                 };
@@ -78,23 +83,25 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int UpdateExpense(string userId, ExpenseRequest existingExpense)
+        public int UpdateExpense(string userEmail, ExpenseRequest updatedExpense)
         {
-            var expense = db.Expenses.Find(existingExpense.Id);
+            var expense = db.Expenses.Find(updatedExpense.Id);
 
             if (expense == null)
             {
                 return -1;
             }
-            if (!expense.User.Id.Equals(userId))
+            if (!expense.UserEmail.Equals(userEmail))
             {
                 return -2;
             }
             try
             {
-                expense.Name = existingExpense.Name;
-                expense.Date = existingExpense.Date;
-                expense.Amount = existingExpense.Amount;
+                expense.Name = updatedExpense.Name;
+                expense.Year = updatedExpense.Year;
+                expense.Month = updatedExpense.Month;
+                expense.Day = updatedExpense.Day;
+                expense.Amount = updatedExpense.Amount;
 
                 db.Expenses.Update(expense);
                 db.SaveChanges();
@@ -107,14 +114,14 @@ namespace Breeze.Api.Services
             }
         }
 
-        public int DeleteExpense(string userId, int expenseId)
+        public int DeleteExpense(string userEmail, int expenseId)
         {
             var expense = db.Expenses.Find(expenseId);
             if (expense == null)
             {
                 return -1;
             }
-            if (!expense.User.Id.Equals(userId))
+            if (!expense.UserEmail.Equals(userEmail))
             {
                 return -2;
             }
