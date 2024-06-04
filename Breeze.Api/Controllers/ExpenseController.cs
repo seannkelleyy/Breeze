@@ -107,7 +107,7 @@ namespace Breeze.Api.Controllers
                 //    _logger.LogError(User.ToString());
                 //    return Unauthorized();
                 //}
-                return Ok(expenses.DeleteExpense("userId", id));
+                return Ok(expenses.DeleteExpenseById("userId", id));
             }
             catch (Exception ex)
             {

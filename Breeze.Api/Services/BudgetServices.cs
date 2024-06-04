@@ -33,7 +33,7 @@ namespace Breeze.Api.Services
         /// <param name="year">The year of the budget.</param>
         /// <param name="month">The month of the budget.</param>
         /// <returns>A budget response object or null if not found.</returns>
-        public BudgetResponse? GetBudget(string userId, int year, int month)
+        public BudgetResponse? GetBudgetByDate(string userId, int year, int month)
         {
             try
             {
@@ -70,7 +70,7 @@ namespace Breeze.Api.Services
         {
             try
             {
-                var existingBudget = GetBudget(userId, newBudget.Year, newBudget.Month);
+                var existingBudget = GetBudgetByDate(userId, newBudget.Year, newBudget.Month);
                 if (existingBudget != null)
                 {
                     return existingBudget.Id;
@@ -142,7 +142,7 @@ namespace Breeze.Api.Services
         /// -4: Unauthorized access.
         /// -5: Unknown error.
         /// </returns>
-        public int DeleteBudget(string userId, int budgetId)
+        public int DeleteBudgetById(string userId, int budgetId)
         {
             try
             {

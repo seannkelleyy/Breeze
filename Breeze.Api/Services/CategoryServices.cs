@@ -57,12 +57,12 @@ namespace Breeze.Api.Services
         }
 
         /// <summary>
-        /// Retrieves a category by its ID.
+        /// Retrieves categories using their budget ID.
         /// </summary>
         /// <param name="userId">The user's identifier.</param>
         /// <param name="categoryId">The category's identifier.</param>
         /// <returns>A category response object or null if not found.</returns>
-        public List<CategoryResponse>? GetCategories(string userId, int budgetId)
+        public List<CategoryResponse>? GetCategoriesByBudgetId(string userId, int budgetId)
         {
             try
             {
@@ -106,7 +106,7 @@ namespace Breeze.Api.Services
                 {
                     return -1;
                 }
-                List<CategoryResponse> existingCategories = GetCategories(userId, newCategory.BudgetId);
+                List<CategoryResponse> existingCategories = GetCategoriesByBudgetId(userId, newCategory.BudgetId);
                 foreach (CategoryResponse cat in existingCategories)
                 {
                     if (cat.Name.Equals(newCategory.Name))
@@ -181,7 +181,7 @@ namespace Breeze.Api.Services
         /// -2: Cannot find item.
         /// -5: Unknown error.
         /// </returns>
-        public int DeleteCategory(string userId, int categoryId)
+        public int DeleteCategoryById(string userId, int categoryId)
         {
             try
             {

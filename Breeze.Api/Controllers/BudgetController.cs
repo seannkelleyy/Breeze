@@ -34,7 +34,7 @@ namespace Breeze.Api.Controllers
                 //    _logger.LogError(User.ToString());
                 //    return Unauthorized();
                 //}
-                return Ok(budgets.GetBudget("userId", year, month));
+                return Ok(budgets.GetBudgetByDate("userId", year, month));
             }
             catch (Exception ex)
             {
@@ -96,7 +96,7 @@ namespace Breeze.Api.Controllers
                 //}
                 incomes.DeleteIncomesForBudget("userId", budgetId);
                 categories.DeleteCategoriesForBudget("userId", budgetId);
-                return Ok(budgets.DeleteBudget("userId", budgetId));
+                return Ok(budgets.DeleteBudgetById("userId", budgetId));
             }
             catch (Exception ex)
             {

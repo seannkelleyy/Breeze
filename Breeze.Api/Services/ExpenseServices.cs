@@ -182,7 +182,7 @@ namespace Breeze.Api.Services
         /// -4: Unauthorized access.
         /// -5: Unknown error.
         /// </returns>
-        public int DeleteExpense(string userId, int expenseId)
+        public int DeleteExpenseById(string userId, int expenseId)
         {
             try
             {
