@@ -4,12 +4,21 @@ using Breeze.Domain;
 
 namespace Breeze.Api.Services
 {
+    /// <summary>
+    /// Service for managing categories.
+    /// </summary>
     public class CategoryService
     {
         private IConfiguration _config;
         private readonly ILogger _logger;
         private readonly BreezeContext db;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CategoryService"/> class.
+        /// </summary>
+        /// <param name="config">Configuration interface.</param>
+        /// <param name="dbContext">Database context for Breeze.</param>
+        /// <param name="logger">Logger for logging errors and information.</param>
         public CategoryService(IConfiguration config, BreezeContext dbContext, ILogger logger)
         {
             _config = config;
@@ -17,51 +26,97 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-
-
-        public CategoryResponse GetCategory(string userEmail, int categoryId)
-        {
-            return db.Categories
-                .Where(category => category.Id == categoryId && category.UserEmail.Equals(userEmail))
-                .Select(category => new CategoryResponse
-                {
-                    Id = category.Id,
-                    UserEmail = category.UserEmail,
-                    Name = category.Name,
-                    Allocation = category.Allocation,
-                    CurrentSpend = category.CurrentSpend,
-                    BudgetId = category.Budget.Id,
-                })
-                .First();
-        }
-
-        public List<CategoryResponse> GetCategories(string userEmail, int budgetId)
-        {
-            return db.Categories
-                .Where(category => category.Budget.Id == budgetId && category.UserEmail.Equals(userEmail))
-                .Select(category => new CategoryResponse
-                {
-                    Id = category.Id,
-                    UserEmail = category.UserEmail,
-                    Name = category.Name,
-                    Allocation = category.Allocation,
-                    CurrentSpend = category.CurrentSpend,
-                    BudgetId = category.Budget.Id,
-                })
-                .ToList();
-        }
-        public int CreateCategory(string userEmail, CategoryRequest newCategory)
+        /// <summary>
+        /// Retrieves a category by its ID.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="categoryId">The category's identifier.</param>
+        /// <returns>A category response object or null if not found.</returns>
+        public CategoryResponse? GetCategoryById(string userId, int categoryId)
         {
             try
             {
-                var budget = db.Budgets.Where(budget => budget.Id == newCategory.BudgetId).FirstOrDefault();
-                if (budget == null)
+                return db.Categories
+                    .Where(category => category.Id.Equals(categoryId) && category.UserId.Equals(userId))
+                    .Select(category => new CategoryResponse
+                    {
+                        Id = category.Id,
+                        UserId = category.UserId,
+                        Name = category.Name,
+                        Allocation = category.Allocation,
+                        CurrentSpend = category.CurrentSpend,
+                        BudgetId = category.Budget.Id,
+                    })
+                    .First();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves a category by its ID.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="categoryId">The category's identifier.</param>
+        /// <returns>A category response object or null if not found.</returns>
+        public List<CategoryResponse>? GetCategories(string userId, int budgetId)
+        {
+            try
+            {
+                return db.Categories
+                    .Where(category => category.Budget.Id.Equals(budgetId) && category.UserId.Equals(userId))
+                    .Select(category => new CategoryResponse
+                    {
+                        Id = category.Id,
+                        UserId = category.UserId,
+                        Name = category.Name,
+                        Allocation = category.Allocation,
+                        CurrentSpend = category.CurrentSpend,
+                        BudgetId = category.Budget.Id,
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Creates a new category.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="newCategory">The new category to create.</param>
+        /// <returns>
+        /// The ID of the created category, or one of the following error codes:
+        /// -1: Cannot find foreign key dependency item.
+        /// -3: Duplicate entry.
+        /// -5: Unknown error.
+        /// </returns>
+        public int CreateCategory(string userId, CategoryRequest newCategory)
+        {
+            try
+            {
+                var budget = db.Budgets.Where(budget => budget.Id.Equals(newCategory.BudgetId)).FirstOrDefault();
+                if (budget is null)
                 {
                     return -1;
                 }
+                List<CategoryResponse> existingCategories = GetCategories(userId, newCategory.BudgetId);
+                foreach (CategoryResponse cat in existingCategories)
+                {
+                    if (cat.Name.Equals(newCategory.Name))
+                    {
+                        return -3;
+                    }
+                }
                 Category category = new Category
                 {
-                    UserEmail = userEmail,
+                    UserId = userId,
                     Name = newCategory.Name,
                     Allocation = newCategory.Allcoation,
                     CurrentSpend = newCategory.CurrentSpend,
@@ -70,21 +125,35 @@ namespace Breeze.Api.Services
 
                 db.Categories.Add(category);
                 db.SaveChanges();
-                return category.Id;
+                return 1;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return -1;
+                return -5;
             }
         }
 
-        public int UpdateCategory(string userEmail, CategoryRequest updatedCategory)
+        /// <summary>
+        /// Updates an existing category.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="updatedCategory">The updated category information.</param>
+        /// <returns>
+        /// The ID of the updated category or the following codes:
+        /// -4 if the user doesn't match.
+        /// -5 for an unknown error.
+        /// </returns>
+        public int UpdateCategory(string userId, CategoryRequest updatedCategory)
         {
             var category = db.Categories.Find(updatedCategory.Id);
-            if (category == null || category.UserEmail.Equals(userEmail))
+            if (category is null)
             {
-                return -1;
+                return -2;
+            }
+            if (!category.UserId.Equals(userId))
+            {
+                return -4;
             }
             try
             {
@@ -98,33 +167,72 @@ namespace Breeze.Api.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return -1;
+                return -5;
             }
         }
 
-        public int DeleteCategory(string userEmail, int categoryId)
+        /// <summary>
+        /// Deletes a category by its ID.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="categoryId">The category's identifier.</param>
+        /// <returns>
+        /// The ID of the deleted category, or one of the following error codes:
+        /// -2: Cannot find item.
+        /// -5: Unknown error.
+        /// </returns>
+        public int DeleteCategory(string userId, int categoryId)
         {
-            var category = db.Categories.Find(categoryId);
-            if (category == null)
+            try
             {
-                return -1;
+                var category = db.Categories.Find(categoryId);
+                if (category is null)
+                {
+                    return -2;
+                }
+                if (!category.UserId.Equals(userId))
+                {
+                    return -4;
+                }
+                db.Categories.Remove(category);
+                db.SaveChanges();
+                return categoryId;
             }
-            if (!category.UserEmail.Equals(userEmail))
+            catch (Exception ex)
             {
-                return -2;
+                _logger.LogError(ex.Message);
+                return -5;
             }
-            db.Categories.Remove(category);
-            db.SaveChanges();
-            return categoryId;
         }
 
-        public int DeleteCategoriesForBudget(int budgetId)
+        /// <summary>
+        /// Deletes all categories associated with a given budget.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="budgetId">The budget's identifier.</param>
+        /// <returns>
+        /// The ID of the budget whose categories were deleted or the following codes:
+        /// -2 if there is nothing to delete.
+        /// -5 for an unknown error.
+        /// </returns>
+        public int DeleteCategoriesForBudget(string userId, int budgetId)
         {
-            db.Categories
-                .RemoveRange(db.Categories
-                .Where(category => category.Budget.Id == budgetId));
-            db.SaveChanges();
-            return budgetId;
+            try
+            {
+                List<Category> categories = (List<Category>)db.Categories.Where(category => category.Budget.Id.Equals(budgetId) && category.UserId.Equals(userId));
+                if (categories is null || categories.Count().Equals(0))
+                {
+                    return -2;
+                }
+                db.Categories.RemoveRange(categories);
+                db.SaveChanges();
+                return budgetId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return -5;
+            }
         }
     }
 }

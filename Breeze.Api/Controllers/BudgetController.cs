@@ -2,7 +2,6 @@
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Breeze.Api.Controllers
 {
@@ -29,13 +28,13 @@ namespace Breeze.Api.Controllers
 
             try
             {
-                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                if (userEmail == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(budgets.GetBudget(userEmail, year, month));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                return Ok(budgets.GetBudget("userId", year, month));
             }
             catch (Exception ex)
             {
@@ -49,13 +48,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                if (userEmail == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(budgets.CreateBudget(userEmail, budgetRequest));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                return Ok(budgets.CreateBudget("userId", budgetRequest));
             }
             catch (Exception ex)
             {
@@ -69,13 +68,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                if (userEmail == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(budgets.UpdateBudget(userEmail, budgetRequest));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                return Ok(budgets.UpdateBudget("userId", budgetRequest));
             }
             catch (Exception ex)
             {
@@ -89,15 +88,15 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                if (userEmail == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
                 incomes.DeleteIncomesForBudget(budgetId);
                 categories.DeleteCategoriesForBudget(budgetId);
-                return Ok(budgets.DeleteBudget(userEmail, budgetId));
+                return Ok(budgets.DeleteBudget("userId", budgetId));
             }
             catch (Exception ex)
             {

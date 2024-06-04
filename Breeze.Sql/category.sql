@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[Category]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY (1,1), 
-    [UserEmail] NVARCHAR(150) NOT NULL, 
+    [UserId] NVARCHAR(150) NOT NULL, 
     [Name] NVARCHAR(200) NOT NULL, 
     [BudgetId] INT NOT NULL,
     [Allocation] DECIMAL(18, 2) NOT NULL, 

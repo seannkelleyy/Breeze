@@ -66,4 +66,7 @@
   <ItemGroup>
     <RefactorLog Include="Breeze.Sql.refactorlog" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Breeze.Sql.publish.xml" />
+  </ItemGroup>
 </Project>

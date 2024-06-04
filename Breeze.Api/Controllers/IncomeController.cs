@@ -2,7 +2,6 @@
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Breeze.Api.Controllers
 {
@@ -24,13 +23,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                if (userEmail == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(incomes.GetIncomeById(userEmail, id));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                return Ok(incomes.GetIncomeById("userId", id));
             }
             catch (Exception ex)
             {
@@ -45,13 +44,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                if (userEmail == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(incomes.GetIncomeByBudgetId(userEmail, budgetId));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                return Ok(incomes.GetIncomeByBudgetId("userId", budgetId));
             }
             catch (Exception ex)
             {
@@ -65,13 +64,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                if (userEmail == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(incomes.CreateIncome(userEmail, incomeRequest));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                return Ok(incomes.CreateIncome("userId", incomeRequest));
             }
             catch (Exception ex)
             {
@@ -85,13 +84,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                if (userEmail == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(incomes.UpdateIncome(userEmail, incomeRequest));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                return Ok(incomes.UpdateIncome("userId", incomeRequest));
             }
             catch (Exception ex)
             {
@@ -104,13 +103,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                if (userEmail == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(incomes.DeleteIncome(userEmail, id));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                return Ok(incomes.DeleteIncomeById("userId", id));
             }
             catch (Exception ex)
             {

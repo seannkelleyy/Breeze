@@ -13,6 +13,12 @@ namespace Breeze.Data
                 .HasOne(income => income.Budget)
                 .WithMany(budget => budget.Income)
                 .HasForeignKey("BudgetId");
+            modelBuilder
+                .Property(i => i.Amount)
+                .HasColumnType("decimal(18, 2)");
+            modelBuilder
+                .Property(i => i.Amount)
+                .HasPrecision(18, 2);
         }
     }
 }

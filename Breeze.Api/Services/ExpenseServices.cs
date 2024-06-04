@@ -4,12 +4,21 @@ using Breeze.Domain;
 
 namespace Breeze.Api.Services
 {
+    /// <summary>
+    /// Service for managing expenses.
+    /// </summary>
     public class ExpenseService
     {
         private IConfiguration _config;
         private readonly ILogger _logger;
         private readonly BreezeContext db;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExpenseService"/> class.
+        /// </summary>
+        /// <param name="config">Configuration interface.</param>
+        /// <param name="dbContext">Database context for Breeze.</param>
+        /// <param name="logger">Logger for logging errors and information.</param>
         public ExpenseService(IConfiguration config, BreezeContext dbContext, ILogger logger)
         {
             _config = config;
@@ -17,53 +26,91 @@ namespace Breeze.Api.Services
             db = dbContext;
         }
 
-        public ExpenseResponse GetExpenseById(string userEmail, int expenseId)
+        /// <summary>
+        /// Retrieves an expense by its ID.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="expenseId">The expense's identifier.</param>
+        /// <returns>An expense response object or null if not found.</returns>
+        public ExpenseResponse? GetExpenseById(string userId, int expenseId)
         {
-            return db.Expenses
-                .Where(expense => expense.Id == expenseId && expense.UserEmail.Equals(userEmail))
-                .Select(expense => new ExpenseResponse
-                {
-                    Id = expense.Id,
-                    UserEmail = expense.UserEmail,
-                    Name = expense.Name,
-                    Year = expense.Year,
-                    Month = expense.Month,
-                    Day = expense.Day,
-                    CategoryId = expense.Category.Id,
-                    Amount = expense.Amount,
-                }).First();
+            try
+            {
+                return db.Expenses
+                    .Where(expense => expense.Id.Equals(expenseId) && expense.UserId.Equals(userId))
+                    .Select(expense => new ExpenseResponse
+                    {
+                        Id = expense.Id,
+                        UserId = expense.UserId,
+                        Name = expense.Name,
+                        Year = expense.Year,
+                        Month = expense.Month,
+                        Day = expense.Day,
+                        CategoryId = expense.Category.Id,
+                        Amount = expense.Amount,
+                    }).First();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return null;
+            }
         }
 
-        public List<ExpenseResponse> GetExpenseByCategoryId(string userEmail, int CategoryId)
+        /// <summary>
+        /// Retrieves expenses by category ID.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="CategoryId">The category's identifier.</param>
+        /// <returns>A list of expense response objects or null if an error occurs.</returns>
+        public List<ExpenseResponse>? GetExpenseByCategoryId(string userId, int CategoryId)
         {
-            return db.Expenses
-                .Where(expense => expense.Category.Id == CategoryId && expense.UserEmail.Equals(userEmail))
-                .Select(expense => new ExpenseResponse
-                {
-                    Id = expense.Category.Id,
-                    UserEmail = expense.UserEmail,
-                    Name = expense.Name,
-                    Year = expense.Year,
-                    Month = expense.Month,
-                    Day = expense.Day,
-                    CategoryId = CategoryId,
-                    Amount = expense.Amount,
-                })
-                .ToList();
+            try
+            {
+                return db.Expenses
+                    .Where(expense => expense.Category.Id.Equals(CategoryId) && expense.UserId.Equals(userId))
+                    .Select(expense => new ExpenseResponse
+                    {
+                        Id = expense.Category.Id,
+                        UserId = expense.UserId,
+                        Name = expense.Name,
+                        Year = expense.Year,
+                        Month = expense.Month,
+                        Day = expense.Day,
+                        CategoryId = CategoryId,
+                        Amount = expense.Amount,
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return null;
+            }
         }
 
-        public int CreateExpense(string userEmail, ExpenseRequest newExpense)
+        /// <summary>
+        /// Creates a new expense.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="newExpense">The new expense to create.</param>
+        /// <returns>
+        /// The ID of the created expense, or one of the following error codes:
+        /// -1: Cannot find foreign key dependency item.
+        /// -5: Unknown error.
+        /// </returns>
+        public int CreateExpense(string userId, ExpenseRequest newExpense)
         {
             try
             {
                 var category = db.Categories.Find(newExpense.CategoryId);
-                if (category == null)
+                if (category is null)
                 {
                     return -1;
                 }
                 Expense expense = new Expense
                 {
-                    UserEmail = userEmail,
+                    UserId = userId,
                     Name = newExpense.Name,
                     Year = newExpense.Year,
                     Month = newExpense.Month,
@@ -74,29 +121,39 @@ namespace Breeze.Api.Services
 
                 db.Expenses.Add(expense);
                 db.SaveChanges();
-                return expense.Id;
+                return 1;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return -1;
+                return -5;
             }
         }
 
-        public int UpdateExpense(string userEmail, ExpenseRequest updatedExpense)
+        /// <summary>
+        /// Updates an existing expense.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="updatedExpense">The updated expense information.</param>
+        /// <returns>
+        /// The ID of the updated expense, or one of the following error codes:
+        /// -1: Cannot find foreign key dependency item.
+        /// -4: Unauthorized access.
+        /// -5: Unknown error.
+        /// </returns>
+        public int UpdateExpense(string userId, ExpenseRequest updatedExpense)
         {
-            var expense = db.Expenses.Find(updatedExpense.Id);
-
-            if (expense == null)
-            {
-                return -1;
-            }
-            if (!expense.UserEmail.Equals(userEmail))
-            {
-                return -2;
-            }
             try
             {
+                var expense = db.Expenses.Find(updatedExpense.Id);
+                if (expense is null)
+                {
+                    return -2;
+                }
+                if (!expense.UserId.Equals(userId))
+                {
+                    return -4;
+                }
                 expense.Name = updatedExpense.Name;
                 expense.Year = updatedExpense.Year;
                 expense.Month = updatedExpense.Month;
@@ -110,32 +167,75 @@ namespace Breeze.Api.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return -1;
+                return -5;
             }
         }
 
-        public int DeleteExpense(string userEmail, int expenseId)
+        /// <summary>
+        /// Deletes an expense by its ID.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="expenseId">The expense's identifier.</param>
+        /// <returns>
+        /// The ID of the deleted expense, or one of the following error codes:
+        /// -2: Cannot find item.
+        /// -4: Unauthorized access.
+        /// -5: Unknown error.
+        /// </returns>
+        public int DeleteExpense(string userId, int expenseId)
         {
-            var expense = db.Expenses.Find(expenseId);
-            if (expense == null)
+            try
             {
-                return -1;
+                var expense = db.Expenses.Find(expenseId);
+                if (expense is null)
+                {
+                    return -2;
+                }
+                if (!expense.UserId.Equals(userId))
+                {
+                    return -4;
+                }
+                db.Expenses.Remove(expense);
+                db.SaveChanges();
+                return expenseId;
             }
-            if (!expense.UserEmail.Equals(userEmail))
+            catch (Exception ex)
             {
-                return -2;
+                _logger.LogError(ex.Message);
+                return -5;
             }
-            db.Expenses.Remove(expense);
-            db.SaveChanges();
-            return expenseId;
+
         }
 
-        public void DeleteExpenseForCategory(int categoryId)
+        /// <summary>
+        /// Deletes all expenses for a given category.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="categoryId">The category's identifier.</param>
+        ///         /// <returns>
+        /// The ID of the category of the deleted expense, or one of the following error codes:
+        /// -2: Cannot find item.
+        /// -5: Unknown error.
+        /// </returns>
+        public int DeleteExpenseForCategory(string userId, int categoryId)
         {
-            db.Expenses
-                .RemoveRange(db.Expenses
-                .Where(expense => expense.Category.Id == categoryId));
-            db.SaveChanges();
+            try
+            {
+                List<Expense> expenses = (List<Expense>)db.Expenses
+                    .Where(expense => expense.Category.Id.Equals(categoryId) && expense.UserId.Equals(userId));
+                if (expenses is null || expenses.Count().Equals(0))
+                {
+                    return -2;
+                }
+                db.Expenses.RemoveRange(expenses);
+                db.SaveChanges();
+                return categoryId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return -5;
+            }
         }
     }
 }
