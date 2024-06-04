@@ -111,7 +111,7 @@ namespace Breeze.Api.Controllers
                 //    _logger.LogError(User.ToString());
                 //    return Unauthorized();
                 //}
-                expenses.DeleteExpenseForCategory(id);
+                expenses.DeleteExpenseForCategory("userId", id);
                 return Ok(categories.DeleteCategory("userId", id));
             }
             catch (Exception ex)
@@ -132,7 +132,7 @@ namespace Breeze.Api.Controllers
                 //    _logger.LogError(User.ToString());
                 //    return Unauthorized();
                 //}
-                return Ok(categories.DeleteCategoriesForBudget(budgetId));
+                return Ok(categories.DeleteCategoriesForBudget("userId", budgetId));
             }
             catch (Exception ex)
             {

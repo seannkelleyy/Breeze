@@ -122,7 +122,7 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                incomes.DeleteIncomesForBudget(budgetId);
+                incomes.DeleteIncomesForBudget("userId", budgetId);
                 return Ok();
             }
             catch (Exception ex)

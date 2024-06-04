@@ -94,8 +94,8 @@ namespace Breeze.Api.Controllers
                 //    _logger.LogError(User.ToString());
                 //    return Unauthorized();
                 //}
-                incomes.DeleteIncomesForBudget(budgetId);
-                categories.DeleteCategoriesForBudget(budgetId);
+                incomes.DeleteIncomesForBudget("userId", budgetId);
+                categories.DeleteCategoriesForBudget("userId", budgetId);
                 return Ok(budgets.DeleteBudget("userId", budgetId));
             }
             catch (Exception ex)
