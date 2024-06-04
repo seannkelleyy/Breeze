@@ -18,7 +18,8 @@ export const EditBudgetPage = () => {
 	useEffect(() => {
 		const date = new Date(parseInt(year as string), parseInt(month as string))
 		getBudgetForDate(date)
-	}, [year, month, getBudgetForDate])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [year, month])
 
 	return (
 		<BreezeBox title='Edit Budget'>

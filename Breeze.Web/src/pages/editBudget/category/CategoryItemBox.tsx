@@ -3,17 +3,19 @@ import { BreezeText } from '../../../components/shared/BreezeText'
 import { CategoryItem } from './CategoryItem'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { useEffect, useState } from 'react'
-import { Category } from '../../../services/hooks/CategoryServices'
+import { Category, useCategories } from '../../../services/hooks/CategoryServices'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useBudgetContext } from '../../../services/contexts/BudgetContext'
 
 type CategoryItemsBoxProps = {
 	categoryItems: Category[]
 }
+
 export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
+	const { postCategory } = useCategories()
 	const { user } = useAuth0()
 	const { budget } = useBudgetContext()
-	const [items, setItems] = useState<Category[]>(categoryItems)
+	const [items, setItems] = useState<Category[]>(categoryItems ?? [])
 
 	useEffect(() => {
 		setItems(categoryItems)
@@ -21,7 +23,7 @@ export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
 
 	const addCategory = () => {
 		const newCategory: Category = {
-			userEmail: user?.email ?? '',
+			userId: user?.email ?? '',
 			name: '',
 			budgetId: budget.id,
 			allocation: 0,
@@ -44,12 +46,13 @@ export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
 				type='small-heading'
 				text='Categories'
 			/>
-			{items.map((Category, index) => (
-				<CategoryItem
-					key={index}
-					categoryItem={Category}
-				/>
-			))}
+			{items &&
+				items.map((Category, index) => (
+					<CategoryItem
+						key={index}
+						categoryItem={Category}
+					/>
+				))}
 			<BreezeButton
 				text='Add Category'
 				onClick={addCategory}

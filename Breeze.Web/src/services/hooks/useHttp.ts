@@ -10,29 +10,35 @@ const handleError = (error: AxiosError) => {
 }
  
 const useHttp =  () => {
-    const { getAccessTokenSilently } = useAuth0();
-    const [accessToken, setAccessToken] = useState<string>(null as unknown as string)
-    const { hostedApi } = useEnvironmentVariables()
+    //const { getAccessTokenSilently } = useAuth0();
+    //const [accessToken, setAccessToken] = useState<string>(null as unknown as string)
+    const apiUrl = useEnvironmentVariables().localApi
 
-    const fetchToken = async () => {
-        const token = await getAccessTokenSilently();
-        setAccessToken(token);
-    };
 
-    useEffect(() => {
-        fetchToken().catch((error) => {
-            console.error(error);
-        });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [getAccessTokenSilently]);
+    // const fetchToken = async () => {
+    //     const token = await getAccessTokenSilently();
+    //     if (token)
+    //         console.log('Token fetched: ' + token);
+    //     setAccessToken(token);
+    // };
+
+    // useEffect(() => {
+    //     fetchToken().catch((error) => {
+    //         console.error(error);
+    //     });
+    //     if (accessToken) {
+    //         axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+    //         console.log('Access token set' + accessToken);
+    //     }
+    // // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [getAccessTokenSilently]);
 
     const getOne = async <T>(relativeUri: string): Promise<T> => {
         try {
-            await fetchToken()
-            const response = await axios.get<T>(`${hostedApi}/${relativeUri}`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+            const response = await axios.get<T>(`${apiUrl}/${relativeUri}`, {
+                // headers: {
+                //     Authorization: `Bearer ${accessToken}`,
+                // },
             })
             return response.data as T
         } catch (error) {
@@ -43,11 +49,10 @@ const useHttp =  () => {
  
     const getMany = async <T>(relativeUri: string): Promise<T[]> => {
         try {
-            await fetchToken()
-            const response = await axios.get<T[]>(`${hostedApi}/${relativeUri}`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+            const response = await axios.get<T[]>(`${apiUrl}/${relativeUri}`, {
+                // headers: {
+                //     Authorization: `Bearer ${accessToken}`,
+                // },
             })
             return response.data
         } catch (error) {
@@ -58,11 +63,10 @@ const useHttp =  () => {
 
     const getManyArray = async <T>(relativeUri: string): Promise<T[][]> => {
         try {
-            await fetchToken()
-            const response = await axios.get<T[][]>(`${hostedApi}/${relativeUri}`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+            const response = await axios.get<T[][]>(`${apiUrl}/${relativeUri}`, {
+                // headers: {
+                //     Authorization: `Bearer ${accessToken}`,
+                // },
             })
             return response.data
         } catch (error) {
@@ -74,11 +78,10 @@ const useHttp =  () => {
     // use getManyHeader to get the headers of the response.  Used for paging
     const getManyHeader = async <T>(relativeUri: string): Promise<{ data: T[]; headers: unknown }> => {
         try {
-            await fetchToken()
-            const response = await axios.get<T[]>(`${hostedApi}/${relativeUri}`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+            const response = await axios.get<T[]>(`${apiUrl}/${relativeUri}`, {
+                // headers: {
+                //     Authorization: `Bearer ${accessToken}`,
+                // },
             })
             return { data: response.data, headers: response.headers }
         } catch (error) {
@@ -89,11 +92,10 @@ const useHttp =  () => {
  
     const post = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
         try {
-            await fetchToken()
-            const response = await axios.post<T>(`${hostedApi}/${relativeUri}`, rq, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+            const response = await axios.post<T>(`${apiUrl}/${relativeUri}`, rq, {
+                // headers: {
+                //     Authorization: `Bearer ${accessToken}`,
+                // },
             })
             return response.data as T
         } catch (error) {
@@ -107,11 +109,10 @@ const useHttp =  () => {
  
     const patch = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
         try {
-            await fetchToken()
-            const response = await axios.patch<T>(`${hostedApi}/${relativeUri}`, rq, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+            const response = await axios.patch<T>(`${apiUrl}/${relativeUri}`, rq, {
+                // headers: {
+                //     Authorization: `Bearer ${accessToken}`,
+                // },
             })
             return response.data
         } catch (error) {
@@ -122,11 +123,10 @@ const useHttp =  () => {
  
     const put = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
         try {
-            await fetchToken()
-            const response = await axios.put<T>(`${hostedApi}/${relativeUri}`, rq, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+            const response = await axios.put<T>(`${apiUrl}/${relativeUri}`, rq, {
+                // headers: {
+                //     Authorization: `Bearer ${accessToken}`,
+                // },
             })
             return response.data
         } catch (error) {
@@ -137,11 +137,10 @@ const useHttp =  () => {
  
     const deleteOne = async <T>(relativeUri: string): Promise<void> => {
         try {
-            await fetchToken()
-            await axios.delete<T>(`${hostedApi}/${relativeUri}`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+            await axios.delete<T>(`${apiUrl}/${relativeUri}`, {
+                // headers: {
+                //     Authorization: `Bearer ${accessToken}`,
+                // },
             })
         } catch (error) {
             handleError(error as AxiosError)

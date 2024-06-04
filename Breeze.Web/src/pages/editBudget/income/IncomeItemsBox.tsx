@@ -2,8 +2,8 @@ import { BreezeButton } from '../../../components/shared/BreezeButton'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { IncomeItem } from './IncomeItem'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
-import { useEffect, useState } from 'react'
-import { Income } from '../../../services/hooks/IncomeServices'
+import { useState } from 'react'
+import { Income, useIncomes } from '../../../services/hooks/IncomeServices'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useBudgetContext } from '../../../services/contexts/BudgetContext'
 
@@ -12,26 +12,28 @@ type IncomeItemsBoxProps = {
 }
 
 export const IncomeItemsBox = ({ incomeItems }: IncomeItemsBoxProps) => {
+	const { postIncome } = useIncomes()
 	const { user } = useAuth0()
-	const { budget } = useBudgetContext()
-	const [items, setItems] = useState<Income[]>(incomeItems)
-
-	useEffect(() => {
-		setItems(incomeItems)
-	}, [incomeItems])
+	const { budget, getBudgetForDate } = useBudgetContext()
+	const [items, setItems] = useState<Income[]>(incomeItems ?? [])
 
 	const addIncome = () => {
-		const emptyIncome: Income = {
-			userEmail: user?.email ?? '',
+		console.log('addIncome ' + budget.id)
+		console.log(items)
+
+		const newIncome: Income = {
+			userId: user?.email ?? '',
 			budgetId: budget.id,
 			name: '',
 			amount: 0,
 			year: new Date(Date.now()).getFullYear(),
-			month: new Date(Date.now()).getMonth(),
+			month: new Date(Date.now()).getMonth() + 1,
 			day: new Date(Date.now()).getDate(),
 		}
-		setItems([...items, emptyIncome])
+		postIncome(newIncome)
+		setItems([...items, newIncome])
 	}
+
 	return (
 		<BreezeBox
 			title='incomes'
@@ -45,12 +47,22 @@ export const IncomeItemsBox = ({ incomeItems }: IncomeItemsBoxProps) => {
 				type='small-heading'
 				text='Incomes'
 			/>
-			{items.map((income, index) => (
-				<IncomeItem
-					key={index}
-					incomeItem={income}
-				/>
-			))}
+			{items &&
+				items.map((income, index) => (
+					<IncomeItem
+						key={index}
+						incomeItem={income}
+						onUpdate={(income: Income) => {
+							const newItems = items.map((item) => {
+								if (item.id === income.id) {
+									return income
+								}
+								return item
+							})
+							setItems(newItems)
+						}}
+					/>
+				))}
 
 			<BreezeButton
 				text='Add Income'

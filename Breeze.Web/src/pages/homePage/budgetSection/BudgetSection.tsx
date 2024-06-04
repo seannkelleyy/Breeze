@@ -18,7 +18,8 @@ export const BudgetSection = () => {
 
 	useEffect(() => {
 		getBudgetForDate(budgetDate)
-	}, [budgetDate, getBudgetForDate])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [budgetDate])
 
 	const changeBudgetDate = (date: Date, direction: boolean) => {
 		const newDate = new Date(date)
@@ -46,7 +47,7 @@ export const BudgetSection = () => {
 					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, false))}
 				/>
 
-				<BreezeCard title='Budegt Date'>
+				<BreezeCard title='Budget Date'>
 					<BreezeText
 						type='large'
 						text={`${getMonthAsString(budgetDate.getMonth())} ${budgetDate.getFullYear()}`}
@@ -62,32 +63,40 @@ export const BudgetSection = () => {
 					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, true))}
 				/>
 			</BreezeBox>
-			<Link to={`/budget/${budgetDate.getFullYear()}/${getMonthAsString(budgetDate.getMonth())}`}>
+			<Link to={`/budget/${budgetDate.getFullYear()}/${budgetDate.getMonth()}`}>
 				<BreezeButton
 					text='Edit Budget'
 					onClick={() => console.log('edit budget')}
 				/>
 			</Link>
-			<BreezeCard title='Glance'>
-				<BreezeText
-					type='small-heading'
-					text='This month at a glance'
-				/>
+			{budget.id === undefined ? (
 				<BreezeText
 					type='large'
-					text={`Total income: ${budget ? budget.monthlyIncome : 0}`}
+					text='Loading...'
 				/>
-				<BreezeText
-					type='large'
-					text={`Total spent: ${budget ? budget.monthlyExpenses : 0}`}
-				/>
-				<BreezeText
-					type='large'
-					text={`Remaining: ${budget ? budget.monthlyIncome - budget.monthlyExpenses : 0}`}
-				/>
-			</BreezeCard>
+			) : (
+				<BreezeCard title='Glance'>
+					<BreezeText
+						type='small-heading'
+						text='This month at a glance'
+					/>
+					<p>{budget.id}</p>
+					<BreezeText
+						type='large'
+						text={`Total income: ${budget.monthlyIncome ?? 0}`}
+					/>
+					<BreezeText
+						type='large'
+						text={`Total spent: ${budget.monthlyExpenses ?? 0}`}
+					/>
+					<BreezeText
+						type='large'
+						text={`Remaining: ${(budget.monthlyIncome ?? 0) - (budget.monthlyExpenses ?? 0)}`}
+					/>
+				</BreezeCard>
+			)}
 			<BreezeBox title='categories'>
-				{budget &&
+				{budget.categories &&
 					budget.categories.map((category, index) => (
 						<CategoryOverview
 							key={index}

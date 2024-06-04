@@ -14,7 +14,7 @@ export const AddExpense = () => {
 	const { postExpense } = useExpenses()
 	const { budget } = useBudgetContext()
 	const [expense, setExpense] = useState<Expense>({
-		userEmail: user?.email ?? '',
+		userId: user?.email ?? '',
 		categoryId: -1,
 		name: '',
 		amount: 0,

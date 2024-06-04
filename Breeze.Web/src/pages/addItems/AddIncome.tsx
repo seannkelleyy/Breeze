@@ -14,7 +14,7 @@ export const AddIncome = () => {
 	const { budget } = useBudgetContext()
 
 	const [income, setIncome] = useState<Income>({
-		userEmail: user?.email ?? '',
+		userId: user?.email ?? '',
 		budgetId: budget.id,
 		name: '',
 		amount: 0,
