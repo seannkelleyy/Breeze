@@ -41,6 +41,7 @@ namespace Breeze.Api.Services
                     .Where(budget => budget.UserId.Equals(userId) && budget.Month == month && budget.Year == year)
                     .Select(budget => new BudgetResponse
                     {
+                        Id = budget.Id,
                         UserId = budget.UserId,
                         MonthlyIncome = budget.MonthlyIncome,
                         MonthlyExpenses = budget.MonthlyExpenses,
