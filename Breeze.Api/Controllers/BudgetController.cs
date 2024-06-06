@@ -54,7 +54,10 @@ namespace Breeze.Api.Controllers
                 //    _logger.LogError(User.ToString());
                 //    return Unauthorized();
                 //}
-                return Ok(budgets.CreateBudget("userId", budgetRequest));
+                var response = budgets.CreateBudget("userId", budgetRequest);
+                budgets.CalculateBudgetIncomes("userId", response, incomes.GetIncomeByBudgetId("userId", response));
+                budgets.CalculateBudgetCategories("userId", response, categories.GetCategoriesByBudgetId("userId", response));
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -74,7 +77,13 @@ namespace Breeze.Api.Controllers
                 //    _logger.LogError(User.ToString());
                 //    return Unauthorized();
                 //}
-                return Ok(budgets.UpdateBudget("userId", budgetRequest));
+                if (budgetRequest.Id is not null)
+                {
+                    budgets.CalculateBudgetIncomes("userId", budgetRequest.Id ?? 0, incomes.GetIncomeByBudgetId("userId", budgetRequest.Id ?? 0));
+                    budgets.CalculateBudgetCategories("userId", budgetRequest.Id ?? 0, categories.GetCategoriesByBudgetId("userId", budgetRequest.Id ?? 0));
+                    return Ok(budgets.UpdateBudget("userId", budgetRequest));
+                }
+                return BadRequest();
             }
             catch (Exception ex)
             {

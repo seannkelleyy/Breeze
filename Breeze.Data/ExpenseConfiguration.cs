@@ -10,10 +10,6 @@ namespace Breeze.Data
         {
             modelBuilder.ToTable("Expense");
             modelBuilder
-                .HasOne(expense => expense.Category)
-                .WithMany(category => category.Expenses)
-                .HasForeignKey("CategoryId");
-            modelBuilder
                 .Property(e => e.Amount)
                 .HasColumnType("decimal(18, 2)");
             modelBuilder

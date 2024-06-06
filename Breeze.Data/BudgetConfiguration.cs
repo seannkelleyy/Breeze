@@ -10,14 +10,6 @@ namespace Breeze.Data
         {
             modelBuilder.ToTable("Budget");
             modelBuilder
-                .HasMany(budget => budget.Categories)
-                .WithOne(category => category.Budget)
-                .HasForeignKey("BudgetId");
-            modelBuilder
-                .HasMany(budget => budget.Income)
-                .WithOne(income => income.Budget)
-                .HasForeignKey("BudgetId");
-            modelBuilder
                 .Property(b => b.MonthlyExpenses)
                 .HasColumnType("decimal(18, 2)");
             modelBuilder
@@ -29,7 +21,6 @@ namespace Breeze.Data
             modelBuilder
                 .Property(b => b.MonthlyIncome)
                 .HasPrecision(18, 2);
-
         }
     }
 }

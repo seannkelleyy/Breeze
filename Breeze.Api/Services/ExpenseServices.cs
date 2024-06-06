@@ -46,7 +46,7 @@ namespace Breeze.Api.Services
                         Year = expense.Year,
                         Month = expense.Month,
                         Day = expense.Day,
-                        CategoryId = expense.Category.Id,
+                        CategoryId = expense.CategoryId,
                         Amount = expense.Amount,
                     }).First();
             }
@@ -68,16 +68,16 @@ namespace Breeze.Api.Services
             try
             {
                 return db.Expenses
-                    .Where(expense => expense.Category.Id.Equals(CategoryId) && expense.UserId.Equals(userId))
+                    .Where(expense => expense.CategoryId.Equals(CategoryId) && expense.UserId.Equals(userId))
                     .Select(expense => new ExpenseResponse
                     {
-                        Id = expense.Category.Id,
+                        Id = expense.CategoryId,
                         UserId = expense.UserId,
                         Name = expense.Name,
                         Year = expense.Year,
                         Month = expense.Month,
                         Day = expense.Day,
-                        CategoryId = CategoryId,
+                        CategoryId = expense.CategoryId,
                         Amount = expense.Amount,
                     })
                     .ToList();
@@ -115,7 +115,7 @@ namespace Breeze.Api.Services
                     Year = newExpense.Year,
                     Month = newExpense.Month,
                     Day = newExpense.Day,
-                    Category = category,
+                    CategoryId = category.Id,
                     Amount = newExpense.Amount,
                 };
 
@@ -222,7 +222,7 @@ namespace Breeze.Api.Services
             try
             {
                 List<Expense> expenses = (List<Expense>)db.Expenses
-                    .Where(expense => expense.Category.Id.Equals(categoryId) && expense.UserId.Equals(userId));
+                    .Where(expense => expense.CategoryId.Equals(categoryId) && expense.UserId.Equals(userId));
                 if (expenses is null || expenses.Count().Equals(0))
                 {
                     return -2;

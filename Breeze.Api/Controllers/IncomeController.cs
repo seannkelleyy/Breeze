@@ -9,11 +9,13 @@ namespace Breeze.Api.Controllers
     [Route("/budgets/{budgetId}/incomes")]
     public class IncomeController : ControllerBase
     {
+        private readonly BudgetService budgets;
         private readonly IncomeService incomes;
         private readonly ILogger<IncomeController> _logger;
 
         public IncomeController(IConfiguration config, ILogger<IncomeController> logger, BreezeContext breezeContext)
         {
+            budgets = new BudgetService(config, breezeContext, logger);
             incomes = new IncomeService(config, breezeContext, logger);
             _logger = logger;
         }
@@ -70,7 +72,9 @@ namespace Breeze.Api.Controllers
                 //    _logger.LogError(User.ToString());
                 //    return Unauthorized();
                 //}
-                return Ok(incomes.CreateIncome("userId", incomeRequest));
+                var response = incomes.CreateIncome("userId", incomeRequest);
+                budgets.CalculateBudgetIncomes("userId", incomeRequest.BudgetId, incomes.GetIncomeByBudgetId("userId", incomeRequest.BudgetId));
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -90,7 +94,9 @@ namespace Breeze.Api.Controllers
                 //    _logger.LogError(User.ToString());
                 //    return Unauthorized();
                 //}
-                return Ok(incomes.UpdateIncome("userId", incomeRequest));
+                var response = incomes.UpdateIncome("userId", incomeRequest);
+                budgets.CalculateBudgetIncomes("userId", incomeRequest.BudgetId, incomes.GetIncomeByBudgetId("userId", incomeRequest.BudgetId));
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -109,7 +115,10 @@ namespace Breeze.Api.Controllers
                 //    _logger.LogError(User.ToString());
                 //    return Unauthorized();
                 //}
-                return Ok(incomes.DeleteIncomeById("userId", id));
+                int budgetId = incomes.GetIncomeById("userId", id).BudgetId;
+                var response = incomes.DeleteIncomeById("userId", id);
+                budgets.CalculateBudgetIncomes("userId", budgetId, incomes.GetIncomeByBudgetId("userId", budgetId));
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -122,8 +131,9 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                incomes.DeleteIncomesForBudget("userId", budgetId);
-                return Ok();
+                var response = incomes.DeleteIncomesForBudget("userId", budgetId);
+                budgets.CalculateBudgetIncomes("userId", budgetId, incomes.GetIncomeByBudgetId("userId", budgetId));
+                return Ok(response);
             }
             catch (Exception ex)
             {

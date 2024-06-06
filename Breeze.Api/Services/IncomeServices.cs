@@ -46,7 +46,7 @@ namespace Breeze.Api.Services
                         Year = income.Year,
                         Month = income.Month,
                         Day = income.Day,
-                        BudgetId = income.Budget.Id,
+                        BudgetId = income.BudgetId,
                         Amount = income.Amount,
                     }).First();
             }
@@ -68,7 +68,7 @@ namespace Breeze.Api.Services
             try
             {
                 return db.Incomes
-                    .Where(income => income.Budget.Id.Equals(budgetId) && income.UserId.Equals(userId))
+                    .Where(income => income.BudgetId.Equals(budgetId) && income.UserId.Equals(userId))
                     .Select(income => new IncomeResponse
                     {
                         Id = income.Id,
@@ -77,7 +77,7 @@ namespace Breeze.Api.Services
                         Year = income.Year,
                         Month = income.Month,
                         Day = income.Day,
-                        BudgetId = income.Budget.Id,
+                        BudgetId = income.BudgetId,
                         Amount = income.Amount,
                     })
                     .ToList();
@@ -108,6 +108,7 @@ namespace Breeze.Api.Services
                 {
                     return -1;
                 }
+
                 Income income = new Income
                 {
                     UserId = userId,
@@ -115,7 +116,7 @@ namespace Breeze.Api.Services
                     Year = newIncome.Year,
                     Month = newIncome.Month,
                     Day = newIncome.Day,
-                    Budget = budget,
+                    BudgetId = budget.Id,
                     Amount = newIncome.Amount,
                 };
                 db.Incomes.Add(income);
@@ -217,7 +218,7 @@ namespace Breeze.Api.Services
             try
             {
                 List<Income> incomes = (List<Income>)db.Incomes
-                    .Where(income => income.Budget.Id.Equals(budgetId) && income.UserId.Equals(userId));
+                    .Where(income => income.BudgetId.Equals(budgetId) && income.UserId.Equals(userId));
                 if (incomes is null || incomes.Count().Equals(0))
                 {
                     return -2;

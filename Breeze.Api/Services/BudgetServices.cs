@@ -1,4 +1,6 @@
 ﻿using Breeze.Api.RequestResponseObjects.Budgets;
+using Breeze.Api.RequestResponseObjects.Categories;
+using Breeze.Api.RequestResponseObjects.Incomes;
 using Breeze.Data;
 using Breeze.Domain;
 
@@ -48,7 +50,7 @@ namespace Breeze.Api.Services
                         Year = budget.Year,
                         Month = budget.Month,
                         Categories = budget.Categories,
-                        Income = budget.Income,
+                        Incomes = budget.Incomes,
                     })
                     .First();
             }
@@ -167,6 +169,93 @@ namespace Breeze.Api.Services
                 return -5;
             }
 
+        }
+
+        /// <summary>
+        /// Recalculates the total budget income when adding a new income.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="budgetId">The budget's identifier to which incomes are added.</param>
+        /// <param name="incomes">The list of incomes to add.</param>
+        /// <returns>
+        /// The ID of the budget to which incomes were added, or one of the following error codes:
+        /// -2: Cannot find the budget.
+        /// -4: User ID does not match.
+        /// -5: Unknown error.
+        /// </returns>
+        public int CalculateBudgetIncomes(string userId, int budgetId, List<IncomeResponse> incomes)
+        {
+            try
+            {
+                var existingBudget = db.Budgets.Find(budgetId);
+                if (existingBudget is null)
+                {
+                    return -2;
+                }
+                if (!existingBudget.UserId.Equals(userId))
+                {
+                    return -4;
+                }
+
+                decimal totalIncome = 0;
+
+                foreach (var income in incomes)
+                {
+                    totalIncome += income.Amount;
+                }
+
+                existingBudget.MonthlyIncome = totalIncome;
+
+                db.Budgets.Update(existingBudget);
+                db.SaveChanges();
+                return existingBudget.Id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return -5;
+            }
+        }
+
+        /// <summary>
+        /// Recalculates the total budget expenses when adding a new category.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="budgetId">The budget's identifier to which categories are added.</param>
+        /// <param name="categories">The list of categories to add.</param>
+        /// <returns>
+        /// The ID of the budget to which categories were added, or one of the following error codes:
+        /// -2: Cannot find the budget.
+        /// -4: User ID does not match.
+        /// -5: Unknown error.
+        /// </returns>
+        public int CalculateBudgetCategories(string userId, int budgetId, List<CategoryResponse> categories)
+        {
+            try
+            {
+                var existingBudget = db.Budgets.Find(budgetId);
+                if (existingBudget is null)
+                {
+                    return -2;
+                }
+                if (!existingBudget.UserId.Equals(userId))
+                {
+                    return -4;
+                }
+
+                decimal totalExpenses = categories.Sum(category => category.Allocation);
+
+                existingBudget.MonthlyExpenses = totalExpenses;
+
+                db.Budgets.Update(existingBudget);
+                db.SaveChanges();
+                return existingBudget.Id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return -5;
+            }
         }
     }
 }

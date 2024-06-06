@@ -1,4 +1,5 @@
 ﻿using Breeze.Api.RequestResponseObjects.Categories;
+using Breeze.Api.RequestResponseObjects.Expenses;
 using Breeze.Data;
 using Breeze.Domain;
 
@@ -45,7 +46,7 @@ namespace Breeze.Api.Services
                         Name = category.Name,
                         Allocation = category.Allocation,
                         CurrentSpend = category.CurrentSpend,
-                        BudgetId = category.Budget.Id,
+                        BudgetId = category.BudgetId,
                     })
                     .First();
             }
@@ -67,7 +68,7 @@ namespace Breeze.Api.Services
             try
             {
                 return db.Categories
-                    .Where(category => category.Budget.Id.Equals(budgetId) && category.UserId.Equals(userId))
+                    .Where(category => category.BudgetId.Equals(budgetId) && category.UserId.Equals(userId))
                     .Select(category => new CategoryResponse
                     {
                         Id = category.Id,
@@ -75,7 +76,7 @@ namespace Breeze.Api.Services
                         Name = category.Name,
                         Allocation = category.Allocation,
                         CurrentSpend = category.CurrentSpend,
-                        BudgetId = category.Budget.Id,
+                        BudgetId = category.BudgetId,
                     })
                     .ToList();
             }
@@ -105,13 +106,13 @@ namespace Breeze.Api.Services
                 {
                     return -1;
                 }
-                Category category = new Category
+                @int category = new @int
                 {
                     UserId = userId,
                     Name = newCategory.Name,
-                    Allocation = newCategory.Allcoation,
+                    Allocation = newCategory.Allocation,
                     CurrentSpend = newCategory.CurrentSpend,
-                    Budget = budget,
+                    BudgetId = budget.Id,
                 };
                 db.Categories.Add(category);
                 db.SaveChanges();
@@ -148,7 +149,7 @@ namespace Breeze.Api.Services
             try
             {
                 category.Name = updatedCategory.Name;
-                category.Allocation = updatedCategory.Allcoation;
+                category.Allocation = updatedCategory.Allocation;
                 category.CurrentSpend = updatedCategory.CurrentSpend;
                 db.Categories.Update(category);
                 db.SaveChanges();
@@ -209,7 +210,7 @@ namespace Breeze.Api.Services
         {
             try
             {
-                List<Category> categories = (List<Category>)db.Categories.Where(category => category.Budget.Id.Equals(budgetId) && category.UserId.Equals(userId));
+                List<@int> categories = (List<@int>)db.Categories.Where(category => category.BudgetId.Equals(budgetId) && category.UserId.Equals(userId));
                 if (categories is null || categories.Count().Equals(0))
                 {
                     return -2;
@@ -217,6 +218,45 @@ namespace Breeze.Api.Services
                 db.Categories.RemoveRange(categories);
                 db.SaveChanges();
                 return budgetId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return -5;
+            }
+        }
+
+        /// <summary>
+        /// Recalculates the amount spent for a specified category when adding an expense.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="categoryId">The category's identifier to which expenses are added.</param>
+        /// <param name="expenses">The list of expenses to add.</param>
+        /// <returns>
+        /// The ID of the category to which expenses were added, or one of the following error codes:
+        /// -2: Cannot find the category.
+        /// -4: User ID does not match.
+        /// -5: Unknown error.
+        /// </returns>
+        public int CalculateCategoryExpenses(string userId, int categoryId, List<ExpenseResponse> expenses)
+        {
+            try
+            {
+                var existingCategory = db.Categories.Find(categoryId);
+                if (existingCategory is null)
+                {
+                    return -2;
+                }
+                if (!existingCategory.UserId.Equals(userId))
+                {
+                    return -4;
+                }
+
+                var amountSpent = expenses.Sum(expense => expense.Amount);
+
+                existingCategory.CurrentSpend = amountSpent;
+                db.SaveChanges();
+                return existingCategory.Id;
             }
             catch (Exception ex)
             {

@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class CategoryConfiguration : IEntityTypeConfiguration<Category>
+public class CategoryConfiguration : IEntityTypeConfiguration<@int>
 {
-    public void Configure(EntityTypeBuilder<Category> modelBuilder)
+    public void Configure(EntityTypeBuilder<@int> modelBuilder)
     {
         modelBuilder.ToTable("Category");
         modelBuilder
