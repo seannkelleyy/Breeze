@@ -94,7 +94,6 @@ namespace Breeze.Api.Services
         /// <returns>
         /// The ID of the created category, or one of the following error codes:
         /// -1: Cannot find foreign key dependency item.
-        /// -3: Duplicate entry.
         /// -5: Unknown error.
         /// </returns>
         public int CreateCategory(string userId, CategoryRequest newCategory)
@@ -105,14 +104,6 @@ namespace Breeze.Api.Services
                 if (budget is null)
                 {
                     return -1;
-                }
-                List<CategoryResponse> existingCategories = GetCategoriesByBudgetId(userId, newCategory.BudgetId);
-                foreach (CategoryResponse cat in existingCategories)
-                {
-                    if (cat.Name.Equals(newCategory.Name))
-                    {
-                        return -3;
-                    }
                 }
                 Category category = new Category
                 {
