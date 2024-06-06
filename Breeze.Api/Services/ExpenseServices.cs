@@ -121,7 +121,7 @@ namespace Breeze.Api.Services
 
                 db.Expenses.Add(expense);
                 db.SaveChanges();
-                return 1;
+                return expense.Id;
             }
             catch (Exception ex)
             {

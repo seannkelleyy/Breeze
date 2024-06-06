@@ -76,7 +76,7 @@ namespace Breeze.Api.Services
                 {
                     return existingBudget.Id;
                 }
-                db.Budgets.Add(new Budget
+                Budget budget = new Budget
                 {
                     UserId = userId,
                     MonthlyIncome = newBudget.MonthlyIncome,
@@ -84,9 +84,10 @@ namespace Breeze.Api.Services
                     Year = newBudget.Year,
                     Month = newBudget.Month
 
-                });
+                };
+                db.Budgets.Add(budget);
                 db.SaveChanges();
-                return 1;
+                return budget.Id;
             }
             catch (Exception ex)
             {

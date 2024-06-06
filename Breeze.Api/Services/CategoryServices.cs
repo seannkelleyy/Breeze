@@ -122,10 +122,9 @@ namespace Breeze.Api.Services
                     CurrentSpend = newCategory.CurrentSpend,
                     Budget = budget,
                 };
-
                 db.Categories.Add(category);
                 db.SaveChanges();
-                return 1;
+                return category.Id;
             }
             catch (Exception ex)
             {

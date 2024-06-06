@@ -120,7 +120,7 @@ namespace Breeze.Api.Services
                 };
                 db.Incomes.Add(income);
                 db.SaveChanges();
-                return 1;
+                return income.Id;
             }
             catch (Exception ex)
             {
