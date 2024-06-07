@@ -1,14 +1,15 @@
-import { useBudgetContext } from '../../../services/contexts/BudgetContext'
-import { getNumberOfDaysInMonth } from '../../../services/utils/GetMonth'
+import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import { BreezeCard } from '../../../components/shared/BreezeCard'
 import { BreezeText } from '../../../components/shared/BreezeText'
+import { useDateContext } from '../../../services/providers/DateProvider'
 
 /**
  * This is a future feature that will calculate the user's progress towards their budget.
  */
 export const Progress = () => {
+	const { getNumberOfDaysInMonth } = useDateContext()
 	const { budget, totalSpent } = useBudgetContext()
-	const totalBudget = budget.monthlyIncome
+	const totalBudget = budget.monthlyIncome ?? 0
 	const numberOfDays = getNumberOfDaysInMonth(new Date().getMonth(), new Date().getFullYear())
 	const dailyBudget = totalBudget / numberOfDays
 

@@ -1,7 +1,5 @@
 import axios, { AxiosError } from 'axios'
-import { useEffect, useState } from 'react'
 import { useEnvironmentVariables } from '../../config/environment/useEnvironmentVariables'
-import { useAuth0 } from '@auth0/auth0-react'
  
 const handleError = (error: AxiosError) => {
     if (error instanceof AxiosError) {

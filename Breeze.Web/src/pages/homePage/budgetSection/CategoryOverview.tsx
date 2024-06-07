@@ -8,6 +8,7 @@ import { BreezeProgressBar } from '../../../components/shared/BreezeProgressBar'
 import { Category } from '../../../services/hooks/CategoryServices'
 import { useExpenses } from '../../../services/hooks/ExpenseServices'
 import { useQuery } from 'react-query'
+import { useDateContext } from '../../../services/providers/DateProvider'
 
 type categoryItemProps = {
 	category: Category
@@ -18,6 +19,7 @@ type categoryItemProps = {
  * @param props.category: The category to give an overview of.
  */
 export const CategoryOverview = ({ category }: categoryItemProps) => {
+	const { getMonthAsString } = useDateContext()
 	const { getExpenses } = useExpenses()
 	const { data: expenses, status } = useQuery(['expenses', category], () => getExpenses(category))
 	const [seeExpenses, setSeeExpenses] = useState<boolean>(false)
@@ -79,7 +81,7 @@ export const CategoryOverview = ({ category }: categoryItemProps) => {
 										type='medium'
 									/>
 									<BreezeText
-										text={`Date: ${expense.year}-${expense.month}-${expense.day}`}
+										text={`Date: ${getMonthAsString(expense.month)} ${expense.day} ${expense.year}`}
 										type='medium'
 									/>
 								</BreezeBox>

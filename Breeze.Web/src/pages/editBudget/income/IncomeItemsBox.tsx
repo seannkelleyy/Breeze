@@ -5,7 +5,7 @@ import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { useEffect, useState } from 'react'
 import { Income, useIncomes } from '../../../services/hooks/IncomeServices'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useBudgetContext } from '../../../services/contexts/BudgetContext'
+import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import { useMutation } from 'react-query'
 
 type IncomeItemsBoxProps = {

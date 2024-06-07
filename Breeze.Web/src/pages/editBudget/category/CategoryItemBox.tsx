@@ -5,7 +5,7 @@ import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { useEffect, useState } from 'react'
 import { Category, useCategories } from '../../../services/hooks/CategoryServices'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useBudgetContext } from '../../../services/contexts/BudgetContext'
+import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import { useMutation } from 'react-query'
 
 type CategoryItemsBoxProps = {
@@ -36,7 +36,6 @@ export const CategoryItemsBox = ({ categoryItems, setExpenses }: CategoryItemsBo
 			budgetId: budget.id,
 			allocation: 0,
 			currentSpend: 0,
-			expenses: [],
 		}
 		postMutation.mutate(newCategory)
 	}

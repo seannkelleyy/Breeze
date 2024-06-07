@@ -30,11 +30,10 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 					categories: [],
 					incomes: [],
 				}
-				const createdBudget = await postBudget(newBudget)
+				await postBudget(newBudget)
 				setBudget(newBudget)
-				console.log('New budget created:', createdBudget)
 			}
-		} catch (error: Error | any) {
+		} catch (error: Error | unknown) {
 			console.error('An error occurred while fetching the budget:', error)
 		}
 		return budget

@@ -1,21 +1,22 @@
 import { useEffect, useState } from 'react'
-import { getMonthAsString } from '../../../services/utils/GetMonth'
 import { CategoryOverview } from './CategoryOverview'
 import { Link } from 'react-router-dom'
 import { BreezeButton } from '../../../components/shared/BreezeButton'
-import { useBudgetContext } from '../../../services/contexts/BudgetContext'
+import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import { BreezeCard } from '../../../components/shared/BreezeCard'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
+import { useDateContext } from '../../../services/providers/DateProvider'
 
 /**
  * This is the category section view of that home page that gives a brief
  * overview of the current budget.
  */
 export const BudgetSection = () => {
-	const [budgetDate, setBudgetDate] = useState<Date>(new Date(Date.now()))
+	const { date, getMonthAsString } = useDateContext()
+	const [budgetDate, setBudgetDate] = useState<Date>(date)
 	const { budget, totalSpent, getBudgetForDate } = useBudgetContext()
-	const categories = budget.categories && budget.categories.sort((a, b) => b.currentSpend - a.currentSpend)
+	const categories = budget.categories?.sort((a, b) => b.currentSpend - a.currentSpend) ?? []
 
 	useEffect(() => {
 		getBudgetForDate(budgetDate)

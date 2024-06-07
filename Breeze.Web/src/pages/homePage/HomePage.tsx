@@ -5,11 +5,11 @@ import { Progress } from './features/Progress'
 import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { BreezeCard } from '../../components/shared/BreezeCard'
-import { getMonthAsString } from '../../services/utils/GetMonth'
 import { useAuth0 } from '@auth0/auth0-react'
 import { LogoutModal } from '../../components/auth/LogoutModal'
 import { useState } from 'react'
 import { BreezeButton } from '../../components/shared/BreezeButton'
+import { useDateContext } from '../../services/providers/DateProvider'
 
 /**
  * This is the home page component that calls the components that make up the home page.
@@ -18,7 +18,7 @@ import { BreezeButton } from '../../components/shared/BreezeButton'
 export const HomePage = () => {
 	const { user } = useAuth0()
 	const [showModal, setShowModal] = useState(false)
-	const today = new Date()
+	const { date, getMonthAsString } = useDateContext()
 
 	return (
 		<BreezeBox title='Home Page'>
@@ -67,9 +67,9 @@ export const HomePage = () => {
 				/>
 				<BreezeCard title='Date'>
 					<BreezeText
-						text={`${today.getDate() + ' '}
-					${getMonthAsString(today.getMonth()) + ' '}
-					${today.getFullYear()}`}
+						text={`${date.getDate() + ' '}
+					${getMonthAsString(date.getMonth()) + ' '}
+					${date.getFullYear()}`}
 						type='small-heading'
 					/>
 				</BreezeCard>

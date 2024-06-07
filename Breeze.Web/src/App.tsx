@@ -1,18 +1,21 @@
-import { BudgetProvider } from './services/contexts/BudgetContext'
+import { BudgetProvider } from './services/providers/BudgetProvider'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import { AppRoutes } from './config/routing/Routes'
+import { DateProvider } from './services/providers/DateProvider'
 
 const App = () => {
 	const queryClient = new QueryClient()
 
 	return (
-		<BudgetProvider>
-			<QueryClientProvider client={queryClient}>
-				<ReactQueryDevtools />
-				<AppRoutes />
-			</QueryClientProvider>
-		</BudgetProvider>
+		<DateProvider>
+			<BudgetProvider>
+				<QueryClientProvider client={queryClient}>
+					<ReactQueryDevtools />
+					<AppRoutes />
+				</QueryClientProvider>
+			</BudgetProvider>
+		</DateProvider>
 	)
 }
 

@@ -3,7 +3,7 @@ import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeInput } from '../../components/shared/BreezeInput'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useBudgetContext } from '../../services/contexts/BudgetContext'
+import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { BreezeSelect } from '../../components/shared/BreezeSelect'
@@ -19,7 +19,7 @@ export const AddExpense = () => {
 	const categories = budget.categories.sort((a, b) => a.name.localeCompare(b.name))
 	const [expense, setExpense] = useState<Expense>({
 		userId: user?.email ?? '',
-		categoryId: categories[0].id ?? -1,
+		categoryId: categories[0]?.id ?? -1,
 		name: '',
 		amount: 0,
 		year: new Date(Date.now()).getFullYear(),
