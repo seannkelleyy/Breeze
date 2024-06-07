@@ -15,6 +15,7 @@ import { BreezeText } from '../../../components/shared/BreezeText'
 export const BudgetSection = () => {
 	const [budgetDate, setBudgetDate] = useState<Date>(new Date(Date.now()))
 	const { budget, totalSpent, getBudgetForDate } = useBudgetContext()
+	const categories = budget.categories && budget.categories.sort((a, b) => b.currentSpend - a.currentSpend)
 
 	useEffect(() => {
 		getBudgetForDate(budgetDate)
@@ -95,8 +96,8 @@ export const BudgetSection = () => {
 				</BreezeCard>
 			)}
 			<BreezeBox title='categories'>
-				{budget.categories &&
-					budget.categories.map((category, index) => (
+				{categories &&
+					categories.map((category, index) => (
 						<CategoryOverview
 							key={index}
 							category={category}

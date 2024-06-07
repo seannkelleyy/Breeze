@@ -1,4 +1,3 @@
-import { Expense } from './ExpenseServices'
 import useHttp from './useHttp'
 
 export type Category = {
@@ -8,7 +7,6 @@ export type Category = {
 	budgetId: number
 	currentSpend: number
 	allocation: number
-	expenses: Expense[]
 }
 
 export const useCategories = () => {

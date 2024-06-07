@@ -6,6 +6,8 @@ import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { BreezeProgressBar } from '../../../components/shared/BreezeProgressBar'
 import { Category } from '../../../services/hooks/CategoryServices'
+import { useExpenses } from '../../../services/hooks/ExpenseServices'
+import { useQuery } from 'react-query'
 
 type categoryItemProps = {
 	category: Category
@@ -15,9 +17,11 @@ type categoryItemProps = {
  * Component that gives an overview of a category, including the name, amount, current spend, and expenses.
  * @param props.category: The category to give an overview of.
  */
-export const CategoryOverview = (props: categoryItemProps) => {
-	const { category } = props
-	const [seeExpeneses, setSeeExpenses] = useState<boolean>(false)
+export const CategoryOverview = ({ category }: categoryItemProps) => {
+	const { getExpenses } = useExpenses()
+	const { data: expenses, status } = useQuery(['expenses', category], () => getExpenses(category))
+	const [seeExpenses, setSeeExpenses] = useState<boolean>(false)
+	// TODO: Replace loading with skeleton loader
 	return (
 		<BreezeCard
 			title='Category Overview'
@@ -46,20 +50,23 @@ export const CategoryOverview = (props: categoryItemProps) => {
 				text={`Remaining: $${category.allocation - category.currentSpend}`}
 				type='medium'
 			/>
-			<BreezeButton
-				content='See Expenses'
-				onClick={() => setSeeExpenses(!seeExpeneses)}
-			/>
-			<BreezeBox title='Category Item Expenses'>
-				{seeExpeneses
-					? category.expenses
-						? category.expenses.map((expense, index) => (
+			{category.currentSpend != 0 && (
+				<>
+					<BreezeButton
+						content='See Expenses'
+						onClick={() => {
+							setSeeExpenses(!seeExpenses)
+						}}
+					/>
+					{seeExpenses &&
+						(status === 'success' ? (
+							expenses.map((expense, index) => (
 								<BreezeBox
-									title='Expense'
+									title='Expenses'
 									key={index}
 									style={{
 										borderBottom: '1px solid var(--border)',
-										width: '120%',
+										width: '80%',
 										padding: '0.5rem',
 									}}
 								>
@@ -76,10 +83,20 @@ export const CategoryOverview = (props: categoryItemProps) => {
 										type='medium'
 									/>
 								</BreezeBox>
-						  ))
-						: null
-					: null}
-			</BreezeBox>
+							))
+						) : status === 'loading' ? (
+							<BreezeText
+								text='Loading...'
+								type='medium'
+							/>
+						) : (
+							<BreezeText
+								text='Error loading expenses'
+								type='medium'
+							/>
+						))}
+				</>
+			)}
 		</BreezeCard>
 	)
 }

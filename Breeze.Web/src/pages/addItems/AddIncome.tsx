@@ -7,10 +7,12 @@ import { useBudgetContext } from '../../services/contexts/BudgetContext'
 import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { Income, useIncomes } from '../../services/hooks/IncomeServices'
+import { useMutation } from 'react-query'
 
 export const AddIncome = () => {
 	const { user } = useAuth0()
 	const { postIncome } = useIncomes()
+	const postMutation = useMutation((income: Income) => postIncome(income))
 	const { budget } = useBudgetContext()
 
 	const [income, setIncome] = useState<Income>({
@@ -60,7 +62,6 @@ export const AddIncome = () => {
 					onChange={(e) => {
 						setIncome({ ...income, name: e.target.value })
 						checkSubmittable()
-						console.log(income)
 					}}
 				/>
 			</BreezeBox>
@@ -84,7 +85,6 @@ export const AddIncome = () => {
 					onChange={(e) => {
 						setIncome({ ...income, amount: parseFloat(e.target.value) })
 						checkSubmittable()
-						console.log(income)
 					}}
 				/>
 			</BreezeBox>
@@ -108,17 +108,13 @@ export const AddIncome = () => {
 					onChange={(e) => {
 						setIncome({ ...income, year: new Date(e.target.value).getFullYear(), month: new Date(e.target.value).getMonth(), day: new Date(e.target.value).getDate() })
 						checkSubmittable()
-						console.log(income)
 					}}
 				/>
 			</BreezeBox>
 			<BreezeButton
 				content='Add Income'
 				disabled={!isSubmittable}
-				onClick={() => {
-					console.log(income)
-					postIncome(income)
-				}}
+				onClick={() => postMutation.mutate(income)}
 			/>
 		</BreezeBox>
 	)
