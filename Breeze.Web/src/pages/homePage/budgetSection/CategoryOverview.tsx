@@ -47,7 +47,7 @@ export const CategoryOverview = (props: categoryItemProps) => {
 				type='medium'
 			/>
 			<BreezeButton
-				text='See Expenses'
+				content='See Expenses'
 				onClick={() => setSeeExpenses(!seeExpeneses)}
 			/>
 			<BreezeBox title='Category Item Expenses'>

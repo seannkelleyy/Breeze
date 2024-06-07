@@ -21,9 +21,9 @@ export const useExpenses = () => {
 
 	const getExpenses = async (category: Category): Promise<Expense[]> => await getMany<Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses`)
 
-	const postExpense = async (category: Category, expense: Expense) => post<Expense, Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses`, expense)
+	const postExpense = async (category: Category, expense: Expense): Promise<number> => post<number, Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses`, expense)
 
-	const patchExpense = async (category: Category, expense: Expense) => patch<Expense, Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses`, expense)
+	const patchExpense = async (category: Category, expense: Expense): Promise<number> => patch<number, Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses`, expense)
 
 	const deleteExpense = async (category: Category, expense: Expense) => deleteOne<Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses/${expense.id}`)
 

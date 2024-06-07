@@ -11,14 +11,14 @@ export const AddButtons = () => {
 			<Link to='/add-expense'>
 				<BreezeButton
 					onClick={() => console.log('Add New Expense')}
-					text='Add New Expense'
+					content='Add New Expense'
 					size='large'
 				/>
 			</Link>
 			<Link to='/add-income'>
 				<BreezeButton
 					onClick={() => console.log('Add New Income')}
-					text='Add New Income'
+					content='Add New Income'
 					size='large'
 				/>
 			</Link>

@@ -18,9 +18,9 @@ export const useIncomes = () => {
 
 	const getIncomes = async (income: Income): Promise<Income[]> => await getMany<Income>(`budgets/${income.budgetId}/incomes`)
 
-	const postIncome = async (income: Income) => post<Income, Income>(`budgets/${income.budgetId}/incomes`, income)
+	const postIncome = async (income: Income): Promise<number> => await post<number, Income>(`budgets/${income.budgetId}/incomes`, income);
 
-	const patchIncome = async (income: Income) => patch<Income, Income>(`budgets/${income.budgetId}/incomes`, income)
+	const patchIncome = async (income: Income): Promise<number> => patch<number, Income>(`budgets/${income.budgetId}/incomes`, income)
 
 	const deleteIncome = async (income: Income) => deleteOne<Income>(`budgets/${income.budgetId}/incomes/${income.id}`)
 

@@ -5,8 +5,10 @@ import { CategoryItemsBox } from './category/CategoryItemBox'
 import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { BreezeCard } from '../../components/shared/BreezeCard'
+import { useEffect, useState } from 'react'
+import { getMonthAsString } from '../../services/utils/GetMonth'
 import './editBudget.css'
-import { useEffect } from 'react'
+import { BackButton } from '../../components/shared/BackButton'
 
 /**
  * This is the page that allows a user to add or edit a budget.
@@ -14,15 +16,20 @@ import { useEffect } from 'react'
 export const EditBudgetPage = () => {
 	const { year, month } = useParams<{ year: string; month: string }>()
 	const { budget, getBudgetForDate } = useBudgetContext()
+	const [monthlyIncome, setMonthlyIncome] = useState(0)
+	const [monthlyExpenses, setMonthlyExpenses] = useState(0)
 
 	useEffect(() => {
 		const date = new Date(parseInt(year as string), parseInt(month as string))
 		getBudgetForDate(date)
+		console.log(budget)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [year, month])
 
+	// TODO: Make it so the top card is fixed and the bottom box scrolls
 	return (
 		<BreezeBox title='Edit Budget'>
+			<BackButton />
 			<BreezeText
 				type='large-heading'
 				text='Edit Budget'
@@ -30,23 +37,23 @@ export const EditBudgetPage = () => {
 			<BreezeCard title='Budget Headlines'>
 				<BreezeText
 					type='large'
-					text={`Date: ${month} ${year}`}
+					text={`Date: ${getMonthAsString(parseInt(month as string))} ${year}`}
 				/>
 				<BreezeText
 					type='large'
-					text={`Income: $${budget.monthlyIncome}`}
+					text={`Income: $${monthlyIncome}`}
 				/>
 				<BreezeText
 					type='large'
-					text={`Expenses: $${budget.monthlyExpenses}`}
+					text={`Expenses: $${monthlyExpenses}`}
 				/>
-				<section className={budget.monthlyIncome - budget.monthlyExpenses >= 0 ? 'amount-left-positive' : 'amount-left-negative'}>
+				<section className={monthlyIncome - monthlyExpenses >= 0 ? 'amount-left-positive' : 'amount-left-negative'}>
 					<BreezeText
 						type='large'
 						style={{
 							padding: '.25em',
 						}}
-						text={`Amount left to allocate: $${budget.monthlyIncome && budget.monthlyExpenses ? budget.monthlyIncome - budget.monthlyExpenses : 0}`}
+						text={`Amount left to allocate: $${monthlyExpenses ? monthlyIncome - monthlyExpenses : 0}`}
 					/>
 				</section>
 			</BreezeCard>
@@ -56,8 +63,14 @@ export const EditBudgetPage = () => {
 					width: '85%',
 				}}
 			>
-				<IncomeItemsBox incomeItems={budget.incomes} />
-				<CategoryItemsBox categoryItems={budget.categories} />
+				<IncomeItemsBox
+					incomeItems={budget.incomes}
+					setIncome={setMonthlyIncome}
+				/>
+				<CategoryItemsBox
+					categoryItems={budget.categories}
+					setExpenses={setMonthlyExpenses}
+				/>
 			</BreezeBox>
 		</BreezeBox>
 	)

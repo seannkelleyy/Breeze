@@ -23,7 +23,7 @@ export const LogoutModal = ({ showModal, setShowModal }: LogoutModalProps) => {
 			}}
 		>
 			<BreezeButton
-				text={
+				content={
 					<img
 						src='./close.svg'
 						alt='Close'

@@ -31,7 +31,7 @@ export const HomePage = () => {
 				}}
 			>
 				<BreezeButton
-					text={
+					content={
 						<img
 							src={user?.picture}
 							alt='Profile picture'

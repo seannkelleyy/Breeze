@@ -8,21 +8,24 @@ import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { BreezeSelect } from '../../components/shared/BreezeSelect'
 import { Expense, useExpenses } from '../../services/hooks/ExpenseServices'
+import { useMutation } from 'react-query'
 
 export const AddExpense = () => {
 	const { user } = useAuth0()
 	const { postExpense } = useExpenses()
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	const postMutation = useMutation((expense: Expense) => postExpense(categories.find((category) => category.id === expense.categoryId)!, expense))
 	const { budget } = useBudgetContext()
+	const categories = budget.categories.sort((a, b) => a.name.localeCompare(b.name))
 	const [expense, setExpense] = useState<Expense>({
 		userId: user?.email ?? '',
-		categoryId: -1,
+		categoryId: categories[0].id ?? -1,
 		name: '',
 		amount: 0,
 		year: new Date(Date.now()).getFullYear(),
 		month: new Date(Date.now()).getMonth(),
 		day: new Date(Date.now()).getDate(),
 	})
-	const categories = budget.categories
 	const [isSubmittable, setIsSubmittable] = useState(false)
 
 	const checkSubmittable = () => {
@@ -136,12 +139,9 @@ export const AddExpense = () => {
 				/>
 			</BreezeBox>
 			<BreezeButton
-				text='Add Expense'
+				content='Add Expense'
 				disabled={!isSubmittable}
-				onClick={() => {
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					postExpense(categories.find((category) => category.id === expense.categoryId)!, expense)
-				}}
+				onClick={() => postMutation.mutate(expense)}
 			/>
 		</BreezeBox>
 	)

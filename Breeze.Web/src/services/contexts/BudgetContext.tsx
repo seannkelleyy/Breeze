@@ -3,7 +3,7 @@ import { Budget, useBudgets } from '../hooks/BudgetServices'
 import { useAuth0 } from '@auth0/auth0-react'
 
 type BudgetProviderProps = { children: React.ReactNode }
-type BudgetContextType = { budget: Budget; getBudgetForDate: (date: Date) => Promise<Budget> }
+type BudgetContextType = { budget: Budget; totalSpent: number; getBudgetForDate: (date: Date) => Promise<Budget> }
 
 // Context creation with default value
 const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContextType)
@@ -13,6 +13,7 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 	const { user } = useAuth0()
 	const { getBudget, postBudget } = useBudgets()
 	const [budget, setBudget] = useState<Budget>({} as Budget)
+	const totalSpent = budget.categories ? budget.categories.reduce((sum, category) => sum + category.currentSpend, 0) : 0
 
 	const getBudgetForDate = async (date: Date) => {
 		try {
@@ -30,7 +31,7 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 					incomes: [],
 				}
 				const createdBudget = await postBudget(newBudget)
-				setBudget(createdBudget)
+				setBudget(newBudget)
 				console.log('New budget created:', createdBudget)
 			}
 		} catch (error: Error | any) {
@@ -38,7 +39,7 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 		}
 		return budget
 	}
-	return <BudgetContext.Provider value={{ budget, getBudgetForDate }}>{children}</BudgetContext.Provider>
+	return <BudgetContext.Provider value={{ budget, totalSpent, getBudgetForDate }}>{children}</BudgetContext.Provider>
 }
 
 // Hook to access the context

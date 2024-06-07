@@ -18,9 +18,9 @@ export const useBudgets = () => {
 
 	const getBudget = async (date: Date): Promise<Budget> => await getOne<Budget>(`budgets/${date.getFullYear()}/${date.getMonth()}`)
 
-	const postBudget = async (budget: Budget) => post<Budget, Budget>('budgets', budget)
+	const postBudget = async (budget: Budget): Promise<number> => post<number, Budget>('budgets', budget)
 
-	const patchBudget = async (budget: Budget) => patch<Budget, Budget>('budgets', budget)
+	const patchBudget = async (budget: Budget): Promise<number> => patch<number, Budget>('budgets', budget)
 
 	const deleteBudget = async (budgetId: number) => deleteOne<Budget>(`budgets/${budgetId}`)
 

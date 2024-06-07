@@ -7,8 +7,7 @@ import { BreezeText } from '../../../components/shared/BreezeText'
  * This is a future feature that will calculate the user's progress towards their budget.
  */
 export const Progress = () => {
-	const { budget } = useBudgetContext()
-	const totalSpent = budget.monthlyExpenses
+	const { budget, totalSpent } = useBudgetContext()
 	const totalBudget = budget.monthlyIncome
 	const numberOfDays = getNumberOfDaysInMonth(new Date().getMonth(), new Date().getFullYear())
 	const dailyBudget = totalBudget / numberOfDays

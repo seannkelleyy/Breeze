@@ -3,20 +3,27 @@ import { BreezeInput } from '../../../components/shared/BreezeInput'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { useMutation } from 'react-query'
 import { Category, useCategories } from '../../../services/hooks/CategoryServices'
+import { DeleteButton } from '../../../components/shared/DeleteButton'
 
 type CategoryItemProps = {
 	categoryItem: Category
+	onUpdate: (category: Category) => void
+	onDelete: (category: Category) => void
 }
 
-export const CategoryItem = ({ categoryItem }: CategoryItemProps) => {
-	const { patchCategory } = useCategories()
-	const mutation = useMutation((category: Category) => patchCategory(category))
+export const CategoryItem = ({ categoryItem, onUpdate, onDelete }: CategoryItemProps) => {
+	const { patchCategory, deleteCategory } = useCategories()
+	const patchMutation = useMutation((category: Category) => patchCategory(category))
+	const deleteMutation = useMutation((category: Category) => deleteCategory(category))
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.allocation)
 	const [categoryName, setCategoryName] = useState<string>(categoryItem.name)
 
 	const UpdateCategory = () => {
-		mutation.mutate(categoryItem)
+		const updatedCategory = { ...categoryItem, allocation: categoryAmount, name: categoryName }
+		onUpdate(updatedCategory)
+		patchMutation.mutate(updatedCategory)
 	}
+
 	return (
 		<BreezeBox
 			title='CategoryItem'
@@ -43,6 +50,12 @@ export const CategoryItem = ({ categoryItem }: CategoryItemProps) => {
 				onChange={(e) => setCategoryAmount(e.target.value as unknown as number)}
 				onBlur={() => {
 					UpdateCategory()
+				}}
+			/>
+			<DeleteButton
+				onClick={() => {
+					deleteMutation.mutate(categoryItem)
+					onDelete(categoryItem)
 				}}
 			/>
 		</BreezeBox>

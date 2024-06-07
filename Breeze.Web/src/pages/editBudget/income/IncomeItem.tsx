@@ -3,21 +3,25 @@ import { BreezeInput } from '../../../components/shared/BreezeInput'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { useMutation } from 'react-query'
 import { Income, useIncomes } from '../../../services/hooks/IncomeServices'
+import { DeleteButton } from '../../../components/shared/DeleteButton'
 
 type IncomeItemProps = {
 	incomeItem: Income
 	onUpdate: (income: Income) => void
+	onDelete: (income: Income) => void
 }
 
-export const IncomeItem = ({ incomeItem, onUpdate }: IncomeItemProps) => {
-	const { patchIncome } = useIncomes()
-	const mutation = useMutation((income: Income) => patchIncome(income))
+export const IncomeItem = ({ incomeItem, onUpdate, onDelete }: IncomeItemProps) => {
+	const { patchIncome, deleteIncome } = useIncomes()
+	const patchMutation = useMutation((income: Income) => patchIncome(income))
+	const deleteMutation = useMutation((income: Income) => deleteIncome(income))
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)
 	const [incomeName, setIncomeName] = useState<string>(incomeItem.name)
 
 	const UpdateIncome = () => {
-		onUpdate({ ...incomeItem, amount: incomeAmount, name: incomeName })
-		mutation.mutate(incomeItem)
+		const updatedIncome = { ...incomeItem, amount: incomeAmount, name: incomeName }
+		onUpdate(updatedIncome)
+		patchMutation.mutate(updatedIncome)
 	}
 
 	return (
@@ -46,6 +50,12 @@ export const IncomeItem = ({ incomeItem, onUpdate }: IncomeItemProps) => {
 				onChange={(e) => setIncomeAmount(e.target.value as unknown as number)}
 				onBlur={() => {
 					UpdateIncome()
+				}}
+			/>
+			<DeleteButton
+				onClick={() => {
+					deleteMutation.mutate(incomeItem)
+					onDelete(incomeItem)
 				}}
 			/>
 		</BreezeBox>

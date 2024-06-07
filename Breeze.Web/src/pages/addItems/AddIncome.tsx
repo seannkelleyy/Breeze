@@ -113,7 +113,7 @@ export const AddIncome = () => {
 				/>
 			</BreezeBox>
 			<BreezeButton
-				text='Add Income'
+				content='Add Income'
 				disabled={!isSubmittable}
 				onClick={() => {
 					console.log(income)

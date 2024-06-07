@@ -5,7 +5,7 @@ export type Category = {
 	id?: number
 	userId: string
 	name: string
-	budgetId?: number
+	budgetId: number
 	currentSpend: number
 	allocation: number
 	expenses: Expense[]
@@ -18,9 +18,9 @@ export const useCategories = () => {
 
 	const getCategories = async (budgetId: number): Promise<Category[]> => await getMany<Category>(`budgets/${budgetId}/categories`)
 
-	const postCategory = async (category: Category) => post<Category, Category>(`budgets/${category.budgetId}/categories/`, category)
+	const postCategory = async (category: Category): Promise<number> => post<number, Category>(`budgets/${category.budgetId}/categories`, category)
 
-	const patchCategory = async (category: Category) => patch<Category, Category>(`budgets/${category.budgetId}/categories/`, category)
+	const patchCategory = async (category: Category): Promise<number> => patch<number, Category>(`budgets/${category.budgetId}/categories`, category)
 
 	const deleteCategory = async (category: Category) => deleteOne<Category>(`budgets/${category.budgetId}/categories/${category.id}`)
 

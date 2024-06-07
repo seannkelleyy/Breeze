@@ -10,7 +10,7 @@ const LoginButton = () => {
 
 	return (
 		<BreezeButton
-			text='Log In/ Sign-Up'
+			content='Log In/ Sign-Up'
 			onClick={() => <Navigate to='/home' />}
 		/>
 	)

@@ -5,9 +5,9 @@ export const BackButton = () => {
 	const navigate = useNavigate()
 	return (
 		<BreezeButton
-			text={
+			content={
 				<img
-					src='./arrow-left.svg'
+					src='/arrow-left.svg'
 					alt='back'
 				/>
 			}

@@ -14,7 +14,7 @@ import { BreezeText } from '../../../components/shared/BreezeText'
  */
 export const BudgetSection = () => {
 	const [budgetDate, setBudgetDate] = useState<Date>(new Date(Date.now()))
-	const { budget, getBudgetForDate } = useBudgetContext()
+	const { budget, totalSpent, getBudgetForDate } = useBudgetContext()
 
 	useEffect(() => {
 		getBudgetForDate(budgetDate)
@@ -38,7 +38,7 @@ export const BudgetSection = () => {
 				direction='row'
 			>
 				<BreezeButton
-					text={
+					content={
 						<img
 							src='./arrow-left.svg'
 							alt='arrow-left'
@@ -54,7 +54,7 @@ export const BudgetSection = () => {
 					/>
 				</BreezeCard>
 				<BreezeButton
-					text={
+					content={
 						<img
 							src='./arrow-right.svg'
 							alt='arrow-right'
@@ -65,7 +65,7 @@ export const BudgetSection = () => {
 			</BreezeBox>
 			<Link to={`/budget/${budgetDate.getFullYear()}/${budgetDate.getMonth()}`}>
 				<BreezeButton
-					text='Edit Budget'
+					content='Edit Budget'
 					onClick={() => console.log('edit budget')}
 				/>
 			</Link>
@@ -80,18 +80,17 @@ export const BudgetSection = () => {
 						type='small-heading'
 						text='This month at a glance'
 					/>
-					<p>{budget.id}</p>
 					<BreezeText
 						type='large'
 						text={`Total income: ${budget.monthlyIncome ?? 0}`}
 					/>
 					<BreezeText
 						type='large'
-						text={`Total spent: ${budget.monthlyExpenses ?? 0}`}
+						text={`Total spent: ${totalSpent ?? 0}`}
 					/>
 					<BreezeText
 						type='large'
-						text={`Remaining: ${(budget.monthlyIncome ?? 0) - (budget.monthlyExpenses ?? 0)}`}
+						text={`Remaining: ${(budget.monthlyIncome ?? 0) - (totalSpent ?? 0)}`}
 					/>
 				</BreezeCard>
 			)}

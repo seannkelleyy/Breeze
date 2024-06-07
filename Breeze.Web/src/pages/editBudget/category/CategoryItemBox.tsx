@@ -6,20 +6,28 @@ import { useEffect, useState } from 'react'
 import { Category, useCategories } from '../../../services/hooks/CategoryServices'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useBudgetContext } from '../../../services/contexts/BudgetContext'
+import { useMutation } from 'react-query'
 
 type CategoryItemsBoxProps = {
 	categoryItems: Category[]
+	setExpenses: (amount: number) => void
 }
 
-export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
+export const CategoryItemsBox = ({ categoryItems, setExpenses }: CategoryItemsBoxProps) => {
 	const { postCategory } = useCategories()
+	const postMutation = useMutation(postCategory, {
+		onSuccess: (id, variables) => {
+			variables.id = id
+			setItems((prevItems) => [...prevItems, variables])
+		},
+	})
 	const { user } = useAuth0()
 	const { budget } = useBudgetContext()
 	const [items, setItems] = useState<Category[]>(categoryItems ?? [])
 
 	useEffect(() => {
-		setItems(categoryItems)
-	}, [categoryItems])
+		setExpenses(items.reduce((acc, item) => acc + 1 * item.allocation, 0))
+	}, [items, setExpenses])
 
 	const addCategory = () => {
 		const newCategory: Category = {
@@ -30,7 +38,21 @@ export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
 			currentSpend: 0,
 			expenses: [],
 		}
-		setItems([...items, newCategory])
+		postMutation.mutate(newCategory)
+	}
+
+	const onUpdate = (category: Category) => {
+		const newItems = items.map((item) => {
+			if (item.id === category.id) {
+				return category
+			}
+			return item
+		})
+		setItems(newItems)
+	}
+
+	const handleDelete = (deletedCategory: Category) => {
+		setItems(items.filter((category) => category.id !== deletedCategory.id))
 	}
 
 	return (
@@ -47,14 +69,16 @@ export const CategoryItemsBox = ({ categoryItems }: CategoryItemsBoxProps) => {
 				text='Categories'
 			/>
 			{items &&
-				items.map((Category, index) => (
+				items.map((category) => (
 					<CategoryItem
-						key={index}
-						categoryItem={Category}
+						key={category.id}
+						categoryItem={category}
+						onUpdate={onUpdate}
+						onDelete={handleDelete}
 					/>
 				))}
 			<BreezeButton
-				text='Add Category'
+				content='Add Category'
 				onClick={addCategory}
 			/>
 		</BreezeBox>

@@ -9,7 +9,7 @@ const LogoutButton = () => {
 
 	return (
 		<BreezeButton
-			text='Log out'
+			content='Log out'
 			onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
 		/>
 	)
