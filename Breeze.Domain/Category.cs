@@ -1,6 +1,6 @@
 ﻿namespace Breeze.Domain
 {
-    public class @int
+    public class Category
     {
         public int Id { get; set; }
         public string UserId { get; set; }

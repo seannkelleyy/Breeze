@@ -8,7 +8,7 @@
         public decimal? MonthlyExpenses { get; set; }
         public int Year { get; set; }
         public int Month { get; set; }
-        public List<@int> Categories { get; set; }
+        public List<Category> Categories { get; set; }
         public List<Income> Incomes { get; set; }
     }
 }

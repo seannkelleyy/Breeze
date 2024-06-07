@@ -106,7 +106,7 @@ namespace Breeze.Api.Services
                 {
                     return -1;
                 }
-                @int category = new @int
+                Category category = new Category
                 {
                     UserId = userId,
                     Name = newCategory.Name,
@@ -210,7 +210,7 @@ namespace Breeze.Api.Services
         {
             try
             {
-                List<@int> categories = (List<@int>)db.Categories.Where(category => category.BudgetId.Equals(budgetId) && category.UserId.Equals(userId));
+                List<Category> categories = (List<Category>)db.Categories.Where(category => category.BudgetId.Equals(budgetId) && category.UserId.Equals(userId));
                 if (categories is null || categories.Count().Equals(0))
                 {
                     return -2;
