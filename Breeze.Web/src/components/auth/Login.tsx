@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom'
 /**
  * Simple login button from Auth0 docs.
  */
-const LoginButton = () => {
+export const LoginButton = () => {
 	//const { loginWithRedirect } = useAuth0()
 
 	return (
@@ -14,5 +14,3 @@ const LoginButton = () => {
 		/>
 	)
 }
-
-export default LoginButton

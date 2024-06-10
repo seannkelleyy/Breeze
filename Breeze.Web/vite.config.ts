@@ -20,5 +20,10 @@ export default defineConfig({
       '@snackTrack': path.resolve(__dirname, 'src'),
       '@': path.resolve(__dirname, './src'),
     },
+    extensions: [
+        '.json',
+        '.ts',
+        '.tsx',
+    ],
   },
 })

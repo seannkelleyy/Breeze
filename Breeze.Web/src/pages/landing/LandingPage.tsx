@@ -1,4 +1,4 @@
-import LoginButton from '../../components/auth/Login'
+import { LoginButton } from '../../components/auth/Login'
 import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeText } from '../../components/shared/BreezeText'
 
