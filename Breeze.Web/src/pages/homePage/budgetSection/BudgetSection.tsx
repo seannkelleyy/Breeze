@@ -84,15 +84,15 @@ export const BudgetSection = () => {
 					/>
 					<BreezeText
 						type='large'
-						text={`Total income: ${budget.monthlyIncome ?? 0}`}
+						text={`Total income: $${budget.monthlyIncome ?? 0}`}
 					/>
 					<BreezeText
 						type='large'
-						text={`Total spent: ${totalSpent ?? 0}`}
+						text={`Total spent: $${totalSpent ?? 0}`}
 					/>
 					<BreezeText
 						type='large'
-						text={`Remaining: ${(budget.monthlyIncome ?? 0) - (totalSpent ?? 0)}`}
+						text={`Remaining: $${(budget.monthlyIncome ?? 0) - (totalSpent ?? 0)}`}
 					/>
 				</BreezeCard>
 			)}
