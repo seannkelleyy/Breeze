@@ -22,7 +22,7 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{year}/{month}")]
+        [HttpGet("{year}-{month}")]
         public IActionResult GetBudget([FromRoute] int year, [FromRoute] int month)
         {
 

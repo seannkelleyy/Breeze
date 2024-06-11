@@ -71,7 +71,7 @@ namespace Breeze.Api.Services
                     .Where(expense => expense.CategoryId.Equals(CategoryId) && expense.UserId.Equals(userId))
                     .Select(expense => new ExpenseResponse
                     {
-                        Id = expense.CategoryId,
+                        Id = expense.Id,
                         UserId = expense.UserId,
                         Name = expense.Name,
                         Year = expense.Year,

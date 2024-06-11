@@ -39,7 +39,7 @@ namespace Breeze.Api.Services
         {
             try
             {
-                return db.Budgets
+                var getBudgetResponse = db.Budgets
                     .Where(budget => budget.UserId.Equals(userId) && budget.Month == month && budget.Year == year)
                     .Select(budget => new BudgetResponse
                     {
@@ -52,7 +52,28 @@ namespace Breeze.Api.Services
                         Categories = budget.Categories,
                         Incomes = budget.Incomes,
                     })
-                    .First();
+                    .FirstOrDefault();
+                if (getBudgetResponse != null)
+                {
+                    getBudgetResponse.Categories = getBudgetResponse.Categories.OrderBy(category => category.Name).ToList();
+                    getBudgetResponse.Incomes = getBudgetResponse.Incomes.OrderBy(income => income.Name).ToList();
+                    return getBudgetResponse;
+                }
+                else
+                {
+                    int budgetCreationResponse = CreateBudget(userId, new BudgetRequest
+                    {
+                        MonthlyIncome = 0,
+                        MonthlyExpenses = 0,
+                        Year = year,
+                        Month = month
+                    });
+                    if (budgetCreationResponse == -5)
+                    {
+                        return null;
+                    }
+                    return GetBudgetByDate(userId, year, month);
+                }
             }
             catch (Exception ex)
             {

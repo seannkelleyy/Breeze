@@ -42,12 +42,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("localhost", policy =>
     {
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://breezebudgeting.azurewebsites.net");
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
     });
     options.AddPolicy("production", policy =>
     {
-        // TODO Add frontend uri when its created
-        //policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://breeze-apiapp.azurewebsites.net/");
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://breezebudgeting.azurewebsites.net");
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
 
     });
@@ -61,13 +61,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseCors("production");
+app.UseCors("OpenCorsPolicy");
 app.UseSwagger();
 app.UseSwaggerUI();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseCors("localhost");
+    app.UseCors("OpenCorsPolicy");
 }
 
 
