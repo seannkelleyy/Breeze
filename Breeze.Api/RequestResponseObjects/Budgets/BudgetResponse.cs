@@ -1,6 +1,4 @@
-﻿using Breeze.Domain;
-
-namespace Breeze.Api.RequestResponseObjects.Budgets
+﻿namespace Breeze.Api.RequestResponseObjects.Budgets
 {
     public class BudgetResponse
     {
@@ -10,7 +8,5 @@ namespace Breeze.Api.RequestResponseObjects.Budgets
         public decimal? MonthlyExpenses { get; set; }
         public int Year { get; set; }
         public int Month { get; set; }
-        public List<Category> Categories { get; set; }
-        public List<Income> Incomes { get; set; }
     }
 }

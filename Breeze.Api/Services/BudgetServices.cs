@@ -49,17 +49,9 @@ namespace Breeze.Api.Services
                         MonthlyExpenses = budget.MonthlyExpenses,
                         Year = budget.Year,
                         Month = budget.Month,
-                        Categories = budget.Categories,
-                        Incomes = budget.Incomes,
                     })
                     .FirstOrDefault();
-                if (getBudgetResponse != null)
-                {
-                    getBudgetResponse.Categories = getBudgetResponse.Categories.OrderBy(category => category.Name).ToList();
-                    getBudgetResponse.Incomes = getBudgetResponse.Incomes.OrderBy(income => income.Name).ToList();
-                    return getBudgetResponse;
-                }
-                else
+                if (getBudgetResponse == null)
                 {
                     int budgetCreationResponse = CreateBudget(userId, new BudgetRequest
                     {
@@ -74,6 +66,7 @@ namespace Breeze.Api.Services
                     }
                     return GetBudgetByDate(userId, year, month);
                 }
+                return getBudgetResponse;
             }
             catch (Exception ex)
             {
