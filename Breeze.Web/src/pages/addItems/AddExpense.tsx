@@ -9,14 +9,16 @@ import { BreezeButton } from '../../components/shared/BreezeButton'
 import { BreezeSelect } from '../../components/shared/BreezeSelect'
 import { Expense, useExpenses } from '../../services/hooks/ExpenseServices'
 import { useMutation } from 'react-query'
+import { useNavigate } from 'react-router-dom'
 
 export const AddExpense = () => {
 	const { user } = useAuth0()
+	const navigate = useNavigate()
 	const { postExpense } = useExpenses()
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const postMutation = useMutation((expense: Expense) => postExpense(categories.find((category) => category.id === expense.categoryId)!, expense))
-	const { budget } = useBudgetContext()
-	const categories = budget.categories.sort((a, b) => a.name.localeCompare(b.name))
+	const { categories, getBudgetForDate } = useBudgetContext()
+	const [isSubmittable, setIsSubmittable] = useState(false)
 	const [expense, setExpense] = useState<Expense>({
 		userId: user?.email ?? '',
 		categoryId: categories[0]?.id ?? -1,
@@ -26,7 +28,6 @@ export const AddExpense = () => {
 		month: new Date(Date.now()).getMonth(),
 		day: new Date(Date.now()).getDate(),
 	})
-	const [isSubmittable, setIsSubmittable] = useState(false)
 
 	const checkSubmittable = () => {
 		if (expense.name !== '' && expense.categoryId !== -1 && expense.amount && expense.year && expense.month && expense.day) {
@@ -131,9 +132,10 @@ export const AddExpense = () => {
 					type='date'
 					title='Expense Date'
 					placeholder='date'
+					defaultValue={new Date(Date.now()).toISOString().split('T')[0]}
 					style={{ width: '100%' }}
 					onChange={(e) => {
-						setExpense({ ...expense, year: new Date(e.target.value).getFullYear(), month: new Date(e.target.value).getMonth(), day: new Date(e.target.value).getDate() })
+						setExpense({ ...expense, year: new Date(e.target.value).getFullYear(), month: new Date(e.target.value + 1).getMonth(), day: new Date(e.target.value).getDate() })
 						checkSubmittable()
 					}}
 				/>
@@ -141,7 +143,12 @@ export const AddExpense = () => {
 			<BreezeButton
 				content='Add Expense'
 				disabled={!isSubmittable}
-				onClick={() => postMutation.mutate(expense)}
+				onClick={() => {
+					postMutation.mutate(expense)
+					getBudgetForDate(expense.year, expense.month)
+					// navigate back using react router
+					navigate(-1)
+				}}
 			/>
 		</BreezeBox>
 	)

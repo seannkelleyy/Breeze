@@ -16,7 +16,7 @@ export const useIncomes = () => {
 
 	const getIncome = async (income: Income): Promise<Income> => await getOne<Income>(`budgets/${income.budgetId}/incomes/${income.id}`)
 
-	const getIncomes = async (income: Income): Promise<Income[]> => await getMany<Income>(`budgets/${income.budgetId}/incomes`)
+	const getIncomes = async (budgetId: number): Promise<Income[]> => await getMany<Income>(`budgets/${budgetId}/incomes`)
 
 	const postIncome = async (income: Income): Promise<number> => await post<number, Income>(`budgets/${income.budgetId}/incomes`, income);
 

@@ -4,6 +4,7 @@ type BreezeInputProps = {
 	type: string
 	title: string
 	placeholder: string
+	defaultValue?: string
 	onBlur?: (e: React.FocusEvent<HTMLInputElement> | null) => void
 	onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
 	style?: React.CSSProperties
@@ -18,14 +19,14 @@ type BreezeInputProps = {
  * @param onChange: - Optional - The onChange function of the input.
  * @param style: - Optional - The style of the input.
  */
-export const BreezeInput = ({ type, title, placeholder, onBlur, onChange, style }: BreezeInputProps) => {
+export const BreezeInput = ({ type, title, placeholder, defaultValue, onBlur, onChange, style }: BreezeInputProps) => {
 	return (
 		<input
 			className='breeze-input'
 			type={type}
 			title={title}
 			placeholder={placeholder}
-			prefix='$'
+			defaultValue={defaultValue}
 			onChange={onChange}
 			onBlur={onBlur}
 			style={style}

@@ -2,32 +2,29 @@ import { BreezeButton } from '../../../components/shared/BreezeButton'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { CategoryItem } from './CategoryItem'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Category, useCategories } from '../../../services/hooks/CategoryServices'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import { useMutation } from 'react-query'
 
 type CategoryItemsBoxProps = {
-	categoryItems: Category[]
 	setExpenses: (amount: number) => void
 }
 
-export const CategoryItemsBox = ({ categoryItems, setExpenses }: CategoryItemsBoxProps) => {
+export const CategoryItemsBox = ({ setExpenses }: CategoryItemsBoxProps) => {
 	const { postCategory } = useCategories()
+	const { budget, categories, refetchCategories } = useBudgetContext()
 	const postMutation = useMutation(postCategory, {
-		onSuccess: (id, variables) => {
-			variables.id = id
-			setItems((prevItems) => [...prevItems, variables])
+		onSettled: () => {
+			refetchCategories()
 		},
 	})
 	const { user } = useAuth0()
-	const { budget } = useBudgetContext()
-	const [items, setItems] = useState<Category[]>(categoryItems ?? [])
 
 	useEffect(() => {
-		setExpenses(items.reduce((acc, item) => acc + 1 * item.allocation, 0))
-	}, [items, setExpenses])
+		setExpenses(categories.reduce((acc, category) => acc + 1 * category.allocation, 0))
+	}, [categories, setExpenses])
 
 	const addCategory = () => {
 		const newCategory: Category = {
@@ -38,20 +35,6 @@ export const CategoryItemsBox = ({ categoryItems, setExpenses }: CategoryItemsBo
 			currentSpend: 0,
 		}
 		postMutation.mutate(newCategory)
-	}
-
-	const onUpdate = (category: Category) => {
-		const newItems = items.map((item) => {
-			if (item.id === category.id) {
-				return category
-			}
-			return item
-		})
-		setItems(newItems)
-	}
-
-	const handleDelete = (deletedCategory: Category) => {
-		setItems(items.filter((category) => category.id !== deletedCategory.id))
 	}
 
 	return (
@@ -67,15 +50,13 @@ export const CategoryItemsBox = ({ categoryItems, setExpenses }: CategoryItemsBo
 				type='small-heading'
 				text='Categories'
 			/>
-			{items &&
-				items.map((category) => (
-					<CategoryItem
-						key={category.id}
-						categoryItem={category}
-						onUpdate={onUpdate}
-						onDelete={handleDelete}
-					/>
-				))}
+			{categories.map((category) => (
+				<CategoryItem
+					key={category.id}
+					categoryItem={category}
+					refetchCategories={refetchCategories}
+				/>
+			))}
 			<BreezeButton
 				content='Add Category'
 				onClick={addCategory}

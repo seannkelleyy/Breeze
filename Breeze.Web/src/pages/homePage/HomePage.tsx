@@ -25,9 +25,8 @@ export const HomePage = () => {
 			<BreezeBox
 				title='Overview'
 				style={{
-					height: '100vh',
-					overflowY: 'hidden',
 					textAlign: 'center',
+					paddingBottom: '3rem',
 				}}
 			>
 				<BreezeButton
@@ -77,9 +76,7 @@ export const HomePage = () => {
 				<Goals />
 				<AddButtons />
 			</BreezeBox>
-			<BreezeBox title='categories'>
-				<BudgetSection />
-			</BreezeBox>
+			<BudgetSection />
 		</BreezeBox>
 	)
 }

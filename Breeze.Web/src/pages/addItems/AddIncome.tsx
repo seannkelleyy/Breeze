@@ -8,13 +8,15 @@ import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { Income, useIncomes } from '../../services/hooks/IncomeServices'
 import { useMutation } from 'react-query'
+import { useNavigate } from 'react-router-dom'
 
 export const AddIncome = () => {
 	const { user } = useAuth0()
+	const navigate = useNavigate()
 	const { postIncome } = useIncomes()
 	const postMutation = useMutation((income: Income) => postIncome(income))
 	const { budget } = useBudgetContext()
-
+	const [isSubmittable, setIsSubmittable] = useState(false)
 	const [income, setIncome] = useState<Income>({
 		userId: user?.email ?? '',
 		budgetId: budget.id,
@@ -24,7 +26,6 @@ export const AddIncome = () => {
 		month: new Date(Date.now()).getMonth(),
 		day: new Date(Date.now()).getDate(),
 	})
-	const [isSubmittable, setIsSubmittable] = useState(false)
 
 	const checkSubmittable = () => {
 		if (income.name !== '' && income.amount && income.year && income.month && income.day) {
@@ -104,6 +105,7 @@ export const AddIncome = () => {
 					type='date'
 					title='Income Date'
 					placeholder='date'
+					defaultValue={new Date(Date.now()).toISOString().split('T')[0]}
 					style={{ width: '100%' }}
 					onChange={(e) => {
 						setIncome({ ...income, year: new Date(e.target.value).getFullYear(), month: new Date(e.target.value).getMonth(), day: new Date(e.target.value).getDate() })
@@ -114,7 +116,10 @@ export const AddIncome = () => {
 			<BreezeButton
 				content='Add Income'
 				disabled={!isSubmittable}
-				onClick={() => postMutation.mutate(income)}
+				onClick={() => {
+					postMutation.mutate(income)
+					navigate(-1)
+				}}
 			/>
 		</BreezeBox>
 	)

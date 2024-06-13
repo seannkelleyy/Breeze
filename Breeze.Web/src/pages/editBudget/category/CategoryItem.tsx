@@ -7,20 +7,28 @@ import { DeleteButton } from '../../../components/shared/DeleteButton'
 
 type CategoryItemProps = {
 	categoryItem: Category
-	onUpdate: (category: Category) => void
-	onDelete: (category: Category) => void
+	refetchCategories: () => void
 }
 
-export const CategoryItem = ({ categoryItem, onUpdate, onDelete }: CategoryItemProps) => {
+export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemProps) => {
 	const { patchCategory, deleteCategory } = useCategories()
-	const patchMutation = useMutation((category: Category) => patchCategory(category))
-	const deleteMutation = useMutation((category: Category) => deleteCategory(category))
+	const patchMutation = useMutation((category: Category) => patchCategory(category), {
+		onSettled: () => {
+			refetchCategories()
+		},
+		retryDelay: 3000,
+	})
+	const deleteMutation = useMutation((category: Category) => deleteCategory(category), {
+		onSettled: () => {
+			refetchCategories()
+		},
+		retryDelay: 3000,
+	})
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.allocation)
 	const [categoryName, setCategoryName] = useState<string>(categoryItem.name)
 
 	const UpdateCategory = () => {
 		const updatedCategory = { ...categoryItem, allocation: categoryAmount, name: categoryName }
-		onUpdate(updatedCategory)
 		patchMutation.mutate(updatedCategory)
 	}
 
@@ -35,9 +43,7 @@ export const CategoryItem = ({ categoryItem, onUpdate, onDelete }: CategoryItemP
 				type='string'
 				placeholder={categoryName}
 				onChange={(e) => setCategoryName(e.target.value)}
-				onBlur={() => {
-					UpdateCategory()
-				}}
+				onBlur={UpdateCategory}
 				style={{
 					textAlign: 'left',
 					width: '75%',
@@ -48,14 +54,11 @@ export const CategoryItem = ({ categoryItem, onUpdate, onDelete }: CategoryItemP
 				type='number'
 				placeholder={categoryAmount.toString()}
 				onChange={(e) => setCategoryAmount(e.target.value as unknown as number)}
-				onBlur={() => {
-					UpdateCategory()
-				}}
+				onBlur={UpdateCategory}
 			/>
 			<DeleteButton
 				onClick={() => {
 					deleteMutation.mutate(categoryItem)
-					onDelete(categoryItem)
 				}}
 			/>
 		</BreezeBox>

@@ -7,20 +7,28 @@ import { DeleteButton } from '../../../components/shared/DeleteButton'
 
 type IncomeItemProps = {
 	incomeItem: Income
-	onUpdate: (income: Income) => void
-	onDelete: (income: Income) => void
+	refetchIncomes: () => void
 }
 
-export const IncomeItem = ({ incomeItem, onUpdate, onDelete }: IncomeItemProps) => {
+export const IncomeItem = ({ incomeItem, refetchIncomes }: IncomeItemProps) => {
 	const { patchIncome, deleteIncome } = useIncomes()
-	const patchMutation = useMutation((income: Income) => patchIncome(income))
-	const deleteMutation = useMutation((income: Income) => deleteIncome(income))
+	const patchMutation = useMutation((income: Income) => patchIncome(income), {
+		onSettled: () => {
+			refetchIncomes()
+		},
+		retryDelay: 3000,
+	})
+	const deleteMutation = useMutation((income: Income) => deleteIncome(income), {
+		onSettled: () => {
+			refetchIncomes()
+		},
+		retryDelay: 3000,
+	})
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)
 	const [incomeName, setIncomeName] = useState<string>(incomeItem.name)
 
 	const UpdateIncome = () => {
 		const updatedIncome = { ...incomeItem, amount: incomeAmount, name: incomeName }
-		onUpdate(updatedIncome)
 		patchMutation.mutate(updatedIncome)
 	}
 
@@ -35,9 +43,7 @@ export const IncomeItem = ({ incomeItem, onUpdate, onDelete }: IncomeItemProps) 
 				type='string'
 				placeholder={incomeName}
 				onChange={(e) => setIncomeName(e.target.value)}
-				onBlur={() => {
-					UpdateIncome()
-				}}
+				onBlur={UpdateIncome}
 				style={{
 					textAlign: 'left',
 					width: '75%',
@@ -48,14 +54,11 @@ export const IncomeItem = ({ incomeItem, onUpdate, onDelete }: IncomeItemProps) 
 				type='number'
 				placeholder={incomeAmount.toString()}
 				onChange={(e) => setIncomeAmount(e.target.value as unknown as number)}
-				onBlur={() => {
-					UpdateIncome()
-				}}
+				onBlur={UpdateIncome}
 			/>
 			<DeleteButton
 				onClick={() => {
 					deleteMutation.mutate(incomeItem)
-					onDelete(incomeItem)
 				}}
 			/>
 		</BreezeBox>

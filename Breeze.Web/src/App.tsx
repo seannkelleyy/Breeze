@@ -8,14 +8,14 @@ const App = () => {
 	const queryClient = new QueryClient()
 
 	return (
-		<DateProvider>
-			<BudgetProvider>
-				<QueryClientProvider client={queryClient}>
+		<QueryClientProvider client={queryClient}>
+			<DateProvider>
+				<BudgetProvider>
 					<ReactQueryDevtools />
 					<AppRoutes />
-				</QueryClientProvider>
-			</BudgetProvider>
-		</DateProvider>
+				</BudgetProvider>
+			</DateProvider>
+		</QueryClientProvider>
 	)
 }
 

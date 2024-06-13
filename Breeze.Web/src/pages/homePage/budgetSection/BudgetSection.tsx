@@ -15,11 +15,10 @@ import { useDateContext } from '../../../services/providers/DateProvider'
 export const BudgetSection = () => {
 	const { date, getMonthAsString } = useDateContext()
 	const [budgetDate, setBudgetDate] = useState<Date>(date)
-	const { budget, totalSpent, getBudgetForDate } = useBudgetContext()
-	const categories = budget.categories?.sort((a, b) => b.currentSpend - a.currentSpend) ?? []
+	const { budget, totalSpent, categories, getBudgetForDate } = useBudgetContext()
 
 	useEffect(() => {
-		getBudgetForDate(budgetDate)
+		getBudgetForDate(budgetDate.getFullYear(), budgetDate.getMonth())
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [budgetDate])
 
@@ -68,7 +67,9 @@ export const BudgetSection = () => {
 			<Link to={`/budget/${budgetDate.getFullYear()}/${budgetDate.getMonth()}`}>
 				<BreezeButton
 					content='Edit Budget'
-					onClick={() => console.log('edit budget')}
+					onClick={() => {
+						// Do nothing
+					}}
 				/>
 			</Link>
 			{budget.id === undefined ? (

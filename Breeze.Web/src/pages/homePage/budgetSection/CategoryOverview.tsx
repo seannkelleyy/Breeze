@@ -1,5 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BreezeCard } from '../../../components/shared/BreezeCard'
 import { BreezeButton } from '../../../components/shared/BreezeButton'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
@@ -8,7 +8,7 @@ import { BreezeProgressBar } from '../../../components/shared/BreezeProgressBar'
 import { Category } from '../../../services/hooks/CategoryServices'
 import { useExpenses } from '../../../services/hooks/ExpenseServices'
 import { useQuery } from 'react-query'
-import { useDateContext } from '../../../services/providers/DateProvider'
+import { ExpenseItem } from './ExpenseItem'
 
 type categoryItemProps = {
 	category: Category
@@ -19,10 +19,16 @@ type categoryItemProps = {
  * @param props.category: The category to give an overview of.
  */
 export const CategoryOverview = ({ category }: categoryItemProps) => {
-	const { getMonthAsString } = useDateContext()
 	const { getExpenses } = useExpenses()
-	const { data: expenses, status } = useQuery(['expenses', category], () => getExpenses(category))
+	const { data: expenses, status, refetch } = useQuery(['expenses', category], () => getExpenses(category))
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const [seeExpenses, setSeeExpenses] = useState<boolean>(false)
+	const categoryPercentage = (category.currentSpend / category.allocation) * 100
+
+	useEffect(() => {
+		refetch()
+	}, [refetch])
+
 	// TODO: Replace loading with skeleton loader
 	return (
 		<BreezeCard
@@ -46,7 +52,7 @@ export const CategoryOverview = ({ category }: categoryItemProps) => {
 			</BreezeBox>
 			<BreezeProgressBar
 				title='Category Progress Bar'
-				percentage={(category.currentSpend / category.allocation) * 100}
+				percentage={categoryPercentage < 100 ? categoryPercentage : 100}
 			/>
 			<BreezeText
 				text={`Remaining: $${category.allocation - category.currentSpend}`}
@@ -62,29 +68,12 @@ export const CategoryOverview = ({ category }: categoryItemProps) => {
 					/>
 					{seeExpenses &&
 						(status === 'success' ? (
+							expenses.length > 0 &&
 							expenses.map((expense, index) => (
-								<BreezeBox
-									title='Expenses'
+								<ExpenseItem
 									key={index}
-									style={{
-										borderBottom: '1px solid var(--border)',
-										width: '80%',
-										padding: '0.5rem',
-									}}
-								>
-									<BreezeText
-										text={`Name: ${expense.name}`}
-										type='medium'
-									/>
-									<BreezeText
-										text={`Amount: $${expense.amount}`}
-										type='medium'
-									/>
-									<BreezeText
-										text={`Date: ${getMonthAsString(expense.month)} ${expense.day} ${expense.year}`}
-										type='medium'
-									/>
-								</BreezeBox>
+									expense={expense}
+								/>
 							))
 						) : status === 'loading' ? (
 							<BreezeText

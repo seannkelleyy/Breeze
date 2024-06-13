@@ -1,14 +1,15 @@
 import { useParams } from 'react-router-dom'
-import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { IncomeItemsBox } from './income/IncomeItemsBox'
 import { CategoryItemsBox } from './category/CategoryItemBox'
 import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { BreezeCard } from '../../components/shared/BreezeCard'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { BackButton } from '../../components/shared/BackButton'
 import './editBudget.css'
 import { useDateContext } from '../../services/providers/DateProvider'
+import { useQuery } from 'react-query'
+import { useBudgets } from '@/services/hooks/BudgetServices'
 
 /**
  * This is the page that allows a user to add or edit a budget.
@@ -16,18 +17,16 @@ import { useDateContext } from '../../services/providers/DateProvider'
 export const EditBudgetPage = () => {
 	const { year, month } = useParams<{ year: string; month: string }>()
 	const { getMonthAsString } = useDateContext()
-	const { budget, getBudgetForDate } = useBudgetContext()
+	const { getBudget } = useBudgets()
+	const { data, status } = useQuery('budget', () => getBudget(parseInt(year as string), parseInt(month as string)), {
+		refetchInterval: 30 * 1000,
+		refetchOnWindowFocus: true,
+		refetchOnMount: 'always',
+		refetchOnReconnect: 'always',
+	})
 	const [monthlyIncome, setMonthlyIncome] = useState(0)
 	const [monthlyExpenses, setMonthlyExpenses] = useState(0)
 
-	useEffect(() => {
-		const date = new Date(parseInt(year as string), parseInt(month as string))
-		getBudgetForDate(date)
-		console.log(budget)
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [year, month])
-
-	// TODO: Make it so the top card is fixed and the bottom box scrolls
 	return (
 		<BreezeBox title='Edit Budget'>
 			<BackButton />
@@ -35,7 +34,13 @@ export const EditBudgetPage = () => {
 				type='large-heading'
 				text='Edit Budget'
 			/>
-			<BreezeCard title='Budget Headlines'>
+			<BreezeCard
+				title='Budget Headlines'
+				style={{
+					position: 'sticky',
+					top: 0,
+				}}
+			>
 				<BreezeText
 					type='large'
 					text={`Date: ${getMonthAsString(parseInt(month as string))} ${year}`}
@@ -64,14 +69,22 @@ export const EditBudgetPage = () => {
 					width: '85%',
 				}}
 			>
-				<IncomeItemsBox
-					incomeItems={budget.incomes}
-					setIncome={setMonthlyIncome}
-				/>
-				<CategoryItemsBox
-					categoryItems={budget.categories}
-					setExpenses={setMonthlyExpenses}
-				/>
+				{data ? (
+					<>
+						<IncomeItemsBox setIncome={setMonthlyIncome} />
+						<CategoryItemsBox setExpenses={setMonthlyExpenses} />
+					</>
+				) : status === 'loading' ? (
+					<BreezeText
+						type='large'
+						text='Loading...'
+					/>
+				) : (
+					<BreezeText
+						type='large'
+						text='Error loading budget'
+					/>
+				)}
 			</BreezeBox>
 		</BreezeBox>
 	)
