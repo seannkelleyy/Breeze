@@ -15,10 +15,13 @@ export const AddExpense = () => {
 	const { user } = useAuth0()
 	const navigate = useNavigate()
 	const { postExpense } = useExpenses()
-	const { categories, refetchCategories } = useBudgetContext()
+	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const postMutation = useMutation((expense: Expense) => postExpense(categories.find((category) => category.id === expense.categoryId)!, expense), {
-		onSettled: refetchCategories,
+		onSettled: () => {
+			refetchCategories()
+			refetchBudget()
+		},
 	})
 	const [isSubmittable, setIsSubmittable] = useState(false)
 	const [expense, setExpense] = useState<Expense>({

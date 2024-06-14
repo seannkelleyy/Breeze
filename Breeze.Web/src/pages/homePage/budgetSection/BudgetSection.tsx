@@ -19,6 +19,7 @@ export const BudgetSection = () => {
 
 	useEffect(() => {
 		getBudgetForDate(budgetDate.getFullYear(), budgetDate.getMonth())
+		refetchCategories
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [budgetDate])
 
@@ -66,12 +67,7 @@ export const BudgetSection = () => {
 				/>
 			</BreezeBox>
 			<Link to={`/budget/${budgetDate.getFullYear()}/${budgetDate.getMonth()}`}>
-				<BreezeButton
-					content='Edit Budget'
-					onClick={() => {
-						// Do nothing
-					}}
-				/>
+				<BreezeButton content='Edit Budget' />
 			</Link>
 			{budget.id === undefined ? (
 				<BreezeText

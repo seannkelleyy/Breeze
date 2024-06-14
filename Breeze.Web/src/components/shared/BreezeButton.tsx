@@ -3,7 +3,7 @@ import './shared.css'
 
 type BreezeButtonProps = {
 	content: string | ReactNode
-	onClick: () => void
+	onClick?: () => void
 	size?: 'small' | 'medium' | 'large'
 	style?: React.CSSProperties
 	disabled?: boolean

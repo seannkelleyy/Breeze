@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect, useMemo } from 'react'
 import { Budget, useBudgets } from '../hooks/BudgetServices'
 import { Category, useCategories } from '../hooks/CategoryServices'
 import { useDateContext } from './DateProvider'
@@ -30,37 +30,30 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 	const { getIncomes } = useIncomes()
 	const [totalSpent, setTotalSpent] = useState(0)
 	const [budgetDate, setBudgetDate] = useState<Date>(date)
-	const { data: fetchedBudget, refetch: refetchBudget } = useQuery(['budget', budgetDate], () => getBudget(budgetDate.getFullYear(), budgetDate.getMonth()), {
-		refetchInterval: 30 * 1000,
+	const { data: budget = {} as Budget, refetch: refetchBudget } = useQuery(['budget', budgetDate], () => getBudget(budgetDate.getFullYear(), budgetDate.getMonth()), {
+		refetchInterval: 180 * 1000,
 		refetchOnMount: 'always',
 		enabled: true,
 	})
-	const [budget, setBudget] = useState<Budget>(fetchedBudget ?? ({} as Budget))
+	const { data: incomes = [], refetch: refetchIncomes } = useQuery(['incomes', budget?.id], () => getIncomes(budget?.id ?? 0), {
+		refetchInterval: 180 * 1000,
+		refetchOnMount: 'always',
+		enabled: !!budget,
+	})
+	const { data: categories = [], refetch: refetchCategories } = useQuery(['categories', budget?.id], () => getCategories(budget?.id ?? 0), {
+		refetchInterval: 180 * 1000,
+		refetchOnMount: 'always',
+		enabled: !!budget,
+	})
+
+	const sortedCategories = useMemo(() => {
+		return [...categories].sort((a, b) => b.currentSpend - a.currentSpend)
+	}, [categories])
 
 	useEffect(() => {
-		if (fetchedBudget) {
-			setBudget(fetchedBudget)
-		}
-	}, [fetchedBudget])
-	const { data: incomes = [], refetch: refetchIncomes } = useQuery(['incomes', fetchedBudget], () => getIncomes(fetchedBudget?.id ?? 0), {
-		refetchInterval: 30 * 1000,
-		refetchOnMount: 'always',
-		enabled: !!fetchedBudget,
-	})
-	const { data: categories = [], refetch: refetchCategories } = useQuery(['categories', fetchedBudget], () => getCategories(fetchedBudget?.id ?? 0), {
-		onSuccess: () => {
-			categories.sort((a, b) => b.currentSpend - a.currentSpend)
-			calculateTotalSpent()
-		},
-		refetchInterval: 30 * 1000,
-		refetchOnMount: 'always',
-		enabled: !!fetchedBudget,
-	})
-
-	const calculateTotalSpent = () => {
-		const total = categories.reduce((sum, category) => sum + category.currentSpend, 0)
-		setTotalSpent(total)
-	}
+		setTotalSpent(categories.reduce((sum, category) => sum + category.currentSpend, 0))
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [sortedCategories])
 
 	const getBudgetForDate = async (year: number, month: number) => {
 		try {

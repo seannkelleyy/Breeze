@@ -14,22 +14,37 @@ type ExpenseItemProps = {
 export const ExpenseItem = ({ expense }: ExpenseItemProps) => {
 	const { getMonthAsString } = useDateContext()
 	const { deleteExpense } = useExpenses()
-	const { budget, categories, getBudgetForDate } = useBudgetContext()
+	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const deleteMutation = useMutation((expense: Expense) => deleteExpense(categories.find((category) => category.id === expense.categoryId)!, expense), {
-		onSuccess: () => getBudgetForDate(budget.year, budget.month),
+		onSettled: () => {
+			refetchBudget()
+			refetchCategories()
+		},
 	})
 	return (
 		<BreezeCard
 			title='Category Overview'
 			style={{
 				width: '80%',
+				gap: '0',
+				position: 'relative',
 			}}
 		>
+			<DeleteButton
+				style={{
+					position: 'absolute',
+					top: '8%',
+					right: '5%',
+					padding: '0',
+					margin: '0',
+				}}
+				onClick={() => deleteMutation.mutate(expense)}
+			/>
 			<BreezeBox
 				title='Expenses'
 				style={{
-					padding: '0.5rem',
+					gap: '.25em',
 				}}
 			>
 				<BreezeText
@@ -44,7 +59,6 @@ export const ExpenseItem = ({ expense }: ExpenseItemProps) => {
 					text={`Date: ${getMonthAsString(expense.month)} ${expense.day} ${expense.year}`}
 					type='medium'
 				/>
-				<DeleteButton onClick={() => deleteMutation.mutate(expense)} />
 			</BreezeBox>
 		</BreezeCard>
 	)

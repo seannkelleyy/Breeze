@@ -19,7 +19,7 @@ export const EditBudgetPage = () => {
 	const { getMonthAsString } = useDateContext()
 	const { getBudget } = useBudgets()
 	const { data, status } = useQuery('budget', () => getBudget(parseInt(year as string), parseInt(month as string)), {
-		refetchInterval: 30 * 1000,
+		refetchInterval: 60 * 1000,
 		refetchOnWindowFocus: true,
 		refetchOnMount: 'always',
 		refetchOnReconnect: 'always',
@@ -41,6 +41,7 @@ export const EditBudgetPage = () => {
 					top: 0,
 					gap: '.15em',
 					padding: '.6em',
+					minWidth: '60%',
 				}}
 			>
 				<BreezeText
