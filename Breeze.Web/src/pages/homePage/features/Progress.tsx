@@ -9,8 +9,8 @@ import { useDateContext } from '../../../services/providers/DateProvider'
 export const Progress = () => {
 	const { getNumberOfDaysInMonth } = useDateContext()
 	const { budget, totalSpent } = useBudgetContext()
-	const totalBudget = budget.monthlyIncome ?? 0
 	const numberOfDays = getNumberOfDaysInMonth(new Date().getMonth(), new Date().getFullYear())
+	const totalBudget = budget.monthlyIncome ?? 0
 	const dailyBudget = totalBudget / numberOfDays
 
 	const calculateProgress = (todaysDate: number, dailyBudget: number, totalSpent: number, totalBudget: number) => {

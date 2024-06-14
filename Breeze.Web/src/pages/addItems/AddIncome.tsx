@@ -6,18 +6,14 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
-import { Income, useIncomes } from '../../services/hooks/IncomeServices'
-import { useMutation } from 'react-query'
 import { useNavigate } from 'react-router-dom'
+import { Income } from '@/services/hooks/httpServices/IncomeServices'
+import { usePostIncome } from '@/services/hooks/income/usePostIncome'
 
 export const AddIncome = () => {
 	const { user } = useAuth0()
 	const navigate = useNavigate()
-	const { postIncome } = useIncomes()
 	const { budget, refetchIncomes } = useBudgetContext()
-	const postMutation = useMutation((income: Income) => postIncome(income), {
-		onSettled: refetchIncomes,
-	})
 	const [isSubmittable, setIsSubmittable] = useState(false)
 	const [income, setIncome] = useState<Income>({
 		userId: user?.email ?? '',
@@ -27,6 +23,13 @@ export const AddIncome = () => {
 		year: new Date(Date.now()).getFullYear(),
 		month: new Date(Date.now()).getMonth(),
 		day: new Date(Date.now()).getDate(),
+	})
+
+	const postMutation = usePostIncome({
+		income: income,
+		onSettled: () => {
+			refetchIncomes()
+		},
 	})
 
 	const checkSubmittable = () => {
@@ -119,7 +122,7 @@ export const AddIncome = () => {
 				content='Add Income'
 				disabled={!isSubmittable}
 				onClick={() => {
-					postMutation.mutate(income)
+					postMutation.mutate()
 					navigate(-1)
 				}}
 			/>

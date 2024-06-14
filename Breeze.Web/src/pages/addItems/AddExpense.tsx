@@ -7,22 +7,16 @@ import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { BreezeSelect } from '../../components/shared/BreezeSelect'
-import { Expense, useExpenses } from '../../services/hooks/ExpenseServices'
-import { useMutation } from 'react-query'
+import { Expense } from '../../services/hooks/httpServices/ExpenseServices'
 import { useNavigate } from 'react-router-dom'
+import { useGlobalToast } from '@/services/providers/GlobalToastProvider'
+import { usePostExpense } from '@/services/hooks/expense/usePostExpense'
 
 export const AddExpense = () => {
+	const toaster = useGlobalToast()
 	const { user } = useAuth0()
 	const navigate = useNavigate()
-	const { postExpense } = useExpenses()
 	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	const postMutation = useMutation((expense: Expense) => postExpense(categories.find((category) => category.id === expense.categoryId)!, expense), {
-		onSettled: () => {
-			refetchCategories()
-			refetchBudget()
-		},
-	})
 	const [isSubmittable, setIsSubmittable] = useState(false)
 	const [expense, setExpense] = useState<Expense>({
 		userId: user?.email ?? '',
@@ -32,6 +26,17 @@ export const AddExpense = () => {
 		year: new Date(Date.now()).getFullYear(),
 		month: new Date(Date.now()).getMonth(),
 		day: new Date(Date.now()).getDate(),
+	})
+
+	const postMutation = usePostExpense({
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		category: categories.find((category) => category.id === expense.categoryId)!,
+		expense: expense,
+		onSettled: () => {
+			refetchCategories()
+			refetchBudget()
+			toaster.showToast('Expense Added', 'green')
+		},
 	})
 
 	const checkSubmittable = () => {
@@ -145,12 +150,12 @@ export const AddExpense = () => {
 					}}
 				/>
 			</BreezeBox>
+
 			<BreezeButton
 				content='Add Expense'
 				disabled={!isSubmittable}
 				onClick={() => {
-					postMutation.mutate(expense)
-					// navigate back using react router
+					postMutation.mutate()
 					navigate(-1)
 				}}
 			/>

@@ -30,7 +30,6 @@ export const BudgetSection = () => {
 		} else {
 			newDate.setMonth(newDate.getMonth() - 1)
 		}
-		refetchCategories()
 		return newDate
 	}
 

@@ -6,10 +6,8 @@ import { BreezeText } from '../../components/shared/BreezeText'
 import { BreezeCard } from '../../components/shared/BreezeCard'
 import { useState } from 'react'
 import { BackButton } from '../../components/shared/BackButton'
-import './editBudget.css'
 import { useDateContext } from '../../services/providers/DateProvider'
-import { useQuery } from 'react-query'
-import { useBudgets } from '@/services/hooks/BudgetServices'
+import { useFetchBudget } from '@/services/hooks/budget/useFetchBudget'
 
 /**
  * This is the page that allows a user to add or edit a budget.
@@ -17,12 +15,10 @@ import { useBudgets } from '@/services/hooks/BudgetServices'
 export const EditBudgetPage = () => {
 	const { year, month } = useParams<{ year: string; month: string }>()
 	const { getMonthAsString } = useDateContext()
-	const { getBudget } = useBudgets()
-	const { data, status } = useQuery('budget', () => getBudget(parseInt(year as string), parseInt(month as string)), {
-		refetchInterval: 60 * 1000,
-		refetchOnWindowFocus: true,
-		refetchOnMount: 'always',
-		refetchOnReconnect: 'always',
+	// TODO use budget context
+	const { data, status } = useFetchBudget({
+		year: parseInt(year as string),
+		month: parseInt(month as string),
 	})
 	const [monthlyIncome, setMonthlyIncome] = useState(0)
 	const [monthlyExpenses, setMonthlyExpenses] = useState(0)

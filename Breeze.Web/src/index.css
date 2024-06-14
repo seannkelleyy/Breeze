@@ -25,6 +25,9 @@
 	--neutral200: #c4c4c4;
 	--neutral300: #9a9a9a;
 	--neutral500: #5a5a5a;
+	--success: #499b66;
+	--error: #b36d6d;
+	--warning: #d3af67;
 	--border: rgb(91, 85, 85, 0.5);
 }
 
@@ -37,4 +40,14 @@
 	src:
 		url('/fonts/inter/Inter-VariableFont_slnt,wght.ttf') format('woff2'),
 		url('/fonts/Inter-Regular.woff') format('woff');
+}
+
+.amount-left-positive {
+	background-color: var(--green500);
+	border-radius: 0.25em;
+}
+
+.amount-left-negative {
+	background-color: var(--red500);
+	border-radius: 0.25em;
 }

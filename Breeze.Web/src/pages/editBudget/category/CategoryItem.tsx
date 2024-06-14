@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { BreezeInput } from '../../../components/shared/BreezeInput'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
-import { useMutation } from 'react-query'
-import { Category, useCategories } from '../../../services/hooks/CategoryServices'
 import { DeleteButton } from '../../../components/shared/DeleteButton'
+import { Category } from '@/services/hooks/httpServices/CategoryServices'
+import { useDeleteCategory } from '@/services/hooks/category/useDeleteCategory'
+import { usePatchCategory } from '@/services/hooks/category/usePatchCategory'
 
 type CategoryItemProps = {
 	categoryItem: Category
@@ -11,26 +12,20 @@ type CategoryItemProps = {
 }
 
 export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemProps) => {
-	const { patchCategory, deleteCategory } = useCategories()
-	const patchMutation = useMutation((category: Category) => patchCategory(category), {
-		onSettled: () => {
-			refetchCategories()
-		},
-		retryDelay: 3000,
-	})
-	const deleteMutation = useMutation((category: Category) => deleteCategory(category), {
-		onSettled: () => {
-			refetchCategories()
-		},
-		retryDelay: 3000,
-	})
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.allocation)
 	const [categoryName, setCategoryName] = useState<string>(categoryItem.name)
-
-	const UpdateCategory = () => {
-		const updatedCategory = { ...categoryItem, allocation: categoryAmount, name: categoryName }
-		patchMutation.mutate(updatedCategory)
-	}
+	const patchMutation = usePatchCategory({
+		category: { ...categoryItem, allocation: categoryAmount, name: categoryName },
+		onSettled: () => {
+			refetchCategories()
+		},
+	})
+	const deleteMutation = useDeleteCategory({
+		category: categoryItem,
+		onSettled: () => {
+			refetchCategories()
+		},
+	})
 
 	return (
 		<BreezeBox
@@ -43,7 +38,7 @@ export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemPr
 				type='string'
 				placeholder={categoryName}
 				onChange={(e) => setCategoryName(e.target.value)}
-				onBlur={UpdateCategory}
+				onBlur={() => patchMutation.mutate()}
 				style={{
 					textAlign: 'left',
 					width: '75%',
@@ -54,11 +49,11 @@ export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemPr
 				type='number'
 				placeholder={categoryAmount.toString()}
 				onChange={(e) => setCategoryAmount(e.target.value as unknown as number)}
-				onBlur={UpdateCategory}
+				onBlur={() => patchMutation.mutate()}
 			/>
 			<DeleteButton
 				onClick={() => {
-					deleteMutation.mutate(categoryItem)
+					deleteMutation.mutate()
 				}}
 			/>
 		</BreezeBox>

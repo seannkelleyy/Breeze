@@ -1,9 +1,11 @@
 import React, { useState, useContext, useEffect, useMemo } from 'react'
-import { Budget, useBudgets } from '../hooks/BudgetServices'
-import { Category, useCategories } from '../hooks/CategoryServices'
 import { useDateContext } from './DateProvider'
-import { useQuery } from 'react-query'
-import { Income, useIncomes } from '../hooks/IncomeServices'
+import { useFetchBudget } from '../hooks/budget/useFetchBudget'
+import { useFetchIncomes } from '../hooks/income/useFetchIncomes'
+import { Budget } from '../hooks/httpServices/BudgetServices'
+import { Category } from '../hooks/httpServices/CategoryServices'
+import { Income } from '../hooks/httpServices/IncomeServices'
+import { useFetchCategories } from '../hooks/category/useFetchCategories'
 //import { useAuth0 } from '@auth0/auth0-react'
 
 type BudgetProviderProps = { children: React.ReactNode }
@@ -25,26 +27,11 @@ const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContext
 export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 	//const { user } = useAuth0()
 	const { date } = useDateContext()
-	const { getBudget } = useBudgets()
-	const { getCategories } = useCategories()
-	const { getIncomes } = useIncomes()
 	const [totalSpent, setTotalSpent] = useState(0)
 	const [budgetDate, setBudgetDate] = useState<Date>(date)
-	const { data: budget = {} as Budget, refetch: refetchBudget } = useQuery(['budget', budgetDate], () => getBudget(budgetDate.getFullYear(), budgetDate.getMonth()), {
-		refetchInterval: 180 * 1000,
-		refetchOnMount: 'always',
-		enabled: true,
-	})
-	const { data: incomes = [], refetch: refetchIncomes } = useQuery(['incomes', budget?.id], () => getIncomes(budget?.id ?? 0), {
-		refetchInterval: 180 * 1000,
-		refetchOnMount: 'always',
-		enabled: !!budget,
-	})
-	const { data: categories = [], refetch: refetchCategories } = useQuery(['categories', budget?.id], () => getCategories(budget?.id ?? 0), {
-		refetchInterval: 180 * 1000,
-		refetchOnMount: 'always',
-		enabled: !!budget,
-	})
+	const { data: budget = {} as Budget, refetch: refetchBudget } = useFetchBudget({ year: budgetDate.getFullYear(), month: budgetDate.getMonth() })
+	const { data: incomes = [], refetch: refetchIncomes } = useFetchIncomes({ budgetId: budget?.id ?? 0 })
+	const { data: categories = [], refetch: refetchCategories } = useFetchCategories({ budgetId: budget?.id ?? 0 })
 
 	const sortedCategories = useMemo(() => {
 		return [...categories].sort((a, b) => b.currentSpend - a.currentSpend)

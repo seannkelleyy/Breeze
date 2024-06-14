@@ -1,4 +1,4 @@
-import useHttp from './useHttp'
+import useHttp from "./useHttp"
 
 export type Category = {
 	id?: number
@@ -12,10 +12,12 @@ export type Category = {
 export const useCategories = () => {
 	const { getOne, getMany, post, patch, deleteOne } = useHttp()
 
+	// used
 	const getCategory = async (category: Category): Promise<Category> => await getOne<Category>(`budgets/${category.budgetId}/categories/${category.id}`)
 
 	const getCategories = async (budgetId: number): Promise<Category[]> => await getMany<Category>(`budgets/${budgetId}/categories`)
 
+	// used
 	const postCategory = async (category: Category): Promise<number> => post<number, Category>(`budgets/${category.budgetId}/categories`, category)
 
 	const patchCategory = async (category: Category): Promise<number> => patch<number, Category>(`budgets/${category.budgetId}/categories`, category)

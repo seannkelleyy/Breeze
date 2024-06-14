@@ -1,5 +1,5 @@
+import { useEnvironmentVariables } from '@/config/environment/useEnvironmentVariables'
 import axios, { AxiosError } from 'axios'
-import { useEnvironmentVariables } from '../../config/environment/useEnvironmentVariables'
  
 const handleError = (error: AxiosError) => {
     if (error instanceof AxiosError) {

@@ -2,24 +2,27 @@ import { BreezeBox } from '@/components/shared/BreezeBox'
 import { BreezeCard } from '@/components/shared/BreezeCard'
 import { BreezeText } from '@/components/shared/BreezeText'
 import { DeleteButton } from '@/components/shared/DeleteButton'
-import { Expense, useExpenses } from '@/services/hooks/ExpenseServices'
+import { useDeleteExpense } from '@/services/hooks/expense/useDeleteExpense'
+import { Expense } from '@/services/hooks/httpServices/ExpenseServices'
 import { useBudgetContext } from '@/services/providers/BudgetProvider'
 import { useDateContext } from '@/services/providers/DateProvider'
-import { useMutation } from 'react-query'
 
 type ExpenseItemProps = {
 	expense: Expense
+	refetchExpenses: () => void
 }
 
-export const ExpenseItem = ({ expense }: ExpenseItemProps) => {
+export const ExpenseItem = ({ expense, refetchExpenses }: ExpenseItemProps) => {
 	const { getMonthAsString } = useDateContext()
-	const { deleteExpense } = useExpenses()
 	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	const deleteMutation = useMutation((expense: Expense) => deleteExpense(categories.find((category) => category.id === expense.categoryId)!, expense), {
+	const deleteMutation = useDeleteExpense({
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		category: categories.find((category) => category.id === expense.categoryId)!,
+		expense,
 		onSettled: () => {
 			refetchBudget()
 			refetchCategories()
+			refetchExpenses()
 		},
 	})
 	return (
@@ -39,7 +42,7 @@ export const ExpenseItem = ({ expense }: ExpenseItemProps) => {
 					padding: '0',
 					margin: '0',
 				}}
-				onClick={() => deleteMutation.mutate(expense)}
+				onClick={() => deleteMutation.mutate()}
 			/>
 			<BreezeBox
 				title='Expenses'

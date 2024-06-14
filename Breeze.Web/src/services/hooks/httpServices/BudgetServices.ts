@@ -1,4 +1,4 @@
-import useHttp from './useHttp'
+import useHttp from "./useHttp"
 
 export type Budget = {
 	id: number
@@ -12,6 +12,7 @@ export type Budget = {
 export const useBudgets = () => {
 	const { getOne, post, patch, deleteOne } = useHttp()
 
+	// used
 	const getBudget = async (year: number, month: number): Promise<Budget> => await getOne<Budget>(`budgets/${year}-${month}`)
 
 	const postBudget = async (budget: Budget): Promise<number> => post<number, Budget>('budgets', budget)

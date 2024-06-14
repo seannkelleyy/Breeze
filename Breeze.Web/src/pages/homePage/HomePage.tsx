@@ -17,8 +17,8 @@ import { useDateContext } from '../../services/providers/DateProvider'
  */
 export const HomePage = () => {
 	const { user } = useAuth0()
-	const [showModal, setShowModal] = useState(false)
 	const { date, getMonthAsString } = useDateContext()
+	const [showModal, setShowModal] = useState(false)
 
 	return (
 		<BreezeBox title='Home Page'>

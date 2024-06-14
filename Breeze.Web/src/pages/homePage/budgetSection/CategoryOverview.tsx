@@ -5,10 +5,9 @@ import { BreezeButton } from '../../../components/shared/BreezeButton'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { BreezeProgressBar } from '../../../components/shared/BreezeProgressBar'
-import { Category } from '../../../services/hooks/CategoryServices'
-import { useExpenses } from '../../../services/hooks/ExpenseServices'
-import { useQuery } from 'react-query'
 import { ExpenseItem } from './ExpenseItem'
+import { Category } from '@/services/hooks/httpServices/CategoryServices'
+import { useFetchExpenses } from '@/services/hooks/expense/useGetExpenses'
 
 type categoryItemProps = {
 	category: Category
@@ -19,15 +18,14 @@ type categoryItemProps = {
  * @param props.category: The category to give an overview of.
  */
 export const CategoryOverview = ({ category }: categoryItemProps) => {
-	const { getExpenses } = useExpenses()
-	const { data: expenses, status, refetch } = useQuery(['expenses', category], () => getExpenses(category))
+	const { data: expenses, status, refetch } = useFetchExpenses({ category })
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const [seeExpenses, setSeeExpenses] = useState<boolean>(false)
 	const categoryPercentage = (category.currentSpend / category.allocation) * 100
 
 	useEffect(() => {
 		refetch()
-	}, [refetch])
+	}, [refetch, expenses])
 
 	// TODO: Replace loading with skeleton loader
 	return (
@@ -73,6 +71,7 @@ export const CategoryOverview = ({ category }: categoryItemProps) => {
 								<ExpenseItem
 									key={index}
 									expense={expense}
+									refetchExpenses={refetch}
 								/>
 							))
 						) : status === 'loading' ? (
