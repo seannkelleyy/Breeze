@@ -29,7 +29,8 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 	const { getCategories } = useCategories()
 	const { getIncomes } = useIncomes()
 	const [totalSpent, setTotalSpent] = useState(0)
-	const { data: fetchedBudget, refetch: refetchBudget } = useQuery('budget', () => getBudget(date.getFullYear(), date.getMonth()), {
+	const [budgetDate, setBudgetDate] = useState<Date>(date)
+	const { data: fetchedBudget, refetch: refetchBudget } = useQuery(['budget', budgetDate], () => getBudget(budgetDate.getFullYear(), budgetDate.getMonth()), {
 		refetchInterval: 30 * 1000,
 		refetchOnMount: 'always',
 		enabled: true,
@@ -41,12 +42,12 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 			setBudget(fetchedBudget)
 		}
 	}, [fetchedBudget])
-	const { data: incomes = [], refetch: refetchIncomes } = useQuery('incomes', () => getIncomes(fetchedBudget?.id ?? 0), {
+	const { data: incomes = [], refetch: refetchIncomes } = useQuery(['incomes', fetchedBudget], () => getIncomes(fetchedBudget?.id ?? 0), {
 		refetchInterval: 30 * 1000,
 		refetchOnMount: 'always',
 		enabled: !!fetchedBudget,
 	})
-	const { data: categories = [], refetch: refetchCategories } = useQuery('categories', () => getCategories(fetchedBudget?.id ?? 0), {
+	const { data: categories = [], refetch: refetchCategories } = useQuery(['categories', fetchedBudget], () => getCategories(fetchedBudget?.id ?? 0), {
 		onSuccess: () => {
 			categories.sort((a, b) => b.currentSpend - a.currentSpend)
 			calculateTotalSpent()
@@ -63,8 +64,10 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 
 	const getBudgetForDate = async (year: number, month: number) => {
 		try {
-			const response = await getBudget(year, month)
-			if (response) setBudget(response)
+			setBudgetDate(new Date(year, month))
+			refetchBudget()
+			refetchIncomes()
+			refetchCategories()
 		} catch (error: Error | unknown) {
 			console.error('An error occurred while fetching the budget:', error)
 		}

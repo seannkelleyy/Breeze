@@ -39,6 +39,8 @@ export const EditBudgetPage = () => {
 				style={{
 					position: 'sticky',
 					top: 0,
+					gap: '.15em',
+					padding: '.6em',
 				}}
 			>
 				<BreezeText
@@ -59,7 +61,7 @@ export const EditBudgetPage = () => {
 						style={{
 							padding: '.25em',
 						}}
-						text={`Amount left to allocate: $${monthlyExpenses ? monthlyIncome - monthlyExpenses : 0}`}
+						text={`Remaining: $${monthlyExpenses ? monthlyIncome - monthlyExpenses : 0}`}
 					/>
 				</section>
 			</BreezeCard>

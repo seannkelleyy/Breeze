@@ -15,7 +15,7 @@ import { useDateContext } from '../../../services/providers/DateProvider'
 export const BudgetSection = () => {
 	const { date, getMonthAsString } = useDateContext()
 	const [budgetDate, setBudgetDate] = useState<Date>(date)
-	const { budget, totalSpent, categories, getBudgetForDate } = useBudgetContext()
+	const { budget, totalSpent, categories, getBudgetForDate, refetchCategories } = useBudgetContext()
 
 	useEffect(() => {
 		getBudgetForDate(budgetDate.getFullYear(), budgetDate.getMonth())
@@ -29,6 +29,7 @@ export const BudgetSection = () => {
 		} else {
 			newDate.setMonth(newDate.getMonth() - 1)
 		}
+		refetchCategories()
 		return newDate
 	}
 
@@ -47,10 +48,10 @@ export const BudgetSection = () => {
 					}
 					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, false))}
 				/>
-
 				<BreezeCard title='Budget Date'>
 					<BreezeText
 						type='large'
+						style={{ textAlign: 'center' }}
 						text={`${getMonthAsString(budgetDate.getMonth())} ${budgetDate.getFullYear()}`}
 					/>
 				</BreezeCard>

@@ -14,8 +14,10 @@ export const AddIncome = () => {
 	const { user } = useAuth0()
 	const navigate = useNavigate()
 	const { postIncome } = useIncomes()
-	const postMutation = useMutation((income: Income) => postIncome(income))
-	const { budget } = useBudgetContext()
+	const { budget, refetchIncomes } = useBudgetContext()
+	const postMutation = useMutation((income: Income) => postIncome(income), {
+		onSettled: refetchIncomes,
+	})
 	const [isSubmittable, setIsSubmittable] = useState(false)
 	const [income, setIncome] = useState<Income>({
 		userId: user?.email ?? '',
@@ -58,8 +60,8 @@ export const AddIncome = () => {
 				<BreezeInput
 					type='string'
 					title='Income Name'
-					style={{ width: '100%' }}
 					placeholder='name'
+					style={{ minWidth: '100%' }}
 					onChange={(e) => {
 						setIncome({ ...income, name: e.target.value })
 						checkSubmittable()
@@ -81,8 +83,8 @@ export const AddIncome = () => {
 				<BreezeInput
 					type='string'
 					title='Income Amount'
-					style={{ width: '100%' }}
 					placeholder='amount'
+					style={{ minWidth: '100%' }}
 					onChange={(e) => {
 						setIncome({ ...income, amount: parseFloat(e.target.value) })
 						checkSubmittable()
@@ -106,7 +108,7 @@ export const AddIncome = () => {
 					title='Income Date'
 					placeholder='date'
 					defaultValue={new Date(Date.now()).toISOString().split('T')[0]}
-					style={{ width: '100%' }}
+					style={{ minWidth: '100%' }}
 					onChange={(e) => {
 						setIncome({ ...income, year: new Date(e.target.value).getFullYear(), month: new Date(e.target.value).getMonth(), day: new Date(e.target.value).getDate() })
 						checkSubmittable()

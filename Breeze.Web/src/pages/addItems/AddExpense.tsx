@@ -15,9 +15,11 @@ export const AddExpense = () => {
 	const { user } = useAuth0()
 	const navigate = useNavigate()
 	const { postExpense } = useExpenses()
+	const { categories, refetchCategories } = useBudgetContext()
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	const postMutation = useMutation((expense: Expense) => postExpense(categories.find((category) => category.id === expense.categoryId)!, expense))
-	const { categories, getBudgetForDate } = useBudgetContext()
+	const postMutation = useMutation((expense: Expense) => postExpense(categories.find((category) => category.id === expense.categoryId)!, expense), {
+		onSettled: refetchCategories,
+	})
 	const [isSubmittable, setIsSubmittable] = useState(false)
 	const [expense, setExpense] = useState<Expense>({
 		userId: user?.email ?? '',
@@ -60,8 +62,8 @@ export const AddExpense = () => {
 				<BreezeInput
 					type='string'
 					title='Expense Name'
-					style={{ width: '100%' }}
 					placeholder='name'
+					style={{ minWidth: '100%' }}
 					onChange={(e) => {
 						setExpense({ ...expense, name: e.target.value })
 						checkSubmittable()
@@ -83,6 +85,7 @@ export const AddExpense = () => {
 				<BreezeSelect
 					title='Category Select'
 					options={categories.map((category) => category.name)}
+					style={{ minWidth: '100%' }}
 					onChange={(e) => {
 						const category = categories.find((category) => category.name === e.target.value)
 						if (category?.id) {
@@ -90,7 +93,6 @@ export const AddExpense = () => {
 							checkSubmittable()
 						}
 					}}
-					style={{ width: '100%' }}
 				/>
 			</BreezeBox>
 			<BreezeBox
@@ -108,8 +110,8 @@ export const AddExpense = () => {
 				<BreezeInput
 					type='string'
 					title='Expense Amount'
-					style={{ width: '100%' }}
 					placeholder='amount'
+					style={{ minWidth: '100%' }}
 					onChange={(e) => {
 						setExpense({ ...expense, amount: parseFloat(e.target.value) })
 						checkSubmittable()
@@ -133,7 +135,7 @@ export const AddExpense = () => {
 					title='Expense Date'
 					placeholder='date'
 					defaultValue={new Date(Date.now()).toISOString().split('T')[0]}
-					style={{ width: '100%' }}
+					style={{ minWidth: '100%' }}
 					onChange={(e) => {
 						setExpense({ ...expense, year: new Date(e.target.value).getFullYear(), month: new Date(e.target.value + 1).getMonth(), day: new Date(e.target.value).getDate() })
 						checkSubmittable()
@@ -145,7 +147,6 @@ export const AddExpense = () => {
 				disabled={!isSubmittable}
 				onClick={() => {
 					postMutation.mutate(expense)
-					getBudgetForDate(expense.year, expense.month)
 					// navigate back using react router
 					navigate(-1)
 				}}
