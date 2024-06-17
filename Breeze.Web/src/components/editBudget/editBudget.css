@@ -1,9 +1,0 @@
-.amount-left-positive {
-	background-color: var(--green500);
-	border-radius: 0.25em;
-}
-
-.amount-left-negative {
-	background-color: var(--red500);
-	border-radius: 0.25em;
-}
