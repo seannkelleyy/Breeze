@@ -62,9 +62,11 @@
     <Build Include="Budget.sql" />
     <Build Include="Expense.sql" />
     <Build Include="Category.sql" />
-    <Build Include="User.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Breeze.Sql.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Breeze.Sql.publish.xml" />
   </ItemGroup>
 </Project>

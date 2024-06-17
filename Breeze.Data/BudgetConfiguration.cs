@@ -10,17 +10,17 @@ namespace Breeze.Data
         {
             modelBuilder.ToTable("Budget");
             modelBuilder
-                .HasOne(budget => budget.User)
-                .WithMany(user => user.Budgets)
-                .HasForeignKey("UserId");
+                .Property(b => b.MonthlyExpenses)
+                .HasColumnType("decimal(18, 2)");
             modelBuilder
-                .HasMany(budget => budget.Categories)
-                .WithOne(category => category.Budget)
-                .HasForeignKey("BudgetId");
+                .Property(b => b.MonthlyExpenses)
+                .HasPrecision(18, 2);
             modelBuilder
-                .HasMany(budget => budget.Income)
-                .WithOne(income => income.Budget)
-                .HasForeignKey("BudgetId");
+                .Property(b => b.MonthlyIncome)
+                .HasColumnType("decimal(18, 2)");
+            modelBuilder
+                .Property(b => b.MonthlyIncome)
+                .HasPrecision(18, 2);
         }
     }
 }

@@ -2,34 +2,57 @@
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Breeze.Api.Controllers
 {
     [ApiController]
-    [Route("/incomes")]
+    [Route("/budgets/{budgetId}/incomes")]
     public class IncomeController : ControllerBase
     {
+        private readonly BudgetService budgets;
         private readonly IncomeService incomes;
         private readonly ILogger<IncomeController> _logger;
 
         public IncomeController(IConfiguration config, ILogger<IncomeController> logger, BreezeContext breezeContext)
         {
+            budgets = new BudgetService(config, breezeContext, logger);
             incomes = new IncomeService(config, breezeContext, logger);
             _logger = logger;
         }
 
-        [HttpGet("{budgetId}")]
-        public IActionResult GetIncome([FromRoute]int budgetId)
+        [HttpGet("{id}")]
+        public IActionResult GetIncome([FromRoute] int id)
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
-                {
-                    return Unauthorized();
-                }
-                return Ok(incomes.GetIncomeByBudgetId(userId, budgetId));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                return Ok(incomes.GetIncomeById("userId", id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to get Income, error code: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet]
+        public IActionResult GetIncomes([FromRoute] int budgetId)
+        {
+            try
+            {
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                return Ok(incomes.GetIncomeByBudgetId("userId", budgetId));
             }
             catch (Exception ex)
             {
@@ -43,12 +66,15 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
-                {
-                    return Unauthorized();
-                }
-                return Ok(incomes.CreateIncome(userId, incomeRequest));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                var response = incomes.CreateIncome("userId", incomeRequest);
+                budgets.CalculateBudgetIncomes("userId", incomeRequest.BudgetId, incomes.GetIncomeByBudgetId("userId", incomeRequest.BudgetId));
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -62,12 +88,15 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
-                {
-                    return Unauthorized();
-                }
-                return Ok(incomes.UpdateIncome(userId, incomeRequest));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                var response = incomes.UpdateIncome("userId", incomeRequest);
+                budgets.CalculateBudgetIncomes("userId", incomeRequest.BudgetId, incomes.GetIncomeByBudgetId("userId", incomeRequest.BudgetId));
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -76,16 +105,20 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteIncome([FromRoute]int id)
+        public IActionResult DeleteIncome([FromRoute] int id)
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
-                {
-                    return Unauthorized();
-                }
-                return Ok(incomes.DeleteIncome(userId, id));
+                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                //if (userId == null)
+                //{
+                //    _logger.LogError(User.ToString());
+                //    return Unauthorized();
+                //}
+                int budgetId = incomes.GetIncomeById("userId", id).BudgetId;
+                var response = incomes.DeleteIncomeById("userId", id);
+                budgets.CalculateBudgetIncomes("userId", budgetId, incomes.GetIncomeByBudgetId("userId", budgetId));
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -93,13 +126,14 @@ namespace Breeze.Api.Controllers
             }
         }
 
-        [HttpDelete("income/{incomeId}")]
+        [HttpDelete]
         public IActionResult DeleteIncomesForBudget(int budgetId)
         {
             try
             {
-                incomes.DeleteIncomesForBudget(budgetId);
-                return Ok();
+                var response = incomes.DeleteIncomesForBudget("userId", budgetId);
+                budgets.CalculateBudgetIncomes("userId", budgetId, incomes.GetIncomeByBudgetId("userId", budgetId));
+                return Ok(response);
             }
             catch (Exception ex)
             {
