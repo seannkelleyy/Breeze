@@ -5,7 +5,7 @@ import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { BreezeProgressBar } from '../../../components/shared/BreezeProgressBar'
 import { ExpenseItem } from './ExpenseItem'
-import { useFetchExpenses } from '@/services/hooks/expense/useGetExpenses'
+import { useFetchExpenses } from '@/services/hooks/expense/useFetchExpenses'
 import { Category } from '@/services/hooks/category/CategoryServices'
 
 type categoryItemProps = {

@@ -18,5 +18,6 @@ export const useFetchExpenses = ({ category }: FetchExpenseProps) => {
 		refetchInterval: 180 * 1000,
 		refetchOnMount: 'always',
 		enabled: true,
+		retryDelay: 30 * 1000,
 	})
 }

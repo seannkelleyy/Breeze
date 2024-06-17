@@ -14,7 +14,7 @@ type BudgetContextType = {
 	totalSpent: number
 	incomes: Income[]
 	categories: Category[]
-	getBudgetForDate: (year: number, month: number) => Promise<Budget>
+	getBudgetForDate: (year: number, month: number) => Promise<{ status: number; budget?: Budget; error?: string }>
 	refetchBudget: () => void
 	refetchIncomes: () => void
 	refetchCategories: () => void
@@ -45,13 +45,21 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 	const getBudgetForDate = async (year: number, month: number) => {
 		try {
 			setBudgetDate(new Date(year, month))
-			refetchBudget()
-			refetchIncomes()
-			refetchCategories()
-		} catch (error: Error | unknown) {
+			await refetchBudget()
+			await refetchIncomes()
+			await refetchCategories()
+			if (!budget) {
+				throw new Error('No budget found')
+			}
+			return { status: 200, budget }
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (error: any) {
 			console.error('An error occurred while fetching the budget:', error)
+			if (error.message === 'No budget found') {
+				return { status: 404, error: 'No budget found' }
+			}
+			return { status: 500, error: 'A server error occurred' }
 		}
-		return budget
 	}
 	return (
 		<BudgetContext.Provider value={{ budget, totalSpent, incomes, categories, getBudgetForDate, refetchBudget, refetchIncomes, refetchCategories }}>

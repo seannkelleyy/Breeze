@@ -17,5 +17,6 @@ export const useFetchCategories = ({ budgetId }: FetchCategoryProps) => {
 		refetchInterval: 180 * 1000,
 		refetchOnMount: 'always',
 		enabled: true,
+		retryDelay: 30 * 1000,
 	})
 }
