@@ -42,32 +42,27 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("localhost", policy =>
     {
-        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://breezebudgeting.azurewebsites.net");
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
     });
     options.AddPolicy("production", policy =>
     {
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://breezebudgeting.azurewebsites.net");
-        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
 
-    });
-    options.AddPolicy("OpenCorsPolicy", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
 
-app.UseCors("OpenCorsPolicy");
 app.UseSwagger();
 app.UseSwaggerUI();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseCors("OpenCorsPolicy");
+    app.UseCors("localhost");
+}
+else
+{
+    app.UseCors("production");
 }
 
 
