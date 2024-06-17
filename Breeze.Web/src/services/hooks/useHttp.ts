@@ -10,7 +10,9 @@ const handleError = (error: AxiosError) => {
 const useHttp =  () => {
     //const { getAccessTokenSilently } = useAuth0();
     //const [accessToken, setAccessToken] = useState<string>(null as unknown as string)
-    const apiUrl = useEnvironmentVariables().localApi
+    const localApi = useEnvironmentVariables().localApi
+    const hostedApi = useEnvironmentVariables().hostedApi
+    const apiUrl = process.env.NODE_ENV === 'production' ? hostedApi : localApi  
 
 
     // const fetchToken = async () => {
