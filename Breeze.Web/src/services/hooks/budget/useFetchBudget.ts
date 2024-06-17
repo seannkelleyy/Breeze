@@ -1,7 +1,7 @@
 import { useQuery } from 'react-query'
 
 import { useCallback } from 'react'
-import { Budget, useBudgets } from '../httpServices/BudgetServices'
+import { Budget, useBudgets } from './BudgetServices'
 
 type FetchBudgetProps = {
 	year: number

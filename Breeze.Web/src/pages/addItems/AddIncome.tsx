@@ -7,8 +7,8 @@ import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { useNavigate } from 'react-router-dom'
-import { Income } from '@/services/hooks/httpServices/IncomeServices'
 import { usePostIncome } from '@/services/hooks/income/usePostIncome'
+import { Income } from '@/services/hooks/income/IncomeServices'
 
 export const AddIncome = () => {
 	const { user } = useAuth0()

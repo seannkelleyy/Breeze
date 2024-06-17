@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { BreezeInput } from '../../../components/shared/BreezeInput'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { DeleteButton } from '../../../components/shared/DeleteButton'
-import { Income } from '@/services/hooks/httpServices/IncomeServices'
 import { useDeleteIncome } from '@/services/hooks/income/useDeleteIncome'
 import { usePatchIncome } from '@/services/hooks/income/usePatchIncome'
+import { Income } from '@/services/hooks/income/IncomeServices'
 
 type IncomeItemProps = {
 	incomeItem: Income

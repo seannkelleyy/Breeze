@@ -1,4 +1,3 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
 import { useEffect, useState } from 'react'
 import { BreezeCard } from '../../../components/shared/BreezeCard'
 import { BreezeButton } from '../../../components/shared/BreezeButton'
@@ -6,8 +5,8 @@ import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { BreezeProgressBar } from '../../../components/shared/BreezeProgressBar'
 import { ExpenseItem } from './ExpenseItem'
-import { Category } from '@/services/hooks/httpServices/CategoryServices'
 import { useFetchExpenses } from '@/services/hooks/expense/useGetExpenses'
+import { Category } from '@/services/hooks/category/CategoryServices'
 
 type categoryItemProps = {
 	category: Category

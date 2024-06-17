@@ -1,7 +1,7 @@
 import { useMutation } from 'react-query';
 import { useCallback } from 'react';
-import { Expense, useExpenses } from '../httpServices/ExpenseServices';
-import { Category } from '../httpServices/CategoryServices';
+import { Expense, useExpenses } from './ExpenseServices';
+import { Category } from '../category/CategoryServices';
 
 type PatchExpenseProps = {
     category: Category;

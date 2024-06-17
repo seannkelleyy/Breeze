@@ -1,4 +1,4 @@
-import useHttp from "./useHttp"
+import useHttp from "../useHttp"
 
 export type Budget = {
 	id: number
@@ -9,10 +9,11 @@ export type Budget = {
 	month: number
 }
 
+// Only getBudget is used in the app currently. Everything else is unused, but I'm keeping it because 
+// I want to keep an example of this pattern in the codebase.
 export const useBudgets = () => {
 	const { getOne, post, patch, deleteOne } = useHttp()
 
-	// used
 	const getBudget = async (year: number, month: number): Promise<Budget> => await getOne<Budget>(`budgets/${year}-${month}`)
 
 	const postBudget = async (budget: Budget): Promise<number> => post<number, Budget>('budgets', budget)

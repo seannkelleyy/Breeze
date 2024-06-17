@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query'
 import { useCallback } from 'react'
-import { Category, useCategories } from '../httpServices/CategoryServices'
+import { Category, useCategories } from './CategoryServices'
 
 type FetchCategoryProps = {
 	budgetId: number

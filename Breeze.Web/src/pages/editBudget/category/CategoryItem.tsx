@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { BreezeInput } from '../../../components/shared/BreezeInput'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { DeleteButton } from '../../../components/shared/DeleteButton'
-import { Category } from '@/services/hooks/httpServices/CategoryServices'
 import { useDeleteCategory } from '@/services/hooks/category/useDeleteCategory'
 import { usePatchCategory } from '@/services/hooks/category/usePatchCategory'
+import { Category } from '@/services/hooks/category/CategoryServices'
 
 type CategoryItemProps = {
 	categoryItem: Category

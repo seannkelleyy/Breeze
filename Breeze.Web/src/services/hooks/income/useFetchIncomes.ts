@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query'
 import { useCallback } from 'react'
-import { Income, useIncomes } from '../httpServices/IncomeServices'
+import { Income, useIncomes } from './IncomeServices'
 
 type FetchIncomesProps = {
 	budgetId: number

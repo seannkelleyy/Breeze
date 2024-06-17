@@ -1,6 +1,6 @@
 import { useMutation } from 'react-query';
 import { useCallback } from 'react';
-import { Category, useCategories } from '../httpServices/CategoryServices';
+import { Category, useCategories } from './CategoryServices';
 
 type DeleteCategoryProps = {
     category: Category;

@@ -1,6 +1,6 @@
 import { useMutation } from 'react-query';
 import { useCallback } from 'react';
-import { Income, useIncomes } from '../httpServices/IncomeServices';
+import { Income, useIncomes } from './IncomeServices';
 
 type DeleteIncomeProps = {
     income: Income;
