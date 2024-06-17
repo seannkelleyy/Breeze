@@ -9,11 +9,9 @@ import { BreezeButton } from '../../components/shared/BreezeButton'
 import { BreezeSelect } from '../../components/shared/BreezeSelect'
 import { Expense } from '../../services/hooks/expense/ExpenseServices'
 import { useNavigate } from 'react-router-dom'
-import { useGlobalToast } from '@/services/providers/GlobalToastProvider'
 import { usePostExpense } from '@/services/hooks/expense/usePostExpense'
 
 export const AddExpense = () => {
-	const toaster = useGlobalToast()
 	const { user } = useAuth0()
 	const navigate = useNavigate()
 	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
@@ -35,7 +33,6 @@ export const AddExpense = () => {
 		onSettled: () => {
 			refetchCategories()
 			refetchBudget()
-			toaster.showToast('Expense Added', 'green')
 		},
 	})
 
@@ -150,7 +147,6 @@ export const AddExpense = () => {
 					}}
 				/>
 			</BreezeBox>
-
 			<BreezeButton
 				content='Add Expense'
 				disabled={!isSubmittable}

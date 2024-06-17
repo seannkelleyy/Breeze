@@ -9,7 +9,7 @@ export type Category = {
 	allocation: number
 }
 
-// Only getCategory, postCategory and deleteCategory are used in the app currently. Everything else is unused, but I'm keeping it because 
+// Only getCategory, postCategory, patchCategory and deleteCategory are used in the app currently. Everything else is unused, but I'm keeping it because 
 // I want to keep an example of this pattern in the codebase.
 export const useCategories = () => {
 	const { getOne, getMany, post, patch, deleteOne } = useHttp()
