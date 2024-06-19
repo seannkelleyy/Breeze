@@ -17,11 +17,11 @@ export const AppRoutes = () => {
 		<BrowserRouter>
 			<Routes>
 				<Route
-					path='/'
+					path='/login'
 					element={<LandingPage />}
 				/>
 				<Route
-					path='/home'
+					path='/'
 					element={<HomePage />}
 				/>
 				<Route
