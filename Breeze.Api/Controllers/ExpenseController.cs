@@ -2,6 +2,7 @@
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Breeze.Api.Controllers
 {
@@ -25,13 +26,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                //if (userId == null)
-                //{
-                //    _logger.LogError(User.ToString());
-                //    return Unauthorized();
-                //}
-                return Ok(expenses.GetExpenseById("userId", id));
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
+                return Ok(expenses.GetExpenseById(userId, id));
             }
             catch (Exception ex)
             {
@@ -45,13 +46,13 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                //if (userId == null)
-                //{
-                //    _logger.LogError(User.ToString());
-                //    return Unauthorized();
-                //}
-                return Ok(expenses.GetExpenseByCategoryId("userId", CategoryId));
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
+                return Ok(expenses.GetExpenseByCategoryId(userId, CategoryId));
             }
             catch (Exception ex)
             {
@@ -65,14 +66,14 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                //if (userId == null)
-                //{
-                //    _logger.LogError(User.ToString());
-                //    return Unauthorized();
-                //}
-                var response = expenses.CreateExpense("userId", expenseRequest);
-                categories.CalculateCategoryExpenses("userId", expenseRequest.CategoryId, expenses.GetExpenseByCategoryId("userId", expenseRequest.CategoryId));
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
+                var response = expenses.CreateExpense(userId, expenseRequest);
+                categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenses.GetExpenseByCategoryId(userId, expenseRequest.CategoryId));
                 return Ok(response);
             }
             catch (Exception ex)
@@ -86,15 +87,15 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                //if (userId == null)
-                //{
-                //    _logger.LogError(User.ToString());
-                //    return Unauthorized();
-                //}
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
 
-                var response = expenses.UpdateExpense("userId", expenseRequest);
-                categories.CalculateCategoryExpenses("userId", expenseRequest.CategoryId, expenses.GetExpenseByCategoryId("userId", expenseRequest.CategoryId));
+                var response = expenses.UpdateExpense(userId, expenseRequest);
+                categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenses.GetExpenseByCategoryId(userId, expenseRequest.CategoryId));
                 return Ok(response);
             }
             catch (Exception ex)
@@ -108,19 +109,19 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                //if (userId == null)
-                //{
-                //    _logger.LogError(User.ToString());
-                //    return Unauthorized();
-                //}
-                int categoryId = expenses.GetExpenseById("userId", id).CategoryId;
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
+                int categoryId = expenses.GetExpenseById(userId, id).CategoryId;
                 if (categoryId == 0)
                 {
                     return BadRequest("Expense not found");
                 }
-                var response = expenses.DeleteExpenseById("userId", id);
-                categories.CalculateCategoryExpenses("userId", categoryId, expenses.GetExpenseByCategoryId("userId", categoryId));
+                var response = expenses.DeleteExpenseById(userId, id);
+                categories.CalculateCategoryExpenses(userId, categoryId, expenses.GetExpenseByCategoryId(userId, categoryId));
                 return Ok(response);
             }
             catch (Exception ex)
@@ -134,14 +135,14 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                //if (userId == null)
-                //{
-                //    _logger.LogError(User.ToString());
-                //    return Unauthorized();
-                //}
-                expenses.DeleteExpenseForCategory("userId", categoryId);
-                categories.CalculateCategoryExpenses("userId", categoryId, expenses.GetExpenseByCategoryId("userId", categoryId));
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
+                expenses.DeleteExpenseForCategory(userId, categoryId);
+                categories.CalculateCategoryExpenses(userId, categoryId, expenses.GetExpenseByCategoryId(userId, categoryId));
                 return Ok();
             }
             catch (Exception ex)
