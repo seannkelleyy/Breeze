@@ -1,4 +1,4 @@
-﻿using Breeze.Api.RequestResponseObjects.Expenses;
+﻿using Breeze.Api.RequestResponseObjects.Goals;
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -6,22 +6,20 @@ using Microsoft.AspNetCore.Mvc;
 namespace Breeze.Api.Controllers
 {
     [ApiController]
-    [Route("/budgets/{budgetId}/categories/{categoryId}/expenses")]
-    public class ExpenseController : ControllerBase
+    [Route("/users/{userId}/goals")]
+    public class GoalController : ControllerBase
     {
-        private readonly CategoryService categories;
-        private readonly ExpenseService expenses;
+        private readonly GoalService goals;
         private readonly ILogger<ExpenseController> _logger;
 
-        public ExpenseController(IConfiguration config, ILogger<ExpenseController> logger, BreezeContext breezeContext)
+        public GoalController(IConfiguration config, ILogger<ExpenseController> logger, BreezeContext breezeContext)
         {
-            categories = new CategoryService(config, breezeContext, logger);
-            expenses = new ExpenseService(config, breezeContext, logger);
+            goals = new GoalService(config, breezeContext, logger);
             _logger = logger;
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetExpense([FromRoute] int id)
+        public IActionResult GetGoalById([FromRoute] int id)
         {
             try
             {
@@ -31,7 +29,7 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(expenses.GetExpenseById(userId, id));
+                return Ok(goals.GetGoalById(userId, id));
             }
             catch (Exception ex)
             {
@@ -41,7 +39,7 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetExpensesForCategory([FromRoute] int CategoryId)
+        public IActionResult GetGoalsForUser()
         {
             try
             {
@@ -51,7 +49,7 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(expenses.GetExpenseByCategoryId(userId, CategoryId));
+                return Ok(goals.GetGoalByUserId(userId));
             }
             catch (Exception ex)
             {
@@ -61,7 +59,7 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult PostExpsense(ExpenseRequest expenseRequest)
+        public IActionResult PostGoal(GoalRequest goalRequest)
         {
             try
             {
@@ -71,8 +69,7 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                var response = expenses.CreateExpense(userId, expenseRequest);
-                categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenses.GetExpenseByCategoryId(userId, expenseRequest.CategoryId));
+                var response = goals.CreateGoal(userId, goalRequest);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -82,7 +79,7 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpPatch]
-        public IActionResult PatchExpsense([FromBody] ExpenseRequest expenseRequest)
+        public IActionResult PatchGoal([FromBody] GoalRequest goalRequest)
         {
             try
             {
@@ -92,8 +89,7 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                var response = expenses.UpdateExpense(userId, expenseRequest);
-                categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenses.GetExpenseByCategoryId(userId, expenseRequest.CategoryId));
+                var response = goals.UpdateGoal(userId, goalRequest);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -103,7 +99,7 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteExpsense([FromRoute] int id)
+        public IActionResult DeleteGoal([FromRoute] int id)
         {
             try
             {
@@ -113,14 +109,7 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                int categoryId = expenses.GetExpenseById(userId, id).CategoryId;
-                if (categoryId == 0)
-                {
-                    return BadRequest("Expense not found");
-                }
-                var response = expenses.DeleteExpenseById(userId, id);
-                categories.CalculateCategoryExpenses(userId, categoryId, expenses.GetExpenseByCategoryId(userId, categoryId));
-                return Ok(response);
+                return Ok(goals.DeleteGoalById(userId, id));
             }
             catch (Exception ex)
             {
@@ -129,7 +118,7 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpDelete]
-        public IActionResult DeleteExpensesForCategory([FromRoute] int categoryId)
+        public IActionResult DeleteGoalsForuser()
         {
             try
             {
@@ -139,9 +128,7 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                expenses.DeleteExpenseForCategory(userId, categoryId);
-                categories.CalculateCategoryExpenses(userId, categoryId, expenses.GetExpenseByCategoryId(userId, categoryId));
-                return Ok();
+                return Ok(goals.DeleteGoalForUser(userId));
             }
             catch (Exception ex)
             {

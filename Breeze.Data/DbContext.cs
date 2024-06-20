@@ -9,6 +9,7 @@ namespace Breeze.Data
         public DbSet<Income> Incomes { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Budget> Budgets { get; set; }
+        public DbSet<Goal> Goals { get; set; }
 
         public BreezeContext(DbContextOptions<BreezeContext> options) : base
             (options)
@@ -22,7 +23,7 @@ namespace Breeze.Data
             modelBuilder.ApplyConfiguration(new CategoryConfiguration());
             modelBuilder.ApplyConfiguration(new ExpenseConfiguration());
             modelBuilder.ApplyConfiguration(new IncomeConfiguration());
-
+            modelBuilder.ApplyConfiguration(new GoalConfiguration());
         }
     }
 }
