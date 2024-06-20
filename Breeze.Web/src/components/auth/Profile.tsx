@@ -9,7 +9,6 @@ export const Profile = () => {
 	const { appVersion } = useEnvironmentVariables()
 	const { user, isAuthenticated, isLoading } = useAuth0()
 
-	// TODO - Add a loading spinner or skeleton loader
 	if (isLoading) {
 		return <BreezeBox title='Loading'>Loading ...</BreezeBox>
 	}

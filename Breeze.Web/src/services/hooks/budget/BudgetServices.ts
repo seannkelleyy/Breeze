@@ -10,7 +10,7 @@ export type Budget = {
 }
 
 // Only getBudget is used in the app currently. Everything else is unused, but I'm keeping it because 
-// I want to keep an example of this pattern in the codebase.
+// I want to keep an example of this pattern in the codebase for reference.
 export const useBudgets = () => {
 	const { getOne, post, patch, deleteOne } = useHttp()
 

@@ -18,7 +18,6 @@ export const useFetchBudget = ({ year, month }: FetchBudgetProps) => {
 	return useQuery<Budget, Error>(['budget', year, month], fetchBudget, {
 		refetchInterval: 180 * 1000,
 		refetchOnMount: 'always',
-		enabled: true,
-		retryDelay: 30 * 1000,
+		retryDelay: 10 * 1000,
 	})
 }

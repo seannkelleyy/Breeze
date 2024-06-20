@@ -14,7 +14,7 @@ export type Expense = {
 }
 
 // Only getExpenses, postExpense, patchExpense and deleteExpenses are used in the app currently. Everything else is unused, but I'm keeping it because 
-// I want to keep an example of this pattern in the codebase.
+// I want to keep an example of this pattern in the codebase for reference.
 export const useExpenses = () => {
 	const { getOne, getMany, post, patch, deleteOne } = useHttp()
 

@@ -78,7 +78,12 @@ export const BudgetSection = () => {
 			<Link to={`/budget/${budgetDate.getFullYear()}/${budgetDate.getMonth()}`}>
 				<BreezeButton content='Edit Budget' />
 			</Link>
-			{response?.status !== 200 ? (
+			{budget.id === undefined ? (
+				<BreezeText
+					type='large'
+					text='Loading...'
+				/>
+			) : (response?.status ?? 0) > 300 ? (
 				<BreezeText
 					type='large'
 					text='No budget found'
@@ -86,11 +91,6 @@ export const BudgetSection = () => {
 						width: '80%',
 						textAlign: 'center',
 					}}
-				/>
-			) : budget.id === undefined ? (
-				<BreezeText
-					type='large'
-					text='Loading...'
 				/>
 			) : (
 				<BreezeCard title='Glance'>
