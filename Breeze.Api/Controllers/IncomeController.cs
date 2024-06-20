@@ -2,7 +2,6 @@
 using Breeze.Api.Services;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Breeze.Api.Controllers
 {
@@ -26,7 +25,7 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -47,7 +46,7 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -67,7 +66,7 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -89,7 +88,7 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -110,7 +109,7 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -132,7 +131,7 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
