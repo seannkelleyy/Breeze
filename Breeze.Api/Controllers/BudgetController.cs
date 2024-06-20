@@ -28,13 +28,13 @@ namespace Breeze.Api.Controllers
 
             try
             {
-                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                //if (userId == null)
-                //{
-                //    _logger.LogError(User.ToString());
-                //    return Unauthorized();
-                //}
-                return Ok(budgets.GetBudgetByDate("userId", year, month));
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
+                return Ok(budgets.GetBudgetByDate(userId, year, month));
             }
             catch (Exception ex)
             {
@@ -48,15 +48,15 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                //if (userId == null)
-                //{
-                //    _logger.LogError(User.ToString());
-                //    return Unauthorized();
-                //}
-                var response = budgets.CreateBudget("userId", budgetRequest);
-                budgets.CalculateBudgetIncomes("userId", response, incomes.GetIncomeByBudgetId("userId", response));
-                budgets.CalculateBudgetCategories("userId", response, categories.GetCategoriesByBudgetId("userId", response));
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
+                var response = budgets.CreateBudget(userId, budgetRequest);
+                budgets.CalculateBudgetIncomes(userId, response, incomes.GetIncomeByBudgetId("userId", response));
+                budgets.CalculateBudgetCategories(userId, response, categories.GetCategoriesByBudgetId("userId", response));
                 return Ok(response);
             }
             catch (Exception ex)
@@ -71,17 +71,17 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                //if (userId == null)
-                //{
-                //    _logger.LogError(User.ToString());
-                //    return Unauthorized();
-                //}
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
                 if (budgetRequest.Id is not null)
                 {
-                    budgets.CalculateBudgetIncomes("userId", budgetRequest.Id ?? 0, incomes.GetIncomeByBudgetId("userId", budgetRequest.Id ?? 0));
-                    budgets.CalculateBudgetCategories("userId", budgetRequest.Id ?? 0, categories.GetCategoriesByBudgetId("userId", budgetRequest.Id ?? 0));
-                    return Ok(budgets.UpdateBudget("userId", budgetRequest));
+                    budgets.CalculateBudgetIncomes(userId, budgetRequest.Id ?? 0, incomes.GetIncomeByBudgetId("userId", budgetRequest.Id ?? 0));
+                    budgets.CalculateBudgetCategories(userId, budgetRequest.Id ?? 0, categories.GetCategoriesByBudgetId("userId", budgetRequest.Id ?? 0));
+                    return Ok(budgets.UpdateBudget(userId, budgetRequest));
                 }
                 return BadRequest();
             }
@@ -97,15 +97,15 @@ namespace Breeze.Api.Controllers
         {
             try
             {
-                //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                //if (userId == null)
-                //{
-                //    _logger.LogError(User.ToString());
-                //    return Unauthorized();
-                //}
-                incomes.DeleteIncomesForBudget("userId", budgetId);
-                categories.DeleteCategoriesForBudget("userId", budgetId);
-                return Ok(budgets.DeleteBudgetById("userId", budgetId));
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
+                incomes.DeleteIncomesForBudget(userId, budgetId);
+                categories.DeleteCategoriesForBudget(userId, budgetId);
+                return Ok(budgets.DeleteBudgetById(userId, budgetId));
             }
             catch (Exception ex)
             {

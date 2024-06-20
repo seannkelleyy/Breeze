@@ -15,7 +15,6 @@ import { useFetchBudget } from '@/services/hooks/budget/useFetchBudget'
 export const EditBudgetPage = () => {
 	const { year, month } = useParams<{ year: string; month: string }>()
 	const { getMonthAsString } = useDateContext()
-	// TODO use budget context
 	const { data, status } = useFetchBudget({
 		year: parseInt(year as string),
 		month: parseInt(month as string),

@@ -7,7 +7,8 @@ import { useEnvironmentVariables } from './config/environment/useEnvironmentVari
 
 // eslint-disable-next-line react-refresh/only-export-components
 const Root = () => {
-	const { authClientId, authDomain, baseUrl } = useEnvironmentVariables()
+	const { authClientId, authDomain, baseLocalUrl: baseLocalUrl, baseHostedUrl, apiAudience } = useEnvironmentVariables()
+	const baseUrl = import.meta.env.MODE === 'production' ? baseHostedUrl : baseLocalUrl
 
 	return (
 		<React.StrictMode>
@@ -16,6 +17,8 @@ const Root = () => {
 				domain={authDomain}
 				authorizationParams={{
 					redirect_uri: baseUrl,
+					audience: apiAudience,
+					scope: 'read:data write:data',
 				}}
 			>
 				<App />

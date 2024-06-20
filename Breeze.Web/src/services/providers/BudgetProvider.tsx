@@ -6,7 +6,6 @@ import { Budget } from '../hooks/budget/BudgetServices'
 import { Category } from '../hooks/category/CategoryServices'
 import { Income } from '../hooks/income/IncomeServices'
 import { useFetchCategories } from '../hooks/category/useFetchCategories'
-//import { useAuth0 } from '@auth0/auth0-react'
 
 type BudgetProviderProps = { children: React.ReactNode }
 type BudgetContextType = {
@@ -25,7 +24,6 @@ const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContext
 
 // Context provider component
 export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
-	//const { user } = useAuth0()
 	const { date } = useDateContext()
 	const [totalSpent, setTotalSpent] = useState(0)
 	const [budgetDate, setBudgetDate] = useState<Date>(date)

@@ -16,7 +16,6 @@ export const useFetchIncomes = ({ budgetId }: FetchIncomesProps) => {
 	return useQuery<Income[], Error>(['income', budgetId], fetchIncome, {
 		refetchInterval: 180 * 1000,
 		refetchOnMount: 'always',
-		enabled: true,
-		retryDelay: 30 * 1000,
+		retryDelay: 10 * 1000,
 	})
 }

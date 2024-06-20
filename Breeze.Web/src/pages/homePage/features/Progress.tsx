@@ -10,7 +10,7 @@ export const Progress = () => {
 	const { getNumberOfDaysInMonth } = useDateContext()
 	const { budget, totalSpent } = useBudgetContext()
 	const numberOfDays = getNumberOfDaysInMonth(new Date().getMonth(), new Date().getFullYear())
-	const totalBudget = budget.monthlyIncome ?? 0
+	const totalBudget = budget && budget.monthlyIncome
 	const dailyBudget = totalBudget / numberOfDays
 
 	const calculateProgress = (todaysDate: number, dailyBudget: number, totalSpent: number, totalBudget: number) => {
@@ -35,6 +35,11 @@ export const Progress = () => {
 			{budget.monthlyIncome ? (
 				<BreezeText
 					text={calculateProgress(new Date().getDate(), dailyBudget, totalSpent, totalBudget)}
+					type='medium'
+				/>
+			) : budget.id && !budget.monthlyIncome ? (
+				<BreezeText
+					text='Create a budget to see your progress.'
 					type='medium'
 				/>
 			) : (

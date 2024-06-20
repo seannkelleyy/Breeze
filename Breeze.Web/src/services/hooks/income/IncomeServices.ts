@@ -12,7 +12,7 @@ export type Income = {
 }
 
 // Only getIncomes, postIncome, patchIncome and deleteIncome are used in the app currently. Everything else is unused, but I'm keeping it because 
-// I want to keep an example of this pattern in the codebase.
+// I want to keep an example of this pattern in the codebase for reference.
 export const useIncomes = () => {
 	const { getOne, getMany, post, patch, deleteOne } = useHttp()
 
