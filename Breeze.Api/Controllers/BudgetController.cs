@@ -28,11 +28,6 @@ namespace Breeze.Api.Controllers
 
             try
             {
-                // Log all claims
-                foreach (var claim in User.Claims)
-                {
-                    _logger.LogInformation($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
-                }
                 var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
                 if (userId == null)
                 {

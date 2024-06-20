@@ -39,34 +39,38 @@ namespace Breeze.Api.Services
         {
             try
             {
-                var getBudgetResponse = db.Budgets
-                    .Where(budget => budget.UserId.Equals(userId) && budget.Month == month && budget.Year == year)
-                    .Select(budget => new BudgetResponse
-                    {
-                        Id = budget.Id,
-                        UserId = budget.UserId,
-                        MonthlyIncome = budget.MonthlyIncome,
-                        MonthlyExpenses = budget.MonthlyExpenses,
-                        Year = budget.Year,
-                        Month = budget.Month,
-                    })
+                var budget = db.Budgets
+                    .Where(b => b.UserId.Equals(userId) && b.Month == month && b.Year == year)
                     .FirstOrDefault();
-                if (getBudgetResponse == null)
+
+                if (budget == null)
                 {
-                    int budgetCreationResponse = CreateBudget(userId, new BudgetRequest
+                    // Create a new budget
+                    Budget newBudget = new Budget
                     {
+                        UserId = userId,
                         MonthlyIncome = 0,
                         MonthlyExpenses = 0,
                         Year = year,
                         Month = month
-                    });
-                    if (budgetCreationResponse == -5)
-                    {
-                        return null;
-                    }
-                    return GetBudgetByDate(userId, year, month);
+                    };
+                    db.Budgets.Add(newBudget);
+                    db.SaveChanges();
+                    budget = newBudget;
                 }
-                return getBudgetResponse;
+
+                // Convert to BudgetResponse
+                var budgetResponse = new BudgetResponse
+                {
+                    Id = budget.Id,
+                    UserId = budget.UserId,
+                    MonthlyIncome = budget.MonthlyIncome,
+                    MonthlyExpenses = budget.MonthlyExpenses,
+                    Year = budget.Year,
+                    Month = budget.Month,
+                };
+
+                return budgetResponse;
             }
             catch (Exception ex)
             {
