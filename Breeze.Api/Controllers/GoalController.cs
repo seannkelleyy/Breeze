@@ -49,7 +49,7 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(goals.GetGoalByUserId(userId));
+                return Ok(goals.GetGoalsByUserId(userId));
             }
             catch (Exception ex)
             {
@@ -118,7 +118,7 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpDelete]
-        public IActionResult DeleteGoalsForuser()
+        public IActionResult DeleteGoalsForUser()
         {
             try
             {

@@ -58,7 +58,7 @@ namespace Breeze.Api.Services
         /// </summary>
         /// <param name="userId">The user's identifier.</param>
         /// <returns>A list of goal response objects or null if an error occurs.</returns>
-        public List<GoalResponse>? GetGoalByUserId(string userId)
+        public List<GoalResponse>? GetGoalsByUserId(string userId)
         {
             try
             {
@@ -68,6 +68,8 @@ namespace Breeze.Api.Services
                     {
                         Id = goal.Id,
                         UserId = goal.UserId,
+                        Description = goal.Description,
+                        IsCompleted = goal.IsCompleted,
                     })
                     .ToList();
             }
@@ -97,7 +99,7 @@ namespace Breeze.Api.Services
                 {
                     UserId = userId,
                     Description = newGoal.Description,
-                    IsCompleted = 0,
+                    IsCompleted = false,
                 };
                 db.Goals.Add(goal);
                 db.SaveChanges();
@@ -135,7 +137,7 @@ namespace Breeze.Api.Services
                     return -4;
                 }
                 goal.Description = updatedGoal.Description;
-                goal.IsCompleted = (int)updatedGoal.IsCompleted!;
+                goal.IsCompleted = (bool)updatedGoal.IsCompleted!;
 
                 db.Goals.Update(goal);
                 db.SaveChanges();
