@@ -33,7 +33,7 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 			style={{
 				width: '100%',
 				flexDirection: 'row',
-				padding: '0.5em',
+				padding: '.5em 0',
 			}}
 		>
 			{isEditMode ? (
@@ -57,10 +57,10 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 					<BreezeButton
 						content={
 							<img
-								src='/save.svg'
-								alt='save'
-								width={20}
-								height={20}
+								src='/complete.svg'
+								alt='complete'
+								width={24}
+								height={24}
 							/>
 						}
 						onClick={() => {
@@ -86,6 +86,7 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 					<BreezeText
 						text={goal.description}
 						type='medium'
+						style={goal.isCompleted ? { textDecoration: 'line-through' } : {}}
 					/>
 				</>
 			)}

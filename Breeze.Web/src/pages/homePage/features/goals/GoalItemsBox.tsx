@@ -15,7 +15,11 @@ import { useState } from 'react'
 export const GoalItemsBox = () => {
 	const { user } = useAuth0()
 	const [isEditMode, setIsEditMode] = useState<boolean>(false)
+	const [showCompleted, setShowCompleted] = useState<boolean>(false)
 	const { data: goals, refetch, isLoading, isError } = useFetchGoals({ userId: user?.sub ?? '' })
+	const unfinishedGoals = goals?.filter((goal: Goal) => goal.isCompleted === false)
+	const completedGoals = goals?.filter((goal: Goal) => goal.isCompleted === true)
+
 	const newGoal: Goal = {
 		userId: user?.sub ?? '',
 		description: 'New Goal',
@@ -50,38 +54,55 @@ export const GoalItemsBox = () => {
 				onClick={() => setIsEditMode(!isEditMode)}
 				style={{
 					position: 'absolute',
-					top: '7.5%',
-					right: '7.5%',
+					top: '1.25em',
+					right: '1.25em',
 					padding: '0',
 					margin: '0',
 					backgroundColor: 'transparent',
 					boxShadow: 'none',
 				}}
 			/>
-			{goals ? (
-				<BreezeList>
-					{goals.map((goal: Goal) => (
-						<GoalItem
-							key={goal.id}
-							userId={user?.sub ?? ''}
-							goal={goal}
-							isEditMode={isEditMode}
-							refetchGoals={refetch}
-						/>
-					))}
-				</BreezeList>
-			) : isLoading ? (
+			<BreezeButton
+				content={showCompleted ? 'Hide Completed Goals' : 'Show Completed Goals'}
+				onClick={() => setShowCompleted(!showCompleted)}
+			/>
+			{isLoading ? (
 				<BreezeText
 					type='medium'
 					text='Loading...'
 				/>
+			) : isError ? (
+				<BreezeText
+					type='medium'
+					text='Error fetching goals'
+				/>
 			) : (
-				isError && (
-					<BreezeText
-						type='medium'
-						text='Error fetching goals'
-					/>
-				)
+				<>
+					<BreezeList>
+						{unfinishedGoals?.map((goal: Goal) => (
+							<GoalItem
+								key={goal.id}
+								userId={user?.sub ?? ''}
+								goal={goal}
+								isEditMode={isEditMode}
+								refetchGoals={refetch}
+							/>
+						))}
+					</BreezeList>
+					{showCompleted && (
+						<BreezeList>
+							{completedGoals?.map((goal: Goal) => (
+								<GoalItem
+									key={goal.id}
+									userId={user?.sub ?? ''}
+									goal={goal}
+									isEditMode={isEditMode}
+									refetchGoals={refetch}
+								/>
+							))}
+						</BreezeList>
+					)}
+				</>
 			)}
 			<BreezeButton
 				content='Add Goal'
