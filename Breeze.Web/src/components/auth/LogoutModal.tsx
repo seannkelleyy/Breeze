@@ -25,6 +25,7 @@ export const LogoutModal = ({ showModal, setShowModal }: LogoutModalProps) => {
 			<BreezeButton
 				content={
 					<img
+						className='svg-icon'
 						src='./close.svg'
 						alt='Close'
 						style={{

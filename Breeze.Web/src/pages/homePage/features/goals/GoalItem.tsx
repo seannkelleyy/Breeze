@@ -51,14 +51,15 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 						style={{
 							width: '100%',
 							textAlign: 'center',
-							backgroundColor: 'var(--neutral150)',
+							backgroundColor: 'var(--color-input-background)',
 						}}
 					/>
 					<BreezeButton
 						content={
 							<img
-								src='/complete.svg'
-								alt='complete'
+								className='svg-icon'
+								src={goal.isCompleted ? '/complete.svg' : '/incomplete.svg'}
+								alt={goal.isCompleted ? 'complete' : 'incomplete'}
 								width={24}
 								height={24}
 							/>

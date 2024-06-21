@@ -44,70 +44,75 @@ export const GoalItemsBox = () => {
 				text='Goals'
 				type='small-heading'
 			/>
-			<BreezeButton
-				content={
-					<img
-						src='/edit.svg'
-						alt='edit'
-					/>
-				}
-				onClick={() => setIsEditMode(!isEditMode)}
-				style={{
-					position: 'absolute',
-					top: '1.25em',
-					right: '1.25em',
-					padding: '0',
-					margin: '0',
-					backgroundColor: 'transparent',
-					boxShadow: 'none',
-				}}
-			/>
-			<BreezeButton
-				content={showCompleted ? 'Hide Completed Goals' : 'Show Completed Goals'}
-				onClick={() => setShowCompleted(!showCompleted)}
-			/>
 			{isLoading ? (
 				<BreezeText
 					type='medium'
 					text='Loading...'
 				/>
-			) : isError ? (
-				<BreezeText
-					type='medium'
-					text='Error fetching goals'
-				/>
 			) : (
 				<>
-					<BreezeList>
-						{unfinishedGoals?.map((goal: Goal) => (
-							<GoalItem
-								key={goal.id}
-								userId={user?.sub ?? ''}
-								goal={goal}
-								isEditMode={isEditMode}
-								refetchGoals={refetch}
+					<BreezeButton
+						content={
+							<img
+								className='svg-icon'
+								src='/edit.svg'
+								alt='edit'
 							/>
-						))}
-					</BreezeList>
-					{showCompleted && (
-						<BreezeList>
-							{completedGoals?.map((goal: Goal) => (
-								<GoalItem
-									key={goal.id}
-									userId={user?.sub ?? ''}
-									goal={goal}
-									isEditMode={isEditMode}
-									refetchGoals={refetch}
-								/>
-							))}
-						</BreezeList>
+						}
+						onClick={() => setIsEditMode(!isEditMode)}
+						style={{
+							position: 'absolute',
+							top: '1.25em',
+							right: '1.25em',
+							padding: '0',
+							margin: '0',
+							backgroundColor: 'transparent',
+							boxShadow: 'none',
+						}}
+					/>
+					<BreezeButton
+						content={showCompleted ? 'Hide Completed Goals' : 'Show Completed Goals'}
+						onClick={() => setShowCompleted(!showCompleted)}
+					/>
+					{isError ? (
+						<BreezeText
+							type='medium'
+							text='Error fetching goals'
+						/>
+					) : (
+						<>
+							<BreezeList>
+								{unfinishedGoals?.map((goal: Goal) => (
+									<GoalItem
+										key={goal.id}
+										userId={user?.sub ?? ''}
+										goal={goal}
+										isEditMode={isEditMode}
+										refetchGoals={refetch}
+									/>
+								))}
+							</BreezeList>
+							{showCompleted && (
+								<BreezeList>
+									{completedGoals?.map((goal: Goal) => (
+										<GoalItem
+											key={goal.id}
+											userId={user?.sub ?? ''}
+											goal={goal}
+											isEditMode={isEditMode}
+											refetchGoals={refetch}
+										/>
+									))}
+								</BreezeList>
+							)}
+						</>
 					)}
+					<BreezeButton
+						content='Add Goal'
+						onClick={() => postMutate.mutate()}
+					/>
 				</>
 			)}
-			<BreezeButton
-				content='Add Goal'
-				onClick={() => postMutate.mutate()}
-			/>
 		</BreezeCard>
 	)
 }

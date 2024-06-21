@@ -52,6 +52,7 @@ export const BudgetSection = () => {
 				<BreezeButton
 					content={
 						<img
+							className='svg-icon'
 							src='./arrow-left.svg'
 							alt='arrow-left'
 						/>
@@ -68,6 +69,7 @@ export const BudgetSection = () => {
 				<BreezeButton
 					content={
 						<img
+							className='svg-icon'
 							src='./arrow-right.svg'
 							alt='arrow-right'
 						/>

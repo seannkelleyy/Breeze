@@ -7,6 +7,7 @@ export const BackButton = () => {
 		<BreezeButton
 			content={
 				<img
+					className='svg-icon'
 					src='/arrow-left.svg'
 					alt='back'
 				/>
