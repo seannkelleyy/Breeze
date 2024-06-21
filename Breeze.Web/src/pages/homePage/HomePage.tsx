@@ -1,5 +1,5 @@
 import { AddButtons } from './AddButtons'
-import { Goals } from './features/Goals'
+import { GoalItemsBox } from './features/goals/GoalItemsBox'
 import { BudgetSection } from './budgetSection/BudgetSection'
 import { Progress } from './features/Progress'
 import { BreezeBox } from '../../components/shared/BreezeBox'
@@ -73,7 +73,7 @@ export const HomePage = () => {
 					/>
 				</BreezeCard>
 				<Progress />
-				<Goals />
+				<GoalItemsBox />
 				<AddButtons />
 			</BreezeBox>
 			<BudgetSection />

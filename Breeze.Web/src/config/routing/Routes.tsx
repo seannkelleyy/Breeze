@@ -6,12 +6,30 @@ import { Profile } from '../../components/auth/Profile'
 import { AddIncome } from '../../pages/addItems/AddIncome'
 import { AddExpense } from '../../pages/addItems/AddExpense'
 import { useAuth0 } from '@auth0/auth0-react'
+import { BreezeBox } from '@/components/shared/BreezeBox'
+import { BreezeText } from '@/components/shared/BreezeText'
 
 export const AppRoutes = () => {
 	const { isAuthenticated, isLoading } = useAuth0()
 
 	if (isLoading) {
-		return <div>Loading...</div>
+		return (
+			<BreezeBox
+				title='Loading'
+				style={{
+					width: '100%',
+					height: '100%',
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+				}}
+			>
+				<BreezeText
+					text='Loading...'
+					type='small-heading'
+				/>
+			</BreezeBox>
+		)
 	}
 
 	return (
