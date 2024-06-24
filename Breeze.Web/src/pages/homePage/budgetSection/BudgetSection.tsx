@@ -59,13 +59,17 @@ export const BudgetSection = () => {
 					}
 					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, false))}
 				/>
-				<BreezeCard title='Budget Date'>
-					<BreezeText
-						type='large'
-						style={{ textAlign: 'center' }}
-						text={`${getMonthAsString(budgetDate.getMonth())} ${budgetDate.getFullYear()}`}
-					/>
-				</BreezeCard>
+				<BreezeText
+					type='large'
+					style={{
+						textAlign: 'center',
+						background: 'var(--color-card-background)',
+						boxShadow: 'var(--shadow-box-shadow)',
+						borderRadius: '0.75rem',
+						padding: '.5em 1em',
+					}}
+					text={`${getMonthAsString(budgetDate.getMonth())} ${budgetDate.getFullYear()}`}
+				/>
 				<BreezeButton
 					content={
 						<img
@@ -114,7 +118,12 @@ export const BudgetSection = () => {
 					/>
 				</BreezeCard>
 			)}
-			<BreezeBox title='categories'>
+			<BreezeBox
+				title='Categories'
+				style={{
+					width: '100%',
+				}}
+			>
 				{categories &&
 					categories.map((category, index) => (
 						<CategoryOverview

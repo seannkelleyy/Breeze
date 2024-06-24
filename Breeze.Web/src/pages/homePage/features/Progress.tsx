@@ -26,12 +26,7 @@ export const Progress = () => {
 	}
 
 	return (
-		<BreezeCard
-			title='Progress'
-			style={{
-				width: '80%',
-			}}
-		>
+		<BreezeCard title='Progress'>
 			{budget.monthlyIncome ? (
 				<BreezeText
 					text={calculateProgress(new Date().getDate(), dailyBudget, totalSpent, totalBudget)}

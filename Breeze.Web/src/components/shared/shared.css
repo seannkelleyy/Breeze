@@ -5,6 +5,11 @@
 	align-items: center;
 	flex-direction: column;
 	gap: 1rem;
+	max-width: 1000px;
+	margin: auto;
+	@media (min-width: 481px) {
+		width: '100%';
+	}
 }
 
 .breeze-box-row {
@@ -13,6 +18,11 @@
 	align-items: center;
 	flex-direction: row;
 	gap: 1rem;
+	max-width: 1000px;
+	margin: auto;
+	@media (min-width: 481px) {
+		width: '100%';
+	}
 }
 
 /* Breeze Button */
@@ -74,6 +84,7 @@
 .breeze-card {
 	display: flex;
 	flex-direction: column;
+	position: relative;
 	justify-content: center;
 	align-items: center;
 	gap: 0.75rem;
@@ -81,7 +92,15 @@
 	box-shadow: var(--shadow-box-shadow);
 	border-radius: 0.75rem;
 	padding: 1em;
-	max-width: 90%;
+	margin: auto;
+	@media (max-width: 650px) {
+		min-width: 70%;
+		max-width: 85%;
+	}
+	@media (min-width: 650px) {
+		min-width: 400px;
+		max-width: 1000px;
+	}
 }
 
 /* Breeze Input */
@@ -140,6 +159,7 @@
 	font-size: 1.15em;
 	text-align: right;
 	box-sizing: border-box;
+	color: var(--color-text);
 	background-color: var(--color-input-background);
 }
 

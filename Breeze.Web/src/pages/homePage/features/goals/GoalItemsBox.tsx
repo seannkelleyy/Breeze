@@ -32,14 +32,7 @@ export const GoalItemsBox = () => {
 	})
 
 	return (
-		<BreezeCard
-			title='Goals'
-			style={{
-				minWidth: '60%',
-				maxWidth: '80%',
-				position: 'relative',
-			}}
-		>
+		<BreezeCard title='Goals'>
 			<BreezeText
 				text='Goals'
 				type='small-heading'

@@ -1,4 +1,3 @@
-import { AddButtons } from './AddButtons'
 import { GoalItemsBox } from './features/goals/GoalItemsBox'
 import { BudgetSection } from './budgetSection/BudgetSection'
 import { Progress } from './features/Progress'
@@ -10,6 +9,7 @@ import { LogoutModal } from '../../components/auth/LogoutModal'
 import { useState } from 'react'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { useDateContext } from '../../services/providers/DateProvider'
+import { Link } from 'react-router-dom'
 
 /**
  * This is the home page component that calls the components that make up the home page.
@@ -21,7 +21,7 @@ export const HomePage = () => {
 	const [showModal, setShowModal] = useState(false)
 
 	return (
-		<BreezeBox title='Home Page'>
+		<>
 			<BreezeBox
 				title='Overview'
 				style={{
@@ -74,9 +74,22 @@ export const HomePage = () => {
 				</BreezeCard>
 				<Progress />
 				<GoalItemsBox />
-				<AddButtons />
+				<BreezeBox title='Add Buttons'>
+					<Link to='/add-expense'>
+						<BreezeButton
+							content='Add New Expense'
+							size='large'
+						/>
+					</Link>
+					<Link to='/add-income'>
+						<BreezeButton
+							content='Add New Income'
+							size='large'
+						/>
+					</Link>
+				</BreezeBox>
 			</BreezeBox>
 			<BudgetSection />
-		</BreezeBox>
+		</>
 	)
 }

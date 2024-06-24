@@ -19,10 +19,8 @@ type BudgetContextType = {
 	refetchCategories: () => void
 }
 
-// Context creation with default value
 const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContextType)
 
-// Context provider component
 export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 	const { date } = useDateContext()
 	const [totalSpent, setTotalSpent] = useState(0)
