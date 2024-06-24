@@ -18,8 +18,8 @@ export const LogoutModal = ({ showModal, setShowModal }: LogoutModalProps) => {
 				top: '1rem',
 				right: '1rem',
 				borderRadius: '1rem',
-				width: '25vw',
-				height: '12vh',
+				minWidth: '9em',
+				minHeight: '9em',
 			}}
 		>
 			<BreezeButton
