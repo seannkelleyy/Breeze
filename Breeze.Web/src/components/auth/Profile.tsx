@@ -57,6 +57,10 @@ export const Profile = () => {
 						type='small'
 					/>
 					<BreezeText
+						text={`User Id: ${user?.sub}`}
+						type='small'
+					/>
+					<BreezeText
 						text={`Breeze Version: ${appVersion}`}
 						type='small'
 						style={{

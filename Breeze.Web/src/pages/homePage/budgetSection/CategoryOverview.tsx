@@ -26,14 +26,8 @@ export const CategoryOverview = ({ category }: categoryItemProps) => {
 		refetch()
 	}, [refetch, expenses])
 
-	// TODO: Replace loading with skeleton loader
 	return (
-		<BreezeCard
-			title='Category Overview'
-			style={{
-				width: '100%',
-			}}
-		>
+		<BreezeCard title='Category Overview'>
 			<BreezeBox
 				title='category-item-info'
 				direction='row'

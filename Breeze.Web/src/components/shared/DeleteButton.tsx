@@ -10,6 +10,7 @@ export const DeleteButton = ({ onClick, style }: DeleteButtonProps) => {
 		<BreezeButton
 			content={
 				<img
+					className='svg-icon'
 					src='/trash.svg'
 					alt='Delete'
 				/>

@@ -35,7 +35,6 @@ const useHttp =  () => {
         onSettled: () => {
             if (accessToken) {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-                console.log('accessToken set' + accessToken)
             }
         }
     });

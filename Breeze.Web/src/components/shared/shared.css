@@ -1,9 +1,15 @@
+/* Breeze Box */
 .breeze-box-column {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
 	gap: 1rem;
+	max-width: 1000px;
+	margin: auto;
+	@media (min-width: 481px) {
+		width: '100%';
+	}
 }
 
 .breeze-box-row {
@@ -12,8 +18,14 @@
 	align-items: center;
 	flex-direction: row;
 	gap: 1rem;
+	max-width: 1000px;
+	margin: auto;
+	@media (min-width: 481px) {
+		width: '100%';
+	}
 }
 
+/* Breeze Button */
 .breeze-button {
 	border-radius: 0.5em;
 	border: 1px solid transparent;
@@ -21,7 +33,7 @@
 	font-size: 1em;
 	font-weight: 500;
 	font-family: inherit;
-	box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 8px;
+	box-shadow: var(--shadow-box-shadow);
 	align-self: center;
 	cursor: pointer;
 }
@@ -33,7 +45,7 @@
 	font-size: 1em;
 	font-weight: 500;
 	font-family: inherit;
-	box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 8px;
+	box-shadow: var(--shadow-box-shadow);
 	align-self: center;
 	cursor: pointer;
 	width: 7em;
@@ -47,7 +59,7 @@
 	font-size: 1em;
 	font-weight: 500;
 	font-family: inherit;
-	box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 8px;
+	box-shadow: var(--shadow-box-shadow);
 	align-self: center;
 	cursor: pointer;
 	width: 10em;
@@ -61,27 +73,37 @@
 	font-size: 1.2em;
 	font-weight: 500;
 	font-family: inherit;
-	box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 8px;
+	box-shadow: var(--shadow-box-shadow);
 	align-self: center;
 	cursor: pointer;
 	width: 12em;
 	height: 3.5em;
 }
 
+/* Breeze Card */
 .breeze-card {
 	display: flex;
 	flex-direction: column;
+	position: relative;
 	justify-content: center;
 	align-items: center;
 	gap: 0.75rem;
-	background: var(--neutral100);
-	color: var(--darkText);
-	box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 8px;
+	background: var(--color-card-background);
+	box-shadow: var(--shadow-box-shadow);
 	border-radius: 0.75rem;
 	padding: 1em;
-	max-width: 90%;
+	margin: auto;
+	@media (max-width: 650px) {
+		min-width: 70%;
+		max-width: 85%;
+	}
+	@media (min-width: 650px) {
+		min-width: 400px;
+		max-width: 1000px;
+	}
 }
 
+/* Breeze Input */
 .breeze-input {
 	width: 10ch;
 	height: 2.5em;
@@ -91,15 +113,15 @@
 	font-size: 1.15em;
 	text-align: right;
 	box-sizing: border-box;
-	color: var(--darkText);
-	background-color: var(--neutral100);
+	color: var(--color-text);
+	background-color: var(--color-input-background);
 }
 
 .breeze-input:focus {
 	outline: none;
-	color: var(--focusText);
 }
 
+/* Breeze List */
 .breeze-list {
 	list-style-type: none;
 	margin: 0;
@@ -111,21 +133,23 @@
 	font-size: 1.1em;
 }
 
+/* Breeze Progress Bar */
 .breeze-progress-bar {
-	background-color: var(--neutral200);
+	background-color: var(--color-progress-background);
 	border-radius: 0.5rem;
 	height: 1rem;
-	box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+	box-shadow: var(--shadow-box-shadow);
 	width: 100%;
 }
 
 .breeze-progress-bar-fill {
-	background-color: var(--blue500);
+	background-color: var(--color-progress);
 	border-radius: 0.5rem;
 	height: 1rem;
 	width: 100%;
 }
 
+/* Breeze Select */
 .breeze-select {
 	width: 10ch;
 	height: 2.5em;
@@ -135,30 +159,27 @@
 	font-size: 1.15em;
 	text-align: right;
 	box-sizing: border-box;
-	color: var(--darkText);
-	background-color: var(--neutral100);
+	color: var(--color-text);
+	background-color: var(--color-input-background);
 }
 
 .breeze-select-option {
 	font-size: 1.15em;
-	color: var(--darkText);
 }
 
+/* Breeze Text */
 .breeze-text-small {
 	font-size: 1em;
-	color: var(--darkText);
 	margin: 0;
 }
 
 .breeze-text-medium {
 	font-size: 1.25em;
-	color: var(--darkText);
 	margin: 0;
 }
 
 .breeze-text-large {
 	font-size: 1.4em;
-	color: var(--darkText);
 	margin: 0;
 }
 
@@ -166,14 +187,12 @@
 	text-align: center;
 	font-size: 1.75em;
 	font-weight: 600;
-	color: var(--darkText);
 	margin: 0;
 }
 
 .breeze-text-large-heading {
 	font-size: 2.25em;
 	font-weight: 650;
-	color: var(--darkText);
 	margin: 0;
 }
 
