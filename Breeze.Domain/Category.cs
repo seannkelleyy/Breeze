@@ -8,6 +8,5 @@
         public int BudgetId { get; set; }
         public decimal Allocation { get; set; }
         public decimal CurrentSpend { get; set; }
-        public List<Expense> Expenses { get; set; }
     }
 }
