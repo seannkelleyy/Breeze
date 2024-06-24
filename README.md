@@ -4,7 +4,7 @@ Author: Sean Kelley
 Breeze is a Budgeting App that allows users to create new budgets by adding expenses and categories. I built it to showcase my full stack development skills as well as practice. 
 
 Tech Stack:
-React with TypeScript, Axios, ReactQuery, C# and Entity Framework, SQL Databse, Auth0 for security
+React with TypeScript, Axios, ReactQuery, C# and Entity Framework, SQL Databse, Auth0 for security. I have also hosted this application in Azure and got experience with creating, deploying and troubleshooting the process of hosting applications in the cloud. 
 
 Getting Started:
   1. Clone the repo to Visual Studio to set up the backend.
