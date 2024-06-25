@@ -11,6 +11,10 @@ type IncomeItemsBoxProps = {
 	setIncome: (amount: number) => void
 }
 
+/**
+ * Component that displays the income items in a box. It is displayed in the EditBudgetPage component.
+ * @param setIncome. The function to set the income after they have been changed.
+ */
 export const IncomeItemsBox = ({ setIncome }: IncomeItemsBoxProps) => {
 	const { user } = useAuth0()
 	const { budget, incomes, refetchIncomes } = useBudgetContext()

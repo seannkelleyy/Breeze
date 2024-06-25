@@ -6,7 +6,7 @@ type BreezeBoxProps = {
 }
 
 /**
- * Simple replacement for a flexbox container. This componant is quick to use and configure.
+ * Simple replacement for a flexbox container. This component is quick to use and configure.
  * @param props.title: - The title of the breeze box.
  * @param props.children: - The children of the breeze box.
  * @param props.direction: - Optional - The direction of the breeze box. Defaults to column.

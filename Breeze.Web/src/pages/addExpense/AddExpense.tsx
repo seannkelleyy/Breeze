@@ -7,10 +7,13 @@ import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { BreezeSelect } from '../../components/shared/BreezeSelect'
-import { Expense } from '../../services/hooks/expense/ExpenseServices'
+import { Expense } from '../../services/hooks/expense/expenseServicess'
 import { useNavigate } from 'react-router-dom'
 import { usePostExpense } from '@/services/hooks/expense/usePostExpense'
 
+/**
+ * This component is the page where a user can add an expense.
+ */
 export const AddExpense = () => {
 	const { user } = useAuth0()
 	const navigate = useNavigate()

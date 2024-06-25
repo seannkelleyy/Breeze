@@ -2,9 +2,9 @@ import React, { useState, useContext, useEffect, useMemo } from 'react'
 import { useDateContext } from './DateProvider'
 import { useFetchBudget } from '../hooks/budget/useFetchBudget'
 import { useFetchIncomes } from '../hooks/income/useFetchIncomes'
-import { Budget } from '../hooks/budget/BudgetServices'
-import { Category } from '../hooks/category/CategoryServices'
-import { Income } from '../hooks/income/IncomeServices'
+import { Budget } from '../hooks/budget/budgetServicess'
+import { Category } from '../hooks/category/categoryServicess'
+import { Income } from '../hooks/income/incomeServicess'
 import { useFetchCategories } from '../hooks/category/useFetchCategories'
 
 type BudgetProviderProps = { children: React.ReactNode }

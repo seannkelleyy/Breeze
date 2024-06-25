@@ -7,13 +7,11 @@ export type Goal = {
     isCompleted: boolean,
 }
 
-// Only getGoals, postGoal, patchGoal and deleteGoal are used in the app currently. Everything else is unused, but I'm keeping it because 
-// I want to keep an example of this pattern in the codebase for reference.
+/**
+ * A hook for fetching goal data. This should only be used when creating new hooks with ReactQuery.
+ */
 export const useGoals = () => {
-	const { getOne, getMany, post, patch, deleteOne } = useHttp()
-
-	const getGoal = async ( userId: string, goalId: number): Promise<Goal> =>
-		await getOne<Goal>(`users/${userId}/goals/${goalId}`)
+	const { getMany, post, patch, deleteOne } = useHttp()
 
 	const getGoals = async (userId: string): Promise<Goal[]> => await getMany<Goal>(`users/${userId}/goals`)
 
@@ -23,5 +21,5 @@ export const useGoals = () => {
 
 	const deleteGoal = async (userId: string, goalId: number) => deleteOne<Goal>(`users/${userId}/goals/${goalId}`)
 
-	return { getGoal, getGoals, postGoal, patchGoal, deleteGoal }
+	return {  getGoals, postGoal, patchGoal, deleteGoal }
 }

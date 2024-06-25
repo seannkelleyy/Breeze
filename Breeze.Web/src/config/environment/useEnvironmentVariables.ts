@@ -11,6 +11,10 @@ export type EnvironmentVariables = {
     apiAudience: string
 }
  
+/**
+ * This function returns the environment variables for the application.
+ * @returns EnvironmentVariables
+ */
 export const useEnvironmentVariables = (): EnvironmentVariables => {
     const localApi =
         import.meta.env.VITE_LOCAL_API ?? 'https://localhost:7284';

@@ -2,7 +2,7 @@ import { BreezeBox } from '@/components/shared/BreezeBox'
 import { BreezeCard } from '@/components/shared/BreezeCard'
 import { BreezeText } from '@/components/shared/BreezeText'
 import { DeleteButton } from '@/components/shared/DeleteButton'
-import { Expense } from '@/services/hooks/expense/ExpenseServices'
+import { Expense } from '@/services/hooks/expense/expenseServicess'
 import { useDeleteExpense } from '@/services/hooks/expense/useDeleteExpense'
 import { useBudgetContext } from '@/services/providers/BudgetProvider'
 import { useDateContext } from '@/services/providers/DateProvider'
@@ -12,6 +12,12 @@ type ExpenseItemProps = {
 	refetchExpenses: () => void
 }
 
+/**
+ * This is the expense item component that displays the details of an expense. This is displayed
+ * in the CategoryOverview component.
+ * @param expense. The expense to display.
+ * @param refetchExpenses. The function to refetch the expenses.
+ */
 export const ExpenseItem = ({ expense, refetchExpenses }: ExpenseItemProps) => {
 	const { getMonthAsString } = useDateContext()
 	const { categories, refetchBudget, refetchCategories } = useBudgetContext()

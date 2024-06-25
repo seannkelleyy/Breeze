@@ -5,6 +5,11 @@ type DeleteButtonProps = {
 	style?: React.CSSProperties
 }
 
+/**
+ * Simple delete button used in Breeze, comes standard with default Breeze styling.
+ * @param props.onClick: The onClick function of the delete button.
+ * @param props.style: - Optional - The style of the delete button.
+ */
 export const DeleteButton = ({ onClick, style }: DeleteButtonProps) => {
 	return (
 		<BreezeButton

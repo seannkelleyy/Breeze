@@ -1,6 +1,6 @@
 import { useMutation } from 'react-query';
 import { useCallback } from 'react';
-import { Goal, useGoals } from './GoalServices';
+import { Goal, useGoals } from './goalServicess';
 
 type PatchGoalProps = {
     userId: string;
@@ -9,6 +9,13 @@ type PatchGoalProps = {
     onSettled?: () => void;
 };
 
+/**
+* A hook for patching a goal.
+* @param props.userId: The user id to patch the goal to.
+* @param props.goal: The goal to patch.
+* @param props.onSuccess: - Optional - The function to call when the mutation is successful.
+* @param props.onSettled: - Optional - The function to call when the mutation is settled.
+*/
 export const usePatchGoal = ({userId, goal, onSuccess, onSettled}: PatchGoalProps) => {
   const { patchGoal } = useGoals();
 

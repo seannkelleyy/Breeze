@@ -10,7 +10,7 @@ import { usePostGoal } from '@/services/hooks/goal/usePostGoal'
 import { useState } from 'react'
 
 /**
- * This is a future component that will display the user's goals.
+ * This is a component that displays the user's goals.
  */
 export const GoalItemsBox = () => {
 	const { user } = useAuth0()

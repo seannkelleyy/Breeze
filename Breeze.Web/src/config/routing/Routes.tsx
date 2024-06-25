@@ -9,6 +9,9 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { BreezeBox } from '@/components/shared/BreezeBox'
 import { BreezeText } from '@/components/shared/BreezeText'
 
+/**
+ * The routes for the application. Called in the App.tsx file.
+ */
 export const AppRoutes = () => {
 	const { isAuthenticated, isLoading } = useAuth0()
 

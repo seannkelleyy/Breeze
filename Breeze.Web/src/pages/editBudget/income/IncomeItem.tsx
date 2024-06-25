@@ -4,13 +4,18 @@ import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { DeleteButton } from '../../../components/shared/DeleteButton'
 import { useDeleteIncome } from '@/services/hooks/income/useDeleteIncome'
 import { usePatchIncome } from '@/services/hooks/income/usePatchIncome'
-import { Income } from '@/services/hooks/income/IncomeServices'
+import { Income } from '@/services/hooks/income/incomeServicess'
 
 type IncomeItemProps = {
 	incomeItem: Income
 	refetchIncomes: () => void
 }
 
+/**
+ * This component is a single income item. It is displayed in the IncomeItemsBox component.
+ * @param incomeItem. The income object.
+ * @param refetchIncomes. A function to refetch the incomes.
+ */
 export const IncomeItem = ({ incomeItem, refetchIncomes }: IncomeItemProps) => {
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)
 	const [incomeName, setIncomeName] = useState<string>(incomeItem.name)

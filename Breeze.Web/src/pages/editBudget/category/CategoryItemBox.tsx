@@ -11,6 +11,10 @@ type CategoryItemsBoxProps = {
 	setExpenses: (amount: number) => void
 }
 
+/**
+ * This component is a box that contains all the category items. It is displayed in the EditBudgetPage component.
+ * @param setExpenses. A function to set the expenses after they have been changed.
+ */
 export const CategoryItemsBox = ({ setExpenses }: CategoryItemsBoxProps) => {
 	const { user } = useAuth0()
 	const { budget, categories, refetchCategories } = useBudgetContext()

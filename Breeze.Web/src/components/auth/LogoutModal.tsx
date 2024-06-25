@@ -9,6 +9,12 @@ type LogoutModalProps = {
 	setShowModal: (showModal: boolean) => void
 }
 
+/**
+ * A modal that shows when the user clicks the logout button.
+ * @param props.showModal: A boolean that determines if the modal is shown.
+ * @param props.setShowModal: A function that sets the showModal state.
+ 
+ */
 export const LogoutModal = ({ showModal, setShowModal }: LogoutModalProps) => {
 	return (
 		<BreezeCard

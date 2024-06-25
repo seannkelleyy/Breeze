@@ -4,7 +4,7 @@ import { BreezeText } from '../../../components/shared/BreezeText'
 import { useDateContext } from '../../../services/providers/DateProvider'
 
 /**
- * This is a future feature that will calculate the user's progress towards their budget.
+ * This is a feature that calculates the user's progress towards their budget.
  */
 export const Progress = () => {
 	const { getNumberOfDaysInMonth } = useDateContext()

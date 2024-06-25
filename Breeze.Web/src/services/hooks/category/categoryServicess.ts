@@ -9,12 +9,11 @@ export type Category = {
 	allocation: number
 }
 
-// Only getCategory, postCategory, patchCategory and deleteCategory are used in the app currently. Everything else is unused, but I'm keeping it because 
-// I want to keep an example of this pattern in the codebase for reference.
+/**
+ * A hook for fetching category data. This should only be used when creating new hooks with ReactQuery.
+ */
 export const useCategories = () => {
-	const { getOne, getMany, post, patch, deleteOne } = useHttp()
-
-	const getCategory = async (category: Category): Promise<Category> => await getOne<Category>(`budgets/${category.budgetId}/categories/${category.id}`)
+	const { getMany, post, patch, deleteOne } = useHttp()
 
 	const getCategories = async (budgetId: number): Promise<Category[]> => await getMany<Category>(`budgets/${budgetId}/categories`)
 
@@ -24,5 +23,5 @@ export const useCategories = () => {
 
 	const deleteCategory = async (category: Category) => deleteOne<Category>(`budgets/${category.budgetId}/categories/${category.id}`)
 
-	return { getCategory, getCategories, postCategory, patchCategory, deleteCategory }
+	return { getCategories, postCategory, patchCategory, deleteCategory }
 }

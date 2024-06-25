@@ -14,6 +14,13 @@ type GoalItemProps = {
 	refetchGoals: () => void
 }
 
+/**
+ * This component is a single goal item. It is displayed in the GoalItemsBox component.
+ * @param userId. The user's id.
+ * @param goal. The goal object.
+ * @param isEditMode. A boolean to indicate if the goal is in edit mode.
+ * @param refetchGoals. A function to refetch the goals.
+ */
 export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemProps) => {
 	const deleteMutation = useDeleteGoal({
 		userId: userId,

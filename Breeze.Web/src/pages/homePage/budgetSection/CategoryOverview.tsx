@@ -18,7 +18,6 @@ type categoryItemProps = {
  */
 export const CategoryOverview = ({ category }: categoryItemProps) => {
 	const { data: expenses, status, refetch } = useFetchExpenses({ category })
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const [seeExpenses, setSeeExpenses] = useState<boolean>(false)
 	const categoryPercentage = (category.currentSpend / category.allocation) * 100
 
