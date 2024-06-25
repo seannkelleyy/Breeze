@@ -11,12 +11,11 @@ export type Income = {
 	day: number
 }
 
-// Only getIncomes, postIncome, patchIncome and deleteIncome are used in the app currently. Everything else is unused, but I'm keeping it because 
-// I want to keep an example of this pattern in the codebase for reference.
+/**
+ * A hook for fetching income data. This should only be used when creating new hooks with ReactQuery.
+ */
 export const useIncomes = () => {
-	const { getOne, getMany, post, patch, deleteOne } = useHttp()
-
-	const getIncome = async (income: Income): Promise<Income> => await getOne<Income>(`budgets/${income.budgetId}/incomes/${income.id}`)
+	const { getMany, post, patch, deleteOne } = useHttp()
 
 	const getIncomes = async (budgetId: number): Promise<Income[]> => await getMany<Income>(`budgets/${budgetId}/incomes`)
 
@@ -26,5 +25,5 @@ export const useIncomes = () => {
 
 	const deleteIncome = async (income: Income) => deleteOne<Income>(`budgets/${income.budgetId}/incomes/${income.id}`)
 
-	return { getIncome, getIncomes, postIncome, patchIncome, deleteIncome }
+	return { getIncomes, postIncome, patchIncome, deleteIncome }
 }

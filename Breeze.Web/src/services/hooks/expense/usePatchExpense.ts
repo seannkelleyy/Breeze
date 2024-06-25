@@ -1,7 +1,7 @@
 import { useMutation } from 'react-query';
 import { useCallback } from 'react';
-import { Expense, useExpenses } from './ExpenseServices';
-import { Category } from '../category/CategoryServices';
+import { Expense, useExpenses } from './expenseServices';
+import { Category } from '../category/categoryServices';
 
 type PatchExpenseProps = {
     category: Category;
@@ -10,6 +10,13 @@ type PatchExpenseProps = {
     onSettled?: () => void;
 };
 
+/**
+ * A hook for patching an expense.
+ * @param props.category: The category to patch the expense from.
+ * @param props.expense: The expense to patch.
+ * @param props.onSuccess: - Optional - The function to call when the mutation is successful.
+ * @param props.onSettled: - Optional - The function to call when the mutation is settled.
+ */
 export const usePatchExpense = ({category, expense, onSuccess, onSettled}: PatchExpenseProps) => {
   const { patchExpense } = useExpenses();
 

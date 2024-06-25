@@ -7,7 +7,7 @@ import { BreezeCard } from '../../../components/shared/BreezeCard'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { useDateContext } from '../../../services/providers/DateProvider'
-import { Budget } from '@/services/hooks/budget/BudgetServices'
+import { Budget } from '@/services/hooks/budget/budgetServices'
 
 /**
  * This is the category section view of that home page that gives a brief

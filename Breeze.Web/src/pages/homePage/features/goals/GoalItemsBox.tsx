@@ -3,14 +3,14 @@ import { BreezeCard } from '../../../../components/shared/BreezeCard'
 import { BreezeList } from '../../../../components/shared/BreezeList'
 import { BreezeText } from '../../../../components/shared/BreezeText'
 import { useFetchGoals } from '@/services/hooks/goal/useFetchGoals'
-import { Goal } from '@/services/hooks/goal/GoalServices'
+import { Goal } from '@/services/hooks/goal/goalServices'
 import { GoalItem } from './GoalItem'
 import { BreezeButton } from '@/components/shared/BreezeButton'
 import { usePostGoal } from '@/services/hooks/goal/usePostGoal'
 import { useState } from 'react'
 
 /**
- * This is a future component that will display the user's goals.
+ * This is a component that displays the user's goals.
  */
 export const GoalItemsBox = () => {
 	const { user } = useAuth0()

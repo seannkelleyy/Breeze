@@ -8,8 +8,11 @@ import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { useNavigate } from 'react-router-dom'
 import { usePostIncome } from '@/services/hooks/income/usePostIncome'
-import { Income } from '@/services/hooks/income/IncomeServices'
+import { Income } from '@/services/hooks/income/incomeServices'
 
+/**
+ * This component is the page where a user can add an income.
+ */
 export const AddIncome = () => {
 	const { user } = useAuth0()
 	const navigate = useNavigate()

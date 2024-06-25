@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Category } from '../category/CategoryServices'
+import { Category } from '../category/categoryServices'
 import useHttp from '../useHttp'
 
 export type Expense = {
@@ -13,13 +13,11 @@ export type Expense = {
 	day: number
 }
 
-// Only getExpenses, postExpense, patchExpense and deleteExpenses are used in the app currently. Everything else is unused, but I'm keeping it because 
-// I want to keep an example of this pattern in the codebase for reference.
+/**
+ * A hook for fetching expense data. This should only be used when creating new hooks with ReactQuery.
+ */
 export const useExpenses = () => {
-	const { getOne, getMany, post, patch, deleteOne } = useHttp()
-
-	const getExpense = async (category: Category, expenseId: number): Promise<Expense> =>
-		await getOne<Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses/${expenseId}`)
+	const { getMany, post, patch, deleteOne } = useHttp()
 
 	const getExpenses = async (category: Category): Promise<Expense[]> => await getMany<Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses`)
 
@@ -29,5 +27,5 @@ export const useExpenses = () => {
 
 	const deleteExpense = async (category: Category, expense: Expense) => deleteOne<Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses/${expense.id}`)
 
-	return { getExpense, getExpenses, postExpense, patchExpense, deleteExpense }
+	return { getExpenses, postExpense, patchExpense, deleteExpense }
 }

@@ -1,6 +1,6 @@
 import { useMutation } from 'react-query';
 import { useCallback } from 'react';
-import { Income, useIncomes } from './IncomeServices';
+import { Income, useIncomes } from './incomeServices';
 
 type PatchIncomeProps = {
     income: Income;
@@ -8,6 +8,12 @@ type PatchIncomeProps = {
     onSettled?: () => void;
 };
 
+/**
+ * A hook for patching an income.
+ * @param props.income: The income to patch.
+ * @param props.onSuccess: - Optional - The function to call when the mutation is successful.
+ * @param props.onSettled: - Optional - The function to call when the mutation is settled.
+ */
 export const usePatchIncome = ({income, onSuccess, onSettled}: PatchIncomeProps) => {
   const { patchIncome } = useIncomes();
 

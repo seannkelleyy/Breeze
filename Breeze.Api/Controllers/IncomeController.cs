@@ -20,27 +20,6 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetIncome([FromRoute] int id)
-        {
-            try
-            {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-                if (userId == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(incomes.GetIncomeById(userId, id));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Failed to get Income, error code: {ex.Message}");
-                return BadRequest(ex.Message);
-            }
-        }
-
-
         [HttpGet]
         public IActionResult GetIncomes([FromRoute] int budgetId)
         {
@@ -117,27 +96,6 @@ namespace Breeze.Api.Controllers
                 }
                 int budgetId = incomes.GetIncomeById(userId, id).BudgetId;
                 var response = incomes.DeleteIncomeById(userId, id);
-                budgets.CalculateBudgetIncomes(userId, budgetId, incomes.GetIncomeByBudgetId(userId, budgetId));
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpDelete]
-        public IActionResult DeleteIncomesForBudget(int budgetId)
-        {
-            try
-            {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-                if (userId == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                var response = incomes.DeleteIncomesForBudget(userId, budgetId);
                 budgets.CalculateBudgetIncomes(userId, budgetId, incomes.GetIncomeByBudgetId(userId, budgetId));
                 return Ok(response);
             }

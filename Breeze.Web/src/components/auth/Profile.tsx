@@ -5,6 +5,9 @@ import { BreezeCard } from '../shared/BreezeCard'
 import { BackButton } from '../shared/BackButton'
 import { useEnvironmentVariables } from '../../config/environment/useEnvironmentVariables'
 
+/**
+ * The profile page for the user. Displays the user's information.
+ */
 export const Profile = () => {
 	const { appVersion } = useEnvironmentVariables()
 	const { user, isAuthenticated, isLoading } = useAuth0()

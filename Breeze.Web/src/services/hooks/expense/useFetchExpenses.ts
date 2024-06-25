@@ -1,12 +1,16 @@
 import { useQuery } from 'react-query'
 import { useCallback } from 'react'
-import { Expense, useExpenses } from './ExpenseServices'
-import { Category } from '../category/CategoryServices'
+import { Expense, useExpenses } from './expenseServices'
+import { Category } from '../category/categoryServices'
 
 type FetchExpenseProps = {
 	category: Category
 }
 
+/**
+ * A hook for fetching expenses.
+ * @param props.category: The category to fetch expenses from.
+ */
 export const useFetchExpenses = ({ category }: FetchExpenseProps) => {
 	const { getExpenses } = useExpenses()
 

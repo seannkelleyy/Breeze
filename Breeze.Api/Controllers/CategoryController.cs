@@ -22,26 +22,6 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetCategory([FromRoute] int id)
-        {
-            try
-            {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-                if (userId == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(categories.GetCategoryById(userId, id));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                return BadRequest();
-            }
-        }
-
         [HttpGet]
         public IActionResult GetCategoriesByBudgetId([FromRoute] int budgetId)
         {
@@ -129,28 +109,5 @@ namespace Breeze.Api.Controllers
                 return BadRequest();
             }
         }
-
-        [HttpDelete]
-        public IActionResult DeleteCategoriesForBudget(int budgetId)
-        {
-            try
-            {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-                if (userId == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                var response = categories.DeleteCategoriesForBudget(userId, budgetId);
-                budgets.CalculateBudgetCategories(userId, budgetId, categories.GetCategoriesByBudgetId(userId, budgetId));
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                return BadRequest();
-            }
-        }
-
     }
 }

@@ -4,13 +4,18 @@ import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { DeleteButton } from '../../../components/shared/DeleteButton'
 import { useDeleteCategory } from '@/services/hooks/category/useDeleteCategory'
 import { usePatchCategory } from '@/services/hooks/category/usePatchCategory'
-import { Category } from '@/services/hooks/category/CategoryServices'
+import { Category } from '@/services/hooks/category/categoryServices'
 
 type CategoryItemProps = {
 	categoryItem: Category
 	refetchCategories: () => void
 }
 
+/**
+ * This component is a single category item. It is displayed in the CategoryItemsBox component.
+ * @param categoryItem. The category object.
+ * @param refetchCategories. A function to refetch the categories.
+ */
 export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemProps) => {
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.allocation)
 	const [categoryName, setCategoryName] = useState<string>(categoryItem.name)

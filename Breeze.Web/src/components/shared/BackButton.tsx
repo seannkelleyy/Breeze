@@ -1,6 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { BreezeButton } from './BreezeButton'
 
+/**
+ * A button that navigates back to the previous page.
+ */
 export const BackButton = () => {
 	const navigate = useNavigate()
 	return (

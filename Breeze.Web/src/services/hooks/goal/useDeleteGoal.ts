@@ -1,6 +1,6 @@
 import { useMutation } from 'react-query';
 import { useCallback } from 'react';
-import {  useGoals } from './GoalServices';
+import {  useGoals } from './goalServices';
 
 type DeleteGoalProps = {
     userId: string;
@@ -9,6 +9,13 @@ type DeleteGoalProps = {
     onSettled?: () => void;
 };
 
+/**
+ * A hook for deleting a goal.
+ * @param props.userId: The user id to delete the goal from.
+ * @param props.goalId: The goal id to delete.
+ * @param props.onSuccess: - Optional - The function to call when the mutation is successful.
+ * @param props.onSettled: - Optional - The function to call when the mutation is settled.
+ */
 export const useDeleteGoal = ({userId, goalId, onSuccess, onSettled}: DeleteGoalProps) => {
   const { deleteGoal } = useGoals();
 

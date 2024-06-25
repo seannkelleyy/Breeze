@@ -20,26 +20,6 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetExpense([FromRoute] int id)
-        {
-            try
-            {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-                if (userId == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(expenses.GetExpenseById(userId, id));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Failed to get Expense, error code: {ex.Message}");
-                return BadRequest(ex.Message);
-            }
-        }
-
         [HttpGet]
         public IActionResult GetExpensesForCategory([FromRoute] int CategoryId)
         {
@@ -121,27 +101,6 @@ namespace Breeze.Api.Controllers
                 var response = expenses.DeleteExpenseById(userId, id);
                 categories.CalculateCategoryExpenses(userId, categoryId, expenses.GetExpenseByCategoryId(userId, categoryId));
                 return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpDelete]
-        public IActionResult DeleteExpensesForCategory([FromRoute] int categoryId)
-        {
-            try
-            {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-                if (userId == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                expenses.DeleteExpenseForCategory(userId, categoryId);
-                categories.CalculateCategoryExpenses(userId, categoryId, expenses.GetExpenseByCategoryId(userId, categoryId));
-                return Ok();
             }
             catch (Exception ex)
             {

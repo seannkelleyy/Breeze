@@ -6,7 +6,7 @@ import { BreezeText } from '../../../components/shared/BreezeText'
 import { BreezeProgressBar } from '../../../components/shared/BreezeProgressBar'
 import { ExpenseItem } from './ExpenseItem'
 import { useFetchExpenses } from '@/services/hooks/expense/useFetchExpenses'
-import { Category } from '@/services/hooks/category/CategoryServices'
+import { Category } from '@/services/hooks/category/categoryServices'
 
 type categoryItemProps = {
 	category: Category
@@ -18,7 +18,6 @@ type categoryItemProps = {
  */
 export const CategoryOverview = ({ category }: categoryItemProps) => {
 	const { data: expenses, status, refetch } = useFetchExpenses({ category })
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const [seeExpenses, setSeeExpenses] = useState<boolean>(false)
 	const categoryPercentage = (category.currentSpend / category.allocation) * 100
 
