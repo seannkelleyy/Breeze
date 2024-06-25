@@ -18,3 +18,7 @@ Getting Started:
 
 HOSTED APP LINK: https://breezebudgeting.azurewebsites.net/
 This app is hosted in Azure using App Servies for the front end and backend as well as an AzureSQL database. 
+
+![Screenshot 2024-06-25 100452](https://github.com/seannkelleyy/Breeze/assets/94130791/948da453-1994-4077-8465-e2a1d1e877f2)
+
+![Screenshot 2024-06-25 100459](https://github.com/seannkelleyy/Breeze/assets/94130791/1df22075-7534-4603-9085-800fe1d79706)
