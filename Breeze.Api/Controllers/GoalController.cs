@@ -18,26 +18,6 @@ namespace Breeze.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetGoalById([FromRoute] int id)
-        {
-            try
-            {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-                if (userId == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(goals.GetGoalById(userId, id));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Failed to get Expense, error code: {ex.Message}");
-                return BadRequest(ex.Message);
-            }
-        }
-
         [HttpGet]
         public IActionResult GetGoalsForUser()
         {
@@ -110,25 +90,6 @@ namespace Breeze.Api.Controllers
                     return Unauthorized();
                 }
                 return Ok(goals.DeleteGoalById(userId, id));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpDelete]
-        public IActionResult DeleteGoalsForUser()
-        {
-            try
-            {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-                if (userId == null)
-                {
-                    _logger.LogError(User.ToString());
-                    return Unauthorized();
-                }
-                return Ok(goals.DeleteGoalForUser(userId));
             }
             catch (Exception ex)
             {
