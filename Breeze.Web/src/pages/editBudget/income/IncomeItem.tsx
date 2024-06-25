@@ -4,7 +4,7 @@ import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { DeleteButton } from '../../../components/shared/DeleteButton'
 import { useDeleteIncome } from '@/services/hooks/income/useDeleteIncome'
 import { usePatchIncome } from '@/services/hooks/income/usePatchIncome'
-import { Income } from '@/services/hooks/income/incomeServicess'
+import { Income } from '@/services/hooks/income/incomeServices'
 
 type IncomeItemProps = {
 	incomeItem: Income

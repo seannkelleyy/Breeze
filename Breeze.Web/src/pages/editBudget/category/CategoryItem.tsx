@@ -4,7 +4,7 @@ import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { DeleteButton } from '../../../components/shared/DeleteButton'
 import { useDeleteCategory } from '@/services/hooks/category/useDeleteCategory'
 import { usePatchCategory } from '@/services/hooks/category/usePatchCategory'
-import { Category } from '@/services/hooks/category/CategoryServices'
+import { Category } from '@/services/hooks/category/categoryServices'
 
 type CategoryItemProps = {
 	categoryItem: Category

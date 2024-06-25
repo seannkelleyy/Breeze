@@ -3,7 +3,7 @@ import { BreezeButton } from '@/components/shared/BreezeButton'
 import { BreezeInput } from '@/components/shared/BreezeInput'
 import { BreezeText } from '@/components/shared/BreezeText'
 import { DeleteButton } from '@/components/shared/DeleteButton'
-import { Goal } from '@/services/hooks/goal/GoalServices'
+import { Goal } from '@/services/hooks/goal/goalServices'
 import { useDeleteGoal } from '@/services/hooks/goal/useDeleteGoal'
 import { usePatchGoal } from '@/services/hooks/goal/usePatchGoal'
 

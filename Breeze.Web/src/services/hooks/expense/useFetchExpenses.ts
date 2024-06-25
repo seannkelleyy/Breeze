@@ -1,7 +1,7 @@
 import { useQuery } from 'react-query'
 import { useCallback } from 'react'
-import { Expense, useExpenses } from './expenseServicess'
-import { Category } from '../category/categoryServicess'
+import { Expense, useExpenses } from './expenseServices'
+import { Category } from '../category/categoryServices'
 
 type FetchExpenseProps = {
 	category: Category

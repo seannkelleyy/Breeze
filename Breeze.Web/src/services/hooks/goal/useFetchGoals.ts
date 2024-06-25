@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query'
 import { useCallback } from 'react'
-import { Goal, useGoals } from './goalServicess'
+import { Goal, useGoals } from './goalServices'
 
 type FetchGoalProps = {
 	userId: string

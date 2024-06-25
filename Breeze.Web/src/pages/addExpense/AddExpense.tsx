@@ -7,7 +7,7 @@ import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { BreezeSelect } from '../../components/shared/BreezeSelect'
-import { Expense } from '../../services/hooks/expense/expenseServicess'
+import { Expense } from '../../services/hooks/expense/expenseServices'
 import { useNavigate } from 'react-router-dom'
 import { usePostExpense } from '@/services/hooks/expense/usePostExpense'
 

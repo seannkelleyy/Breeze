@@ -1,6 +1,6 @@
 import { useMutation } from 'react-query';
 import { useCallback } from 'react';
-import { Goal, useGoals } from './goalServicess';
+import { Goal, useGoals } from './goalServices';
 
 type PostGoalProps = {
     userId: string;

@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Category } from '../category/categoryServicess'
+import { Category } from '../category/categoryServices'
 import useHttp from '../useHttp'
 
 export type Expense = {

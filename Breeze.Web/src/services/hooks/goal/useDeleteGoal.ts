@@ -1,6 +1,6 @@
 import { useMutation } from 'react-query';
 import { useCallback } from 'react';
-import {  useGoals } from './goalServicess';
+import {  useGoals } from './goalServices';
 
 type DeleteGoalProps = {
     userId: string;
