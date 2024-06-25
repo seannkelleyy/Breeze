@@ -8,6 +8,7 @@ import { GoalItem } from './GoalItem'
 import { BreezeButton } from '@/components/shared/BreezeButton'
 import { usePostGoal } from '@/services/hooks/goal/usePostGoal'
 import { useState } from 'react'
+import { Pencil } from 'lucide-react'
 
 /**
  * This is a component that displays the user's goals.
@@ -45,13 +46,7 @@ export const GoalItemsBox = () => {
 			) : (
 				<>
 					<BreezeButton
-						content={
-							<img
-								className='svg-icon'
-								src='/edit.svg'
-								alt='edit'
-							/>
-						}
+						content={<Pencil />}
 						onClick={() => setIsEditMode(!isEditMode)}
 						style={{
 							position: 'absolute',

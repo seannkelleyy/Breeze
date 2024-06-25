@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { CategoryOverview } from './CategoryOverview'
-import { Link } from 'react-router-dom'
 import { BreezeButton } from '../../../components/shared/BreezeButton'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import { BreezeCard } from '../../../components/shared/BreezeCard'
@@ -8,6 +7,8 @@ import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { useDateContext } from '../../../services/providers/DateProvider'
 import { Budget } from '@/services/hooks/budget/budgetServices'
+import { EditBudgetModal } from '@/pages/editBudget/EditBudget'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 
 /**
  * This is the category section view of that home page that gives a brief
@@ -18,6 +19,7 @@ export const BudgetSection = () => {
 	const [budgetDate, setBudgetDate] = useState<Date>(date)
 	const { budget, totalSpent, categories, getBudgetForDate, refetchCategories } = useBudgetContext()
 	const [response, setResponse] = useState<{ status: number; budget?: Budget; error?: string }>()
+	const [showEditBudgetModal, setShowEditBudgetModal] = useState(false)
 
 	useEffect(() => {
 		const fetchBudget = async () => {
@@ -50,13 +52,7 @@ export const BudgetSection = () => {
 				direction='row'
 			>
 				<BreezeButton
-					content={
-						<img
-							className='svg-icon'
-							src='./arrow-left.svg'
-							alt='arrow-left'
-						/>
-					}
+					content={<ArrowLeft />}
 					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, false))}
 				/>
 				<BreezeText
@@ -71,19 +67,20 @@ export const BudgetSection = () => {
 					text={`${getMonthAsString(budgetDate.getMonth())} ${budgetDate.getFullYear()}`}
 				/>
 				<BreezeButton
-					content={
-						<img
-							className='svg-icon'
-							src='./arrow-right.svg'
-							alt='arrow-right'
-						/>
-					}
+					content={<ArrowRight />}
 					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, true))}
 				/>
 			</BreezeBox>
-			<Link to={`/budget/${budgetDate.getFullYear()}/${budgetDate.getMonth()}`}>
-				<BreezeButton content='Edit Budget' />
-			</Link>
+			<BreezeButton
+				content='Edit Budget'
+				onClick={() => setShowEditBudgetModal(true)}
+			/>
+			<EditBudgetModal
+				year={budgetDate.getFullYear()}
+				month={budgetDate.getMonth()}
+				showModal={showEditBudgetModal}
+				setShowModal={setShowEditBudgetModal}
+			/>
 			{budget.id === undefined ? (
 				<BreezeText
 					type='large'

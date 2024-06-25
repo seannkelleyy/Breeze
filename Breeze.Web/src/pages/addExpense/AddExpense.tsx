@@ -4,19 +4,23 @@ import { BreezeInput } from '../../components/shared/BreezeInput'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
-import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { BreezeSelect } from '../../components/shared/BreezeSelect'
 import { Expense } from '../../services/hooks/expense/expenseServices'
-import { useNavigate } from 'react-router-dom'
 import { usePostExpense } from '@/services/hooks/expense/usePostExpense'
+import { BreezeModal } from '@/components/shared/BreezeModal'
 
+type AddExpenseProps = {
+	showModal: boolean
+	setShowModal: (showModal: boolean) => void
+}
 /**
  * This component is the page where a user can add an expense.
+ * @param showModal. A boolean to indicate if the modal is shown.
+ * @param setShowModal. A function to set the modal.
  */
-export const AddExpense = () => {
+export const AddExpenseModal = ({ showModal, setShowModal }: AddExpenseProps) => {
 	const { user } = useAuth0()
-	const navigate = useNavigate()
 	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
 	const [isSubmittable, setIsSubmittable] = useState(false)
 	const [expense, setExpense] = useState<Expense>({
@@ -48,8 +52,11 @@ export const AddExpense = () => {
 	}
 
 	return (
-		<BreezeBox title='Add-Expense'>
-			<BackButton />
+		<BreezeModal
+			title='Add Expense'
+			showModal={showModal}
+			onClose={() => setShowModal(!showModal)}
+		>
 			<BreezeText
 				type='large-heading'
 				text='Add Expense'
@@ -155,9 +162,8 @@ export const AddExpense = () => {
 				disabled={!isSubmittable}
 				onClick={() => {
 					postMutation.mutate()
-					navigate(-1)
 				}}
 			/>
-		</BreezeBox>
+		</BreezeModal>
 	)
 }

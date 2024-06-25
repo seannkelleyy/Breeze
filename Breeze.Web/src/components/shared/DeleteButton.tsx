@@ -1,3 +1,4 @@
+import { Trash } from 'lucide-react'
 import { BreezeButton } from './BreezeButton'
 
 type DeleteButtonProps = {
@@ -13,13 +14,7 @@ type DeleteButtonProps = {
 export const DeleteButton = ({ onClick, style }: DeleteButtonProps) => {
 	return (
 		<BreezeButton
-			content={
-				<img
-					className='svg-icon'
-					src='/trash.svg'
-					alt='Delete'
-				/>
-			}
+			content={<Trash />}
 			onClick={onClick}
 			style={{
 				padding: '0',

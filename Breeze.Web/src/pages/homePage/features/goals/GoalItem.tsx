@@ -6,6 +6,7 @@ import { DeleteButton } from '@/components/shared/DeleteButton'
 import { Goal } from '@/services/hooks/goal/goalServices'
 import { useDeleteGoal } from '@/services/hooks/goal/useDeleteGoal'
 import { usePatchGoal } from '@/services/hooks/goal/usePatchGoal'
+import { Square, SquareCheckBig } from 'lucide-react'
 
 type GoalItemProps = {
 	userId: string
@@ -34,6 +35,7 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 			refetchGoals()
 		},
 	})
+
 	return (
 		<BreezeBox
 			title='Goal'
@@ -62,15 +64,7 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 						}}
 					/>
 					<BreezeButton
-						content={
-							<img
-								className='svg-icon'
-								src={goal.isCompleted ? '/complete.svg' : '/incomplete.svg'}
-								alt={goal.isCompleted ? 'complete' : 'incomplete'}
-								width={24}
-								height={24}
-							/>
-						}
+						content={goal.isCompleted ? <SquareCheckBig /> : <Square />}
 						onClick={() => {
 							goal.isCompleted = !goal.isCompleted
 							patchMutation.mutate()

@@ -5,11 +5,12 @@ import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { BreezeCard } from '../../components/shared/BreezeCard'
 import { useAuth0 } from '@auth0/auth0-react'
-import { LogoutModal } from '../../components/auth/LogoutModal'
 import { useState } from 'react'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { useDateContext } from '../../services/providers/DateProvider'
-import { Link } from 'react-router-dom'
+import { AddExpenseModal } from '../addExpense/AddExpense'
+import { AddIncomeModal } from '../addIncome/AddIncome'
+import { ProfileModal } from '@/components/auth/ProfileModal'
 
 /**
  * This is the home page component that calls the components that make up the home page.
@@ -18,7 +19,9 @@ import { Link } from 'react-router-dom'
 export const HomePage = () => {
 	const { user } = useAuth0()
 	const { date, getMonthAsString } = useDateContext()
-	const [showModal, setShowModal] = useState(false)
+	const [showProfileModal, setShowProfileModal] = useState(false)
+	const [showAddExpenseModal, setShowAddExpenseModal] = useState(false)
+	const [showAddIncomeModal, setShowAddIncomeModal] = useState(false)
 
 	return (
 		<>
@@ -41,7 +44,7 @@ export const HomePage = () => {
 							}}
 						/>
 					}
-					onClick={() => setShowModal(!showModal)}
+					onClick={() => setShowProfileModal(!showProfileModal)}
 					style={{
 						position: 'absolute',
 						top: '1rem',
@@ -54,10 +57,10 @@ export const HomePage = () => {
 						borderRadius: '3rem',
 					}}
 				/>
-				{showModal && (
-					<LogoutModal
-						showModal={showModal}
-						setShowModal={setShowModal}
+				{showProfileModal && (
+					<ProfileModal
+						showModal={showProfileModal}
+						setShowModal={setShowProfileModal}
 					/>
 				)}
 				<BreezeText
@@ -74,19 +77,29 @@ export const HomePage = () => {
 				</BreezeCard>
 				<Progress />
 				<GoalItemsBox />
+				<AddExpenseModal
+					showModal={showAddExpenseModal}
+					setShowModal={setShowAddExpenseModal}
+				/>
+				<AddIncomeModal
+					showModal={showAddIncomeModal}
+					setShowModal={setShowAddIncomeModal}
+				/>
 				<BreezeBox title='Add Buttons'>
-					<Link to='/add-expense'>
-						<BreezeButton
-							content='Add New Expense'
-							size='large'
-						/>
-					</Link>
-					<Link to='/add-income'>
-						<BreezeButton
-							content='Add New Income'
-							size='large'
-						/>
-					</Link>
+					<BreezeButton
+						content='Add New Expense'
+						size='large'
+						onClick={() => {
+							setShowAddExpenseModal(!showAddExpenseModal)
+						}}
+					/>
+					<BreezeButton
+						content='Add New Income'
+						size='large'
+						onClick={() => {
+							setShowAddIncomeModal(!showAddIncomeModal)
+						}}
+					/>
 				</BreezeBox>
 			</BreezeBox>
 			<BudgetSection />

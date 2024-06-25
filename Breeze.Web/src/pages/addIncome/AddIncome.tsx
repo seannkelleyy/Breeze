@@ -4,16 +4,22 @@ import { BreezeInput } from '../../components/shared/BreezeInput'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
-import { BackButton } from '../../components/shared/BackButton'
 import { BreezeButton } from '../../components/shared/BreezeButton'
 import { useNavigate } from 'react-router-dom'
 import { usePostIncome } from '@/services/hooks/income/usePostIncome'
 import { Income } from '@/services/hooks/income/incomeServices'
+import { BreezeModal } from '@/components/shared/BreezeModal'
 
+type AddIncomeModalProps = {
+	showModal: boolean
+	setShowModal: (showModal: boolean) => void
+}
 /**
- * This component is the page where a user can add an income.
+ * This component is the page where a user can add an expense.
+ * @param showModal. A boolean to indicate if the modal is shown.
+ * @param setShowModal. A function to set the modal.
  */
-export const AddIncome = () => {
+export const AddIncomeModal = ({ showModal, setShowModal }: AddIncomeModalProps) => {
 	const { user } = useAuth0()
 	const navigate = useNavigate()
 	const { budget, refetchIncomes } = useBudgetContext()
@@ -44,8 +50,11 @@ export const AddIncome = () => {
 	}
 
 	return (
-		<BreezeBox title='Add-Income'>
-			<BackButton />
+		<BreezeModal
+			title='Add Expense'
+			showModal={showModal}
+			onClose={() => setShowModal(!showModal)}
+		>
 			<BreezeText
 				type='large-heading'
 				text='Add Income'
@@ -129,6 +138,6 @@ export const AddIncome = () => {
 					navigate(-1)
 				}}
 			/>
-		</BreezeBox>
+		</BreezeModal>
 	)
 }
