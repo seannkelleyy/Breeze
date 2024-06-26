@@ -1,11 +1,11 @@
 import React, { useState, useContext, useEffect, useMemo } from 'react'
-import { useDateContext } from './DateProvider'
 import { useFetchBudget } from '../hooks/budget/useFetchBudget'
 import { useFetchIncomes } from '../hooks/income/useFetchIncomes'
 import { Budget } from '../hooks/budget/budgetServices'
 import { Category } from '../hooks/category/categoryServices'
 import { Income } from '../hooks/income/incomeServices'
 import { useFetchCategories } from '../hooks/category/useFetchCategories'
+import dayjs, { Dayjs } from 'dayjs'
 
 type BudgetProviderProps = { children: React.ReactNode }
 type BudgetContextType = {
@@ -22,10 +22,9 @@ type BudgetContextType = {
 const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContextType)
 
 export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
-	const { date } = useDateContext()
 	const [totalSpent, setTotalSpent] = useState(0)
-	const [budgetDate, setBudgetDate] = useState<Date>(date)
-	const { data: budget = {} as Budget, refetch: refetchBudget } = useFetchBudget({ year: budgetDate.getFullYear(), month: budgetDate.getMonth() })
+	const [budgetDate, setBudgetDate] = useState<Dayjs>(dayjs(new Date()))
+	const { data: budget = {} as Budget, refetch: refetchBudget } = useFetchBudget({ date: budgetDate })
 	const { data: incomes = [], refetch: refetchIncomes } = useFetchIncomes({ budgetId: budget?.id ?? 0 })
 	const { data: categories = [], refetch: refetchCategories } = useFetchCategories({ budgetId: budget?.id ?? 0 })
 
@@ -40,7 +39,7 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 
 	const getBudgetForDate = async (year: number, month: number) => {
 		try {
-			setBudgetDate(new Date(year, month))
+			setBudgetDate(dayjs().year(year).month(month))
 			await refetchBudget()
 			await refetchIncomes()
 			await refetchCategories()

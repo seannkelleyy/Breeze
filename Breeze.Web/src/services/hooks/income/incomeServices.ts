@@ -6,9 +6,7 @@ export type Income = {
 	budgetId: number
 	name: string
 	amount: number
-	year: number
-	month: number
-	day: number
+	date: string
 }
 
 /**

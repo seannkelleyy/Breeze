@@ -4,23 +4,18 @@ import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { BreezeCard } from '../../components/shared/BreezeCard'
 import { useState } from 'react'
-import { useDateContext } from '../../services/providers/DateProvider'
 import { useFetchBudget } from '@/services/hooks/budget/useFetchBudget'
 import { BreezeModal } from '@/components/shared/BreezeModal'
+import { Dayjs } from 'dayjs'
 
 type EditBudgetModalProps = {
-	year: number
-	month: number
+	date: Dayjs
 	showModal: boolean
 	setShowModal: (showModal: boolean) => void
 }
 
-export const EditBudgetModal = ({ year, month, showModal, setShowModal }: EditBudgetModalProps) => {
-	const { getMonthAsString } = useDateContext()
-	const { data, status } = useFetchBudget({
-		year: year,
-		month: month,
-	})
+export const EditBudgetModal = ({ date, showModal, setShowModal }: EditBudgetModalProps) => {
+	const { data, status } = useFetchBudget({ date: date })
 	const [monthlyIncome, setMonthlyIncome] = useState(0)
 	const [monthlyExpenses, setMonthlyExpenses] = useState(0)
 
@@ -32,7 +27,6 @@ export const EditBudgetModal = ({ year, month, showModal, setShowModal }: EditBu
 		>
 			<div style={{ overflow: 'auto', maxHeight: '70vh' }}>
 				{' '}
-				{/* Add this div */}
 				<BreezeText
 					type='large-heading'
 					text='Edit Budget'
@@ -49,7 +43,7 @@ export const EditBudgetModal = ({ year, month, showModal, setShowModal }: EditBu
 				>
 					<BreezeText
 						type='large'
-						text={`Date: ${getMonthAsString(month)} ${year}`}
+						text={date.format('MMMM YYYY')}
 					/>
 					<BreezeText
 						type='large'

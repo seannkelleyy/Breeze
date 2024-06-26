@@ -9,6 +9,7 @@ import { BreezeSelect } from '../../components/shared/BreezeSelect'
 import { Expense } from '../../services/hooks/expense/expenseServices'
 import { usePostExpense } from '@/services/hooks/expense/usePostExpense'
 import { BreezeModal } from '@/components/shared/BreezeModal'
+import dayjs from 'dayjs'
 
 type AddExpenseProps = {
 	showModal: boolean
@@ -28,9 +29,7 @@ export const AddExpenseModal = ({ showModal, setShowModal }: AddExpenseProps) =>
 		categoryId: categories[0]?.id ?? -1,
 		name: '',
 		amount: 0,
-		year: new Date(Date.now()).getFullYear(),
-		month: new Date(Date.now()).getMonth(),
-		day: new Date(Date.now()).getDate(),
+		date: dayjs().format('YYYY-MM-DD'),
 	})
 
 	const postMutation = usePostExpense({
@@ -44,7 +43,7 @@ export const AddExpenseModal = ({ showModal, setShowModal }: AddExpenseProps) =>
 	})
 
 	const checkSubmittable = () => {
-		if (expense.name !== '' && expense.categoryId !== -1 && expense.amount && expense.year && expense.month && expense.day) {
+		if (expense.name !== '' && expense.categoryId !== -1 && expense.amount && expense.date) {
 			setIsSubmittable(true)
 		} else {
 			setIsSubmittable(false)
@@ -149,10 +148,10 @@ export const AddExpenseModal = ({ showModal, setShowModal }: AddExpenseProps) =>
 					type='date'
 					title='Expense Date'
 					placeholder='date'
-					defaultValue={new Date(Date.now()).toISOString().split('T')[0]}
+					defaultValue={dayjs().format('YYYY-MM-DD')}
 					style={{ minWidth: '100%' }}
 					onChange={(e) => {
-						setExpense({ ...expense, year: new Date(e.target.value).getFullYear(), month: new Date(e.target.value + 1).getMonth(), day: new Date(e.target.value).getDate() })
+						setExpense({ ...expense, date: dayjs(e.target.value).format('YYYY-MM-DD') })
 						checkSubmittable()
 					}}
 				/>
@@ -162,6 +161,7 @@ export const AddExpenseModal = ({ showModal, setShowModal }: AddExpenseProps) =>
 				disabled={!isSubmittable}
 				onClick={() => {
 					postMutation.mutate()
+					setShowModal(!showModal)
 				}}
 			/>
 		</BreezeModal>

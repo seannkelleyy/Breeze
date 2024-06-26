@@ -5,10 +5,10 @@ import { BreezeText } from '../../components/shared/BreezeText'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { BreezeButton } from '../../components/shared/BreezeButton'
-import { useNavigate } from 'react-router-dom'
 import { usePostIncome } from '@/services/hooks/income/usePostIncome'
 import { Income } from '@/services/hooks/income/incomeServices'
 import { BreezeModal } from '@/components/shared/BreezeModal'
+import dayjs from 'dayjs'
 
 type AddIncomeModalProps = {
 	showModal: boolean
@@ -21,7 +21,6 @@ type AddIncomeModalProps = {
  */
 export const AddIncomeModal = ({ showModal, setShowModal }: AddIncomeModalProps) => {
 	const { user } = useAuth0()
-	const navigate = useNavigate()
 	const { budget, refetchIncomes } = useBudgetContext()
 	const [isSubmittable, setIsSubmittable] = useState(false)
 	const [income, setIncome] = useState<Income>({
@@ -29,9 +28,7 @@ export const AddIncomeModal = ({ showModal, setShowModal }: AddIncomeModalProps)
 		budgetId: budget.id,
 		name: '',
 		amount: 0,
-		year: new Date(Date.now()).getFullYear(),
-		month: new Date(Date.now()).getMonth(),
-		day: new Date(Date.now()).getDate(),
+		date: dayjs().format('YYYY-MM-DD'),
 	})
 
 	const postMutation = usePostIncome({
@@ -42,7 +39,7 @@ export const AddIncomeModal = ({ showModal, setShowModal }: AddIncomeModalProps)
 	})
 
 	const checkSubmittable = () => {
-		if (income.name !== '' && income.amount && income.year && income.month && income.day) {
+		if (income.name !== '' && income.amount && income.date) {
 			setIsSubmittable(true)
 		} else {
 			setIsSubmittable(false)
@@ -122,10 +119,10 @@ export const AddIncomeModal = ({ showModal, setShowModal }: AddIncomeModalProps)
 					type='date'
 					title='Income Date'
 					placeholder='date'
-					defaultValue={new Date(Date.now()).toISOString().split('T')[0]}
+					defaultValue={dayjs().format('YYYY-MM-DD')}
 					style={{ minWidth: '100%' }}
 					onChange={(e) => {
-						setIncome({ ...income, year: new Date(e.target.value).getFullYear(), month: new Date(e.target.value).getMonth(), day: new Date(e.target.value).getDate() })
+						setIncome({ ...income, date: dayjs(e.target.value).format('YYYY-MM-DD') })
 						checkSubmittable()
 					}}
 				/>
@@ -135,7 +132,7 @@ export const AddIncomeModal = ({ showModal, setShowModal }: AddIncomeModalProps)
 				disabled={!isSubmittable}
 				onClick={() => {
 					postMutation.mutate()
-					navigate(-1)
+					setShowModal(!showModal)
 				}}
 			/>
 		</BreezeModal>

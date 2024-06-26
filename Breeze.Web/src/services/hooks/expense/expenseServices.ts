@@ -8,9 +8,7 @@ export type Expense = {
 	categoryId: number
 	name: string
 	amount: number
-	year: number
-	month: number
-	day: number
+	date: string
 }
 
 /**

@@ -61,8 +61,25 @@ button {
 	border-radius: 0.25em;
 }
 
-.svg-icon {
-	@media (prefers-color-scheme: dark) {
-		filter: invert(1) sepia(1) saturate(1) hue-rotate(180deg);
+.loader {
+	display: inline-block;
+	width: 50px;
+	height: 50px;
+	border: 3px solid rgba(0, 0, 0, 0.3);
+	border-radius: 50%;
+	border-top-color: var(--color-text);
+	-webkit-animation: spin 1s ease-in-out infinite;
+	animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@-webkit-keyframes spin {
+	to {
+		-webkit-transform: rotate(360deg);
 	}
 }

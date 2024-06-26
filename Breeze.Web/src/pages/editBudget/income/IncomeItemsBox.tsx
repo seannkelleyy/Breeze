@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import { usePostIncome } from '@/services/hooks/income/usePostIncome'
+import dayjs from 'dayjs'
 
 type IncomeItemsBoxProps = {
 	setIncome: (amount: number) => void
@@ -24,9 +25,7 @@ export const IncomeItemsBox = ({ setIncome }: IncomeItemsBoxProps) => {
 			budgetId: budget.id,
 			name: '',
 			amount: 0,
-			year: new Date(Date.now()).getFullYear(),
-			month: new Date(Date.now()).getMonth() + 1,
-			day: new Date(Date.now()).getDate(),
+			date: dayjs().format('YYYY-MM-DD'),
 		},
 		onSettled: () => {
 			refetchIncomes()
@@ -34,7 +33,7 @@ export const IncomeItemsBox = ({ setIncome }: IncomeItemsBoxProps) => {
 	})
 
 	useEffect(() => {
-		setIncome(incomes.reduce((acc, income) => acc + 1 * income.amount, 0))
+		incomes && setIncome(incomes.reduce((acc, income) => acc + 1 * income.amount, 0))
 	}, [incomes, setIncome])
 
 	return (
@@ -50,13 +49,14 @@ export const IncomeItemsBox = ({ setIncome }: IncomeItemsBoxProps) => {
 				type='small-heading'
 				text='Incomes'
 			/>
-			{incomes.map((income) => (
-				<IncomeItem
-					key={income.id}
-					incomeItem={income}
-					refetchIncomes={refetchIncomes}
-				/>
-			))}
+			{incomes &&
+				incomes.map((income) => (
+					<IncomeItem
+						key={income.id}
+						incomeItem={income}
+						refetchIncomes={refetchIncomes}
+					/>
+				))}
 
 			<BreezeButton
 				content='Add Income'

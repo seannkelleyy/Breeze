@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom/client'
 import { Auth0Provider } from '@auth0/auth0-react'
 import { useEnvironmentVariables } from './config/environment/useEnvironmentVariables'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { BudgetProvider } from './services/providers/BudgetProvider'
-import { DateProvider } from './services/providers/DateProvider'
 import './index.css'
 import { AppRoutes } from './config/routing/AppRoutes'
 
@@ -13,7 +11,6 @@ const Root = () => {
 	const queryClient = new QueryClient()
 	const { authClientId, authDomain, baseLocalUrl: baseLocalUrl, baseHostedUrl, apiAudience } = useEnvironmentVariables()
 	const baseUrl = import.meta.env.MODE === 'production' ? baseHostedUrl : baseLocalUrl
-
 	return (
 		<React.StrictMode>
 			<Auth0Provider
@@ -26,11 +23,7 @@ const Root = () => {
 				}}
 			>
 				<QueryClientProvider client={queryClient}>
-					<DateProvider>
-						<BudgetProvider>
-							<AppRoutes />
-						</BudgetProvider>
-					</DateProvider>
+					<AppRoutes />
 				</QueryClientProvider>
 			</Auth0Provider>
 		</React.StrictMode>

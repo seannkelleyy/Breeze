@@ -5,18 +5,17 @@ import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import { BreezeCard } from '../../../components/shared/BreezeCard'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
-import { useDateContext } from '../../../services/providers/DateProvider'
 import { Budget } from '@/services/hooks/budget/budgetServices'
 import { EditBudgetModal } from '@/pages/editBudget/EditBudget'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import dayjs, { Dayjs } from 'dayjs'
 
 /**
  * This is the category section view of that home page that gives a brief
  * overview of the current budget.
  */
 export const BudgetSection = () => {
-	const { date, getMonthAsString } = useDateContext()
-	const [budgetDate, setBudgetDate] = useState<Date>(date)
+	const [budgetDate, setBudgetDate] = useState<Dayjs>(dayjs())
 	const { budget, totalSpent, categories, getBudgetForDate, refetchCategories } = useBudgetContext()
 	const [response, setResponse] = useState<{ status: number; budget?: Budget; error?: string }>()
 	const [showEditBudgetModal, setShowEditBudgetModal] = useState(false)
@@ -24,7 +23,7 @@ export const BudgetSection = () => {
 	useEffect(() => {
 		const fetchBudget = async () => {
 			try {
-				const response = await getBudgetForDate(budgetDate.getFullYear(), budgetDate.getMonth())
+				const response = await getBudgetForDate(budgetDate.year(), budgetDate.month())
 				setResponse(response)
 			} catch (error) {
 				console.error('An error occurred while fetching the budget:', error)
@@ -35,14 +34,13 @@ export const BudgetSection = () => {
 		refetchCategories()
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [budgetDate])
-	const changeBudgetDate = (date: Date, direction: boolean) => {
-		const newDate = new Date(date)
+
+	const changeBudgetDate = (direction: boolean) => {
 		if (direction) {
-			newDate.setMonth(newDate.getMonth() + 1)
+			setBudgetDate(budgetDate.add(1, 'month'))
 		} else {
-			newDate.setMonth(newDate.getMonth() - 1)
+			setBudgetDate(budgetDate.subtract(1, 'month'))
 		}
-		return newDate
 	}
 
 	return (
@@ -53,7 +51,7 @@ export const BudgetSection = () => {
 			>
 				<BreezeButton
 					content={<ArrowLeft />}
-					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, false))}
+					onClick={() => changeBudgetDate(false)}
 				/>
 				<BreezeText
 					type='large'
@@ -64,11 +62,11 @@ export const BudgetSection = () => {
 						borderRadius: '0.75rem',
 						padding: '.5em 1em',
 					}}
-					text={`${getMonthAsString(budgetDate.getMonth())} ${budgetDate.getFullYear()}`}
+					text={budgetDate.format('MMM YYYY')}
 				/>
 				<BreezeButton
 					content={<ArrowRight />}
-					onClick={() => setBudgetDate(changeBudgetDate(budgetDate, true))}
+					onClick={() => changeBudgetDate(true)}
 				/>
 			</BreezeBox>
 			<BreezeButton
@@ -76,8 +74,7 @@ export const BudgetSection = () => {
 				onClick={() => setShowEditBudgetModal(true)}
 			/>
 			<EditBudgetModal
-				year={budgetDate.getFullYear()}
-				month={budgetDate.getMonth()}
+				date={budgetDate}
 				showModal={showEditBudgetModal}
 				setShowModal={setShowEditBudgetModal}
 			/>
