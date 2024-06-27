@@ -17,31 +17,35 @@ export const Progress = () => {
 		if (projectedForToday <= totalSpent + dailyBudget && projectedForToday >= totalSpent - dailyBudget) {
 			return "You're right on track to meet your budget!"
 		} else if (projectedForToday > totalSpent) {
-			return "Great Work! You're running under budget!"
+			return "Great Work! You're on pace to be under budget!"
 		} else if (totalSpent % 1 > totalBudget) {
 			return "You've exceeded your budget. Try to cut back on spending."
 		}
 		return "You're spending more than you should. Try to cut back on spending."
 	}
 
+	if (!budget.id)
+		return (
+			<BreezeText
+				text='No budget set. Set a budget to see your progress.'
+				type='medium'
+			/>
+		)
+
+	if (!budget.monthlyIncome)
+		return (
+			<BreezeText
+				text='Create a budget to see your progress.'
+				type='medium'
+			/>
+		)
+
 	return (
 		<BreezeCard title='Progress'>
-			{budget.monthlyIncome ? (
-				<BreezeText
-					text={calculateProgress(new Date().getDate(), dailyBudget, totalSpent, totalBudget)}
-					type='medium'
-				/>
-			) : budget.id && !budget.monthlyIncome ? (
-				<BreezeText
-					text='Create a budget to see your progress.'
-					type='medium'
-				/>
-			) : (
-				<BreezeText
-					text='No budget set. Set a budget to see your progress.'
-					type='medium'
-				/>
-			)}
+			<BreezeText
+				text={calculateProgress(new Date().getDate(), dailyBudget, totalSpent, totalBudget)}
+				type='medium'
+			/>
 		</BreezeCard>
 	)
 }

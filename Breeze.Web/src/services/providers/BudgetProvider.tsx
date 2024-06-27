@@ -25,8 +25,8 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 	const [totalSpent, setTotalSpent] = useState(0)
 	const [budgetDate, setBudgetDate] = useState<Dayjs>(dayjs(new Date()))
 	const { data: budget = {} as Budget, refetch: refetchBudget } = useFetchBudget({ date: budgetDate })
-	const { data: incomes = [], refetch: refetchIncomes } = useFetchIncomes({ budgetId: budget?.id ?? 0 })
-	const { data: categories = [], refetch: refetchCategories } = useFetchCategories({ budgetId: budget?.id ?? 0 })
+	const { data: incomes = [], refetch: refetchIncomes } = useFetchIncomes({ budgetId: budget?.id, enabled: !!budget.id })
+	const { data: categories = [], refetch: refetchCategories } = useFetchCategories({ budgetId: budget?.id, enabled: !!budget.id })
 
 	const sortedCategories = useMemo(() => {
 		return [...categories].sort((a, b) => b.currentSpend - a.currentSpend)

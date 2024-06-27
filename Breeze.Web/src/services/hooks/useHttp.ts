@@ -13,6 +13,7 @@ const useHttp =  () => {
     const { getAccessTokenSilently } = useAuth0();
     const {localApi, hostedApi, apiAudience} = useEnvironmentVariables()
 
+    
     const fetchToken = async () => {
         return await getAccessTokenSilently({
             authorizationParams: {
@@ -34,15 +35,19 @@ const useHttp =  () => {
         }
     })
 
+    const checkForAccessToken = async () => {
+        if (!accessToken) {
+            await refetch();
+        }
+    }
+    
     const axiosInstance = axios.create({
         baseURL: process.env.NODE_ENV === 'production' ? hostedApi : localApi, 
     })
 
     axiosInstance.interceptors.request.use(
         async (config) => {
-            if (!accessToken) {
-                await refetch();
-            }
+            await checkForAccessToken()
             if (accessToken) {
                 config.headers.Authorization = `Bearer ${accessToken}`;
             }
@@ -56,9 +61,7 @@ const useHttp =  () => {
 
     const getOne = async <T>(relativeUri: string): Promise<T> => {
         try {
-            if (!accessToken) {
-                await refetch()
-            }
+            await checkForAccessToken()
             return (await axiosInstance.get<T>(relativeUri)).data as T
         } catch (error) {
             handleError(error as AxiosError)
@@ -68,9 +71,7 @@ const useHttp =  () => {
  
     const getMany = async <T>(relativeUri: string): Promise<T[]> => {
         try {
-            if (accessToken === undefined) {
-                await refetch()
-            }
+            await checkForAccessToken()
             return (await axiosInstance.get<T[]>(relativeUri)).data
         } catch (error) {
             handleError(error as AxiosError)
@@ -80,9 +81,7 @@ const useHttp =  () => {
 
     const getManyArray = async <T>(relativeUri: string): Promise<T[][]> => {
         try {
-            if (!accessToken) {
-                await refetch()
-            }
+            await checkForAccessToken()
             return (await axiosInstance.get<T[][]>(relativeUri)).data
         } catch (error) {
             handleError(error as AxiosError)
@@ -93,9 +92,7 @@ const useHttp =  () => {
     // use getManyHeader to get the headers of the response.  Used for paging
     const getManyHeader = async <T>(relativeUri: string): Promise<{ data: T[]; headers: unknown }> => {
         try {
-            if (!accessToken) {
-                await refetch()
-            }
+            await checkForAccessToken()
             const response = await axiosInstance.get<T[]>(relativeUri)
             return { data: response.data, headers: response.headers }
         } catch (error) {
@@ -106,9 +103,7 @@ const useHttp =  () => {
  
     const post = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
         try {
-            if (!accessToken) {
-                await refetch()
-            }
+            await checkForAccessToken()
             return (await axiosInstance.post<T>(relativeUri, rq)).data as T
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -120,9 +115,7 @@ const useHttp =  () => {
  
     const patch = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
         try {
-            if (!accessToken) {
-                await refetch()
-            }
+            await checkForAccessToken()
             return (await axiosInstance.patch<T>(relativeUri, rq)).data
         } catch (error) {
             handleError(error as AxiosError)
@@ -132,9 +125,7 @@ const useHttp =  () => {
  
     const put = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
         try {
-            if (!accessToken) {
-                await refetch()
-            }
+            await checkForAccessToken()
             return (await axiosInstance.put<T>(relativeUri, rq)).data
         } catch (error) {
             handleError(error as AxiosError)
@@ -144,9 +135,7 @@ const useHttp =  () => {
 
     const deleteOne = async <T>(relativeUri: string): Promise<void> => {
         try {
-            if (!accessToken) {
-                await refetch()
-            }
+            await checkForAccessToken()
             await axiosInstance.delete<T>(relativeUri)
         } catch (error) {
             handleError(error as AxiosError)

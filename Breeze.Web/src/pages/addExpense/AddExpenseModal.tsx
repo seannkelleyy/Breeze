@@ -12,15 +12,13 @@ import { BreezeModal } from '@/components/shared/BreezeModal'
 import dayjs from 'dayjs'
 
 type AddExpenseProps = {
-	showModal: boolean
-	setShowModal: (showModal: boolean) => void
+	setShowModal: (showModal: boolean | ((prevShowModal: boolean) => boolean)) => void
 }
 /**
  * This component is the page where a user can add an expense.
- * @param showModal. A boolean to indicate if the modal is shown.
  * @param setShowModal. A function to set the modal.
  */
-export const AddExpenseModal = ({ showModal, setShowModal }: AddExpenseProps) => {
+export const AddExpenseModal = ({ setShowModal }: AddExpenseProps) => {
 	const { user } = useAuth0()
 	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
 	const [isSubmittable, setIsSubmittable] = useState(false)
@@ -53,8 +51,7 @@ export const AddExpenseModal = ({ showModal, setShowModal }: AddExpenseProps) =>
 	return (
 		<BreezeModal
 			title='Add Expense'
-			showModal={showModal}
-			onClose={() => setShowModal(!showModal)}
+			onClose={() => setShowModal((prev) => !prev)}
 		>
 			<BreezeText
 				type='large-heading'
@@ -161,7 +158,7 @@ export const AddExpenseModal = ({ showModal, setShowModal }: AddExpenseProps) =>
 				disabled={!isSubmittable}
 				onClick={() => {
 					postMutation.mutate()
-					setShowModal(!showModal)
+					setShowModal((prev) => !prev)
 				}}
 			/>
 		</BreezeModal>

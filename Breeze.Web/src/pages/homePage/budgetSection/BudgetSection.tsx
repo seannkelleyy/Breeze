@@ -6,7 +6,7 @@ import { BreezeCard } from '../../../components/shared/BreezeCard'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { Budget } from '@/services/hooks/budget/budgetServices'
-import { EditBudgetModal } from '@/pages/editBudget/EditBudget'
+import { EditBudgetModal } from '@/pages/editBudget/EditBudgetModal'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import dayjs, { Dayjs } from 'dayjs'
 
@@ -43,6 +43,26 @@ export const BudgetSection = () => {
 		}
 	}
 
+	if (budget.id === undefined)
+		return (
+			<BreezeText
+				type='large'
+				text='Loading...'
+			/>
+		)
+
+	if ((response?.status ?? 0) > 300)
+		return (
+			<BreezeText
+				type='large'
+				text='No budget found'
+				style={{
+					width: '80%',
+					textAlign: 'center',
+				}}
+			/>
+		)
+
 	return (
 		<BreezeBox title='budget'>
 			<BreezeBox
@@ -73,45 +93,31 @@ export const BudgetSection = () => {
 				content='Edit Budget'
 				onClick={() => setShowEditBudgetModal(true)}
 			/>
-			<EditBudgetModal
-				date={budgetDate}
-				showModal={showEditBudgetModal}
-				setShowModal={setShowEditBudgetModal}
-			/>
-			{budget.id === undefined ? (
-				<BreezeText
-					type='large'
-					text='Loading...'
+			{showEditBudgetModal && (
+				<EditBudgetModal
+					date={budgetDate}
+					setShowModal={setShowEditBudgetModal}
 				/>
-			) : (response?.status ?? 0) > 300 ? (
-				<BreezeText
-					type='large'
-					text='No budget found'
-					style={{
-						width: '80%',
-						textAlign: 'center',
-					}}
-				/>
-			) : (
-				<BreezeCard title='Glance'>
-					<BreezeText
-						type='small-heading'
-						text='This month at a glance'
-					/>
-					<BreezeText
-						type='large'
-						text={`Total income: $${budget.monthlyIncome ?? 0}`}
-					/>
-					<BreezeText
-						type='large'
-						text={`Total spent: $${totalSpent ?? 0}`}
-					/>
-					<BreezeText
-						type='large'
-						text={`Remaining: $${(budget.monthlyIncome ?? 0) - (totalSpent ?? 0)}`}
-					/>
-				</BreezeCard>
 			)}
+
+			<BreezeCard title='Glance'>
+				<BreezeText
+					type='small-heading'
+					text='This month at a glance'
+				/>
+				<BreezeText
+					type='large'
+					text={`Total income: $${budget.monthlyIncome ?? 0}`}
+				/>
+				<BreezeText
+					type='large'
+					text={`Total spent: $${totalSpent ?? 0}`}
+				/>
+				<BreezeText
+					type='large'
+					text={`Remaining: $${(budget.monthlyIncome ?? 0) - (totalSpent ?? 0)}`}
+				/>
+			</BreezeCard>
 			<BreezeBox
 				title='Categories'
 				style={{

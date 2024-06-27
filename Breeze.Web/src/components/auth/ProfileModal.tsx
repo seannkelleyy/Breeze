@@ -6,26 +6,23 @@ import { BreezeBox } from '../shared/BreezeBox'
 import { BreezeModal } from '../shared/BreezeModal'
 
 type LogoutModalProps = {
-	showModal: boolean
-	setShowModal: (showModal: boolean) => void
+	setShowModal: (showModal: boolean | ((prevShowModal: boolean) => boolean)) => void
 }
 
 /**
  * A modal that shows when the user clicks the logout button.
- * @param props.showModal: A boolean that determines if the modal is shown.
  * @param props.setShowModal: A function that sets the showModal state.
  
  */
-export const ProfileModal = ({ showModal, setShowModal }: LogoutModalProps) => {
+export const ProfileModal = ({ setShowModal }: LogoutModalProps) => {
 	const { appVersion } = useEnvironmentVariables()
 	const { user, isLoading } = useAuth0()
 
 	return (
 		<BreezeModal
 			title='Profile'
-			showModal={showModal}
 			isLoading={isLoading}
-			onClose={() => setShowModal(!showModal)}
+			onClose={() => setShowModal((prev) => !prev)}
 		>
 			<BreezeBox
 				title='Profile'

@@ -24,7 +24,7 @@ export const ExpenseItem = ({ expense, refetchExpenses }: ExpenseItemProps) => {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		category: categories.find((category) => category.id === expense.categoryId)!,
 		expense,
-		onSettled: () => {
+		onSuccess: () => {
 			refetchBudget()
 			refetchCategories()
 			refetchExpenses()

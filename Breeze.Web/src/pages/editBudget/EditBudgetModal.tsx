@@ -10,23 +10,45 @@ import { Dayjs } from 'dayjs'
 
 type EditBudgetModalProps = {
 	date: Dayjs
-	showModal: boolean
-	setShowModal: (showModal: boolean) => void
+	setShowModal: (showModal: boolean | ((prevShowModal: boolean) => boolean)) => void
 }
 
-export const EditBudgetModal = ({ date, showModal, setShowModal }: EditBudgetModalProps) => {
+export const EditBudgetModal = ({ date, setShowModal }: EditBudgetModalProps) => {
 	const { data, status } = useFetchBudget({ date: date })
 	const [monthlyIncome, setMonthlyIncome] = useState(0)
 	const [monthlyExpenses, setMonthlyExpenses] = useState(0)
 
+	if (status === 'loading')
+		return (
+			<BreezeModal
+				title='Edit Budget'
+				onClose={() => setShowModal((prev) => !prev)}
+			>
+				<BreezeText
+					type='large'
+					text='Loading...'
+				/>
+			</BreezeModal>
+		)
+
+	if (status === 'error')
+		return (
+			<BreezeModal
+				title='Edit Budget'
+				onClose={() => setShowModal((prev) => !prev)}
+			>
+				<BreezeText
+					type='large'
+					text='Error loading budget'
+				/>
+			</BreezeModal>
+		)
 	return (
 		<BreezeModal
 			title='Edit Budget'
-			showModal={showModal}
-			onClose={() => setShowModal(!showModal)}
+			onClose={() => setShowModal((prev) => !prev)}
 		>
-			<div style={{ overflow: 'auto', maxHeight: '70vh' }}>
-				{' '}
+			<div style={{ overflow: 'auto', maxHeight: '100%' }}>
 				<BreezeText
 					type='large-heading'
 					text='Edit Budget'
@@ -69,25 +91,14 @@ export const EditBudgetModal = ({ date, showModal, setShowModal }: EditBudgetMod
 						width: '85%',
 					}}
 				>
-					{data ? (
+					{data && (
 						<>
 							<IncomeItemsBox setIncome={setMonthlyIncome} />
 							<CategoryItemsBox setExpenses={setMonthlyExpenses} />
 						</>
-					) : status === 'loading' ? (
-						<BreezeText
-							type='large'
-							text='Loading...'
-						/>
-					) : (
-						<BreezeText
-							type='large'
-							text='Error loading budget'
-						/>
 					)}
 				</BreezeBox>
-			</div>{' '}
-			{/* End of added div */}
+			</div>
 		</BreezeModal>
 	)
 }

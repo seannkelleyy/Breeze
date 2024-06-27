@@ -4,7 +4,6 @@ import { BreezeCard } from './BreezeCard'
 
 type BreezeModalProps = {
 	title: string
-	showModal: boolean
 	isLoading?: boolean
 	children: React.ReactNode
 	onClose: () => void
@@ -13,57 +12,54 @@ type BreezeModalProps = {
 /**
  * A modal that shows when the user clicks the logout button.
  * @param props.title: The title of the modal.
- * @param props.showModal: A boolean that determines if the modal is shown.
  * @param props.isLoading: - optional - A boolean that determines if the modal is loading.
  * @param props.children: The children of the modal.
  * @param props.onClose: A function that closes the modal.
  */
-export const BreezeModal = ({ title, showModal, isLoading, children, onClose }: BreezeModalProps) => {
+export const BreezeModal = ({ title, isLoading, children, onClose }: BreezeModalProps) => {
 	return (
-		showModal && (
-			<>
-				<div
-					style={{
-						position: 'fixed',
-						top: 0,
-						left: 0,
-						width: '100%',
-						height: '100%',
-						background: 'rgba(0, 0, 0, 0.5)',
-						backdropFilter: 'blur(5px)',
-						zIndex: 1,
-					}}
+		<>
+			<div
+				style={{
+					position: 'fixed',
+					top: 0,
+					left: 0,
+					width: '100%',
+					height: '100%',
+					background: 'rgba(0, 0, 0, 0.5)',
+					backdropFilter: 'blur(5px)',
+					zIndex: 1,
+				}}
+				onClick={onClose}
+			/>
+			<BreezeCard
+				title={title}
+				style={{
+					position: 'fixed',
+					top: '50%',
+					left: '50%',
+					transform: 'translate(-50%, -50%)',
+					width: '100%',
+					height: '70%',
+					padding: '1em',
+					borderRadius: '1em',
+					boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
+					zIndex: 2,
+				}}
+			>
+				<BreezeButton
+					content={<X />}
 					onClick={onClose}
-				/>
-				<BreezeCard
-					title={title}
 					style={{
-						position: 'fixed',
-						top: '50%',
-						left: '50%',
-						transform: 'translate(-50%, -50%)',
-						width: '100%',
-						height: '70%',
-						padding: '1em',
-						borderRadius: '1em',
-						boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
-						zIndex: 2,
+						position: 'absolute',
+						top: '1rem',
+						right: '1rem',
+						background: 'none',
+						boxShadow: 'none',
 					}}
-				>
-					<BreezeButton
-						content={<X />}
-						onClick={onClose}
-						style={{
-							position: 'absolute',
-							top: '1rem',
-							right: '1rem',
-							background: 'none',
-							boxShadow: 'none',
-						}}
-					/>
-					{isLoading ? <p>Loading... </p> : children}
-				</BreezeCard>
-			</>
-		)
+				/>
+				{isLoading ? <p>Loading... </p> : children}
+			</BreezeCard>
+		</>
 	)
 }
