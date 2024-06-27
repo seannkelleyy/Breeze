@@ -9,6 +9,7 @@ import { Budget } from '@/services/hooks/budget/budgetServices'
 import { EditBudgetModal } from '@/pages/editBudget/EditBudgetModal'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import dayjs, { Dayjs } from 'dayjs'
+import { LoadingEffect } from '@/components/shared/LoadingEffect'
 
 /**
  * This is the category section view of that home page that gives a brief
@@ -43,13 +44,7 @@ export const BudgetSection = () => {
 		}
 	}
 
-	if (budget.id === undefined)
-		return (
-			<BreezeText
-				type='large'
-				text='Loading...'
-			/>
-		)
+	if (budget.id === undefined) return <LoadingEffect />
 
 	if ((response?.status ?? 0) > 300)
 		return (

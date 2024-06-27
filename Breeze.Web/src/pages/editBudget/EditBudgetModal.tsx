@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useFetchBudget } from '@/services/hooks/budget/useFetchBudget'
 import { BreezeModal } from '@/components/shared/BreezeModal'
 import { Dayjs } from 'dayjs'
+import { LoadingEffect } from '@/components/shared/LoadingEffect'
 
 type EditBudgetModalProps = {
 	date: Dayjs
@@ -24,10 +25,7 @@ export const EditBudgetModal = ({ date, setShowModal }: EditBudgetModalProps) =>
 				title='Edit Budget'
 				onClose={() => setShowModal((prev) => !prev)}
 			>
-				<BreezeText
-					type='large'
-					text='Loading...'
-				/>
+				<LoadingEffect />
 			</BreezeModal>
 		)
 

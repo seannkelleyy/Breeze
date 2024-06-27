@@ -41,6 +41,7 @@ export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemPr
 			<BreezeInput
 				title='Category Name'
 				type='string'
+				selectAllOnClick
 				placeholder={categoryName}
 				onChange={(e) => setCategoryName(e.target.value)}
 				onBlur={() => patchMutation.mutate()}
@@ -52,6 +53,7 @@ export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemPr
 			<BreezeInput
 				title='Category Amount'
 				type='number'
+				selectAllOnClick
 				placeholder={categoryAmount.toString()}
 				onChange={(e) => setCategoryAmount(e.target.value as unknown as number)}
 				onBlur={() => patchMutation.mutate()}

@@ -10,6 +10,7 @@ import { Expense } from '../../services/hooks/expense/expenseServices'
 import { usePostExpense } from '@/services/hooks/expense/usePostExpense'
 import { BreezeModal } from '@/components/shared/BreezeModal'
 import dayjs from 'dayjs'
+import { useFetchExpenses } from '@/services/hooks/expense/useFetchExpenses'
 
 type AddExpenseProps = {
 	setShowModal: (showModal: boolean | ((prevShowModal: boolean) => boolean)) => void
@@ -29,6 +30,7 @@ export const AddExpenseModal = ({ setShowModal }: AddExpenseProps) => {
 		amount: 0,
 		date: dayjs().format('YYYY-MM-DD'),
 	})
+	const { refetch: refetchExpenses } = useFetchExpenses({ category: categories.find((category) => category.id === expense.categoryId) ?? categories[0] })
 
 	const postMutation = usePostExpense({
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -37,6 +39,7 @@ export const AddExpenseModal = ({ setShowModal }: AddExpenseProps) => {
 		onSettled: () => {
 			refetchCategories()
 			refetchBudget()
+			refetchExpenses()
 		},
 	})
 

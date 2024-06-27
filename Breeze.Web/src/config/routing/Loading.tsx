@@ -1,4 +1,5 @@
 import { BreezeBox } from '@/components/shared/BreezeBox'
+import { LoadingEffect } from '@/components/shared/LoadingEffect'
 
 export const Loading = () => {
 	return (
@@ -13,7 +14,7 @@ export const Loading = () => {
 				alignItems: 'center',
 			}}
 		>
-			<div className='loader'></div>
+			<LoadingEffect />
 		</BreezeBox>
 	)
 }

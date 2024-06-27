@@ -56,6 +56,7 @@ export const BreezeModal = ({ title, isLoading, children, onClose }: BreezeModal
 						right: '1rem',
 						background: 'none',
 						boxShadow: 'none',
+						zIndex: 3,
 					}}
 				/>
 				{isLoading ? <p>Loading... </p> : children}

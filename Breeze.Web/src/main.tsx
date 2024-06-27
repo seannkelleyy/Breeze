@@ -19,7 +19,7 @@ const Root = () => {
 				authorizationParams={{
 					redirect_uri: baseUrl,
 					audience: apiAudience,
-					scope: 'read:data write:data',
+					scope: 'openid profile email read:data write:data',
 				}}
 			>
 				<QueryClientProvider client={queryClient}>

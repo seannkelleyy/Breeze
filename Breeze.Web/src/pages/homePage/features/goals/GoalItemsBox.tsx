@@ -9,6 +9,7 @@ import { BreezeButton } from '@/components/shared/BreezeButton'
 import { usePostGoal } from '@/services/hooks/goal/usePostGoal'
 import { useState } from 'react'
 import { Pencil } from 'lucide-react'
+import { LoadingEffect } from '@/components/shared/LoadingEffect'
 
 /**
  * This is a component that displays the user's goals.
@@ -39,10 +40,7 @@ export const GoalItemsBox = () => {
 					text='Goals'
 					type='small-heading'
 				/>
-				<BreezeText
-					type='medium'
-					text='Loading...'
-				/>
+				<LoadingEffect />
 			</BreezeCard>
 		)
 

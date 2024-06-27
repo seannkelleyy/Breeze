@@ -41,6 +41,7 @@ export const IncomeItem = ({ incomeItem, refetchIncomes }: IncomeItemProps) => {
 			<BreezeInput
 				title='Income Name'
 				type='string'
+				selectAllOnClick
 				placeholder={incomeName}
 				onChange={(e) => setIncomeName(e.target.value)}
 				onBlur={() => patchMutation.mutate()}
@@ -52,6 +53,7 @@ export const IncomeItem = ({ incomeItem, refetchIncomes }: IncomeItemProps) => {
 			<BreezeInput
 				title='Income Amount'
 				type='number'
+				selectAllOnClick
 				placeholder={incomeAmount.toString()}
 				onChange={(e) => setIncomeAmount(e.target.value as unknown as number)}
 				onBlur={() => patchMutation.mutate()}
