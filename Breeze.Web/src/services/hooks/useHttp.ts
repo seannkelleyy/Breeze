@@ -11,7 +11,7 @@ const handleError = (error: AxiosError) => {
  
 const useHttp =  () => {
     const { getAccessTokenSilently } = useAuth0();
-    const {localApi, hostedApi, apiAudience} = useEnvironmentVariables()
+    const {baseLocalApi, baseHostedApi, apiAudience} = useEnvironmentVariables()
 
     
     const fetchToken = async () => {
@@ -42,7 +42,7 @@ const useHttp =  () => {
     }
     
     const axiosInstance = axios.create({
-        baseURL: process.env.NODE_ENV === 'production' ? hostedApi : localApi, 
+        baseURL: process.env.NODE_ENV === 'production' ? baseHostedApi : baseLocalApi, 
     })
 
     axiosInstance.interceptors.request.use(
