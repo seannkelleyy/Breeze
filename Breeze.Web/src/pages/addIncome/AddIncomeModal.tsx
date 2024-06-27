@@ -19,7 +19,7 @@ type AddIncomeModalProps = {
  */
 export const AddIncomeModal = ({ setShowModal }: AddIncomeModalProps) => {
 	const { user } = useAuth0()
-	const { budget, refetchIncomes } = useBudgetContext()
+	const { budget, refetchIncomes, refetchBudget } = useBudgetContext()
 	const [isSubmittable, setIsSubmittable] = useState(false)
 	const [income, setIncome] = useState<Income>({
 		userId: user?.email ?? '',
@@ -31,7 +31,10 @@ export const AddIncomeModal = ({ setShowModal }: AddIncomeModalProps) => {
 
 	const postMutation = usePostIncome({
 		income: income,
-		onSettled: () => refetchIncomes(),
+		onSettled: () => {
+			refetchBudget()
+			refetchIncomes()
+		},
 	})
 
 	const checkSubmittable = () => {
