@@ -1,4 +1,4 @@
-﻿namespace Breeze.Api.RequestResponseObjects.Categories
+﻿namespace Breeze.Api.Categories.RequestResponseObjects
 {
     public class CategoryRequest
     {

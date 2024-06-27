@@ -1,6 +1,6 @@
-﻿namespace Breeze.Domain
+﻿namespace Breeze.Api.Budget.RequestResponseObjects
 {
-    public class Budget
+    public class BudgetResponse
     {
         public int Id { get; set; }
         public string UserId { get; set; }

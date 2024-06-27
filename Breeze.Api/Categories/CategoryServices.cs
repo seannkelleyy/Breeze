@@ -1,9 +1,9 @@
-﻿using Breeze.Api.RequestResponseObjects.Categories;
-using Breeze.Api.RequestResponseObjects.Expenses;
+﻿using Breeze.Api.Categories.RequestResponseObjects;
+using Breeze.Api.Expenses.RequestResponseObjects;
 using Breeze.Data;
 using Breeze.Domain;
 
-namespace Breeze.Api.Services
+namespace Breeze.Api.Categories
 {
     /// <summary>
     /// Service for managing categories.

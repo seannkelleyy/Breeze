@@ -1,29 +1,27 @@
-﻿using Breeze.Api.RequestResponseObjects.Categories;
-using Breeze.Api.Services;
+﻿using Breeze.Api.Categories;
+using Breeze.Api.Expenses.RequestResponseObjects;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Breeze.Api.Controllers
+namespace Breeze.Api.Expenses
 {
     [ApiController]
-    [Route("/budgets/{budgetId}/categories")]
-    public class CategoryController : ControllerBase
+    [Route("/budgets/{budgetId}/categories/{categoryId}/expenses")]
+    public class ExpenseController : ControllerBase
     {
-        private readonly BudgetService budgets;
         private readonly CategoryService categories;
         private readonly ExpenseService expenses;
-        private readonly ILogger<CategoryController> _logger;
+        private readonly ILogger<ExpenseController> _logger;
 
-        public CategoryController(IConfiguration config, ILogger<CategoryController> logger, BreezeContext breezeContext)
+        public ExpenseController(IConfiguration config, ILogger<ExpenseController> logger, BreezeContext breezeContext)
         {
-            budgets = new BudgetService(config, breezeContext, logger);
             categories = new CategoryService(config, breezeContext, logger);
             expenses = new ExpenseService(config, breezeContext, logger);
             _logger = logger;
         }
 
         [HttpGet]
-        public IActionResult GetCategoriesByBudgetId([FromRoute] int budgetId)
+        public IActionResult GetExpensesForCategory([FromRoute] int CategoryId)
         {
             try
             {
@@ -33,17 +31,17 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(categories.GetCategoriesByBudgetId(userId, budgetId));
+                return Ok(expenses.GetExpenseByCategoryId(userId, CategoryId));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return BadRequest();
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpPost]
-        public IActionResult PostCategory(CategoryRequest categoryRequest)
+        public IActionResult PostExpsense(ExpenseRequest expenseRequest)
         {
             try
             {
@@ -53,19 +51,18 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                var response = categories.CreateCategory(userId, categoryRequest);
-                budgets.CalculateBudgetCategories(userId, categoryRequest.BudgetId, categories.GetCategoriesByBudgetId(userId, categoryRequest.BudgetId));
+                var response = expenses.CreateExpense(userId, expenseRequest);
+                categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenses.GetExpenseByCategoryId(userId, expenseRequest.CategoryId));
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
-                return BadRequest();
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpPatch]
-        public IActionResult PatchCategory(CategoryRequest categoryRequest)
+        public IActionResult PatchExpsense([FromBody] ExpenseRequest expenseRequest)
         {
             try
             {
@@ -75,19 +72,18 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                var response = categories.UpdateCategory(userId, categoryRequest);
-                budgets.CalculateBudgetCategories(userId, categoryRequest.BudgetId, categories.GetCategoriesByBudgetId(userId, categoryRequest.BudgetId));
+                var response = expenses.UpdateExpense(userId, expenseRequest);
+                categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenses.GetExpenseByCategoryId(userId, expenseRequest.CategoryId));
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
-                return BadRequest();
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteCategory(int id)
+        public IActionResult DeleteExpsense([FromRoute] int id)
         {
             try
             {
@@ -97,16 +93,18 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                int budgetId = categories.GetCategoryById(userId, id).BudgetId;
-                var response = categories.DeleteCategoryById(userId, id);
-                budgets.CalculateBudgetCategories(userId, budgetId, categories.GetCategoriesByBudgetId(userId, budgetId));
-                expenses.DeleteExpenseForCategory(userId, id);
+                int categoryId = expenses.GetExpenseById(userId, id).CategoryId;
+                if (categoryId == 0)
+                {
+                    return BadRequest("Expense not found");
+                }
+                var response = expenses.DeleteExpenseById(userId, id);
+                categories.CalculateCategoryExpenses(userId, categoryId, expenses.GetExpenseByCategoryId(userId, categoryId));
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
-                return BadRequest();
+                return BadRequest(ex.Message);
             }
         }
     }

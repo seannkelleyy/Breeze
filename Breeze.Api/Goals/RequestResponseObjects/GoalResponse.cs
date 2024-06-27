@@ -1,4 +1,4 @@
-﻿namespace Breeze.Api.RequestResponseObjects.Goals
+﻿namespace Breeze.Api.Goals.RequestResponseObjects
 {
     public class GoalResponse
     {

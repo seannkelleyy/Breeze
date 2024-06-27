@@ -1,8 +1,8 @@
-﻿using Breeze.Api.RequestResponseObjects.Expenses;
+﻿using Breeze.Api.Expenses.RequestResponseObjects;
 using Breeze.Data;
 using Breeze.Domain;
 
-namespace Breeze.Api.Services
+namespace Breeze.Api.Expenses
 {
     /// <summary>
     /// Service for managing expenses.
@@ -43,9 +43,7 @@ namespace Breeze.Api.Services
                         Id = expense.Id,
                         UserId = expense.UserId,
                         Name = expense.Name,
-                        Year = expense.Year,
-                        Month = expense.Month,
-                        Day = expense.Day,
+                        Date = expense.Date,
                         CategoryId = expense.CategoryId,
                         Amount = expense.Amount,
                     }).First();
@@ -74,9 +72,7 @@ namespace Breeze.Api.Services
                         Id = expense.Id,
                         UserId = expense.UserId,
                         Name = expense.Name,
-                        Year = expense.Year,
-                        Month = expense.Month,
-                        Day = expense.Day,
+                        Date = expense.Date,
                         CategoryId = expense.CategoryId,
                         Amount = expense.Amount,
                     })
@@ -112,9 +108,7 @@ namespace Breeze.Api.Services
                 {
                     UserId = userId,
                     Name = newExpense.Name,
-                    Year = newExpense.Year,
-                    Month = newExpense.Month,
-                    Day = newExpense.Day,
+                    Date = newExpense.Date,
                     CategoryId = category.Id,
                     Amount = newExpense.Amount,
                 };
@@ -155,9 +149,7 @@ namespace Breeze.Api.Services
                     return -4;
                 }
                 expense.Name = updatedExpense.Name;
-                expense.Year = updatedExpense.Year;
-                expense.Month = updatedExpense.Month;
-                expense.Day = updatedExpense.Day;
+                expense.Date = updatedExpense.Date;
                 expense.Amount = updatedExpense.Amount;
 
                 db.Expenses.Update(expense);

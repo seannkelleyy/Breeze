@@ -5,8 +5,6 @@
     [BudgetId] INT NOT NULL, 
     [Name] NVARCHAR(50) NOT NULL, 
     [Amount] DECIMAL(18, 2) NOT NULL,
-    [Year] INT NOT NULL,
-    [Month] INT NOT NULL,
-    [Day] INT NOT NULL,
+    [Date] DATE NOT NULL,
     CONSTRAINT [FK_Income_Budget] FOREIGN KEY ([BudgetId]) REFERENCES [Budget]([Id]),
 )

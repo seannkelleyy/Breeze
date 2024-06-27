@@ -4,6 +4,5 @@
     [UserId] NVARCHAR(50) NOT NULL, 
     [MonthlyIncome] DECIMAL(18, 2), 
     [MonthlyExpenses] DECIMAL(18, 2),
-    [Year] INT NOT NULL, 
-    [Month] INT NOT NULL,
+    [Date] DATE NOT NULL, 
 )

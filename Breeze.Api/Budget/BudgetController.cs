@@ -1,8 +1,9 @@
-﻿using Breeze.Api.Services;
+﻿using Breeze.Api.Categories;
+using Breeze.Api.Incomes;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Breeze.Api.Controllers
+namespace Breeze.Api.Budgets
 {
     [ApiController]
     [Route("/budgets")]
@@ -33,7 +34,7 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(budgets.GetBudgetByDate(userId, year, month));
+                return Ok(budgets.GetBudgetByDate(userId, new DateOnly(year, month, 1)));
             }
             catch (Exception ex)
             {

@@ -1,25 +1,27 @@
-﻿using Breeze.Api.RequestResponseObjects.Goals;
-using Breeze.Api.Services;
+﻿using Breeze.Api.Budgets;
+using Breeze.Api.Incomes.RequestResponseObjects;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Breeze.Api.Controllers
+namespace Breeze.Api.Incomes
 {
     [ApiController]
-    [Route("/users/{userId}/goals")]
-    public class GoalController : ControllerBase
+    [Route("/budgets/{budgetId}/incomes")]
+    public class IncomeController : ControllerBase
     {
-        private readonly GoalService goals;
-        private readonly ILogger<ExpenseController> _logger;
+        private readonly BudgetService budgets;
+        private readonly IncomeService incomes;
+        private readonly ILogger<IncomeController> _logger;
 
-        public GoalController(IConfiguration config, ILogger<ExpenseController> logger, BreezeContext breezeContext)
+        public IncomeController(IConfiguration config, ILogger<IncomeController> logger, BreezeContext breezeContext)
         {
-            goals = new GoalService(config, breezeContext, logger);
+            budgets = new BudgetService(config, breezeContext, logger);
+            incomes = new IncomeService(config, breezeContext, logger);
             _logger = logger;
         }
 
         [HttpGet]
-        public IActionResult GetGoalsForUser()
+        public IActionResult GetIncomes([FromRoute] int budgetId)
         {
             try
             {
@@ -29,17 +31,17 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(goals.GetGoalsByUserId(userId));
+                return Ok(incomes.GetIncomesByBudgetId(userId, budgetId));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError($"Failed to get Incomes, error code: {ex.Message}");
                 return BadRequest(ex.Message);
             }
         }
 
         [HttpPost]
-        public IActionResult PostGoal(GoalRequest goalRequest)
+        public IActionResult PostIncome(IncomeRequest incomeRequest)
         {
             try
             {
@@ -49,7 +51,8 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                var response = goals.CreateGoal(userId, goalRequest);
+                var response = incomes.CreateIncome(userId, incomeRequest);
+                budgets.CalculateBudgetIncomes(userId, incomeRequest.BudgetId, incomes.GetIncomesByBudgetId(userId, incomeRequest.BudgetId));
                 return Ok(response);
             }
             catch (Exception ex)
@@ -59,7 +62,8 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpPatch]
-        public IActionResult PatchGoal([FromBody] GoalRequest goalRequest)
+
+        public IActionResult PatchIncome([FromBody] IncomeRequest incomeRequest)
         {
             try
             {
@@ -69,7 +73,8 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                var response = goals.UpdateGoal(userId, goalRequest);
+                var response = incomes.UpdateIncome(userId, incomeRequest);
+                budgets.CalculateBudgetIncomes(userId, incomeRequest.BudgetId, incomes.GetIncomesByBudgetId(userId, incomeRequest.BudgetId));
                 return Ok(response);
             }
             catch (Exception ex)
@@ -79,7 +84,7 @@ namespace Breeze.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteGoal([FromRoute] int id)
+        public IActionResult DeleteIncome([FromRoute] int id)
         {
             try
             {
@@ -89,7 +94,10 @@ namespace Breeze.Api.Controllers
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(goals.DeleteGoalById(userId, id));
+                int budgetId = incomes.GetIncomeById(userId, id).BudgetId;
+                var response = incomes.DeleteIncomeById(userId, id);
+                budgets.CalculateBudgetIncomes(userId, budgetId, incomes.GetIncomesByBudgetId(userId, budgetId));
+                return Ok(response);
             }
             catch (Exception ex)
             {

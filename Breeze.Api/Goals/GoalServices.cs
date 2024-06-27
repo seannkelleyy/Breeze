@@ -1,8 +1,8 @@
-﻿using Breeze.Api.RequestResponseObjects.Goals;
+﻿using Breeze.Api.Goals.RequestResponseObjects;
 using Breeze.Data;
 using Breeze.Domain;
 
-namespace Breeze.Api.Services
+namespace Breeze.Api.Goals
 {
     /// <summary>
     /// Service for managing goals.

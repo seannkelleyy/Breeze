@@ -1,10 +1,9 @@
-﻿using Breeze.Api.RequestResponseObjects.Budgets;
-using Breeze.Api.RequestResponseObjects.Categories;
-using Breeze.Api.RequestResponseObjects.Incomes;
+﻿using Breeze.Api.Budget.RequestResponseObjects;
+using Breeze.Api.Categories.RequestResponseObjects;
+using Breeze.Api.Incomes.RequestResponseObjects;
 using Breeze.Data;
-using Breeze.Domain;
 
-namespace Breeze.Api.Services
+namespace Breeze.Api.Budgets
 {
     /// <summary>
     /// Service for managing budgets.
@@ -32,33 +31,30 @@ namespace Breeze.Api.Services
         /// Retrieves a budget for a specified user, year, and month.
         /// </summary>
         /// <param name="userId">The user's identifier.</param>
-        /// <param name="year">The year of the budget.</param>
-        /// <param name="month">The month of the budget.</param>
+        /// <param name="date">The Date of the budget.</param>
         /// <returns>A budget response object or null if not found.</returns>
-        public BudgetResponse? GetBudgetByDate(string userId, int year, int month)
+        public BudgetResponse? GetBudgetByDate(string userId, DateOnly date)
         {
             try
             {
                 var budget = db.Budgets
-                    .Where(b => b.UserId.Equals(userId) && b.Month == month && b.Year == year)
+                    .Where(b => b.UserId.Equals(userId) && b.Date.Month == date.Month && b.Date.Year == date.Year)
                     .FirstOrDefault();
 
                 if (budget == null)
                 {
                     // Create a new budget
-                    Budget newBudget = new Budget
+                    Domain.Budget newBudget = new Domain.Budget
                     {
                         UserId = userId,
                         MonthlyIncome = 0,
                         MonthlyExpenses = 0,
-                        Year = year,
-                        Month = month
+                        Date = date
                     };
                     db.Budgets.Add(newBudget);
                     db.SaveChanges();
                     budget = newBudget;
                 }
-
                 // Convert to BudgetResponse
                 var budgetResponse = new BudgetResponse
                 {
@@ -66,8 +62,7 @@ namespace Breeze.Api.Services
                     UserId = budget.UserId,
                     MonthlyIncome = budget.MonthlyIncome,
                     MonthlyExpenses = budget.MonthlyExpenses,
-                    Year = budget.Year,
-                    Month = budget.Month,
+                    Date = budget.Date,
                 };
 
                 return budgetResponse;
@@ -91,18 +86,17 @@ namespace Breeze.Api.Services
         {
             try
             {
-                var existingBudget = GetBudgetByDate(userId, newBudget.Year, newBudget.Month);
+                var existingBudget = GetBudgetByDate(userId, newBudget.Date);
                 if (existingBudget != null)
                 {
                     return existingBudget.Id;
                 }
-                Budget budget = new Budget
+                Domain.Budget budget = new Domain.Budget
                 {
                     UserId = userId,
                     MonthlyIncome = newBudget.MonthlyIncome,
                     MonthlyExpenses = newBudget.MonthlyExpenses,
-                    Year = newBudget.Year,
-                    Month = newBudget.Month
+                    Date = newBudget.Date,
 
                 };
                 db.Budgets.Add(budget);

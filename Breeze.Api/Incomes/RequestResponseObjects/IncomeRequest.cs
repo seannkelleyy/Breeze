@@ -1,4 +1,4 @@
-﻿namespace Breeze.Api.RequestResponseObjects.Incomes
+﻿namespace Breeze.Api.Incomes.RequestResponseObjects
 {
     public class IncomeRequest
     {
@@ -6,8 +6,6 @@
         public string Name { get; set; }
         public int BudgetId { get; set; }
         public decimal Amount { get; set; }
-        public int Year { get; set; }
-        public int Month { get; set; }
-        public int Day { get; set; }
+        public DateOnly Date { get; set; }
     }
 }

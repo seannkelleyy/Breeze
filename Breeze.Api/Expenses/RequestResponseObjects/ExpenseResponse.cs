@@ -1,4 +1,4 @@
-﻿namespace Breeze.Api.RequestResponseObjects.Expenses
+﻿namespace Breeze.Api.Expenses.RequestResponseObjects
 {
     public class ExpenseResponse
     {
@@ -7,8 +7,6 @@
         public string Name { get; set; }
         public int CategoryId { get; set; }
         public decimal Amount { get; set; }
-        public int Year { get; set; }
-        public int Month { get; set; }
-        public int Day { get; set; }
+        public DateOnly Date { get; set; }
     }
 }

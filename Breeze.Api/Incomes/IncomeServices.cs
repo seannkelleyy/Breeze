@@ -1,8 +1,8 @@
-﻿using Breeze.Api.RequestResponseObjects.Incomes;
+﻿using Breeze.Api.Incomes.RequestResponseObjects;
 using Breeze.Data;
 using Breeze.Domain;
 
-namespace Breeze.Api.Services
+namespace Breeze.Api.Incomes
 {
     /// <summary>
     /// Service for managing incomes.
@@ -43,9 +43,7 @@ namespace Breeze.Api.Services
                         Id = income.Id,
                         UserId = income.UserId,
                         Name = income.Name,
-                        Year = income.Year,
-                        Month = income.Month,
-                        Day = income.Day,
+                        Date = income.Date,
                         BudgetId = income.BudgetId,
                         Amount = income.Amount,
                     }).First();
@@ -63,24 +61,28 @@ namespace Breeze.Api.Services
         /// <param name="userId">The user's identifier.</param>
         /// <param name="budgetId">The budget's identifier.</param>
         /// <returns>A list of income response objects or null if an error occurs.</returns>
-        public List<IncomeResponse>? GetIncomeByBudgetId(string userId, int budgetId)
+        public List<IncomeResponse>? GetIncomesByBudgetId(string userId, int budgetId)
         {
             try
             {
-                return db.Incomes
+                List<IncomeResponse> items = db.Incomes
                     .Where(income => income.BudgetId.Equals(budgetId) && income.UserId.Equals(userId))
                     .Select(income => new IncomeResponse
                     {
                         Id = income.Id,
                         UserId = income.UserId,
                         Name = income.Name,
-                        Year = income.Year,
-                        Month = income.Month,
-                        Day = income.Day,
+                        Date = income.Date,
                         BudgetId = income.BudgetId,
                         Amount = income.Amount,
                     })
                     .ToList();
+                if (items != null)
+                {
+                    return items;
+                }
+                return [];
+
             }
             catch (Exception ex)
             {
@@ -113,9 +115,7 @@ namespace Breeze.Api.Services
                 {
                     UserId = userId,
                     Name = newIncome.Name,
-                    Year = newIncome.Year,
-                    Month = newIncome.Month,
-                    Day = newIncome.Day,
+                    Date = newIncome.Date,
                     BudgetId = budget.Id,
                     Amount = newIncome.Amount,
                 };
@@ -156,9 +156,7 @@ namespace Breeze.Api.Services
                 }
                 income.Name = updatedIncome.Name;
                 income.Amount = updatedIncome.Amount;
-                income.Year = updatedIncome.Year;
-                income.Month = updatedIncome.Month;
-                income.Day = updatedIncome.Day;
+                income.Date = updatedIncome.Date;
                 db.Incomes.Update(income);
                 db.SaveChanges();
                 return income.Id;
