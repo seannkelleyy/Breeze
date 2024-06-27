@@ -7,10 +7,10 @@ import { BreezeCard } from '../../components/shared/BreezeCard'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useState } from 'react'
 import { BreezeButton } from '../../components/shared/BreezeButton'
-import { useDateContext } from '../../services/providers/DateProvider'
-import { AddExpenseModal } from '../addExpense/AddExpense'
-import { AddIncomeModal } from '../addIncome/AddIncome'
+import { AddExpenseModal } from '../addExpense/AddExpenseModal'
+import { AddIncomeModal } from '../addIncome/AddIncomeModal'
 import { ProfileModal } from '@/components/auth/ProfileModal'
+import dayjs from 'dayjs'
 
 /**
  * This is the home page component that calls the components that make up the home page.
@@ -18,7 +18,6 @@ import { ProfileModal } from '@/components/auth/ProfileModal'
  */
 export const HomePage = () => {
 	const { user } = useAuth0()
-	const { date, getMonthAsString } = useDateContext()
 	const [showProfileModal, setShowProfileModal] = useState(false)
 	const [showAddExpenseModal, setShowAddExpenseModal] = useState(false)
 	const [showAddIncomeModal, setShowAddIncomeModal] = useState(false)
@@ -57,34 +56,21 @@ export const HomePage = () => {
 						borderRadius: '3rem',
 					}}
 				/>
-				{showProfileModal && (
-					<ProfileModal
-						showModal={showProfileModal}
-						setShowModal={setShowProfileModal}
-					/>
-				)}
+				{showProfileModal && <ProfileModal setShowModal={setShowProfileModal} />}
 				<BreezeText
 					text={<u>BREEZE</u>}
 					type='title'
 				/>
 				<BreezeCard title='Date'>
 					<BreezeText
-						text={`${date.getDate() + ' '}
-					${getMonthAsString(date.getMonth()) + ' '}
-					${date.getFullYear()}`}
+						text={dayjs().format('MMMM DD, YYYY')}
 						type='small-heading'
 					/>
 				</BreezeCard>
 				<Progress />
 				<GoalItemsBox />
-				<AddExpenseModal
-					showModal={showAddExpenseModal}
-					setShowModal={setShowAddExpenseModal}
-				/>
-				<AddIncomeModal
-					showModal={showAddIncomeModal}
-					setShowModal={setShowAddIncomeModal}
-				/>
+				{showAddExpenseModal && <AddExpenseModal setShowModal={setShowAddExpenseModal} />}
+				{showAddIncomeModal && <AddIncomeModal setShowModal={setShowAddIncomeModal} />}
 				<BreezeBox title='Add Buttons'>
 					<BreezeButton
 						content='Add New Expense'

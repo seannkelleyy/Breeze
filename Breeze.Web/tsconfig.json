@@ -29,6 +29,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*"],
-  "exclude": ["src/components/shared/BreezeConfirmationToast.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

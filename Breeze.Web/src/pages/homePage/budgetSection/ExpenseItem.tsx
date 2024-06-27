@@ -5,7 +5,7 @@ import { DeleteButton } from '@/components/shared/DeleteButton'
 import { Expense } from '@/services/hooks/expense/expenseServices'
 import { useDeleteExpense } from '@/services/hooks/expense/useDeleteExpense'
 import { useBudgetContext } from '@/services/providers/BudgetProvider'
-import { useDateContext } from '@/services/providers/DateProvider'
+import dayjs from 'dayjs'
 
 type ExpenseItemProps = {
 	expense: Expense
@@ -19,13 +19,12 @@ type ExpenseItemProps = {
  * @param refetchExpenses. The function to refetch the expenses.
  */
 export const ExpenseItem = ({ expense, refetchExpenses }: ExpenseItemProps) => {
-	const { getMonthAsString } = useDateContext()
 	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
 	const deleteMutation = useDeleteExpense({
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		category: categories.find((category) => category.id === expense.categoryId)!,
 		expense,
-		onSettled: () => {
+		onSuccess: () => {
 			refetchBudget()
 			refetchCategories()
 			refetchExpenses()
@@ -65,7 +64,7 @@ export const ExpenseItem = ({ expense, refetchExpenses }: ExpenseItemProps) => {
 					type='medium'
 				/>
 				<BreezeText
-					text={`Date: ${getMonthAsString(expense.month)} ${expense.day} ${expense.year}`}
+					text={`Date: ${dayjs(expense.date).format('MM/DD/YYYY')}`}
 					type='medium'
 				/>
 			</BreezeBox>

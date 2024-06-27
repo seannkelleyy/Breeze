@@ -20,7 +20,6 @@ export const useFetchExpenses = ({ category }: FetchExpenseProps) => {
 
 	return useQuery<Expense[], Error>(['expenses', category.id], fetchExpenses, {
 		refetchInterval: 180 * 1000,
-		refetchOnMount: 'always',
 		retryDelay: 10 * 1000,
 	})
 }

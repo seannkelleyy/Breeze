@@ -27,14 +27,34 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 		userId: userId,
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		goalId: goal.id!,
+		onSettled: () => refetchGoals(),
 	})
 	const patchMutation = usePatchGoal({
 		userId: userId,
 		goal: goal,
-		onSuccess: () => {
-			refetchGoals()
-		},
+		onSettled: () => refetchGoals(),
 	})
+
+	if (!isEditMode)
+		return (
+			<BreezeBox
+				title='Goal'
+				style={{
+					width: '100%',
+					flexDirection: 'row',
+					padding: '.5em 0',
+				}}
+			>
+				{' '}
+				<>
+					<BreezeText
+						text={goal.description}
+						type='medium'
+						style={goal.isCompleted ? { textDecoration: 'line-through' } : {}}
+					/>
+				</>
+			</BreezeBox>
+		)
 
 	return (
 		<BreezeBox
@@ -45,53 +65,36 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 				padding: '.5em 0',
 			}}
 		>
-			{isEditMode ? (
-				<>
-					<BreezeInput
-						type='text'
-						title='Goal'
-						placeholder='Enter goal'
-						defaultValue={goal.description}
-						selectAllOnClick
-						onChange={(e) => {
-							goal.description = e.target.value
-						}}
-						onBlur={() => patchMutation.mutate()}
-						style={{
-							width: '100%',
-							textAlign: 'center',
-							backgroundColor: 'var(--color-input-background)',
-						}}
-					/>
-					<BreezeButton
-						content={goal.isCompleted ? <SquareCheckBig /> : <Square />}
-						onClick={() => {
-							goal.isCompleted = !goal.isCompleted
-							patchMutation.mutate()
-						}}
-						style={{
-							padding: '0',
-							margin: '0',
-							backgroundColor: 'transparent',
-							boxShadow: 'none',
-						}}
-					/>
-					<DeleteButton
-						onClick={() => {
-							deleteMutation.mutate()
-							refetchGoals()
-						}}
-					/>
-				</>
-			) : (
-				<>
-					<BreezeText
-						text={goal.description}
-						type='medium'
-						style={goal.isCompleted ? { textDecoration: 'line-through' } : {}}
-					/>
-				</>
-			)}
+			<BreezeInput
+				type='text'
+				title='Goal'
+				placeholder='Enter goal'
+				defaultValue={goal.description}
+				selectAllOnClick
+				onChange={(e) => {
+					goal.description = e.target.value
+				}}
+				onBlur={() => patchMutation.mutate()}
+				style={{
+					width: '100%',
+					textAlign: 'center',
+					backgroundColor: 'var(--color-input-background)',
+				}}
+			/>
+			<BreezeButton
+				content={goal.isCompleted ? <SquareCheckBig /> : <Square />}
+				onClick={() => {
+					goal.isCompleted = !goal.isCompleted
+					patchMutation.mutate()
+				}}
+				style={{
+					padding: '0',
+					margin: '0',
+					backgroundColor: 'transparent',
+					boxShadow: 'none',
+				}}
+			/>
+			<DeleteButton onClick={() => deleteMutation.mutate()} />
 		</BreezeBox>
 	)
 }

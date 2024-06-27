@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { BreezeCard } from '../../../components/shared/BreezeCard'
 import { BreezeButton } from '../../../components/shared/BreezeButton'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
@@ -20,10 +20,6 @@ export const CategoryOverview = ({ category }: categoryItemProps) => {
 	const { data: expenses, status, refetch } = useFetchExpenses({ category })
 	const [seeExpenses, setSeeExpenses] = useState<boolean>(false)
 	const categoryPercentage = (category.currentSpend / category.allocation) * 100
-
-	useEffect(() => {
-		refetch()
-	}, [refetch, expenses])
 
 	return (
 		<BreezeCard title='Category Overview'>

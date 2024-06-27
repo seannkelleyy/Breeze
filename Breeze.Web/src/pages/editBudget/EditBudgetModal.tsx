@@ -4,35 +4,51 @@ import { BreezeBox } from '../../components/shared/BreezeBox'
 import { BreezeText } from '../../components/shared/BreezeText'
 import { BreezeCard } from '../../components/shared/BreezeCard'
 import { useState } from 'react'
-import { useDateContext } from '../../services/providers/DateProvider'
 import { useFetchBudget } from '@/services/hooks/budget/useFetchBudget'
 import { BreezeModal } from '@/components/shared/BreezeModal'
+import { Dayjs } from 'dayjs'
 
 type EditBudgetModalProps = {
-	year: number
-	month: number
-	showModal: boolean
-	setShowModal: (showModal: boolean) => void
+	date: Dayjs
+	setShowModal: (showModal: boolean | ((prevShowModal: boolean) => boolean)) => void
 }
 
-export const EditBudgetModal = ({ year, month, showModal, setShowModal }: EditBudgetModalProps) => {
-	const { getMonthAsString } = useDateContext()
-	const { data, status } = useFetchBudget({
-		year: year,
-		month: month,
-	})
+export const EditBudgetModal = ({ date, setShowModal }: EditBudgetModalProps) => {
+	const { data, status } = useFetchBudget({ date: date })
 	const [monthlyIncome, setMonthlyIncome] = useState(0)
 	const [monthlyExpenses, setMonthlyExpenses] = useState(0)
 
+	if (status === 'loading')
+		return (
+			<BreezeModal
+				title='Edit Budget'
+				onClose={() => setShowModal((prev) => !prev)}
+			>
+				<BreezeText
+					type='large'
+					text='Loading...'
+				/>
+			</BreezeModal>
+		)
+
+	if (status === 'error')
+		return (
+			<BreezeModal
+				title='Edit Budget'
+				onClose={() => setShowModal((prev) => !prev)}
+			>
+				<BreezeText
+					type='large'
+					text='Error loading budget'
+				/>
+			</BreezeModal>
+		)
 	return (
 		<BreezeModal
 			title='Edit Budget'
-			showModal={showModal}
-			onClose={() => setShowModal(!showModal)}
+			onClose={() => setShowModal((prev) => !prev)}
 		>
-			<div style={{ overflow: 'auto', maxHeight: '70vh' }}>
-				{' '}
-				{/* Add this div */}
+			<div style={{ overflow: 'auto', maxHeight: '100%' }}>
 				<BreezeText
 					type='large-heading'
 					text='Edit Budget'
@@ -49,7 +65,7 @@ export const EditBudgetModal = ({ year, month, showModal, setShowModal }: EditBu
 				>
 					<BreezeText
 						type='large'
-						text={`Date: ${getMonthAsString(month)} ${year}`}
+						text={date.format('MMMM YYYY')}
 					/>
 					<BreezeText
 						type='large'
@@ -75,25 +91,14 @@ export const EditBudgetModal = ({ year, month, showModal, setShowModal }: EditBu
 						width: '85%',
 					}}
 				>
-					{data ? (
+					{data && (
 						<>
 							<IncomeItemsBox setIncome={setMonthlyIncome} />
 							<CategoryItemsBox setExpenses={setMonthlyExpenses} />
 						</>
-					) : status === 'loading' ? (
-						<BreezeText
-							type='large'
-							text='Loading...'
-						/>
-					) : (
-						<BreezeText
-							type='large'
-							text='Error loading budget'
-						/>
 					)}
 				</BreezeBox>
-			</div>{' '}
-			{/* End of added div */}
+			</div>
 		</BreezeModal>
 	)
 }
