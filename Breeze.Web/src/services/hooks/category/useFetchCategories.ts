@@ -19,7 +19,6 @@ export const useFetchCategories = ({ budgetId }: FetchCategoryProps) => {
 
 	return useQuery<Category[], Error>(['categories', budgetId], fetchCategories, {
 		refetchInterval: 180 * 1000,
-		refetchOnMount: 'always',
 		retryDelay: 10 * 1000,
 	})
 }

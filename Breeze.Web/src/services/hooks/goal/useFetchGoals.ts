@@ -20,7 +20,6 @@ export const useFetchGoals = ({ userId }: FetchGoalProps) => {
 
 	return useQuery<Goal[], Error>(['goals', userId], fetchGoals, {
 		refetchInterval: 180 * 1000,
-		refetchOnMount: 'always',
 		retryDelay: 10 * 1000,
 	})
 }

@@ -12,40 +12,54 @@ const handleError = (error: AxiosError) => {
 const useHttp =  () => {
     const { getAccessTokenSilently } = useAuth0();
     const {localApi, hostedApi, apiAudience} = useEnvironmentVariables()
-    const apiUrl = process.env.NODE_ENV === 'production' ? hostedApi : localApi  
 
     const fetchToken = async () => {
-        const token = await getAccessTokenSilently({
+        return await getAccessTokenSilently({
             authorizationParams: {
                 scope: 'read:data write:data',
                 audience: apiAudience
             }
-        });
-        if (!token) {
-            throw new Error('Token is undefined');
-        }
-        return token;
-    };
+        })
+    }
+    
     const { data: accessToken, refetch } = useQuery('accessToken', fetchToken, {
         refetchInterval: 1000 * 180,
         refetchOnWindowFocus: true,
         refetchOnMount: true,
         refetchOnReconnect: true,
-        refetchIntervalInBackground: true,
-        onSettled: () => {
+        onSuccess: (accessToken) => {
             if (accessToken) {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+                axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
             }
         }
-    });
+    })
+
+    const axiosInstance = axios.create({
+        baseURL: process.env.NODE_ENV === 'production' ? hostedApi : localApi, 
+    })
+
+    axiosInstance.interceptors.request.use(
+        async (config) => {
+            if (!accessToken) {
+                await refetch();
+            }
+            if (accessToken) {
+                config.headers.Authorization = `Bearer ${accessToken}`;
+            }
+            return config;
+        },
+        (error) => {
+            return Promise.reject(error);
+        }
+    )
+
 
     const getOne = async <T>(relativeUri: string): Promise<T> => {
         try {
-            if (!accessToken || accessToken === undefined) {
+            if (!accessToken) {
                 await refetch()
             }
-            const response = await axios.get<T>(`${apiUrl}/${relativeUri}`)
-            return response.data as T
+            return (await axiosInstance.get<T>(relativeUri)).data as T
         } catch (error) {
             handleError(error as AxiosError)
         }
@@ -54,11 +68,10 @@ const useHttp =  () => {
  
     const getMany = async <T>(relativeUri: string): Promise<T[]> => {
         try {
-            if (!accessToken || accessToken === undefined) {
+            if (accessToken === undefined) {
                 await refetch()
             }
-            const response = await axios.get<T[]>(`${apiUrl}/${relativeUri}`)
-            return response.data
+            return (await axiosInstance.get<T[]>(relativeUri)).data
         } catch (error) {
             handleError(error as AxiosError)
         }
@@ -67,11 +80,10 @@ const useHttp =  () => {
 
     const getManyArray = async <T>(relativeUri: string): Promise<T[][]> => {
         try {
-            if (!accessToken || accessToken === undefined) {
+            if (!accessToken) {
                 await refetch()
             }
-            const response = await axios.get<T[][]>(`${apiUrl}/${relativeUri}`)
-            return response.data
+            return (await axiosInstance.get<T[][]>(relativeUri)).data
         } catch (error) {
             handleError(error as AxiosError)
         }
@@ -81,10 +93,10 @@ const useHttp =  () => {
     // use getManyHeader to get the headers of the response.  Used for paging
     const getManyHeader = async <T>(relativeUri: string): Promise<{ data: T[]; headers: unknown }> => {
         try {
-            if (!accessToken || accessToken === undefined) {
+            if (!accessToken) {
                 await refetch()
             }
-            const response = await axios.get<T[]>(`${apiUrl}/${relativeUri}`)
+            const response = await axiosInstance.get<T[]>(relativeUri)
             return { data: response.data, headers: response.headers }
         } catch (error) {
             handleError(error as AxiosError)
@@ -94,11 +106,10 @@ const useHttp =  () => {
  
     const post = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
         try {
-            if (!accessToken || accessToken === undefined) {
+            if (!accessToken) {
                 await refetch()
             }
-            const response = await axios.post<T>(`${apiUrl}/${relativeUri}`, rq)
-            return response.data as T
+            return (await axiosInstance.post<T>(relativeUri, rq)).data as T
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 throw error
@@ -109,11 +120,10 @@ const useHttp =  () => {
  
     const patch = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
         try {
-            if (!accessToken || accessToken === undefined) {
+            if (!accessToken) {
                 await refetch()
             }
-            const response = await axios.patch<T>(`${apiUrl}/${relativeUri}`, rq)
-            return response.data
+            return (await axiosInstance.patch<T>(relativeUri, rq)).data
         } catch (error) {
             handleError(error as AxiosError)
         }
@@ -122,11 +132,10 @@ const useHttp =  () => {
  
     const put = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
         try {
-            if (!accessToken || accessToken === undefined) {
+            if (!accessToken) {
                 await refetch()
             }
-            const response = await axios.put<T>(`${apiUrl}/${relativeUri}`, rq)
-            return response.data
+            return (await axiosInstance.put<T>(relativeUri, rq)).data
         } catch (error) {
             handleError(error as AxiosError)
         }
@@ -135,10 +144,10 @@ const useHttp =  () => {
 
     const deleteOne = async <T>(relativeUri: string): Promise<void> => {
         try {
-            if (!accessToken || accessToken === undefined) {
+            if (!accessToken) {
                 await refetch()
             }
-            await axios.delete<T>(`${apiUrl}/${relativeUri}`)
+            await axiosInstance.delete<T>(relativeUri)
         } catch (error) {
             handleError(error as AxiosError)
         }
