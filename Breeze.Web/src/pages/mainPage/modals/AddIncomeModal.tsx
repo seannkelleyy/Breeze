@@ -30,6 +30,7 @@ export const AddIncomeModal = ({ setShowModal }: AddIncomeModalProps) => {
 	})
 
 	const postMutation = usePostIncome({
+		income: income,
 		onSettled: () => {
 			refetchBudget()
 			refetchIncomes()
@@ -125,7 +126,7 @@ export const AddIncomeModal = ({ setShowModal }: AddIncomeModalProps) => {
 				content='Add Income'
 				disabled={!isSubmittable}
 				onClick={() => {
-					postMutation.mutate(income)
+					postMutation.mutate()
 					setShowModal((prev) => !prev)
 				}}
 			/>
