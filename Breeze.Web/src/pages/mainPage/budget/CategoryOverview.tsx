@@ -4,9 +4,10 @@ import { BreezeButton } from '../../../components/shared/BreezeButton'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { BreezeProgressBar } from '../../../components/shared/BreezeProgressBar'
-import { ExpenseItem } from './ExpenseItem'
+import { ExpenseItem } from './expenses/ExpenseItem'
 import { useFetchExpenses } from '@/services/hooks/expense/useFetchExpenses'
 import { Category } from '@/services/hooks/category/categoryServices'
+import { LoadingEffect } from '@/components/shared/LoadingEffect'
 
 type categoryItemProps = {
 	category: Category
@@ -20,6 +21,16 @@ export const CategoryOverview = ({ category }: categoryItemProps) => {
 	const { data: expenses, status, refetch } = useFetchExpenses({ category })
 	const [seeExpenses, setSeeExpenses] = useState<boolean>(false)
 	const categoryPercentage = (category.currentSpend / category.allocation) * 100
+
+	if (status === 'loading') return <LoadingEffect />
+
+	if (status === 'error')
+		return (
+			<BreezeText
+				text='Error loading expenses'
+				type='medium'
+			/>
+		)
 
 	return (
 		<BreezeCard title='Category Overview'>
@@ -53,24 +64,13 @@ export const CategoryOverview = ({ category }: categoryItemProps) => {
 						}}
 					/>
 					{seeExpenses &&
-						(status === 'success' ? (
-							expenses.length > 0 &&
-							expenses.map((expense, index) => (
-								<ExpenseItem
-									key={index}
-									expense={expense}
-									refetchExpenses={refetch}
-								/>
-							))
-						) : status === 'loading' ? (
-							<BreezeText
-								text='Loading...'
-								type='medium'
-							/>
-						) : (
-							<BreezeText
-								text='Error loading expenses'
-								type='medium'
+						expenses &&
+						expenses.length > 0 &&
+						expenses.map((expense, index) => (
+							<ExpenseItem
+								key={index}
+								expense={expense}
+								refetchExpenses={refetch}
 							/>
 						))}
 				</>

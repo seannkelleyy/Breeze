@@ -1,15 +1,15 @@
 import { useAuth0 } from '@auth0/auth0-react'
-import { BreezeCard } from '../../../../components/shared/BreezeCard'
-import { BreezeList } from '../../../../components/shared/BreezeList'
-import { BreezeText } from '../../../../components/shared/BreezeText'
+import { BreezeCard } from '../../../../../components/shared/BreezeCard'
+import { BreezeList } from '../../../../../components/shared/BreezeList'
+import { BreezeText } from '../../../../../components/shared/BreezeText'
 import { useFetchGoals } from '@/services/hooks/goal/useFetchGoals'
 import { Goal } from '@/services/hooks/goal/goalServices'
 import { GoalItem } from './GoalItem'
 import { BreezeButton } from '@/components/shared/BreezeButton'
 import { usePostGoal } from '@/services/hooks/goal/usePostGoal'
 import { useState } from 'react'
-import { Pencil } from 'lucide-react'
 import { LoadingEffect } from '@/components/shared/LoadingEffect'
+import { EditButton } from '@/components/shared/EditButton'
 
 /**
  * This is a component that displays the user's goals.
@@ -64,18 +64,12 @@ export const GoalItemsBox = () => {
 				text='Goals'
 				type='small-heading'
 			/>
-
-			<BreezeButton
-				content={<Pencil />}
+			<EditButton
 				onClick={() => setIsEditMode(!isEditMode)}
 				style={{
 					position: 'absolute',
 					top: '1.25em',
 					right: '1.25em',
-					padding: '0',
-					margin: '0',
-					backgroundColor: 'transparent',
-					boxShadow: 'none',
 				}}
 			/>
 			<BreezeButton

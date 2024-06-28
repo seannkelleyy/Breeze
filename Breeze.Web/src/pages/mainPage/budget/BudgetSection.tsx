@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
-import { CategoryOverview } from './CategoryOverview'
 import { BreezeButton } from '../../../components/shared/BreezeButton'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import { BreezeCard } from '../../../components/shared/BreezeCard'
 import { BreezeBox } from '../../../components/shared/BreezeBox'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { Budget } from '@/services/hooks/budget/budgetServices'
-import { EditBudgetModal } from '@/pages/editBudget/EditBudgetModal'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import dayjs, { Dayjs } from 'dayjs'
 import { LoadingEffect } from '@/components/shared/LoadingEffect'
+import { EditBudgetModal } from '../modals/editBudgetModal/EditBudgetModal'
+import { CategoryOverview } from './CategoryOverview'
 
 /**
  * This is the category section view of that home page that gives a brief

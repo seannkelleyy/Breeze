@@ -1,10 +1,10 @@
-import { BreezeButton } from '../../../components/shared/BreezeButton'
-import { BreezeText } from '../../../components/shared/BreezeText'
+import { BreezeButton } from '../../../../../components/shared/BreezeButton'
+import { BreezeText } from '../../../../../components/shared/BreezeText'
 import { CategoryItem } from './CategoryItem'
-import { BreezeBox } from '../../../components/shared/BreezeBox'
+import { BreezeBox } from '../../../../../components/shared/BreezeBox'
 import { useEffect } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useBudgetContext } from '../../../services/providers/BudgetProvider'
+import { useBudgetContext } from '../../../../../services/providers/BudgetProvider'
 import { usePostCategory } from '@/services/hooks/category/usePostCategory'
 
 type CategoryItemsBoxProps = {

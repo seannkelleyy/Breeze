@@ -7,6 +7,7 @@ type BreezeModalProps = {
 	isLoading?: boolean
 	children: React.ReactNode
 	onClose: () => void
+	style?: React.CSSProperties
 }
 
 /**
@@ -15,8 +16,10 @@ type BreezeModalProps = {
  * @param props.isLoading: - optional - A boolean that determines if the modal is loading.
  * @param props.children: The children of the modal.
  * @param props.onClose: A function that closes the modal.
+ * @param props.style: - Optional - The style of the breeze box.
+
  */
-export const BreezeModal = ({ title, isLoading, children, onClose }: BreezeModalProps) => {
+export const BreezeModal = ({ title, isLoading, children, onClose, style }: BreezeModalProps) => {
 	return (
 		<>
 			<div
@@ -45,6 +48,7 @@ export const BreezeModal = ({ title, isLoading, children, onClose }: BreezeModal
 					borderRadius: '1em',
 					boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
 					zIndex: 2,
+					...style,
 				}}
 			>
 				<BreezeButton

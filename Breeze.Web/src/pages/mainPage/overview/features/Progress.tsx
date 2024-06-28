@@ -1,6 +1,6 @@
-import { useBudgetContext } from '../../../services/providers/BudgetProvider'
-import { BreezeCard } from '../../../components/shared/BreezeCard'
-import { BreezeText } from '../../../components/shared/BreezeText'
+import { BreezeCard } from '@/components/shared/BreezeCard'
+import { BreezeText } from '@/components/shared/BreezeText'
+import { useBudgetContext } from '@/services/providers/BudgetProvider'
 import dayjs from 'dayjs'
 
 /**

@@ -71,6 +71,23 @@ export const ProfileModal = ({ setShowModal }: LogoutModalProps) => {
 					fontSize: '0.8rem',
 				}}
 			/>
+			<BreezeText
+				text='Built by: Sean Kelley'
+				type='small'
+			/>
+			<BreezeText
+				text={
+					<a
+						title='Source Code'
+						href='https://github.com/seannkelleyy/Breeze'
+						target='_blank'
+						rel='noopener'
+					>
+						Source Code
+					</a>
+				}
+				type='small'
+			/>
 		</BreezeModal>
 	)
 }

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { forwardRef } from 'react'
 import './shared.css'
 
 type BreezeInputProps = {
@@ -6,8 +8,8 @@ type BreezeInputProps = {
 	placeholder: string
 	defaultValue?: string
 	selectAllOnClick?: boolean
-	onBlur?: (e: React.FocusEvent<HTMLInputElement> | null) => void
-	onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+	onBlur?: (e: any) => void
+	onChange?: (e: any) => void
 	style?: React.CSSProperties
 }
 
@@ -20,9 +22,10 @@ type BreezeInputProps = {
  * @param onChange: - Optional - The onChange function of the input.
  * @param style: - Optional - The style of the input.
  */
-export const BreezeInput = ({ type, title, placeholder, defaultValue, selectAllOnClick, onBlur, onChange, style }: BreezeInputProps) => {
+export const BreezeInput = forwardRef<HTMLInputElement, BreezeInputProps>(({ type, title, placeholder, defaultValue, selectAllOnClick, onBlur, onChange, style }, ref) => {
 	return (
 		<input
+			ref={ref}
 			className='breeze-input'
 			type={type}
 			title={title}
@@ -34,4 +37,4 @@ export const BreezeInput = ({ type, title, placeholder, defaultValue, selectAllO
 			style={style}
 		/>
 	)
-}
+})

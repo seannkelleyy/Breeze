@@ -1,11 +1,13 @@
-import { BreezeBox } from '@/components/shared/BreezeBox'
 import { BreezeCard } from '@/components/shared/BreezeCard'
-import { BreezeText } from '@/components/shared/BreezeText'
 import { DeleteButton } from '@/components/shared/DeleteButton'
 import { Expense } from '@/services/hooks/expense/expenseServices'
 import { useDeleteExpense } from '@/services/hooks/expense/useDeleteExpense'
 import { useBudgetContext } from '@/services/providers/BudgetProvider'
-import dayjs from 'dayjs'
+import { useState } from 'react'
+import { EditExpense } from './EditExpense'
+import { ViewExpense } from './ViewExpense'
+import { EditButton } from '@/components/shared/EditButton'
+import { BreezeBox } from '@/components/shared/BreezeBox'
 
 type ExpenseItemProps = {
 	expense: Expense
@@ -20,6 +22,8 @@ type ExpenseItemProps = {
  */
 export const ExpenseItem = ({ expense, refetchExpenses }: ExpenseItemProps) => {
 	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
+	const [isEditMode, setIsEditMode] = useState<boolean>(false)
+
 	const deleteMutation = useDeleteExpense({
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		category: categories.find((category) => category.id === expense.categoryId)!,
@@ -33,40 +37,39 @@ export const ExpenseItem = ({ expense, refetchExpenses }: ExpenseItemProps) => {
 	return (
 		<BreezeCard
 			title='Category Overview'
+			secondary
 			style={{
 				width: '80%',
 				gap: '0',
 				position: 'relative',
 			}}
 		>
-			<DeleteButton
-				style={{
-					position: 'absolute',
-					top: '8%',
-					right: '5%',
-					padding: '0',
-					margin: '0',
-				}}
-				onClick={() => deleteMutation.mutate()}
-			/>
 			<BreezeBox
-				title='Expenses'
+				title='Expense Tools'
+				direction='row'
 				style={{
-					gap: '.25em',
+					width: '100%',
+					justifyContent: 'space-between',
+					alignItems: 'center',
 				}}
 			>
-				<BreezeText
-					text={`Name: ${expense.name}`}
-					type='medium'
-				/>
-				<BreezeText
-					text={`Amount: $${expense.amount}`}
-					type='medium'
-				/>
-				<BreezeText
-					text={`Date: ${dayjs(expense.date).format('MM/DD/YYYY')}`}
-					type='medium'
-				/>
+				<EditButton onClick={() => setIsEditMode(!isEditMode)} />
+				<DeleteButton onClick={() => deleteMutation.mutate()} />
+			</BreezeBox>
+			<BreezeBox
+				title='Edit Expense'
+				style={{
+					margin: '.5em',
+				}}
+			>
+				{isEditMode ? (
+					<EditExpense
+						expenseItem={expense}
+						refetchExpenses={refetchExpenses}
+					/>
+				) : (
+					<ViewExpense expense={expense} />
+				)}
 			</BreezeBox>
 		</BreezeCard>
 	)

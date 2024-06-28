@@ -1,9 +1,9 @@
-import { HomePage } from '@/pages/homePage/HomePage'
 import { LandingPage } from '@/pages/landing/LandingPage'
 import { BudgetProvider } from '@/services/providers/BudgetProvider'
 import { useAuth0 } from '@auth0/auth0-react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Loading } from './Loading'
+import { HomePage } from '@/pages/mainPage/overview/HomePage'
 
 export const AppRoutes = () => {
 	const { isAuthenticated, isLoading } = useAuth0()

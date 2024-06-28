@@ -1,8 +1,8 @@
 import { IncomeItemsBox } from './income/IncomeItemsBox'
 import { CategoryItemsBox } from './category/CategoryItemBox'
-import { BreezeBox } from '../../components/shared/BreezeBox'
-import { BreezeText } from '../../components/shared/BreezeText'
-import { BreezeCard } from '../../components/shared/BreezeCard'
+import { BreezeBox } from '../../../../components/shared/BreezeBox'
+import { BreezeText } from '../../../../components/shared/BreezeText'
+import { BreezeCard } from '../../../../components/shared/BreezeCard'
 import { useState } from 'react'
 import { useFetchBudget } from '@/services/hooks/budget/useFetchBudget'
 import { BreezeModal } from '@/components/shared/BreezeModal'
@@ -53,6 +53,7 @@ export const EditBudgetModal = ({ date, setShowModal }: EditBudgetModalProps) =>
 				/>
 				<BreezeCard
 					title='Budget Headlines'
+					secondary
 					style={{
 						position: 'sticky',
 						top: 0,
