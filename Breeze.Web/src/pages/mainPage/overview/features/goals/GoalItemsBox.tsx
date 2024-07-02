@@ -19,8 +19,8 @@ export const GoalItemsBox = () => {
 	const [isEditMode, setIsEditMode] = useState<boolean>(false)
 	const [showCompleted, setShowCompleted] = useState<boolean>(false)
 	const { data: goals, refetch, isLoading, isError } = useFetchGoals({ userId: user?.sub ?? '' })
-	const unfinishedGoals = goals?.filter((goal: Goal) => goal.isCompleted === false)
-	const completedGoals = goals?.filter((goal: Goal) => goal.isCompleted === true)
+	const unfinishedGoals = goals && goals?.filter((goal: Goal) => goal.isCompleted === false)
+	const completedGoals = goals && goals?.filter((goal: Goal) => goal.isCompleted === true)
 
 	const newGoal: Goal = {
 		userId: user?.sub ?? '',
@@ -78,19 +78,8 @@ export const GoalItemsBox = () => {
 			/>
 
 			<BreezeList>
-				{unfinishedGoals?.map((goal: Goal) => (
-					<GoalItem
-						key={goal.id}
-						userId={user?.sub ?? ''}
-						goal={goal}
-						isEditMode={isEditMode}
-						refetchGoals={refetch}
-					/>
-				))}
-			</BreezeList>
-			{showCompleted && (
-				<BreezeList>
-					{completedGoals?.map((goal: Goal) => (
+				{unfinishedGoals &&
+					unfinishedGoals.map((goal: Goal) => (
 						<GoalItem
 							key={goal.id}
 							userId={user?.sub ?? ''}
@@ -99,6 +88,19 @@ export const GoalItemsBox = () => {
 							refetchGoals={refetch}
 						/>
 					))}
+			</BreezeList>
+			{showCompleted && (
+				<BreezeList>
+					{completedGoals &&
+						completedGoals?.map((goal: Goal) => (
+							<GoalItem
+								key={goal.id}
+								userId={user?.sub ?? ''}
+								goal={goal}
+								isEditMode={isEditMode}
+								refetchGoals={refetch}
+							/>
+						))}
 				</BreezeList>
 			)}
 			<BreezeButton

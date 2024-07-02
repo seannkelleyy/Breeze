@@ -65,10 +65,9 @@ export const CategoryOverview = ({ category }: categoryItemProps) => {
 					/>
 					{seeExpenses &&
 						expenses &&
-						expenses.length > 0 &&
-						expenses.map((expense, index) => (
+						expenses.map((expense) => (
 							<ExpenseItem
-								key={index}
+								key={expense.id}
 								expense={expense}
 								refetchExpenses={refetch}
 							/>

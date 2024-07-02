@@ -48,13 +48,14 @@ export const CategoryItemsBox = ({ setExpenses }: CategoryItemsBoxProps) => {
 				type='small-heading'
 				text='Categories'
 			/>
-			{categories.map((category) => (
-				<CategoryItem
-					key={category.id}
-					categoryItem={category}
-					refetchCategories={refetchCategories}
-				/>
-			))}
+			{categories &&
+				categories.map((category) => (
+					<CategoryItem
+						key={category.id}
+						categoryItem={category}
+						refetchCategories={refetchCategories}
+					/>
+				))}
 			<BreezeButton
 				content='Add Category'
 				onClick={() => postMutation.mutate()}
