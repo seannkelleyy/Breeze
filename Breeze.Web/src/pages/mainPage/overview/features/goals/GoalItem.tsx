@@ -23,15 +23,10 @@ type GoalItemProps = {
  * @param refetchGoals. A function to refetch the goals.
  */
 export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemProps) => {
-	const deleteMutation = useDeleteGoal({
-		userId: userId,
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		goalId: goal.id!,
+	const patchMutation = usePatchGoal({
 		onSettled: () => refetchGoals(),
 	})
-	const patchMutation = usePatchGoal({
-		userId: userId,
-		goal: goal,
+	const deleteMutation = useDeleteGoal({
 		onSettled: () => refetchGoals(),
 	})
 
@@ -74,7 +69,12 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 				onChange={(e) => {
 					goal.description = e.target.value
 				}}
-				onBlur={() => patchMutation.mutate()}
+				onBlur={() =>
+					patchMutation.mutate({
+						userId: userId,
+						goal: goal,
+					})
+				}
 				style={{
 					width: '100%',
 					textAlign: 'center',
@@ -85,7 +85,7 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 				content={goal.isCompleted ? <SquareCheckBig /> : <Square />}
 				onClick={() => {
 					goal.isCompleted = !goal.isCompleted
-					patchMutation.mutate()
+					patchMutation.mutate({ userId: userId, goal: goal })
 				}}
 				style={{
 					padding: '0',
@@ -94,7 +94,15 @@ export const GoalItem = ({ userId, goal, isEditMode, refetchGoals }: GoalItemPro
 					boxShadow: 'none',
 				}}
 			/>
-			<DeleteButton onClick={() => deleteMutation.mutate()} />
+			<DeleteButton
+				onClick={() =>
+					deleteMutation.mutate({
+						userId: userId,
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						goalId: goal.id!,
+					})
+				}
+			/>
 		</BreezeBox>
 	)
 }

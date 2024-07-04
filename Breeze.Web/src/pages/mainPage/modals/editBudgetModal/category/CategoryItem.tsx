@@ -20,13 +20,11 @@ export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemPr
 	const [categoryAmount, setCategoryAmount] = useState<number>(categoryItem.allocation)
 	const [categoryName, setCategoryName] = useState<string>(categoryItem.name)
 	const patchMutation = usePatchCategory({
-		category: { ...categoryItem, allocation: categoryAmount, name: categoryName },
 		onSettled: () => {
 			refetchCategories()
 		},
 	})
 	const deleteMutation = useDeleteCategory({
-		category: categoryItem,
 		onSettled: () => {
 			refetchCategories()
 		},
@@ -36,7 +34,6 @@ export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemPr
 		<BreezeBox
 			title='CategoryItem'
 			direction='row'
-			style={{ justifyContent: 'space-between', width: '100%' }}
 		>
 			<BreezeInput
 				title='Category Name'
@@ -44,10 +41,13 @@ export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemPr
 				selectAllOnClick
 				placeholder={categoryName}
 				onChange={(e) => setCategoryName(e.target.value)}
-				onBlur={() => patchMutation.mutate()}
+				onBlur={() =>
+					patchMutation.mutate({
+						category: { ...categoryItem, allocation: categoryAmount, name: categoryName },
+					})
+				}
 				style={{
-					textAlign: 'left',
-					width: '75%',
+					width: '100%',
 				}}
 			/>
 			<BreezeInput
@@ -56,11 +56,15 @@ export const CategoryItem = ({ categoryItem, refetchCategories }: CategoryItemPr
 				selectAllOnClick
 				placeholder={categoryAmount.toString()}
 				onChange={(e) => setCategoryAmount(e.target.value as unknown as number)}
-				onBlur={() => patchMutation.mutate()}
+				onBlur={() =>
+					patchMutation.mutate({
+						category: { ...categoryItem, allocation: categoryAmount, name: categoryName },
+					})
+				}
 			/>
 			<DeleteButton
 				onClick={() => {
-					deleteMutation.mutate()
+					deleteMutation.mutate({ category: categoryItem })
 				}}
 			/>
 		</BreezeBox>

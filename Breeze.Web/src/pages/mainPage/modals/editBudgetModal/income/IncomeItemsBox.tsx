@@ -20,13 +20,6 @@ export const IncomeItemsBox = ({ setIncome }: IncomeItemsBoxProps) => {
 	const { user } = useAuth0()
 	const { budget, incomes, refetchIncomes } = useBudgetContext()
 	const postMutation = usePostIncome({
-		income: {
-			userId: user?.email ?? '',
-			budgetId: budget.id,
-			name: '',
-			amount: 0,
-			date: dayjs().format('YYYY-MM-DD'),
-		},
 		onSettled: () => {
 			refetchIncomes()
 		},
@@ -38,11 +31,10 @@ export const IncomeItemsBox = ({ setIncome }: IncomeItemsBoxProps) => {
 
 	return (
 		<BreezeBox
-			title='incomes'
+			title='Incomes'
 			style={{
 				padding: '0.5em',
 				borderRadius: '0.5em',
-				width: '100%',
 			}}
 		>
 			<BreezeText
@@ -60,7 +52,17 @@ export const IncomeItemsBox = ({ setIncome }: IncomeItemsBoxProps) => {
 
 			<BreezeButton
 				content='Add Income'
-				onClick={() => postMutation.mutate()}
+				onClick={() =>
+					postMutation.mutate({
+						income: {
+							userId: user?.email ?? '',
+							budgetId: budget.id,
+							name: '',
+							amount: 0,
+							date: dayjs().format('YYYY-MM-DD'),
+						},
+					})
+				}
 			/>
 		</BreezeBox>
 	)

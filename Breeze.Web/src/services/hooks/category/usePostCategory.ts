@@ -3,21 +3,29 @@ import { useCallback } from 'react';
 import { Category, useCategories } from './categoryServices';
 
 type PostCategoryProps = {
-    category: Category;
     onSuccess?: () => void;
     onSettled?: () => void;
 };
 
 /**
  * A hook for posting a category.
- * @param props.category: The category to post.
  * @param props.onSuccess: - Optional - The function to call when the mutation is successful.
  * @param props.onSettled: - Optional - The function to call when the mutation is settled.
  */
-export const usePostCategory = ({category, onSuccess, onSettled}: PostCategoryProps) => {
+
+type PostCategoryMutationProps = {
+   category: Category
+}
+
+/**
+ * Mutation function for posting a category.
+ * @param props.category: The category to post.
+ */
+ 
+export const usePostCategory = ({ onSuccess, onSettled}: PostCategoryProps) => {
   const { postCategory } = useCategories();
 
-  const mutationFn = useCallback(() => postCategory(category), [category, postCategory]);
+  const mutationFn = useCallback(({category} : PostCategoryMutationProps) => postCategory(category), [ postCategory]);
 
   return useMutation(mutationFn, {
     onSuccess: onSuccess,

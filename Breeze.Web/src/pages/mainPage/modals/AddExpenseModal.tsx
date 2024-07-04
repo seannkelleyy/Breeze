@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { BreezeInput } from '../../../components/shared/BreezeInput'
 import { BreezeText } from '../../../components/shared/BreezeText'
 import { useAuth0 } from '@auth0/auth0-react'
@@ -11,44 +10,59 @@ import { BreezeModal } from '@/components/shared/BreezeModal'
 import dayjs from 'dayjs'
 import { useFetchExpenses } from '@/services/hooks/expense/useFetchExpenses'
 import { LoadingEffect } from '@/components/shared/LoadingEffect'
+import { Controller, useForm } from 'react-hook-form'
 
 type AddExpenseProps = {
 	setShowModal: (showModal: boolean | ((prevShowModal: boolean) => boolean)) => void
 }
-/**
- * This component is the page where a user can add an expense.
- * @param setShowModal. A function to set the modal.
- */
+
+type FormInputs = {
+	name: string
+	amount: number
+	date: string
+	categoryName: string
+}
+
 export const AddExpenseModal = ({ setShowModal }: AddExpenseProps) => {
 	const { user } = useAuth0()
 	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
-	const [isSubmittable, setIsSubmittable] = useState(false)
-	const [expense, setExpense] = useState<Expense>({
-		userId: user?.email ?? '',
-		categoryId: categories[0]?.id ?? -1,
-		name: '',
-		amount: 0,
-		date: dayjs().format('YYYY-MM-DD'),
+
+	const {
+		handleSubmit,
+		getValues,
+		control,
+		formState: { isValid },
+	} = useForm<FormInputs>({
+		defaultValues: {
+			name: '',
+			amount: 0,
+			date: dayjs().format('YYYY-MM-DD'),
+			categoryName: categories[0]?.name ?? -1,
+		},
+		mode: 'onChange',
 	})
-	const { refetch: refetchExpenses } = useFetchExpenses({ category: categories.find((category) => category.id === expense.categoryId) ?? categories[0] })
+
+	const { refetch: refetchExpenses } = useFetchExpenses({ category: categories.find((category) => category.name === getValues().categoryName) ?? categories[0] })
 
 	const postMutation = usePostExpense({
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		category: categories.find((category) => category.id === expense.categoryId)!,
-		expense: expense,
 		onSettled: () => {
 			refetchCategories()
 			refetchBudget()
 			refetchExpenses()
 		},
 	})
-
-	const checkSubmittable = () => {
-		if (expense.name !== '' && expense.categoryId !== -1 && expense.amount && expense.date) {
-			setIsSubmittable(true)
-		} else {
-			setIsSubmittable(false)
+	const onSubmit = (data: FormInputs) => {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const category = categories.find((category) => category.name === data.categoryName)!
+		const expense: Expense = {
+			userId: user?.email ?? '',
+			categoryId: category?.id ?? -1,
+			name: data.name,
+			amount: data.amount,
+			date: data.date,
 		}
+		postMutation.mutate({ category, expense })
+		setShowModal((prev) => !prev)
 	}
 
 	if (!categories) return <LoadingEffect />
@@ -63,99 +77,99 @@ export const AddExpenseModal = ({ setShowModal }: AddExpenseProps) => {
 			}}
 			onClose={() => setShowModal((prev) => !prev)}
 		>
-			<BreezeText
-				type='large-heading'
-				text='Add Expense'
+			<form
+				onSubmit={handleSubmit(onSubmit)}
 				style={{
-					alignSelf: 'self-start',
+					display: 'flex',
+					flexDirection: 'column',
+					alignItems: 'center',
+					justifyContent: 'center',
+					minWidth: '75%',
+					gap: '1rem',
 				}}
-			/>
-			<BreezeText
-				type='medium'
-				text='Expense Name:'
-				style={{
-					margin: '.25em',
-					alignSelf: 'self-start',
-				}}
-			/>
-			<BreezeInput
-				type='string'
-				title='Expense Name'
-				placeholder='name'
-				style={{ minWidth: '100%' }}
-				onChange={(e) => {
-					setExpense({ ...expense, name: e.target.value })
-					checkSubmittable()
-				}}
-			/>
-			<BreezeText
-				type='medium'
-				text='Expense Category:'
-				style={{
-					margin: '.25em',
-					alignSelf: 'self-start',
-				}}
-			/>
-			<BreezeSelect
-				title='Category Select'
-				options={categories.map((category) => category.name)}
-				style={{ minWidth: '100%' }}
-				onChange={(e) => {
-					const category = categories.find((category) => category.name === e.target.value)
-					if (category?.id) {
-						setExpense({ ...expense, categoryId: category.id })
-						checkSubmittable()
-					}
-				}}
-			/>
-
-			<BreezeText
-				type='medium'
-				text='Expense Amount:'
-				style={{
-					margin: '.25em',
-					alignSelf: 'self-start',
-				}}
-			/>
-			<BreezeInput
-				type='string'
-				title='Expense Amount'
-				placeholder='amount'
-				style={{ minWidth: '100%' }}
-				onChange={(e) => {
-					setExpense({ ...expense, amount: parseFloat(e.target.value) })
-					checkSubmittable()
-				}}
-			/>
-
-			<BreezeText
-				type='medium'
-				text='Expense Date:'
-				style={{
-					margin: '.25em',
-					alignSelf: 'self-start',
-				}}
-			/>
-			<BreezeInput
-				type='date'
-				title='Expense Date'
-				placeholder='date'
-				defaultValue={dayjs().format('YYYY-MM-DD')}
-				style={{ minWidth: '100%' }}
-				onChange={(e) => {
-					setExpense({ ...expense, date: dayjs(e.target.value).format('YYYY-MM-DD') })
-					checkSubmittable()
-				}}
-			/>
-
-			<BreezeButton
-				content='Add Expense'
-				disabled={!isSubmittable}
-				onClick={() => {
-					postMutation.mutate()
-					setShowModal((prev) => !prev)
-				}}
-			/>
+			>
+				<BreezeText
+					type='large-heading'
+					text='Add Expense'
+					style={{
+						alignSelf: 'self-start',
+					}}
+				/>
+				<Controller
+					name='name'
+					control={control}
+					defaultValue=''
+					rules={{ required: true }}
+					render={({ field }) => (
+						<BreezeInput
+							{...field}
+							type='text'
+							title='Expense Name'
+							placeholder='name'
+							label='Expense Name:'
+							style={{ width: '100%' }}
+						/>
+					)}
+				/>
+				<Controller
+					name='categoryName'
+					control={control}
+					defaultValue={categories[0]?.name ?? ''}
+					rules={{ required: true }}
+					render={({ field }) => (
+						<BreezeSelect
+							{...field}
+							title='Category Select'
+							label='Expense Category:'
+							options={categories.map((category) => category.name)}
+							style={{ width: '100%' }}
+						/>
+					)}
+				/>
+				<Controller
+					name='amount'
+					control={control}
+					defaultValue={0}
+					rules={{ required: true, min: 0.01 }}
+					render={({ field }) => (
+						<BreezeInput
+							{...field}
+							type='number'
+							title='Expense Amount'
+							placeholder='amount'
+							label='Expense Amount:'
+							style={{ width: '100%' }}
+						/>
+					)}
+				/>
+				<Controller
+					name='date'
+					control={control}
+					defaultValue={dayjs().format('YYYY-MM-DD')}
+					rules={{ required: true }}
+					render={({ field }) => (
+						<BreezeInput
+							{...field}
+							type='date'
+							title='Expense Date'
+							placeholder='date'
+							label='Expense Date:'
+							style={{ width: '100%' }}
+						/>
+					)}
+				/>
+				{isValid ? (
+					<BreezeButton
+						type='submit'
+						content='Add Expense'
+					/>
+				) : (
+					<BreezeText
+						type='small'
+						text='Please fill out all fields '
+					/>
+				)}
+			</form>
 		</BreezeModal>
 	)
 }

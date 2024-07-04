@@ -3,21 +3,29 @@ import { useCallback } from 'react';
 import { Income, useIncomes } from './incomeServices';
 
 type DeleteIncomeProps = {
-    income: Income;
     onSuccess?: () => void;
     onSettled?: () => void;
 };
 
 /**
  * A hook for deleting an income.
- * @param props.income: The income to delete.
  * @param props.onSuccess: - Optional - The function to call when the mutation is successful.
  * @param props.onSettled: - Optional - The function to call when the mutation is settled.
  */
-export const useDeleteIncome = ({income, onSuccess, onSettled}: DeleteIncomeProps) => {
+
+type DeleteIncomeMutationProps = {
+  income: Income;
+};
+
+/**
+ * Mutation function for deleting an income.
+ * @param props.income: The income to delete.
+ */
+
+export const useDeleteIncome = ({onSuccess, onSettled}: DeleteIncomeProps) => {
   const { deleteIncome } = useIncomes();
 
-  const mutationFn = useCallback(() => deleteIncome(income), [income, deleteIncome]);
+  const mutationFn = useCallback(({income}: DeleteIncomeMutationProps) => deleteIncome(income), [deleteIncome]);
 
   return useMutation(mutationFn, {
     onSuccess: onSuccess,

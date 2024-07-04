@@ -2,78 +2,120 @@ import { BreezeInput } from '@/components/shared/BreezeInput'
 import { Expense } from '@/services/hooks/expense/expenseServices'
 import { usePatchExpense } from '@/services/hooks/expense/usePatchExpense'
 import { useBudgetContext } from '@/services/providers/BudgetProvider'
-import dayjs from 'dayjs'
-import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 
 type EditExpenseProps = {
 	expenseItem: Expense
 	refetchExpenses: () => void
 }
+
+type EditExpenseInputs = {
+	name: string
+	amount: number
+	date: string
+}
+
+/**
+ * Component that allows a user to edit an expense.
+ */
 export const EditExpense = ({ expenseItem, refetchExpenses }: EditExpenseProps) => {
 	const { categories, refetchBudget, refetchCategories } = useBudgetContext()
-	const [expense, setExpense] = useState<Expense>({
-		id: expenseItem.id,
-		userId: expenseItem.userId,
-		categoryId: expenseItem.categoryId,
-		name: expenseItem.name,
-		amount: expenseItem.amount,
-		date: expenseItem.date,
+
+	const { handleSubmit, control } = useForm<EditExpenseInputs>({
+		defaultValues: {
+			name: expenseItem.name,
+			amount: expenseItem.amount,
+			date: expenseItem.date,
+		},
 	})
 
 	const patchMutation = usePatchExpense({
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		category: categories.find((category) => category.id === expense.categoryId)!,
-		expense,
 		onSettled: () => {
 			refetchBudget()
 			refetchCategories()
 			refetchExpenses()
 		},
 	})
+	const onSubmit = (data: EditExpenseInputs) => {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const category = categories.find((category) => category.id === expenseItem.categoryId)!
+		patchMutation.mutate({
+			category,
+			expense: {
+				id: expenseItem.id,
+				userId: expenseItem.userId,
+				categoryId: expenseItem.categoryId,
+				name: data.name,
+				amount: data.amount,
+				date: data.date,
+			},
+		})
+	}
 	return (
-		<>
-			<BreezeInput
-				type='text'
-				title='Name'
-				placeholder='Expense Name'
-				defaultValue={expense.name}
-				selectAllOnClick
-				onChange={(e) => {
-					setExpense({ ...expense, name: e.target.value })
-				}}
-				onBlur={() => patchMutation.mutate()}
-				style={{
-					width: '100%',
-					textAlign: 'center',
-					backgroundColor: 'var(--color-input-background)',
-				}}
+		<form
+			onSubmit={handleSubmit(onSubmit)}
+			style={{
+				display: 'flex',
+				flexDirection: 'column',
+				alignItems: 'center',
+				justifyContent: 'center',
+				width: '100%',
+				gap: '1rem',
+			}}
+		>
+			<Controller
+				name='name'
+				control={control}
+				defaultValue={expenseItem.name}
+				rules={{ required: true }}
+				render={({ field }) => (
+					<BreezeInput
+						{...field}
+						type='text'
+						title='Name'
+						placeholder='Expense Name'
+						label='Expense Name:'
+						selectAllOnClick
+						style={{ width: '100%' }}
+						onBlur={handleSubmit(onSubmit)}
+					/>
+				)}
 			/>
-			<BreezeInput
-				type='text'
-				title='Amount'
-				placeholder='Expense Amount'
-				defaultValue={expense.amount.toString()}
-				selectAllOnClick
-				onChange={(e) => {
-					setExpense({ ...expense, amount: Number(e.target.value) })
-				}}
-				onBlur={() => patchMutation.mutate()}
-				style={{
-					width: '100%',
-					textAlign: 'center',
-					backgroundColor: 'var(--color-input-background)',
-				}}
+			<Controller
+				name='amount'
+				control={control}
+				defaultValue={expenseItem.amount}
+				rules={{ required: true }}
+				render={({ field }) => (
+					<BreezeInput
+						{...field}
+						type='number'
+						title='Amount'
+						placeholder='Expense Amount'
+						label='Expense Amount:'
+						selectAllOnClick
+						style={{ width: '100%' }}
+						onBlur={handleSubmit(onSubmit)}
+					/>
+				)}
 			/>
-			<BreezeInput
-				type='date'
-				title='Expense Date'
-				placeholder='date'
-				defaultValue={expense.date}
-				style={{ minWidth: '100%' }}
-				onChange={(e) => {
-					setExpense({ ...expense, date: dayjs(e.target.value).format('YYYY-MM-DD') })
-				}}
+			<Controller
+				name='date'
+				control={control}
+				defaultValue={expenseItem.date}
+				rules={{ required: true }}
+				render={({ field }) => (
+					<BreezeInput
+						{...field}
+						type='date'
+						title='Expense Date'
+						placeholder='date'
+						label='Expense Date:'
+						style={{ minWidth: '100%' }}
+						onBlur={handleSubmit(onSubmit)}
+					/>
+				)}
 			/>
-		</>
+		</form>
 	)
 }

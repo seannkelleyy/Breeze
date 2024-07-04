@@ -20,13 +20,11 @@ export const IncomeItem = ({ incomeItem, refetchIncomes }: IncomeItemProps) => {
 	const [incomeAmount, setIncomeAmount] = useState<number>(incomeItem.amount)
 	const [incomeName, setIncomeName] = useState<string>(incomeItem.name)
 	const patchMutation = usePatchIncome({
-		income: { ...incomeItem, amount: incomeAmount, name: incomeName },
 		onSettled: () => {
 			refetchIncomes()
 		},
 	})
 	const deleteMutation = useDeleteIncome({
-		income: incomeItem,
 		onSettled: () => {
 			refetchIncomes()
 		},
@@ -36,7 +34,6 @@ export const IncomeItem = ({ incomeItem, refetchIncomes }: IncomeItemProps) => {
 		<BreezeBox
 			title='CategoryItem'
 			direction='row'
-			style={{ justifyContent: 'space-between', width: '100%' }}
 		>
 			<BreezeInput
 				title='Income Name'
@@ -44,10 +41,9 @@ export const IncomeItem = ({ incomeItem, refetchIncomes }: IncomeItemProps) => {
 				selectAllOnClick
 				placeholder={incomeName}
 				onChange={(e) => setIncomeName(e.target.value)}
-				onBlur={() => patchMutation.mutate()}
+				onBlur={() => patchMutation.mutate({ income: { ...incomeItem, amount: incomeAmount, name: incomeName } })}
 				style={{
-					textAlign: 'left',
-					width: '75%',
+					width: '100%',
 				}}
 			/>
 			<BreezeInput
@@ -56,11 +52,11 @@ export const IncomeItem = ({ incomeItem, refetchIncomes }: IncomeItemProps) => {
 				selectAllOnClick
 				placeholder={incomeAmount.toString()}
 				onChange={(e) => setIncomeAmount(e.target.value as unknown as number)}
-				onBlur={() => patchMutation.mutate()}
+				onBlur={() => patchMutation.mutate({ income: { ...incomeItem, amount: incomeAmount, name: incomeName } })}
 			/>
 			<DeleteButton
 				onClick={() => {
-					deleteMutation.mutate()
+					deleteMutation.mutate({ income: incomeItem })
 				}}
 			/>
 		</BreezeBox>

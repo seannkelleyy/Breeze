@@ -84,12 +84,7 @@ export const EditBudgetModal = ({ date, setShowModal }: EditBudgetModalProps) =>
 						/>
 					</section>
 				</BreezeCard>
-				<BreezeBox
-					title='Budget Items'
-					style={{
-						width: '85%',
-					}}
-				>
+				<BreezeBox title='Budget Items'>
 					{data && (
 						<>
 							<IncomeItemsBox setIncome={setMonthlyIncome} />

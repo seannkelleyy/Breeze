@@ -19,13 +19,6 @@ export const CategoryItemsBox = ({ setExpenses }: CategoryItemsBoxProps) => {
 	const { user } = useAuth0()
 	const { budget, categories, refetchCategories } = useBudgetContext()
 	const postMutation = usePostCategory({
-		category: {
-			userId: user?.email ?? '',
-			name: '',
-			budgetId: budget.id,
-			allocation: 0,
-			currentSpend: 0,
-		},
 		onSettled: () => {
 			refetchCategories()
 		},
@@ -37,11 +30,10 @@ export const CategoryItemsBox = ({ setExpenses }: CategoryItemsBoxProps) => {
 
 	return (
 		<BreezeBox
-			title='incomes'
+			title='Categories'
 			style={{
 				padding: '0.5em',
 				borderRadius: '0.5em',
-				width: '100%',
 			}}
 		>
 			<BreezeText
@@ -58,7 +50,17 @@ export const CategoryItemsBox = ({ setExpenses }: CategoryItemsBoxProps) => {
 				))}
 			<BreezeButton
 				content='Add Category'
-				onClick={() => postMutation.mutate()}
+				onClick={() =>
+					postMutation.mutate({
+						category: {
+							userId: user?.email ?? '',
+							name: '',
+							budgetId: budget.id,
+							allocation: 0,
+							currentSpend: 0,
+						},
+					})
+				}
 			/>
 		</BreezeBox>
 	)

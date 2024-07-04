@@ -22,14 +22,7 @@ export const GoalItemsBox = () => {
 	const unfinishedGoals = goals && goals?.filter((goal: Goal) => goal.isCompleted === false)
 	const completedGoals = goals && goals?.filter((goal: Goal) => goal.isCompleted === true)
 
-	const newGoal: Goal = {
-		userId: user?.sub ?? '',
-		description: 'New Goal',
-		isCompleted: false,
-	}
 	const postMutate = usePostGoal({
-		userId: user?.sub ?? '',
-		goal: newGoal,
 		onSettled: () => refetch(),
 	})
 
@@ -105,7 +98,16 @@ export const GoalItemsBox = () => {
 			)}
 			<BreezeButton
 				content='Add Goal'
-				onClick={() => postMutate.mutate()}
+				onClick={() =>
+					postMutate.mutate({
+						userId: user?.sub ?? '',
+						goal: {
+							userId: user?.sub ?? '',
+							description: 'New Goal',
+							isCompleted: false,
+						},
+					})
+				}
 			/>
 		</BreezeCard>
 	)

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BreezeCard } from '@/components/shared/BreezeCard'
 import { DeleteButton } from '@/components/shared/DeleteButton'
 import { Expense } from '@/services/hooks/expense/expenseServices'
@@ -25,9 +26,6 @@ export const ExpenseItem = ({ expense, refetchExpenses }: ExpenseItemProps) => {
 	const [isEditMode, setIsEditMode] = useState<boolean>(false)
 
 	const deleteMutation = useDeleteExpense({
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		category: categories.find((category) => category.id === expense.categoryId)!,
-		expense,
 		onSuccess: () => {
 			refetchBudget()
 			refetchCategories()
@@ -39,9 +37,10 @@ export const ExpenseItem = ({ expense, refetchExpenses }: ExpenseItemProps) => {
 			title='Category Overview'
 			secondary
 			style={{
-				width: '80%',
 				gap: '0',
 				position: 'relative',
+				minWidth: '50%',
+				maxWidth: 'auto',
 			}}
 		>
 			<BreezeBox
@@ -54,7 +53,7 @@ export const ExpenseItem = ({ expense, refetchExpenses }: ExpenseItemProps) => {
 				}}
 			>
 				<EditButton onClick={() => setIsEditMode(!isEditMode)} />
-				<DeleteButton onClick={() => deleteMutation.mutate()} />
+				<DeleteButton onClick={() => deleteMutation.mutate({ category: categories.find((category) => category.id === expense.categoryId)!, expense })} />
 			</BreezeBox>
 			<BreezeBox
 				title='Edit Expense'
