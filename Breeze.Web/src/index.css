@@ -1,5 +1,5 @@
 :root {
-	font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	line-height: 1.5;
 	font-weight: 400;
 
@@ -17,9 +17,10 @@
 	/* Light mode */
 	--color-background: #88b1bd;
 	--color-text: #242424;
-	--color-card-background: #f1f1f1;
-	--color-input-background: #e1e1e1;
-	--color-button: #e1e1e1;
+	--color-card-background: #e1e1e1;
+	--color-card-background-secondary: #f1f1f1;
+	--color-input-background: #f1f1f1;
+	--color-button: #f1f1f1;
 	--color-progress-background: #c4c4c4;
 
 	/* Dark mode */
@@ -27,6 +28,7 @@
 		--color-background: #242424;
 		--color-text: #ffffff;
 		--color-card-background: #3c3c3c;
+		--color-card-background-secondary: #4a4a4a;
 		--color-input-background: #595a5cbd;
 		--color-button: #56575c88;
 	}
@@ -39,15 +41,12 @@
 	color: var(--color-text);
 }
 
-@font-face {
-	font-family: 'Inter';
-	src:
-		url('/fonts/inter/Inter-VariableFont_slnt,wght.ttf') format('woff2'),
-		url('/fonts/Inter-Regular.woff') format('woff');
-}
-
 button {
 	background-color: var(--color-button);
+	color: var(--color-text);
+}
+
+a {
 	color: var(--color-text);
 }
 
@@ -59,10 +58,4 @@ button {
 .amount-left-negative {
 	background-color: var(--color-negative);
 	border-radius: 0.25em;
-}
-
-.svg-icon {
-	@media (prefers-color-scheme: dark) {
-		filter: invert(1) sepia(1) saturate(1) hue-rotate(180deg);
-	}
 }

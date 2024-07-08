@@ -15,12 +15,13 @@ export const useFetchExpenses = ({ category }: FetchExpenseProps) => {
 	const { getExpenses } = useExpenses()
 
 	const fetchExpenses = useCallback(() => {
+		if (!category.id)
+			return []
 		return getExpenses(category)
 	}, [getExpenses, category])
 
-	return useQuery<Expense[], Error>(['expenses', category.id], fetchExpenses, {
+	return useQuery<Expense[], Error>(['expenses', category], fetchExpenses, {
 		refetchInterval: 180 * 1000,
-		refetchOnMount: 'always',
 		retryDelay: 10 * 1000,
 	})
 }

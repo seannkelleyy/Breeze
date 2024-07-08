@@ -182,4 +182,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="UserId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e4da06fc-4eac-4d6d-9dc3-43d6a80b6e9c" ChangeDateTime="06/26/2024 12:20:17">
+    <Property Name="ElementName" Value="[dbo].[Budget].[Year]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Budget]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Date" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c827e0ac-7dbe-48e0-8aaf-11d1beacb678" ChangeDateTime="06/26/2024 12:20:51">
+    <Property Name="ElementName" Value="[dbo].[Expense].[Year]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Expense]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Date" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9da88e5f-0ce0-4d3d-8c43-58f160c24648" ChangeDateTime="06/26/2024 20:00:37">
+    <Property Name="ElementName" Value="[dbo].[Income].[Year]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Income]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Date" />
+  </Operation>
 </Operations>

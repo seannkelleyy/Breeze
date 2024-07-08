@@ -3,21 +3,29 @@ import { useCallback } from 'react';
 import { Category, useCategories } from './categoryServices';
 
 type PatchCategoryProps = {
-    category: Category;
     onSuccess?: () => void;
     onSettled?: () => void;
 };
 
 /**
  * A hook for patching a category.
- * @param props.category: The category to patch.
  * @param props.onSuccess: - Optional - The function to call when the mutation is successful.
  * @param props.onSettled: - Optional - The function to call when the mutation is settled.
  */
-export const usePatchCategory = ({category, onSuccess, onSettled}: PatchCategoryProps) => {
+
+type PatchCategoryMutationProps = {
+   category: Category
+}
+
+/**
+ * Mutation function for patching a category.
+ * @param props.category: The category to post.
+ */
+
+export const usePatchCategory = ({ onSuccess, onSettled}: PatchCategoryProps) => {
   const { patchCategory } = useCategories();
 
-  const mutationFn = useCallback(() => patchCategory(category), [category, patchCategory]);
+  const mutationFn = useCallback(({category} : PatchCategoryMutationProps) => patchCategory(category), [ patchCategory]);
 
   return useMutation(mutationFn, {
     onSuccess: onSuccess,

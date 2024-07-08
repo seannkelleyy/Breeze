@@ -13,6 +13,13 @@ export const LandingPage = () => {
 				text={<u>BREEZE</u>}
 				type='title'
 			/>
+			<BreezeText
+				text={`The simple budget app that makes budgeting a Breeze.`}
+				type='medium'
+				style={{
+					textAlign: 'center',
+				}}
+			/>
 			<LoginButton />
 		</BreezeBox>
 	)

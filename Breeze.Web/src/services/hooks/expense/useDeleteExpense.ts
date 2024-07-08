@@ -4,23 +4,31 @@ import { Expense, useExpenses } from './expenseServices';
 import { Category } from '../category/categoryServices';
 
 type DeleteExpenseProps = {
-    category: Category;
-    expense: Expense;
     onSuccess?: () => void;
     onSettled?: () => void;
 };
 
 /**
  * A hook for deleting an expense.
- * @param props.category: The category to delete the expense from.
- * @param props.expense: The expense to delete.
  * @param props.onSuccess: - Optional - The function to call when the mutation is successful.
  * @param props.onSettled: - Optional - The function to call when the mutation is settled.
  */
-export const useDeleteExpense = ({category, expense, onSuccess, onSettled}: DeleteExpenseProps) => {
+
+ type DeleteExpenseMutationProps = {
+    category: Category;
+    expense: Expense;
+}
+
+/**
+* Mutation function for deleting an expense.
+* @param props.category: The category to delete the expense from.
+* @param props.expense: The expense to delete.
+*/
+
+export const useDeleteExpense = ({onSuccess, onSettled}: DeleteExpenseProps) => {
   const { deleteExpense } = useExpenses();
 
-  const mutationFn = useCallback(() => deleteExpense(category, expense), [category, expense, deleteExpense]);
+  const mutationFn = useCallback(({category, expense}: DeleteExpenseMutationProps) => deleteExpense(category, expense), [deleteExpense]);
 
   return useMutation(mutationFn, {
     onSuccess: onSuccess,
