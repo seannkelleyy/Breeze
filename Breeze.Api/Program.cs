@@ -79,7 +79,7 @@ builder.Services.AddCors(options =>
     });
     options.AddPolicy("production", policy =>
     {
-        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://breezebudgeting.azurewebsites.net");
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://www.breeze.seannkelleyy.com");
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
     });
 });
