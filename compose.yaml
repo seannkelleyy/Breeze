@@ -24,3 +24,4 @@ services:
       - ./Breeze.Sql:/app/src/api
     environment:
       - CHOKIDAR_USEPOLLING=true
+
