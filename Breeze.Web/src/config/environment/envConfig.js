@@ -8,5 +8,5 @@ window.ENV_CONFIG = {
     APP_VERSION: '1.1.0',
     AUTH_CLIENT_ID: 'Osw8qGrmXjQe3kYYcL0ca3FdUqB9LeVd',
     AUTH_DOMAIN: 'https://dev-r15wsyccxyjfwrqm.us.auth0.com/',
-    AUTH_AUDIENCE: 'breeze-apiapp.azurewebsites.net/'
+    AUTH_AUDIENCE: 'breeze-api.azurewebsites.net'
 }

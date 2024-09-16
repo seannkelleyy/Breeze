@@ -52,7 +52,7 @@ export const useEnvironmentVariables = (): EnvironmentVariables => {
     const appVersion = getValue('APP_VERSION', '1.0.0')
     const authClientId = getValue('VITE_AUTH_CLIENT_ID', 'Osw8qGrmXjQe3kYYcL0ca3FdUqB9LeVd')
     const authDomain = getValue('VITE_AUTH_DOMAIN', 'dev-r15wsyccxyjfwrqm.us.auth0.com')
-    const apiAudience = getValue('VITE_API_AUDIENCE', 'breeze-apiapp.azurewebsites.net/')
+    const apiAudience = getValue('VITE_API_AUDIENCE', 'breeze-api.azurewebsites.net')
 
     const EnvironmentVars: EnvironmentVariables = {
         baseLocalApi,
