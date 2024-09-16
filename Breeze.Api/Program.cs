@@ -66,6 +66,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["ApplicationInsights:InstrumentationKey"]);
 
 // Establish connection string
 builder.Services.AddDbContext<BreezeContext>(options =>
