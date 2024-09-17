@@ -10,15 +10,11 @@ namespace Breeze.Api.Budgets
     public class BudgetController : ControllerBase
     {
         private readonly BudgetService budgets;
-        private readonly CategoryService categories;
-        private readonly IncomeService incomes;
         private readonly ILogger<BudgetController> _logger;
 
         public BudgetController(IConfiguration config, ILogger<BudgetController> logger, BreezeContext breezeContext)
         {
             budgets = new BudgetService(config, breezeContext, logger);
-            categories = new CategoryService(config, breezeContext, logger);
-            incomes = new IncomeService(config, breezeContext, logger);
             _logger = logger;
         }
 

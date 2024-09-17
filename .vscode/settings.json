@@ -1,9 +1,8 @@
 {
     "appService.zipIgnorePattern": [
-        "node_modules{,/**}",
-        ".vscode{,/**}"
+        ".vscode{,/**}",
     ],
-    "appService.defaultWebAppToDeploy": "/subscriptions/1693c06a-21a5-4424-b38c-0f876f0fe603/resourceGroups/Breeze/providers/Microsoft.Web/sites/breezebudgeting",
-    "appService.deploySubpath": "Breeze.Web/dist",
+    "appService.defaultWebAppToDeploy": "None",
+    "appService.deploySubpath": "Breeze.Api/bin/Release/net8.0",
     "appService.showBuildDuringDeployPrompt": false
 }
