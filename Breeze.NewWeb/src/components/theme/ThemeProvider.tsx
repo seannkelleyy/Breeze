@@ -61,6 +61,7 @@ export function ThemeProvider({ children, storageKey = 'vite-ui-theme', ...props
 	)
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
 	const context = useContext(ThemeProviderContext)
 

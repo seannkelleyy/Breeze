@@ -12,12 +12,12 @@ const handleError = (error: AxiosError) => {
 
 const useHttp = () => {
 	const { instance } = useMsal()
-	const { baseLocalApi, baseHostedApi } = useEnvironmentVariables()
+	const { baseLocalApi, baseHostedApi, authApiId } = useEnvironmentVariables()
 
 	const fetchToken = async () => {
 		const account = instance.getAllAccounts()[0]
 		const tokenRequest = {
-			scopes: ['https://breezebudget.onmicrosoft.com/api/user.access'], // Ensure `apiAuthority` is the scope for your API
+			scopes: [`${authApiId}/user.access`],
 			account,
 		}
 
@@ -34,7 +34,7 @@ const useHttp = () => {
 	}
 
 	const { data: accessToken, refetch } = useQuery('accessToken', fetchToken, {
-		refetchInterval: 1000 * 180, // Refresh every 3 minutes
+		refetchInterval: 1000 * 180,
 		refetchOnWindowFocus: true,
 		refetchOnMount: true,
 		refetchOnReconnect: true,
@@ -158,3 +158,4 @@ const useHttp = () => {
 }
 
 export default useHttp
+

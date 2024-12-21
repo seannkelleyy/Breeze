@@ -8,7 +8,7 @@ export type EnvironmentVariables = {
 	appVersion: string
 	authClientId: string
 	authTenantId: string
-	apiAuthority: string
+	authApiId: string
 }
 
 export type ENV_CONFIG = {
@@ -21,7 +21,7 @@ export type ENV_CONFIG = {
 	APP_VERSION: string
 	AUTH_CLIENT_ID: string
 	AUTH_TENANT_ID: string
-	API_AUTHORITY: string
+	AUTH_API_ID: string
 	[key: string]: string
 }
 
@@ -48,7 +48,7 @@ export const useEnvironmentVariables = (): EnvironmentVariables => {
 	const appVersion = getValue('APP_VERSION', '1.0.0')
 	const authClientId = getValue('VITE_AUTH_CLIENT_ID', '6b9d2142-9242-4d76-b20f-c2e99f8424f8')
 	const authTenantId = getValue('VITE_AUTH_TENANT_ID', '8ae2f3c6-fff1-4515-8822-26cdbe306321')
-	const apiAuthority = getValue('VITE_API_AUTHORITY', 'https://breezebudget.onmicrosoft.com/api')
+	const authApiId = getValue('VITE_API_AUTHORITY', 'https://breezebudget.onmicrosoft.com/api')
 
 	const EnvironmentVars: EnvironmentVariables = {
 		baseLocalApi,
@@ -60,8 +60,9 @@ export const useEnvironmentVariables = (): EnvironmentVariables => {
 		appVersion,
 		authClientId,
 		authTenantId,
-		apiAuthority,
+		authApiId,
 	}
 
 	return EnvironmentVars
 }
+
