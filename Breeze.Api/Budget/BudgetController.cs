@@ -1,10 +1,14 @@
-﻿using Breeze.Api.Categories;
+﻿using System.Diagnostics;
+using Breeze.Api.Categories;
 using Breeze.Api.Incomes;
 using Breeze.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web;
 
 namespace Breeze.Api.Budgets
 {
+    [Authorize]
     [ApiController]
     [Route("/budgets")]
     public class BudgetController : ControllerBase
@@ -24,7 +28,7 @@ namespace Breeze.Api.Budgets
 
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());

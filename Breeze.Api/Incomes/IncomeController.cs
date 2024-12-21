@@ -1,10 +1,13 @@
 ﻿using Breeze.Api.Budgets;
 using Breeze.Api.Incomes.RequestResponseObjects;
 using Breeze.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web;
 
 namespace Breeze.Api.Incomes
 {
+    [Authorize]
     [ApiController]
     [Route("/budgets/{budgetId}/incomes")]
     public class IncomeController : ControllerBase
@@ -25,7 +28,7 @@ namespace Breeze.Api.Incomes
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -45,14 +48,23 @@ namespace Breeze.Api.Incomes
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 var response = incomes.CreateIncome(userId, incomeRequest);
-                budgets.CalculateBudgetIncomes(userId, incomeRequest.BudgetId, incomes.GetIncomesByBudgetId(userId, incomeRequest.BudgetId));
+                var incomeList = incomes.GetIncomesByBudgetId(userId, incomeRequest.BudgetId);
+                if (incomeList != null)
+                {
+                    budgets.CalculateBudgetIncomes(userId, incomeRequest.BudgetId, incomeList);
+                }
+                else
+                {
+                    _logger.LogError("Income list is null");
+                    return BadRequest("Income list is null");
+                }
                 return Ok(response);
             }
             catch (Exception ex)
@@ -67,14 +79,23 @@ namespace Breeze.Api.Incomes
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 var response = incomes.UpdateIncome(userId, incomeRequest);
-                budgets.CalculateBudgetIncomes(userId, incomeRequest.BudgetId, incomes.GetIncomesByBudgetId(userId, incomeRequest.BudgetId));
+                var incomeList = incomes.GetIncomesByBudgetId(userId, incomeRequest.BudgetId);
+                if (incomeList != null)
+                {
+                    budgets.CalculateBudgetIncomes(userId, incomeRequest.BudgetId, incomeList);
+                }
+                else
+                {
+                    _logger.LogError("Income list is null");
+                    return BadRequest("Income list is null");
+                }
                 return Ok(response);
             }
             catch (Exception ex)
@@ -88,15 +109,30 @@ namespace Breeze.Api.Incomes
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                int budgetId = incomes.GetIncomeById(userId, id).BudgetId;
+                var income = incomes.GetIncomeById(userId, id);
+                if (income == null)
+                {
+                    _logger.LogError("Income not found");
+                    return NotFound("Income not found");
+                }
+                int budgetId = income.BudgetId;
                 var response = incomes.DeleteIncomeById(userId, id);
-                budgets.CalculateBudgetIncomes(userId, budgetId, incomes.GetIncomesByBudgetId(userId, budgetId));
+                var incomeList = incomes.GetIncomesByBudgetId(userId, budgetId);
+                if (incomeList != null)
+                {
+                    budgets.CalculateBudgetIncomes(userId, budgetId, incomeList);
+                }
+                else
+                {
+                    _logger.LogError("Income list is null");
+                    return BadRequest("Income list is null");
+                }
                 return Ok(response);
             }
             catch (Exception ex)

@@ -30,7 +30,6 @@ export type ExtendedWindow = Window &
         ENV_CONFIG: ENV_CONFIG
     }
  
-
 /**
  * This function returns the environment variables for the application.
  * @returns EnvironmentVariables
@@ -38,6 +37,7 @@ export type ExtendedWindow = Window &
 export const useEnvironmentVariables = (): EnvironmentVariables => {
     const windowConfig = (window as ExtendedWindow).ENV_CONFIG
 
+    console.log('windowConfig', windowConfig)
     const getValue = (envVar: string, defaultValue: string) =>
         (windowConfig[envVar] ?? `%${envVar}%`) === `%${envVar}%`
             ? defaultValue
