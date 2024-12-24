@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LandingPage } from '../../pages/LandingPage'
 import { BudgetProvider } from '../../services/providers/BudgetProvider'
 import { useMsal } from '@azure/msal-react'
+import { Dashboard } from '../../pages/Dashboard'
+import { Navigation } from '../../components/navigation/Navigation'
 
 export const AppRoutes = () => {
 	const { accounts } = useMsal()
@@ -15,7 +17,8 @@ export const AppRoutes = () => {
 					element={
 						isAuthenticated ? (
 							<BudgetProvider>
-								<h1>Hello</h1>
+								<Navigation />
+								<Dashboard />
 							</BudgetProvider>
 						) : (
 							<Navigate to='/login' />
@@ -24,7 +27,12 @@ export const AppRoutes = () => {
 				/>
 				<Route
 					path='/login'
-					element={<LandingPage />}
+					element={
+						<>
+							<Navigation />
+							<LandingPage />
+						</>
+					}
 				/>
 				<Route
 					path='*'
