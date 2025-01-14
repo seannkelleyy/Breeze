@@ -7,11 +7,11 @@ import {
 	getCoreRowModel,
 	getSortedRowModel,
 	getFilteredRowModel,
-	getPaginationRowModel,
 	useReactTable,
 	ColumnFiltersState,
 } from '@tanstack/react-table'
 import { Button } from '../ui/button'
+import { Input } from '../ui/input'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../ui/table'
 
 const data = [
@@ -21,8 +21,28 @@ const data = [
 	{ id: 4, name: 'Dining Out', amount: 80, date: '2024-12-07', category: 'Food' },
 	{ id: 5, name: 'Internet', amount: 60, date: '2024-12-09', category: 'Utilities' },
 	{ id: 6, name: 'Concert Tickets', amount: 150, date: '2024-12-11', category: 'Entertainment' },
+	{ id: 7, name: 'Car Insurance', amount: 300, date: '2024-12-13', category: 'Insurance' },
+	{ id: 8, name: 'Movie Night', amount: 40, date: '2024-12-14', category: 'Entertainment' },
+	{ id: 9, name: 'Coffee', amount: 15, date: '2024-12-15', category: 'Food' },
+	{ id: 10, name: 'Gas', amount: 70, date: '2024-12-16', category: 'Transportation' },
+	{ id: 11, name: 'Water Bill', amount: 45, date: '2024-12-17', category: 'Utilities' },
+	{ id: 12, name: 'Book Purchase', amount: 25, date: '2024-12-18', category: 'Education' },
+	{ id: 13, name: 'Phone Bill', amount: 90, date: '2024-12-19', category: 'Utilities' },
+	{ id: 14, name: 'Gift', amount: 100, date: '2024-12-20', category: 'Miscellaneous' },
+	{ id: 15, name: 'Lunch', amount: 30, date: '2024-12-21', category: 'Food' },
+	{ id: 16, name: 'Subscription', amount: 15, date: '2024-12-22', category: 'Entertainment' },
+	{ id: 17, name: 'Haircut', amount: 25, date: '2024-12-23', category: 'Personal Care' },
+	{ id: 18, name: 'Parking Fee', amount: 10, date: '2024-12-24', category: 'Transportation' },
+	{ id: 19, name: 'Home Supplies', amount: 75, date: '2024-12-25', category: 'Household' },
+	{ id: 20, name: 'Pet Food', amount: 50, date: '2024-12-26', category: 'Pets' },
+	{ id: 21, name: 'Streaming Service', amount: 20, date: '2024-12-27', category: 'Entertainment' },
+	{ id: 22, name: 'Holiday Decorations', amount: 60, date: '2024-12-28', category: 'Miscellaneous' },
+	{ id: 23, name: 'Dinner', amount: 85, date: '2024-12-29', category: 'Food' },
+	{ id: 24, name: 'Taxi Ride', amount: 25, date: '2024-12-30', category: 'Transportation' },
+	{ id: 25, name: 'Health Checkup', amount: 200, date: '2024-12-31', category: 'Health' },
 ]
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const columns: ColumnDef<(typeof data)[0]>[] = [
 	{
 		accessorKey: 'name',
@@ -55,9 +75,10 @@ export const columns: ColumnDef<(typeof data)[0]>[] = [
 
 export function ExpensesTable() {
 	const [sorting, setSorting] = React.useState<SortingState>([{ id: 'date', desc: true }])
-	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([{ id: 'category', value: '' }])
+	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
 	const [activeCategory, setActiveCategory] = React.useState('')
+	const [nameFilter, setNameFilter] = React.useState('')
 
 	const table = useReactTable({
 		data,
@@ -69,7 +90,6 @@ export function ExpensesTable() {
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
 	})
 
 	const uniqueCategories = Array.from(new Set(data.map((item) => item.category)))
@@ -80,12 +100,24 @@ export function ExpensesTable() {
 	}
 
 	return (
-		<div className='w-full'>
+		<div className='w-full max-w-[568px]'>
+			<div className='flex items-center py-4'>
+				<Input
+					placeholder='Search by name...'
+					value={nameFilter}
+					onChange={(event) => {
+						const value = event.target.value
+						setNameFilter(value)
+						table.getColumn('name')?.setFilterValue(value)
+					}}
+					className='max-w-sm'
+				/>
+			</div>
 			<div className='flex flex-wrap gap-2 py-4'>
 				<Button
 					onClick={() => handleCategoryClick('')}
 					variant='outline'
-					className={activeCategory === '' ? 'bg-blue-500 text-white' : ''}
+					className={activeCategory === '' ? 'bg-accent text-white' : ''}
 				>
 					All
 				</Button>
@@ -94,13 +126,16 @@ export function ExpensesTable() {
 						key={category}
 						onClick={() => handleCategoryClick(category)}
 						variant='outline'
-						className={activeCategory === category ? 'bg-blue-500 text-white' : ''}
+						className={activeCategory === category ? 'bg-accent text-white' : ''}
 					>
 						{category}
 					</Button>
 				))}
 			</div>
-			<div className='rounded-md border'>
+			<div
+				className='rounded-md border overflow-auto'
+				style={{ maxHeight: '400px' }}
+			>
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -132,24 +167,6 @@ export function ExpensesTable() {
 						)}
 					</TableBody>
 				</Table>
-			</div>
-			<div className='flex items-center justify-end space-x-2 py-4'>
-				<Button
-					variant='outline'
-					size='sm'
-					onClick={() => table.previousPage()}
-					disabled={!table.getCanPreviousPage()}
-				>
-					Previous
-				</Button>
-				<Button
-					variant='outline'
-					size='sm'
-					onClick={() => table.nextPage()}
-					disabled={!table.getCanNextPage()}
-				>
-					Next
-				</Button>
 			</div>
 		</div>
 	)

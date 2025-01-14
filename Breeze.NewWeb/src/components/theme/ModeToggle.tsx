@@ -1,6 +1,6 @@
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@radix-ui/react-dropdown-menu'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@radix-ui/react-dropdown-menu'
 import { Button } from '../ui/button'
 
 export function ModeToggle() {
@@ -18,10 +18,30 @@ export function ModeToggle() {
 					<span className='sr-only'>Toggle theme</span>
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align='end'>
-				<DropdownMenuItem onClick={() => setTheme('light')}>Light</DropdownMenuItem>
-				<DropdownMenuItem onClick={() => setTheme('dark')}>Dark</DropdownMenuItem>
-				<DropdownMenuItem onClick={() => setTheme('system')}>System</DropdownMenuItem>
+			<DropdownMenuContent
+				align='end'
+				className='bg-background p-2 border border-border rounded-md'
+			>
+				<DropdownMenuItem
+					className='hover:cursor-pointer hover:bg-border rounded-md p-1'
+					onClick={() => setTheme('light')}
+				>
+					Light
+				</DropdownMenuItem>
+				<DropdownMenuSeparator className='h-[1px] bg-border my-.5' />
+				<DropdownMenuItem
+					className='hover:cursor-pointer hover:bg-border rounded-md p-1'
+					onClick={() => setTheme('dark')}
+				>
+					Dark
+				</DropdownMenuItem>
+				<DropdownMenuSeparator className='h-[1px] bg-border my-.5' />
+				<DropdownMenuItem
+					className='hover:cursor-pointer hover:bg-border rounded-md p-1'
+					onClick={() => setTheme('system')}
+				>
+					System
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)

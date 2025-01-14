@@ -12,9 +12,9 @@ export const Dashboard = () => {
 	return (
 		<section
 			title='Dashboard'
-			className='h-screen w-screen flex flex-col justify-center items-center'
+			className='h-screen w-screen flex flex-col justify-center items-center mt-40'
 		>
-			<h1 className='text-2xl'>{today}</h1>
+			<h1 className='text-3xl mb-4'>{today}</h1>
 			<h2>Welcome {accounts[0].name}</h2>
 			<h2>
 				Spent so far: $ <span className='text-accent'>{totalSpent.toFixed(2)}</span>

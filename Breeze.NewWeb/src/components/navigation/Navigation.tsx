@@ -29,12 +29,12 @@ const DesktopNavigation = () => {
 				</Button>
 				<Button variant='ghost'>
 					<a
-						href='https://www.breeze.seannkelleyy.com'
+						href='https://www.seannkelleyy.com'
 						target='_blank'
 						rel='noopener noreferrer'
-						title='Breeze Budgets'
+						title='Portfolio'
 					>
-						Breeze Budgets
+						Portfolio
 					</a>
 				</Button>
 			</div>
@@ -101,12 +101,12 @@ const MobileNavigation = () => {
 					<MenubarSeparator />
 					<Button variant='ghost'>
 						<a
-							href='https://www.breeze.seannkelleyy.com'
+							href='https://www.seannkelleyy.com'
 							target='_blank'
 							rel='noopener noreferrer'
-							title='Breeze Budgets'
+							title='Portfolio'
 						>
-							Breeze Budgets
+							Portfolio
 						</a>
 					</Button>
 				</MenubarContent>
