@@ -1,12 +1,11 @@
-import { useMutation } from 'react-query';
-import { useCallback } from 'react';
-import { Expense, useExpenses } from './expenseServices';
-import { Category } from '../category/categoryServices';
+import { useMutation } from 'react-query'
+import { useCallback } from 'react'
+import { Expense, useExpenses } from './expenseServices'
 
 type DeleteExpenseProps = {
-    onSuccess?: () => void;
-    onSettled?: () => void;
-};
+	onSuccess?: () => void
+	onSettled?: () => void
+}
 
 /**
  * A hook for deleting an expense.
@@ -14,24 +13,25 @@ type DeleteExpenseProps = {
  * @param props.onSettled: - Optional - The function to call when the mutation is settled.
  */
 
- type DeleteExpenseMutationProps = {
-    category: Category;
-    expense: Expense;
+type DeleteExpenseMutationProps = {
+	budgetId: number
+	expense: Expense
 }
 
 /**
-* Mutation function for deleting an expense.
-* @param props.category: The category to delete the expense from.
-* @param props.expense: The expense to delete.
-*/
+ * Mutation function for deleting an expense.
+ * @param props.budgetId: The budget Id of the expense to delete.
+ * @param props.expense: The expense to delete.
+ */
 
-export const useDeleteExpense = ({onSuccess, onSettled}: DeleteExpenseProps) => {
-  const { deleteExpense } = useExpenses();
+export const useDeleteExpense = ({ onSuccess, onSettled }: DeleteExpenseProps) => {
+	const { deleteExpense } = useExpenses()
 
-  const mutationFn = useCallback(({category, expense}: DeleteExpenseMutationProps) => deleteExpense(category, expense), [deleteExpense]);
+	const mutationFn = useCallback(({ budgetId, expense }: DeleteExpenseMutationProps) => deleteExpense(budgetId, expense), [deleteExpense])
 
-  return useMutation(mutationFn, {
-    onSuccess: onSuccess,
-    onSettled: onSettled,
-  });
-};
+	return useMutation(mutationFn, {
+		onSuccess: onSuccess,
+		onSettled: onSettled,
+	})
+}
+

@@ -11,7 +11,6 @@ import {
 	useReactTable,
 } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
-import { Checkbox } from '@radix-ui/react-checkbox'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@radix-ui/react-dropdown-menu'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -184,25 +183,6 @@ const data: Income[] = [
 // eslint-disable-next-line react-refresh/only-export-components
 export const columns: ColumnDef<Income>[] = [
 	{
-		id: 'select',
-		header: ({ table }) => (
-			<Checkbox
-				checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-				onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-				aria-label='Select all'
-			/>
-		),
-		cell: ({ row }) => (
-			<Checkbox
-				checked={row.getIsSelected()}
-				onCheckedChange={(value) => row.toggleSelected(!!value)}
-				aria-label='Select row'
-			/>
-		),
-		enableSorting: false,
-		enableHiding: false,
-	},
-	{
 		accessorKey: 'name',
 		header: 'Name',
 	},
@@ -215,7 +195,7 @@ export const columns: ColumnDef<Income>[] = [
 				style: 'currency',
 				currency: 'USD',
 			}).format(amount)
-			return <div className='text-right font-medium'>{formatted}</div>
+			return <div className='text-left font-medium'>{formatted}</div>
 		},
 	},
 	{
@@ -233,30 +213,31 @@ export const columns: ColumnDef<Income>[] = [
 			const income = row.original
 
 			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button
-							variant='ghost'
-							className='h-8 w-8 p-0'
+				<div className='flex justify-end'>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant='ghost'
+								className='h-8 w-8 p-0'
+							>
+								<MoreHorizontal />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent
+							align='end'
+							className='bg-background p-2 border border-border rounded-md'
 						>
-							<span className='sr-only'>Open menu</span>
-							<MoreHorizontal />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent
-						align='end'
-						className='bg-background p-2 border border-border rounded-md'
-					>
-						<DropdownMenuItem
-							className='hover:cursor-pointer hover:bg-border rounded-md p-1'
-							onClick={() => navigator.clipboard.writeText(income.id?.toString() || '')}
-						>
-							Copy income ID
-						</DropdownMenuItem>
-						<DropdownMenuSeparator className='h-[1px] bg-border my-1' />
-						<DropdownMenuItem className='hover:cursor-pointer hover:bg-border rounded-md p-1'>View income details</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
+							<DropdownMenuItem
+								className='hover:cursor-pointer hover:bg-border rounded-md p-1'
+								onClick={() => navigator.clipboard.writeText(income.id?.toString() || '')}
+							>
+								Copy income ID
+							</DropdownMenuItem>
+							<DropdownMenuSeparator className='h-[1px] bg-border my-1' />
+							<DropdownMenuItem className='hover:cursor-pointer hover:bg-border rounded-md p-1'>View income details</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
 			)
 		},
 	},
@@ -287,19 +268,19 @@ export function IncomeTable() {
 	})
 
 	return (
-		<div className='w-full max-w-[568px]'>
+		<div className='w-full max-w-[568px] min-w-0'>
 			<div className='flex items-center py-4'>
 				<Input
 					placeholder='Filter names...'
 					value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
 					onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
-					className='max-w-sm'
+					className='w-full'
 				/>
 			</div>
 			<div className='rounded-md border'>
 				<div className='max-h-96 overflow-auto'>
-					<Table>
-						<TableHeader>
+					<Table className='w-full table-fixed'>
+						<TableHeader className='w-full'>
 							{table.getHeaderGroups().map((headerGroup) => (
 								<TableRow key={headerGroup.id}>
 									{headerGroup.headers.map((header) => (
@@ -321,10 +302,10 @@ export function IncomeTable() {
 									</TableRow>
 								))
 							) : (
-								<TableRow>
+								<TableRow className='w-full'>
 									<TableCell
 										colSpan={columns.length}
-										className='h-24 text-center'
+										className='h-24 text-center w-full'
 									>
 										No results.
 									</TableCell>

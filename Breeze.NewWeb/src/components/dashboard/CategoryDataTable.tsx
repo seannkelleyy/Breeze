@@ -13,6 +13,8 @@ import {
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../ui/table'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { MoreHorizontal } from 'lucide-react'
 
 const data = [
 	{ id: 1, name: 'Groceries', amount: 200, date: '2024-12-01', category: 'Food' },
@@ -71,6 +73,41 @@ export const columns: ColumnDef<(typeof data)[0]>[] = [
 		accessorKey: 'category',
 		header: 'Category',
 	},
+	{
+		id: 'actions',
+		enableHiding: false,
+		cell: ({ row }) => {
+			const income = row.original
+
+			return (
+				<div className='flex justify-end'>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant='ghost'
+								className='h-8 w-8 p-0'
+							>
+								<MoreHorizontal />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent
+							align='end'
+							className='bg-background p-2 border border-border rounded-md'
+						>
+							<DropdownMenuItem
+								className='hover:cursor-pointer hover:bg-border rounded-md p-1'
+								onClick={() => navigator.clipboard.writeText(income.id?.toString() || '')}
+							>
+								Copy income ID
+							</DropdownMenuItem>
+							<DropdownMenuSeparator className='h-[1px] bg-border my-1' />
+							<DropdownMenuItem className='hover:cursor-pointer hover:bg-border rounded-md p-1'>View income details</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
+			)
+		},
+	},
 ]
 
 export function ExpensesTable() {
@@ -100,7 +137,7 @@ export function ExpensesTable() {
 	}
 
 	return (
-		<div className='w-full max-w-[568px]'>
+		<div className='w-max min-w-[228px] max-w-[568px]'>
 			<div className='flex items-center py-4'>
 				<Input
 					placeholder='Search by name...'
@@ -110,7 +147,6 @@ export function ExpensesTable() {
 						setNameFilter(value)
 						table.getColumn('name')?.setFilterValue(value)
 					}}
-					className='max-w-sm'
 				/>
 			</div>
 			<div className='flex flex-wrap gap-2 py-4'>

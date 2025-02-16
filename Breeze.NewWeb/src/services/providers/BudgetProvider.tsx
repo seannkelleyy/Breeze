@@ -19,6 +19,33 @@ type BudgetContextType = {
 	refetchCategories: () => void
 }
 
+const testBudget: Budget = {
+	id: 1,
+	userId: '',
+	date: dayjs().format('MMMM YYYY'),
+	monthlyIncome: 7250,
+	monthlyExpenses: 4765.32,
+}
+
+const testCategories: Category[] = [
+	{
+		id: 1,
+		name: 'Groceries',
+		budgetId: 1,
+		currentSpend: 100,
+		userId: '',
+		allocation: 700,
+	},
+	{
+		id: 2,
+		name: 'Rent',
+		budgetId: 1,
+		currentSpend: 200,
+		userId: '',
+		allocation: 340,
+	},
+]
+
 const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContextType)
 
 export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
@@ -57,7 +84,7 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 		}
 	}
 	return (
-		<BudgetContext.Provider value={{ budget, totalSpent, incomes, categories, getBudgetForDate, refetchBudget, refetchIncomes, refetchCategories }}>
+		<BudgetContext.Provider value={{ budget: testBudget, totalSpent, incomes, categories: testCategories, getBudgetForDate, refetchBudget, refetchIncomes, refetchCategories }}>
 			{children}
 		</BudgetContext.Provider>
 	)
@@ -65,3 +92,4 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useBudgetContext = () => useContext(BudgetContext)
+
