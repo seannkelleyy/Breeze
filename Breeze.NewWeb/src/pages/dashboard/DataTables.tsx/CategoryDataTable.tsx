@@ -10,10 +10,10 @@ import {
 	useReactTable,
 	ColumnFiltersState,
 } from '@tanstack/react-table'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../ui/table'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { Button } from '../../../components/ui/button'
+import { Input } from '../../../components/ui/input'
+import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../../../components/ui/table'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu'
 import { MoreHorizontal } from 'lucide-react'
 
 const data = [

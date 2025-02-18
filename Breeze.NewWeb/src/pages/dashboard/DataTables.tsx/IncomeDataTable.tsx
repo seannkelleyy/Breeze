@@ -12,10 +12,10 @@ import {
 } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@radix-ui/react-dropdown-menu'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../ui/table'
-import { Income } from '../../services/hooks/income/incomeServices'
+import { Button } from '../../../components/ui/button'
+import { Input } from '../../../components/ui/input'
+import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../../../components/ui/table'
+import { Income } from '../../../services/hooks/income/incomeServices'
 
 const data: Income[] = [
 	{

@@ -1,11 +1,13 @@
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
-import { Card } from '../ui/card'
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
-import { ExpensesTable } from './CategoryDataTable'
-import { IncomeTable } from './IncomeDataTable'
+import { Card } from '../../components/ui/card'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../../components/ui/carousel'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
+import { ExpensesTable } from './DataTables.tsx/CategoryDataTable'
+import { IncomeTable } from './DataTables.tsx/IncomeDataTable'
 import { IncomeModal } from './modals/IncomeModal'
 import { ExpenseModal } from './modals/ExpenseModal'
+import { Button } from '../../components/ui/button'
+import { Link } from 'react-router-dom'
 
 export const BudgetCarousel = () => {
 	const { budget, getBudgetForDate } = useBudgetContext()
@@ -35,7 +37,7 @@ export const BudgetCarousel = () => {
 				<CarouselContent className='flex flex-col'>
 					<CarouselItem className='flex flex-col'>
 						<Card className='flex flex-col justify-start items-center p-4'>
-							<h1 className='text-xl font-bold'>{budget?.date ?? 'December 2024'}</h1>
+							<h1 className='text-2xl font-bold'>{budget?.date ?? 'December 2024'}</h1>
 							<h2>
 								Income: $ <span className='text-accent'>{budget?.monthlyIncome?.toFixed(2) ?? 5672.23}</span>
 							</h2>
@@ -49,6 +51,9 @@ export const BudgetCarousel = () => {
 								<IncomeModal />
 								<ExpenseModal />
 							</div>
+							<Link to='/create-budget'>
+								<Button className='mt-4'>Create Budget</Button>
+							</Link>
 							<Tabs
 								defaultValue='expenses'
 								className='flex flex-col justify-center items-center mt-4'

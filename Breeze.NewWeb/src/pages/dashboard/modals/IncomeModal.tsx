@@ -1,29 +1,28 @@
-import { Button } from '../../ui/button'
-import { DialogHeader, DialogFooter, DialogTrigger, Dialog, DialogContent, DialogTitle, DialogDescription } from '../../ui/dialog'
-import { Input } from '../../ui/input'
-import { Expense } from '../../../services/hooks/expense/expenseServices'
-import { useMsal } from '@azure/msal-react'
-import { useState } from 'react'
+import { Button } from '../../../components/ui/button'
+import { DialogHeader, DialogFooter, DialogTrigger, Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../components/ui/dialog'
+import { Input } from '../../../components/ui/input'
+import { Income } from '../../../services/hooks/income/incomeServices'
+import { usePostIncome } from '../../../services/hooks/income/usePostIncome'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
-import { usePostExpense } from '../../../services/hooks/expense/usePostExpense'
+import { useState } from 'react'
+import { useMsal } from '@azure/msal-react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { Form, FormControl, FormField, FormItem, FormLabel } from '../../ui/form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
+import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../components/ui/form'
 
-type ExpenseModalProps = {
-	existingExpense?: Expense
+type IncomeModalProps = {
+	existingIncome?: Income
 }
 
-export const ExpenseModal = ({ existingExpense }: ExpenseModalProps) => {
+export const IncomeModal = ({ existingIncome }: IncomeModalProps) => {
 	const [open, setOpen] = useState(false)
-	const { budget, categories, refetchCategories, refetchBudget } = useBudgetContext()
+	const { budget, refetchIncomes, refetchBudget } = useBudgetContext()
 	const currentUserAccount = useMsal().accounts[0]
 
-	const expense = existingExpense ?? {
+	const income = existingIncome ?? {
 		userId: currentUserAccount.username,
-		categoryId: categories[0]?.id ?? 1,
+		budgetId: budget?.id ?? -1,
 		name: '',
 		amount: 0,
 		date: new Date().toUTCString(),
@@ -32,9 +31,6 @@ export const ExpenseModal = ({ existingExpense }: ExpenseModalProps) => {
 	const formSchema = z.object({
 		name: z.string().min(1, {
 			message: 'Name is required',
-		}),
-		categoryId: z.number().min(1, {
-			message: 'Category is required',
 		}),
 		amount: z
 			.string()
@@ -49,47 +45,46 @@ export const ExpenseModal = ({ existingExpense }: ExpenseModalProps) => {
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: expense,
-	})
-
-	const postMutation = usePostExpense({
-		onSettled: () => {
-			refetchBudget()
-			refetchCategories()
-			setOpen(false)
-		},
+		defaultValues: income,
 	})
 
 	const onSubmit = (values: z.infer<typeof formSchema>) => {
-		const expenseToSubmit = {
+		const incomeToSubmit = {
 			...values,
 			budgetId: budget?.id,
 			userId: currentUserAccount.username,
 		}
-		console.log(expenseToSubmit)
-		postMutation.mutate({ budgetId: budget?.id, expense: expenseToSubmit })
+		console.log(incomeToSubmit)
+		postMutation.mutate({ income: incomeToSubmit })
 	}
 
+	const postMutation = usePostIncome({
+		onSettled: () => {
+			refetchBudget()
+			refetchIncomes()
+			setOpen(false)
+		},
+	})
 	return (
 		<Dialog
 			open={open}
 			onOpenChange={setOpen}
 		>
-			<DialogTrigger asChild>
+			<DialogTrigger>
 				<Button
 					variant='outline'
 					onClick={() => setOpen(true)}
 				>
-					Add Expense
+					Add Income
 				</Button>
 			</DialogTrigger>
 			<DialogContent className='sm:max-w-[425px]'>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<DialogHeader>
-							<DialogTitle>{expense ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
+							<DialogTitle>{income ? 'Edit Income' : 'Add Income'}</DialogTitle>
 							<DialogDescription>
-								{expense ? "Make changes to your expense here. Click save when you're done." : "Add a new expense entry. Click save when you're done."}
+								{income ? "Make changes to your income here. Click save when you're done." : "Add a new income entry. Click save when you're done."}
 							</DialogDescription>
 						</DialogHeader>
 						<div className='grid gap-4 py-4'>
@@ -106,39 +101,6 @@ export const ExpenseModal = ({ existingExpense }: ExpenseModalProps) => {
 												{...field}
 												className='col-span-3'
 											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-							<p>{expense.categoryId}</p>
-							<FormField
-								control={form.control}
-								name='categoryId'
-								render={({ field }) => (
-									<FormItem className='grid grid-cols-4 items-center gap-4'>
-										<FormLabel className='text-right'>Category</FormLabel>
-										<FormControl>
-											<Select
-												{...field}
-												value={field.value.toString()}
-												onValueChange={(value) => field.onChange(Number(value))}
-											>
-												<SelectTrigger className='col-span-3'>
-													<SelectValue>{categories.find((category) => category.id === field.value)?.name}</SelectValue>
-												</SelectTrigger>
-												<SelectContent className='bg-background'>
-													{categories.map((category, index) => (
-														<div key={category.id}>
-															<SelectItem
-																value={String(category.id)}
-																className={`hover:cursor-pointer hover:bg-accent hover:text-white w-full ${index < categories.length - 1 ? 'border-b' : ''}`}
-															>
-																{category.name}
-															</SelectItem>
-														</div>
-													))}
-												</SelectContent>
-											</Select>
 										</FormControl>
 									</FormItem>
 								)}
@@ -179,7 +141,7 @@ export const ExpenseModal = ({ existingExpense }: ExpenseModalProps) => {
 							/>
 						</div>
 						<DialogFooter>
-							<Button type='submit'>{expense ? 'Save changes' : 'Add Expense'}</Button>
+							<Button type='submit'>{income ? 'Save changes' : 'Add Income'}</Button>
 						</DialogFooter>
 					</form>
 				</Form>
