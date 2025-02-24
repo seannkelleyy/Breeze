@@ -4,7 +4,6 @@ import { BudgetProvider } from '../../services/providers/BudgetProvider'
 import { useMsal } from '@azure/msal-react'
 import { Navigation } from '../../components/navigation/Navigation'
 import { BudgetCarousel } from '../../pages/dashboard/BudgetCarousel'
-import { CreateBudget } from '../../pages/budget/CreateBudget'
 
 export const AppRoutes = () => {
 	const { accounts } = useMsal()
@@ -30,21 +29,6 @@ export const AppRoutes = () => {
 								<div className='h-screen w-screen flex flex-col justify-center items-center'>
 									<Navigation />
 									<BudgetCarousel />
-								</div>
-							</BudgetProvider>
-						) : (
-							<Navigate to='/login' />
-						)
-					}
-				/>
-				<Route
-					path='/create-budget'
-					element={
-						isAuthenticated ? (
-							<BudgetProvider>
-								<div className='h-screen w-screen flex flex-col justify-center items-center'>
-									<Navigation />
-									<CreateBudget />
 								</div>
 							</BudgetProvider>
 						) : (

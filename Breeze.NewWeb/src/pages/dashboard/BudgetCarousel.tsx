@@ -6,8 +6,7 @@ import { ExpensesTable } from './DataTables.tsx/CategoryDataTable'
 import { IncomeTable } from './DataTables.tsx/IncomeDataTable'
 import { IncomeModal } from './modals/IncomeModal'
 import { ExpenseModal } from './modals/ExpenseModal'
-import { Button } from '../../components/ui/button'
-import { Link } from 'react-router-dom'
+import { CreateBudget } from '../budget/CreateBudget'
 
 export const BudgetCarousel = () => {
 	const { budget, getBudgetForDate } = useBudgetContext()
@@ -51,9 +50,7 @@ export const BudgetCarousel = () => {
 								<IncomeModal />
 								<ExpenseModal />
 							</div>
-							<Link to='/create-budget'>
-								<Button className='mt-4'>Create Budget</Button>
-							</Link>
+							<CreateBudget />
 							<Tabs
 								defaultValue='expenses'
 								className='flex flex-col justify-center items-center mt-4'
