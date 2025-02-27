@@ -137,7 +137,7 @@ export function ExpensesTable() {
 	}
 
 	return (
-		<div className='w-max min-w-[228px] max-w-[568px]'>
+		<section title='Expenses' className='w-full max-w-[568px]'>
 			<div className='flex items-center py-4'>
 				<Input
 					placeholder='Search by name...'
@@ -204,7 +204,7 @@ export function ExpensesTable() {
 					</TableBody>
 				</Table>
 			</div>
-		</div>
+		</section>
 	)
 }
 

@@ -268,7 +268,7 @@ export function IncomeTable() {
 	})
 
 	return (
-		<div className='w-full max-w-[568px] min-w-0'>
+		<section title='Incomes' className='w-full max-w-[568px]'>
 			<div className='flex items-center py-4'>
 				<Input
 					placeholder='Filter names...'
@@ -315,7 +315,7 @@ export function IncomeTable() {
 					</Table>
 				</div>
 			</div>
-		</div>
+		</section>
 	)
 }
 

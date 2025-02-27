@@ -77,9 +77,9 @@ export const CreateBudget = () => {
 		form.setValue('categories', categories)
 	}
 
-	const totalIncome = Number((form.getValues().incomes ?? []).reduce((sum, income) => sum + (Number(income.amount) || 0), 0)).toFixed(2)
+	const totalIncome = Number((form.getValues().incomes ?? []).reduce((sum, income) => sum + (Number(income.amount) || 0), 0))
 
-	const totalExpenses = Number((form.getValues().categories ?? []).reduce((sum, category) => sum + (Number(category.allocation) || 0), 0)).toFixed(2)
+	const totalExpenses = Number((form.getValues().categories ?? []).reduce((sum, category) => sum + (Number(category.allocation) || 0), 0))
 
 	return (
 		<Dialog
@@ -95,10 +95,19 @@ export const CreateBudget = () => {
 						<DialogHeader>
 							<DialogTitle className='text-2xl'>Create Budget</DialogTitle>
 							<DialogDescription>Define your estimated incomes and expenses.</DialogDescription>
+							<h1 className='text-lg font-bold'>
+								Total Budget: $
+								{
+									<span className={totalIncome - totalExpenses > 0 ? 'p-1 rounded-sm bg-success' : ' p-1 rounded-sm bg-destructive'}>
+										{(totalIncome - totalExpenses).toFixed(2)}
+									</span>
+								}
+							</h1>
+							<DialogDescription>Ideally this number will be 0. </DialogDescription>
 						</DialogHeader>
 						<div className='grid gap-4 py-4'>
 							<h2 className='text-xl font-bold'>Estimated Incomes</h2>
-							<h3 className='text-lg font-bold'>Total Income: ${Number(totalIncome)}</h3>
+							<h3 className='text-lg font-bold'>Total Income: ${Number(totalIncome).toFixed(2)}</h3>
 							{form.watch('incomes').map((_, index) => (
 								<div
 									key={index}
@@ -157,7 +166,7 @@ export const CreateBudget = () => {
 								Add Income
 							</Button>
 							<h2 className='text-xl font-bold'>Estimated Expenses</h2>
-							<h3 className='text-lg font-bold'>Total Expenses: ${Number(totalExpenses)}</h3>
+							<h3 className='text-lg font-bold'>Total Expenses: ${Number(totalExpenses).toFixed(2)}</h3>
 							{form.watch('categories').map((_, index) => (
 								<div
 									key={index}

@@ -7,6 +7,7 @@ import { IncomeTable } from './DataTables.tsx/IncomeDataTable'
 import { IncomeModal } from './modals/IncomeModal'
 import { ExpenseModal } from './modals/ExpenseModal'
 import { CreateBudget } from '../budget/CreateBudget'
+import { Goals } from '../goal/Goals'
 
 export const BudgetCarousel = () => {
 	const { budget, getBudgetForDate } = useBudgetContext()
@@ -31,10 +32,9 @@ export const BudgetCarousel = () => {
 	const budgetDifference = parseFloat((budget?.monthlyIncome - budget?.monthlyExpenses).toFixed(2)) ?? 3903.36
 
 	return (
-		<div className='absolute top-1/4 left-1/2 transform -translate-x-1/2 w-1/2'>
-			<Carousel>
-				<CarouselContent className='flex flex-col'>
-					<CarouselItem className='flex flex-col'>
+			<Carousel className='absolute top-1/4 left-1/2 transform -translate-x-1/2'>
+				<CarouselContent>
+					<CarouselItem>
 						<Card className='flex flex-col justify-start items-center p-4'>
 							<h1 className='text-2xl font-bold'>{budget?.date ?? 'December 2024'}</h1>
 							<h2>
@@ -51,6 +51,7 @@ export const BudgetCarousel = () => {
 								<ExpenseModal />
 							</div>
 							<CreateBudget />
+							<Goals />
 							<Tabs
 								defaultValue='expenses'
 								className='flex flex-col justify-center items-center mt-4'
@@ -72,7 +73,6 @@ export const BudgetCarousel = () => {
 				<CarouselPrevious onClick={getPreviousBudget} />
 				<CarouselNext onClick={getNextBudget} />
 			</Carousel>
-		</div>
 	)
 }
 

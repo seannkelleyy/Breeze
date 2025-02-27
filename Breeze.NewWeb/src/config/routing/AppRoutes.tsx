@@ -1,9 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { LandingPage } from '../../pages/LandingPage'
+import { LandingPage } from '../../sections/LandingPage'
 import { BudgetProvider } from '../../services/providers/BudgetProvider'
 import { useMsal } from '@azure/msal-react'
 import { Navigation } from '../../components/navigation/Navigation'
-import { BudgetCarousel } from '../../pages/dashboard/BudgetCarousel'
+import { BudgetCarousel } from '../../sections/dashboard/BudgetCarousel'
 
 export const AppRoutes = () => {
 	const { accounts } = useMsal()
