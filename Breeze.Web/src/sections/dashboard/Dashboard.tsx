@@ -50,8 +50,8 @@ export const Dashboard = () => {
 						<div className='flex gap-4 pt-4'>
 							<IncomeModal />
 							<ExpenseModal />
+							<CreateBudget />
 						</div>
-						<CreateBudget />
 						<Goals />
 						<Tabs
 							defaultValue='expenses'

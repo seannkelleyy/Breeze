@@ -5,7 +5,7 @@ import { Goal } from '../../services/hooks/goal/goalServices'
 import { useMsal } from '@azure/msal-react'
 import { useForm } from 'react-hook-form'
 import { usePostGoal } from '../../services/hooks/goal/usePostGoal'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import { Button } from '../../components/ui/button'
 import { FormField, FormItem, FormLabel, FormControl, Form } from '../../components/ui/form'
 import { Input } from '../../components/ui/input'
@@ -57,7 +57,12 @@ export const CreateGoalModal = ({ existingGoal, refetchGoals }: GoalModalProps) 
 			open={open}
 			onOpenChange={setOpen}
 		>
-			<DialogTrigger onClick={() => setOpen(true)}>Create Goal</DialogTrigger>
+			<Button
+				className='w-fit self-center'
+				onClick={() => setOpen(true)}
+			>
+				Create Goal
+			</Button>
 			<DialogContent className='sm:max-w-[425px]'>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>

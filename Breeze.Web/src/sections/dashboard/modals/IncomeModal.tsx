@@ -1,5 +1,5 @@
 import { Button } from '../../../components/ui/button'
-import { DialogHeader, DialogFooter, DialogTrigger, Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../components/ui/dialog'
+import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../components/ui/dialog'
 import { Input } from '../../../components/ui/input'
 import { Income } from '../../../services/hooks/income/incomeServices'
 import { usePostIncome } from '../../../services/hooks/income/usePostIncome'
@@ -70,7 +70,7 @@ export const IncomeModal = ({ existingIncome }: IncomeModalProps) => {
 			open={open}
 			onOpenChange={setOpen}
 		>
-			<DialogTrigger onClick={() => setOpen(true)}>Add Income</DialogTrigger>
+			<Button onClick={() => setOpen(true)}>Add Income</Button>
 			<DialogContent className='sm:max-w-[425px]'>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>

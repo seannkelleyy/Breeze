@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useMsal } from '@azure/msal-react'
 import { Input } from '../../components/ui/input'
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../components/ui/dialog'
 import { Form, FormControl, FormField, FormItem } from '../../components/ui/form'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -86,7 +86,7 @@ export const CreateBudget = () => {
 			open={open}
 			onOpenChange={setOpen}
 		>
-			<DialogTrigger>Create Budget</DialogTrigger>
+			<Button onClick={() => setOpen(true)}>Create Budget</Button>
 			<DialogContent className='sm:max-w-[425px] max-h-[80vh] overflow-y-auto'>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>

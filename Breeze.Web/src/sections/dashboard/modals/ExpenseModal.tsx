@@ -1,5 +1,5 @@
 import { Button } from '../../../components/ui/button'
-import { DialogHeader, DialogFooter, DialogTrigger, Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../components/ui/dialog'
+import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../components/ui/dialog'
 import { Input } from '../../../components/ui/input'
 import { Expense } from '../../../services/hooks/expense/expenseServices'
 import { useMsal } from '@azure/msal-react'
@@ -75,7 +75,7 @@ export const ExpenseModal = ({ existingExpense }: ExpenseModalProps) => {
 			open={open}
 			onOpenChange={setOpen}
 		>
-			<DialogTrigger onClick={() => setOpen(true)}>Add Expense</DialogTrigger>
+			<Button onClick={() => setOpen(true)}>Add Expense</Button>
 			<DialogContent className='sm:max-w-[425px]'>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>

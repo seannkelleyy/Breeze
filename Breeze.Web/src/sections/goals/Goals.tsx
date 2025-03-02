@@ -29,7 +29,6 @@ export const Goals = () => {
 							key={goal.id}
 							goal={goal}
 							refetchGoals={refetch}
-							userId={account?.homeAccountId ?? ''}
 						/>
 					))}
 			</ul>
