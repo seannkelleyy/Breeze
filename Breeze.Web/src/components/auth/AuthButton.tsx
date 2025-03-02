@@ -33,7 +33,6 @@ export const AuthButton = () => {
 					.loginPopup(loginRequest)
 					.then((response) => {
 						if (response && response.account) {
-							console.log('Login successful', response.account)
 							navigate('/')
 						}
 					})
