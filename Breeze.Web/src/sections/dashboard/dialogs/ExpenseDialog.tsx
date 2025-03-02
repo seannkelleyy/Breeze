@@ -12,11 +12,11 @@ import { useForm } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
 
-type ExpenseModalProps = {
+type ExpenseDialogProps = {
 	existingExpense?: Expense
 }
 
-export const ExpenseModal = ({ existingExpense }: ExpenseModalProps) => {
+export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 	const [open, setOpen] = useState(false)
 	const { budget, categories, refetchCategories, refetchBudget } = useBudgetContext()
 	const currentUserAccount = useMsal().accounts[0]

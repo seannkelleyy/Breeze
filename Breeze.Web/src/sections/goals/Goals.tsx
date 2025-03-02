@@ -1,7 +1,7 @@
 import { useMsal } from '@azure/msal-react'
 import { useFetchGoals } from '../../services/hooks/goal/useFetchGoals'
 import { GoalItem } from './GoalItem'
-import { CreateGoalModal } from './CreateGoalModal'
+import { CreateGoalDialog } from './dialogs/CreateGoalDialog'
 
 export const Goals = () => {
 	const account = useMsal().accounts[0]
@@ -32,7 +32,7 @@ export const Goals = () => {
 						/>
 					))}
 			</ul>
-			<CreateGoalModal refetchGoals={refetch} />
+			<CreateGoalDialog refetchGoals={refetch} />
 		</section>
 	)
 }

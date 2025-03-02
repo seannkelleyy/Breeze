@@ -1,5 +1,5 @@
 import { Goal } from '../../services/hooks/goal/goalServices'
-import { EditGoalModal } from './EditGoalModal'
+import { EditGoalDialog } from './dialogs/EditGoalDialog'
 
 type GoalItemProps = {
 	goal: Goal
@@ -10,7 +10,7 @@ export const GoalItem = ({ goal, refetchGoals }: GoalItemProps) => {
 	return (
 		<div className='flex gap-2 items-center justify-between w-3/4 ml-auto mr-auto'>
 			<p className='text-xl'>{goal.isCompleted ? <del>{goal.description}</del> : goal.description}</p>
-			<EditGoalModal
+			<EditGoalDialog
 				goal={goal}
 				refetchGoals={refetchGoals}
 			/>

@@ -1,24 +1,24 @@
 import { useState } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Goal } from '../../services/hooks/goal/goalServices'
-import { useForm } from 'react-hook-form'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog'
-import { Button } from '../../components/ui/button'
-import { FormField, FormItem, FormLabel, FormControl, Form } from '../../components/ui/form'
-import { Input } from '../../components/ui/input'
-import { usePatchGoal } from '../../services/hooks/goal/usePatchGoal'
+import { Form, useForm } from 'react-hook-form'
+import { Goal } from '../../../services/hooks/goal/goalServices'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../../../components/ui/dialog'
 import { useMsal } from '@azure/msal-react'
 import { Pencil, Trash } from 'lucide-react'
-import { useDeleteGoal } from '../../services/hooks/goal/useDeleteGoal'
-import { ConfirmationModal } from '../../components/reusable/ConfirmationModal'
+import { ConfirmationModal } from '../../../components/reusable/ConfirmationModal'
+import { Button } from '../../../components/ui/button'
+import { FormField, FormItem, FormLabel, FormControl } from '../../../components/ui/form'
+import { Input } from '../../../components/ui/input'
+import { useDeleteGoal } from '../../../services/hooks/goal/useDeleteGoal'
+import { usePatchGoal } from '../../../services/hooks/goal/usePatchGoal'
 
-type GoalItemModalProps = {
+type GoalItemDialogProps = {
 	goal: Goal
 	refetchGoals: () => void
 }
 
-export const EditGoalModal = ({ goal, refetchGoals }: GoalItemModalProps) => {
+export const EditGoalDialog = ({ goal, refetchGoals }: GoalItemDialogProps) => {
 	const account = useMsal().accounts[0]
 	const [open, setOpen] = useState(false)
 	const [deleteOpen, setDeleteOpen] = useState(false)

@@ -11,22 +11,24 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../components/ui/form'
 
-type IncomeModalProps = {
+type IncomeDialogProps = {
 	existingIncome?: Income
 }
 
-export const IncomeModal = ({ existingIncome }: IncomeModalProps) => {
+export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 	const [open, setOpen] = useState(false)
 	const { budget, refetchIncomes, refetchBudget } = useBudgetContext()
 	const currentUserAccount = useMsal().accounts[0]
 
-	const income = existingIncome ?? {
-		userId: currentUserAccount.username,
-		budgetId: budget?.id ?? -1,
-		name: '',
-		amount: 0,
-		date: new Date().toUTCString(),
-	}
+	const income = existingIncome
+		? { ...existingIncome, date: new Date(existingIncome.date).toISOString().split('T')[0] }
+		: {
+				userId: currentUserAccount.homeAccountId,
+				budgetId: budget?.id ?? -1,
+				name: '',
+				amount: 0,
+				date: new Date().toISOString().split('T')[0],
+		  }
 
 	const formSchema = z.object({
 		name: z.string().min(1, {
@@ -38,8 +40,8 @@ export const IncomeModal = ({ existingIncome }: IncomeModalProps) => {
 				message: 'Amount must be greater than 0',
 			})
 			.transform((val) => parseFloat(val)),
-		date: z.string().min(1, {
-			message: 'Date is required',
+		date: z.string().refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
+			message: 'Invalid date format',
 		}),
 	})
 

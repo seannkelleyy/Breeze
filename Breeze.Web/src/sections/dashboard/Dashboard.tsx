@@ -2,9 +2,9 @@ import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { Card } from '../../components/ui/card'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../../components/ui/carousel'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
-import { IncomeModal } from './modals/IncomeModal'
-import { ExpenseModal } from './modals/ExpenseModal'
-import { CreateBudget } from '../budget/CreateBudget'
+import { IncomeDialog } from './dialogs/IncomeDialog'
+import { ExpenseDialog } from './dialogs/ExpenseDialog'
+import { CreateBudgetDialog } from '../budget/CreateBudgetDialog'
 import { Goals } from '../goals/Goals'
 import { IncomeTable } from './dataTables/IncomeTable'
 import { ExpensesTable } from './dataTables/ExpenseTable'
@@ -48,9 +48,9 @@ export const Dashboard = () => {
 							Difference: $ <span className={budgetDifference > 0 ? 'p-1 rounded-sm bg-success' : ' p-1 rounded-sm bg-destructive'}>{budgetDifference}</span>
 						</h2>
 						<div className='flex gap-4 pt-4'>
-							<IncomeModal />
-							<ExpenseModal />
-							<CreateBudget />
+							<IncomeDialog />
+							<ExpenseDialog />
+							<CreateBudgetDialog />
 						</div>
 						<Goals />
 						<Tabs

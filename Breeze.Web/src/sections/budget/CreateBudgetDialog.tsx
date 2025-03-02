@@ -39,7 +39,7 @@ const formSchema = z.object({
 	),
 })
 
-export const CreateBudget = () => {
+export const CreateBudgetDialog = () => {
 	const [open, setOpen] = useState(false)
 	const account = useMsal().accounts[0]
 	const { budget, refetchCategories, refetchBudget } = useBudgetContext()

@@ -1,21 +1,21 @@
 import { useState } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Goal } from '../../services/hooks/goal/goalServices'
 import { useMsal } from '@azure/msal-react'
-import { useForm } from 'react-hook-form'
-import { usePostGoal } from '../../services/hooks/goal/usePostGoal'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog'
-import { Button } from '../../components/ui/button'
-import { FormField, FormItem, FormLabel, FormControl, Form } from '../../components/ui/form'
-import { Input } from '../../components/ui/input'
+import { Form, useForm } from 'react-hook-form'
+import { Goal } from '../../../services/hooks/goal/goalServices'
+import { usePostGoal } from '../../../services/hooks/goal/usePostGoal'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog'
+import { Button } from '../../../components/ui/button'
+import { FormField, FormItem, FormLabel, FormControl } from '../../../components/ui/form'
+import { Input } from '../../../components/ui/input'
 
-type GoalModalProps = {
+type GoalDialogProps = {
 	existingGoal?: Goal
 	refetchGoals: () => void
 }
 
-export const CreateGoalModal = ({ existingGoal, refetchGoals }: GoalModalProps) => {
+export const CreateGoalDialog = ({ existingGoal, refetchGoals }: GoalDialogProps) => {
 	const [open, setOpen] = useState(false)
 	const currentUserAccount = useMsal().accounts[0]
 

@@ -131,7 +131,7 @@ export function ExpensesTable() {
 	const [nameFilter, setNameFilter] = React.useState('')
 	const { categories } = useBudgetContext()
 
-	const { data: expenses = [], status, refetch } = useFetchExpenses({ category: categories[0] })
+	const { data: expenses = [], status } = useFetchExpenses({ category: categories[0] })
 
 	const table = useReactTable({
 		data: expenses,
