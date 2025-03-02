@@ -3,7 +3,7 @@ import { LandingPage } from '../../sections/LandingPage'
 import { BudgetProvider } from '../../services/providers/BudgetProvider'
 import { useMsal } from '@azure/msal-react'
 import { Navigation } from '../../components/navigation/Navigation'
-import { BudgetCarousel } from '../../sections/dashboard/BudgetCarousel'
+import { Dashboard } from '../../sections/dashboard/Dashboard'
 
 export const AppRoutes = () => {
 	const { accounts, inProgress } = useMsal()
@@ -33,7 +33,7 @@ export const AppRoutes = () => {
 							<BudgetProvider>
 								<div className='h-screen w-screen flex flex-col justify-center items-center'>
 									<Navigation />
-									<BudgetCarousel />
+									<Dashboard />
 								</div>
 							</BudgetProvider>
 						) : (

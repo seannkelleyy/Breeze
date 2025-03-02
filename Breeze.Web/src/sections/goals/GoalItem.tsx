@@ -1,4 +1,4 @@
-import { Check, Pencil, Save, Square, SquareCheckBig, Trash } from 'lucide-react'
+import { Pencil, Save, Square, SquareCheckBig, Trash } from 'lucide-react'
 import { Input } from '../../components/ui/input'
 import { Goal } from '../../services/hooks/goal/goalServices'
 import { Button } from '../../components/ui/button'

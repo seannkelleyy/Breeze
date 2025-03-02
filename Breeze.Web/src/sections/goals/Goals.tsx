@@ -1,26 +1,22 @@
 import { useMsal } from '@azure/msal-react'
 import { useFetchGoals } from '../../services/hooks/goal/useFetchGoals'
 import { GoalItem } from './GoalItem'
-import { usePatchGoal } from '../../services/hooks/goal/usePatchGoal'
-const testGoals = [
-	{ id: 1, description: 'Pay off house', isCompleted: true, userId: '1' },
-	{ id: 2, description: 'Pay off car', isCompleted: false, userId: '1' },
-	{ id: 3, description: 'Fund emergency fund', isCompleted: true, userId: '1' },
-]
+import { CreateGoalModal } from './CreateGoalModal'
 
 export const Goals = () => {
 	const account = useMsal().accounts[0]
 	const { data: goals, refetch, isLoading, isError } = useFetchGoals({ userId: account?.homeAccountId ?? '' })
-	const patchMutation = usePatchGoal({
-		onSettled: () => refetch(),
-	})
 
-	// if (isLoading) return <div>Loading...</div>
+	if (isLoading) {
+		console.log('loading')
+	}
 
-	// if (isError) return <div>Error fetching goals</div>
+	if (isError) {
+		console.log('error')
+	}
 
 	// put incomplete goals at top
-	const fakeGoals = testGoals?.sort((a, b) => (a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1))
+	goals?.sort((a, b) => (a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1))
 
 	return (
 		<section className='space-y-4 w-3/4 flex flex-col items-evenly'>
@@ -28,7 +24,7 @@ export const Goals = () => {
 				<h1 className='text-2xl font-bold'>Goals</h1>
 			</div>
 			<ul className='space-y-2'>
-				{fakeGoals?.map((goal) => (
+				{goals?.map((goal) => (
 					<GoalItem
 						key={goal.id}
 						goal={goal}
@@ -37,6 +33,7 @@ export const Goals = () => {
 					/>
 				))}
 			</ul>
+			<CreateGoalModal refetchGoals={refetch} />
 		</section>
 	)
 }

@@ -5,11 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import { IncomeModal } from './modals/IncomeModal'
 import { ExpenseModal } from './modals/ExpenseModal'
 import { CreateBudget } from '../budget/CreateBudget'
-import { Goals } from '../goal/Goals'
+import { Goals } from '../goals/Goals'
 import { IncomeTable } from './dataTables/IncomeTable'
 import { ExpensesTable } from './dataTables/ExpenseTable'
 
-export const BudgetCarousel = () => {
+export const Dashboard = () => {
 	const { budget, getBudgetForDate } = useBudgetContext()
 	const today = new Date()
 
