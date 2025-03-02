@@ -65,3 +65,4 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useBudgetContext = () => useContext(BudgetContext)
+

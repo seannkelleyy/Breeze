@@ -1,0 +1,61 @@
+:root {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
+
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: neutralscale;
+
+	/* Default Colors */
+	--color-progress: #0096c7;
+	--color-positive: #45b96d;
+	--color-negative: #b84f4f;
+	--shadow-box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 8px;
+
+	/* Light mode */
+	--color-background: #88b1bd;
+	--color-text: #242424;
+	--color-card-background: #e1e1e1;
+	--color-card-background-secondary: #f1f1f1;
+	--color-input-background: #f1f1f1;
+	--color-button: #f1f1f1;
+	--color-progress-background: #c4c4c4;
+
+	/* Dark mode */
+	@media (prefers-color-scheme: dark) {
+		--color-background: #242424;
+		--color-text: #ffffff;
+		--color-card-background: #3c3c3c;
+		--color-card-background-secondary: #4a4a4a;
+		--color-input-background: #595a5cbd;
+		--color-button: #56575c88;
+	}
+
+	background-color: var(--color-background);
+	color: var(--color-text);
+}
+
+::placeholder {
+	color: var(--color-text);
+}
+
+button {
+	background-color: var(--color-button);
+	color: var(--color-text);
+}
+
+a {
+	color: var(--color-text);
+}
+
+.amount-left-positive {
+	background-color: var(--color-positive);
+	border-radius: 0.25em;
+}
+
+.amount-left-negative {
+	background-color: var(--color-negative);
+	border-radius: 0.25em;
+}

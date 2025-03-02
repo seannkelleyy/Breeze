@@ -87,7 +87,6 @@ else
     app.UseCors("production");
 }
 
-
 app.UseHttpsRedirection();
 
 app.UseRouting();
@@ -99,5 +98,3 @@ app.MapControllers();
 app.MapControllers();
 
 app.Run();
-
-
