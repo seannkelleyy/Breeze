@@ -58,7 +58,16 @@ builder.Services.AddApplicationInsightsTelemetry(options =>
 
 // Establish connection string
 builder.Services.AddDbContext<BreezeContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("breezeDb")));
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        options.UseMySql(builder.Configuration.GetConnectionString("breezeDb-local"), new MySqlServerVersion(new Version(8, 0, 33)));
+    }
+    else
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("breezeDb"));
+    }
+});
 
 builder.Services.AddCors(options =>
 {

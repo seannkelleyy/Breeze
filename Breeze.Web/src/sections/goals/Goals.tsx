@@ -15,8 +15,7 @@ export const Goals = () => {
 		console.log('error')
 	}
 
-	// put incomplete goals at top
-	goals?.sort((a, b) => (a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1))
+	if (goals) goals.sort((a, b) => (a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1))
 
 	return (
 		<section className='space-y-4 w-3/4 flex flex-col items-evenly'>
@@ -24,14 +23,15 @@ export const Goals = () => {
 				<h1 className='text-2xl font-bold'>Goals</h1>
 			</div>
 			<ul className='space-y-2'>
-				{goals?.map((goal) => (
-					<GoalItem
-						key={goal.id}
-						goal={goal}
-						refetchGoals={refetch}
-						userId={account?.homeAccountId ?? ''}
-					/>
-				))}
+				{goals &&
+					goals.map((goal) => (
+						<GoalItem
+							key={goal.id}
+							goal={goal}
+							refetchGoals={refetch}
+							userId={account?.homeAccountId ?? ''}
+						/>
+					))}
 			</ul>
 			<CreateGoalModal refetchGoals={refetch} />
 		</section>

@@ -16,6 +16,8 @@ const useHttp = () => {
 
 	const fetchToken = async () => {
 		const account = instance.getAllAccounts()[0]
+		if (!account) throw new Error('No account found')
+
 		const tokenRequest = {
 			scopes: [`${authApiId}/user.access`],
 			account,
@@ -33,11 +35,14 @@ const useHttp = () => {
 		}
 	}
 
-	const { data: accessToken, refetch } = useQuery('accessToken', fetchToken, {
-		refetchInterval: 1000 * 180,
-		refetchOnWindowFocus: true,
-		refetchOnMount: true,
-		refetchOnReconnect: true,
+	const {
+		data: accessToken,
+		refetch,
+		isFetching,
+	} = useQuery('accessToken', fetchToken, {
+		enabled: false,
+		refetchOnWindowFocus: false,
+		refetchOnReconnect: false,
 		onSuccess: (token) => {
 			if (token) {
 				axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`
@@ -48,10 +53,16 @@ const useHttp = () => {
 		},
 	})
 
-	const checkForAccessToken = async () => {
-		if (!accessToken) {
+	const fetchAccessToken = async () => {
+		try {
 			await refetch()
+		} catch (error) {
+			console.error('Token fetch failed:', error)
 		}
+	}
+
+	if (!accessToken && !isFetching) {
+		fetchAccessToken()
 	}
 
 	const axiosInstance = axios.create({
@@ -70,6 +81,12 @@ const useHttp = () => {
 			return Promise.reject(error)
 		},
 	)
+
+	const checkForAccessToken = async () => {
+		if (!accessToken) {
+			await refetch()
+		}
+	}
 
 	const getOne = async <T>(relativeUri: string): Promise<T> => {
 		try {
@@ -101,7 +118,7 @@ const useHttp = () => {
 		return [[]] as T[][]
 	}
 
-	// use getManyHeader to get the headers of the response.  Used for paging
+	// Used for paging: Get headers alongside data
 	const getManyHeader = async <T>(relativeUri: string): Promise<{ data: T[]; headers: unknown }> => {
 		try {
 			await checkForAccessToken()

@@ -8,6 +8,7 @@ import { CreateBudget } from '../budget/CreateBudget'
 import { Goals } from '../goals/Goals'
 import { IncomeTable } from './dataTables/IncomeTable'
 import { ExpensesTable } from './dataTables/ExpenseTable'
+import dayjs from 'dayjs'
 
 export const Dashboard = () => {
 	const { budget, getBudgetForDate } = useBudgetContext()
@@ -29,20 +30,19 @@ export const Dashboard = () => {
 		}
 	}
 
-	//	const budgetDifference = parseFloat((budget?.monthlyIncome - budget?.monthlyExpenses).toFixed(2)) ?? 3903.36
-	const budgetDifference = 90.23
+	const budgetDifference = parseFloat((budget?.monthlyIncome - budget?.monthlyExpenses).toFixed(2)) ?? 'Loading...'
 
 	return (
-		<Carousel className='absolute  left-1/2 transform -translate-x-1/2 overflow-x-hidden'>
+		<Carousel className='absolute left-1/2 transform -translate-x-1/2 overflow-x-hidden'>
 			<CarouselContent>
 				<CarouselItem>
 					<Card className='flex flex-col gap-1 justify-start items-center p-4'>
-						<h1 className='text-3xl font-bold'>{budget?.date ?? 'December 2024'}</h1>
+						<h1 className='text-3xl font-bold'>{dayjs(budget?.date).format('MMMM YYYY')}</h1>
 						<h2 className='text-lg'>
-							Income: $ <span className='text-accent'>{budget?.monthlyIncome?.toFixed(2) ?? 5672.23}</span>
+							Income: $ <span className='text-accent'>{budget?.monthlyIncome?.toFixed(2) ?? 'Loading...'}</span>
 						</h2>
 						<h2 className='text-lg'>
-							Expenses: $ <span className='text-accent'>{budget?.monthlyExpenses?.toFixed(2) ?? 1768.87}</span>
+							Expenses: $ <span className='text-accent'>{budget?.monthlyExpenses?.toFixed(2) ?? 'Loading...'}</span>
 						</h2>
 						<h2 className='text-lg'>
 							Difference: $ <span className={budgetDifference > 0 ? 'p-1 rounded-sm bg-success' : ' p-1 rounded-sm bg-destructive'}>{budgetDifference}</span>
@@ -57,7 +57,7 @@ export const Dashboard = () => {
 							defaultValue='expenses'
 							className='flex flex-col justify-center items-center mt-4'
 						>
-							<TabsList className=''>
+							<TabsList>
 								<TabsTrigger value='income'>Income</TabsTrigger>
 								<TabsTrigger value='expenses'>Expenses</TabsTrigger>
 							</TabsList>

@@ -1,8 +1,23 @@
 {
-    "appService.zipIgnorePattern": [
-        ".vscode{,/**}",
-    ],
-    "appService.defaultWebAppToDeploy": "None",
-    "appService.deploySubpath": "Breeze.Api/bin/Release/net8.0",
-    "appService.showBuildDuringDeployPrompt": false
+	"appService.zipIgnorePattern": [".vscode{,/**}"],
+	"appService.defaultWebAppToDeploy": "None",
+	"appService.deploySubpath": "Breeze.Api/bin/Release/net8.0",
+	"appService.showBuildDuringDeployPrompt": false,
+	"sqltools.connections": [
+		{
+			"mysqlOptions": {
+				"authProtocol": "default",
+				"enableSsl": "Disabled"
+			},
+			"previewLimit": 50,
+			"server": "127.0.0.1",
+			"port": 3306,
+			"driver": "MySQL",
+			"name": "Breeze-local",
+			"database": "Breeze-local",
+			"username": "root",
+			"password": ""
+		}
+	]
 }
+
