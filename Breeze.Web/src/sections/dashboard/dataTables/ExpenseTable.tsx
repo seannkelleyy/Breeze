@@ -74,7 +74,7 @@ export const columns: ColumnDef<Expense>[] = [
 			}),
 	},
 	{
-		accessorKey: 'category',
+		accessorKey: 'categoryId',
 		header: ({ column }) => {
 			return (
 				<Button
@@ -85,6 +85,13 @@ export const columns: ColumnDef<Expense>[] = [
 					<ArrowUpDown className='ml-2 h-4 w-4' />
 				</Button>
 			)
+		},
+		cell: ({ row }) => {
+			const categoryId = row.getValue('categoryId') as number
+			// eslint-disable-next-line react-hooks/rules-of-hooks
+			const { categories } = useBudgetContext()
+			const category = categories.find((cat) => cat.id === categoryId)
+			return category ? category.name : 'Unknown'
 		},
 	},
 	{
@@ -149,7 +156,7 @@ export function ExpensesTable() {
 
 	const handleCategoryClick = (category: React.SetStateAction<string>) => {
 		setActiveCategory(category)
-		table.getColumn('category')?.setFilterValue(category)
+		table.getColumn('categoryId')?.setFilterValue(category)
 	}
 
 	return (

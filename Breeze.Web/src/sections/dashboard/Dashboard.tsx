@@ -9,6 +9,7 @@ import { Goals } from '../goals/Goals'
 import { IncomeTable } from './dataTables/IncomeTable'
 import { ExpensesTable } from './dataTables/ExpenseTable'
 import dayjs from 'dayjs'
+import { EditBudgetDialog } from '../budget/EditBudgetDialog'
 
 export const Dashboard = () => {
 	const { budget, getBudgetForDate } = useBudgetContext()
@@ -50,7 +51,7 @@ export const Dashboard = () => {
 						<div className='flex gap-4 pt-4'>
 							<IncomeDialog />
 							<ExpenseDialog />
-							<CreateBudgetDialog />
+							{budget ? <EditBudgetDialog /> : <CreateBudgetDialog />}
 						</div>
 						<Goals />
 						<Tabs

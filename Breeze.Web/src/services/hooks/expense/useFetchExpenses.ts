@@ -15,8 +15,7 @@ export const useFetchExpenses = ({ category }: FetchExpenseProps) => {
 	const { getExpenses } = useExpenses()
 
 	const fetchExpenses = useCallback(() => {
-		if (!category.id)
-			return []
+		if (!category) return []
 		return getExpenses(category)
 	}, [getExpenses, category])
 
@@ -25,3 +24,4 @@ export const useFetchExpenses = ({ category }: FetchExpenseProps) => {
 		retryDelay: 10 * 1000,
 	})
 }
+
