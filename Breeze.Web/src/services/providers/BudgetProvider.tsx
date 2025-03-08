@@ -6,6 +6,8 @@ import { Category } from '../hooks/category/categoryServices'
 import { Income } from '../hooks/income/incomeServices'
 import { useFetchCategories } from '../hooks/category/useFetchCategories'
 import dayjs, { Dayjs } from 'dayjs'
+import { Expense } from '../hooks/expense/expenseServices'
+import { useFetchExpensesForBudget } from '../hooks/expense/useFetchExpensesForBudget'
 
 type BudgetProviderProps = { children: React.ReactNode }
 type BudgetContextType = {
@@ -13,10 +15,12 @@ type BudgetContextType = {
 	totalSpent: number
 	incomes: Income[]
 	categories: Category[]
+	expenses: Expense[]
 	getBudgetForDate: (year: number, month: number) => Promise<{ status: number; budget?: Budget; error?: string }>
 	refetchBudget: () => void
 	refetchIncomes: () => void
 	refetchCategories: () => void
+	refetchExpenses: () => void
 }
 
 const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContextType)
@@ -27,6 +31,7 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 	const { data: budget = {} as Budget, refetch: refetchBudget } = useFetchBudget({ date: budgetDate })
 	const { data: incomes = [], refetch: refetchIncomes } = useFetchIncomes({ budgetId: budget?.id, enabled: !!budget.id })
 	const { data: categories = [], refetch: refetchCategories } = useFetchCategories({ budgetId: budget?.id, enabled: !!budget.id })
+	const { data: expenses = [], refetch: refetchExpenses } = useFetchExpensesForBudget({ budgetId: budget?.id })
 
 	const sortedCategories = useMemo(() => {
 		return [...categories].sort((a, b) => b.currentSpend - a.currentSpend)
@@ -57,7 +62,7 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 		}
 	}
 	return (
-		<BudgetContext.Provider value={{ budget, totalSpent, incomes, categories, getBudgetForDate, refetchBudget, refetchIncomes, refetchCategories }}>
+		<BudgetContext.Provider value={{ budget, totalSpent, incomes, categories, expenses, getBudgetForDate, refetchBudget, refetchIncomes, refetchCategories, refetchExpenses }}>
 			{children}
 		</BudgetContext.Provider>
 	)

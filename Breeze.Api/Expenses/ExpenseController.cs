@@ -43,6 +43,26 @@ namespace Breeze.Api.Expenses
             }
         }
 
+        [HttpGet("/budgets/{budgetID}/expenses")]
+        public IActionResult GetAllExpensesForUser([FromRoute] int BudgetID)
+        {
+            try
+            {
+                var userId = User.GetObjectId();
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
+                return Ok(expenses.GetExpensesForBudget(userId, BudgetID));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost]
         public IActionResult PostExpsense(ExpenseRequest expenseRequest)
         {

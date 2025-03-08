@@ -16,7 +16,6 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '.
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu'
 import { ArrowUpDown, MoreHorizontal } from 'lucide-react'
 import { Expense } from '../../../services/hooks/expense/expenseServices'
-import { useFetchExpenses } from '../../../services/hooks/expense/useFetchExpenses'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -136,12 +135,18 @@ export function ExpensesTable() {
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
 	const [activeCategory, setActiveCategory] = React.useState('')
 	const [nameFilter, setNameFilter] = React.useState('')
-	const { categories } = useBudgetContext()
+	const { categories, expenses } = useBudgetContext()
 
-	const { data: expenses = [], status } = useFetchExpenses({ category: categories[0] })
+	const filteredExpenses = React.useMemo(() => {
+		if (!activeCategory) return expenses
+		return expenses.filter((expense) => {
+			const category = categories.find((cat) => cat.id === expense.categoryId)
+			return category?.name === activeCategory
+		})
+	}, [activeCategory, expenses, categories])
 
 	const table = useReactTable({
-		data: expenses,
+		data: filteredExpenses,
 		columns,
 		onColumnFiltersChange: setColumnFilters,
 		onColumnVisibilityChange: setColumnVisibility,

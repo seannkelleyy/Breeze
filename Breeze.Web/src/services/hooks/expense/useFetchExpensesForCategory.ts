@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { Expense, useExpenses } from './expenseServices'
 import { Category } from '../category/categoryServices'
 
-type FetchExpenseProps = {
+type FetchExpensesForCategoryProps = {
 	category: Category
 }
 
@@ -11,15 +11,15 @@ type FetchExpenseProps = {
  * A hook for fetching expenses.
  * @param props.category: The category to fetch expenses from.
  */
-export const useFetchExpenses = ({ category }: FetchExpenseProps) => {
-	const { getExpenses } = useExpenses()
+export const useFetchExpensesForCategory = ({ category }: FetchExpensesForCategoryProps) => {
+	const { getExpensesForCategory } = useExpenses()
 
 	const fetchExpenses = useCallback(() => {
 		if (!category) return []
-		return getExpenses(category)
-	}, [getExpenses, category])
+		return getExpensesForCategory(category)
+	}, [getExpensesForCategory, category])
 
-	return useQuery<Expense[], Error>(['expenses', category], fetchExpenses, {
+	return useQuery<Expense[], Error>(['expensesCategory', category], fetchExpenses, {
 		refetchInterval: 180 * 1000,
 		retryDelay: 10 * 1000,
 	})

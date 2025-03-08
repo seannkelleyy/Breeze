@@ -1,4 +1,6 @@
-﻿using Breeze.Api.Expenses.RequestResponseObjects;
+﻿using Breeze.Api.Categories;
+using Breeze.Api.Categories.RequestResponseObjects;
+using Breeze.Api.Expenses.RequestResponseObjects;
 using Breeze.Data;
 using Breeze.Domain;
 
@@ -67,6 +69,43 @@ namespace Breeze.Api.Expenses
             {
                 return db.Expenses
                     .Where(expense => expense.CategoryId.Equals(CategoryId) && expense.UserId.Equals(userId))
+                    .Select(expense => new ExpenseResponse
+                    {
+                        Id = expense.Id,
+                        UserId = expense.UserId,
+                        Name = expense.Name,
+                        Date = expense.Date,
+                        CategoryId = expense.CategoryId,
+                        Amount = expense.Amount,
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all expenses for a budget.
+        /// </summary>
+        /// <param name="userId">The user's identifier.</param>
+        /// <param name="BudgetId">The budget's identifier.</param>
+        /// <returns>A list of expense response objects or null if an error occurs.</returns>
+        public List<ExpenseResponse>? GetExpensesForBudget(string userId, int BudgetId)
+        {
+            try
+            {
+                CategoryService categoryService = new CategoryService(_config, db, _logger);
+                List<CategoryResponse>? categories = categoryService.GetCategoriesByBudgetId(userId, BudgetId);
+                if (categories == null)
+                {
+                    return null;
+                }
+
+                return db.Expenses
+                    .Where(expense => expense.UserId.Equals(userId) && categories.Select(category => category.Id).Contains(expense.CategoryId))
                     .Select(expense => new ExpenseResponse
                     {
                         Id = expense.Id,

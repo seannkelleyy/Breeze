@@ -11,7 +11,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
-import { useFetchExpenses } from '../../../services/hooks/expense/useFetchExpenses'
 
 type ExpenseDialogProps = {
 	existingExpense?: Expense
@@ -19,7 +18,7 @@ type ExpenseDialogProps = {
 
 export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 	const [open, setOpen] = useState(false)
-	const { budget, categories, refetchCategories, refetchBudget } = useBudgetContext()
+	const { budget, categories, refetchCategories, refetchBudget, refetchExpenses } = useBudgetContext()
 	const currentUserAccount = useMsal().accounts[0]
 
 	const expense = existingExpense ?? {
@@ -29,7 +28,6 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 		amount: 0,
 		date: new Date().toISOString().split('T')[0],
 	}
-	const { refetch: refetchExpenses } = useFetchExpenses({ category: categories.find((category) => category.id === expense.categoryId) ?? categories[0] })
 
 	const formSchema = z.object({
 		name: z.string().min(1, {
@@ -68,7 +66,6 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 			budgetId: budget?.id,
 			userId: currentUserAccount.username,
 		}
-		console.log(expenseToSubmit)
 		postMutation.mutate({ budgetId: budget?.id, expense: expenseToSubmit })
 		refetchExpenses()
 	}
