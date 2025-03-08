@@ -11,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
+import { useFetchExpenses } from '../../../services/hooks/expense/useFetchExpenses'
 
 type ExpenseDialogProps = {
 	existingExpense?: Expense
@@ -26,8 +27,9 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 		categoryId: categories[0]?.id ?? 1,
 		name: '',
 		amount: 0,
-		date: new Date().toUTCString(),
+		date: new Date().toISOString().split('T')[0],
 	}
+	const { refetch: refetchExpenses } = useFetchExpenses({ category: categories.find((category) => category.id === expense.categoryId) ?? categories[0] })
 
 	const formSchema = z.object({
 		name: z.string().min(1, {
@@ -42,8 +44,8 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 				message: 'Amount must be greater than 0',
 			})
 			.transform((val) => parseFloat(val)),
-		date: z.string().min(1, {
-			message: 'Date is required',
+		date: z.string().refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
+			message: 'Invalid date format',
 		}),
 	})
 
@@ -68,6 +70,7 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 		}
 		console.log(expenseToSubmit)
 		postMutation.mutate({ budgetId: budget?.id, expense: expenseToSubmit })
+		refetchExpenses()
 	}
 
 	return (

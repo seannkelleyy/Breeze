@@ -1,29 +1,21 @@
+import { Button } from '../../../components/ui/button'
+import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../components/ui/dialog'
+import { Input } from '../../../components/ui/input'
 import { useState } from 'react'
+import { useMsal } from '@azure/msal-react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMsal } from '@azure/msal-react'
-import { Form, useForm } from 'react-hook-form'
-import { Goal } from '../../../services/hooks/goal/goalServices'
+import { useForm } from 'react-hook-form'
+import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../components/ui/form'
 import { usePostGoal } from '../../../services/hooks/goal/usePostGoal'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog'
-import { Button } from '../../../components/ui/button'
-import { FormField, FormItem, FormLabel, FormControl } from '../../../components/ui/form'
-import { Input } from '../../../components/ui/input'
 
 type GoalDialogProps = {
-	existingGoal?: Goal
 	refetchGoals: () => void
 }
 
-export const CreateGoalDialog = ({ existingGoal, refetchGoals }: GoalDialogProps) => {
+export const CreateGoalDialog = ({ refetchGoals }: GoalDialogProps) => {
 	const [open, setOpen] = useState(false)
 	const currentUserAccount = useMsal().accounts[0]
-
-	const goal = existingGoal ?? {
-		userId: currentUserAccount.username,
-		description: '',
-		isCompleted: false,
-	}
 
 	const formSchema = z.object({
 		description: z.string().min(1, {
@@ -33,18 +25,22 @@ export const CreateGoalDialog = ({ existingGoal, refetchGoals }: GoalDialogProps
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: goal,
+		defaultValues: {
+			description: '',
+		},
 	})
 
 	const onSubmit = (values: z.infer<typeof formSchema>) => {
-		const goalToSubmit = {
-			...values,
+		postGoalMutation.mutate({
 			userId: currentUserAccount.username,
-			isCompleted: false,
-		}
-		postGoalMutation.mutate({ userId: currentUserAccount.username, goal: goalToSubmit })
+			goal: {
+				userId: currentUserAccount.username,
+				description: values.description,
+				isCompleted: false,
+			},
+		})
 	}
-
+	console.log(form.control)
 	const postGoalMutation = usePostGoal({
 		onSettled: () => {
 			refetchGoals()
@@ -67,30 +63,32 @@ export const CreateGoalDialog = ({ existingGoal, refetchGoals }: GoalDialogProps
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<DialogHeader>
-							<DialogTitle>{goal ? 'Edit Goal' : 'Create Goal'}</DialogTitle>
-							<DialogDescription>{goal ? "Make changes to your goal here. Click save when you're done." : "Create a new goal. Click save when you're done."}</DialogDescription>
+							<DialogTitle>Create Goal</DialogTitle>
+							<DialogDescription>Create a new goal. Click save when you're done.</DialogDescription>
 						</DialogHeader>
 						<div className='grid gap-4 py-4'>
-							<FormField
-								control={form.control}
-								name='description'
-								render={({ field }) => (
-									<FormItem className='grid grid-cols-4 items-center gap-4'>
-										<FormLabel className='text-right'>Goal</FormLabel>
-										<FormControl>
-											<Input
-												id='description'
-												type='text'
-												{...field}
-												className='col-span-3'
-											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
+							<FormItem>
+								<FormField
+									control={form.control}
+									name='description'
+									render={({ field }) => (
+										<FormItem className='grid grid-cols-4 items-center gap-4'>
+											<FormLabel className='text-right'>Goal</FormLabel>
+											<FormControl>
+												<Input
+													id='description'
+													type='text'
+													{...field}
+													className='col-span-3'
+												/>
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+							</FormItem>
 						</div>
 						<DialogFooter>
-							<Button type='submit'>{goal ? 'Save changes' : 'Create Goal'}</Button>
+							<Button type='submit'>Create Goal</Button>
 						</DialogFooter>
 					</form>
 				</Form>
