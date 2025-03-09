@@ -1,40 +1,25 @@
 using Breeze.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
-var domain = $"https://{builder.Configuration["Auth0:Domain"]}/";
+// Docs: https://learn.microsoft.com/en-us/azure/active-directory-b2c/enable-authentication-web-api?tabs=csharpclient
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(options =>
-{
-    options.Authority = domain;
-    options.Audience = builder.Configuration["Auth0:Audience"];
-    options.TokenValidationParameters = new TokenValidationParameters
+    .AddMicrosoftIdentityWebApi(options =>
     {
-        NameClaimType = ClaimTypes.NameIdentifier
-    };
-    options.Events = new JwtBearerEvents
-    {
-        OnTokenValidated = context =>
-        {
-            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
-            if (claimsIdentity != null)
-            {
-                string userId = claimsIdentity.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
-                if (userId != null)
-                {
-                    claimsIdentity.AddClaim(new Claim("user_id", userId));
-                }
-            }
-            return Task.CompletedTask;
-        }
-    };
-});
+        builder.Configuration.Bind("AzureAdB2C", options);
 
-// Add services to the container.
+        options.TokenValidationParameters.NameClaimType = "name";
+    },
+    options =>
+    {
+        builder.Configuration.Bind("AzureAdB2C", options);
+    });
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -66,11 +51,23 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["ApplicationInsights:InstrumentationKey"]);
+builder.Services.AddApplicationInsightsTelemetry(options =>
+{
+    options.ConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
+});
 
 // Establish connection string
 builder.Services.AddDbContext<BreezeContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("breezeDb")));
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        options.UseMySql(builder.Configuration.GetConnectionString("breezeDb-local"), new MySqlServerVersion(new Version(8, 0, 33)));
+    }
+    else
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("breezeDb"));
+    }
+});
 
 builder.Services.AddCors(options =>
 {
@@ -99,20 +96,14 @@ else
     app.UseCors("production");
 }
 
-
 app.UseHttpsRedirection();
 
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.MapControllers();
 
 app.MapControllers();
 
 app.Run();
-
-

@@ -1,12 +1,11 @@
-import { useMutation } from 'react-query';
-import { useCallback } from 'react';
-import { Expense, useExpenses } from './expenseServices';
-import { Category } from '../category/categoryServices';
+import { useMutation } from 'react-query'
+import { useCallback } from 'react'
+import { Expense, useExpenses } from './expenseServices'
 
 type PostExpenseProps = {
-    onSuccess?: () => void;
-    onSettled?: () => void;
-};
+	onSuccess?: () => void
+	onSettled?: () => void
+}
 
 /**
  * A hook for posting an expense.
@@ -15,21 +14,22 @@ type PostExpenseProps = {
  */
 
 type PostExpenseMutationProps = {
-    category: Category;
-    expense: Expense;
+	budgetId: number
+	expense: Expense
 }
 /**
  * Mutation function for posting an expense.
- * @param props.category: The category to post the expense to.
+ * @param props.budgetId: The budget Id to post the expense to.
  * @param props.expense: The expense to post.
  */
-export const usePostExpense = ({onSuccess, onSettled}: PostExpenseProps) => {
-  const { postExpense } = useExpenses();
+export const usePostExpense = ({ onSuccess, onSettled }: PostExpenseProps) => {
+	const { postExpense } = useExpenses()
 
-  const mutationFn = useCallback(({category, expense} : PostExpenseMutationProps) => postExpense(category, expense), [postExpense]);
+	const mutationFn = useCallback(({ budgetId, expense }: PostExpenseMutationProps) => postExpense(budgetId, expense), [postExpense])
 
-  return useMutation(mutationFn, {
-    onSuccess: onSuccess,
-    onSettled: onSettled,
-  });
-};
+	return useMutation(mutationFn, {
+		onSuccess: onSuccess,
+		onSettled: onSettled,
+	})
+}
+

@@ -1,10 +1,13 @@
 ﻿using Breeze.Api.Categories;
 using Breeze.Api.Expenses.RequestResponseObjects;
 using Breeze.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web;
 
 namespace Breeze.Api.Expenses
 {
+    [Authorize]
     [ApiController]
     [Route("/budgets/{budgetId}/categories/{categoryId}/expenses")]
     public class ExpenseController : ControllerBase
@@ -25,7 +28,7 @@ namespace Breeze.Api.Expenses
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -40,19 +43,44 @@ namespace Breeze.Api.Expenses
             }
         }
 
+        [HttpGet("/budgets/{budgetID}/expenses")]
+        public IActionResult GetAllExpensesForUser([FromRoute] int BudgetID)
+        {
+            try
+            {
+                var userId = User.GetObjectId();
+                if (userId == null)
+                {
+                    _logger.LogError(User.ToString());
+                    return Unauthorized();
+                }
+                return Ok(expenses.GetExpensesForBudget(userId, BudgetID));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost]
         public IActionResult PostExpsense(ExpenseRequest expenseRequest)
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 var response = expenses.CreateExpense(userId, expenseRequest);
-                categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenses.GetExpenseByCategoryId(userId, expenseRequest.CategoryId));
+                var expenseList = expenses.GetExpenseByCategoryId(userId, expenseRequest.CategoryId);
+                if (expenseList == null)
+                {
+                    return BadRequest("Expenses not found");
+                }
+                categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenseList);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -66,14 +94,19 @@ namespace Breeze.Api.Expenses
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 var response = expenses.UpdateExpense(userId, expenseRequest);
-                categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenses.GetExpenseByCategoryId(userId, expenseRequest.CategoryId));
+                var expenseList = expenses.GetExpenseByCategoryId(userId, expenseRequest.CategoryId);
+                if (expenseList == null)
+                {
+                    return BadRequest("Expenses not found");
+                }
+                categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenseList);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -87,19 +120,25 @@ namespace Breeze.Api.Expenses
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                int categoryId = expenses.GetExpenseById(userId, id).CategoryId;
-                if (categoryId == 0)
+                var expense = expenses.GetExpenseById(userId, id);
+                if (expense == null)
                 {
                     return BadRequest("Expense not found");
                 }
+                int categoryId = expense.CategoryId;
                 var response = expenses.DeleteExpenseById(userId, id);
-                categories.CalculateCategoryExpenses(userId, categoryId, expenses.GetExpenseByCategoryId(userId, categoryId));
+                var expenseList = expenses.GetExpenseByCategoryId(userId, categoryId);
+                if (expenseList == null)
+                {
+                    return BadRequest("Expenses not found");
+                }
+                categories.CalculateCategoryExpenses(userId, categoryId, expenseList);
                 return Ok(response);
             }
             catch (Exception ex)

@@ -1,11 +1,15 @@
-﻿using Breeze.Api.Budgets;
+﻿using System.Threading.Tasks;
+using Breeze.Api.Budgets;
 using Breeze.Api.Categories.RequestResponseObjects;
 using Breeze.Api.Expenses;
 using Breeze.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web;
 
 namespace Breeze.Api.Categories
 {
+    [Authorize]
     [ApiController]
     [Route("/budgets/{budgetId}/categories")]
     public class CategoryController : ControllerBase
@@ -28,7 +32,7 @@ namespace Breeze.Api.Categories
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -48,14 +52,20 @@ namespace Breeze.Api.Categories
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 var response = categories.CreateCategory(userId, categoryRequest);
-                budgets.CalculateBudgetCategories(userId, categoryRequest.BudgetId, categories.GetCategoriesByBudgetId(userId, categoryRequest.BudgetId));
+                var categoryList = categories.GetCategoriesByBudgetId(userId, categoryRequest.BudgetId);
+                if (categoryList == null)
+                {
+                    _logger.LogError($"Category list is null for user {userId} and budget {categoryRequest.BudgetId}");
+                    return BadRequest("Category list is null");
+                }
+                budgets.CalculateBudgetCategories(userId, categoryRequest.BudgetId, categoryList);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -70,14 +80,20 @@ namespace Breeze.Api.Categories
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
                 var response = categories.UpdateCategory(userId, categoryRequest);
-                budgets.CalculateBudgetCategories(userId, categoryRequest.BudgetId, categories.GetCategoriesByBudgetId(userId, categoryRequest.BudgetId));
+                var categoryList = categories.GetCategoriesByBudgetId(userId, categoryRequest.BudgetId);
+                if (categoryList == null)
+                {
+                    _logger.LogError($"Category list is null for user {userId} and budget {categoryRequest.BudgetId}");
+                    return BadRequest("Category list is null");
+                }
+                budgets.CalculateBudgetCategories(userId, categoryRequest.BudgetId, categoryList);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -87,21 +103,38 @@ namespace Breeze.Api.Categories
             }
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteCategory(int id)
+        [HttpDelete("{categoryId}")]
+        public async Task<IActionResult> DeleteCategory([FromRoute] int categoryId)
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                int budgetId = categories.GetCategoryById(userId, id).BudgetId;
-                var response = categories.DeleteCategoryById(userId, id);
-                budgets.CalculateBudgetCategories(userId, budgetId, categories.GetCategoriesByBudgetId(userId, budgetId));
-                expenses.DeleteExpenseForCategory(userId, id);
+                var category = categories.GetCategoryById(userId, categoryId);
+                if (category == null)
+                {
+                    _logger.LogError($"Category not found for user {userId} and category {categoryId}");
+                    return NotFound("Category not found");
+                }
+                int budgetId = category.BudgetId;
+                expenses.DeleteExpenseForCategory(userId, categoryId);
+                var response = categories.DeleteCategoryById(userId, categoryId);
+                if (response < 0)
+                {
+                    _logger.LogError($"Failed to delete category {categoryId}");
+                    return BadRequest("Failed to delete category. Code: " + response);
+                }
+                var categoryList = categories.GetCategoriesByBudgetId(userId, budgetId);
+                if (categoryList == null)
+                {
+                    _logger.LogError($"Category list is null for user {userId} and budget {budgetId}");
+                    return BadRequest("Category list is null");
+                }
+                budgets.CalculateBudgetCategories(userId, budgetId, categoryList);
                 return Ok(response);
             }
             catch (Exception ex)

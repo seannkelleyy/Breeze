@@ -1,37 +1,28 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { Auth0Provider } from '@auth0/auth0-react'
-import { useEnvironmentVariables } from './config/environment/useEnvironmentVariables'
-import { QueryClient, QueryClientProvider } from 'react-query'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
 import './index.css'
 import { AppRoutes } from './config/routing/AppRoutes'
+import { MsalProvider } from '@azure/msal-react'
+import { useMsalInstance } from './config/auth/MsalInstance'
+import { QueryClient, QueryClientProvider } from 'react-query'
+import { ThemeProvider } from './components/theme/ThemeProvider'
 
 // eslint-disable-next-line react-refresh/only-export-components
 const Root = () => {
 	const queryClient = new QueryClient()
-	const { authClientId, authDomain, baseLocalUrl: baseLocalUrl, baseHostedUrl, apiAudience } = useEnvironmentVariables()
-	const baseUrl = import.meta.env.MODE === 'production' ? baseHostedUrl : baseLocalUrl
+	const msalInstance = useMsalInstance()
 	return (
-		<React.StrictMode>
-			<Auth0Provider
-				clientId={authClientId}
-				domain={authDomain}
-				authorizationParams={{
-					redirect_uri: baseUrl,
-					audience: apiAudience,
-					scope: 'openid profile email read:data write:data',
-				}}
-			>
+		<StrictMode>
+			<MsalProvider instance={msalInstance}>
 				<QueryClientProvider client={queryClient}>
-					<AppRoutes />
+					<ThemeProvider defaultTheme='system'>
+						<AppRoutes />
+					</ThemeProvider>
 				</QueryClientProvider>
-			</Auth0Provider>
-		</React.StrictMode>
+			</MsalProvider>
+		</StrictMode>
 	)
 }
 
-const rootElement = document.getElementById('root')
-if (rootElement) {
-	const root = ReactDOM.createRoot(rootElement)
-	root.render(<Root />)
-}
+createRoot(document.getElementById('root')!).render(<Root />)
+

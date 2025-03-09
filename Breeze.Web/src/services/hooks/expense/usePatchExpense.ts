@@ -1,12 +1,11 @@
-import { useMutation } from 'react-query';
-import { useCallback } from 'react';
-import { Expense, useExpenses } from './expenseServices';
-import { Category } from '../category/categoryServices';
+import { useMutation } from 'react-query'
+import { useCallback } from 'react'
+import { Expense, useExpenses } from './expenseServices'
 
 type PatchExpenseProps = {
-    onSuccess?: () => void;
-    onSettled?: () => void;
-};
+	onSuccess?: () => void
+	onSettled?: () => void
+}
 
 /**
  * A hook for patching an expense.
@@ -15,23 +14,23 @@ type PatchExpenseProps = {
  */
 
 type PatchExpenseMutationProps = {
-    category: Category;
-    expense: Expense;
+	budgetId: number
+	expense: Expense
 }
 
 /**
-* Mutation function for patching an expense.
-* @param props.category: The category to patch the expense from.
-* @param props.expense: The expense to patch.
-*/
+ * Mutation function for patching an expense.
+ * @param props.budgetId: The budget Id of the expense to patch.
+ * @param props.expense: The expense to patch.
+ */
 
-export const usePatchExpense = ({onSuccess, onSettled}: PatchExpenseProps) => {
-  const { patchExpense } = useExpenses();
+export const usePatchExpense = ({ onSuccess, onSettled }: PatchExpenseProps) => {
+	const { patchExpense } = useExpenses()
 
-  const mutationFn = useCallback(({category, expense}: PatchExpenseMutationProps) => patchExpense(category, expense), [patchExpense]);
+	const mutationFn = useCallback(({ budgetId, expense }: PatchExpenseMutationProps) => patchExpense(budgetId, expense), [patchExpense])
 
-  return useMutation(mutationFn, {
-    onSuccess: onSuccess,
-    onSettled: onSettled,
-  });
-};
+	return useMutation(mutationFn, {
+		onSuccess: onSuccess,
+		onSettled: onSettled,
+	})
+}

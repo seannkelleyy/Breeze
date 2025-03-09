@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { Category } from '../category/categoryServices'
 import useHttp from '../useHttp'
 
@@ -17,13 +16,17 @@ export type Expense = {
 export const useExpenses = () => {
 	const { getMany, post, patch, deleteOne } = useHttp()
 
-	const getExpenses = async (category: Category): Promise<Expense[]> => await getMany<Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses`)
+	const getExpensesForCategory = async (category: Category): Promise<Expense[]> => await getMany<Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses`)
 
-	const postExpense = async (category: Category, expense: Expense): Promise<number> => post<number, Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses`, expense)
+	const getExpensesForBudget = async (budgetId: number): Promise<Expense[]> => await getMany<Expense>(`budgets/${budgetId}/expenses`)
 
-	const patchExpense = async (category: Category, expense: Expense): Promise<number> => patch<number, Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses`, expense)
+	const postExpense = async (budgetId: number, expense: Expense): Promise<number> => post<number, Expense>(`budgets/${budgetId}/categories/${expense.categoryId}/expenses`, expense)
 
-	const deleteExpense = async (category: Category, expense: Expense) => deleteOne<Expense>(`budgets/${category.budgetId}/categories/${category.id}/expenses/${expense.id}`)
+	const patchExpense = async (budgetId: number, expense: Expense): Promise<number> =>
+		patch<number, Expense>(`budgets/${budgetId}/categories/${expense.categoryId}/expenses`, expense)
 
-	return { getExpenses, postExpense, patchExpense, deleteExpense }
+	const deleteExpense = async (budgetId: number, expense: Expense) => deleteOne<Expense>(`budgets/${budgetId}/categories/${expense.categoryId}/expenses/${expense.id}`)
+
+	return { getExpensesForCategory, getExpensesForBudget, postExpense, patchExpense, deleteExpense }
 }
+

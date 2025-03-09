@@ -2,9 +2,12 @@
 using Breeze.Api.Goals.RequestResponseObjects;
 using Breeze.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Breeze.Api.Goals
 {
+    [Authorize]
     [ApiController]
     [Route("/users/{userId}/goals")]
     public class GoalController : ControllerBase
@@ -23,7 +26,7 @@ namespace Breeze.Api.Goals
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -43,7 +46,7 @@ namespace Breeze.Api.Goals
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -63,7 +66,7 @@ namespace Breeze.Api.Goals
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());
@@ -83,7 +86,7 @@ namespace Breeze.Api.Goals
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+                var userId = User.GetObjectId();
                 if (userId == null)
                 {
                     _logger.LogError(User.ToString());

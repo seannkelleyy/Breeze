@@ -6,7 +6,6 @@ type FetchGoalProps = {
 	userId: string
 }
 
-
 /**
  * A hook for fetching goal data.
  * @param props.userId: The user id to fetch goals from.
@@ -20,6 +19,9 @@ export const useFetchGoals = ({ userId }: FetchGoalProps) => {
 
 	return useQuery<Goal[], Error>(['goals', userId], fetchGoals, {
 		refetchInterval: 180 * 1000,
-		retryDelay: 10 * 1000,
+		retryDelay: 1 * 1000,
+		retry: 3,
+		enabled: true,
 	})
 }
+
