@@ -8,7 +8,7 @@ const DesktopNavigation = () => {
 	return (
 		<section
 			title='navigation'
-			className='hidden sm:flex fixed top-0 w-full h-16 px-4 justify-between backdrop-blur-lg bg-white/2 z-10'
+			className='hidden sm:flex fixed top-0 w-full h-16 px-4 justify-between backdrop-blur-lg bg-white/2 z-10 items-center'
 		>
 			<div className='flex justify-start items-center gap-2'>
 				<img
@@ -39,6 +39,9 @@ const DesktopNavigation = () => {
 					</a>
 				</Button>
 			</div>
+			<h1 className='font-thin text-3xl'>
+				<u>Breeze</u>
+			</h1>
 			<div className='flex justify-end items-center gap-2'>
 				<Button variant='ghost'>
 					<a
