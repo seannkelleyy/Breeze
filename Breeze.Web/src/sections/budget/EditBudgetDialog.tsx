@@ -185,20 +185,15 @@ export const EditBudgetDialog = () => {
 							<DialogDescription>Edit and add your estimated incomes and expenses.</DialogDescription>
 							<h1 className='text-lg font-bold'>
 								Total Budget: $
-								{
-									<span className={totalIncome - totalExpenses >= 0 ? 'p-1 rounded-sm bg-success' : ' p-1 rounded-sm bg-destructive'}>
-										{(totalIncome - totalExpenses).toFixed(2)}
-									</span>
-								}
+								{<span className={totalIncome - totalExpenses >= 0 ? 'p-1 rounded-sm bg-success' : ' p-1 rounded-sm bg-destructive'}>{totalIncome - totalExpenses}</span>}
 							</h1>
-							<DialogDescription>Ideally this number will be 0. </DialogDescription>
 						</DialogHeader>
-						<div
+						<section
 							title='Budget Incomes'
 							className='grid gap-2 py-4 mt-2'
 						>
 							<h2 className='text-xl font-bold'>Estimated Incomes</h2>
-							<h3 className='font-bold'>Total Income: ${Number(totalIncome).toFixed(2)}</h3>
+							<h3 className='font-bold'>Total Income: ${totalIncome}</h3>
 							{form.watch('incomes').map((_, index) => (
 								<BudgetIncomeItem
 									index={index}
@@ -219,13 +214,13 @@ export const EditBudgetDialog = () => {
 							>
 								Add Income
 							</Button>
-						</div>
-						<div
+						</section>
+						<section
 							title='Budget Expenses'
 							className='grid gap-2 py-4 mt-2'
 						>
 							<h2 className='text-xl font-bold'>Estimated Expenses</h2>
-							<h3 className='font-bold'>Total Expenses: ${Number(totalExpenses).toFixed(2)}</h3>
+							<h3 className='font-bold'>Total Expenses: ${totalExpenses}</h3>
 							{form.watch('categories').map((_, index) => (
 								<BudgetExpenseItem
 									index={index}
@@ -245,7 +240,7 @@ export const EditBudgetDialog = () => {
 							>
 								Add Expense
 							</Button>
-						</div>
+						</section>
 						<DialogFooter>
 							<Button type='submit'>Save Budget</Button>
 						</DialogFooter>

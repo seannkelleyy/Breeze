@@ -39,7 +39,7 @@ const DesktopNavigation = () => {
 					</a>
 				</Button>
 			</div>
-			<div className='flex justify-end items-center'>
+			<div className='flex justify-end items-center gap-2'>
 				<Button variant='ghost'>
 					<a
 						href='https://github.com/seannkelleyy'

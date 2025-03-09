@@ -31,7 +31,10 @@ type BudgetExpenseItemProps = {
 
 export const BudgetExpenseItem = ({ index, form, deleteCategory }: BudgetExpenseItemProps) => {
 	return (
-		<div className='flex gap-2 items-center'>
+		<section
+			className='flex gap-2 items-center'
+			title='Budget Expense'
+		>
 			<FormField
 				control={form.control}
 				name={`categories.${index}.name`}
@@ -71,7 +74,7 @@ export const BudgetExpenseItem = ({ index, form, deleteCategory }: BudgetExpense
 				}
 				onDelete={() => deleteCategory(index)}
 			/>
-		</div>
+		</section>
 	)
 }
 

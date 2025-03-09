@@ -86,7 +86,6 @@ export const CreateBudgetDialog = () => {
 		values.incomes.forEach((income) => {
 			postIncomeMutation.mutate({ income })
 		})
-
 		setOpen(false)
 	}
 
@@ -150,7 +149,7 @@ export const CreateBudgetDialog = () => {
 							</h1>
 							<DialogDescription>Ideally this number will be 0. </DialogDescription>
 						</DialogHeader>
-						<div
+						<section
 							title='Budget Incomes'
 							className='grid gap-2 py-4 mt-2'
 						>
@@ -176,8 +175,8 @@ export const CreateBudgetDialog = () => {
 							>
 								Add Income
 							</Button>
-						</div>
-						<div
+						</section>
+						<section
 							title='Budget Expenses'
 							className='grid gap-2 py-4 mt-2'
 						>
@@ -202,7 +201,7 @@ export const CreateBudgetDialog = () => {
 							>
 								Add Expense
 							</Button>
-						</div>
+						</section>
 						<DialogFooter>
 							<Button type='submit'>Save Budget</Button>
 						</DialogFooter>

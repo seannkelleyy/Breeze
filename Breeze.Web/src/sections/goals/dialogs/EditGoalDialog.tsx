@@ -65,7 +65,10 @@ export const EditGoalDialog = ({ goal, refetchGoals }: GoalItemDialogProps) => {
 				</DialogTrigger>
 				<DialogContent>
 					<Form {...form}>
-						<form onSubmit={form.handleSubmit(onSubmit)}>
+						<form
+							onSubmit={form.handleSubmit(onSubmit)}
+							className='space-y-2'
+						>
 							<DialogHeader>
 								<DialogTitle>Edit Goal</DialogTitle>
 								<DialogDescription>Make changes to your goal here. Click 'Save Changes' when you’re done.</DialogDescription>

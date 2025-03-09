@@ -30,7 +30,10 @@ type BudgetIncomeItemProps = {
 }
 export const BudgetIncomeItem = ({ index, form, deleteIncome }: BudgetIncomeItemProps) => {
 	return (
-		<div className='flex gap-2 items-center'>
+		<section
+			className='flex gap-2 items-center'
+			title='Budget Income'
+		>
 			<FormField
 				control={form.control}
 				name={`incomes.${index}.name`}
@@ -80,7 +83,7 @@ export const BudgetIncomeItem = ({ index, form, deleteIncome }: BudgetIncomeItem
 				additionalText={`You are about to delete the income: ${form.getValues().incomes[index].name}`}
 				onDelete={() => deleteIncome(index)}
 			/>
-		</div>
+		</section>
 	)
 }
 

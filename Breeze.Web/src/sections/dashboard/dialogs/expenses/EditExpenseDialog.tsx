@@ -84,94 +84,95 @@ export const EditExpenseDialog = ({ existingExpense }: EditExpenseDialogProps) =
 			</DialogTrigger>
 			<DialogContent className='sm:max-w-[425px]'>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)}>
+					<form
+						onSubmit={form.handleSubmit(onSubmit)}
+						className='space-y-2'
+					>
 						<DialogHeader>
 							<DialogTitle>Edit Expense</DialogTitle>
 							<DialogDescription>Make changes to your expense here. Click save when you're done.</DialogDescription>
 						</DialogHeader>
-						<div className='grid gap-4 py-4'>
-							<FormField
-								control={form.control}
-								name='name'
-								render={({ field }) => (
-									<FormItem className='grid grid-cols-4 items-center gap-4'>
-										<FormLabel className='text-right'>Name</FormLabel>
-										<FormControl>
-											<Input
-												id='name'
-												type='text'
-												{...field}
-												className='col-span-3'
-											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='categoryId'
-								render={({ field }) => (
-									<FormItem className='grid grid-cols-4 items-center gap-4'>
-										<FormLabel className='text-right'>Category</FormLabel>
-										<FormControl>
-											<Select
-												value={field.value?.toString() || ''}
-												onValueChange={(value) => field.onChange(Number(value))}
-											>
-												<SelectTrigger className='col-span-3'>
-													<SelectValue>{categories.find((category) => category.id === field.value)?.name || 'Select a category'}</SelectValue>
-												</SelectTrigger>
-												<SelectContent className='bg-background'>
-													{categories.map((category) => (
-														<SelectItem
-															key={category.id}
-															value={String(category.id)}
-														>
-															{category.name}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
+						<FormField
+							control={form.control}
+							name='name'
+							render={({ field }) => (
+								<FormItem className='grid grid-cols-4 items-center gap-4'>
+									<FormLabel className='text-right'>Name</FormLabel>
+									<FormControl>
+										<Input
+											id='name'
+											type='text'
+											{...field}
+											className='col-span-3'
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='categoryId'
+							render={({ field }) => (
+								<FormItem className='grid grid-cols-4 items-center gap-4'>
+									<FormLabel className='text-right'>Category</FormLabel>
+									<FormControl>
+										<Select
+											value={field.value?.toString() || ''}
+											onValueChange={(value) => field.onChange(Number(value))}
+										>
+											<SelectTrigger className='col-span-3'>
+												<SelectValue>{categories.find((category) => category.id === field.value)?.name || 'Select a category'}</SelectValue>
+											</SelectTrigger>
+											<SelectContent className='bg-background'>
+												{categories.map((category) => (
+													<SelectItem
+														key={category.id}
+														value={String(category.id)}
+													>
+														{category.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
 
-							<FormField
-								control={form.control}
-								name='amount'
-								render={({ field }) => (
-									<FormItem className='grid grid-cols-4 items-center gap-4'>
-										<FormLabel className='text-right'>Amount</FormLabel>
-										<FormControl>
-											<Input
-												id='amount'
-												type='number'
-												{...field}
-												className='col-span-3'
-											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='date'
-								render={({ field }) => (
-									<FormItem className='grid grid-cols-4 items-center gap-4'>
-										<FormLabel className='text-right'>Date</FormLabel>
-										<FormControl>
-											<Input
-												id='date'
-												type='date'
-												{...field}
-												className='col-span-3'
-											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-						</div>
+						<FormField
+							control={form.control}
+							name='amount'
+							render={({ field }) => (
+								<FormItem className='grid grid-cols-4 items-center gap-4'>
+									<FormLabel className='text-right'>Amount</FormLabel>
+									<FormControl>
+										<Input
+											id='amount'
+											type='number'
+											{...field}
+											className='col-span-3'
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='date'
+							render={({ field }) => (
+								<FormItem className='grid grid-cols-4 items-center gap-4'>
+									<FormLabel className='text-right'>Date</FormLabel>
+									<FormControl>
+										<Input
+											id='date'
+											type='date'
+											{...field}
+											className='col-span-3'
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
 						<DialogFooter className='flex items-center'>
 							<DeleteConfirmationDialog
 								onDelete={() => deleteMutation.mutate({ budgetId: budget.id, expense: existingExpense })}

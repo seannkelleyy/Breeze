@@ -146,7 +146,10 @@ export function ExpensesTable() {
 			title='Expenses'
 			className='w-full'
 		>
-			<div className='flex flex-wrap gap-2 pb-2'>
+			<section
+				className='flex flex-wrap gap-2 pb-2'
+				title='Filter Categories'
+			>
 				{['All', ...uniqueCategories].map((category) => {
 					const isActive = activeCategory === category || (category === 'All' && activeCategory === '')
 					return (
@@ -160,7 +163,7 @@ export function ExpensesTable() {
 						</Button>
 					)
 				})}
-			</div>
+			</section>
 			<Input
 				placeholder='Filter names...'
 				value={nameFilter}
@@ -171,7 +174,10 @@ export function ExpensesTable() {
 					table.getColumn('name')?.setFilterValue(value)
 				}}
 			/>
-			<div className='max-h-96 overflow-auto rounded-md border'>
+			<section
+				className='max-h-96 overflow-auto rounded-md border'
+				title='Expenses Table'
+			>
 				<Table className='w-full table-fixed'>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -221,7 +227,7 @@ export function ExpensesTable() {
 						)}
 					</TableBody>
 				</Table>
-			</div>
+			</section>
 		</section>
 	)
 }

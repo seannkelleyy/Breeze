@@ -126,7 +126,10 @@ export function IncomeTable() {
 				onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
 				className='w-full my-2'
 			/>
-			<div className='max-h-96 overflow-auto rounded-md border'>
+			<section
+				className='max-h-96 overflow-auto rounded-md border'
+				title='Incomes Table'
+			>
 				<Table className='w-full table-fixed'>
 					<TableHeader className='w-full'>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -161,7 +164,7 @@ export function IncomeTable() {
 						)}
 					</TableBody>
 				</Table>
-			</div>
+			</section>
 		</section>
 	)
 }

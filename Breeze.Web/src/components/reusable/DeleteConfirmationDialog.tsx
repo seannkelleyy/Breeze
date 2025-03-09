@@ -10,6 +10,14 @@ type DeleteConfirmationDialogProps = {
 	onDelete: () => void
 }
 
+/// A dialog that prompts the user to confirm deletion of an item.
+///
+/// @param itemType - The type of item being deleted.
+/// @param additionalText - Additional text to display in the dialog.
+/// @param onDelete - The function to call when the user confirms deletion.
+///
+/// @returns The delete confirmation dialog.
+///
 export const DeleteConfirmationDialog = ({ itemType, additionalText, onDelete }: DeleteConfirmationDialogProps) => {
 	const [open, onOpenChange] = useState(false)
 

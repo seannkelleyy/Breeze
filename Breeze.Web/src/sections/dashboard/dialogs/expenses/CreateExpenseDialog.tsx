@@ -69,96 +69,97 @@ export const CreateExpenseDialog = () => {
 			<Button onClick={() => setOpen(true)}>Add Expense</Button>
 			<DialogContent className='sm:max-w-[425px]'>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)}>
+					<form
+						onSubmit={form.handleSubmit(onSubmit)}
+						className='space-y-2'
+					>
 						<DialogHeader>
 							<DialogTitle>Create Expense</DialogTitle>
 							<DialogDescription>Add a new expense entry. Click save when you're done.</DialogDescription>
 						</DialogHeader>
-						<div className='grid gap-4 py-4'>
-							<FormField
-								control={form.control}
-								name='name'
-								render={({ field }) => (
-									<FormItem className='grid grid-cols-4 items-center gap-4'>
-										<FormLabel className='text-right'>Name</FormLabel>
-										<FormControl>
-											<Input
-												id='name'
-												type='text'
-												{...field}
-												className='col-span-3'
-											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='categoryId'
-								render={({ field }) => (
-									<FormItem className='grid grid-cols-4 items-center gap-4'>
-										<FormLabel className='text-right'>Category</FormLabel>
-										<FormControl>
-											<Select
-												{...field}
-												value={field.value.toString()}
-												onValueChange={(value) => field.onChange(Number(value))}
-											>
-												<SelectTrigger className='col-span-3'>
-													<SelectValue>{categories.find((category) => category.id === field.value)?.name}</SelectValue>
-												</SelectTrigger>
-												<SelectContent className='bg-background'>
-													{categories.map((category, index) => (
-														<div key={category.id}>
-															<SelectItem
-																value={String(category.id)}
-																className={`hover:cursor-pointer hover:bg-accent hover:text-white w-full ${index < categories.length - 1 ? 'border-b' : ''}`}
-															>
-																{category.name}
-															</SelectItem>
-														</div>
-													))}
-												</SelectContent>
-											</Select>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='amount'
-								render={({ field }) => (
-									<FormItem className='grid grid-cols-4 items-center gap-4'>
-										<FormLabel className='text-right'>Amount</FormLabel>
-										<FormControl>
-											<Input
-												id='amount'
-												type='number'
-												{...field}
-												className='col-span-3'
-											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='date'
-								render={({ field }) => (
-									<FormItem className='grid grid-cols-4 items-center gap-4'>
-										<FormLabel className='text-right'>Date</FormLabel>
-										<FormControl>
-											<Input
-												id='date'
-												type='date'
-												{...field}
-												className='col-span-3'
-											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-						</div>
+						<FormField
+							control={form.control}
+							name='name'
+							render={({ field }) => (
+								<FormItem className='grid grid-cols-4 items-center gap-4'>
+									<FormLabel className='text-right'>Name</FormLabel>
+									<FormControl>
+										<Input
+											id='name'
+											type='text'
+											{...field}
+											className='col-span-3'
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='categoryId'
+							render={({ field }) => (
+								<FormItem className='grid grid-cols-4 items-center gap-4'>
+									<FormLabel className='text-right'>Category</FormLabel>
+									<FormControl>
+										<Select
+											{...field}
+											value={field.value.toString()}
+											onValueChange={(value) => field.onChange(Number(value))}
+										>
+											<SelectTrigger className='col-span-3'>
+												<SelectValue>{categories.find((category) => category.id === field.value)?.name}</SelectValue>
+											</SelectTrigger>
+											<SelectContent className='bg-background'>
+												{categories.map((category, index) => (
+													<div key={category.id}>
+														<SelectItem
+															value={String(category.id)}
+															className={`hover:cursor-pointer hover:bg-accent hover:text-white w-full ${index < categories.length - 1 ? 'border-b' : ''}`}
+														>
+															{category.name}
+														</SelectItem>
+													</div>
+												))}
+											</SelectContent>
+										</Select>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='amount'
+							render={({ field }) => (
+								<FormItem className='grid grid-cols-4 items-center gap-4'>
+									<FormLabel className='text-right'>Amount</FormLabel>
+									<FormControl>
+										<Input
+											id='amount'
+											type='number'
+											{...field}
+											className='col-span-3'
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='date'
+							render={({ field }) => (
+								<FormItem className='grid grid-cols-4 items-center gap-4'>
+									<FormLabel className='text-right'>Date</FormLabel>
+									<FormControl>
+										<Input
+											id='date'
+											type='date'
+											{...field}
+											className='col-span-3'
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
 						<DialogFooter>
 							<Button type='submit'>Create Expense</Button>
 						</DialogFooter>

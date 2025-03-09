@@ -60,32 +60,33 @@ export const CreateGoalDialog = ({ refetchGoals }: GoalDialogProps) => {
 			</Button>
 			<DialogContent className='sm:max-w-[425px]'>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)}>
+					<form
+						onSubmit={form.handleSubmit(onSubmit)}
+						className='space-y-2'
+					>
 						<DialogHeader>
 							<DialogTitle>Create Goal</DialogTitle>
 							<DialogDescription>Create a new goal. Click save when you're done.</DialogDescription>
 						</DialogHeader>
-						<div className='grid gap-4 py-4'>
-							<FormItem>
-								<FormField
-									control={form.control}
-									name='description'
-									render={({ field }) => (
-										<FormItem className='grid grid-cols-4 items-center gap-4'>
-											<FormLabel className='text-right'>Goal</FormLabel>
-											<FormControl>
-												<Input
-													id='description'
-													type='text'
-													{...field}
-													className='col-span-3'
-												/>
-											</FormControl>
-										</FormItem>
-									)}
-								/>
-							</FormItem>
-						</div>
+						<FormItem>
+							<FormField
+								control={form.control}
+								name='description'
+								render={({ field }) => (
+									<FormItem className='grid grid-cols-4 items-center gap-4'>
+										<FormLabel className='text-right'>Goal</FormLabel>
+										<FormControl>
+											<Input
+												id='description'
+												type='text'
+												{...field}
+												className='col-span-3'
+											/>
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+						</FormItem>
 						<DialogFooter>
 							<Button type='submit'>Create Goal</Button>
 						</DialogFooter>

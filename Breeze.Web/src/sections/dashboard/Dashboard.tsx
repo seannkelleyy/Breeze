@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { Card } from '../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
@@ -9,40 +10,64 @@ import { ExpensesTable } from './dataTables/ExpenseTable'
 import dayjs from 'dayjs'
 import { EditBudgetDialog } from '../budget/EditBudgetDialog'
 import { CreateExpenseDialog } from './dialogs/expenses/CreateExpenseDialog'
+import { Button } from '../../components/ui/button'
+import { MoveLeft, MoveRight } from 'lucide-react'
 
 export const Dashboard = () => {
 	const { budget, getBudgetForDate } = useBudgetContext()
-	const today = new Date()
+	const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()) // Track the current month
+	const [currentYear, setCurrentYear] = useState(new Date().getFullYear()) // Track the current year
+
+	useEffect(() => {
+		getBudgetForDate(currentYear, currentMonth)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentMonth, currentYear])
 
 	const getNextBudget = () => {
-		if (today.getMonth() === 11) {
-			getBudgetForDate(today.getFullYear() + 1, 0)
+		if (currentMonth === 11) {
+			setCurrentMonth(0)
+			setCurrentYear(currentYear + 1)
 		} else {
-			getBudgetForDate(today.getFullYear(), today.getMonth() + 1)
+			setCurrentMonth(currentMonth + 1)
 		}
 	}
 
 	const getPreviousBudget = () => {
-		if (today.getMonth() === 0) {
-			getBudgetForDate(today.getFullYear() - 1, 11)
+		if (currentMonth === 0) {
+			setCurrentMonth(11)
+			setCurrentYear(currentYear - 1)
 		} else {
-			getBudgetForDate(today.getFullYear(), today.getMonth() - 1)
+			setCurrentMonth(currentMonth - 1)
 		}
 	}
 
-	const budgetDifference = parseFloat((budget?.monthlyIncome - budget?.monthlyExpenses).toFixed(2)) ?? 'Loading...'
+	const budgetDifference = (budget?.monthlyIncome ?? 0) - (budget?.monthlyExpenses ?? 0)
 
 	return (
 		<Card className='absolute left-1/2 transform -translate-x-1/2 overflow-x-hidden flex flex-col gap-1 justify-start items-center p-4'>
-			<h1 className='text-3xl font-bold'>{dayjs(budget?.date).format('MMMM YYYY')}</h1>
+			<div className='flex gap-4 mb-4'>
+				<Button
+					onClick={getPreviousBudget}
+					title='Previous Month'
+				>
+					<MoveLeft />
+				</Button>
+				<h1 className='text-3xl font-bold'>{dayjs(new Date(currentYear, currentMonth)).format('MMMM YYYY')}</h1>
+				<Button
+					onClick={getNextBudget}
+					title='Next Month'
+				>
+					<MoveRight />
+				</Button>
+			</div>
 			<h2 className='text-lg'>
-				Income: $ <span className='text-accent'>{budget?.monthlyIncome?.toFixed(2) ?? 'Loading...'}</span>
+				Income: $ <span className='text-accent font-bold'>{budget?.monthlyIncome ?? 'Loading...'}</span>
 			</h2>
 			<h2 className='text-lg'>
-				Expenses: $ <span className='text-accent'>{budget?.monthlyExpenses?.toFixed(2) ?? 'Loading...'}</span>
+				Expenses: $ <span className='text-accent font-bold'>{budget?.monthlyExpenses ?? 'Loading...'}</span>
 			</h2>
 			<h2 className='text-lg'>
-				Difference: $ <span className={budgetDifference > 0 ? 'p-1 rounded-sm bg-success' : ' p-1 rounded-sm bg-destructive'}>{budgetDifference}</span>
+				Difference: $ <span className={budgetDifference >= 0 ? 'p-1 rounded-sm bg-success' : ' p-1 rounded-sm bg-destructive'}>{budgetDifference}</span>
 			</h2>
 			<div className='flex gap-4 pt-4'>
 				<CreateIncomeDialog />
