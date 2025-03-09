@@ -1,4 +1,3 @@
-import { useMsal } from '@azure/msal-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
@@ -23,11 +22,10 @@ type ExpenseDialogProps = {
 export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 	const [open, setOpen] = useState(false)
 	const { budget, categories, refetchCategories, refetchBudget, refetchExpenses } = useBudgetContext()
-	const currentUserAccount = useMsal().accounts[0]
 
 	const isEditing = Boolean(existingExpense)
 	const defaultExpense = existingExpense || {
-		userId: currentUserAccount.username,
+		userId: '',
 		categoryId: categories[0]?.id ?? 1,
 		name: '',
 		amount: 0,
@@ -81,7 +79,7 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 		if (isEditing) {
 			patchMutation.mutate({ budgetId: budget?.id, expense: { ...values } })
 		} else {
-			postMutation.mutate({ budgetId: budget?.id, expense: { ...values, userId: currentUserAccount.username } })
+			postMutation.mutate({ budgetId: budget?.id, expense: { ...values, userId: '' } })
 		}
 	}
 

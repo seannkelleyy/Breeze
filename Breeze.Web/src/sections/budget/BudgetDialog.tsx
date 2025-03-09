@@ -1,6 +1,5 @@
 import { Button } from '../../components/ui/button'
 import { useEffect, useState } from 'react'
-import { useMsal } from '@azure/msal-react'
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../components/ui/dialog'
 import { Form } from '../../components/ui/form'
@@ -43,7 +42,6 @@ const formSchema = z.object({
 
 export const BudgetDialog = () => {
 	const [open, setOpen] = useState(false)
-	const account = useMsal().accounts[0]
 	const { budget, categories, incomes, refetchCategories, refetchBudget, refetchIncomes } = useBudgetContext()
 
 	const form = useForm({
@@ -206,7 +204,7 @@ export const BudgetDialog = () => {
 								onClick={() => {
 									const updatedIncomes = [
 										...form.getValues().incomes,
-										{ id: -1, userId: account.homeAccountId, budgetId: budget.id, name: '', amount: 0, date: new Date().toISOString().split('T')[0] },
+										{ id: -1, userId: '', budgetId: budget.id, name: '', amount: 0, date: new Date().toISOString().split('T')[0] },
 									]
 									form.setValue('incomes', updatedIncomes, { shouldValidate: false })
 								}}
@@ -230,10 +228,7 @@ export const BudgetDialog = () => {
 							<Button
 								type='button'
 								onClick={() => {
-									const updatedCategories = [
-										...form.getValues().categories,
-										{ id: -1, userId: account.homeAccountId, name: '', budgetId: budget.id, currentSpend: 0, allocation: 0 },
-									]
+									const updatedCategories = [...form.getValues().categories, { id: -1, userId: '', name: '', budgetId: budget.id, currentSpend: 0, allocation: 0 }]
 									form.setValue('categories', updatedCategories, { shouldValidate: false })
 								}}
 							>

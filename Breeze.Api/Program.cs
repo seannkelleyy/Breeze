@@ -82,6 +82,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers();
+
+
 var app = builder.Build();
 
 app.UseSwagger();
@@ -95,6 +98,13 @@ else
 {
     app.UseCors("production");
 }
+
+builder.Services.AddLogging(options =>
+{
+    options.AddConsole();
+    options.AddDebug();
+});
+
 
 app.UseHttpsRedirection();
 

@@ -1,11 +1,9 @@
-import { useMsal } from '@azure/msal-react'
 import { useFetchGoals } from '../../services/hooks/goal/useFetchGoals'
 import { Card } from '../../components/ui/card'
 import { GoalDialog } from './GoalDialog'
 
 export const Goals = () => {
-	const account = useMsal().accounts[0]
-	const { data: goals, refetch, isLoading, isError } = useFetchGoals({ userId: account?.homeAccountId ?? '' })
+	const { data: goals, refetch, isLoading, isError } = useFetchGoals({ userId: '' })
 
 	if (goals) goals.sort((a, b) => (a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1))
 

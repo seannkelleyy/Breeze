@@ -1,4 +1,3 @@
-import { useMsal } from '@azure/msal-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
@@ -22,11 +21,10 @@ type IncomeDialogProps = {
 export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 	const [open, setOpen] = useState(false)
 	const { budget, refetchIncomes, refetchBudget } = useBudgetContext()
-	const currentUserAccount = useMsal().accounts[0]
 
 	const isEditing = !!existingIncome
 	const defaultIncome = existingIncome || {
-		userId: currentUserAccount.homeAccountId,
+		userId: '',
 		budgetId: budget?.id ?? -1,
 		name: '',
 		amount: 0,
@@ -77,7 +75,7 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 		if (isEditing) {
 			patchMutation.mutate({ income: { ...values } })
 		} else {
-			postMutation.mutate({ income: { ...values, budgetId: budget?.id, userId: currentUserAccount.homeAccountId } })
+			postMutation.mutate({ income: { ...values, userId: '' } })
 		}
 	}
 

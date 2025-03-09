@@ -1,4 +1,3 @@
-import { useMsal } from '@azure/msal-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
@@ -20,7 +19,6 @@ type GoalDialogProps = {
 }
 
 export const GoalDialog = ({ goal, refetchGoals }: GoalDialogProps) => {
-	const account = useMsal().accounts[0]
 	const [open, setOpen] = useState(false)
 
 	const isEditing = !!goal
@@ -62,12 +60,12 @@ export const GoalDialog = ({ goal, refetchGoals }: GoalDialogProps) => {
 				description: values.description,
 				isCompleted: values.isCompleted ?? false,
 			}
-			updateGoalMutation.mutate({ userId: account.homeAccountId, goal: goalToUpdate })
+			updateGoalMutation.mutate({ userId: '', goal: goalToUpdate })
 		} else {
 			postGoalMutation.mutate({
-				userId: account.username,
+				userId: '',
 				goal: {
-					userId: account.username,
+					userId: '',
 					description: values.description,
 					isCompleted: false,
 				},
@@ -125,7 +123,7 @@ export const GoalDialog = ({ goal, refetchGoals }: GoalDialogProps) => {
 							{isEditing && (
 								<DeleteConfirmationDialog
 									itemType='goal'
-									onDelete={() => deleteMutation.mutate({ userId: account.homeAccountId, goalId: goal!.id! })}
+									onDelete={() => deleteMutation.mutate({ userId: '', goalId: goal!.id! })}
 									additionalText={<p className='text-center'>Goal: {goal!.description}</p>}
 								/>
 							)}

@@ -1,4 +1,5 @@
-﻿using Breeze.Api.Categories;
+﻿using Breeze.Api.Budgets;
+using Breeze.Api.Categories;
 using Breeze.Api.Expenses.RequestResponseObjects;
 using Breeze.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -81,6 +82,7 @@ namespace Breeze.Api.Expenses
                     return BadRequest("Expenses not found");
                 }
                 categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenseList);
+
                 return Ok(response);
             }
             catch (Exception ex)
