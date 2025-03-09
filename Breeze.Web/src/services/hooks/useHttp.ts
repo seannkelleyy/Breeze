@@ -41,15 +41,13 @@ const useHttp = () => {
 		isFetching,
 	} = useQuery('accessToken', fetchToken, {
 		enabled: false,
-		refetchOnWindowFocus: false,
-		refetchOnReconnect: false,
+		refetchInterval: 1000 * 60 * 3,
+		retry: true,
+		retryDelay: 1000 * 5,
 		onSuccess: (token) => {
 			if (token) {
 				axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`
 			}
-		},
-		onError: (error) => {
-			console.error('Error fetching token:', error)
 		},
 	})
 

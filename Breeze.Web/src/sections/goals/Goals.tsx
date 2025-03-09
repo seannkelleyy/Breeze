@@ -17,7 +17,10 @@ export const Goals = () => {
 			<ul className='space-y-2'>
 				{goals ? (
 					goals.map((goal) => (
-						<li className='flex gap-2 items-center justify-between w-3/4 ml-auto mr-auto'>
+						<li
+							className='flex gap-2 items-center justify-between w-3/4 ml-auto mr-auto'
+							key={goal.id}
+						>
 							<p className='text-xl'>{goal.isCompleted ? <del>{goal.description}</del> : goal.description}</p>
 							<GoalDialog
 								goal={goal}

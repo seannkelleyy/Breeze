@@ -20,7 +20,8 @@ export const useFetchExpensesForBudget = ({ budgetId }: FetchExpensesForBudgetPr
 
 	return useQuery<Expense[], Error>(['expensesBudget', budgetId], fetchExpenses, {
 		refetchInterval: 180 * 1000,
-		retryDelay: 10 * 1000,
+		retryDelay: 1 * 1000,
+		retry: 3,
 	})
 }
 

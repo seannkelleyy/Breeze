@@ -21,7 +21,8 @@ export const useFetchExpensesForCategory = ({ category }: FetchExpensesForCatego
 
 	return useQuery<Expense[], Error>(['expensesCategory', category], fetchExpenses, {
 		refetchInterval: 180 * 1000,
-		retryDelay: 10 * 1000,
+		retryDelay: 1 * 1000,
+		retry: 3,
 	})
 }
 

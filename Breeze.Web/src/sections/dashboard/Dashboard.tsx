@@ -14,8 +14,8 @@ import { BudgetDialog } from '../budget/BudgetDialog'
 
 export const Dashboard = () => {
 	const { budget, getBudgetForDate } = useBudgetContext()
-	const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()) // Track the current month
-	const [currentYear, setCurrentYear] = useState(new Date().getFullYear()) // Track the current year
+	const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
+	const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
 
 	useEffect(() => {
 		getBudgetForDate(currentYear, currentMonth)
