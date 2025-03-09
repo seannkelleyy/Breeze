@@ -1,41 +1,42 @@
 import { Button } from '../../components/ui/button'
 import { useEffect, useState } from 'react'
 import { useMsal } from '@azure/msal-react'
-import { Input } from '../../components/ui/input'
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../components/ui/dialog'
-import { Form, FormControl, FormField, FormItem } from '../../components/ui/form'
+import { Form } from '../../components/ui/form'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { usePostCategory } from '../../services/hooks/category/usePostCategory'
-import { Trash } from 'lucide-react'
 import { usePatchCategory } from '../../services/hooks/category/usePatchCategory'
+import { usePostIncome } from '../../services/hooks/income/usePostIncome'
+import { usePatchIncome } from '../../services/hooks/income/usePatchIncome'
+import { useDeleteCategory } from '../../services/hooks/category/useDeleteCategory'
+import { useDeleteIncome } from '../../services/hooks/income/useDeleteIncome'
+import { BudgetExpenseItem } from './BudgetExpenseItem'
+import { BudgetIncomeItem } from './BudgetIncomeItem'
 
 const formSchema = z.object({
 	incomes: z.array(
 		z.object({
+			id: z.number().optional(),
+			userId: z.string(),
+			budgetId: z.number(),
 			name: z.string().min(1, 'Name is required'),
-			amount: z
-				.string()
-				.refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-					message: 'Amount must be greater than 0',
-				})
-				.transform((val) => parseFloat(val)),
+			amount: z.coerce.number().min(0, 'Amount must be greater than or equal to 0'),
+			date: z.string().refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
+				message: 'Invalid date format',
+			}),
 		}),
 	),
 	categories: z.array(
 		z.object({
+			id: z.number().optional(),
 			userId: z.string(),
 			name: z.string().min(1, 'Name is required'),
 			budgetId: z.number(),
 			currentSpend: z.number(),
-			allocation: z
-				.string()
-				.refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, {
-					message: 'Allocation must be non-negative',
-				})
-				.transform((val) => parseFloat(val)),
+			allocation: z.coerce.number().min(0, 'Allocation must be non-negative'),
 		}),
 	),
 })
@@ -43,63 +44,104 @@ const formSchema = z.object({
 export const EditBudgetDialog = () => {
 	const [open, setOpen] = useState(false)
 	const account = useMsal().accounts[0]
-	const { budget, categories, incomes, refetchCategories, refetchBudget } = useBudgetContext()
+	const { budget, categories, incomes, refetchCategories, refetchBudget, refetchIncomes } = useBudgetContext()
 
 	const form = useForm({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			incomes: incomes.length > 0 ? incomes.map((income) => ({ name: income.name, amount: income.amount })) : [{ name: '', amount: 0 }],
-			categories:
-				categories.length > 0
-					? categories.map((category) => ({
-							userId: account.homeAccountId,
-							name: category.name,
-							budgetId: budget.id,
-							currentSpend: category.currentSpend,
-							allocation: category.allocation,
-					  }))
-					: [{ userId: account.homeAccountId, name: '', budgetId: budget.id, currentSpend: 0, allocation: 0 }],
+			incomes: incomes.map((income) => ({
+				id: income.id,
+				userId: income.userId,
+				budgetId: income.budgetId,
+				name: income.name,
+				amount: income.amount,
+				date: income.date,
+			})),
+			categories: categories.map((category) => ({
+				id: category.id,
+				userId: category.userId,
+				name: category.name,
+				budgetId: category.budgetId,
+				currentSpend: category.currentSpend,
+				allocation: category.allocation,
+			})),
 		},
 	})
 
-	const postMutation = usePostCategory({
+	const postCategoryMutation = usePostCategory({
 		onSettled: () => {
 			refetchBudget()
 			refetchCategories()
 		},
 	})
 
-	const patchMutation = usePatchCategory({
+	const patchCategoryMutation = usePatchCategory({
 		onSettled: () => {
 			refetchBudget()
 			refetchCategories()
 		},
 	})
+
+	const deleteCategoryMutation = useDeleteCategory({
+		onSettled: () => refetchCategories(),
+	})
+
+	const postIncomeMutation = usePostIncome({
+		onSettled: () => {
+			refetchBudget()
+			refetchIncomes()
+		},
+	})
+
+	const patchIncomeMutation = usePatchIncome({
+		onSettled: () => {
+			refetchBudget()
+			refetchIncomes()
+		},
+	})
+
+	const deleteIncomeMutation = useDeleteIncome({
+		onSettled: () => refetchCategories(),
+	})
+
+	const handleDeleteCategory = (index: number) => {
+		const categoryToDelete = form.getValues().categories[index]
+		if (categoryToDelete.id !== -1) {
+			deleteCategoryMutation.mutate({ category: categoryToDelete })
+		}
+		const updatedCategories = form.getValues().categories.filter((_, i) => i !== index)
+		form.setValue('categories', updatedCategories)
+	}
+
+	const handleDeleteIncome = (index: number) => {
+		const incomeToDelete = form.getValues().incomes[index]
+		if (incomeToDelete.id !== -1) {
+			deleteIncomeMutation.mutate({ income: incomeToDelete })
+		}
+		const updatedIncomes = form.getValues().incomes.filter((_, i) => i !== index)
+		form.setValue('incomes', updatedIncomes)
+	}
 
 	const onSubmit = (values: z.infer<typeof formSchema>) => {
-		console.log('Budget Data:', values)
-
 		values.categories.forEach((category) => {
 			const existingCategory = categories.find((c) => c.name === category.name)
-
 			if (existingCategory) {
-				patchMutation.mutate({ category })
+				patchCategoryMutation.mutate({ category: category })
 			} else {
-				postMutation.mutate({ category })
+				postCategoryMutation.mutate({ category: category })
+			}
+		})
+
+		values.incomes.forEach((income) => {
+			const existingIncome = incomes.find((i) => i.id === income.id)
+			if (existingIncome) {
+				patchIncomeMutation.mutate({ income: income })
+			} else {
+				postIncomeMutation.mutate({ income: income })
 			}
 		})
 
 		setOpen(false)
-	}
-
-	const removeIncome = (index: number) => {
-		const incomes = form.getValues().incomes.filter((_, i) => i !== index)
-		form.setValue('incomes', incomes)
-	}
-
-	const removeCategory = (index: number) => {
-		const categories = form.getValues().categories.filter((_, i) => i !== index)
-		form.setValue('categories', categories)
 	}
 
 	const totalIncome = Number((form.getValues().incomes ?? []).reduce((sum, income) => sum + (Number(income.amount) || 0), 0))
@@ -109,17 +151,25 @@ export const EditBudgetDialog = () => {
 	useEffect(() => {
 		if (open && incomes.length > 0 && categories.length > 0) {
 			form.reset({
-				incomes: incomes.map((income) => ({ name: income.name, amount: income.amount })),
+				incomes: incomes.map((income) => ({
+					id: income.id,
+					userId: income.userId,
+					budgetId: income.budgetId,
+					name: income.name,
+					amount: income.amount,
+					date: income.date,
+				})),
 				categories: categories.map((category) => ({
-					userId: account.homeAccountId,
+					id: category.id,
+					userId: category.userId,
 					name: category.name,
-					budgetId: budget.id,
+					budgetId: category.budgetId,
 					currentSpend: category.currentSpend,
 					allocation: category.allocation,
 				})),
 			})
 		}
-	}, [open, incomes, categories, budget, form, account.homeAccountId])
+	}, [open, incomes, categories, budget, form])
 
 	return (
 		<Dialog
@@ -127,7 +177,7 @@ export const EditBudgetDialog = () => {
 			onOpenChange={setOpen}
 		>
 			<Button onClick={() => setOpen(true)}>Edit Budget</Button>
-			<DialogContent className='sm:max-w-[425px] max-h-[80vh] overflow-y-auto'>
+			<DialogContent className='max-h-[80vh] overflow-y-auto'>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<DialogHeader>
@@ -143,124 +193,55 @@ export const EditBudgetDialog = () => {
 							</h1>
 							<DialogDescription>Ideally this number will be 0. </DialogDescription>
 						</DialogHeader>
-						<div className='grid gap-2 py-4'>
+						<div
+							title='Budget Incomes'
+							className='grid gap-2 py-4 mt-2'
+						>
 							<h2 className='text-xl font-bold'>Estimated Incomes</h2>
 							<h3 className='font-bold'>Total Income: ${Number(totalIncome).toFixed(2)}</h3>
 							{form.watch('incomes').map((_, index) => (
-								<div
-									key={index}
-									className='flex gap-4 items-center'
-								>
-									<FormField
-										control={form.control}
-										name={`incomes.${index}.name`}
-										render={({ field }) => (
-											<FormItem>
-												<FormControl>
-													<Input
-														{...field}
-														placeholder='Income Name'
-													/>
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name={`incomes.${index}.amount`}
-										render={({ field }) => (
-											<FormItem>
-												<FormControl>
-													<Input
-														type='number'
-														{...field}
-														placeholder='Amount'
-														value={field.value === 0 ? '' : field.value}
-														onFocus={(e) => {
-															e.target.select()
-															if (e.target.value === '0') e.target.value = ''
-														}}
-														onBlur={(e) => {
-															if (e.target.value === '') e.target.value = '0'
-														}}
-													/>
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-									<Button
-										type='button'
-										variant='ghost'
-										onClick={() => removeIncome(index)}
-									>
-										<Trash />
-									</Button>
-								</div>
+								<BudgetIncomeItem
+									index={index}
+									form={form}
+									deleteIncome={handleDeleteIncome}
+								/>
 							))}
+
 							<Button
 								type='button'
-								onClick={() => form.setValue('incomes', [...form.getValues().incomes, { name: '', amount: 0 }])}
+								onClick={() => {
+									const updatedIncomes = [
+										...form.getValues().incomes,
+										{ id: -1, userId: account.homeAccountId, budgetId: budget.id, name: '', amount: 0, date: new Date().toISOString().split('T')[0] },
+									]
+									form.setValue('incomes', updatedIncomes, { shouldValidate: false })
+								}}
 							>
 								Add Income
 							</Button>
-							<h2 className='text-xl font-bold mt-2'>Estimated Expenses</h2>
+						</div>
+						<div
+							title='Budget Expenses'
+							className='grid gap-2 py-4 mt-2'
+						>
+							<h2 className='text-xl font-bold'>Estimated Expenses</h2>
 							<h3 className='font-bold'>Total Expenses: ${Number(totalExpenses).toFixed(2)}</h3>
 							{form.watch('categories').map((_, index) => (
-								<div
-									key={index}
-									className='flex gap-4 items-center'
-								>
-									<FormField
-										control={form.control}
-										name={`categories.${index}.name`}
-										render={({ field }) => (
-											<FormItem>
-												<FormControl>
-													<Input
-														{...field}
-														placeholder='Expense Name'
-													/>
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name={`categories.${index}.allocation`}
-										render={({ field }) => (
-											<FormItem>
-												<FormControl>
-													<Input
-														type='number'
-														{...field}
-														value={field.value === 0 ? '' : field.value}
-														placeholder='Amount'
-														onFocus={(e) => {
-															e.target.select()
-															if (e.target.value === '0') e.target.value = ''
-														}}
-														onBlur={(e) => {
-															if (e.target.value === '') e.target.value = '0'
-														}}
-													/>
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-									<Button
-										type='button'
-										variant='ghost'
-										onClick={() => removeCategory(index)}
-									>
-										<Trash />
-									</Button>
-								</div>
+								<BudgetExpenseItem
+									index={index}
+									form={form}
+									deleteCategory={handleDeleteCategory}
+								/>
 							))}
 							<Button
 								type='button'
-								onClick={() =>
-									form.setValue('categories', [...form.getValues().categories, { userId: account.homeAccountId, name: '', budgetId: budget.id, currentSpend: 0, allocation: 0 }])
-								}
+								onClick={() => {
+									const updatedCategories = [
+										...form.getValues().categories,
+										{ id: -1, userId: account.homeAccountId, name: '', budgetId: budget.id, currentSpend: 0, allocation: 0 },
+									]
+									form.setValue('categories', updatedCategories, { shouldValidate: false })
+								}}
 							>
 								Add Expense
 							</Button>

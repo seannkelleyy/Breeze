@@ -1,4 +1,5 @@
-﻿using Breeze.Api.Budgets;
+﻿using System.Threading.Tasks;
+using Breeze.Api.Budgets;
 using Breeze.Api.Categories.RequestResponseObjects;
 using Breeze.Api.Expenses;
 using Breeze.Data;
@@ -102,8 +103,8 @@ namespace Breeze.Api.Categories
             }
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteCategory(int categoryId)
+        [HttpDelete("{categoryId}")]
+        public async Task<IActionResult> DeleteCategory([FromRoute] int categoryId)
         {
             try
             {
@@ -120,7 +121,13 @@ namespace Breeze.Api.Categories
                     return NotFound("Category not found");
                 }
                 int budgetId = category.BudgetId;
+                expenses.DeleteExpenseForCategory(userId, categoryId);
                 var response = categories.DeleteCategoryById(userId, categoryId);
+                if (response < 0)
+                {
+                    _logger.LogError($"Failed to delete category {categoryId}");
+                    return BadRequest("Failed to delete category. Code: " + response);
+                }
                 var categoryList = categories.GetCategoriesByBudgetId(userId, budgetId);
                 if (categoryList == null)
                 {
@@ -128,7 +135,6 @@ namespace Breeze.Api.Categories
                     return BadRequest("Category list is null");
                 }
                 budgets.CalculateBudgetCategories(userId, budgetId, categoryList);
-                expenses.DeleteExpenseForCategory(userId, categoryId);
                 return Ok(response);
             }
             catch (Exception ex)

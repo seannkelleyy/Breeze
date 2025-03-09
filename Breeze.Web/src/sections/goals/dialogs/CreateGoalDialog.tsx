@@ -40,7 +40,6 @@ export const CreateGoalDialog = ({ refetchGoals }: GoalDialogProps) => {
 			},
 		})
 	}
-	console.log(form.control)
 	const postGoalMutation = usePostGoal({
 		onSettled: () => {
 			refetchGoals()

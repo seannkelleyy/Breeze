@@ -190,6 +190,7 @@ namespace Breeze.Api.Expenses
                 expense.Name = updatedExpense.Name;
                 expense.Date = updatedExpense.Date;
                 expense.Amount = updatedExpense.Amount;
+                expense.CategoryId = updatedExpense.CategoryId;
 
                 db.Expenses.Update(expense);
                 db.SaveChanges();

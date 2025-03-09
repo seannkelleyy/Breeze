@@ -13,10 +13,11 @@ import {
 import { Button } from '../../../components/ui/button'
 import { Input } from '../../../components/ui/input'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../../../components/ui/table'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu'
-import { ArrowUpDown, MoreHorizontal } from 'lucide-react'
+import { ArrowUpDown } from 'lucide-react'
 import { Expense } from '../../../services/hooks/expense/expenseServices'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
+import dayjs from 'dayjs'
+import { EditExpenseDialog } from '../dialogs/expenses/EditExpenseDialog'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const columns: ColumnDef<Expense>[] = [
@@ -65,12 +66,10 @@ export const columns: ColumnDef<Expense>[] = [
 				</Button>
 			)
 		},
-		cell: ({ row }) =>
-			new Date(row.getValue('date')).toLocaleDateString('en-US', {
-				year: 'numeric',
-				month: 'long',
-				day: 'numeric',
-			}),
+		cell: ({ row }) => {
+			const date = row.getValue('date') as string | number | Date | null | undefined
+			return dayjs(date).format('MMMM D, YYYY')
+		},
 	},
 	{
 		accessorKey: 'categoryId',
@@ -96,33 +95,11 @@ export const columns: ColumnDef<Expense>[] = [
 	{
 		id: 'actions',
 		cell: ({ row }) => {
-			const income = row.original
+			const expense = row.original
 
 			return (
 				<div className='flex justify-end'>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant='ghost'
-								className='h-8 w-8 p-0'
-							>
-								<MoreHorizontal />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent
-							align='end'
-							className='bg-background p-2 border border-border rounded-md'
-						>
-							<DropdownMenuItem
-								className='hover:cursor-pointer hover:bg-border rounded-md p-1'
-								onClick={() => navigator.clipboard.writeText(income.id?.toString() || '')}
-							>
-								Copy income ID
-							</DropdownMenuItem>
-							<DropdownMenuSeparator className='h-[1px] bg-border my-1' />
-							<DropdownMenuItem className='hover:cursor-pointer hover:bg-border rounded-md p-1'>View income details</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<EditExpenseDialog existingExpense={expense} />
 				</div>
 			)
 		},

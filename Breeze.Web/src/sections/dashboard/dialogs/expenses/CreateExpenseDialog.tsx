@@ -1,27 +1,22 @@
-import { Button } from '../../../components/ui/button'
-import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../components/ui/dialog'
-import { Input } from '../../../components/ui/input'
-import { Expense } from '../../../services/hooks/expense/expenseServices'
+import { Button } from '../../../../components/ui/button'
+import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../../components/ui/dialog'
+import { Input } from '../../../../components/ui/input'
 import { useMsal } from '@azure/msal-react'
 import { useState } from 'react'
-import { useBudgetContext } from '../../../services/providers/BudgetProvider'
-import { usePostExpense } from '../../../services/hooks/expense/usePostExpense'
+import { useBudgetContext } from '../../../../services/providers/BudgetProvider'
+import { usePostExpense } from '../../../../services/hooks/expense/usePostExpense'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../components/ui/form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
+import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../../components/ui/form'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../components/ui/select'
 
-type ExpenseDialogProps = {
-	existingExpense?: Expense
-}
-
-export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
+export const CreateExpenseDialog = () => {
 	const [open, setOpen] = useState(false)
 	const { budget, categories, refetchCategories, refetchBudget, refetchExpenses } = useBudgetContext()
 	const currentUserAccount = useMsal().accounts[0]
 
-	const expense = existingExpense ?? {
+	const expense = {
 		userId: currentUserAccount.username,
 		categoryId: categories[0]?.id ?? 1,
 		name: '',
@@ -30,18 +25,14 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 	}
 
 	const formSchema = z.object({
+		userId: z.string(),
 		name: z.string().min(1, {
 			message: 'Name is required',
 		}),
 		categoryId: z.number().min(1, {
 			message: 'Category is required',
 		}),
-		amount: z
-			.string()
-			.refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-				message: 'Amount must be greater than 0',
-			})
-			.transform((val) => parseFloat(val)),
+		amount: z.coerce.number().min(0, 'Amount must be greater than 0'),
 		date: z.string().refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
 			message: 'Invalid date format',
 		}),
@@ -56,6 +47,7 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 		onSettled: () => {
 			refetchBudget()
 			refetchCategories()
+			refetchExpenses()
 			setOpen(false)
 		},
 	})
@@ -67,7 +59,6 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 			userId: currentUserAccount.username,
 		}
 		postMutation.mutate({ budgetId: budget?.id, expense: expenseToSubmit })
-		refetchExpenses()
 	}
 
 	return (
@@ -80,10 +71,8 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<DialogHeader>
-							<DialogTitle>{expense ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
-							<DialogDescription>
-								{expense ? "Make changes to your expense here. Click save when you're done." : "Add a new expense entry. Click save when you're done."}
-							</DialogDescription>
+							<DialogTitle>Create Expense</DialogTitle>
+							<DialogDescription>Add a new expense entry. Click save when you're done.</DialogDescription>
 						</DialogHeader>
 						<div className='grid gap-4 py-4'>
 							<FormField
@@ -171,7 +160,7 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 							/>
 						</div>
 						<DialogFooter>
-							<Button type='submit'>{expense ? 'Save changes' : 'Add Expense'}</Button>
+							<Button type='submit'>Create Expense</Button>
 						</DialogFooter>
 					</form>
 				</Form>

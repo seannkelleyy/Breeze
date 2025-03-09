@@ -10,13 +10,14 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from '@tanstack/react-table'
-import { ArrowUpDown, MoreHorizontal } from 'lucide-react'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@radix-ui/react-dropdown-menu'
+import { ArrowUpDown } from 'lucide-react'
 import { Button } from '../../../components/ui/button'
 import { Input } from '../../../components/ui/input'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../../../components/ui/table'
 import { Income } from '../../../services/hooks/income/incomeServices'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
+import dayjs from 'dayjs'
+import { EditIncomeDialog } from '../dialogs/incomes/EditIncomeDialog'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const columns: ColumnDef<Income>[] = [
@@ -70,8 +71,8 @@ export const columns: ColumnDef<Income>[] = [
 			)
 		},
 		cell: ({ row }) => {
-			const date = new Date(row.getValue('date'))
-			return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+			const date = row.getValue('date') as string | number | Date | null | undefined
+			return dayjs(date).format('MMMM D, YYYY')
 		},
 	},
 	{
@@ -82,29 +83,7 @@ export const columns: ColumnDef<Income>[] = [
 
 			return (
 				<div className='flex justify-end'>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant='ghost'
-								className='h-8 w-8 p-0'
-							>
-								<MoreHorizontal />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent
-							align='end'
-							className='bg-background p-2 border border-border rounded-md'
-						>
-							<DropdownMenuItem
-								className='hover:cursor-pointer hover:bg-border rounded-md p-1'
-								onClick={() => navigator.clipboard.writeText(income.id?.toString() || '')}
-							>
-								Copy income ID
-							</DropdownMenuItem>
-							<DropdownMenuSeparator className='h-[1px] bg-border my-1' />
-							<DropdownMenuItem className='hover:cursor-pointer hover:bg-border rounded-md p-1'>View income details</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<EditIncomeDialog existingIncome={income} />
 				</div>
 			)
 		},

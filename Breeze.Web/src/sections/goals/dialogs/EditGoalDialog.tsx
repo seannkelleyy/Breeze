@@ -10,8 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../comp
 import { Goal } from '../../../services/hooks/goal/goalServices'
 import { usePatchGoal } from '../../../services/hooks/goal/usePatchGoal'
 import { useDeleteGoal } from '../../../services/hooks/goal/useDeleteGoal'
-import { Pencil, Trash } from 'lucide-react'
-import { ConfirmationModal } from '../../../components/reusable/ConfirmationModal'
+import { Pencil } from 'lucide-react'
+import { DeleteConfirmationDialog } from '../../../components/reusable/DeleteConfirmationDialog'
 
 type GoalItemDialogProps = {
 	goal: Goal
@@ -21,7 +21,6 @@ type GoalItemDialogProps = {
 export const EditGoalDialog = ({ goal, refetchGoals }: GoalItemDialogProps) => {
 	const account = useMsal().accounts[0]
 	const [open, setOpen] = useState(false)
-	const [deleteOpen, setDeleteOpen] = useState(false)
 
 	const formSchema = z.object({
 		description: z.string().min(1, {
@@ -89,12 +88,11 @@ export const EditGoalDialog = ({ goal, refetchGoals }: GoalItemDialogProps) => {
 								)}
 							/>
 							<DialogFooter className='flex justify-between items-center w-full'>
-								<Button
-									variant='destructive'
-									onClick={() => setDeleteOpen(true)}
-								>
-									<Trash />
-								</Button>
+								<DeleteConfirmationDialog
+									itemType='goal'
+									onDelete={() => deleteMutation.mutate({ userId: account.homeAccountId, goalId: goal.id! })}
+									additionalText={<p className='text-center'>Goal: {goal.description}</p>}
+								/>
 								<FormField
 									control={form.control}
 									name='isCompleted'
@@ -118,12 +116,6 @@ export const EditGoalDialog = ({ goal, refetchGoals }: GoalItemDialogProps) => {
 					</Form>
 				</DialogContent>
 			</Dialog>
-			<ConfirmationModal
-				itemType='goal'
-				open={deleteOpen}
-				onOpenChange={setDeleteOpen}
-				onDelete={() => deleteMutation.mutate({ userId: account.homeAccountId, goalId: goal.id! })}
-			/>
 		</>
 	)
 }
