@@ -1,6 +1,5 @@
 import { useMsal } from '@azure/msal-react'
 import { useFetchGoals } from '../../services/hooks/goal/useFetchGoals'
-import { GoalItem } from './GoalItem'
 import { Card } from '../../components/ui/card'
 import { GoalDialog } from './GoalDialog'
 
@@ -18,11 +17,13 @@ export const Goals = () => {
 			<ul className='space-y-2'>
 				{goals ? (
 					goals.map((goal) => (
-						<GoalItem
-							key={goal.id}
-							goal={goal}
-							refetchGoals={refetch}
-						/>
+						<li className='flex gap-2 items-center justify-between w-3/4 ml-auto mr-auto'>
+							<p className='text-xl'>{goal.isCompleted ? <del>{goal.description}</del> : goal.description}</p>
+							<GoalDialog
+								goal={goal}
+								refetchGoals={refetch}
+							/>
+						</li>
 					))
 				) : isLoading ? (
 					<li className='text-center'>Loading Goals...</li>

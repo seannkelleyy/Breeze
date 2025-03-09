@@ -2,16 +2,15 @@ import { useState, useEffect } from 'react'
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { Card } from '../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
-import { CreateIncomeDialog } from './dialogs/incomes/CreateIncomeDialog'
-import { CreateBudgetDialog } from '../budget/CreateBudgetDialog'
 import { Goals } from '../goals/Goals'
 import { IncomeTable } from './dataTables/IncomeTable'
 import { ExpensesTable } from './dataTables/ExpenseTable'
 import dayjs from 'dayjs'
-import { EditBudgetDialog } from '../budget/EditBudgetDialog'
-import { CreateExpenseDialog } from './dialogs/expenses/CreateExpenseDialog'
 import { Button } from '../../components/ui/button'
 import { MoveLeft, MoveRight } from 'lucide-react'
+import { IncomeDialog } from './dialogs/IncomeDialog'
+import { ExpenseDialog } from './dialogs/ExpenseDialog'
+import { BudgetDialog } from '../budget/BudgetDialog'
 
 export const Dashboard = () => {
 	const { budget, getBudgetForDate } = useBudgetContext()
@@ -70,9 +69,9 @@ export const Dashboard = () => {
 				Difference: $ <span className={budgetDifference >= 0 ? 'p-1 rounded-sm bg-success' : ' p-1 rounded-sm bg-destructive'}>{budgetDifference}</span>
 			</h2>
 			<div className='flex gap-4 pt-4'>
-				<CreateIncomeDialog />
-				<CreateExpenseDialog />
-				{budget ? <EditBudgetDialog /> : <CreateBudgetDialog />}
+				<IncomeDialog />
+				<ExpenseDialog />
+				<BudgetDialog />
 			</div>
 			<Goals />
 			<Tabs

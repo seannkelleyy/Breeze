@@ -8,7 +8,11 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { usePostCategory } from '../../services/hooks/category/usePostCategory'
+import { usePatchCategory } from '../../services/hooks/category/usePatchCategory'
 import { usePostIncome } from '../../services/hooks/income/usePostIncome'
+import { usePatchIncome } from '../../services/hooks/income/usePatchIncome'
+import { useDeleteCategory } from '../../services/hooks/category/useDeleteCategory'
+import { useDeleteIncome } from '../../services/hooks/income/useDeleteIncome'
 import { BudgetExpenseItem } from './BudgetExpenseItem'
 import { BudgetIncomeItem } from './BudgetIncomeItem'
 
@@ -19,7 +23,7 @@ const formSchema = z.object({
 			userId: z.string(),
 			budgetId: z.number(),
 			name: z.string().min(1, 'Name is required'),
-			amount: z.coerce.number().min(0, 'Amount must be greater than or equal to 0'),
+			amount: z.coerce.number().min(0, 'Amount must be greater than 0'),
 			date: z.string().refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
 				message: 'Invalid date format',
 			}),
@@ -37,7 +41,7 @@ const formSchema = z.object({
 	),
 })
 
-export const CreateBudgetDialog = () => {
+export const BudgetDialog = () => {
 	const [open, setOpen] = useState(false)
 	const account = useMsal().accounts[0]
 	const { budget, categories, incomes, refetchCategories, refetchBudget, refetchIncomes } = useBudgetContext()
@@ -71,6 +75,17 @@ export const CreateBudgetDialog = () => {
 		},
 	})
 
+	const patchCategoryMutation = usePatchCategory({
+		onSettled: () => {
+			refetchBudget()
+			refetchCategories()
+		},
+	})
+
+	const deleteCategoryMutation = useDeleteCategory({
+		onSettled: () => refetchCategories(),
+	})
+
 	const postIncomeMutation = usePostIncome({
 		onSettled: () => {
 			refetchBudget()
@@ -78,27 +93,55 @@ export const CreateBudgetDialog = () => {
 		},
 	})
 
-	const onSubmit = (values: z.infer<typeof formSchema>) => {
-		values.categories.forEach((category) => {
-			postCategoryMutation.mutate({ category })
-		})
+	const patchIncomeMutation = usePatchIncome({
+		onSettled: () => {
+			refetchBudget()
+			refetchIncomes()
+		},
+	})
 
-		values.incomes.forEach((income) => {
-			postIncomeMutation.mutate({ income })
-		})
-		setOpen(false)
+	const deleteIncomeMutation = useDeleteIncome({
+		onSettled: () => refetchCategories(),
+	})
+
+	const handleDeleteCategory = (index: number) => {
+		const categoryToDelete = form.getValues().categories[index]
+		if (categoryToDelete.id !== -1) {
+			deleteCategoryMutation.mutate({ category: categoryToDelete })
+		}
+		const updatedCategories = form.getValues().categories.filter((_, i) => i !== index)
+		form.setValue('categories', updatedCategories)
 	}
 
-	const removeIncome = (index: number) => {
-		const formIncomes = form.getValues().incomes
-		const updatedIncomes = formIncomes.filter((_, i) => i !== index)
+	const handleDeleteIncome = (index: number) => {
+		const incomeToDelete = form.getValues().incomes[index]
+		if (incomeToDelete.id !== -1) {
+			deleteIncomeMutation.mutate({ income: incomeToDelete })
+		}
+		const updatedIncomes = form.getValues().incomes.filter((_, i) => i !== index)
 		form.setValue('incomes', updatedIncomes)
 	}
 
-	const removeExpenseCategory = (index: number) => {
-		const formCategories = form.getValues().categories
-		const updatedCategories = formCategories.filter((_, i) => i !== index)
-		form.setValue('categories', updatedCategories)
+	const onSubmit = (values: z.infer<typeof formSchema>) => {
+		values.categories.forEach((category) => {
+			const existingCategory = categories.find((c) => c.name === category.name)
+			if (existingCategory) {
+				patchCategoryMutation.mutate({ category: category })
+			} else {
+				postCategoryMutation.mutate({ category: category })
+			}
+		})
+
+		values.incomes.forEach((income) => {
+			const existingIncome = incomes.find((i) => i.id === income.id)
+			if (existingIncome) {
+				patchIncomeMutation.mutate({ income: income })
+			} else {
+				postIncomeMutation.mutate({ income: income })
+			}
+		})
+
+		setOpen(false)
 	}
 
 	const totalIncome = Number((form.getValues().incomes ?? []).reduce((sum, income) => sum + (Number(income.amount) || 0), 0))
@@ -138,28 +181,23 @@ export const CreateBudgetDialog = () => {
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<DialogHeader>
 							<DialogTitle className='text-2xl'>Edit Budget</DialogTitle>
-							<DialogDescription>Edit and add your estimated incomes and expenses.</DialogDescription>
+							<DialogDescription>Add and edit your estimated incomes and expenses.</DialogDescription>
 							<h1 className='text-lg font-bold'>
 								Total Budget: $
-								{
-									<span className={totalIncome - totalExpenses >= 0 ? 'p-1 rounded-sm bg-success' : ' p-1 rounded-sm bg-destructive'}>
-										{(totalIncome - totalExpenses).toFixed(2)}
-									</span>
-								}
+								{<span className={totalIncome - totalExpenses >= 0 ? 'p-1 rounded-sm bg-success' : ' p-1 rounded-sm bg-destructive'}>{totalIncome - totalExpenses}</span>}
 							</h1>
-							<DialogDescription>Ideally this number will be 0. </DialogDescription>
 						</DialogHeader>
 						<section
 							title='Budget Incomes'
 							className='grid gap-2 py-4 mt-2'
 						>
 							<h2 className='text-xl font-bold'>Estimated Incomes</h2>
-							<h3 className='font-bold'>Total Income: ${Number(totalIncome).toFixed(2)}</h3>
+							<h3 className='font-bold'>Total Income: ${totalIncome}</h3>
 							{form.watch('incomes').map((_, index) => (
 								<BudgetIncomeItem
 									index={index}
 									form={form}
-									deleteIncome={removeIncome}
+									deleteIncome={handleDeleteIncome}
 								/>
 							))}
 
@@ -181,12 +219,12 @@ export const CreateBudgetDialog = () => {
 							className='grid gap-2 py-4 mt-2'
 						>
 							<h2 className='text-xl font-bold'>Estimated Expenses</h2>
-							<h3 className='font-bold'>Total Expenses: ${Number(totalExpenses).toFixed(2)}</h3>
+							<h3 className='font-bold'>Total Expenses: ${totalExpenses}</h3>
 							{form.watch('categories').map((_, index) => (
 								<BudgetExpenseItem
 									index={index}
 									form={form}
-									deleteCategory={removeExpenseCategory}
+									deleteCategory={handleDeleteCategory}
 								/>
 							))}
 							<Button

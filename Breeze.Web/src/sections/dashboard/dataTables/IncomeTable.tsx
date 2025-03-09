@@ -17,7 +17,7 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '.
 import { Income } from '../../../services/hooks/income/incomeServices'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import dayjs from 'dayjs'
-import { EditIncomeDialog } from '../dialogs/incomes/EditIncomeDialog'
+import { IncomeDialog } from '../dialogs/IncomeDialog'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const columns: ColumnDef<Income>[] = [
@@ -83,7 +83,7 @@ export const columns: ColumnDef<Income>[] = [
 
 			return (
 				<div className='flex justify-end'>
-					<EditIncomeDialog existingIncome={income} />
+					<IncomeDialog existingIncome={income} />
 				</div>
 			)
 		},

@@ -17,7 +17,7 @@ import { ArrowUpDown } from 'lucide-react'
 import { Expense } from '../../../services/hooks/expense/expenseServices'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import dayjs from 'dayjs'
-import { EditExpenseDialog } from '../dialogs/expenses/EditExpenseDialog'
+import { ExpenseDialog } from '../dialogs/ExpenseDialog'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const columns: ColumnDef<Expense>[] = [
@@ -99,7 +99,7 @@ export const columns: ColumnDef<Expense>[] = [
 
 			return (
 				<div className='flex justify-end'>
-					<EditExpenseDialog existingExpense={expense} />
+					<ExpenseDialog existingExpense={expense} />
 				</div>
 			)
 		},

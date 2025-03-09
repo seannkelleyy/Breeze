@@ -1,47 +1,62 @@
-import { Button } from '../../../../components/ui/button'
-import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogTitle, DialogDescription, DialogTrigger } from '../../../../components/ui/dialog'
-import { Input } from '../../../../components/ui/input'
-import { Expense } from '../../../../services/hooks/expense/expenseServices'
-import { useState } from 'react'
-import { useBudgetContext } from '../../../../services/providers/BudgetProvider'
-import { z } from 'zod'
+import { useMsal } from '@azure/msal-react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../../components/ui/form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../components/ui/select'
 import { Pencil } from 'lucide-react'
-import { usePatchExpense } from '../../../../services/hooks/expense/usePatchExpense'
-import { useDeleteExpense } from '../../../../services/hooks/expense/useDeleteExpense'
-import { DeleteConfirmationDialog } from '../../../../components/reusable/DeleteConfirmationDialog'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { DeleteConfirmationDialog } from '../../../components/reusable/DeleteConfirmationDialog'
+import { Button } from '../../../components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../../../components/ui/dialog'
+import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../components/ui/form'
+import { Input } from '../../../components/ui/input'
+import { Expense } from '../../../services/hooks/expense/expenseServices'
+import { useDeleteExpense } from '../../../services/hooks/expense/useDeleteExpense'
+import { usePatchExpense } from '../../../services/hooks/expense/usePatchExpense'
+import { usePostExpense } from '../../../services/hooks/expense/usePostExpense'
+import { useBudgetContext } from '../../../services/providers/BudgetProvider'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
 
-type EditExpenseDialogProps = {
-	existingExpense: Expense
+type ExpenseDialogProps = {
+	existingExpense?: Expense
 }
 
-export const EditExpenseDialog = ({ existingExpense }: EditExpenseDialogProps) => {
+export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 	const [open, setOpen] = useState(false)
 	const { budget, categories, refetchCategories, refetchBudget, refetchExpenses } = useBudgetContext()
+	const currentUserAccount = useMsal().accounts[0]
 
-	const expense = { ...existingExpense, date: new Date(existingExpense.date).toISOString().split('T')[0] }
+	const isEditing = Boolean(existingExpense)
+	const defaultExpense = existingExpense || {
+		userId: currentUserAccount.username,
+		categoryId: categories[0]?.id ?? 1,
+		name: '',
+		amount: 0,
+		date: new Date().toISOString().split('T')[0],
+	}
 
 	const formSchema = z.object({
-		id: z.number(),
+		id: z.number().optional(),
 		userId: z.string(),
-		name: z.string().min(1, {
-			message: 'Name is required',
-		}),
-		categoryId: z.number().min(1, {
-			message: 'Category is required',
-		}),
-		amount: z.coerce.number().min(0, 'Amount must be greater than  0'),
+		name: z.string().min(1, { message: 'Name is required' }),
+		categoryId: z.number().min(1, { message: 'Category is required' }),
+		amount: z.coerce.number().min(0, 'Amount must be greater than 0'),
 		date: z.string().refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
 			message: 'Invalid date format',
 		}),
 	})
 
-	const form = useForm<z.infer<typeof formSchema>>({
+	const form = useForm({
 		resolver: zodResolver(formSchema),
-		defaultValues: expense,
+		defaultValues: defaultExpense,
+	})
+
+	const postMutation = usePostExpense({
+		onSettled: () => {
+			refetchBudget()
+			refetchCategories()
+			refetchExpenses()
+			setOpen(false)
+		},
 	})
 
 	const patchMutation = usePatchExpense({
@@ -63,12 +78,11 @@ export const EditExpenseDialog = ({ existingExpense }: EditExpenseDialogProps) =
 	})
 
 	const onSubmit = (values: z.infer<typeof formSchema>) => {
-		patchMutation.mutate({
-			budgetId: budget?.id,
-			expense: {
-				...values,
-			},
-		})
+		if (isEditing) {
+			patchMutation.mutate({ budgetId: budget?.id, expense: { ...values } })
+		} else {
+			postMutation.mutate({ budgetId: budget?.id, expense: { ...values, userId: currentUserAccount.username } })
+		}
 	}
 
 	return (
@@ -76,12 +90,16 @@ export const EditExpenseDialog = ({ existingExpense }: EditExpenseDialogProps) =
 			open={open}
 			onOpenChange={setOpen}
 		>
-			<DialogTrigger
-				onClick={() => setOpen(true)}
-				className='hover:cursor-pointer'
-			>
-				<Pencil />
-			</DialogTrigger>
+			{isEditing ? (
+				<DialogTrigger
+					onClick={() => setOpen(true)}
+					className='hover:cursor-pointer'
+				>
+					<Pencil />
+				</DialogTrigger>
+			) : (
+				<Button onClick={() => setOpen(true)}>Add Expense</Button>
+			)}
 			<DialogContent className='sm:max-w-[425px]'>
 				<Form {...form}>
 					<form
@@ -89,8 +107,8 @@ export const EditExpenseDialog = ({ existingExpense }: EditExpenseDialogProps) =
 						className='space-y-2'
 					>
 						<DialogHeader>
-							<DialogTitle>Edit Expense</DialogTitle>
-							<DialogDescription>Make changes to your expense here. Click save when you're done.</DialogDescription>
+							<DialogTitle>{isEditing ? 'Edit Expense' : 'Create Expense'}</DialogTitle>
+							<DialogDescription>{isEditing ? 'Make changes to your expense here.' : 'Add a new expense entry.'} Click save when you're done.</DialogDescription>
 						</DialogHeader>
 						<FormField
 							control={form.control}
@@ -100,8 +118,6 @@ export const EditExpenseDialog = ({ existingExpense }: EditExpenseDialogProps) =
 									<FormLabel className='text-right'>Name</FormLabel>
 									<FormControl>
 										<Input
-											id='name'
-											type='text'
 											{...field}
 											className='col-span-3'
 										/>
@@ -138,7 +154,6 @@ export const EditExpenseDialog = ({ existingExpense }: EditExpenseDialogProps) =
 								</FormItem>
 							)}
 						/>
-
 						<FormField
 							control={form.control}
 							name='amount'
@@ -147,10 +162,9 @@ export const EditExpenseDialog = ({ existingExpense }: EditExpenseDialogProps) =
 									<FormLabel className='text-right'>Amount</FormLabel>
 									<FormControl>
 										<Input
-											id='amount'
-											type='number'
 											{...field}
 											className='col-span-3'
+											type='number'
 										/>
 									</FormControl>
 								</FormItem>
@@ -164,22 +178,23 @@ export const EditExpenseDialog = ({ existingExpense }: EditExpenseDialogProps) =
 									<FormLabel className='text-right'>Date</FormLabel>
 									<FormControl>
 										<Input
-											id='date'
-											type='date'
 											{...field}
 											className='col-span-3'
+											type='date'
 										/>
 									</FormControl>
 								</FormItem>
 							)}
 						/>
 						<DialogFooter className='flex items-center'>
-							<DeleteConfirmationDialog
-								onDelete={() => deleteMutation.mutate({ budgetId: budget.id, expense: existingExpense })}
-								itemType={'Expense'}
-								additionalText={`You are about to delete the expense: ${existingExpense.name}`}
-							/>
-							<Button type='submit'>Save Changes</Button>
+							{isEditing && existingExpense && (
+								<DeleteConfirmationDialog
+									onDelete={() => deleteMutation.mutate({ budgetId: budget.id, expense: existingExpense })}
+									itemType='Expense'
+									additionalText={`You are about to delete the expense: ${existingExpense.name}`}
+								/>
+							)}
+							<Button type='submit'>{isEditing ? 'Save Changes' : 'Create Expense'}</Button>
 						</DialogFooter>
 					</form>
 				</Form>
