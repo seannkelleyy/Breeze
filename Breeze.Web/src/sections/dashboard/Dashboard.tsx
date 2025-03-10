@@ -43,7 +43,7 @@ export const Dashboard = () => {
 	const budgetDifference = (budget?.monthlyIncome ?? 0) - (budget?.monthlyExpenses ?? 0)
 
 	return (
-		<Card className='absolute left-1/2 transform -translate-x-1/2 overflow-x-hidden flex flex-col gap-1 justify-start items-center p-4 pt-30'>
+		<Card className='absolute left-1/2 transform -translate-x-1/2 overflow-x-hidden flex flex-col gap-1 justify-start items-center p-4 mt-30'>
 			<div className='flex gap-4 mb-4'>
 				<Button
 					onClick={getPreviousBudget}
