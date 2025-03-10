@@ -65,4 +65,4 @@ jobs:
         with:
           app-name: 'breeze-api'
           slot-name: 'Production'
-          package: ./Breeze.Api/bin/Release/net9.0/publish
+          package: .Breeze.Api
