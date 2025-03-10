@@ -7,42 +7,34 @@ export const AuthButton = () => {
 	const { instance, accounts } = useMsal()
 	const navigate = useNavigate()
 
-	if (accounts.length > 0) {
-		return (
-			<Button
-				onClick={() => {
-					instance
-						.logoutPopup()
-						.then(() => {
-							navigate('/')
-						})
-						.catch((error) => {
-							console.error('Logout failed', error)
-						})
-				}}
-			>
-				Log out
-			</Button>
-		)
+	const handleLogin = () => {
+		instance
+			.loginPopup(loginRequest)
+			.then((response) => {
+				if (response.account) {
+					navigate('/')
+				}
+			})
+			.catch((error) => {
+				console.error('Login failed', error)
+			})
 	}
 
-	return (
-		<Button
-			onClick={() => {
-				instance
-					.loginPopup(loginRequest)
-					.then((response) => {
-						if (response && response.account) {
-							navigate('/')
-						}
-					})
-					.catch((error) => {
-						console.error('Login failed', error)
-					})
-			}}
-		>
-			Log in
-		</Button>
-	)
+	const handleLogout = () => {
+		instance
+			.logoutPopup()
+			.then(() => {
+				navigate('/login')
+			})
+			.catch((error) => {
+				console.error('Logout failed', error)
+			})
+	}
+
+	if (accounts.length > 0) {
+		return <Button onClick={handleLogout}>Log out</Button>
+	}
+
+	return <Button onClick={handleLogin}>Log in</Button>
 }
 
