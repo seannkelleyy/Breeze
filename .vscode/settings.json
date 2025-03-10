@@ -1,7 +1,7 @@
 {
 	"appService.zipIgnorePattern": [".vscode{,/**}"],
 	"appService.defaultWebAppToDeploy": "None",
-	"appService.deploySubpath": "Breeze.Api/bin/Release/net8.0",
+	"appService.deploySubpath": "Breeze.Api/bin/Release/net9.0/publish",
 	"appService.showBuildDuringDeployPrompt": false,
 	"sqltools.connections": [
 		{

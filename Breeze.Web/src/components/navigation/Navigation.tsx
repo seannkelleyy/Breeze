@@ -1,8 +1,8 @@
 import { Github, Linkedin, Mail } from 'lucide-react'
 import { ModeToggle } from '../theme/ModeToggle'
-import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarSeparator } from '@radix-ui/react-menubar'
 import { Button } from '../ui/button'
 import { AuthButton } from '../auth/AuthButton'
+import { Menubar, MenubarContent, MenubarMenu, MenubarSeparator, MenubarTrigger } from '../ui/menubar'
 
 const DesktopNavigation = () => {
 	return (

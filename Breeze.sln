@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Breeze.Domain", "Breeze.Dom
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Breeze.Data", "Breeze.Data\Breeze.Data.csproj", "{90361944-4CD3-4D40-B1BC-97F942E93B91}"
 EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Breeze.Sql", "Breeze.Sql\Breeze.Sql.sqlproj", "{28722EA8-1C05-46B9-9EEA-02DBA7264E82}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F895DE08-0C51-4CCE-ABCF-CDE0D95E50E6}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
