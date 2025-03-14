@@ -24,6 +24,7 @@ namespace Breeze.Api.Categories
         /// <param name="logger">Logger for logging errors and information.</param>
         public CategoryService(IConfiguration config, BreezeContext dbContext, ILogger logger)
         {
+            budgets = new BudgetService(config, dbContext, logger);
             _config = config;
             _logger = logger;
             db = dbContext;

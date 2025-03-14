@@ -13,7 +13,6 @@ namespace Breeze.Api.Expenses
     [Route("/budgets/{budgetId}/categories/{categoryId}/expenses")]
     public class ExpenseController : ControllerBase
     {
-        private readonly BudgetService budgets;
         private readonly CategoryService categories;
         private readonly ExpenseService expenses;
         private readonly ILogger<ExpenseController> _logger;
