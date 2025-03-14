@@ -1,4 +1,5 @@
-﻿using Breeze.Api.Categories.RequestResponseObjects;
+﻿using Breeze.Api.Budgets;
+using Breeze.Api.Categories.RequestResponseObjects;
 using Breeze.Api.Expenses.RequestResponseObjects;
 using Breeze.Data;
 using Breeze.Domain;
@@ -10,6 +11,7 @@ namespace Breeze.Api.Categories
     /// </summary>
     public class CategoryService
     {
+        private readonly BudgetService budgets;
         private IConfiguration _config;
         private readonly ILogger _logger;
         private readonly BreezeContext db;
@@ -255,6 +257,12 @@ namespace Breeze.Api.Categories
                 var amountSpent = expenses.Sum(expense => expense.Amount);
 
                 existingCategory.CurrentSpend = amountSpent;
+                var categories = GetCategoriesByBudgetId(userId, existingCategory.BudgetId);
+                if (categories == null)
+                {
+                    return -2;
+                }
+                budgets.CalculateBudgetCategories(userId, existingCategory.BudgetId, categories);
                 db.SaveChanges();
                 return existingCategory.Id;
             }

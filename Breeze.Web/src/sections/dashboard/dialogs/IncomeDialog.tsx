@@ -77,7 +77,7 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 		if (isEditing) {
 			patchMutation.mutate({ income: { ...values } })
 		} else {
-			postMutation.mutate({ income: { ...values, budgetId: budget?.id, userId: currentUserAccount.homeAccountId } })
+			postMutation.mutate({ income: { ...values, userId: currentUserAccount.homeAccountId } })
 		}
 	}
 

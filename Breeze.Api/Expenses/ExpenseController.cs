@@ -1,4 +1,5 @@
-﻿using Breeze.Api.Categories;
+﻿using Breeze.Api.Budgets;
+using Breeze.Api.Categories;
 using Breeze.Api.Expenses.RequestResponseObjects;
 using Breeze.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +13,7 @@ namespace Breeze.Api.Expenses
     [Route("/budgets/{budgetId}/categories/{categoryId}/expenses")]
     public class ExpenseController : ControllerBase
     {
+        private readonly BudgetService budgets;
         private readonly CategoryService categories;
         private readonly ExpenseService expenses;
         private readonly ILogger<ExpenseController> _logger;
@@ -81,6 +83,7 @@ namespace Breeze.Api.Expenses
                     return BadRequest("Expenses not found");
                 }
                 categories.CalculateCategoryExpenses(userId, expenseRequest.CategoryId, expenseList);
+
                 return Ok(response);
             }
             catch (Exception ex)
