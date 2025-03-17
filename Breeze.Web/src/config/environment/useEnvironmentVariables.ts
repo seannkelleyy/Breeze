@@ -39,8 +39,8 @@ export const useEnvironmentVariables = (): EnvironmentVariables => {
 
 	const getValue = (envVar: string, defaultValue: string) => ((windowConfig[envVar] ?? `%${envVar}%`) === `%${envVar}%` ? defaultValue : windowConfig[envVar])
 
-	const baseLocalApi = getValue('BASE_LOCAL_API', 'https://localhost:7284')
-	const baseHostedApi = getValue('BASE_HOSTED_API', 'https://breeze-api.azurewebsites.net')
+	const baseLocalApi = getValue('BASE_LOCAL_API', 'https://localhost:7284/')
+	const baseHostedApi = getValue('BASE_HOSTED_API', 'https://breeze-api.azurewebsites.net/')
 	const baseLocalUrl = getValue('BASE_LOCAL_URL', 'http://localhost:5173/')
 	const baseHostedUrl = getValue('BASE_HOSTED_URL', 'https://www.breeze.seannkelleyy/')
 	const baseLocalLoginUrl = getValue('BASE_LOCAL_LOGIN_URL', 'http://localhost:5173/login')
