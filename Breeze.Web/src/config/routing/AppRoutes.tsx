@@ -6,13 +6,9 @@ import { Navigation } from '../../components/navigation/Navigation'
 import { Dashboard } from '../../sections/dashboard/Dashboard'
 
 export const AppRoutes = () => {
-	const { accounts, inProgress } = useMsal()
+	const { accounts } = useMsal()
 
 	const isAuthenticated = accounts.length > 0
-
-	if (inProgress === 'login' || inProgress === 'logout') {
-		return <div>Loading...</div>
-	}
 
 	return (
 		<BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
@@ -40,10 +36,6 @@ export const AppRoutes = () => {
 							<Navigate to='/login' />
 						)
 					}
-				/>
-				<Route
-					path='*'
-					element={isAuthenticated ? <Navigate to='/' /> : <Navigate to='/login' />}
 				/>
 			</Routes>
 		</BrowserRouter>
