@@ -1,30 +1,36 @@
-import { useMsal } from '@azure/msal-react'
+import { useMsal, AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
 import { Button } from '../ui/button'
-import { loginRequest } from '../../config/auth/MsalInstance'
+import { loginRequest } from '../../config/auth/msalConfig'
 
 export const AuthButton = () => {
-	const { instance, accounts } = useMsal()
+	const { instance } = useMsal()
 
-	const handleLogin = async () => {
-		try {
-			await instance.loginPopup(loginRequest)
-		} catch (error) {
-			console.error('Login failed', error)
-		}
+	const handleLogin = () => {
+		instance
+			.loginPopup({
+				...loginRequest,
+				redirectUri: '/',
+			})
+			.catch((error) => console.log(error))
 	}
 
-	const handleLogout = async () => {
-		try {
-			await instance.logoutRedirect()
-		} catch (error) {
-			console.error('Logout failed', error)
-		}
+	const handleLogout = () => {
+		instance.logoutPopup({
+			postLogoutRedirectUri: '/',
+		})
+		window.location.reload()
 	}
 
-	if (accounts.length > 0) {
-		return <Button onClick={handleLogout}>Log out</Button>
-	}
+	return (
+		<>
+			<AuthenticatedTemplate>
+				<Button onClick={handleLogout}>Log out</Button>
+			</AuthenticatedTemplate>
 
-	return <Button onClick={handleLogin}>Log in</Button>
+			<UnauthenticatedTemplate>
+				<Button onClick={handleLogin}>Log in</Button>
+			</UnauthenticatedTemplate>
+		</>
+	)
 }
 

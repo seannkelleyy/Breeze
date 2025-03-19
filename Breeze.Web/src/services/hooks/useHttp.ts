@@ -1,6 +1,5 @@
 import axios, { AxiosError } from 'axios'
 import { useQuery } from 'react-query'
-import { useEnvironmentVariables } from '../../config/environment/useEnvironmentVariables'
 import { useMsal } from '@azure/msal-react'
 import { InteractionRequiredAuthError } from '@azure/msal-browser'
 
@@ -12,14 +11,13 @@ const handleError = (error: AxiosError) => {
 
 const useHttp = () => {
 	const { instance } = useMsal()
-	const { baseLocalApi, baseHostedApi, authApiId } = useEnvironmentVariables()
 
 	const fetchToken = async () => {
 		const account = instance.getAllAccounts()[0]
 		if (!account) throw new Error('No account found')
 
 		const tokenRequest = {
-			scopes: [`${authApiId}/user.access`],
+			scopes: [import.meta.env.VITE_AUTH_API_SCOPE],
 			account,
 		}
 
@@ -64,7 +62,7 @@ const useHttp = () => {
 	}
 
 	const axiosInstance = axios.create({
-		baseURL: process.env.NODE_ENV === 'production' ? baseHostedApi : baseLocalApi,
+		baseURL: process.env.NODE_ENV === 'production' ? import.meta.env.VITE_BASE_HOSTED_API : import.meta.env.VITE_BASE_LOCAL_API,
 	})
 
 	axiosInstance.interceptors.request.use(
@@ -85,6 +83,22 @@ const useHttp = () => {
 			await refetch()
 		}
 	}
+
+	// const apiClient = axios.create({
+	// 	baseURL: process.env.NODE_ENV === 'production' ? import.meta.env.VITE_BASE_HOSTED_API : import.meta.env.VITE_BASE_LOCAL_API,
+	// })
+
+	// apiClient.interceptors.request.use(async (config) => {
+	// 	const account = instance.getAllAccounts()[0]
+	// 	if (account) {
+	// 		const tokenResponse = await instance.acquireTokenSilent({
+	// 			scopes: [import.meta.env.VITE_AUTH_API_SCOPE],
+	// 			account,
+	// 		})
+	// 		config.headers.Authorization = `Bearer ${tokenResponse.accessToken}`
+	// 	}
+	// 	return config
+	// })
 
 	const getOne = async <T>(relativeUri: string): Promise<T> => {
 		try {
