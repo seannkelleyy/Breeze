@@ -1,6 +1,6 @@
 import { useMsal, AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
 import { Button } from '../ui/button'
-import { loginRequest } from '../../config/auth/msalConfig'
+import { loginRequest } from '../../config/auth/authConfig'
 
 export const AuthButton = () => {
 	const { instance } = useMsal()
