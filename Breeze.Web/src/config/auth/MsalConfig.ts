@@ -1,5 +1,3 @@
-import { PublicClientApplication } from '@azure/msal-browser'
-
 export const msalConfig = {
 	auth: {
 		clientId: import.meta.env.VITE_AUTH_CLIENT_ID,
@@ -7,12 +5,10 @@ export const msalConfig = {
 		redirectUri: process.env.NODE_ENV === 'production' ? import.meta.env.VITE_BASE_HOSTED_URI : import.meta.env.VITE_BASE_LOCAL_URI,
 	},
 	cache: {
-		cacheLocation: 'sessionStorage',
-		storeAuthStateInCookie: false,
+		cacheLocation: 'localStorage',
+		storeAuthStateInCookie: true,
 	},
 }
-
-export const msalInstance = new PublicClientApplication(msalConfig)
 
 export const loginRequest = {
 	scopes: ['openid', 'offline_access', import.meta.env.VITE_AUTH_API_SCOPE],
