@@ -1,4 +1,4 @@
-import { useMsal } from '@azure/msal-react'
+import { useMsal, AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
 import { Button } from '../ui/button'
 
 // export const AuthButton = () => {
