@@ -6,7 +6,7 @@ import { MsalProvider } from '@azure/msal-react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { ThemeProvider } from './components/theme/ThemeProvider'
 import { PublicClientApplication } from '@azure/msal-browser'
-import { msalConfig } from './config/auth/MsalConfig'
+import { msalConfig } from './config/auth/msalConfig'
 
 const msalInstance = new PublicClientApplication(msalConfig)
 
