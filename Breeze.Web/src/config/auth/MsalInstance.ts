@@ -2,13 +2,13 @@ import { PublicClientApplication } from '@azure/msal-browser'
 import { useEnvironmentVariables } from '../environment/useEnvironmentVariables'
 
 export const useMsalInstance = () => {
-	const { authClientId, authTenantId, baseLocalUrl, baseHostedUrl } = useEnvironmentVariables()
+	const { authClientId, authTenantId } = useEnvironmentVariables()
 
 	return new PublicClientApplication({
 		auth: {
 			clientId: authClientId,
 			authority: `https://login.microsoftonline.com/${authTenantId}`,
-			redirectUri: process.env.NODE_ENV === 'production' ? baseHostedUrl : baseLocalUrl,
+			redirectUri: window.location.origin,
 		},
 		cache: {
 			cacheLocation: 'sessionStorage',
