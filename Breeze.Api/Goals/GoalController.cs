@@ -1,9 +1,9 @@
 ﻿using Breeze.Api.Expenses;
 using Breeze.Api.Goals.RequestResponseObjects;
 using Breeze.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Breeze.Api.Goals
 {
@@ -26,8 +26,9 @@ namespace Breeze.Api.Goals
         {
             try
             {
-                var userId = User.GetObjectId();
-                if (userId == null)
+                var userId = User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(userId))
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
@@ -46,8 +47,9 @@ namespace Breeze.Api.Goals
         {
             try
             {
-                var userId = User.GetObjectId();
-                if (userId == null)
+                var userId = User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(userId))
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
@@ -66,8 +68,9 @@ namespace Breeze.Api.Goals
         {
             try
             {
-                var userId = User.GetObjectId();
-                if (userId == null)
+                var userId = User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(userId))
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
@@ -86,8 +89,9 @@ namespace Breeze.Api.Goals
         {
             try
             {
-                var userId = User.GetObjectId();
-                if (userId == null)
+                var userId = User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(userId))
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();

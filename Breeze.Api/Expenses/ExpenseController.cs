@@ -29,8 +29,9 @@ namespace Breeze.Api.Expenses
         {
             try
             {
-                var userId = User.GetObjectId();
-                if (userId == null)
+                var userId = User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(userId))
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
@@ -49,8 +50,9 @@ namespace Breeze.Api.Expenses
         {
             try
             {
-                var userId = User.GetObjectId();
-                if (userId == null)
+                var userId = User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(userId))
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
@@ -69,8 +71,9 @@ namespace Breeze.Api.Expenses
         {
             try
             {
-                var userId = User.GetObjectId();
-                if (userId == null)
+                var userId = User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(userId))
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
@@ -96,8 +99,9 @@ namespace Breeze.Api.Expenses
         {
             try
             {
-                var userId = User.GetObjectId();
-                if (userId == null)
+                var userId = User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(userId))
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
@@ -122,8 +126,9 @@ namespace Breeze.Api.Expenses
         {
             try
             {
-                var userId = User.GetObjectId();
-                if (userId == null)
+                var userId = User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(userId))
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();

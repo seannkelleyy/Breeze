@@ -1,4 +1,4 @@
-import { useUser } from '@clerk/clerk-react'
+import { SignUpButton, useUser } from '@clerk/clerk-react'
 import { Button } from '../components/ui/button'
 import { Link } from 'react-router-dom'
 import AuthButton from '../components/auth/AuthButton'
@@ -22,8 +22,12 @@ export const LandingPage = () => {
 					</div>
 				) : (
 					<div className='flex flex-col gap-2'>
-						<p className='w-full text-center'>Welcome to Breeze</p>
+						<p className='w-full text-center text-lg'>Welcome to Breeze</p>
 						<AuthButton />
+						<p className='w-full text-center text-sm mt-4'>Don't have an account?</p>
+						<SignUpButton>
+							<Button className='w-min self-center'>Sign Up</Button>
+						</SignUpButton>
 					</div>
 				)}
 			</div>

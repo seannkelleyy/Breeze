@@ -3,14 +3,16 @@ import { Button } from '../ui/button'
 
 export default function AuthButton() {
 	return (
-		<Button>
+		<>
 			<SignedOut>
-				<SignInButton />
+				<SignInButton>
+					<Button>Sign In</Button>
+				</SignInButton>
 			</SignedOut>
 			<SignedIn>
 				<UserButton />
 			</SignedIn>
-		</Button>
+		</>
 	)
 }
 

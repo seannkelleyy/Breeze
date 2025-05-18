@@ -1,22 +1,30 @@
+using System.IdentityModel.Tokens.Jwt;
 using Breeze.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
-var builder = WebApplication.CreateBuilder(args);
-// Docs: https://learn.microsoft.com/en-us/azure/active-directory-b2c/enable-authentication-web-api?tabs=csharpclient
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(options =>
-    {
-        builder.Configuration.Bind("AzureAdB2C", options);
+JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-        options.TokenValidationParameters.NameClaimType = "name";
-    },
-    options =>
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        builder.Configuration.Bind("AzureAdB2C", options);
+        options.Authority = "https://apt-monkfish-71.clerk.accounts.dev";
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = "https://apt-monkfish-71.clerk.accounts.dev",
+            ValidateAudience = false, // Set to true if you're using custom audience
+            ValidateLifetime = true,
+            NameClaimType = "sub" // This is Clerk's user ID
+        };
     });
+
+
 
 builder.Services.AddAuthorization();
 

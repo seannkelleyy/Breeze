@@ -23,24 +23,28 @@ namespace Breeze.Api.Budgets
         }
 
         [HttpGet("{year}-{month}")]
+        [Authorize]
         public IActionResult GetBudget([FromRoute] int year, [FromRoute] int month)
         {
-
             try
             {
-                var userId = User.GetObjectId();
-                if (userId == null)
+                var userId = User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(userId))
                 {
                     _logger.LogError(User.ToString());
                     return Unauthorized();
                 }
-                return Ok(budgets.GetBudgetByDate(userId, new DateOnly(year, month, 1)));
+
+                var budget = budgets.GetBudgetByDate(userId, new DateOnly(year, month, 1));
+                return Ok(budget);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
-                return BadRequest();
+                _logger.LogError(ex, "Failed to get budget");
+                return BadRequest("Something went wrong.");
             }
         }
+
     }
 }

@@ -1,9 +1,11 @@
 import { useFetchGoals } from '../../services/hooks/goal/useFetchGoals'
 import { Card } from '../../components/ui/card'
 import { GoalDialog } from './GoalDialog'
+import { useUser } from '@clerk/clerk-react'
 
 export const Goals = () => {
-	const { data: goals, refetch, isLoading, isError } = useFetchGoals({ userId: '' })
+	const user = useUser().user
+	const { data: goals, refetch, isLoading, isError } = useFetchGoals({ userId: user?.id ?? '' })
 
 	if (goals) goals.sort((a, b) => (a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1))
 

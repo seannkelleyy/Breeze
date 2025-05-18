@@ -22,7 +22,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 				<ClerkProvider
 					publishableKey={PUBLISHABLE_KEY}
 					afterSignOutUrl='/login'
-					signInForceRedirectUrl={'http://localhost:5173/'}
+					signInForceRedirectUrl={'/'}
 				>
 					<AppRoutes />
 				</ClerkProvider>

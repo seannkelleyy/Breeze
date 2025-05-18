@@ -12,6 +12,7 @@ import { Goal } from '../../services/hooks/goal/goalServices'
 import { useDeleteGoal } from '../../services/hooks/goal/useDeleteGoal'
 import { usePatchGoal } from '../../services/hooks/goal/usePatchGoal'
 import { usePostGoal } from '../../services/hooks/goal/usePostGoal'
+import { useUser } from '@clerk/clerk-react'
 
 type GoalDialogProps = {
 	goal?: Goal
@@ -19,6 +20,7 @@ type GoalDialogProps = {
 }
 
 export const GoalDialog = ({ goal, refetchGoals }: GoalDialogProps) => {
+	const user = useUser().user
 	const [open, setOpen] = useState(false)
 
 	const isEditing = !!goal
@@ -60,18 +62,20 @@ export const GoalDialog = ({ goal, refetchGoals }: GoalDialogProps) => {
 				description: values.description,
 				isCompleted: values.isCompleted ?? false,
 			}
-			updateGoalMutation.mutate({ userId: '', goal: goalToUpdate })
+			updateGoalMutation.mutate({ userId: user?.id ?? '', goal: goalToUpdate })
 		} else {
 			postGoalMutation.mutate({
-				userId: '',
+				userId: user?.id ?? '',
 				goal: {
-					userId: '',
+					userId: user?.id ?? '',
 					description: values.description,
 					isCompleted: false,
 				},
 			})
 		}
 	}
+
+	//TODO: Create delete goal function instead declaring it in the button
 
 	return (
 		<Dialog
@@ -123,7 +127,7 @@ export const GoalDialog = ({ goal, refetchGoals }: GoalDialogProps) => {
 							{isEditing && (
 								<DeleteConfirmationDialog
 									itemType='goal'
-									onDelete={() => deleteMutation.mutate({ userId: '', goalId: goal!.id! })}
+									onDelete={() => deleteMutation.mutate({ userId: user?.id ?? '', goalId: goal!.id! })}
 									additionalText={<p className='text-center'>Goal: {goal!.description}</p>}
 								/>
 							)}

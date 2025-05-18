@@ -14,18 +14,20 @@ import { usePatchExpense } from '../../../services/hooks/expense/usePatchExpense
 import { usePostExpense } from '../../../services/hooks/expense/usePostExpense'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
+import { useUser } from '@clerk/clerk-react'
 
 type ExpenseDialogProps = {
 	existingExpense?: Expense
 }
 
 export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
+	const user = useUser().user
 	const [open, setOpen] = useState(false)
 	const { budget, categories, refetchCategories, refetchBudget, refetchExpenses } = useBudgetContext()
 
 	const isEditing = Boolean(existingExpense)
 	const defaultExpense = existingExpense || {
-		userId: '',
+		userId: user?.id ?? '',
 		categoryId: categories[0]?.id ?? 1,
 		name: '',
 		amount: 0,
