@@ -2,6 +2,7 @@ import { Github, Linkedin, Mail } from 'lucide-react'
 import { ModeToggle } from '../theme/ModeToggle'
 import { Button } from '../ui/button'
 import { Menubar, MenubarContent, MenubarMenu, MenubarSeparator, MenubarTrigger } from '../ui/menubar'
+import AuthButton from '../auth/AuthButton'
 
 const DesktopNavigation = () => {
 	return (
@@ -73,6 +74,7 @@ const DesktopNavigation = () => {
 					</a>
 				</Button>
 				<ModeToggle />
+				<AuthButton />
 			</div>
 		</section>
 	)
@@ -152,6 +154,7 @@ const MobileNavigation = () => {
 							<Mail /> Email
 						</a>
 					</Button>
+					<AuthButton />
 				</MenubarContent>
 			</MenubarMenu>
 			<ModeToggle />

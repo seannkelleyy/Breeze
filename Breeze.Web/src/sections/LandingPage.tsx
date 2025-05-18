@@ -1,8 +1,10 @@
+import { useUser } from '@clerk/clerk-react'
 import { Button } from '../components/ui/button'
 import { Link } from 'react-router-dom'
+import AuthButton from '../components/auth/AuthButton'
 
 export const LandingPage = () => {
-	const users = 10 // Replace with actual user count from your state or context
+	const userIsSignedIn = useUser().isSignedIn
 	return (
 		<section className='h-screen w-screen flex flex-col justify-center items-center'>
 			<div className='flex flex-col justify-center items-center gap-2 h-full'>
@@ -11,9 +13,9 @@ export const LandingPage = () => {
 				<p className='w-full text-right'>
 					to <span className='text-accent'>budget</span>.
 				</p>
-				{users > 0 ? (
+				{userIsSignedIn ? (
 					<div className='flex flex-col gap-2'>
-						<p className='w-full text-center'>Welcome, {'Test use'}</p>
+						<p className='w-full text-center'>Welcome, Test User</p>
 						<Link to='/'>
 							<Button>Go to Dashboard</Button>
 						</Link>
@@ -21,9 +23,7 @@ export const LandingPage = () => {
 				) : (
 					<div className='flex flex-col gap-2'>
 						<p className='w-full text-center'>Welcome to Breeze</p>
-						<Link to='/login'>
-							<Button>Login</Button>
-						</Link>
+						<AuthButton />
 					</div>
 				)}
 			</div>

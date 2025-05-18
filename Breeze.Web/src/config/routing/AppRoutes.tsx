@@ -1,11 +1,12 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { LandingPage } from '../../sections/LandingPage'
 import { BudgetProvider } from '../../services/providers/BudgetProvider'
 import { Navigation } from '../../components/navigation/Navigation'
 import { Dashboard } from '../../sections/dashboard/Dashboard'
+import { SignedIn, useUser } from '@clerk/clerk-react'
 
 export const AppRoutes = () => {
-	const isAuthenticated = true
+	const isAuthenticated = useUser().isSignedIn
 
 	return (
 		<BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
@@ -22,16 +23,14 @@ export const AppRoutes = () => {
 				<Route
 					path='/'
 					element={
-						isAuthenticated ? (
+						<SignedIn>
 							<BudgetProvider>
 								<div className='h-screen w-screen flex flex-col justify-center items-center'>
 									<Navigation />
 									<Dashboard />
 								</div>
 							</BudgetProvider>
-						) : (
-							<Navigate to='/login' />
-						)
+						</SignedIn>
 					}
 				/>
 			</Routes>
