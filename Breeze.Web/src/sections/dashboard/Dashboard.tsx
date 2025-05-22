@@ -19,6 +19,7 @@ export const Dashboard = () => {
 
 	useEffect(() => {
 		getBudgetForDate(currentYear, currentMonth)
+		console.log('Budget for date:', currentYear, currentMonth)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentMonth, currentYear])
 

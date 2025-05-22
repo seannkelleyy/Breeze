@@ -36,11 +36,7 @@ export const DeleteConfirmationDialog = ({ itemType, additionalText, onDelete }:
 				<DialogHeader>
 					<DialogTitle>Are you sure?</DialogTitle>
 					<DialogDescription>Are you sure you want to delete this {itemType}? This action cannot be undone.</DialogDescription>
-					{additionalText && (
-						<DialogDescription>
-							<div className='text-center font-bold text-destructive'>{additionalText}</div>
-						</DialogDescription>
-					)}
+					{additionalText && <DialogDescription className='text-center font-bold text-destructive'>{additionalText}</DialogDescription>}
 				</DialogHeader>
 				<DialogFooter>
 					<Button

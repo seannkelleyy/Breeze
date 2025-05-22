@@ -40,6 +40,8 @@ const formSchema = z.object({
 	),
 })
 
+//TODO: Change expenses to be expense categories
+//TODO: Change income verbage to say that this is expected income and that you should add it when it is deposited.
 export const BudgetDialog = () => {
 	const [open, setOpen] = useState(false)
 	const { budget, categories, incomes, refetchCategories, refetchBudget, refetchIncomes } = useBudgetContext()

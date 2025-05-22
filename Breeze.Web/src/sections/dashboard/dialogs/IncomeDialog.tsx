@@ -34,7 +34,7 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 	}
 
 	const formSchema = z.object({
-		id: z.number(),
+		id: z.number().optional(),
 		userId: z.string(),
 		budgetId: z.number(),
 		name: z.string().min(1, { message: 'Name is required' }),
@@ -51,6 +51,7 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 
 	const postMutation = usePostIncome({
 		onSettled: () => {
+			console.log('Post mutation settled')
 			refetchBudget()
 			refetchIncomes()
 			setOpen(false)

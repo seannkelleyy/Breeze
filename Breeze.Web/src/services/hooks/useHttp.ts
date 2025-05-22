@@ -10,36 +10,10 @@ const handleError = (error: AxiosError) => {
 
 const useHttp = () => {
 	const { getToken } = useAuth()
-	// const fetchToken = async () => {
-	// 	const account = instance.getAllAccounts()[0]
-	// 	if (!account) throw new Error('No account found')
 
-	// 	const tokenRequest = {
-	// 		scopes: [import.meta.env.VITE_AUTH_API_SCOPE],
-	// 		account,
-	// 	}
-
-	// 	try {
-	// 		const response = await instance.acquireTokenSilent(tokenRequest)
-	// 		return response.accessToken
-	// 	} catch (error) {
-	// 		if (error instanceof InteractionRequiredAuthError) {
-	// 			const response = await instance.acquireTokenPopup(tokenRequest)
-	// 			return response.accessToken
-	// 		}
-	// 		throw error
-	// 	}
-	// }
-
-	const {
-		data: accessToken,
-		refetch,
-		isFetching,
-	} = useQuery('accessToken', () => getToken(), {
-		enabled: false,
+	const { data: accessToken, refetch } = useQuery('accessToken', () => getToken(), {
+		enabled: true,
 		refetchInterval: 1000 * 60 * 3,
-		retry: true,
-		retryDelay: 1000 * 5,
 		onSuccess: (token) => {
 			if (token) {
 				axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`
@@ -47,18 +21,6 @@ const useHttp = () => {
 			}
 		},
 	})
-
-	const fetchAccessToken = async () => {
-		try {
-			await refetch()
-		} catch (error) {
-			console.error('Token fetch failed:', error)
-		}
-	}
-
-	if (!accessToken && !isFetching) {
-		fetchAccessToken()
-	}
 
 	const axiosInstance = axios.create({
 		baseURL: process.env.NODE_ENV === 'production' ? import.meta.env.VITE_BASE_HOSTED_API : import.meta.env.VITE_BASE_LOCAL_API,

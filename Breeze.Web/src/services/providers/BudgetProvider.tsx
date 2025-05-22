@@ -25,7 +25,7 @@ type BudgetContextType = {
 
 const BudgetContext = React.createContext<BudgetContextType>({} as BudgetContextType)
 
-export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
+export const BudgetDataProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 	const [totalSpent, setTotalSpent] = useState(0)
 	const [budgetDate, setBudgetDate] = useState<Dayjs>(dayjs(new Date()))
 	const { data: budget = {} as Budget, refetch: refetchBudget } = useFetchBudget({ date: budgetDate })

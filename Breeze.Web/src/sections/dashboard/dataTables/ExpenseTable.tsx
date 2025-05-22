@@ -207,7 +207,7 @@ export function ExpensesTable() {
 									Error loading expenses. Please try again.
 								</TableCell>
 							</TableRow>
-						) : expenses.length ? (
+						) : expenses?.length ? (
 							table.getRowModel().rows.map((row) => (
 								<TableRow key={row.id}>
 									{row.getVisibleCells().map((cell) => (

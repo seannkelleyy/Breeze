@@ -11,7 +11,11 @@ export const LandingPage = () => {
 				<h1 className='w-full text-left text-5xl font-medium'>Breeze</h1>
 				<p className='w-full text-center'>The better way</p>
 				<p className='w-full text-right'>
-					to <span className='text-accent'>budget</span>.
+					to
+					<b>
+						<span className='text-accent'> budget</span>
+					</b>
+					.
 				</p>
 				{userIsSignedIn ? (
 					<div className='flex flex-col gap-2'>
