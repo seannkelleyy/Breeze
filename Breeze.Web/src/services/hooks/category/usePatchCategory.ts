@@ -1,11 +1,11 @@
-import { useMutation } from 'react-query';
-import { useCallback } from 'react';
-import { Category, useCategories } from './categoryServices';
+import { useMutation } from '@tanstack/react-query'
+import { useCallback } from 'react'
+import { Category, useCategories } from './categoryServices'
 
 type PatchCategoryProps = {
-    onSuccess?: () => void;
-    onSettled?: () => void;
-};
+	onSuccess?: () => void
+	onSettled?: () => void
+}
 
 /**
  * A hook for patching a category.
@@ -14,7 +14,7 @@ type PatchCategoryProps = {
  */
 
 type PatchCategoryMutationProps = {
-   category: Category
+	category: Category
 }
 
 /**
@@ -22,13 +22,15 @@ type PatchCategoryMutationProps = {
  * @param props.category: The category to post.
  */
 
-export const usePatchCategory = ({ onSuccess, onSettled}: PatchCategoryProps) => {
-  const { patchCategory } = useCategories();
+export const usePatchCategory = ({ onSuccess, onSettled }: PatchCategoryProps) => {
+	const { patchCategory } = useCategories()
 
-  const mutationFn = useCallback(({category} : PatchCategoryMutationProps) => patchCategory(category), [ patchCategory]);
+	const mutationFn = useCallback(({ category }: PatchCategoryMutationProps) => patchCategory(category), [patchCategory])
 
-  return useMutation(mutationFn, {
-    onSuccess: onSuccess,
-    onSettled: onSettled,
-  });
-};
+	return useMutation({
+		mutationFn,
+		onSuccess: onSuccess,
+		onSettled: onSettled,
+	})
+}
+

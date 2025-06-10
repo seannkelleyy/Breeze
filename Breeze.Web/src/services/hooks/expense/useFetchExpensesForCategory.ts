@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { Expense, useExpenses } from './expenseServices'
 import { Category } from '../category/categoryServices'
@@ -19,7 +19,9 @@ export const useFetchExpensesForCategory = ({ category }: FetchExpensesForCatego
 		return getExpensesForCategory(category)
 	}, [getExpensesForCategory, category])
 
-	return useQuery<Expense[], Error>(['expensesCategory', category], fetchExpenses, {
+	return useQuery<Expense[], Error>({
+		queryKey: ['expensesCategory', category],
+		queryFn: fetchExpenses,
 		refetchInterval: 180 * 1000,
 		retryDelay: 1 * 1000,
 		retry: 3,

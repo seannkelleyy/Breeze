@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import { useCallback } from 'react'
 import { Budget, useBudgets } from './budgetServices'
@@ -20,7 +20,9 @@ export const useFetchBudget = ({ date }: FetchBudgetProps) => {
 		return getBudget(date.year(), date.month() + 1)
 	}, [getBudget, date])
 
-	return useQuery<Budget, Error>(['budget', date.format('YYYY-MM')], fetchBudget, {
+	return useQuery<Budget, Error>({
+		queryKey: ['budget', date.format('YYYY-MM')],
+		queryFn: fetchBudget,
 		refetchInterval: 180 * 1000,
 		retryDelay: 1 * 1000,
 		retry: 3,

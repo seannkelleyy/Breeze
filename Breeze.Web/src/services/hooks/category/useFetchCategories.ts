@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { Category, useCategories } from './categoryServices'
 
@@ -22,7 +22,9 @@ export const useFetchCategories = ({ budgetId, enabled }: FetchCategoryProps) =>
 		return getCategories(budgetId)
 	}, [getCategories, budgetId, enabled])
 
-	return useQuery<Category[], Error>(['categories', budgetId], fetchCategories, {
+	return useQuery<Category[], Error>({
+		queryKey: ['categories', budgetId],
+		queryFn: fetchCategories,
 		refetchInterval: 180 * 1000,
 		retryDelay: 1 * 1000,
 		retry: 3,

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useBudgetContext } from '../../services/providers/BudgetProvider'
-import { Card } from '../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 import { Goals } from '../goals/Goals'
 import { IncomeTable } from './dataTables/IncomeTable'

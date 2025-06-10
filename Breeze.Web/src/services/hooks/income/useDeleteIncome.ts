@@ -1,11 +1,11 @@
-import { useMutation } from 'react-query';
-import { useCallback } from 'react';
-import { Income, useIncomes } from './incomeServices';
+import { useMutation } from '@tanstack/react-query'
+import { useCallback } from 'react'
+import { Income, useIncomes } from './incomeServices'
 
 type DeleteIncomeProps = {
-    onSuccess?: () => void;
-    onSettled?: () => void;
-};
+	onSuccess?: () => void
+	onSettled?: () => void
+}
 
 /**
  * A hook for deleting an income.
@@ -14,21 +14,23 @@ type DeleteIncomeProps = {
  */
 
 type DeleteIncomeMutationProps = {
-  income: Income;
-};
+	income: Income
+}
 
 /**
  * Mutation function for deleting an income.
  * @param props.income: The income to delete.
  */
 
-export const useDeleteIncome = ({onSuccess, onSettled}: DeleteIncomeProps) => {
-  const { deleteIncome } = useIncomes();
+export const useDeleteIncome = ({ onSuccess, onSettled }: DeleteIncomeProps) => {
+	const { deleteIncome } = useIncomes()
 
-  const mutationFn = useCallback(({income}: DeleteIncomeMutationProps) => deleteIncome(income), [deleteIncome]);
+	const mutationFn = useCallback(({ income }: DeleteIncomeMutationProps) => deleteIncome(income), [deleteIncome])
 
-  return useMutation(mutationFn, {
-    onSuccess: onSuccess,
-    onSettled: onSettled,
-  });
-};
+	return useMutation({
+		mutationFn,
+		onSuccess: onSuccess,
+		onSettled: onSettled,
+	})
+}
+

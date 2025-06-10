@@ -1,11 +1,11 @@
-import { useMutation } from 'react-query';
-import { useCallback } from 'react';
-import { Income, useIncomes } from './incomeServices';
+import { useMutation } from '@tanstack/react-query'
+import { useCallback } from 'react'
+import { Income, useIncomes } from './incomeServices'
 
 type PostIncomeProps = {
-    onSuccess?: () => void;
-    onSettled?: () => void;
-};
+	onSuccess?: () => void
+	onSettled?: () => void
+}
 
 /**
  * A hook for posting an income.
@@ -14,21 +14,23 @@ type PostIncomeProps = {
  */
 
 type PostIncomeMutationProps = {
-  income: Income;
-};
+	income: Income
+}
 
 /**
  * Mutation function for posting an income.
-  * @param props.income: The income to post.
+ * @param props.income: The income to post.
  */
- 
-export const usePostIncome = ({onSuccess, onSettled}: PostIncomeProps) => {
-  const { postIncome } = useIncomes();
 
-  const mutationFn = useCallback(({income} : PostIncomeMutationProps) => postIncome(income), [ postIncome]);
+export const usePostIncome = ({ onSuccess, onSettled }: PostIncomeProps) => {
+	const { postIncome } = useIncomes()
 
-  return useMutation(mutationFn, {
-    onSuccess: onSuccess,
-    onSettled: onSettled,
-  });
-};
+	const mutationFn = useCallback(({ income }: PostIncomeMutationProps) => postIncome(income), [postIncome])
+
+	return useMutation({
+		mutationFn,
+		onSuccess: onSuccess,
+		onSettled: onSettled,
+	})
+}
+
