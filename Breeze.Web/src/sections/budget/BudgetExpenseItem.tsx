@@ -8,7 +8,7 @@ type BudgetExpenseItemProps = {
 	form: UseFormReturn<
 		{
 			incomes: {
-				id: number | undefined
+				id?: number
 				userId: string
 				budgetId: number
 				name: string
@@ -16,7 +16,7 @@ type BudgetExpenseItemProps = {
 				date: string
 			}[]
 			categories: {
-				id: number | undefined
+				id?: number
 				userId: string
 				name: string
 				budgetId: number
