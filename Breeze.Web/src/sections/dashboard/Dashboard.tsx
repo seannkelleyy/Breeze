@@ -44,7 +44,7 @@ export const Dashboard = () => {
 	const budgetDifference = (budget?.monthlyIncome ?? 0) - (budget?.monthlyExpenses ?? 0)
 
 	return (
-		<Card className='text-center mt-[15vh] p-4 max-w-[750px] rounded-[.5rem] overflow-x-hidden flex flex-col gap-1 justify-start items-center '>
+		<div className='text-center mt-[15vh] py-4 px-96 rounded-[.5rem] overflow-x-hidden flex flex-col gap-1 justify-start items-center '>
 			<div className='flex gap-4 mb-4'>
 				<Button
 					onClick={getPreviousBudget}
@@ -90,7 +90,7 @@ export const Dashboard = () => {
 					<IncomeTable />
 				</TabsContent>
 			</Tabs>
-		</Card>
+		</div>
 	)
 }
 
