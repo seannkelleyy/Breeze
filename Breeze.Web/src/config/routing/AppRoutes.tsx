@@ -34,7 +34,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
 export const AppRoutes = () => {
 	return (
-		<BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+		<BrowserRouter>
 			<Routes>
 				<Route
 					path='/login'
