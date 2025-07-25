@@ -23,10 +23,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'yarn'
-          cache-dependency-path: './Breeze.Web/yarn.lock'
-      - name: Enable Corepack
-        run: corepack enable
+      - name: Enable Corepack and Setup Yarn
+        run: |
+          corepack enable
+          cd ./Breeze.Web
+          corepack prepare yarn@4.9.2 --activate
+          yarn --version
+      - name: Install Dependencies
+        run: |
+          cd ./Breeze.Web
+          yarn install --immutable
+      - name: Build Application
+        run: |
+          cd ./Breeze.Web
+          yarn build
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -34,11 +44,12 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_FOREST_080EEE10F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: 'upload'
+          skip_build: true
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
           # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: './Breeze.Web' # App source code path
+          app_location: './Breeze.Web/dist' # Built app content directory
           api_location: '' # Api source code path - optional
-          output_location: 'dist' # Built app content directory - optional
+          output_location: '' # Skip additional build step since we pre-build
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
