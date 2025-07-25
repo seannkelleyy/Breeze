@@ -1,17 +1,17 @@
-import { Button } from '../../components/ui/button'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
-import { useBudgetContext } from '../../services/providers/BudgetProvider'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../components/ui/dialog'
-import { Form } from '../../components/ui/form'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { usePostCategory } from '../../services/hooks/category/usePostCategory'
-import { usePatchCategory } from '../../services/hooks/category/usePatchCategory'
-import { usePostIncome } from '../../services/hooks/income/usePostIncome'
-import { usePatchIncome } from '../../services/hooks/income/usePatchIncome'
+import { Button } from '../../components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog'
+import { Form } from '../../components/ui/form'
 import { useDeleteCategory } from '../../services/hooks/category/useDeleteCategory'
+import { usePatchCategory } from '../../services/hooks/category/usePatchCategory'
+import { usePostCategory } from '../../services/hooks/category/usePostCategory'
 import { useDeleteIncome } from '../../services/hooks/income/useDeleteIncome'
+import { usePatchIncome } from '../../services/hooks/income/usePatchIncome'
+import { usePostIncome } from '../../services/hooks/income/usePostIncome'
+import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { BudgetExpenseItem } from './BudgetExpenseItem'
 import { BudgetIncomeItem } from './BudgetIncomeItem'
 
@@ -46,7 +46,7 @@ export const BudgetDialog = () => {
 	const [open, setOpen] = useState(false)
 	const { budget, categories, incomes, refetchCategories, refetchBudget, refetchIncomes } = useBudgetContext()
 
-	const form = useForm({
+	const form = useForm<z.infer<typeof formSchema>, undefined>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			incomes: incomes.map((income) => ({

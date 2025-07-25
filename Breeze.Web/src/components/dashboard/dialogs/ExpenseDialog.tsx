@@ -3,31 +3,32 @@ import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { DeleteConfirmationDialog } from '../../../components/reusable/DeleteConfirmationDialog'
+import { DeleteConfirmationDialog } from '../../../components/deleteConfirmation/DeleteConfirmationDialog'
 import { Button } from '../../../components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../../../components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
-import { Income } from '../../../services/hooks/income/incomeServices'
-import { useDeleteIncome } from '../../../services/hooks/income/useDeleteIncome'
-import { usePatchIncome } from '../../../services/hooks/income/usePatchIncome'
-import { usePostIncome } from '../../../services/hooks/income/usePostIncome'
+import { Expense } from '../../../services/hooks/expense/expenseServices'
+import { useDeleteExpense } from '../../../services/hooks/expense/useDeleteExpense'
+import { usePatchExpense } from '../../../services/hooks/expense/usePatchExpense'
+import { usePostExpense } from '../../../services/hooks/expense/usePostExpense'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
 import { useUser } from '@clerk/clerk-react'
 
-type IncomeDialogProps = {
-	existingIncome?: Income
+type ExpenseDialogProps = {
+	existingExpense?: Expense
 }
 
-export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
+export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 	const user = useUser().user
 	const [open, setOpen] = useState(false)
-	const { budget, refetchIncomes, refetchBudget } = useBudgetContext()
+	const { budget, categories, refetchCategories, refetchBudget, refetchExpenses } = useBudgetContext()
 
-	const isEditing = !!existingIncome
-	const defaultIncome = existingIncome || {
+	const isEditing = Boolean(existingExpense)
+	const defaultExpense = existingExpense || {
 		userId: user?.id ?? '',
-		budgetId: budget?.id ?? -1,
+		categoryId: categories[0]?.id ?? 1,
 		name: '',
 		amount: 0,
 		date: new Date().toISOString().split('T')[0],
@@ -36,49 +37,51 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 	const formSchema = z.object({
 		id: z.number().optional(),
 		userId: z.string(),
-		budgetId: z.number(),
 		name: z.string().min(1, { message: 'Name is required' }),
+		categoryId: z.number().min(1, { message: 'Category is required' }),
 		amount: z.coerce.number().min(0, 'Amount must be greater than 0'),
 		date: z.string().refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
 			message: 'Invalid date format',
 		}),
 	})
 
-	const form = useForm<z.infer<typeof formSchema>>({
+	const form = useForm({
 		resolver: zodResolver(formSchema),
-		defaultValues: defaultIncome,
+		defaultValues: defaultExpense,
 	})
 
-	const postMutation = usePostIncome({
+	const postMutation = usePostExpense({
 		onSettled: () => {
-			console.log('Post mutation settled')
 			refetchBudget()
-			refetchIncomes()
+			refetchCategories()
+			refetchExpenses()
 			setOpen(false)
 		},
 	})
 
-	const patchMutation = usePatchIncome({
+	const patchMutation = usePatchExpense({
 		onSettled: () => {
 			refetchBudget()
-			refetchIncomes()
+			refetchCategories()
+			refetchExpenses()
 			setOpen(false)
 		},
 	})
 
-	const deleteMutation = useDeleteIncome({
+	const deleteMutation = useDeleteExpense({
 		onSettled: () => {
 			refetchBudget()
-			refetchIncomes()
+			refetchCategories()
+			refetchExpenses()
 			setOpen(false)
 		},
 	})
 
 	const onSubmit = (values: z.infer<typeof formSchema>) => {
 		if (isEditing) {
-			patchMutation.mutate({ income: { ...values } })
+			patchMutation.mutate({ budgetId: budget?.id, expense: { ...values } })
 		} else {
-			postMutation.mutate({ income: { ...values, userId: '' } })
+			postMutation.mutate({ budgetId: budget?.id, expense: { ...values, userId: '' } })
 		}
 	}
 
@@ -95,7 +98,7 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 					<Pencil />
 				</DialogTrigger>
 			) : (
-				<Button onClick={() => setOpen(true)}>Add Income</Button>
+				<Button onClick={() => setOpen(true)}>Add Expense</Button>
 			)}
 			<DialogContent className='sm:max-w-[425px]'>
 				<Form {...form}>
@@ -104,8 +107,8 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 						className='space-y-2'
 					>
 						<DialogHeader>
-							<DialogTitle>{isEditing ? 'Edit Income' : 'Create Income'}</DialogTitle>
-							<DialogDescription>{isEditing ? 'Make changes to your income here.' : 'Add a new income entry.'}</DialogDescription>
+							<DialogTitle>{isEditing ? 'Edit Expense' : 'Create Expense'}</DialogTitle>
+							<DialogDescription>{isEditing ? 'Make changes to your expense here.' : 'Add a new expense entry.'} Click save when you're done.</DialogDescription>
 						</DialogHeader>
 						<FormField
 							control={form.control}
@@ -115,11 +118,38 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 									<FormLabel className='text-right'>Name</FormLabel>
 									<FormControl>
 										<Input
-											id='name'
-											type='text'
 											{...field}
 											className='col-span-3'
 										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='categoryId'
+							render={({ field }) => (
+								<FormItem className='grid grid-cols-4 items-center gap-4'>
+									<FormLabel className='text-right'>Category</FormLabel>
+									<FormControl>
+										<Select
+											value={field.value?.toString() || ''}
+											onValueChange={(value) => field.onChange(Number(value))}
+										>
+											<SelectTrigger className='col-span-3'>
+												<SelectValue>{categories.find((category) => category.id === field.value)?.name || 'Select a category'}</SelectValue>
+											</SelectTrigger>
+											<SelectContent className='bg-background'>
+												{categories.map((category) => (
+													<SelectItem
+														key={category.id}
+														value={String(category.id)}
+													>
+														{category.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
 									</FormControl>
 								</FormItem>
 							)}
@@ -132,10 +162,9 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 									<FormLabel className='text-right'>Amount</FormLabel>
 									<FormControl>
 										<Input
-											id='amount'
-											type='number'
 											{...field}
 											className='col-span-3'
+											type='number'
 										/>
 									</FormControl>
 								</FormItem>
@@ -149,24 +178,23 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 									<FormLabel className='text-right'>Date</FormLabel>
 									<FormControl>
 										<Input
-											id='date'
-											type='date'
 											{...field}
 											className='col-span-3'
+											type='date'
 										/>
 									</FormControl>
 								</FormItem>
 							)}
 						/>
 						<DialogFooter className='flex items-center'>
-							{isEditing && existingIncome && (
+							{isEditing && existingExpense && (
 								<DeleteConfirmationDialog
-									onDelete={() => deleteMutation.mutate({ income: existingIncome })}
-									additionalText={`You are about to delete the income: ${existingIncome.name}`}
-									itemType={'Income'}
+									onDelete={() => deleteMutation.mutate({ budgetId: budget.id, expense: existingExpense })}
+									itemType='Expense'
+									additionalText={`You are about to delete the expense: ${existingExpense.name}`}
 								/>
 							)}
-							<Button type='submit'>{isEditing ? 'Save Changes' : 'Create Income'}</Button>
+							<Button type='submit'>{isEditing ? 'Save Changes' : 'Create Expense'}</Button>
 						</DialogFooter>
 					</form>
 				</Form>
