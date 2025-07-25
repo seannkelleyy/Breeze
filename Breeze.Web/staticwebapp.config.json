@@ -1,0 +1,15 @@
+{
+  "platform": {
+    "apiRuntime": "node:18",
+    "buildRuntimeVersion": "22"
+  },
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  },
+  "routes": [
+    {
+      "route": "/api/*",
+      "allowedRoles": ["anonymous"]
+    }
+  ]
+}
