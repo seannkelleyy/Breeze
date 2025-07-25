@@ -1,3 +1,4 @@
+import { useUser } from '@clerk/clerk-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
@@ -8,13 +9,12 @@ import { Button } from '../../../components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../../../components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
 import { Expense } from '../../../services/hooks/expense/expenseServices'
 import { useDeleteExpense } from '../../../services/hooks/expense/useDeleteExpense'
 import { usePatchExpense } from '../../../services/hooks/expense/usePatchExpense'
 import { usePostExpense } from '../../../services/hooks/expense/usePostExpense'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
-import { useUser } from '@clerk/clerk-react'
 
 type ExpenseDialogProps = {
 	existingExpense?: Expense
@@ -165,6 +165,7 @@ export const ExpenseDialog = ({ existingExpense }: ExpenseDialogProps) => {
 											{...field}
 											className='col-span-3'
 											type='number'
+											value={typeof field.value === 'number' || typeof field.value === 'string' ? field.value : ''}
 										/>
 									</FormControl>
 								</FormItem>

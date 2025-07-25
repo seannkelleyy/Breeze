@@ -1,3 +1,4 @@
+import { useUser } from '@clerk/clerk-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
@@ -13,7 +14,6 @@ import { useDeleteIncome } from '../../../services/hooks/income/useDeleteIncome'
 import { usePatchIncome } from '../../../services/hooks/income/usePatchIncome'
 import { usePostIncome } from '../../../services/hooks/income/usePostIncome'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
-import { useUser } from '@clerk/clerk-react'
 
 type IncomeDialogProps = {
 	existingIncome?: Income
@@ -45,7 +45,7 @@ export const IncomeDialog = ({ existingIncome }: IncomeDialogProps) => {
 	})
 
 	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
+		resolver: zodResolver(formSchema) as any,
 		defaultValues: defaultIncome,
 	})
 
