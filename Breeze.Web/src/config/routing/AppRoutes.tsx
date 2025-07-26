@@ -1,11 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
-import { LandingPage } from '../../sections/LandingPage'
 import { BudgetDataProvider } from '../../services/providers/BudgetProvider'
-import { Navigation } from '../../components/navigation/Navigation'
-import { Dashboard } from '../../sections/dashboard/Dashboard'
 import { useAuth, useUser } from '@clerk/clerk-react'
 import { ReactNode } from 'react'
 import { Button } from '../../components/ui/button'
+import { LandingPage } from '../../components/landingPage/LandingPage'
+import { Dashboard } from '../../components/dashboard/Dashboard'
+import { Navigation } from '../../components/navigation'
 
 const NotFound = () => {
 	const navigate = useNavigate()
@@ -34,7 +34,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
 export const AppRoutes = () => {
 	return (
-		<BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+		<BrowserRouter>
 			<Routes>
 				<Route
 					path='/login'

@@ -1,4 +1,4 @@
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { Expense, useExpenses } from './expenseServices'
 
@@ -27,7 +27,8 @@ export const usePostExpense = ({ onSuccess, onSettled }: PostExpenseProps) => {
 
 	const mutationFn = useCallback(({ budgetId, expense }: PostExpenseMutationProps) => postExpense(budgetId, expense), [postExpense])
 
-	return useMutation(mutationFn, {
+	return useMutation({
+		mutationFn,
 		onSuccess: onSuccess,
 		onSettled: onSettled,
 	})

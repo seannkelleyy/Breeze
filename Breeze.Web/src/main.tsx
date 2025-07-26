@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import './index.css'
 import { AppRoutes } from './config/routing/AppRoutes'
-import { QueryClient, QueryClientProvider } from 'react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from './components/theme/ThemeProvider'
 import ReactDOM from 'react-dom/client'
 import { ClerkProvider } from '@clerk/clerk-react'

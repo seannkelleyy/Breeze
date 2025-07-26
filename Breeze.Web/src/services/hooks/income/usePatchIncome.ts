@@ -1,11 +1,11 @@
-import { useMutation } from 'react-query';
-import { useCallback } from 'react';
-import { Income, useIncomes } from './incomeServices';
+import { useMutation } from '@tanstack/react-query'
+import { useCallback } from 'react'
+import { Income, useIncomes } from './incomeServices'
 
 type PatchIncomeProps = {
-    onSuccess?: () => void;
-    onSettled?: () => void;
-};
+	onSuccess?: () => void
+	onSettled?: () => void
+}
 
 /**
  * A hook for patching an income.
@@ -14,21 +14,23 @@ type PatchIncomeProps = {
  */
 
 type PatchIncomeMutationProps = {
-  income: Income;
-};
+	income: Income
+}
 
 /**
  * Mutation function for patching an income.
-  * @param props.income: The income to patch.
+ * @param props.income: The income to patch.
  */
 
-export const usePatchIncome = ({onSuccess, onSettled}: PatchIncomeProps) => {
-  const { patchIncome } = useIncomes();
+export const usePatchIncome = ({ onSuccess, onSettled }: PatchIncomeProps) => {
+	const { patchIncome } = useIncomes()
 
-  const mutationFn = useCallback(({income}: PatchIncomeMutationProps) => patchIncome(income), [patchIncome]);
+	const mutationFn = useCallback(({ income }: PatchIncomeMutationProps) => patchIncome(income), [patchIncome])
 
-  return useMutation(mutationFn, {
-    onSuccess: onSuccess,
-    onSettled: onSettled,
-  });
-};
+	return useMutation({
+		mutationFn,
+		onSuccess: onSuccess,
+		onSettled: onSettled,
+	})
+}
+

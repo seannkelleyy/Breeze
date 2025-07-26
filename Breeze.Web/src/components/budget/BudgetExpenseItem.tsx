@@ -1,14 +1,14 @@
 import { Input } from '../../components/ui/input'
 import { FormField, FormItem, FormControl } from '../../components/ui/form'
-import { DeleteConfirmationDialog } from '../../components/reusable/DeleteConfirmationDialog'
+import { DeleteConfirmationDialog } from '../../components/deleteConfirmation/DeleteConfirmationDialog'
 import { UseFormReturn } from 'react-hook-form'
 
-type BudgetIncomeItemProps = {
+type BudgetExpenseItemProps = {
 	index: number
 	form: UseFormReturn<
 		{
 			incomes: {
-				id: number | undefined
+				id?: number
 				userId: string
 				budgetId: number
 				name: string
@@ -16,7 +16,7 @@ type BudgetIncomeItemProps = {
 				date: string
 			}[]
 			categories: {
-				id: number | undefined
+				id?: number
 				userId: string
 				name: string
 				budgetId: number
@@ -26,23 +26,24 @@ type BudgetIncomeItemProps = {
 		},
 		undefined
 	>
-	deleteIncome: (index: number) => void
+	deleteCategory: (index: number) => void
 }
-export const BudgetIncomeItem = ({ index, form, deleteIncome }: BudgetIncomeItemProps) => {
+
+export const BudgetExpenseItem = ({ index, form, deleteCategory }: BudgetExpenseItemProps) => {
 	return (
 		<section
 			className='flex gap-2 items-center'
-			title='Budget Income'
+			title='Budget Expense'
 		>
 			<FormField
 				control={form.control}
-				name={`incomes.${index}.name`}
+				name={`categories.${index}.name`}
 				render={({ field }) => (
 					<FormItem>
 						<FormControl>
 							<Input
 								{...field}
-								placeholder='Income Name'
+								placeholder='Expense Name'
 							/>
 						</FormControl>
 					</FormItem>
@@ -50,38 +51,28 @@ export const BudgetIncomeItem = ({ index, form, deleteIncome }: BudgetIncomeItem
 			/>
 			<FormField
 				control={form.control}
-				name={`incomes.${index}.amount`}
+				name={`categories.${index}.allocation`}
 				render={({ field }) => (
 					<FormItem>
 						<FormControl>
 							<Input
 								type='number'
 								{...field}
-								placeholder='Amount'
-							/>
-						</FormControl>
-					</FormItem>
-				)}
-			/>
-			<FormField
-				control={form.control}
-				name={`incomes.${index}.date`}
-				render={({ field }) => (
-					<FormItem>
-						<FormControl>
-							<Input
-								{...field}
-								type='date'
-								placeholder='Income Date'
+								placeholder='Allocation'
 							/>
 						</FormControl>
 					</FormItem>
 				)}
 			/>
 			<DeleteConfirmationDialog
-				itemType='income'
-				additionalText={`You are about to delete the income: ${form.getValues().incomes[index].name}`}
-				onDelete={() => deleteIncome(index)}
+				itemType='expense category'
+				additionalText={
+					<>
+						<p>Deleting this category will remove all expenses associated with it.</p>
+						<p>Are you sure you want to delete this category?</p>
+					</>
+				}
+				onDelete={() => deleteCategory(index)}
 			/>
 		</section>
 	)

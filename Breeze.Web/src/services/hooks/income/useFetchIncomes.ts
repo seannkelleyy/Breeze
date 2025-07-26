@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { Income, useIncomes } from './incomeServices'
 
@@ -22,7 +22,9 @@ export const useFetchIncomes = ({ budgetId, enabled }: FetchIncomesProps) => {
 		return getIncomes(budgetId)
 	}, [getIncomes, budgetId, enabled])
 
-	return useQuery<Income[], Error>(['income', budgetId], fetchIncome, {
+	return useQuery<Income[], Error>({
+		queryKey: ['income', budgetId],
+		queryFn: fetchIncome,
 		refetchInterval: 180 * 1000,
 		retryDelay: 1 * 1000,
 		retry: 3,

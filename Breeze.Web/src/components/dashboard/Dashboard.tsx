@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react'
-import { useBudgetContext } from '../../services/providers/BudgetProvider'
-import { Card } from '../../components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
-import { Goals } from '../goals/Goals'
-import { IncomeTable } from './dataTables/IncomeTable'
-import { ExpensesTable } from './dataTables/ExpenseTable'
 import dayjs from 'dayjs'
-import { Button } from '../../components/ui/button'
 import { MoveLeft, MoveRight } from 'lucide-react'
-import { IncomeDialog } from './dialogs/IncomeDialog'
-import { ExpenseDialog } from './dialogs/ExpenseDialog'
+import { useEffect, useState } from 'react'
+import { Button } from '../../components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
+import { useBudgetContext } from '../../services/providers/BudgetProvider'
 import { BudgetDialog } from '../budget/BudgetDialog'
+import { Goals } from '../goals/Goals'
+import { ExpensesTable } from './dataTables/ExpenseTable'
+import { IncomeTable } from './dataTables/IncomeTable'
+import { ExpenseDialog } from './dialogs/ExpenseDialog'
+import { IncomeDialog } from './dialogs/IncomeDialog'
 
 export const Dashboard = () => {
 	const { budget, getBudgetForDate } = useBudgetContext()
@@ -44,7 +43,7 @@ export const Dashboard = () => {
 	const budgetDifference = (budget?.monthlyIncome ?? 0) - (budget?.monthlyExpenses ?? 0)
 
 	return (
-		<Card className='text-center mt-[15vh] p-4 max-w-[750px] rounded-[.5rem] overflow-x-hidden flex flex-col gap-1 justify-start items-center '>
+		<div className='text-center pt-[10vh] py-4 px-96 rounded-[.5rem] overflow-x-hidden flex flex-col gap-1 justify-start items-center '>
 			<div className='flex gap-4 mb-4'>
 				<Button
 					onClick={getPreviousBudget}
@@ -90,7 +89,7 @@ export const Dashboard = () => {
 					<IncomeTable />
 				</TabsContent>
 			</Tabs>
-		</Card>
+		</div>
 	)
 }
 

@@ -1,4 +1,4 @@
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { Expense, useExpenses } from './expenseServices'
 
@@ -29,8 +29,10 @@ export const usePatchExpense = ({ onSuccess, onSettled }: PatchExpenseProps) => 
 
 	const mutationFn = useCallback(({ budgetId, expense }: PatchExpenseMutationProps) => patchExpense(budgetId, expense), [patchExpense])
 
-	return useMutation(mutationFn, {
+	return useMutation({
+		mutationFn,
 		onSuccess: onSuccess,
 		onSettled: onSettled,
 	})
 }
+

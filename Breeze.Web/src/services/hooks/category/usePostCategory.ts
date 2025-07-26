@@ -1,11 +1,11 @@
-import { useMutation } from 'react-query';
-import { useCallback } from 'react';
-import { Category, useCategories } from './categoryServices';
+import { useMutation } from '@tanstack/react-query'
+import { useCallback } from 'react'
+import { Category, useCategories } from './categoryServices'
 
 type PostCategoryProps = {
-    onSuccess?: () => void;
-    onSettled?: () => void;
-};
+	onSuccess?: () => void
+	onSettled?: () => void
+}
 
 /**
  * A hook for posting a category.
@@ -14,21 +14,23 @@ type PostCategoryProps = {
  */
 
 type PostCategoryMutationProps = {
-   category: Category
+	category: Category
 }
 
 /**
  * Mutation function for posting a category.
  * @param props.category: The category to post.
  */
- 
-export const usePostCategory = ({ onSuccess, onSettled}: PostCategoryProps) => {
-  const { postCategory } = useCategories();
 
-  const mutationFn = useCallback(({category} : PostCategoryMutationProps) => postCategory(category), [ postCategory]);
+export const usePostCategory = ({ onSuccess, onSettled }: PostCategoryProps) => {
+	const { postCategory } = useCategories()
 
-  return useMutation(mutationFn, {
-    onSuccess: onSuccess,
-    onSettled: onSettled,
-  });
-};
+	const mutationFn = useCallback(({ category }: PostCategoryMutationProps) => postCategory(category), [postCategory])
+
+	return useMutation({
+		mutationFn,
+		onSuccess: onSuccess,
+		onSettled: onSettled,
+	})
+}
+

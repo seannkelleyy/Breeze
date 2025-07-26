@@ -1,6 +1,6 @@
 import { useAuth } from '@clerk/clerk-react'
 import axios, { AxiosError } from 'axios'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 
 const handleError = (error: AxiosError) => {
 	if (error instanceof AxiosError) {
@@ -11,15 +11,11 @@ const handleError = (error: AxiosError) => {
 const useHttp = () => {
 	const { getToken } = useAuth()
 
-	const { data: accessToken, refetch } = useQuery('accessToken', () => getToken(), {
+	const { data: accessToken, refetch } = useQuery({
+		queryKey: ['accessToken'],
+		queryFn: () => getToken(),
 		enabled: true,
 		refetchInterval: 1000 * 60 * 3,
-		onSuccess: (token) => {
-			if (token) {
-				axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`
-				console.log('Token fetched successfully:', token)
-			}
-		},
 	})
 
 	const axiosInstance = axios.create({

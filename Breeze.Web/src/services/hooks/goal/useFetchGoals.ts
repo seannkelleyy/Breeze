@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { Goal, useGoals } from './goalServices'
 
@@ -17,7 +17,9 @@ export const useFetchGoals = ({ userId }: FetchGoalProps) => {
 		return getGoals(userId)
 	}, [getGoals, userId])
 
-	return useQuery<Goal[], Error>(['goals', userId], fetchGoals, {
+	return useQuery<Goal[], Error>({
+		queryKey: ['goals', userId],
+		queryFn: fetchGoals,
 		refetchInterval: 180 * 1000,
 		retryDelay: 1 * 1000,
 		retry: 3,

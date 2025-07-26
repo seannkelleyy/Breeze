@@ -1,4 +1,3 @@
-import * as React from 'react'
 import {
 	ColumnDef,
 	ColumnFiltersState,
@@ -10,13 +9,14 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from '@tanstack/react-table'
+import dayjs from 'dayjs'
 import { ArrowUpDown } from 'lucide-react'
+import * as React from 'react'
 import { Button } from '../../../components/ui/button'
 import { Input } from '../../../components/ui/input'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../../../components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table'
 import { Income } from '../../../services/hooks/income/incomeServices'
 import { useBudgetContext } from '../../../services/providers/BudgetProvider'
-import dayjs from 'dayjs'
 import { IncomeDialog } from '../dialogs/IncomeDialog'
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -30,7 +30,7 @@ export const columns: ColumnDef<Income>[] = [
 					onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
 				>
 					Name
-					<ArrowUpDown className='ml-2 h-4 w-4' />
+					<ArrowUpDown />
 				</Button>
 			)
 		},
@@ -44,7 +44,7 @@ export const columns: ColumnDef<Income>[] = [
 					onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
 				>
 					Amount
-					<ArrowUpDown className='ml-2 h-4 w-4' />
+					<ArrowUpDown />
 				</Button>
 			)
 		},
@@ -66,7 +66,7 @@ export const columns: ColumnDef<Income>[] = [
 					onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
 				>
 					Date
-					<ArrowUpDown className='ml-2 h-4 w-4' />
+					<ArrowUpDown />
 				</Button>
 			)
 		},
