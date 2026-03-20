@@ -19,18 +19,20 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./Breeze.Web/src:/app/src/web
+      - ./Breeze.Web:/app
     environment:
       - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - webApi
   webApi:
     image: breeze-api
     build:
-      context: ./
+      context: .
       dockerfile: Dockerfile.api
     depends_on:
       - postgres
     ports:
-      - 7284:8080
+      - 7284:80
     volumes:
       - ./Breeze.Api:/app/src/api
       - ./Breeze.Data:/app/src/api
@@ -39,6 +41,7 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - ConnectionStrings__breezeDb-local=Host=postgres;Port=5432;Database=Breeze-local;Username=postgres;Password=postgres
+    command: ["dotnet", "Breeze.Api.dll"]
 
 volumes:
   breeze-postgres-data:

@@ -93,6 +93,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("localhost", policy =>
     {
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
+
     });
     options.AddPolicy("production", policy =>
     {

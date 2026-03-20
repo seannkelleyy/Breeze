@@ -46,7 +46,7 @@ const RequiredMonthlyContributionCard = ({
 			</CardHeader>
 			{!collapsed ? (
 				<CardContent>
-					<p className='text-3xl font-bold text-accent'>{formatCurrency(monthlyNeededForDesiredTarget)}</p>
+					<p className='text-3xl font-bold text-success'>{formatCurrency(monthlyNeededForDesiredTarget)}</p>
 					<p className='text-sm text-muted-foreground mt-2'>Based on: {requiredMonthlyTargetLabel}</p>
 					<p className='text-sm text-muted-foreground mt-1'>Annual household income: {formatCurrency(annualHouseholdIncome)}</p>
 					<p className='text-sm text-muted-foreground mt-2'>
@@ -69,3 +69,4 @@ const RequiredMonthlyContributionCard = ({
 }
 
 export default RequiredMonthlyContributionCard
+

@@ -29,6 +29,24 @@ const ProjectionChartCard = ({ collapsed, toggleControl, currentAge, chartConfig
 	const { currencyCode, plannerSummary } = useCurrentUser()
 	const targetAge = plannerSummary?.targetAge ?? currentAge
 	const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode)
+	// Map account dataKey to account name
+	const accountNameMap = Object.fromEntries(accounts.map((a, i) => [`account-${i}`, a.name]))
+	// Custom tooltip formatter: show account name next to number, colored
+	const tooltipFormatter = (value: number, name: string) => {
+		const accountName = accountNameMap[name]
+		if (accountName) {
+			// Find index for color
+			const index = Object.keys(accountNameMap).findIndex((k) => k === name)
+			const colorVar = `--chart-${(index + 1) % 5}`
+			return (
+				<span>
+					<span style={{ color: `var(${colorVar})`, fontWeight: 500 }}>{accountName}</span>: {formatCurrency(Number(value))}
+				</span>
+			)
+		}
+		// For totalBalance or other keys
+		return formatCurrency(Number(value))
+	}
 	return (
 		<Card>
 			<CardHeader className='flex flex-row items-start justify-between gap-2'>
@@ -62,13 +80,13 @@ const ProjectionChartCard = ({ collapsed, toggleControl, currentAge, chartConfig
 								return `${value}`
 							},
 						}}
-						tooltipFormatter={(value: number) => formatCurrency(Number(value))}
+						tooltipFormatter={tooltipFormatter}
 						tooltipLabelFormatter={(label: string | number) => `Age ${label}`}
 					>
 						<Line
 							type='monotone'
 							dataKey='totalBalance'
-							stroke='var(--color-totalBalance)'
+							stroke='var(--chart-header)'
 							strokeWidth={3}
 							dot={false}
 							strokeDasharray='6 4'
@@ -79,7 +97,7 @@ const ProjectionChartCard = ({ collapsed, toggleControl, currentAge, chartConfig
 								key={account.id}
 								type='monotone'
 								dataKey={`account-${index}`}
-								stroke={`var(--color-account-${index})`}
+								stroke={'var(--chart-' + ((index + 1) % 5) + ')'}
 								strokeWidth={2}
 								dot={false}
 								yAxisId='left'
@@ -90,7 +108,7 @@ const ProjectionChartCard = ({ collapsed, toggleControl, currentAge, chartConfig
 						<div className='inline-flex items-center gap-2'>
 							<span
 								className='inline-block h-2 w-6 rounded-sm'
-								style={{ backgroundColor: 'hsl(var(--chart-1))' }}
+								style={{ backgroundColor: 'hsl(var(--color-balance))' }}
 							/>
 							<span>Total Portfolio</span>
 						</div>
@@ -101,7 +119,7 @@ const ProjectionChartCard = ({ collapsed, toggleControl, currentAge, chartConfig
 							>
 								<span
 									className='inline-block h-2 w-6 rounded-sm'
-									style={{ backgroundColor: accountLineColors[index % accountLineColors.length] }}
+									style={{ backgroundColor: 'hsl(var(--chart-' + ((index + 1) % 5) + '))' }}
 								/>
 								<span>{account.name}</span>
 							</div>

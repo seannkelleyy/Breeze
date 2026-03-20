@@ -34,13 +34,7 @@ const LandingPage = () => {
 		<section className='h-screen w-screen flex flex-col justify-center items-center'>
 			<div className='flex flex-col justify-center items-center gap-2 h-full'>
 				<h1 className='w-full text-left text-5xl font-medium'>Breeze</h1>
-				<p className='w-full text-center'>Budgeting should be a</p>
-				<p className='w-full text-right'>
-					<b>
-						<span className='text-accent'> Breeze</span>
-					</b>
-					.
-				</p>
+				<p className='w-full text-center'>The personal financial planner</p>
 				{isSignedIn ? <SignedIn /> : <SignedOut />}
 			</div>
 		</section>

@@ -4,7 +4,6 @@ import { useCallback, useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 import { accountLineColors, clamp, getDefaultAssetFinanceDetailsForAccount, normalizeBonusMode } from './lib/plannerMath'
-import { Navigation } from '../../components/common/navigation'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useFetchPlanner, usePlannerModel, usePlannerPersistence, usePutPlanner } from './hooks/planner/index'
