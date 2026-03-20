@@ -17,7 +17,7 @@ services:
       context: ./Breeze.Web
       dockerfile: Dockerfile.web
     ports:
-      - 5173:5173
+      - 3000:3000
     volumes:
       - ./Breeze.Web/src:/app/src/web
     environment:

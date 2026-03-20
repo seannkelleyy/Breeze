@@ -92,12 +92,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("localhost", policy =>
     {
-        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
     });
     options.AddPolicy("production", policy =>
     {
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://www.breeze.seannkelleyy.com");
-        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
     });
 });
 
