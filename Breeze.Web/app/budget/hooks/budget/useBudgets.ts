@@ -1,13 +1,13 @@
-import useHttp from '@/lib/services/useHttp'
-import { Budget } from '../../types/budget'
+import useHttp from '@/lib/services/useHttp';
+import { Budget } from '../../types/budget';
 
 const useBudgets = () => {
-	const { getOne } = useHttp()
+  const { getOne } = useHttp();
 
-	const getBudget = async (year: number, month: number): Promise<Budget> => await getOne<Budget>(`budgets/${year}-${month}`)
+  const getBudget = async (year: number, month: number): Promise<Budget> =>
+    await getOne<Budget>(`budgets/${year}-${month}`);
 
-	return { getBudget }
-}
+  return { getBudget };
+};
 
-export default useBudgets
-
+export default useBudgets;

@@ -1,13 +1,13 @@
-import useHttp from '@/lib/services/useHttp'
-import { IRSAccount } from '../../types/irs'
+import useHttp from '@/lib/services/useHttp';
+import { IRSAccount } from '../../types/irs';
 
 const useIRSAccounts = () => {
-	const { getMany } = useHttp()
+  const { getMany } = useHttp();
 
-	const getIRSAccounts = async (): Promise<IRSAccount[]> => await getMany<IRSAccount>('irs-accounts')
+  const getIRSAccounts = async (): Promise<IRSAccount[]> =>
+    await getMany<IRSAccount>('irs-accounts');
 
-	return { getIRSAccounts }
-}
+  return { getIRSAccounts };
+};
 
-export default useIRSAccounts
-
+export default useIRSAccounts;

@@ -34,4 +34,3 @@ Full docs in .github/instructions/.
 - db/migrations/ Atlas output — run: make migrate-diff
 
 # Web - Copilot Instructions
-

@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
-import { Goal } from '../../types/goal'
-import { useGoals } from './index'
+import { useMutation } from '@tanstack/react-query';
+import { Goal } from '../../types/goal';
+import { useGoals } from './index';
 
 interface PostGoalProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -16,7 +16,7 @@ interface PostGoalProps {
  */
 
 interface PostGoalMutationProps {
-	goal: Goal
+  goal: Goal;
 }
 
 /**
@@ -26,16 +26,15 @@ interface PostGoalMutationProps {
  */
 
 const usePostGoal = ({ onSuccess, onSettled }: PostGoalProps) => {
-	const { postGoal } = useGoals()
+  const { postGoal } = useGoals();
 
-	const mutationFn = useCallback(({ goal }: PostGoalMutationProps) => postGoal(goal), [postGoal])
+  const mutationFn = useCallback(({ goal }: PostGoalMutationProps) => postGoal(goal), [postGoal]);
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default usePostGoal
-
+export default usePostGoal;

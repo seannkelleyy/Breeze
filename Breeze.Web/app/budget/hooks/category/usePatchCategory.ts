@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
-import { Category } from '../../types/category'
-import { useCategories } from './index'
+import { useMutation } from '@tanstack/react-query';
+import { Category } from '../../types/category';
+import { useCategories } from './index';
 
 interface PatchCategoryProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -16,7 +16,7 @@ interface PatchCategoryProps {
  */
 
 interface PatchCategoryMutationProps {
-	category: Category
+  category: Category;
 }
 
 /**
@@ -25,16 +25,18 @@ interface PatchCategoryMutationProps {
  */
 
 const usePatchCategory = ({ onSuccess, onSettled }: PatchCategoryProps) => {
-	const { patchCategory } = useCategories()
+  const { patchCategory } = useCategories();
 
-	const mutationFn = useCallback(({ category }: PatchCategoryMutationProps) => patchCategory(category), [patchCategory])
+  const mutationFn = useCallback(
+    ({ category }: PatchCategoryMutationProps) => patchCategory(category),
+    [patchCategory],
+  );
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default usePatchCategory
-
+export default usePatchCategory;

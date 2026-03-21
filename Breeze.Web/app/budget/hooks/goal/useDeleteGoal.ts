@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
-import { Goal } from '../../types/goal'
-import { useGoals } from './index'
+import { useMutation } from '@tanstack/react-query';
+import { Goal } from '../../types/goal';
+import { useGoals } from './index';
 
 interface DeleteGoalProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -16,7 +16,7 @@ interface DeleteGoalProps {
  */
 
 interface DeleteGoalMutationProps {
-	goal: Goal
+  goal: Goal;
 }
 
 /**
@@ -26,16 +26,18 @@ interface DeleteGoalMutationProps {
  */
 
 const useDeleteGoal = ({ onSuccess, onSettled }: DeleteGoalProps) => {
-	const { deleteGoal } = useGoals()
+  const { deleteGoal } = useGoals();
 
-	const mutationFn = useCallback(({ goal }: DeleteGoalMutationProps) => deleteGoal(goal), [deleteGoal])
+  const mutationFn = useCallback(
+    ({ goal }: DeleteGoalMutationProps) => deleteGoal(goal),
+    [deleteGoal],
+  );
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default useDeleteGoal
-
+export default useDeleteGoal;

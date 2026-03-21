@@ -1,13 +1,13 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query';
 
-import { Expense } from '../../types/expense'
-import { useExpenses } from './index'
+import { Expense } from '../../types/expense';
+import { useExpenses } from './index';
 
 interface DeleteExpenseProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -17,8 +17,8 @@ interface DeleteExpenseProps {
  */
 
 interface DeleteExpenseMutationProps {
-	budgetId: number
-	expense: Expense
+  budgetId: number;
+  expense: Expense;
 }
 
 /**
@@ -28,16 +28,18 @@ interface DeleteExpenseMutationProps {
  */
 
 const useDeleteExpense = ({ onSuccess, onSettled }: DeleteExpenseProps) => {
-	const { deleteExpense } = useExpenses()
+  const { deleteExpense } = useExpenses();
 
-	const mutationFn = useCallback(({ budgetId, expense }: DeleteExpenseMutationProps) => deleteExpense(budgetId, expense), [deleteExpense])
+  const mutationFn = useCallback(
+    ({ budgetId, expense }: DeleteExpenseMutationProps) => deleteExpense(budgetId, expense),
+    [deleteExpense],
+  );
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default useDeleteExpense
-
+export default useDeleteExpense;

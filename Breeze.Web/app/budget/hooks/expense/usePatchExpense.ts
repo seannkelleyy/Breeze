@@ -1,13 +1,13 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query';
 
-import { Expense } from '../../types/expense'
-import { useExpenses } from './index'
+import { Expense } from '../../types/expense';
+import { useExpenses } from './index';
 
 interface PatchExpenseProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -17,8 +17,8 @@ interface PatchExpenseProps {
  */
 
 interface PatchExpenseMutationProps {
-	budgetId: number
-	expense: Expense
+  budgetId: number;
+  expense: Expense;
 }
 
 /**
@@ -28,16 +28,18 @@ interface PatchExpenseMutationProps {
  */
 
 const usePatchExpense = ({ onSuccess, onSettled }: PatchExpenseProps) => {
-	const { patchExpense } = useExpenses()
+  const { patchExpense } = useExpenses();
 
-	const mutationFn = useCallback(({ budgetId, expense }: PatchExpenseMutationProps) => patchExpense(budgetId, expense), [patchExpense])
+  const mutationFn = useCallback(
+    ({ budgetId, expense }: PatchExpenseMutationProps) => patchExpense(budgetId, expense),
+    [patchExpense],
+  );
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default usePatchExpense
-
+export default usePatchExpense;

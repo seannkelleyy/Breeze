@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useQuery } from '@tanstack/react-query'
-import { Category } from '../../types/category'
-import { Expense } from '../../types/expense'
-import { useExpenses } from './index'
+import { useQuery } from '@tanstack/react-query';
+import { Category } from '../../types/category';
+import { Expense } from '../../types/expense';
+import { useExpenses } from './index';
 
 interface FetchExpensesForCategoryProps {
-	category: Category
+  category: Category;
 }
 
 /**
@@ -14,21 +14,20 @@ interface FetchExpensesForCategoryProps {
  * @param props.category: The category to fetch expenses from.
  */
 const useFetchExpensesForCategory = ({ category }: FetchExpensesForCategoryProps) => {
-	const { getExpensesForCategory } = useExpenses()
+  const { getExpensesForCategory } = useExpenses();
 
-	const fetchExpenses = useCallback(() => {
-		if (!category) return []
-		return getExpensesForCategory(category)
-	}, [getExpensesForCategory, category])
+  const fetchExpenses = useCallback(() => {
+    if (!category) return [];
+    return getExpensesForCategory(category);
+  }, [getExpensesForCategory, category]);
 
-	return useQuery<Expense[], Error>({
-		queryKey: ['expensesCategory', category],
-		queryFn: fetchExpenses,
-		refetchInterval: 180 * 1000,
-		retryDelay: 1 * 1000,
-		retry: 3,
-	})
-}
+  return useQuery<Expense[], Error>({
+    queryKey: ['expensesCategory', category],
+    queryFn: fetchExpenses,
+    refetchInterval: 180 * 1000,
+    retryDelay: 1 * 1000,
+    retry: 3,
+  });
+};
 
-export default useFetchExpensesForCategory
-
+export default useFetchExpensesForCategory;

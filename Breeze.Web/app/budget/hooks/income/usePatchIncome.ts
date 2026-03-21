@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
-import { Income } from '../../types/income'
-import { useIncomes } from './index'
+import { useMutation } from '@tanstack/react-query';
+import { Income } from '../../types/income';
+import { useIncomes } from './index';
 
 interface PatchIncomeProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -16,7 +16,7 @@ interface PatchIncomeProps {
  */
 
 interface PatchIncomeMutationProps {
-	income: Income
+  income: Income;
 }
 
 /**
@@ -25,16 +25,18 @@ interface PatchIncomeMutationProps {
  */
 
 const usePatchIncome = ({ onSuccess, onSettled }: PatchIncomeProps) => {
-	const { patchIncome } = useIncomes()
+  const { patchIncome } = useIncomes();
 
-	const mutationFn = useCallback(({ income }: PatchIncomeMutationProps) => patchIncome(income), [patchIncome])
+  const mutationFn = useCallback(
+    ({ income }: PatchIncomeMutationProps) => patchIncome(income),
+    [patchIncome],
+  );
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default usePatchIncome
-
+export default usePatchIncome;

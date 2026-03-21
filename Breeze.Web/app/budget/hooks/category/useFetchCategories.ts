@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useQuery } from '@tanstack/react-query'
-import { Category } from '../../types/category'
-import { useCategories } from './index'
+import { useQuery } from '@tanstack/react-query';
+import { Category } from '../../types/category';
+import { useCategories } from './index';
 
 interface FetchCategoryProps {
-	budgetId: number
-	enabled?: boolean
+  budgetId: number;
+  enabled?: boolean;
 }
 
 /**
@@ -15,24 +15,23 @@ interface FetchCategoryProps {
  * @param enabled. - optional - Determines whether or not the request is made.
  */
 const useFetchCategories = ({ budgetId, enabled }: FetchCategoryProps) => {
-	const { getCategories } = useCategories()
+  const { getCategories } = useCategories();
 
-	const fetchCategories = useCallback(() => {
-		if (!enabled) {
-			return []
-		}
-		return getCategories(budgetId)
-	}, [getCategories, budgetId, enabled])
+  const fetchCategories = useCallback(() => {
+    if (!enabled) {
+      return [];
+    }
+    return getCategories(budgetId);
+  }, [getCategories, budgetId, enabled]);
 
-	return useQuery<Category[], Error>({
-		queryKey: ['categories', budgetId],
-		queryFn: fetchCategories,
-		refetchInterval: 180 * 1000,
-		retryDelay: 1 * 1000,
-		retry: 3,
-		enabled: enabled,
-	})
-}
+  return useQuery<Category[], Error>({
+    queryKey: ['categories', budgetId],
+    queryFn: fetchCategories,
+    refetchInterval: 180 * 1000,
+    retryDelay: 1 * 1000,
+    retry: 3,
+    enabled: enabled,
+  });
+};
 
-export default useFetchCategories
-
+export default useFetchCategories;

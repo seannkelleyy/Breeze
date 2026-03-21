@@ -1,22 +1,25 @@
-import useHttp from '@/lib/services/useHttp'
-import { Category } from '../../types/category'
+import useHttp from '@/lib/services/useHttp';
+import { Category } from '../../types/category';
 
 /**
  * A hook for fetching category data. This should only be used when creating new hooks with ReactQuery.
  */
 const useCategories = () => {
-	const { getMany, post, patch, deleteOne } = useHttp()
+  const { getMany, post, patch, deleteOne } = useHttp();
 
-	const getCategories = async (budgetId: number): Promise<Category[]> => await getMany<Category>(`budgets/${budgetId}/categories`)
+  const getCategories = async (budgetId: number): Promise<Category[]> =>
+    await getMany<Category>(`budgets/${budgetId}/categories`);
 
-	const postCategory = async (category: Category): Promise<number> => post<number, Category>(`budgets/${category.budgetId}/categories`, category)
+  const postCategory = async (category: Category): Promise<number> =>
+    post<number, Category>(`budgets/${category.budgetId}/categories`, category);
 
-	const patchCategory = async (category: Category): Promise<number> => patch<number, Category>(`budgets/${category.budgetId}/categories`, category)
+  const patchCategory = async (category: Category): Promise<number> =>
+    patch<number, Category>(`budgets/${category.budgetId}/categories`, category);
 
-	const deleteCategory = async (category: Category) => deleteOne<Category>(`budgets/${category.budgetId}/categories/${category.id}`)
+  const deleteCategory = async (category: Category) =>
+    deleteOne<Category>(`budgets/${category.budgetId}/categories/${category.id}`);
 
-	return { getCategories, postCategory, patchCategory, deleteCategory }
-}
+  return { getCategories, postCategory, patchCategory, deleteCategory };
+};
 
-export default useCategories
-
+export default useCategories;

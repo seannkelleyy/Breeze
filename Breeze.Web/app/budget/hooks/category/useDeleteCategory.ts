@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
-import { Category } from '../../types/category'
-import { useCategories } from './index'
+import { useMutation } from '@tanstack/react-query';
+import { Category } from '../../types/category';
+import { useCategories } from './index';
 
 interface DeleteCategoryProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -16,7 +16,7 @@ interface DeleteCategoryProps {
  */
 
 interface DeleteCategoryMutationProps {
-	category: Category
+  category: Category;
 }
 
 /**
@@ -25,16 +25,18 @@ interface DeleteCategoryMutationProps {
  */
 
 const useDeleteCategory = ({ onSuccess, onSettled }: DeleteCategoryProps) => {
-	const { deleteCategory } = useCategories()
+  const { deleteCategory } = useCategories();
 
-	const mutationFn = useCallback(({ category }: DeleteCategoryMutationProps) => deleteCategory(category), [deleteCategory])
+  const mutationFn = useCallback(
+    ({ category }: DeleteCategoryMutationProps) => deleteCategory(category),
+    [deleteCategory],
+  );
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default useDeleteCategory
-
+export default useDeleteCategory;

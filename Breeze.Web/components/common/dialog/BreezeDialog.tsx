@@ -1,17 +1,25 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState } from 'react';
 
-import { cn } from '@/lib/utils'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface BreezeDialogProps {
-	dialogTrigger: ReactNode
-	title: string
-	description: string | ReactNode
-	footerActions?: ReactNode
-	children?: ReactNode
-	open?: boolean
-	onOpenChange?: (open: boolean) => void
-	dialogContentClassName?: string
+  dialogTrigger: ReactNode;
+  title: string;
+  description: string | ReactNode;
+  footerActions?: ReactNode;
+  children?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  dialogContentClassName?: string;
 }
 
 /**
@@ -26,35 +34,36 @@ interface BreezeDialogProps {
  * @returns {JSX.Element} The BreezeDialog component.
  */
 export const BreezeDialog = ({
-	dialogTrigger,
-	title,
-	description,
-	children,
-	footerActions,
-	open: controlledOpen,
-	onOpenChange: controlledOnOpenChange,
-	dialogContentClassName,
+  dialogTrigger,
+  title,
+  description,
+  children,
+  footerActions,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  dialogContentClassName,
 }: BreezeDialogProps) => {
-	const [internalOpen, setInternalOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false);
 
-	const open = controlledOpen ?? internalOpen
-	const onOpenChange = controlledOnOpenChange ?? setInternalOpen
+  const open = controlledOpen ?? internalOpen;
+  const onOpenChange = controlledOnOpenChange ?? setInternalOpen;
 
-	return (
-		<Dialog
-			open={open}
-			onOpenChange={onOpenChange}
-		>
-			<DialogTrigger asChild>{dialogTrigger}</DialogTrigger>
-			<DialogContent className={cn('max-w-[95%] md:max-w-[400px] rounded-md max-h-[90vh] overflow-y-auto', dialogContentClassName)}>
-				<DialogHeader>
-					<DialogTitle>{title}</DialogTitle>
-					<DialogDescription>{description}</DialogDescription>
-				</DialogHeader>
-				{children}
-				{footerActions && <DialogFooter>{footerActions}</DialogFooter>}
-			</DialogContent>
-		</Dialog>
-	)
-}
-
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>{dialogTrigger}</DialogTrigger>
+      <DialogContent
+        className={cn(
+          'max-h-[90vh] max-w-[95%] overflow-y-auto rounded-md md:max-w-[400px]',
+          dialogContentClassName,
+        )}
+      >
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        {children}
+        {footerActions && <DialogFooter>{footerActions}</DialogFooter>}
+      </DialogContent>
+    </Dialog>
+  );
+};

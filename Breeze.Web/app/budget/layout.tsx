@@ -1,6 +1,5 @@
-import { BudgetDataProvider } from './providers/index'
+import { BudgetDataProvider } from './providers/index';
 
 export default function BudgetLayout({ children }: { children: React.ReactNode }) {
-	return <BudgetDataProvider>{children}</BudgetDataProvider>
+  return <BudgetDataProvider>{children}</BudgetDataProvider>;
 }
-

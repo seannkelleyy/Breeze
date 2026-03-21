@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
-import { Income } from '../../types/income'
-import { useIncomes } from './index'
+import { useMutation } from '@tanstack/react-query';
+import { Income } from '../../types/income';
+import { useIncomes } from './index';
 
 interface PostIncomeProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -16,8 +16,8 @@ interface PostIncomeProps {
  */
 
 interface PostIncomeMutationProps {
-	budgetId: number
-	income: Income
+  budgetId: number;
+  income: Income;
 }
 
 /**
@@ -26,16 +26,18 @@ interface PostIncomeMutationProps {
  */
 
 const usePostIncome = ({ onSuccess, onSettled }: PostIncomeProps) => {
-	const { postIncome } = useIncomes()
+  const { postIncome } = useIncomes();
 
-	const mutationFn = useCallback(({ budgetId, income }: PostIncomeMutationProps) => postIncome(budgetId, income), [postIncome])
+  const mutationFn = useCallback(
+    ({ budgetId, income }: PostIncomeMutationProps) => postIncome(budgetId, income),
+    [postIncome],
+  );
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default usePostIncome
-
+export default usePostIncome;

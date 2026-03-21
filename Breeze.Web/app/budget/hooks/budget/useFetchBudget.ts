@@ -1,13 +1,13 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useQuery } from '@tanstack/react-query'
-import { Dayjs } from 'dayjs'
-import { Budget } from '../../types/budget'
-import { useBudgets } from './index'
+import { useQuery } from '@tanstack/react-query';
+import { Dayjs } from 'dayjs';
+import { Budget } from '../../types/budget';
+import { useBudgets } from './index';
 
 type FetchBudgetProps = {
-	date: Dayjs
-}
+  date: Dayjs;
+};
 
 /**
  * A hook for fetching budget data.
@@ -15,20 +15,19 @@ type FetchBudgetProps = {
  * @param month. The month of the budget.
  */
 export const useFetchBudget = ({ date }: FetchBudgetProps) => {
-	const { getBudget } = useBudgets()
+  const { getBudget } = useBudgets();
 
-	const fetchBudget = useCallback(() => {
-		return getBudget(date.year(), date.month() + 1)
-	}, [getBudget, date])
+  const fetchBudget = useCallback(() => {
+    return getBudget(date.year(), date.month() + 1);
+  }, [getBudget, date]);
 
-	return useQuery<Budget, Error>({
-		queryKey: ['budget', date.format('YYYY-MM')],
-		queryFn: fetchBudget,
-		refetchInterval: 180 * 1000,
-		retryDelay: 1 * 1000,
-		retry: 3,
-	})
-}
+  return useQuery<Budget, Error>({
+    queryKey: ['budget', date.format('YYYY-MM')],
+    queryFn: fetchBudget,
+    refetchInterval: 180 * 1000,
+    retryDelay: 1 * 1000,
+    retry: 3,
+  });
+};
 
-export default useFetchBudget
-
+export default useFetchBudget;

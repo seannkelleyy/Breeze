@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
-import { Category } from '../../types/category'
-import { useCategories } from './index'
+import { useMutation } from '@tanstack/react-query';
+import { Category } from '../../types/category';
+import { useCategories } from './index';
 
 interface PostCategoryProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -16,7 +16,7 @@ interface PostCategoryProps {
  */
 
 interface PostCategoryMutationProps {
-	category: Category
+  category: Category;
 }
 
 /**
@@ -25,16 +25,18 @@ interface PostCategoryMutationProps {
  */
 
 const usePostCategory = ({ onSuccess, onSettled }: PostCategoryProps) => {
-	const { postCategory } = useCategories()
+  const { postCategory } = useCategories();
 
-	const mutationFn = useCallback(({ category }: PostCategoryMutationProps) => postCategory(category), [postCategory])
+  const mutationFn = useCallback(
+    ({ category }: PostCategoryMutationProps) => postCategory(category),
+    [postCategory],
+  );
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default usePostCategory
-
+export default usePostCategory;

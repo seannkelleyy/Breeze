@@ -1,11 +1,11 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useQuery } from '@tanstack/react-query'
-import { Goal } from '../../types/goal'
-import { useGoals } from './index'
+import { useQuery } from '@tanstack/react-query';
+import { Goal } from '../../types/goal';
+import { useGoals } from './index';
 
 interface FetchGoalProps {
-	userId: string
+  userId: string;
 }
 
 /**
@@ -13,21 +13,20 @@ interface FetchGoalProps {
  * @param props.userId: The user id to fetch goals from.
  */
 const useFetchGoals = ({ userId }: FetchGoalProps) => {
-	const { getGoals } = useGoals()
+  const { getGoals } = useGoals();
 
-	const fetchGoals = useCallback(() => {
-		return getGoals(userId)
-	}, [getGoals, userId])
+  const fetchGoals = useCallback(() => {
+    return getGoals(userId);
+  }, [getGoals, userId]);
 
-	return useQuery<Goal[], Error>({
-		queryKey: ['goals', userId],
-		queryFn: fetchGoals,
-		refetchInterval: 180 * 1000,
-		retryDelay: 1 * 1000,
-		retry: 3,
-		enabled: true,
-	})
-}
+  return useQuery<Goal[], Error>({
+    queryKey: ['goals', userId],
+    queryFn: fetchGoals,
+    refetchInterval: 180 * 1000,
+    retryDelay: 1 * 1000,
+    retry: 3,
+    enabled: true,
+  });
+};
 
-export default useFetchGoals
-
+export default useFetchGoals;

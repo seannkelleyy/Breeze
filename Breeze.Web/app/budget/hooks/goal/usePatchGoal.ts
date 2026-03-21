@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
-import { Goal } from '../../types/goal'
-import { useGoals } from './index'
+import { useMutation } from '@tanstack/react-query';
+import { Goal } from '../../types/goal';
+import { useGoals } from './index';
 
 interface PatchGoalProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -16,7 +16,7 @@ interface PatchGoalProps {
  */
 
 interface PatchGoalMutationProps {
-	goal: Goal
+  goal: Goal;
 }
 
 /**
@@ -26,16 +26,18 @@ interface PatchGoalMutationProps {
  */
 
 const usePatchGoal = ({ onSuccess, onSettled }: PatchGoalProps) => {
-	const { patchGoal } = useGoals()
+  const { patchGoal } = useGoals();
 
-	const mutationFn = useCallback(({ goal }: PatchGoalMutationProps) => patchGoal(goal), [patchGoal])
+  const mutationFn = useCallback(
+    ({ goal }: PatchGoalMutationProps) => patchGoal(goal),
+    [patchGoal],
+  );
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default usePatchGoal
-
+export default usePatchGoal;

@@ -1,13 +1,13 @@
-import { useCallback } from 'react'
+import { useCallback } from 'react';
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query';
 
-import { Expense } from '../../types/expense'
-import { useExpenses } from './index'
+import { Expense } from '../../types/expense';
+import { useExpenses } from './index';
 
 interface PostExpenseProps {
-	onSuccess?: () => void
-	onSettled?: () => void
+  onSuccess?: () => void;
+  onSettled?: () => void;
 }
 
 /**
@@ -17,8 +17,8 @@ interface PostExpenseProps {
  */
 
 interface PostExpenseMutationProps {
-	budgetId: number
-	expense: Expense
+  budgetId: number;
+  expense: Expense;
 }
 /**
  * Mutation function for posting an expense.
@@ -26,16 +26,18 @@ interface PostExpenseMutationProps {
  * @param props.expense: The expense to post.
  */
 const usePostExpense = ({ onSuccess, onSettled }: PostExpenseProps) => {
-	const { postExpense } = useExpenses()
+  const { postExpense } = useExpenses();
 
-	const mutationFn = useCallback(({ budgetId, expense }: PostExpenseMutationProps) => postExpense(budgetId, expense), [postExpense])
+  const mutationFn = useCallback(
+    ({ budgetId, expense }: PostExpenseMutationProps) => postExpense(budgetId, expense),
+    [postExpense],
+  );
 
-	return useMutation({
-		mutationFn,
-		onSuccess: onSuccess,
-		onSettled: onSettled,
-	})
-}
+  return useMutation({
+    mutationFn,
+    onSuccess: onSuccess,
+    onSettled: onSettled,
+  });
+};
 
-export default usePostExpense
-
+export default usePostExpense;

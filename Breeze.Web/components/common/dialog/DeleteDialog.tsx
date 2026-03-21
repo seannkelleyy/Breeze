@@ -1,15 +1,15 @@
-'use client'
-import { useState } from 'react'
+'use client';
+import { useState } from 'react';
 
-import { Trash } from 'lucide-react'
+import { Trash } from 'lucide-react';
 
-import { BreezeDialog } from '../dialog/BreezeDialog'
-import { Button } from '@/components/ui/button'
+import { BreezeDialog } from '../dialog/BreezeDialog';
+import { Button } from '@/components/ui/button';
 
 interface DeleteDialogProps {
-	itemType: string
-	additionalText?: string | React.ReactNode
-	onDelete: () => void
+  itemType: string;
+  additionalText?: string | React.ReactNode;
+  onDelete: () => void;
 }
 
 /**
@@ -20,48 +20,45 @@ interface DeleteDialogProps {
  * @returns {JSX.Element} The DeleteConfirmationDialog component.
  */
 const DeleteDialog = ({ itemType, additionalText, onDelete }: DeleteDialogProps) => {
-	const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
-	const dialogTrigger = (
-		<button
-			className='hover:cursor-pointer bg-destructive w-8 h-8 p-1 rounded-md flex items-center justify-center'
-			onClick={() => setOpen(true)}
-		>
-			<Trash />
-		</button>
-	)
+  const dialogTrigger = (
+    <button
+      className="bg-destructive flex h-8 w-8 items-center justify-center rounded-md p-1 hover:cursor-pointer"
+      onClick={() => setOpen(true)}
+    >
+      <Trash />
+    </button>
+  );
 
-	const dialogDescription = (
-		<>
-			Are you sure you want to delete this {itemType}? This action cannot be undone.
-			{additionalText && <span className='block text-center font-bold text-destructive mt-2'>{additionalText}</span>}
-		</>
-	)
+  const dialogDescription = (
+    <>
+      Are you sure you want to delete this {itemType}? This action cannot be undone.
+      {additionalText && (
+        <span className="text-destructive mt-2 block text-center font-bold">{additionalText}</span>
+      )}
+    </>
+  );
 
-	const footerActions = (
-		<div className='flex flex-row gap-2 items-center justify-center w-full'>
-			<Button onClick={() => setOpen(false)}>Cancel</Button>
-			<Button
-				variant='destructive'
-				onClick={onDelete}
-				className='hover:cursor-pointer'
-			>
-				Delete
-			</Button>
-		</div>
-	)
+  const footerActions = (
+    <div className="flex w-full flex-row items-center justify-center gap-2">
+      <Button onClick={() => setOpen(false)}>Cancel</Button>
+      <Button variant="destructive" onClick={onDelete} className="hover:cursor-pointer">
+        Delete
+      </Button>
+    </div>
+  );
 
-	return (
-		<BreezeDialog
-			open={open}
-			onOpenChange={setOpen}
-			dialogTrigger={dialogTrigger}
-			title='Are you sure?'
-			description={dialogDescription}
-			footerActions={footerActions}
-		/>
-	)
-}
+  return (
+    <BreezeDialog
+      open={open}
+      onOpenChange={setOpen}
+      dialogTrigger={dialogTrigger}
+      title="Are you sure?"
+      description={dialogDescription}
+      footerActions={footerActions}
+    />
+  );
+};
 
-export default DeleteDialog
-
+export default DeleteDialog;
