@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/node_modules/@clerk/nextjs/dist/types';
 import axios, { AxiosError } from 'axios';
 
 const handleError = (error: AxiosError) => {

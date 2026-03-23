@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import { Trash } from 'lucide-react';
 
-import { BreezeDialog } from '../dialog/BreezeDialog';
+import { BreezeDialog } from './BreezeDialog';
 import { Button } from '@/components/ui/button';
 
 interface DeleteDialogProps {

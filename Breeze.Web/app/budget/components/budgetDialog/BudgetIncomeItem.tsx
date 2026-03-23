@@ -1,7 +1,7 @@
 'use client';
 import { useEffect } from 'react';
 
-import { UseFormReturn } from 'react-hook-form';
+import { UseFormReturn } from '@/node_modules/react-hook-form/dist';
 
 import { FormInputField } from '../../../../components/common/form/FormInputField';
 import { FormSelectField } from '../../../../components/common/form/FormSelectField';

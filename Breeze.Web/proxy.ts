@@ -1,4 +1,4 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware } from '@/node_modules/@clerk/nextjs/dist/types/server';
 
 export default clerkMiddleware();
 

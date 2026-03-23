@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 
-import { FieldValues, UseFormReturn } from 'react-hook-form';
+import { FieldValues, UseFormReturn } from '@/node_modules/react-hook-form/dist';
 
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';

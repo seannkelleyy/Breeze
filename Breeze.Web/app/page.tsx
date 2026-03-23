@@ -2,7 +2,7 @@
 import BreezeAuthButton from '@/components/common/auth/BreezeAuthButton';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { SignUpButton } from '@clerk/nextjs';
+import { SignUpButton } from '@/node_modules/@clerk/nextjs/dist/types';
 import Link from 'next/link';
 import { Navigation } from '@/components/common/navigation';
 

@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm } from '@/node_modules/react-hook-form/dist';
 import { useBudgetContext } from '@/app/budget/providers/index';
 import { Income, incomeFormSchema } from '@/app/budget/types/income';
 import { BreezeFormDialog } from '@/components/common/form/BreezeFormDialog';

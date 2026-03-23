@@ -1,5 +1,5 @@
 ---
-applyTo: "internal/service/**"
+applyTo: "breeze.api/internal/service/**"
 ---
 
 # Service Layer Instructions

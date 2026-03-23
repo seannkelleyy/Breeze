@@ -1,5 +1,5 @@
 ---
-applyTo: "db/**"
+applyTo: "breeze.api/db/**"
 ---
 
 # DB Schema and Query Instructions

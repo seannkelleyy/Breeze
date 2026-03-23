@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/node_modules/@clerk/nextjs/dist/types';
 import { useQuery } from '@tanstack/react-query';
 import { PlannerResponse } from '../../types/planner';
 import { usePlanner } from './index';

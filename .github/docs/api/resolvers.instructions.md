@@ -1,5 +1,5 @@
 ---
-applyTo: "internal/graph/**"
+applyTo: "breeze.api/internal/graph/**"
 ---
 
 # GraphQL Resolver Instructions

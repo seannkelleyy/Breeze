@@ -30,7 +30,7 @@ import { PlannerPerson } from '@/app/planner/types/person';
 import { PlannerAccount } from '@/app/planner/types/account';
 import { AssetFinanceDetails } from '@/app/planner/types/finance';
 import { PlannerSummary } from '@/app/planner/types/planner';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@/node_modules/@clerk/nextjs/dist/types';
 
 export type PlannerRetirementMethod = 'target-amount' | 'fire' | 'income-replacement';
 

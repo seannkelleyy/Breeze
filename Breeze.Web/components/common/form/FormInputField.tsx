@@ -1,5 +1,5 @@
 'use client';
-import { Controller, FieldValues, Path, UseFormReturn } from 'react-hook-form';
+import { Controller, FieldValues, Path, UseFormReturn } from '@/node_modules/react-hook-form/dist';
 import { Input } from '@/components/ui/input';
 
 type FormInputFieldProps<TFormValues extends FieldValues> = {
