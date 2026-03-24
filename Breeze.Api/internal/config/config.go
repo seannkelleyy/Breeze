@@ -10,6 +10,7 @@ type Config struct {
 	ClerkSecretKey string
 	Port           string
 	Env            string
+	SentryDSN      string
 }
 
 func Load() *Config {
@@ -23,12 +24,11 @@ func Load() *Config {
 		log.Fatal("CLERK_SECRET_KEY environment variable not set")
 	}
 
-	env := os.Getenv("ENV")
-
 	return &Config{
 		DatabaseURL:    dbURL,
 		ClerkSecretKey: clerkKey,
 		Port:           os.Getenv("PORT"), // Optional, defaults to 8080 in main.go
-		Env:            env,
+		Env:            os.Getenv("ENV"),
+		SentryDSN:      os.Getenv("SENTRY_DSN"), // Optional, only needed if using Sentry
 	}
 }

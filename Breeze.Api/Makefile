@@ -1,3 +1,14 @@
+# Run tests
+test:
+	go test ./...
+
+test-verbose:
+	go test -v ./...
+
+test-coverage:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out
+	
 # Breeze API Makefile
 
 ATLAS=atlas
@@ -22,9 +33,14 @@ migrate-diff:
 migrate:
 	export $(shell cat .env | xargs) && $(ATLAS) migrate apply --env local
 
+
 # Run the API
 run:
 	go run ./cmd/api/...
+
+# Run River job runner
+river:
+	go run ./cmd/river/...
 
 # Build the binary
 build:

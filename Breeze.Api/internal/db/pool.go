@@ -2,18 +2,20 @@ package db
 
 import (
 	"context"
-	"log"
+	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewPool(ctx context.Context, dbURL string) *pgxpool.Pool {
+func NewPool(ctx context.Context, dbURL string) (*pgxpool.Pool, error) {
 	pool, err := pgxpool.New(ctx, dbURL)
 	if err != nil {
-		log.Fatalf("Unable to create connection pool: %v", err)
+		slog.Error("Unable to create connection pool", "error", err)
+		return nil, err
 	}
 	if err := pool.Ping(ctx); err != nil {
-		log.Fatalf("Unable to connect to database: %v", err)
+		slog.Error("Unable to connect to database", "error", err)
+		return nil, err
 	}
-	return pool
+	return pool, nil
 }
