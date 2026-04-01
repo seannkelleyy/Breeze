@@ -12,10 +12,11 @@ test-coverage:
 # Breeze API Makefile
 
 ATLAS=atlas
-SQLC=sqlc
-GQLGEN=go run github.com/99designs/gqlgen
+SQLC=go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+GQLGEN=go run github.com/99designs/gqlgen@latest
+MIGRATION_NAME?=init
 
-.PHONY: gen migrate-diff migrate run tidy build
+.PHONY: gen migrate-diff migrate migrate-apply migrate-lint run tidy build
 
 # Generate all code (sqlc then gqlgen — order matters)
 gen:
@@ -27,11 +28,16 @@ migrate-clean:
 
 # Plan a new migration from schema changes
 migrate-diff:
-	export $(shell cat .env | xargs) && $(ATLAS) migrate diff --env local
+	export $(shell cat .env | xargs) && $(ATLAS) migrate diff $(MIGRATION_NAME) --env local
 
 # Apply pending migrations to the database
 migrate:
 	export $(shell cat .env | xargs) && $(ATLAS) migrate apply --env local
+
+migrate-apply: migrate
+
+migrate-lint:
+	export $(shell cat .env | xargs) && $(ATLAS) migrate lint --env local --latest 1
 
 
 # Run the API

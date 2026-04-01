@@ -14,6 +14,3 @@ resolver:
   dir: graph
   package: graph
   filename_template: "{name}.resolvers.go"
-
-autobind:
-  - "breeze.api/graph/model"

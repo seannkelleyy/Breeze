@@ -22,20 +22,20 @@ next-env.d.ts
 /breeze.api/.env.*
 
 # React | Typescript | Next.js
-/Breeze.Web/.next/
-/Breeze.Web/node_modules/
-/Breeze.Web/.env
-/Breeze.Web/.env.*
-/Breeze.Web/.eslintcache
-/Breeze.Web/.turbo/
+/breeze.web/.next/
+/breeze.web/node_modules/
+/breeze.web/.env
+/breeze.web/.env.*
+/breeze.web/.eslintcache
+/breeze.web/.turbo/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-/Breeze.Web/.vscode/
-/Breeze.Web/out/
-/Breeze.Web/build/
-/Breeze.Web/.vercel
-/Breeze.Web/coverage
-/Breeze.Web/next-env.d.ts
-/Breeze.Web/*.tsbuildinfo
+/breeze.web/.vscode/
+/breeze.web/out/
+/breeze.web/build/
+/breeze.web/.vercel
+/breeze.web/coverage
+/breeze.web/next-env.d.ts
+/breeze.web/*.tsbuildinfo

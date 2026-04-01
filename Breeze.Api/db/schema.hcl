@@ -1,26 +1,51 @@
-// schema.hcl — Atlas schema source of truth
+schema "public" {}
 
-schema "public" {
+extension "pgcrypto" {
+  schema = schema.public
 }
 
-// Example: users table (customize as needed)
 table "users" {
+  schema = schema.public
+
   column "id" {
-    type = uuid
-    null = false
+    type    = uuid
+    null    = false
     default = sql("gen_random_uuid()")
   }
+
   column "email" {
     type = varchar(255)
     null = false
-    unique = true
   }
+
   column "created_at" {
-    type = timestamp
-    null = false
+    type    = timestamptz
+    null    = false
     default = sql("now()")
   }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
   primary_key {
-    columns = ["id"]
+    columns = [column.id]
+  }
+
+  index "idx_users_email" {
+    columns = [column.email]
+    unique  = true
+  }
+
+  index "idx_users_active" {
+    columns = [column.id]
+    where   = "deleted_at IS NULL"
   }
 }
