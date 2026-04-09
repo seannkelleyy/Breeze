@@ -7,11 +7,64 @@ package graph
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"breeze.api/graph/generated"
 	"breeze.api/graph/model"
+	"breeze.api/internal/middleware"
+	"breeze.api/internal/service"
+	"github.com/google/uuid"
 )
+
+// CreateUser is the resolver for the createUser field.
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
+	svcInput, err := createUserInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := r.UserService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapUserToModel(user), nil
+}
+
+// UpdateUser is the resolver for the updateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
+	svcInput, err := updateUserInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := r.UserService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapUserToModel(user), nil
+}
+
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	err = r.UserService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
 
 // Health is the resolver for the health field.
 func (r *queryResolver) Health(ctx context.Context) (*model.Health, error) {
@@ -26,7 +79,64 @@ func (r *queryResolver) Health(ctx context.Context) (*model.Health, error) {
 	}, nil
 }
 
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	user, err := r.UserService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapUserToModel(user), nil
+}
+
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
+	identityProviderID := middleware.UserIDFromCtx(ctx)
+	if identityProviderID == "" {
+		return nil, nil
+	}
+
+	user, err := r.UserService.GetByIdentityProviderID(ctx, identityProviderID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapUserToModel(user), nil
+}
+
+// Users is the resolver for the users field.
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	users, err := r.UserService.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.User, 0, len(users))
+	for i := range users {
+		user := users[i]
+		mapped := mapUserToModel(&user)
+		out = append(out, mapped)
+	}
+
+	return out, nil
+}
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

@@ -19,6 +19,7 @@ import (
 	"breeze.api/graph/generated"
 	"breeze.api/internal/config"
 	"breeze.api/internal/db"
+	dbsqlc "breeze.api/internal/db/sqlc"
 	"breeze.api/internal/middleware"
 	"breeze.api/internal/service"
 )
@@ -46,8 +47,10 @@ func main() {
 
 	slog.Info("starting server", "port", cfg.Port, "env", cfg.Env)
 
-	// Init Clerk
-	clerk.SetKey(cfg.ClerkSecretKey)
+	// Init Clerk when auth is enforced.
+	if !cfg.IsLocalEnv() {
+		clerk.SetKey(cfg.ClerkSecretKey)
+	}
 
 	// Init DB
 	ctx := context.Background()
@@ -60,7 +63,12 @@ func main() {
 	defer pool.Close()
 
 	healthService := service.NewHealthService()
-	resolver := &graph.Resolver{HealthService: healthService}
+	queries := dbsqlc.New(pool)
+	userService := service.NewUserService(queries)
+	resolver := &graph.Resolver{
+		HealthService: healthService,
+		UserService:   userService,
+	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 
 	mux := http.NewServeMux()
@@ -86,7 +94,14 @@ func main() {
 		RequestsPerSecond: 30, // adjust as needed
 		Burst:             60,
 	}
-	handler := middleware.CORS(middleware.RateLimit(rateLimitCfg, mux))
+
+	var handler http.Handler = mux
+	if cfg.IsLocalEnv() {
+		slog.Info("running without auth and rate limiting", "env", cfg.Env)
+		handler = middleware.CORS(handler)
+	} else {
+		handler = middleware.CORS(middleware.RateLimit(rateLimitCfg, middleware.RequireAuth(handler)))
+	}
 
 	slog.Info("server running", "port", port)
 	if err := http.ListenAndServe(":"+port, handler); err != nil {

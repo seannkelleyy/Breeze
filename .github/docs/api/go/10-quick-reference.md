@@ -198,3 +198,9 @@ These tables need seed data before the app is usable:
 | `return_profile_schedule` | Year-by-year depreciation rates for each vehicle profile |
 
 Seed via Atlas migrations using `INSERT` statements in a dedicated migration file.
+
+---
+
+## Vertical Slice Playbook
+
+For a full end-to-end generic guide to standing up any new vertical (DB, service, GraphQL, wiring, auth, tests), see: [11-vertical-slice-whole-stack-playbook.md](11-vertical-slice-whole-stack-playbook.md)

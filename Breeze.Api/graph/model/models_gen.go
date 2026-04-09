@@ -2,10 +2,290 @@
 
 package model
 
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+)
+
+type CreateUserInput struct {
+	IdentityProviderID string         `json:"identityProviderId"`
+	Email              string         `json:"email"`
+	ReturnType         ReturnType     `json:"returnType"`
+	SafeWithdrawalRate string         `json:"safeWithdrawalRate"`
+	CurrencyType       string         `json:"currencyType"`
+	InflationRate      string         `json:"inflationRate"`
+	DeductionType      DeductionType  `json:"deductionType"`
+	DeductionAmount    *string        `json:"deductionAmount,omitempty"`
+	MaxTaxBracketID    *string        `json:"maxTaxBracketId,omitempty"`
+	FilingStatus       FilingStatus   `json:"filingStatus"`
+	PayoffStrategy     PayoffStrategy `json:"payoffStrategy"`
+}
+
 type Health struct {
 	Status    string `json:"status"`
 	Timestamp string `json:"timestamp"`
 }
 
+type Mutation struct {
+}
+
 type Query struct {
+}
+
+type UpdateUserInput struct {
+	ID                 string         `json:"id"`
+	IdentityProviderID string         `json:"identityProviderId"`
+	Email              string         `json:"email"`
+	ReturnType         ReturnType     `json:"returnType"`
+	SafeWithdrawalRate string         `json:"safeWithdrawalRate"`
+	CurrencyType       string         `json:"currencyType"`
+	InflationRate      string         `json:"inflationRate"`
+	DeductionType      DeductionType  `json:"deductionType"`
+	DeductionAmount    *string        `json:"deductionAmount,omitempty"`
+	MaxTaxBracketID    *string        `json:"maxTaxBracketId,omitempty"`
+	FilingStatus       FilingStatus   `json:"filingStatus"`
+	PayoffStrategy     PayoffStrategy `json:"payoffStrategy"`
+}
+
+type User struct {
+	ID                 string         `json:"id"`
+	IdentityProviderID string         `json:"identityProviderId"`
+	Email              string         `json:"email"`
+	ReturnType         ReturnType     `json:"returnType"`
+	SafeWithdrawalRate string         `json:"safeWithdrawalRate"`
+	CurrencyType       string         `json:"currencyType"`
+	InflationRate      string         `json:"inflationRate"`
+	DeductionType      DeductionType  `json:"deductionType"`
+	DeductionAmount    *string        `json:"deductionAmount,omitempty"`
+	MaxTaxBracketID    *string        `json:"maxTaxBracketId,omitempty"`
+	FilingStatus       FilingStatus   `json:"filingStatus"`
+	PayoffStrategy     PayoffStrategy `json:"payoffStrategy"`
+	CreatedAt          string         `json:"createdAt"`
+	UpdatedAt          string         `json:"updatedAt"`
+}
+
+type DeductionType string
+
+const (
+	DeductionTypeStandard DeductionType = "STANDARD"
+	DeductionTypeItemized DeductionType = "ITEMIZED"
+)
+
+var AllDeductionType = []DeductionType{
+	DeductionTypeStandard,
+	DeductionTypeItemized,
+}
+
+func (e DeductionType) IsValid() bool {
+	switch e {
+	case DeductionTypeStandard, DeductionTypeItemized:
+		return true
+	}
+	return false
+}
+
+func (e DeductionType) String() string {
+	return string(e)
+}
+
+func (e *DeductionType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DeductionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DeductionType", str)
+	}
+	return nil
+}
+
+func (e DeductionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DeductionType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DeductionType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type FilingStatus string
+
+const (
+	FilingStatusSingle FilingStatus = "SINGLE"
+	FilingStatusMfj    FilingStatus = "MFJ"
+	FilingStatusMfs    FilingStatus = "MFS"
+	FilingStatusHoh    FilingStatus = "HOH"
+)
+
+var AllFilingStatus = []FilingStatus{
+	FilingStatusSingle,
+	FilingStatusMfj,
+	FilingStatusMfs,
+	FilingStatusHoh,
+}
+
+func (e FilingStatus) IsValid() bool {
+	switch e {
+	case FilingStatusSingle, FilingStatusMfj, FilingStatusMfs, FilingStatusHoh:
+		return true
+	}
+	return false
+}
+
+func (e FilingStatus) String() string {
+	return string(e)
+}
+
+func (e *FilingStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FilingStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FilingStatus", str)
+	}
+	return nil
+}
+
+func (e FilingStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *FilingStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e FilingStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type PayoffStrategy string
+
+const (
+	PayoffStrategyAvalanche PayoffStrategy = "AVALANCHE"
+	PayoffStrategySnowball  PayoffStrategy = "SNOWBALL"
+)
+
+var AllPayoffStrategy = []PayoffStrategy{
+	PayoffStrategyAvalanche,
+	PayoffStrategySnowball,
+}
+
+func (e PayoffStrategy) IsValid() bool {
+	switch e {
+	case PayoffStrategyAvalanche, PayoffStrategySnowball:
+		return true
+	}
+	return false
+}
+
+func (e PayoffStrategy) String() string {
+	return string(e)
+}
+
+func (e *PayoffStrategy) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PayoffStrategy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PayoffStrategy", str)
+	}
+	return nil
+}
+
+func (e PayoffStrategy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PayoffStrategy) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PayoffStrategy) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ReturnType string
+
+const (
+	ReturnTypeReal    ReturnType = "REAL"
+	ReturnTypeNominal ReturnType = "NOMINAL"
+)
+
+var AllReturnType = []ReturnType{
+	ReturnTypeReal,
+	ReturnTypeNominal,
+}
+
+func (e ReturnType) IsValid() bool {
+	switch e {
+	case ReturnTypeReal, ReturnTypeNominal:
+		return true
+	}
+	return false
+}
+
+func (e ReturnType) String() string {
+	return string(e)
+}
+
+func (e *ReturnType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ReturnType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ReturnType", str)
+	}
+	return nil
+}
+
+func (e ReturnType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ReturnType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ReturnType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

@@ -9,20 +9,103 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/govalues/decimal"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (email)
-VALUES ($1)
-RETURNING id, email, created_at, updated_at, deleted_at
+INSERT INTO users (
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+RETURNING
+  id,
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy,
+  created_at,
+  updated_at,
+  deleted_at
 `
 
-func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, email)
-	var i User
+type CreateUserParams struct {
+	Email              string          `json:"email"`
+	IdentityProviderID string          `json:"identity_provider_id"`
+	ReturnType         ReturnType      `json:"return_type"`
+	SafeWithdrawalRate decimal.Decimal `json:"safe_withdrawal_rate"`
+	CurrencyType       string          `json:"currency_type"`
+	InflationRate      decimal.Decimal `json:"inflation_rate"`
+	DeductionType      DeductionType   `json:"deduction_type"`
+	DeductionAmount    pgtype.Numeric  `json:"deduction_amount"`
+	MaxTaxBracketID    pgtype.UUID     `json:"max_tax_bracket_id"`
+	FilingStatus       FilingStatus    `json:"filing_status"`
+	PayoffStrategy     PayoffStrategy  `json:"payoff_strategy"`
+}
+
+type CreateUserRow struct {
+	ID                 uuid.UUID          `json:"id"`
+	Email              string             `json:"email"`
+	IdentityProviderID string             `json:"identity_provider_id"`
+	ReturnType         ReturnType         `json:"return_type"`
+	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType       string             `json:"currency_type"`
+	InflationRate      decimal.Decimal    `json:"inflation_rate"`
+	DeductionType      DeductionType      `json:"deduction_type"`
+	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus       FilingStatus       `json:"filing_status"`
+	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
+	row := q.db.QueryRow(ctx, createUser,
+		arg.Email,
+		arg.IdentityProviderID,
+		arg.ReturnType,
+		arg.SafeWithdrawalRate,
+		arg.CurrencyType,
+		arg.InflationRate,
+		arg.DeductionType,
+		arg.DeductionAmount,
+		arg.MaxTaxBracketID,
+		arg.FilingStatus,
+		arg.PayoffStrategy,
+	)
+	var i CreateUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.IdentityProviderID,
+		&i.ReturnType,
+		&i.SafeWithdrawalRate,
+		&i.CurrencyType,
+		&i.InflationRate,
+		&i.DeductionType,
+		&i.DeductionAmount,
+		&i.MaxTaxBracketID,
+		&i.FilingStatus,
+		&i.PayoffStrategy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -31,19 +114,126 @@ func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, created_at, updated_at, deleted_at
+SELECT
+  id,
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy,
+  created_at,
+  updated_at,
+  deleted_at
 FROM users
 WHERE id = $1
   AND deleted_at IS NULL
 LIMIT 1
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
+type GetUserByIDRow struct {
+	ID                 uuid.UUID          `json:"id"`
+	Email              string             `json:"email"`
+	IdentityProviderID string             `json:"identity_provider_id"`
+	ReturnType         ReturnType         `json:"return_type"`
+	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType       string             `json:"currency_type"`
+	InflationRate      decimal.Decimal    `json:"inflation_rate"`
+	DeductionType      DeductionType      `json:"deduction_type"`
+	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus       FilingStatus       `json:"filing_status"`
+	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
-	var i User
+	var i GetUserByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.IdentityProviderID,
+		&i.ReturnType,
+		&i.SafeWithdrawalRate,
+		&i.CurrencyType,
+		&i.InflationRate,
+		&i.DeductionType,
+		&i.DeductionAmount,
+		&i.MaxTaxBracketID,
+		&i.FilingStatus,
+		&i.PayoffStrategy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getUserByIdentityProviderID = `-- name: GetUserByIdentityProviderID :one
+SELECT
+  id,
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy,
+  created_at,
+  updated_at,
+  deleted_at
+FROM users
+WHERE identity_provider_id = $1
+  AND deleted_at IS NULL
+LIMIT 1
+`
+
+type GetUserByIdentityProviderIDRow struct {
+	ID                 uuid.UUID          `json:"id"`
+	Email              string             `json:"email"`
+	IdentityProviderID string             `json:"identity_provider_id"`
+	ReturnType         ReturnType         `json:"return_type"`
+	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType       string             `json:"currency_type"`
+	InflationRate      decimal.Decimal    `json:"inflation_rate"`
+	DeductionType      DeductionType      `json:"deduction_type"`
+	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus       FilingStatus       `json:"filing_status"`
+	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (GetUserByIdentityProviderIDRow, error) {
+	row := q.db.QueryRow(ctx, getUserByIdentityProviderID, identityProviderID)
+	var i GetUserByIdentityProviderIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.IdentityProviderID,
+		&i.ReturnType,
+		&i.SafeWithdrawalRate,
+		&i.CurrencyType,
+		&i.InflationRate,
+		&i.DeductionType,
+		&i.DeductionAmount,
+		&i.MaxTaxBracketID,
+		&i.FilingStatus,
+		&i.PayoffStrategy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -52,24 +242,67 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, email, created_at, updated_at, deleted_at
+SELECT
+  id,
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy,
+  created_at,
+  updated_at,
+  deleted_at
 FROM users
 WHERE deleted_at IS NULL
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+type ListUsersRow struct {
+	ID                 uuid.UUID          `json:"id"`
+	Email              string             `json:"email"`
+	IdentityProviderID string             `json:"identity_provider_id"`
+	ReturnType         ReturnType         `json:"return_type"`
+	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType       string             `json:"currency_type"`
+	InflationRate      decimal.Decimal    `json:"inflation_rate"`
+	DeductionType      DeductionType      `json:"deduction_type"`
+	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus       FilingStatus       `json:"filing_status"`
+	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 	rows, err := q.db.Query(ctx, listUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []ListUsersRow
 	for rows.Next() {
-		var i User
+		var i ListUsersRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Email,
+			&i.IdentityProviderID,
+			&i.ReturnType,
+			&i.SafeWithdrawalRate,
+			&i.CurrencyType,
+			&i.InflationRate,
+			&i.DeductionType,
+			&i.DeductionAmount,
+			&i.MaxTaxBracketID,
+			&i.FilingStatus,
+			&i.PayoffStrategy,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -84,7 +317,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
-const softDeleteUser = `-- name: SoftDeleteUser :exec
+const softDeleteUser = `-- name: SoftDeleteUser :execrows
 UPDATE users
 SET deleted_at = now(),
     updated_at = now()
@@ -92,7 +325,114 @@ WHERE id = $1
   AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteUser(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, softDeleteUser, id)
-	return err
+func (q *Queries) SoftDeleteUser(ctx context.Context, id uuid.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteUser, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET
+  email = $2,
+  identity_provider_id = $3,
+  return_type = $4,
+  safe_withdrawal_rate = $5,
+  currency_type = $6,
+  inflation_rate = $7,
+  deduction_type = $8,
+  deduction_amount = $9,
+  max_tax_bracket_id = $10,
+  filing_status = $11,
+  payoff_strategy = $12,
+  updated_at = now()
+WHERE id = $1
+  AND deleted_at IS NULL
+RETURNING
+  id,
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy,
+  created_at,
+  updated_at,
+  deleted_at
+`
+
+type UpdateUserParams struct {
+	ID                 uuid.UUID       `json:"id"`
+	Email              string          `json:"email"`
+	IdentityProviderID string          `json:"identity_provider_id"`
+	ReturnType         ReturnType      `json:"return_type"`
+	SafeWithdrawalRate decimal.Decimal `json:"safe_withdrawal_rate"`
+	CurrencyType       string          `json:"currency_type"`
+	InflationRate      decimal.Decimal `json:"inflation_rate"`
+	DeductionType      DeductionType   `json:"deduction_type"`
+	DeductionAmount    pgtype.Numeric  `json:"deduction_amount"`
+	MaxTaxBracketID    pgtype.UUID     `json:"max_tax_bracket_id"`
+	FilingStatus       FilingStatus    `json:"filing_status"`
+	PayoffStrategy     PayoffStrategy  `json:"payoff_strategy"`
+}
+
+type UpdateUserRow struct {
+	ID                 uuid.UUID          `json:"id"`
+	Email              string             `json:"email"`
+	IdentityProviderID string             `json:"identity_provider_id"`
+	ReturnType         ReturnType         `json:"return_type"`
+	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType       string             `json:"currency_type"`
+	InflationRate      decimal.Decimal    `json:"inflation_rate"`
+	DeductionType      DeductionType      `json:"deduction_type"`
+	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus       FilingStatus       `json:"filing_status"`
+	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
+	row := q.db.QueryRow(ctx, updateUser,
+		arg.ID,
+		arg.Email,
+		arg.IdentityProviderID,
+		arg.ReturnType,
+		arg.SafeWithdrawalRate,
+		arg.CurrencyType,
+		arg.InflationRate,
+		arg.DeductionType,
+		arg.DeductionAmount,
+		arg.MaxTaxBracketID,
+		arg.FilingStatus,
+		arg.PayoffStrategy,
+	)
+	var i UpdateUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.IdentityProviderID,
+		&i.ReturnType,
+		&i.SafeWithdrawalRate,
+		&i.CurrencyType,
+		&i.InflationRate,
+		&i.DeductionType,
+		&i.DeductionAmount,
+		&i.MaxTaxBracketID,
+		&i.FilingStatus,
+		&i.PayoffStrategy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }

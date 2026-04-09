@@ -5,14 +5,210 @@
 package sqlc
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/google/uuid"
+	"github.com/govalues/decimal"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type DeductionType string
+
+const (
+	DeductionTypeSTANDARD DeductionType = "STANDARD"
+	DeductionTypeITEMIZED DeductionType = "ITEMIZED"
+)
+
+func (e *DeductionType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = DeductionType(s)
+	case string:
+		*e = DeductionType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for DeductionType: %T", src)
+	}
+	return nil
+}
+
+type NullDeductionType struct {
+	DeductionType DeductionType `json:"deduction_type"`
+	Valid         bool          `json:"valid"` // Valid is true if DeductionType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullDeductionType) Scan(value interface{}) error {
+	if value == nil {
+		ns.DeductionType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.DeductionType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullDeductionType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.DeductionType), nil
+}
+
+type FilingStatus string
+
+const (
+	FilingStatusSINGLE FilingStatus = "SINGLE"
+	FilingStatusMFJ    FilingStatus = "MFJ"
+	FilingStatusMFS    FilingStatus = "MFS"
+	FilingStatusHOH    FilingStatus = "HOH"
+)
+
+func (e *FilingStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = FilingStatus(s)
+	case string:
+		*e = FilingStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for FilingStatus: %T", src)
+	}
+	return nil
+}
+
+type NullFilingStatus struct {
+	FilingStatus FilingStatus `json:"filing_status"`
+	Valid        bool         `json:"valid"` // Valid is true if FilingStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullFilingStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.FilingStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.FilingStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullFilingStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.FilingStatus), nil
+}
+
+type PayoffStrategy string
+
+const (
+	PayoffStrategyAVALANCHE PayoffStrategy = "AVALANCHE"
+	PayoffStrategySNOWBALL  PayoffStrategy = "SNOWBALL"
+)
+
+func (e *PayoffStrategy) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PayoffStrategy(s)
+	case string:
+		*e = PayoffStrategy(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PayoffStrategy: %T", src)
+	}
+	return nil
+}
+
+type NullPayoffStrategy struct {
+	PayoffStrategy PayoffStrategy `json:"payoff_strategy"`
+	Valid          bool           `json:"valid"` // Valid is true if PayoffStrategy is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPayoffStrategy) Scan(value interface{}) error {
+	if value == nil {
+		ns.PayoffStrategy, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PayoffStrategy.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPayoffStrategy) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PayoffStrategy), nil
+}
+
+type ReturnType string
+
+const (
+	ReturnTypeREAL    ReturnType = "REAL"
+	ReturnTypeNOMINAL ReturnType = "NOMINAL"
+)
+
+func (e *ReturnType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ReturnType(s)
+	case string:
+		*e = ReturnType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ReturnType: %T", src)
+	}
+	return nil
+}
+
+type NullReturnType struct {
+	ReturnType ReturnType `json:"return_type"`
+	Valid      bool       `json:"valid"` // Valid is true if ReturnType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullReturnType) Scan(value interface{}) error {
+	if value == nil {
+		ns.ReturnType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ReturnType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullReturnType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ReturnType), nil
+}
+
+type TaxBracket struct {
+	ID            uuid.UUID          `json:"id"`
+	Year          int32              `json:"year"`
+	FilingStatus  FilingStatus       `json:"filing_status"`
+	MinimumAmount decimal.Decimal    `json:"minimum_amount"`
+	MaximumAmount pgtype.Numeric     `json:"maximum_amount"`
+	Rate          decimal.Decimal    `json:"rate"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt     pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type User struct {
-	ID        uuid.UUID          `json:"id"`
-	Email     string             `json:"email"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+	ID                 uuid.UUID          `json:"id"`
+	Email              string             `json:"email"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	IdentityProviderID string             `json:"identity_provider_id"`
+	ReturnType         ReturnType         `json:"return_type"`
+	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType       string             `json:"currency_type"`
+	InflationRate      decimal.Decimal    `json:"inflation_rate"`
+	DeductionType      DeductionType      `json:"deduction_type"`
+	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus       FilingStatus       `json:"filing_status"`
+	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
 }

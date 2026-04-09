@@ -27,6 +27,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -39,13 +40,47 @@ type ComplexityRoot struct {
 		Timestamp func(childComplexity int) int
 	}
 
+	Mutation struct {
+		CreateUser func(childComplexity int, input model.CreateUserInput) int
+		DeleteUser func(childComplexity int, id string) int
+		UpdateUser func(childComplexity int, input model.UpdateUserInput) int
+	}
+
 	Query struct {
 		Health func(childComplexity int) int
+		Me     func(childComplexity int) int
+		User   func(childComplexity int, id string) int
+		Users  func(childComplexity int) int
+	}
+
+	User struct {
+		CreatedAt          func(childComplexity int) int
+		CurrencyType       func(childComplexity int) int
+		DeductionAmount    func(childComplexity int) int
+		DeductionType      func(childComplexity int) int
+		Email              func(childComplexity int) int
+		FilingStatus       func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		IdentityProviderID func(childComplexity int) int
+		InflationRate      func(childComplexity int) int
+		MaxTaxBracketID    func(childComplexity int) int
+		PayoffStrategy     func(childComplexity int) int
+		ReturnType         func(childComplexity int) int
+		SafeWithdrawalRate func(childComplexity int) int
+		UpdatedAt          func(childComplexity int) int
 	}
 }
 
+type MutationResolver interface {
+	CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error)
+	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error)
+	DeleteUser(ctx context.Context, id string) (bool, error)
+}
 type QueryResolver interface {
 	Health(ctx context.Context) (*model.Health, error)
+	User(ctx context.Context, id string) (*model.User, error)
+	Me(ctx context.Context) (*model.User, error)
+	Users(ctx context.Context) ([]*model.User, error)
 }
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -75,12 +110,155 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Health.Timestamp(childComplexity), true
 
+	case "Mutation.createUser":
+		if e.ComplexityRoot.Mutation.CreateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createUser_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateUser(childComplexity, args["input"].(model.CreateUserInput)), true
+	case "Mutation.deleteUser":
+		if e.ComplexityRoot.Mutation.DeleteUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteUser_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteUser(childComplexity, args["id"].(string)), true
+	case "Mutation.updateUser":
+		if e.ComplexityRoot.Mutation.UpdateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUser_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpdateUser(childComplexity, args["input"].(model.UpdateUserInput)), true
+
 	case "Query.health":
 		if e.ComplexityRoot.Query.Health == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Query.Health(childComplexity), true
+
+	case "Query.me":
+		if e.ComplexityRoot.Query.Me == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.Me(childComplexity), true
+	case "Query.user":
+		if e.ComplexityRoot.Query.User == nil {
+			break
+		}
+
+		args, err := ec.field_Query_user_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.User(childComplexity, args["id"].(string)), true
+	case "Query.users":
+		if e.ComplexityRoot.Query.Users == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.Users(childComplexity), true
+
+	case "User.createdAt":
+		if e.ComplexityRoot.User.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.CreatedAt(childComplexity), true
+	case "User.currencyType":
+		if e.ComplexityRoot.User.CurrencyType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.CurrencyType(childComplexity), true
+	case "User.deductionAmount":
+		if e.ComplexityRoot.User.DeductionAmount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.DeductionAmount(childComplexity), true
+	case "User.deductionType":
+		if e.ComplexityRoot.User.DeductionType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.DeductionType(childComplexity), true
+	case "User.email":
+		if e.ComplexityRoot.User.Email == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.Email(childComplexity), true
+	case "User.filingStatus":
+		if e.ComplexityRoot.User.FilingStatus == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.FilingStatus(childComplexity), true
+	case "User.id":
+		if e.ComplexityRoot.User.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.ID(childComplexity), true
+	case "User.identityProviderId":
+		if e.ComplexityRoot.User.IdentityProviderID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.IdentityProviderID(childComplexity), true
+	case "User.inflationRate":
+		if e.ComplexityRoot.User.InflationRate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.InflationRate(childComplexity), true
+	case "User.maxTaxBracketId":
+		if e.ComplexityRoot.User.MaxTaxBracketID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.MaxTaxBracketID(childComplexity), true
+	case "User.payoffStrategy":
+		if e.ComplexityRoot.User.PayoffStrategy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.PayoffStrategy(childComplexity), true
+	case "User.returnType":
+		if e.ComplexityRoot.User.ReturnType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.ReturnType(childComplexity), true
+	case "User.safeWithdrawalRate":
+		if e.ComplexityRoot.User.SafeWithdrawalRate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.SafeWithdrawalRate(childComplexity), true
+	case "User.updatedAt":
+		if e.ComplexityRoot.User.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.UpdatedAt(childComplexity), true
 
 	}
 	return 0, false
@@ -89,7 +267,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputCreateUserInput,
+		ec.unmarshalInputUpdateUserInput,
+	)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -123,6 +304,21 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 
 			return &response
 		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -151,11 +347,88 @@ func newExecutionContext(
 var sources = []*ast.Source{
 	{Name: "../schema.graphqls", Input: `type Query {
   health: Health!
+  user(id: ID!): User
+  me: User
+  users: [User!]!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  deleteUser(id: ID!): Boolean!
 }
 
 type Health {
   status: String!
   timestamp: String!
+}
+
+enum ReturnType {
+  REAL
+  NOMINAL
+}
+
+enum DeductionType {
+  STANDARD
+  ITEMIZED
+}
+
+enum FilingStatus {
+  SINGLE
+  MFJ
+  MFS
+  HOH
+}
+
+enum PayoffStrategy {
+  AVALANCHE
+  SNOWBALL
+}
+
+type User {
+  id: ID!
+  identityProviderId: String!
+  email: String!
+  returnType: ReturnType!
+  safeWithdrawalRate: String!
+  currencyType: String!
+  inflationRate: String!
+  deductionType: DeductionType!
+  deductionAmount: String
+  maxTaxBracketId: ID
+  filingStatus: FilingStatus!
+  payoffStrategy: PayoffStrategy!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateUserInput {
+  identityProviderId: String!
+  email: String!
+  returnType: ReturnType!
+  safeWithdrawalRate: String!
+  currencyType: String!
+  inflationRate: String!
+  deductionType: DeductionType!
+  deductionAmount: String
+  maxTaxBracketId: ID
+  filingStatus: FilingStatus!
+  payoffStrategy: PayoffStrategy!
+}
+
+input UpdateUserInput {
+  id: ID!
+  identityProviderId: String!
+  email: String!
+  returnType: ReturnType!
+  safeWithdrawalRate: String!
+  currencyType: String!
+  inflationRate: String!
+  deductionType: DeductionType!
+  deductionAmount: String
+  maxTaxBracketId: ID
+  filingStatus: FilingStatus!
+  payoffStrategy: PayoffStrategy!
 }
 `, BuiltIn: false},
 }
@@ -165,6 +438,39 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateUserInput2breezeᚗapiᚋgraphᚋmodelᚐCreateUserInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateUserInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateUserInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -173,6 +479,17 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -286,6 +603,189 @@ func (ec *executionContext) fieldContext_Health_timestamp(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_createUser,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().CreateUser(ctx, fc.Args["input"].(model.CreateUserInput))
+		},
+		nil,
+		ec.marshalNUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "identityProviderId":
+				return ec.fieldContext_User_identityProviderId(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "returnType":
+				return ec.fieldContext_User_returnType(ctx, field)
+			case "safeWithdrawalRate":
+				return ec.fieldContext_User_safeWithdrawalRate(ctx, field)
+			case "currencyType":
+				return ec.fieldContext_User_currencyType(ctx, field)
+			case "inflationRate":
+				return ec.fieldContext_User_inflationRate(ctx, field)
+			case "deductionType":
+				return ec.fieldContext_User_deductionType(ctx, field)
+			case "deductionAmount":
+				return ec.fieldContext_User_deductionAmount(ctx, field)
+			case "maxTaxBracketId":
+				return ec.fieldContext_User_maxTaxBracketId(ctx, field)
+			case "filingStatus":
+				return ec.fieldContext_User_filingStatus(ctx, field)
+			case "payoffStrategy":
+				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateUser,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().UpdateUser(ctx, fc.Args["input"].(model.UpdateUserInput))
+		},
+		nil,
+		ec.marshalNUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "identityProviderId":
+				return ec.fieldContext_User_identityProviderId(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "returnType":
+				return ec.fieldContext_User_returnType(ctx, field)
+			case "safeWithdrawalRate":
+				return ec.fieldContext_User_safeWithdrawalRate(ctx, field)
+			case "currencyType":
+				return ec.fieldContext_User_currencyType(ctx, field)
+			case "inflationRate":
+				return ec.fieldContext_User_inflationRate(ctx, field)
+			case "deductionType":
+				return ec.fieldContext_User_deductionType(ctx, field)
+			case "deductionAmount":
+				return ec.fieldContext_User_deductionAmount(ctx, field)
+			case "maxTaxBracketId":
+				return ec.fieldContext_User_maxTaxBracketId(ctx, field)
+			case "filingStatus":
+				return ec.fieldContext_User_filingStatus(ctx, field)
+			case "payoffStrategy":
+				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_deleteUser,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DeleteUser(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_health(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -316,6 +816,195 @@ func (ec *executionContext) fieldContext_Query_health(_ context.Context, field g
 				return ec.fieldContext_Health_timestamp(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Health", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_user,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().User(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalOUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "identityProviderId":
+				return ec.fieldContext_User_identityProviderId(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "returnType":
+				return ec.fieldContext_User_returnType(ctx, field)
+			case "safeWithdrawalRate":
+				return ec.fieldContext_User_safeWithdrawalRate(ctx, field)
+			case "currencyType":
+				return ec.fieldContext_User_currencyType(ctx, field)
+			case "inflationRate":
+				return ec.fieldContext_User_inflationRate(ctx, field)
+			case "deductionType":
+				return ec.fieldContext_User_deductionType(ctx, field)
+			case "deductionAmount":
+				return ec.fieldContext_User_deductionAmount(ctx, field)
+			case "maxTaxBracketId":
+				return ec.fieldContext_User_maxTaxBracketId(ctx, field)
+			case "filingStatus":
+				return ec.fieldContext_User_filingStatus(ctx, field)
+			case "payoffStrategy":
+				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_me,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().Me(ctx)
+		},
+		nil,
+		ec.marshalOUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_me(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "identityProviderId":
+				return ec.fieldContext_User_identityProviderId(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "returnType":
+				return ec.fieldContext_User_returnType(ctx, field)
+			case "safeWithdrawalRate":
+				return ec.fieldContext_User_safeWithdrawalRate(ctx, field)
+			case "currencyType":
+				return ec.fieldContext_User_currencyType(ctx, field)
+			case "inflationRate":
+				return ec.fieldContext_User_inflationRate(ctx, field)
+			case "deductionType":
+				return ec.fieldContext_User_deductionType(ctx, field)
+			case "deductionAmount":
+				return ec.fieldContext_User_deductionAmount(ctx, field)
+			case "maxTaxBracketId":
+				return ec.fieldContext_User_maxTaxBracketId(ctx, field)
+			case "filingStatus":
+				return ec.fieldContext_User_filingStatus(ctx, field)
+			case "payoffStrategy":
+				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_users,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().Users(ctx)
+		},
+		nil,
+		ec.marshalNUser2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐUserᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_users(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "identityProviderId":
+				return ec.fieldContext_User_identityProviderId(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "returnType":
+				return ec.fieldContext_User_returnType(ctx, field)
+			case "safeWithdrawalRate":
+				return ec.fieldContext_User_safeWithdrawalRate(ctx, field)
+			case "currencyType":
+				return ec.fieldContext_User_currencyType(ctx, field)
+			case "inflationRate":
+				return ec.fieldContext_User_inflationRate(ctx, field)
+			case "deductionType":
+				return ec.fieldContext_User_deductionType(ctx, field)
+			case "deductionAmount":
+				return ec.fieldContext_User_deductionAmount(ctx, field)
+			case "maxTaxBracketId":
+				return ec.fieldContext_User_maxTaxBracketId(ctx, field)
+			case "filingStatus":
+				return ec.fieldContext_User_filingStatus(ctx, field)
+			case "payoffStrategy":
+				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -424,6 +1113,412 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_identityProviderId(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_identityProviderId,
+		func(ctx context.Context) (any, error) {
+			return obj.IdentityProviderID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_identityProviderId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_email(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_email,
+		func(ctx context.Context) (any, error) {
+			return obj.Email, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_returnType(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_returnType,
+		func(ctx context.Context) (any, error) {
+			return obj.ReturnType, nil
+		},
+		nil,
+		ec.marshalNReturnType2breezeᚗapiᚋgraphᚋmodelᚐReturnType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_returnType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ReturnType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_safeWithdrawalRate(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_safeWithdrawalRate,
+		func(ctx context.Context) (any, error) {
+			return obj.SafeWithdrawalRate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_safeWithdrawalRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_currencyType(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_currencyType,
+		func(ctx context.Context) (any, error) {
+			return obj.CurrencyType, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_currencyType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_inflationRate(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_inflationRate,
+		func(ctx context.Context) (any, error) {
+			return obj.InflationRate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_inflationRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_deductionType(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_deductionType,
+		func(ctx context.Context) (any, error) {
+			return obj.DeductionType, nil
+		},
+		nil,
+		ec.marshalNDeductionType2breezeᚗapiᚋgraphᚋmodelᚐDeductionType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_deductionType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DeductionType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_deductionAmount(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_deductionAmount,
+		func(ctx context.Context) (any, error) {
+			return obj.DeductionAmount, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_deductionAmount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_maxTaxBracketId(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_maxTaxBracketId,
+		func(ctx context.Context) (any, error) {
+			return obj.MaxTaxBracketID, nil
+		},
+		nil,
+		ec.marshalOID2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_maxTaxBracketId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_filingStatus(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_filingStatus,
+		func(ctx context.Context) (any, error) {
+			return obj.FilingStatus, nil
+		},
+		nil,
+		ec.marshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_filingStatus(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type FilingStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_payoffStrategy(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_payoffStrategy,
+		func(ctx context.Context) (any, error) {
+			return obj.PayoffStrategy, nil
+		},
+		nil,
+		ec.marshalNPayoffStrategy2breezeᚗapiᚋgraphᚋmodelᚐPayoffStrategy,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_payoffStrategy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type PayoffStrategy does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1875,6 +2970,213 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, obj any) (model.CreateUserInput, error) {
+	var it model.CreateUserInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"identityProviderId", "email", "returnType", "safeWithdrawalRate", "currencyType", "inflationRate", "deductionType", "deductionAmount", "maxTaxBracketId", "filingStatus", "payoffStrategy"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "identityProviderId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("identityProviderId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IdentityProviderID = data
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "returnType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("returnType"))
+			data, err := ec.unmarshalNReturnType2breezeᚗapiᚋgraphᚋmodelᚐReturnType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ReturnType = data
+		case "safeWithdrawalRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("safeWithdrawalRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SafeWithdrawalRate = data
+		case "currencyType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currencyType"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CurrencyType = data
+		case "inflationRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inflationRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.InflationRate = data
+		case "deductionType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deductionType"))
+			data, err := ec.unmarshalNDeductionType2breezeᚗapiᚋgraphᚋmodelᚐDeductionType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeductionType = data
+		case "deductionAmount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deductionAmount"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeductionAmount = data
+		case "maxTaxBracketId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maxTaxBracketId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MaxTaxBracketID = data
+		case "filingStatus":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filingStatus"))
+			data, err := ec.unmarshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilingStatus = data
+		case "payoffStrategy":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payoffStrategy"))
+			data, err := ec.unmarshalNPayoffStrategy2breezeᚗapiᚋgraphᚋmodelᚐPayoffStrategy(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PayoffStrategy = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, obj any) (model.UpdateUserInput, error) {
+	var it model.UpdateUserInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "identityProviderId", "email", "returnType", "safeWithdrawalRate", "currencyType", "inflationRate", "deductionType", "deductionAmount", "maxTaxBracketId", "filingStatus", "payoffStrategy"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "identityProviderId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("identityProviderId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IdentityProviderID = data
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "returnType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("returnType"))
+			data, err := ec.unmarshalNReturnType2breezeᚗapiᚋgraphᚋmodelᚐReturnType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ReturnType = data
+		case "safeWithdrawalRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("safeWithdrawalRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SafeWithdrawalRate = data
+		case "currencyType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currencyType"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CurrencyType = data
+		case "inflationRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inflationRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.InflationRate = data
+		case "deductionType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deductionType"))
+			data, err := ec.unmarshalNDeductionType2breezeᚗapiᚋgraphᚋmodelᚐDeductionType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeductionType = data
+		case "deductionAmount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deductionAmount"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeductionAmount = data
+		case "maxTaxBracketId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maxTaxBracketId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MaxTaxBracketID = data
+		case "filingStatus":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filingStatus"))
+			data, err := ec.unmarshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilingStatus = data
+		case "payoffStrategy":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payoffStrategy"))
+			data, err := ec.unmarshalNPayoffStrategy2breezeᚗapiᚋgraphᚋmodelᚐPayoffStrategy(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PayoffStrategy = data
+		}
+	}
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1901,6 +3203,69 @@ func (ec *executionContext) _Health(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "timestamp":
 			out.Values[i] = ec._Health_timestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var mutationImplementors = []string{"Mutation"}
+
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "createUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createUser(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateUser(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteUser(ctx, field)
+			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1968,6 +3333,66 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_user(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "me":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_me(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "users":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_users(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -1976,6 +3401,104 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var userImplementors = []string{"User"}
+
+func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *model.User) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("User")
+		case "id":
+			out.Values[i] = ec._User_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "identityProviderId":
+			out.Values[i] = ec._User_identityProviderId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "email":
+			out.Values[i] = ec._User_email(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "returnType":
+			out.Values[i] = ec._User_returnType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "safeWithdrawalRate":
+			out.Values[i] = ec._User_safeWithdrawalRate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "currencyType":
+			out.Values[i] = ec._User_currencyType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "inflationRate":
+			out.Values[i] = ec._User_inflationRate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deductionType":
+			out.Values[i] = ec._User_deductionType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deductionAmount":
+			out.Values[i] = ec._User_deductionAmount(ctx, field, obj)
+		case "maxTaxBracketId":
+			out.Values[i] = ec._User_maxTaxBracketId(ctx, field, obj)
+		case "filingStatus":
+			out.Values[i] = ec._User_filingStatus(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "payoffStrategy":
+			out.Values[i] = ec._User_payoffStrategy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._User_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._User_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2350,6 +3873,31 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNCreateUserInput2breezeᚗapiᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v any) (model.CreateUserInput, error) {
+	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDeductionType2breezeᚗapiᚋgraphᚋmodelᚐDeductionType(ctx context.Context, v any) (model.DeductionType, error) {
+	var res model.DeductionType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDeductionType2breezeᚗapiᚋgraphᚋmodelᚐDeductionType(ctx context.Context, sel ast.SelectionSet, v model.DeductionType) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus(ctx context.Context, v any) (model.FilingStatus, error) {
+	var res model.FilingStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus(ctx context.Context, sel ast.SelectionSet, v model.FilingStatus) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNHealth2breezeᚗapiᚋgraphᚋmodelᚐHealth(ctx context.Context, sel ast.SelectionSet, v model.Health) graphql.Marshaler {
 	return ec._Health(ctx, sel, &v)
 }
@@ -2362,6 +3910,42 @@ func (ec *executionContext) marshalNHealth2ᚖbreezeᚗapiᚋgraphᚋmodelᚐHea
 		return graphql.Null
 	}
 	return ec._Health(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNPayoffStrategy2breezeᚗapiᚋgraphᚋmodelᚐPayoffStrategy(ctx context.Context, v any) (model.PayoffStrategy, error) {
+	var res model.PayoffStrategy
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPayoffStrategy2breezeᚗapiᚋgraphᚋmodelᚐPayoffStrategy(ctx context.Context, sel ast.SelectionSet, v model.PayoffStrategy) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNReturnType2breezeᚗapiᚋgraphᚋmodelᚐReturnType(ctx context.Context, v any) (model.ReturnType, error) {
+	var res model.ReturnType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNReturnType2breezeᚗapiᚋgraphᚋmodelᚐReturnType(ctx context.Context, sel ast.SelectionSet, v model.ReturnType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
@@ -2378,6 +3962,41 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUpdateUserInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v any) (model.UpdateUserInput, error) {
+	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUser2breezeᚗapiᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+	return ec._User(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUser2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -2551,6 +4170,24 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalID(*v)
+	return res
+}
+
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {
 	if v == nil {
 		return nil, nil
@@ -2567,6 +4204,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

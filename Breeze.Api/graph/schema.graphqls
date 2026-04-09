@@ -1,8 +1,85 @@
 type Query {
   health: Health!
+  user(id: ID!): User
+  me: User
+  users: [User!]!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  deleteUser(id: ID!): Boolean!
 }
 
 type Health {
   status: String!
   timestamp: String!
+}
+
+enum ReturnType {
+  REAL
+  NOMINAL
+}
+
+enum DeductionType {
+  STANDARD
+  ITEMIZED
+}
+
+enum FilingStatus {
+  SINGLE
+  MFJ
+  MFS
+  HOH
+}
+
+enum PayoffStrategy {
+  AVALANCHE
+  SNOWBALL
+}
+
+type User {
+  id: ID!
+  identityProviderId: String!
+  email: String!
+  returnType: ReturnType!
+  safeWithdrawalRate: String!
+  currencyType: String!
+  inflationRate: String!
+  deductionType: DeductionType!
+  deductionAmount: String
+  maxTaxBracketId: ID
+  filingStatus: FilingStatus!
+  payoffStrategy: PayoffStrategy!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateUserInput {
+  identityProviderId: String!
+  email: String!
+  returnType: ReturnType!
+  safeWithdrawalRate: String!
+  currencyType: String!
+  inflationRate: String!
+  deductionType: DeductionType!
+  deductionAmount: String
+  maxTaxBracketId: ID
+  filingStatus: FilingStatus!
+  payoffStrategy: PayoffStrategy!
+}
+
+input UpdateUserInput {
+  id: ID!
+  identityProviderId: String!
+  email: String!
+  returnType: ReturnType!
+  safeWithdrawalRate: String!
+  currencyType: String!
+  inflationRate: String!
+  deductionType: DeductionType!
+  deductionAmount: String
+  maxTaxBracketId: ID
+  filingStatus: FilingStatus!
+  payoffStrategy: PayoffStrategy!
 }

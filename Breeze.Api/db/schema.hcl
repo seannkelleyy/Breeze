@@ -4,7 +4,27 @@ extension "pgcrypto" {
   schema = schema.public
 }
 
-table "users" {
+enum "filing_status" {
+  schema = schema.public
+  values = ["SINGLE", "MFJ", "MFS", "HOH"]
+}
+
+enum "return_type" {
+  schema = schema.public
+  values = ["REAL", "NOMINAL"]
+}
+
+enum "deduction_type" {
+  schema = schema.public
+  values = ["STANDARD", "ITEMIZED"]
+}
+
+enum "payoff_strategy" {
+  schema = schema.public
+  values = ["AVALANCHE", "SNOWBALL"]
+}
+
+table "tax_brackets" {
   schema = schema.public
 
   column "id" {
@@ -13,8 +33,28 @@ table "users" {
     default = sql("gen_random_uuid()")
   }
 
-  column "email" {
-    type = varchar(255)
+  column "year" {
+    type = int
+    null = false
+  }
+
+  column "filing_status" {
+    type = enum.filing_status
+    null = false
+  }
+
+  column "minimum_amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "maximum_amount" {
+    type = numeric(12,2)
+    null = true
+  }
+
+  column "rate" {
+    type = decimal(5,4)
     null = false
   }
 
@@ -39,8 +79,113 @@ table "users" {
     columns = [column.id]
   }
 
+  index "idx_tax_brackets_year_status" {
+    columns = [column.year, column.filing_status]
+  }
+
+  index "idx_tax_brackets_year_status_min" {
+    columns = [column.year, column.filing_status, column.minimum_amount]
+  }
+}
+
+table "users" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "email" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "identity_provider_id" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "return_type" {
+    type = enum.return_type
+    null = false
+  }
+
+  column "safe_withdrawal_rate" {
+    type = decimal(5,4)
+    null = false
+  }
+
+  column "currency_type" {
+    type = varchar(10)
+    null = false
+  }
+
+  column "inflation_rate" {
+    type = decimal(5,4)
+    null = false
+  }
+
+  column "deduction_type" {
+    type = enum.deduction_type
+    null = false
+  }
+
+  column "deduction_amount" {
+    type = numeric(12,2)
+    null = true
+  }
+
+  column "max_tax_bracket_id" {
+    type = uuid
+    null = true
+  }
+
+  column "filing_status" {
+    type = enum.filing_status
+    null = false
+  }
+
+  column "payoff_strategy" {
+    type = enum.payoff_strategy
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_users_max_tax_bracket" {
+    columns     = [column.max_tax_bracket_id]
+    ref_columns = [table.tax_brackets.column.id]
+    on_delete   = SET_NULL
+  }
+
   index "idx_users_email" {
     columns = [column.email]
+    unique  = true
+  }
+
+  index "idx_users_identity_provider_id" {
+    columns = [column.identity_provider_id]
     unique  = true
   }
 

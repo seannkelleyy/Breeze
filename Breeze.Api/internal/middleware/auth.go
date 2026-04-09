@@ -11,7 +11,7 @@ import (
 
 // RequireAuth validates the Clerk JWT on incoming requests.
 func RequireAuth(next http.Handler) http.Handler {
-	return clerkhttp.WithHeaderAuthorization()(next)
+	return clerkhttp.RequireHeaderAuthorization()(next)
 }
 
 // UserIDFromCtx extracts the Clerk user ID from the request context.
