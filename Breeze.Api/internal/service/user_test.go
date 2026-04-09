@@ -16,12 +16,12 @@ import (
 
 // mockQuerier is a minimal mock of sqlc.Querier for testing
 type mockQuerier struct {
-	createUserFunc                   func(context.Context, sqlc.CreateUserParams) (sqlc.CreateUserRow, error)
-	getUserByIDFunc                  func(context.Context, uuid.UUID) (sqlc.GetUserByIDRow, error)
-	getUserByIdentityProviderIDFunc  func(context.Context, string) (sqlc.GetUserByIdentityProviderIDRow, error)
-	listUsersFunc                    func(context.Context) ([]sqlc.ListUsersRow, error)
-	updateUserFunc                   func(context.Context, sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error)
-	softDeleteUserFunc               func(context.Context, uuid.UUID) (int64, error)
+	createUserFunc                  func(context.Context, sqlc.CreateUserParams) (sqlc.CreateUserRow, error)
+	getUserByIDFunc                 func(context.Context, uuid.UUID) (sqlc.GetUserByIDRow, error)
+	getUserByIdentityProviderIDFunc func(context.Context, string) (sqlc.GetUserByIdentityProviderIDRow, error)
+	listUsersFunc                   func(context.Context) ([]sqlc.ListUsersRow, error)
+	updateUserFunc                  func(context.Context, sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error)
+	softDeleteUserFunc              func(context.Context, uuid.UUID) (int64, error)
 }
 
 func (m *mockQuerier) CreateUser(ctx context.Context, params sqlc.CreateUserParams) (sqlc.CreateUserRow, error) {
