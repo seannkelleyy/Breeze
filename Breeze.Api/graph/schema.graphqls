@@ -3,12 +3,17 @@ type Query {
   user(id: ID!): User
   me: User
   users: [User!]!
+  asset(id: ID!): Asset
+  assets(userId: ID!): [Asset!]!
 }
 
 type Mutation {
   createUser(input: CreateUserInput!): User!
   updateUser(input: UpdateUserInput!): User!
   deleteUser(id: ID!): Boolean!
+  createAsset(input: CreateAssetInput!): Asset!
+  updateAsset(input: UpdateAssetInput!): Asset!
+  deleteAsset(id: ID!): Boolean!
 }
 
 type Health {
@@ -36,6 +41,15 @@ enum FilingStatus {
 enum PayoffStrategy {
   AVALANCHE
   SNOWBALL
+}
+
+enum AssetType {
+  CASH
+  INVESTMENT
+  RETIREMENT
+  REAL_ESTATE
+  VEHICLE
+  OTHER
 }
 
 type User {
@@ -82,4 +96,29 @@ input UpdateUserInput {
   maxTaxBracketId: ID
   filingStatus: FilingStatus!
   payoffStrategy: PayoffStrategy!
+}
+
+type Asset {
+  id: ID!
+  userId: ID!
+  name: String!
+  assetType: AssetType!
+  currentValue: String!
+  lastValueUpdatedAt: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateAssetInput {
+  userId: ID!
+  name: String!
+  assetType: AssetType!
+  currentValue: String!
+}
+
+input UpdateAssetInput {
+  id: ID!
+  name: String!
+  assetType: AssetType!
+  currentValue: String!
 }

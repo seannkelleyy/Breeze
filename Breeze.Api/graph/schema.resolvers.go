@@ -66,6 +66,54 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 	return true, nil
 }
 
+// CreateAsset is the resolver for the createAsset field.
+func (r *mutationResolver) CreateAsset(ctx context.Context, input model.CreateAssetInput) (*model.Asset, error) {
+	svcInput, err := createAssetInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	asset, err := r.AssetService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapAssetToModel(asset), nil
+}
+
+// UpdateAsset is the resolver for the updateAsset field.
+func (r *mutationResolver) UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (*model.Asset, error) {
+	svcInput, err := updateAssetInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	asset, err := r.AssetService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapAssetToModel(asset), nil
+}
+
+// DeleteAsset is the resolver for the deleteAsset field.
+func (r *mutationResolver) DeleteAsset(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid asset id: %w", err)
+	}
+
+	err = r.AssetService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
 // Health is the resolver for the health field.
 func (r *queryResolver) Health(ctx context.Context) (*model.Health, error) {
 	health, err := r.HealthService.Get(ctx)
@@ -127,6 +175,45 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 		user := users[i]
 		mapped := mapUserToModel(&user)
 		out = append(out, mapped)
+	}
+
+	return out, nil
+}
+
+// Asset is the resolver for the asset field.
+func (r *queryResolver) Asset(ctx context.Context, id string) (*model.Asset, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid asset id: %w", err)
+	}
+
+	asset, err := r.AssetService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapAssetToModel(asset), nil
+}
+
+// Assets is the resolver for the assets field.
+func (r *queryResolver) Assets(ctx context.Context, userID string) ([]*model.Asset, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	assets, err := r.AssetService.ListByUserID(ctx, parsedUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.Asset, 0, len(assets))
+	for i := range assets {
+		asset := assets[i]
+		out = append(out, mapAssetToModel(&asset))
 	}
 
 	return out, nil

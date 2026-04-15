@@ -24,6 +24,11 @@ enum "payoff_strategy" {
   values = ["AVALANCHE", "SNOWBALL"]
 }
 
+enum "asset_type" {
+  schema = schema.public
+  values = ["CASH", "INVESTMENT", "RETIREMENT", "REAL_ESTATE", "VEHICLE", "OTHER"]
+}
+
 table "tax_brackets" {
   schema = schema.public
 
@@ -191,6 +196,78 @@ table "users" {
 
   index "idx_users_active" {
     columns = [column.id]
+    where   = "deleted_at IS NULL"
+  }
+}
+
+table "assets" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "name" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "asset_type" {
+    type = enum.asset_type
+    null = false
+  }
+
+  column "current_value" {
+    type = numeric(14,2)
+    null = false
+  }
+
+  column "last_value_updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_assets_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_assets_user_id" {
+    columns = [column.user_id]
+  }
+
+  index "idx_assets_user_active" {
+    columns = [column.user_id, column.created_at]
     where   = "deleted_at IS NULL"
   }
 }

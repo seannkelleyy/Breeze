@@ -11,11 +11,16 @@ import (
 )
 
 type Querier interface {
+	CreateAsset(ctx context.Context, arg CreateAssetParams) (Asset, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	GetAssetByID(ctx context.Context, id uuid.UUID) (Asset, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error)
 	GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (GetUserByIdentityProviderIDRow, error)
+	ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]Asset, error)
 	ListUsers(ctx context.Context) ([]ListUsersRow, error)
+	SoftDeleteAsset(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteUser(ctx context.Context, id uuid.UUID) (int64, error)
+	UpdateAsset(ctx context.Context, arg UpdateAssetParams) (Asset, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error)
 }
 

@@ -6,4 +6,5 @@ import "breeze.api/internal/service"
 type Resolver struct {
 	HealthService *service.HealthService
 	UserService   *service.UserService
+	AssetService  *service.AssetService
 }

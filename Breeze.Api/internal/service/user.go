@@ -59,11 +59,20 @@ type UpdateUserInput struct {
 	PayoffStrategy     sqlc.PayoffStrategy
 }
 
-type UserService struct {
-	queries sqlc.Querier
+type userQuerier interface {
+	CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.CreateUserRow, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (sqlc.GetUserByIDRow, error)
+	GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (sqlc.GetUserByIdentityProviderIDRow, error)
+	ListUsers(ctx context.Context) ([]sqlc.ListUsersRow, error)
+	UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error)
+	SoftDeleteUser(ctx context.Context, id uuid.UUID) (int64, error)
 }
 
-func NewUserService(queries sqlc.Querier) *UserService {
+type UserService struct {
+	queries userQuerier
+}
+
+func NewUserService(queries userQuerier) *UserService {
 	return &UserService{queries: queries}
 }
 

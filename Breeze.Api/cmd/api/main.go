@@ -65,9 +65,11 @@ func main() {
 	healthService := service.NewHealthService()
 	queries := dbsqlc.New(pool)
 	userService := service.NewUserService(queries)
+	assetService := service.NewAssetService(queries)
 	resolver := &graph.Resolver{
 		HealthService: healthService,
 		UserService:   userService,
+		AssetService:  assetService,
 	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 
@@ -104,6 +106,7 @@ func main() {
 	}
 
 	slog.Info("server running", "port", port)
+	slog.Info("graphql playground", "url", fmt.Sprintf("http://localhost:%s/graphql", port))
 	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		slog.Error("server error", "error", err)
 		sentry.CaptureException(err)

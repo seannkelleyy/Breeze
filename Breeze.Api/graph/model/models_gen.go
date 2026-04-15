@@ -9,6 +9,24 @@ import (
 	"strconv"
 )
 
+type Asset struct {
+	ID                 string    `json:"id"`
+	UserID             string    `json:"userId"`
+	Name               string    `json:"name"`
+	AssetType          AssetType `json:"assetType"`
+	CurrentValue       string    `json:"currentValue"`
+	LastValueUpdatedAt string    `json:"lastValueUpdatedAt"`
+	CreatedAt          string    `json:"createdAt"`
+	UpdatedAt          string    `json:"updatedAt"`
+}
+
+type CreateAssetInput struct {
+	UserID       string    `json:"userId"`
+	Name         string    `json:"name"`
+	AssetType    AssetType `json:"assetType"`
+	CurrentValue string    `json:"currentValue"`
+}
+
 type CreateUserInput struct {
 	IdentityProviderID string         `json:"identityProviderId"`
 	Email              string         `json:"email"`
@@ -32,6 +50,13 @@ type Mutation struct {
 }
 
 type Query struct {
+}
+
+type UpdateAssetInput struct {
+	ID           string    `json:"id"`
+	Name         string    `json:"name"`
+	AssetType    AssetType `json:"assetType"`
+	CurrentValue string    `json:"currentValue"`
 }
 
 type UpdateUserInput struct {
@@ -64,6 +89,69 @@ type User struct {
 	PayoffStrategy     PayoffStrategy `json:"payoffStrategy"`
 	CreatedAt          string         `json:"createdAt"`
 	UpdatedAt          string         `json:"updatedAt"`
+}
+
+type AssetType string
+
+const (
+	AssetTypeCash       AssetType = "CASH"
+	AssetTypeInvestment AssetType = "INVESTMENT"
+	AssetTypeRetirement AssetType = "RETIREMENT"
+	AssetTypeRealEstate AssetType = "REAL_ESTATE"
+	AssetTypeVehicle    AssetType = "VEHICLE"
+	AssetTypeOther      AssetType = "OTHER"
+)
+
+var AllAssetType = []AssetType{
+	AssetTypeCash,
+	AssetTypeInvestment,
+	AssetTypeRetirement,
+	AssetTypeRealEstate,
+	AssetTypeVehicle,
+	AssetTypeOther,
+}
+
+func (e AssetType) IsValid() bool {
+	switch e {
+	case AssetTypeCash, AssetTypeInvestment, AssetTypeRetirement, AssetTypeRealEstate, AssetTypeVehicle, AssetTypeOther:
+		return true
+	}
+	return false
+}
+
+func (e AssetType) String() string {
+	return string(e)
+}
+
+func (e *AssetType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AssetType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AssetType", str)
+	}
+	return nil
+}
+
+func (e AssetType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AssetType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AssetType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type DeductionType string

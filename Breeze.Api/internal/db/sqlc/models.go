@@ -13,6 +13,52 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AssetType string
+
+const (
+	AssetTypeCASH       AssetType = "CASH"
+	AssetTypeINVESTMENT AssetType = "INVESTMENT"
+	AssetTypeRETIREMENT AssetType = "RETIREMENT"
+	AssetTypeREALESTATE AssetType = "REAL_ESTATE"
+	AssetTypeVEHICLE    AssetType = "VEHICLE"
+	AssetTypeOTHER      AssetType = "OTHER"
+)
+
+func (e *AssetType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AssetType(s)
+	case string:
+		*e = AssetType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AssetType: %T", src)
+	}
+	return nil
+}
+
+type NullAssetType struct {
+	AssetType AssetType `json:"asset_type"`
+	Valid     bool      `json:"valid"` // Valid is true if AssetType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAssetType) Scan(value interface{}) error {
+	if value == nil {
+		ns.AssetType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AssetType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAssetType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AssetType), nil
+}
+
 type DeductionType string
 
 const (
@@ -181,6 +227,18 @@ func (ns NullReturnType) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.ReturnType), nil
+}
+
+type Asset struct {
+	ID                 uuid.UUID          `json:"id"`
+	UserID             uuid.UUID          `json:"user_id"`
+	Name               string             `json:"name"`
+	AssetType          AssetType          `json:"asset_type"`
+	CurrentValue       decimal.Decimal    `json:"current_value"`
+	LastValueUpdatedAt pgtype.Timestamptz `json:"last_value_updated_at"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type TaxBracket struct {
