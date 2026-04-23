@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
-import { useForm } from '@/node_modules/react-hook-form/dist';
+import { useForm } from 'react-hook-form';
 
 import { BreezeFormDialog } from '../../../../components/common/form/BreezeFormDialog';
 

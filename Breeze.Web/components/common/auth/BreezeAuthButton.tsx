@@ -4,7 +4,7 @@ import {
   SignedOut,
   SignInButton,
   UserButton,
-} from '@/node_modules/@clerk/nextjs/dist/types';
+} from '@clerk/nextjs';
 
 const BreezeAuthButton = () => {
   return (

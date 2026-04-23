@@ -2,7 +2,7 @@
 import BreezeAuthButton from '@/components/common/auth/BreezeAuthButton';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { SignUpButton } from '@/node_modules/@clerk/nextjs/dist/types';
+import { SignUpButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Navigation } from '@/components/common/navigation';
 
@@ -12,7 +12,7 @@ const LandingPage = () => {
   const SignedIn = () => (
     <div className="flex flex-col gap-2">
       <p className="w-full text-center">Welcome, {user?.firstName}</p>
-      <Link href="/budget">
+      <Link href="/planner">
         <Button>Go to Dashboard</Button>
       </Link>
       <SignUpButton>

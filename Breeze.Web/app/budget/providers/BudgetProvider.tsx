@@ -70,6 +70,7 @@ const BudgetDataProvider: React.FC<BudgetProviderProps> = ({ children }) => {
     },
     [budget, refetchBudget, refetchCategories, refetchIncomes],
   );
+
   return (
     <BudgetContext.Provider
       value={{

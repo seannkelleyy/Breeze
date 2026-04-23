@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useRef, useState } from 'react';
 
 import { FormattedNumberInput } from '../../components/common/form/FormattedNumberInput';

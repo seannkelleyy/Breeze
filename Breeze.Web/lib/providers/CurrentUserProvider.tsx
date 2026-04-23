@@ -30,7 +30,7 @@ import { PlannerPerson } from '@/app/planner/types/person';
 import { PlannerAccount } from '@/app/planner/types/account';
 import { AssetFinanceDetails } from '@/app/planner/types/finance';
 import { PlannerSummary } from '@/app/planner/types/planner';
-import { useUser } from '@/node_modules/@clerk/nextjs/dist/types';
+import { useUser } from '@clerk/nextjs';
 
 export type PlannerRetirementMethod = 'target-amount' | 'fire' | 'income-replacement';
 
@@ -95,6 +95,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const { user, isLoaded, isSignedIn } = useUser();
   const { getOne, put } = useHttp();
   const loadedPreferencesForUserRef = useRef<string | null>(null);
+  const hasResetSignedOutDefaultsRef = useRef(false);
   const [currencyCode, setCurrencyCode] = useState('USD');
   const [returnDisplayMode, setReturnDisplayMode] = useState<'real' | 'nominal'>(
     PLANNER_DEFAULT_RETURN_DISPLAY_MODE,
@@ -208,6 +209,11 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     }
 
     if (!isSignedIn) {
+      if (hasResetSignedOutDefaultsRef.current) {
+        return;
+      }
+
+      hasResetSignedOutDefaultsRef.current = true;
       loadedPreferencesForUserRef.current = null;
       setCurrencyCode('USD');
       setReturnDisplayMode(PLANNER_DEFAULT_RETURN_DISPLAY_MODE);
@@ -223,6 +229,8 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       setPlannerAssetFinanceDetailsByAccountId({});
       return;
     }
+
+    hasResetSignedOutDefaultsRef.current = false;
 
     const userId = user?.id ?? '';
     if (!userId) {

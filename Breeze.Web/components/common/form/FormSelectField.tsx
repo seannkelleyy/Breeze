@@ -1,5 +1,5 @@
 'use client';
-import { Controller, FieldValues, Path, UseFormReturn } from '@/node_modules/react-hook-form/dist';
+import { Controller, FieldValues, Path, UseFormReturn } from 'react-hook-form';
 import {
   Select,
   SelectContent,

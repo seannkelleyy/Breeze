@@ -1,4 +1,4 @@
-import { UseFormReturn } from '@/node_modules/react-hook-form/dist';
+import { UseFormReturn } from 'react-hook-form';
 
 import { FormInputField } from '../../../../components/common/form/FormInputField';
 import { BudgetFormData } from '../../types/budget';

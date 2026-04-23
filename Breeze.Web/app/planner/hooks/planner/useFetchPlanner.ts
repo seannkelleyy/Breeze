@@ -1,25 +1,32 @@
 import { useCallback } from 'react';
 
-import { useAuth } from '@/node_modules/@clerk/nextjs/dist/types';
 import { useQuery } from '@tanstack/react-query';
 import { PlannerResponse } from '../../types/planner';
-import { usePlanner } from './index';
 
 const useFetchPlanner = () => {
-  const { isSignedIn } = useAuth();
-  const { getPlanner } = usePlanner();
-
   const fetchPlanner = useCallback(() => {
-    return getPlanner();
-  }, [getPlanner]);
+    const now = new Date().toISOString();
+    return Promise.resolve({
+      id: 0,
+      userId: '',
+      desiredInvestmentAmount: 0,
+      monthlyExpenses: 0,
+      inflationRate: 3,
+      safeWithdrawalRate: 4,
+      people: [],
+      accounts: [],
+      createdAtUtc: now,
+      updatedAtUtc: now,
+    });
+  }, []);
 
   return useQuery<PlannerResponse, Error>({
     queryKey: ['planner'],
     queryFn: fetchPlanner,
-    refetchInterval: 180 * 1000,
+    refetchInterval: false,
     retryDelay: 1 * 1000,
-    retry: 3,
-    enabled: Boolean(isSignedIn),
+    retry: 0,
+    enabled: true,
   });
 };
 

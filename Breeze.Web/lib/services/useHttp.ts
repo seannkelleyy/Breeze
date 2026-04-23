@@ -1,4 +1,4 @@
-import { useAuth } from '@/node_modules/@clerk/nextjs/dist/types';
+import { useAuth } from '@clerk/nextjs';
 import axios, { AxiosError } from 'axios';
 
 const handleError = (error: AxiosError) => {
@@ -57,7 +57,6 @@ const useHttp = () => {
     return [[]] as T[][];
   };
 
-  // Used for paging: Get headers alongside data
   const getManyHeader = async <T>(
     relativeUri: string,
   ): Promise<{ data: T[]; headers: unknown }> => {

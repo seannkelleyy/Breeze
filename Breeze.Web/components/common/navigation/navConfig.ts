@@ -52,18 +52,18 @@ export const externalNavItems: ReadonlyArray<ExternalNavItem> = [
 
 export const routeNavItems: ReadonlyArray<RouteNavItem> = [
   {
-    label: 'Budget Dashboard',
+    label: 'Budget',
     to: '/budget',
-    title: 'Budget Dashboard',
+    title: 'Budget',
+  },
+  {
+    label: 'Mortgage',
+    to: '/mortgage',
+    title: 'Mortgage',
   },
   {
     label: 'Planner',
     to: '/planner',
     title: 'Planner',
-  },
-  {
-    label: 'Mortgage Tools',
-    to: '/mortgage',
-    title: 'Mortgage Tools',
   },
 ];

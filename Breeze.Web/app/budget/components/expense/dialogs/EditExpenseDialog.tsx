@@ -7,7 +7,7 @@ import { FormInputField } from '../../../../../components/common/form/FormInputF
 import { FormSelectField } from '../../../../../components/common/form/FormSelectField';
 import { useDeleteExpense, usePatchExpense } from '@/app/budget/hooks/expense/index';
 import { Expense, expenseFormSchema } from '@/app/budget/types/expense';
-import { useForm } from '@/node_modules/react-hook-form/dist';
+import { useForm } from 'react-hook-form';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import DeleteDialog from '@/components/common/dialog/DeleteDialog';
 

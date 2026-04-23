@@ -2,7 +2,7 @@
 import { CurrentUserProvider } from '@/lib/providers/CurrentUserProvider';
 import { ThemeProvider } from '@/lib/providers/ThemeProvider';
 import { queryClient } from '@/lib/queryClient';
-import { ClerkProvider } from '@/node_modules/@clerk/nextjs/dist/types';
+import { ClerkProvider } from '@clerk/nextjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
