@@ -27,6 +27,17 @@ type CreateAssetInput struct {
 	CurrentValue string    `json:"currentValue"`
 }
 
+type CreateLiabilityInput struct {
+	UserID             string        `json:"userId"`
+	Name               string        `json:"name"`
+	LiabilityType      LiabilityType `json:"liabilityType"`
+	CurrentBalance     string        `json:"currentBalance"`
+	InterestRate       string        `json:"interestRate"`
+	MinimumPayment     string        `json:"minimumPayment"`
+	TargetExtraPayment string        `json:"targetExtraPayment"`
+	PayoffPriority     int           `json:"payoffPriority"`
+}
+
 type CreateTaxBracketInput struct {
 	Year          int          `json:"year"`
 	FilingStatus  FilingStatus `json:"filingStatus"`
@@ -54,6 +65,21 @@ type Health struct {
 	Timestamp string `json:"timestamp"`
 }
 
+type Liability struct {
+	ID                   string        `json:"id"`
+	UserID               string        `json:"userId"`
+	Name                 string        `json:"name"`
+	LiabilityType        LiabilityType `json:"liabilityType"`
+	CurrentBalance       string        `json:"currentBalance"`
+	InterestRate         string        `json:"interestRate"`
+	MinimumPayment       string        `json:"minimumPayment"`
+	TargetExtraPayment   string        `json:"targetExtraPayment"`
+	PayoffPriority       int           `json:"payoffPriority"`
+	LastBalanceUpdatedAt string        `json:"lastBalanceUpdatedAt"`
+	CreatedAt            string        `json:"createdAt"`
+	UpdatedAt            string        `json:"updatedAt"`
+}
+
 type Mutation struct {
 }
 
@@ -76,6 +102,17 @@ type UpdateAssetInput struct {
 	Name         string    `json:"name"`
 	AssetType    AssetType `json:"assetType"`
 	CurrentValue string    `json:"currentValue"`
+}
+
+type UpdateLiabilityInput struct {
+	ID                 string        `json:"id"`
+	Name               string        `json:"name"`
+	LiabilityType      LiabilityType `json:"liabilityType"`
+	CurrentBalance     string        `json:"currentBalance"`
+	InterestRate       string        `json:"interestRate"`
+	MinimumPayment     string        `json:"minimumPayment"`
+	TargetExtraPayment string        `json:"targetExtraPayment"`
+	PayoffPriority     int           `json:"payoffPriority"`
 }
 
 type UpdateTaxBracketInput struct {
@@ -291,6 +328,69 @@ func (e *FilingStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (e FilingStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type LiabilityType string
+
+const (
+	LiabilityTypeMortgage     LiabilityType = "MORTGAGE"
+	LiabilityTypeCreditCard   LiabilityType = "CREDIT_CARD"
+	LiabilityTypeStudentLoan  LiabilityType = "STUDENT_LOAN"
+	LiabilityTypeAutoLoan     LiabilityType = "AUTO_LOAN"
+	LiabilityTypePersonalLoan LiabilityType = "PERSONAL_LOAN"
+	LiabilityTypeOther        LiabilityType = "OTHER"
+)
+
+var AllLiabilityType = []LiabilityType{
+	LiabilityTypeMortgage,
+	LiabilityTypeCreditCard,
+	LiabilityTypeStudentLoan,
+	LiabilityTypeAutoLoan,
+	LiabilityTypePersonalLoan,
+	LiabilityTypeOther,
+}
+
+func (e LiabilityType) IsValid() bool {
+	switch e {
+	case LiabilityTypeMortgage, LiabilityTypeCreditCard, LiabilityTypeStudentLoan, LiabilityTypeAutoLoan, LiabilityTypePersonalLoan, LiabilityTypeOther:
+		return true
+	}
+	return false
+}
+
+func (e LiabilityType) String() string {
+	return string(e)
+}
+
+func (e *LiabilityType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LiabilityType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LiabilityType", str)
+	}
+	return nil
+}
+
+func (e LiabilityType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *LiabilityType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e LiabilityType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

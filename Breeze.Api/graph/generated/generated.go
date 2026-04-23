@@ -51,14 +51,32 @@ type ComplexityRoot struct {
 		Timestamp func(childComplexity int) int
 	}
 
+	Liability struct {
+		CreatedAt            func(childComplexity int) int
+		CurrentBalance       func(childComplexity int) int
+		ID                   func(childComplexity int) int
+		InterestRate         func(childComplexity int) int
+		LastBalanceUpdatedAt func(childComplexity int) int
+		LiabilityType        func(childComplexity int) int
+		MinimumPayment       func(childComplexity int) int
+		Name                 func(childComplexity int) int
+		PayoffPriority       func(childComplexity int) int
+		TargetExtraPayment   func(childComplexity int) int
+		UpdatedAt            func(childComplexity int) int
+		UserID               func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateAsset      func(childComplexity int, input model.CreateAssetInput) int
+		CreateLiability  func(childComplexity int, input model.CreateLiabilityInput) int
 		CreateTaxBracket func(childComplexity int, input model.CreateTaxBracketInput) int
 		CreateUser       func(childComplexity int, input model.CreateUserInput) int
 		DeleteAsset      func(childComplexity int, id string) int
+		DeleteLiability  func(childComplexity int, id string) int
 		DeleteTaxBracket func(childComplexity int, id string) int
 		DeleteUser       func(childComplexity int, id string) int
 		UpdateAsset      func(childComplexity int, input model.UpdateAssetInput) int
+		UpdateLiability  func(childComplexity int, input model.UpdateLiabilityInput) int
 		UpdateTaxBracket func(childComplexity int, input model.UpdateTaxBracketInput) int
 		UpdateUser       func(childComplexity int, input model.UpdateUserInput) int
 	}
@@ -67,6 +85,8 @@ type ComplexityRoot struct {
 		Asset       func(childComplexity int, id string) int
 		Assets      func(childComplexity int, userID string) int
 		Health      func(childComplexity int) int
+		Liabilities func(childComplexity int, userID string) int
+		Liability   func(childComplexity int, id string) int
 		Me          func(childComplexity int) int
 		TaxBracket  func(childComplexity int, id string) int
 		TaxBrackets func(childComplexity int, year int, filingStatus model.FilingStatus) int
@@ -110,6 +130,9 @@ type MutationResolver interface {
 	CreateAsset(ctx context.Context, input model.CreateAssetInput) (*model.Asset, error)
 	UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (*model.Asset, error)
 	DeleteAsset(ctx context.Context, id string) (bool, error)
+	CreateLiability(ctx context.Context, input model.CreateLiabilityInput) (*model.Liability, error)
+	UpdateLiability(ctx context.Context, input model.UpdateLiabilityInput) (*model.Liability, error)
+	DeleteLiability(ctx context.Context, id string) (bool, error)
 	CreateTaxBracket(ctx context.Context, input model.CreateTaxBracketInput) (*model.TaxBracket, error)
 	UpdateTaxBracket(ctx context.Context, input model.UpdateTaxBracketInput) (*model.TaxBracket, error)
 	DeleteTaxBracket(ctx context.Context, id string) (bool, error)
@@ -121,6 +144,8 @@ type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
 	Asset(ctx context.Context, id string) (*model.Asset, error)
 	Assets(ctx context.Context, userID string) ([]*model.Asset, error)
+	Liability(ctx context.Context, id string) (*model.Liability, error)
+	Liabilities(ctx context.Context, userID string) ([]*model.Liability, error)
 	TaxBracket(ctx context.Context, id string) (*model.TaxBracket, error)
 	TaxBrackets(ctx context.Context, year int, filingStatus model.FilingStatus) ([]*model.TaxBracket, error)
 }
@@ -201,6 +226,79 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Health.Timestamp(childComplexity), true
 
+	case "Liability.createdAt":
+		if e.ComplexityRoot.Liability.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.CreatedAt(childComplexity), true
+	case "Liability.currentBalance":
+		if e.ComplexityRoot.Liability.CurrentBalance == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.CurrentBalance(childComplexity), true
+	case "Liability.id":
+		if e.ComplexityRoot.Liability.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.ID(childComplexity), true
+	case "Liability.interestRate":
+		if e.ComplexityRoot.Liability.InterestRate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.InterestRate(childComplexity), true
+	case "Liability.lastBalanceUpdatedAt":
+		if e.ComplexityRoot.Liability.LastBalanceUpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.LastBalanceUpdatedAt(childComplexity), true
+	case "Liability.liabilityType":
+		if e.ComplexityRoot.Liability.LiabilityType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.LiabilityType(childComplexity), true
+	case "Liability.minimumPayment":
+		if e.ComplexityRoot.Liability.MinimumPayment == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.MinimumPayment(childComplexity), true
+	case "Liability.name":
+		if e.ComplexityRoot.Liability.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.Name(childComplexity), true
+	case "Liability.payoffPriority":
+		if e.ComplexityRoot.Liability.PayoffPriority == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.PayoffPriority(childComplexity), true
+	case "Liability.targetExtraPayment":
+		if e.ComplexityRoot.Liability.TargetExtraPayment == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.TargetExtraPayment(childComplexity), true
+	case "Liability.updatedAt":
+		if e.ComplexityRoot.Liability.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.UpdatedAt(childComplexity), true
+	case "Liability.userId":
+		if e.ComplexityRoot.Liability.UserID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.UserID(childComplexity), true
+
 	case "Mutation.createAsset":
 		if e.ComplexityRoot.Mutation.CreateAsset == nil {
 			break
@@ -212,6 +310,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CreateAsset(childComplexity, args["input"].(model.CreateAssetInput)), true
+	case "Mutation.createLiability":
+		if e.ComplexityRoot.Mutation.CreateLiability == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createLiability_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateLiability(childComplexity, args["input"].(model.CreateLiabilityInput)), true
 	case "Mutation.createTaxBracket":
 		if e.ComplexityRoot.Mutation.CreateTaxBracket == nil {
 			break
@@ -245,6 +354,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DeleteAsset(childComplexity, args["id"].(string)), true
+	case "Mutation.deleteLiability":
+		if e.ComplexityRoot.Mutation.DeleteLiability == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteLiability_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteLiability(childComplexity, args["id"].(string)), true
 	case "Mutation.deleteTaxBracket":
 		if e.ComplexityRoot.Mutation.DeleteTaxBracket == nil {
 			break
@@ -278,6 +398,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.UpdateAsset(childComplexity, args["input"].(model.UpdateAssetInput)), true
+	case "Mutation.updateLiability":
+		if e.ComplexityRoot.Mutation.UpdateLiability == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateLiability_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpdateLiability(childComplexity, args["input"].(model.UpdateLiabilityInput)), true
 	case "Mutation.updateTaxBracket":
 		if e.ComplexityRoot.Mutation.UpdateTaxBracket == nil {
 			break
@@ -330,6 +461,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Query.Health(childComplexity), true
 
+	case "Query.liabilities":
+		if e.ComplexityRoot.Query.Liabilities == nil {
+			break
+		}
+
+		args, err := ec.field_Query_liabilities_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.Liabilities(childComplexity, args["userId"].(string)), true
+	case "Query.liability":
+		if e.ComplexityRoot.Query.Liability == nil {
+			break
+		}
+
+		args, err := ec.field_Query_liability_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.Liability(childComplexity, args["id"].(string)), true
 	case "Query.me":
 		if e.ComplexityRoot.Query.Me == nil {
 			break
@@ -519,9 +672,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateAssetInput,
+		ec.unmarshalInputCreateLiabilityInput,
 		ec.unmarshalInputCreateTaxBracketInput,
 		ec.unmarshalInputCreateUserInput,
 		ec.unmarshalInputUpdateAssetInput,
+		ec.unmarshalInputUpdateLiabilityInput,
 		ec.unmarshalInputUpdateTaxBracketInput,
 		ec.unmarshalInputUpdateUserInput,
 	)
@@ -606,6 +761,8 @@ var sources = []*ast.Source{
   users: [User!]!
   asset(id: ID!): Asset
   assets(userId: ID!): [Asset!]!
+  liability(id: ID!): Liability
+  liabilities(userId: ID!): [Liability!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
 }
@@ -617,6 +774,9 @@ type Mutation {
   createAsset(input: CreateAssetInput!): Asset!
   updateAsset(input: UpdateAssetInput!): Asset!
   deleteAsset(id: ID!): Boolean!
+  createLiability(input: CreateLiabilityInput!): Liability!
+  updateLiability(input: UpdateLiabilityInput!): Liability!
+  deleteLiability(id: ID!): Boolean!
   createTaxBracket(input: CreateTaxBracketInput!): TaxBracket!
   updateTaxBracket(input: UpdateTaxBracketInput!): TaxBracket!
   deleteTaxBracket(id: ID!): Boolean!
@@ -655,6 +815,15 @@ enum AssetType {
   RETIREMENT
   REAL_ESTATE
   VEHICLE
+  OTHER
+}
+
+enum LiabilityType {
+  MORTGAGE
+  CREDIT_CARD
+  STUDENT_LOAN
+  AUTO_LOAN
+  PERSONAL_LOAN
   OTHER
 }
 
@@ -713,6 +882,43 @@ type Asset {
   lastValueUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
+}
+
+type Liability {
+  id: ID!
+  userId: ID!
+  name: String!
+  liabilityType: LiabilityType!
+  currentBalance: String!
+  interestRate: String!
+  minimumPayment: String!
+  targetExtraPayment: String!
+  payoffPriority: Int!
+  lastBalanceUpdatedAt: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateLiabilityInput {
+  userId: ID!
+  name: String!
+  liabilityType: LiabilityType!
+  currentBalance: String!
+  interestRate: String!
+  minimumPayment: String!
+  targetExtraPayment: String!
+  payoffPriority: Int!
+}
+
+input UpdateLiabilityInput {
+  id: ID!
+  name: String!
+  liabilityType: LiabilityType!
+  currentBalance: String!
+  interestRate: String!
+  minimumPayment: String!
+  targetExtraPayment: String!
+  payoffPriority: Int!
 }
 
 type TaxBracket {
@@ -775,6 +981,17 @@ func (ec *executionContext) field_Mutation_createAsset_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createLiability_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateLiabilityInput2breezeᚗapiᚋgraphᚋmodelᚐCreateLiabilityInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createTaxBracket_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -798,6 +1015,17 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 }
 
 func (ec *executionContext) field_Mutation_deleteAsset_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteLiability_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
@@ -834,6 +1062,17 @@ func (ec *executionContext) field_Mutation_updateAsset_args(ctx context.Context,
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateAssetInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateAssetInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateLiability_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateLiabilityInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateLiabilityInput)
 	if err != nil {
 		return nil, err
 	}
@@ -893,6 +1132,28 @@ func (ec *executionContext) field_Query_assets_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["userId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_liabilities_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["userId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_liability_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -1276,6 +1537,354 @@ func (ec *executionContext) fieldContext_Health_timestamp(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Liability_id(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_userId(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_userId,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_name(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_liabilityType(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_liabilityType,
+		func(ctx context.Context) (any, error) {
+			return obj.LiabilityType, nil
+		},
+		nil,
+		ec.marshalNLiabilityType2breezeᚗapiᚋgraphᚋmodelᚐLiabilityType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_liabilityType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type LiabilityType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_currentBalance(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_currentBalance,
+		func(ctx context.Context) (any, error) {
+			return obj.CurrentBalance, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_currentBalance(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_interestRate(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_interestRate,
+		func(ctx context.Context) (any, error) {
+			return obj.InterestRate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_interestRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_minimumPayment(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_minimumPayment,
+		func(ctx context.Context) (any, error) {
+			return obj.MinimumPayment, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_minimumPayment(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_targetExtraPayment(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_targetExtraPayment,
+		func(ctx context.Context) (any, error) {
+			return obj.TargetExtraPayment, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_targetExtraPayment(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_payoffPriority(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_payoffPriority,
+		func(ctx context.Context) (any, error) {
+			return obj.PayoffPriority, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_payoffPriority(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_lastBalanceUpdatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_lastBalanceUpdatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.LastBalanceUpdatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_lastBalanceUpdatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1612,6 +2221,181 @@ func (ec *executionContext) fieldContext_Mutation_deleteAsset(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteAsset_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createLiability(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_createLiability,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().CreateLiability(ctx, fc.Args["input"].(model.CreateLiabilityInput))
+		},
+		nil,
+		ec.marshalNLiability2ᚖbreezeᚗapiᚋgraphᚋmodelᚐLiability,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createLiability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Liability_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Liability_userId(ctx, field)
+			case "name":
+				return ec.fieldContext_Liability_name(ctx, field)
+			case "liabilityType":
+				return ec.fieldContext_Liability_liabilityType(ctx, field)
+			case "currentBalance":
+				return ec.fieldContext_Liability_currentBalance(ctx, field)
+			case "interestRate":
+				return ec.fieldContext_Liability_interestRate(ctx, field)
+			case "minimumPayment":
+				return ec.fieldContext_Liability_minimumPayment(ctx, field)
+			case "targetExtraPayment":
+				return ec.fieldContext_Liability_targetExtraPayment(ctx, field)
+			case "payoffPriority":
+				return ec.fieldContext_Liability_payoffPriority(ctx, field)
+			case "lastBalanceUpdatedAt":
+				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Liability_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Liability_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Liability", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createLiability_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateLiability(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateLiability,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().UpdateLiability(ctx, fc.Args["input"].(model.UpdateLiabilityInput))
+		},
+		nil,
+		ec.marshalNLiability2ᚖbreezeᚗapiᚋgraphᚋmodelᚐLiability,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateLiability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Liability_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Liability_userId(ctx, field)
+			case "name":
+				return ec.fieldContext_Liability_name(ctx, field)
+			case "liabilityType":
+				return ec.fieldContext_Liability_liabilityType(ctx, field)
+			case "currentBalance":
+				return ec.fieldContext_Liability_currentBalance(ctx, field)
+			case "interestRate":
+				return ec.fieldContext_Liability_interestRate(ctx, field)
+			case "minimumPayment":
+				return ec.fieldContext_Liability_minimumPayment(ctx, field)
+			case "targetExtraPayment":
+				return ec.fieldContext_Liability_targetExtraPayment(ctx, field)
+			case "payoffPriority":
+				return ec.fieldContext_Liability_payoffPriority(ctx, field)
+			case "lastBalanceUpdatedAt":
+				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Liability_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Liability_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Liability", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateLiability_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteLiability(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_deleteLiability,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DeleteLiability(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteLiability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteLiability_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2113,6 +2897,140 @@ func (ec *executionContext) fieldContext_Query_assets(ctx context.Context, field
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_assets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_liability(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_liability,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().Liability(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalOLiability2ᚖbreezeᚗapiᚋgraphᚋmodelᚐLiability,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_liability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Liability_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Liability_userId(ctx, field)
+			case "name":
+				return ec.fieldContext_Liability_name(ctx, field)
+			case "liabilityType":
+				return ec.fieldContext_Liability_liabilityType(ctx, field)
+			case "currentBalance":
+				return ec.fieldContext_Liability_currentBalance(ctx, field)
+			case "interestRate":
+				return ec.fieldContext_Liability_interestRate(ctx, field)
+			case "minimumPayment":
+				return ec.fieldContext_Liability_minimumPayment(ctx, field)
+			case "targetExtraPayment":
+				return ec.fieldContext_Liability_targetExtraPayment(ctx, field)
+			case "payoffPriority":
+				return ec.fieldContext_Liability_payoffPriority(ctx, field)
+			case "lastBalanceUpdatedAt":
+				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Liability_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Liability_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Liability", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_liability_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_liabilities(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_liabilities,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().Liabilities(ctx, fc.Args["userId"].(string))
+		},
+		nil,
+		ec.marshalNLiability2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐLiabilityᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_liabilities(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Liability_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Liability_userId(ctx, field)
+			case "name":
+				return ec.fieldContext_Liability_name(ctx, field)
+			case "liabilityType":
+				return ec.fieldContext_Liability_liabilityType(ctx, field)
+			case "currentBalance":
+				return ec.fieldContext_Liability_currentBalance(ctx, field)
+			case "interestRate":
+				return ec.fieldContext_Liability_interestRate(ctx, field)
+			case "minimumPayment":
+				return ec.fieldContext_Liability_minimumPayment(ctx, field)
+			case "targetExtraPayment":
+				return ec.fieldContext_Liability_targetExtraPayment(ctx, field)
+			case "payoffPriority":
+				return ec.fieldContext_Liability_payoffPriority(ctx, field)
+			case "lastBalanceUpdatedAt":
+				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Liability_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Liability_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Liability", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_liabilities_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4480,6 +5398,85 @@ func (ec *executionContext) unmarshalInputCreateAssetInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCreateLiabilityInput(ctx context.Context, obj any) (model.CreateLiabilityInput, error) {
+	var it model.CreateLiabilityInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"userId", "name", "liabilityType", "currentBalance", "interestRate", "minimumPayment", "targetExtraPayment", "payoffPriority"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "userId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserID = data
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "liabilityType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("liabilityType"))
+			data, err := ec.unmarshalNLiabilityType2breezeᚗapiᚋgraphᚋmodelᚐLiabilityType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.LiabilityType = data
+		case "currentBalance":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentBalance"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CurrentBalance = data
+		case "interestRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("interestRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.InterestRate = data
+		case "minimumPayment":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("minimumPayment"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MinimumPayment = data
+		case "targetExtraPayment":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetExtraPayment"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TargetExtraPayment = data
+		case "payoffPriority":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payoffPriority"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PayoffPriority = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateTaxBracketInput(ctx context.Context, obj any) (model.CreateTaxBracketInput, error) {
 	var it model.CreateTaxBracketInput
 	if obj == nil {
@@ -4684,6 +5681,85 @@ func (ec *executionContext) unmarshalInputUpdateAssetInput(ctx context.Context, 
 				return it, err
 			}
 			it.CurrentValue = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateLiabilityInput(ctx context.Context, obj any) (model.UpdateLiabilityInput, error) {
+	var it model.UpdateLiabilityInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "name", "liabilityType", "currentBalance", "interestRate", "minimumPayment", "targetExtraPayment", "payoffPriority"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "liabilityType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("liabilityType"))
+			data, err := ec.unmarshalNLiabilityType2breezeᚗapiᚋgraphᚋmodelᚐLiabilityType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.LiabilityType = data
+		case "currentBalance":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentBalance"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CurrentBalance = data
+		case "interestRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("interestRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.InterestRate = data
+		case "minimumPayment":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("minimumPayment"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MinimumPayment = data
+		case "targetExtraPayment":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetExtraPayment"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TargetExtraPayment = data
+		case "payoffPriority":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payoffPriority"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PayoffPriority = data
 		}
 	}
 	return it, nil
@@ -4987,6 +6063,100 @@ func (ec *executionContext) _Health(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var liabilityImplementors = []string{"Liability"}
+
+func (ec *executionContext) _Liability(ctx context.Context, sel ast.SelectionSet, obj *model.Liability) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, liabilityImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Liability")
+		case "id":
+			out.Values[i] = ec._Liability_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._Liability_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Liability_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "liabilityType":
+			out.Values[i] = ec._Liability_liabilityType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "currentBalance":
+			out.Values[i] = ec._Liability_currentBalance(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "interestRate":
+			out.Values[i] = ec._Liability_interestRate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "minimumPayment":
+			out.Values[i] = ec._Liability_minimumPayment(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "targetExtraPayment":
+			out.Values[i] = ec._Liability_targetExtraPayment(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "payoffPriority":
+			out.Values[i] = ec._Liability_payoffPriority(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lastBalanceUpdatedAt":
+			out.Values[i] = ec._Liability_lastBalanceUpdatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._Liability_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Liability_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -5044,6 +6214,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteAsset":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteAsset(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createLiability":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createLiability(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateLiability":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateLiability(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteLiability":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteLiability(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -5222,6 +6413,47 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_assets(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "liability":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_liability(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "liabilities":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_liabilities(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -5871,6 +7103,11 @@ func (ec *executionContext) unmarshalNCreateAssetInput2breezeᚗapiᚋgraphᚋmo
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreateLiabilityInput2breezeᚗapiᚋgraphᚋmodelᚐCreateLiabilityInput(ctx context.Context, v any) (model.CreateLiabilityInput, error) {
+	res, err := ec.unmarshalInputCreateLiabilityInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateTaxBracketInput2breezeᚗapiᚋgraphᚋmodelᚐCreateTaxBracketInput(ctx context.Context, v any) (model.CreateTaxBracketInput, error) {
 	res, err := ec.unmarshalInputCreateTaxBracketInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5947,6 +7184,46 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) marshalNLiability2breezeᚗapiᚋgraphᚋmodelᚐLiability(ctx context.Context, sel ast.SelectionSet, v model.Liability) graphql.Marshaler {
+	return ec._Liability(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLiability2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐLiabilityᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Liability) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNLiability2ᚖbreezeᚗapiᚋgraphᚋmodelᚐLiability(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNLiability2ᚖbreezeᚗapiᚋgraphᚋmodelᚐLiability(ctx context.Context, sel ast.SelectionSet, v *model.Liability) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Liability(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNLiabilityType2breezeᚗapiᚋgraphᚋmodelᚐLiabilityType(ctx context.Context, v any) (model.LiabilityType, error) {
+	var res model.LiabilityType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNLiabilityType2breezeᚗapiᚋgraphᚋmodelᚐLiabilityType(ctx context.Context, sel ast.SelectionSet, v model.LiabilityType) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNPayoffStrategy2breezeᚗapiᚋgraphᚋmodelᚐPayoffStrategy(ctx context.Context, v any) (model.PayoffStrategy, error) {
 	var res model.PayoffStrategy
 	err := res.UnmarshalGQL(v)
@@ -6015,6 +7292,11 @@ func (ec *executionContext) marshalNTaxBracket2ᚖbreezeᚗapiᚋgraphᚋmodel�
 
 func (ec *executionContext) unmarshalNUpdateAssetInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateAssetInput(ctx context.Context, v any) (model.UpdateAssetInput, error) {
 	res, err := ec.unmarshalInputUpdateAssetInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateLiabilityInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateLiabilityInput(ctx context.Context, v any) (model.UpdateLiabilityInput, error) {
+	res, err := ec.unmarshalInputUpdateLiabilityInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -6252,6 +7534,13 @@ func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.Se
 	_ = ctx
 	res := graphql.MarshalID(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOLiability2ᚖbreezeᚗapiᚋgraphᚋmodelᚐLiability(ctx context.Context, sel ast.SelectionSet, v *model.Liability) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Liability(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

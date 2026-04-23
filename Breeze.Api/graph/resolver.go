@@ -7,5 +7,6 @@ type Resolver struct {
 	HealthService     *service.HealthService
 	UserService       *service.UserService
 	AssetService      *service.AssetService
+	LiabilityService  *service.LiabilityService
 	TaxBracketService *service.TaxBracketService
 }

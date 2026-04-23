@@ -145,6 +145,52 @@ func (ns NullFilingStatus) Value() (driver.Value, error) {
 	return string(ns.FilingStatus), nil
 }
 
+type LiabilityType string
+
+const (
+	LiabilityTypeMORTGAGE     LiabilityType = "MORTGAGE"
+	LiabilityTypeCREDITCARD   LiabilityType = "CREDIT_CARD"
+	LiabilityTypeSTUDENTLOAN  LiabilityType = "STUDENT_LOAN"
+	LiabilityTypeAUTOLOAN     LiabilityType = "AUTO_LOAN"
+	LiabilityTypePERSONALLOAN LiabilityType = "PERSONAL_LOAN"
+	LiabilityTypeOTHER        LiabilityType = "OTHER"
+)
+
+func (e *LiabilityType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = LiabilityType(s)
+	case string:
+		*e = LiabilityType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for LiabilityType: %T", src)
+	}
+	return nil
+}
+
+type NullLiabilityType struct {
+	LiabilityType LiabilityType `json:"liability_type"`
+	Valid         bool          `json:"valid"` // Valid is true if LiabilityType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullLiabilityType) Scan(value interface{}) error {
+	if value == nil {
+		ns.LiabilityType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.LiabilityType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullLiabilityType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.LiabilityType), nil
+}
+
 type PayoffStrategy string
 
 const (
@@ -239,6 +285,22 @@ type Asset struct {
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type Liability struct {
+	ID                   uuid.UUID          `json:"id"`
+	UserID               uuid.UUID          `json:"user_id"`
+	Name                 string             `json:"name"`
+	LiabilityType        LiabilityType      `json:"liability_type"`
+	CurrentBalance       decimal.Decimal    `json:"current_balance"`
+	InterestRate         decimal.Decimal    `json:"interest_rate"`
+	MinimumPayment       decimal.Decimal    `json:"minimum_payment"`
+	TargetExtraPayment   decimal.Decimal    `json:"target_extra_payment"`
+	PayoffPriority       int32              `json:"payoff_priority"`
+	LastBalanceUpdatedAt pgtype.Timestamptz `json:"last_balance_updated_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type TaxBracket struct {

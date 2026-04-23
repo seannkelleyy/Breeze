@@ -115,6 +115,54 @@ func (r *mutationResolver) DeleteAsset(ctx context.Context, id string) (bool, er
 	return true, nil
 }
 
+// CreateLiability is the resolver for the createLiability field.
+func (r *mutationResolver) CreateLiability(ctx context.Context, input model.CreateLiabilityInput) (*model.Liability, error) {
+	svcInput, err := createLiabilityInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	liability, err := r.LiabilityService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapLiabilityToModel(liability), nil
+}
+
+// UpdateLiability is the resolver for the updateLiability field.
+func (r *mutationResolver) UpdateLiability(ctx context.Context, input model.UpdateLiabilityInput) (*model.Liability, error) {
+	svcInput, err := updateLiabilityInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	liability, err := r.LiabilityService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapLiabilityToModel(liability), nil
+}
+
+// DeleteLiability is the resolver for the deleteLiability field.
+func (r *mutationResolver) DeleteLiability(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid liability id: %w", err)
+	}
+
+	err = r.LiabilityService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
 // CreateTaxBracket is the resolver for the createTaxBracket field.
 func (r *mutationResolver) CreateTaxBracket(ctx context.Context, input model.CreateTaxBracketInput) (*model.TaxBracket, error) {
 	svcInput, err := createTaxBracketInputFromModel(input)
@@ -263,6 +311,45 @@ func (r *queryResolver) Assets(ctx context.Context, userID string) ([]*model.Ass
 	for i := range assets {
 		asset := assets[i]
 		out = append(out, mapAssetToModel(&asset))
+	}
+
+	return out, nil
+}
+
+// Liability is the resolver for the liability field.
+func (r *queryResolver) Liability(ctx context.Context, id string) (*model.Liability, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid liability id: %w", err)
+	}
+
+	liability, err := r.LiabilityService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapLiabilityToModel(liability), nil
+}
+
+// Liabilities is the resolver for the liabilities field.
+func (r *queryResolver) Liabilities(ctx context.Context, userID string) ([]*model.Liability, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	liabilities, err := r.LiabilityService.ListByUserID(ctx, parsedUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.Liability, 0, len(liabilities))
+	for i := range liabilities {
+		liability := liabilities[i]
+		out = append(out, mapLiabilityToModel(&liability))
 	}
 
 	return out, nil

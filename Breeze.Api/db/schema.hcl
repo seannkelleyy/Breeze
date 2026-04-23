@@ -29,6 +29,11 @@ enum "asset_type" {
   values = ["CASH", "INVESTMENT", "RETIREMENT", "REAL_ESTATE", "VEHICLE", "OTHER"]
 }
 
+enum "liability_type" {
+  schema = schema.public
+  values = ["MORTGAGE", "CREDIT_CARD", "STUDENT_LOAN", "AUTO_LOAN", "PERSONAL_LOAN", "OTHER"]
+}
+
 table "tax_brackets" {
   schema = schema.public
 
@@ -267,6 +272,100 @@ table "assets" {
   }
 
   index "idx_assets_user_active" {
+    columns = [column.user_id, column.created_at]
+    where   = "deleted_at IS NULL"
+  }
+}
+
+table "liabilities" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "name" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "liability_type" {
+    type = enum.liability_type
+    null = false
+  }
+
+  column "current_balance" {
+    type = numeric(14,2)
+    null = false
+  }
+
+  column "interest_rate" {
+    type = decimal(5,4)
+    null = false
+  }
+
+  column "minimum_payment" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "target_extra_payment" {
+    type    = numeric(12,2)
+    null    = false
+    default = sql("0")
+  }
+
+  column "payoff_priority" {
+    type    = int
+    null    = false
+    default = 0
+  }
+
+  column "last_balance_updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_liabilities_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_liabilities_user_id" {
+    columns = [column.user_id]
+  }
+
+  index "idx_liabilities_user_active" {
     columns = [column.user_id, column.created_at]
     where   = "deleted_at IS NULL"
   }

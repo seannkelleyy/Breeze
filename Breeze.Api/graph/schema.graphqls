@@ -5,6 +5,8 @@ type Query {
   users: [User!]!
   asset(id: ID!): Asset
   assets(userId: ID!): [Asset!]!
+  liability(id: ID!): Liability
+  liabilities(userId: ID!): [Liability!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
 }
@@ -16,6 +18,9 @@ type Mutation {
   createAsset(input: CreateAssetInput!): Asset!
   updateAsset(input: UpdateAssetInput!): Asset!
   deleteAsset(id: ID!): Boolean!
+  createLiability(input: CreateLiabilityInput!): Liability!
+  updateLiability(input: UpdateLiabilityInput!): Liability!
+  deleteLiability(id: ID!): Boolean!
   createTaxBracket(input: CreateTaxBracketInput!): TaxBracket!
   updateTaxBracket(input: UpdateTaxBracketInput!): TaxBracket!
   deleteTaxBracket(id: ID!): Boolean!
@@ -54,6 +59,15 @@ enum AssetType {
   RETIREMENT
   REAL_ESTATE
   VEHICLE
+  OTHER
+}
+
+enum LiabilityType {
+  MORTGAGE
+  CREDIT_CARD
+  STUDENT_LOAN
+  AUTO_LOAN
+  PERSONAL_LOAN
   OTHER
 }
 
@@ -112,6 +126,43 @@ type Asset {
   lastValueUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
+}
+
+type Liability {
+  id: ID!
+  userId: ID!
+  name: String!
+  liabilityType: LiabilityType!
+  currentBalance: String!
+  interestRate: String!
+  minimumPayment: String!
+  targetExtraPayment: String!
+  payoffPriority: Int!
+  lastBalanceUpdatedAt: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateLiabilityInput {
+  userId: ID!
+  name: String!
+  liabilityType: LiabilityType!
+  currentBalance: String!
+  interestRate: String!
+  minimumPayment: String!
+  targetExtraPayment: String!
+  payoffPriority: Int!
+}
+
+input UpdateLiabilityInput {
+  id: ID!
+  name: String!
+  liabilityType: LiabilityType!
+  currentBalance: String!
+  interestRate: String!
+  minimumPayment: String!
+  targetExtraPayment: String!
+  payoffPriority: Int!
 }
 
 type TaxBracket {
