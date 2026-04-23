@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import useAssetsApi from './useAssetsApi';
 import { ApiAsset, CreateApiAssetInput } from '../../types/apiAsset';
+import useAssetsApi from './useAssetsApi';
 
 interface UseCreateAssetProps {
   userId?: string;
@@ -13,10 +13,7 @@ const useCreateAsset = ({ userId }: UseCreateAssetProps) => {
   const { createAsset } = useAssetsApi();
   const queryClient = useQueryClient();
 
-  const mutationFn = useCallback(
-    (input: CreateApiAssetInput) => createAsset(input),
-    [createAsset],
-  );
+  const mutationFn = useCallback((input: CreateApiAssetInput) => createAsset(input), [createAsset]);
 
   return useMutation<ApiAsset, Error, CreateApiAssetInput>({
     mutationFn,

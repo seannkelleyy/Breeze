@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 
-import { ApiUser } from '../../types/apiAsset';
 import useApiUserBootstrap from '@/lib/services/useApiUserBootstrap';
+import { ApiUser } from '../../types/apiAsset';
 
 interface UseApiUserProps {
   identityProviderId: string;

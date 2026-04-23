@@ -173,7 +173,10 @@ const ApiAssetsCard = () => {
           </div>
           <div className="space-y-2">
             <Label>Asset Type</Label>
-            <Select value={newAssetType} onValueChange={(value) => setNewAssetType(value as ApiAssetType)}>
+            <Select
+              value={newAssetType}
+              onValueChange={(value) => setNewAssetType(value as ApiAssetType)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
@@ -223,14 +226,19 @@ const ApiAssetsCard = () => {
           ) : null}
 
           {!assetsQuery.isLoading && sortedAssets.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No assets yet. Add your first asset above.</p>
+            <p className="text-muted-foreground text-sm">
+              No assets yet. Add your first asset above.
+            </p>
           ) : null}
 
           {sortedAssets.map((asset) => {
             const editable = getEditableAsset(asset);
 
             return (
-              <div key={asset.id} className="grid grid-cols-1 gap-3 rounded-md border p-3 md:grid-cols-12">
+              <div
+                key={asset.id}
+                className="grid grid-cols-1 gap-3 rounded-md border p-3 md:grid-cols-12"
+              >
                 <div className="space-y-2 md:col-span-4">
                   <Label>Name</Label>
                   <Input

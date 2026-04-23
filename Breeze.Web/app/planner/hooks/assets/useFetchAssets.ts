@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 
-import useAssetsApi from './useAssetsApi';
 import { ApiAsset } from '../../types/apiAsset';
+import useAssetsApi from './useAssetsApi';
 
 interface UseFetchAssetsProps {
   userId?: string;

@@ -1,10 +1,6 @@
 import useGraphql from '@/lib/services/useGraphql';
 
-import {
-  ApiAsset,
-  CreateApiAssetInput,
-  UpdateApiAssetInput,
-} from '../../types/apiAsset';
+import { ApiAsset, CreateApiAssetInput, UpdateApiAssetInput } from '../../types/apiAsset';
 
 interface AssetsPayload {
   assets: ApiAsset[];
