@@ -13,6 +13,7 @@ import (
 
 	"breeze.api/graph/generated"
 	"breeze.api/graph/model"
+	"breeze.api/internal/db/sqlc"
 	"breeze.api/internal/middleware"
 	"breeze.api/internal/service"
 	"github.com/google/uuid"
@@ -104,6 +105,54 @@ func (r *mutationResolver) DeleteAsset(ctx context.Context, id string) (bool, er
 	}
 
 	err = r.AssetService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+// CreateTaxBracket is the resolver for the createTaxBracket field.
+func (r *mutationResolver) CreateTaxBracket(ctx context.Context, input model.CreateTaxBracketInput) (*model.TaxBracket, error) {
+	svcInput, err := createTaxBracketInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	bracket, err := r.TaxBracketService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapTaxBracketToModel(bracket), nil
+}
+
+// UpdateTaxBracket is the resolver for the updateTaxBracket field.
+func (r *mutationResolver) UpdateTaxBracket(ctx context.Context, input model.UpdateTaxBracketInput) (*model.TaxBracket, error) {
+	svcInput, err := updateTaxBracketInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	bracket, err := r.TaxBracketService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapTaxBracketToModel(bracket), nil
+}
+
+// DeleteTaxBracket is the resolver for the deleteTaxBracket field.
+func (r *mutationResolver) DeleteTaxBracket(ctx context.Context, id string) (bool, error) {
+	parsedID, err := taxBracketIDFromString(id)
+	if err != nil {
+		return false, err
+	}
+
+	err = r.TaxBracketService.Delete(ctx, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -214,6 +263,45 @@ func (r *queryResolver) Assets(ctx context.Context, userID string) ([]*model.Ass
 	for i := range assets {
 		asset := assets[i]
 		out = append(out, mapAssetToModel(&asset))
+	}
+
+	return out, nil
+}
+
+// TaxBracket is the resolver for the taxBracket field.
+func (r *queryResolver) TaxBracket(ctx context.Context, id string) (*model.TaxBracket, error) {
+	parsedID, err := taxBracketIDFromString(id)
+	if err != nil {
+		return nil, err
+	}
+
+	bracket, err := r.TaxBracketService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapTaxBracketToModel(bracket), nil
+}
+
+// TaxBrackets is the resolver for the taxBrackets field.
+func (r *queryResolver) TaxBrackets(ctx context.Context, year int, filingStatus model.FilingStatus) ([]*model.TaxBracket, error) {
+	serviceYear, err := taxBracketYearFromInput(year)
+	if err != nil {
+		return nil, err
+	}
+
+	brackets, err := r.TaxBracketService.ListByYearAndFilingStatus(ctx, serviceYear, sqlc.FilingStatus(filingStatus))
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.TaxBracket, 0, len(brackets))
+	for i := range brackets {
+		bracket := brackets[i]
+		out = append(out, mapTaxBracketToModel(&bracket))
 	}
 
 	return out, nil

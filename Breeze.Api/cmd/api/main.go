@@ -66,10 +66,12 @@ func main() {
 	queries := dbsqlc.New(pool)
 	userService := service.NewUserService(queries)
 	assetService := service.NewAssetService(queries)
+	taxBracketService := service.NewTaxBracketService(queries)
 	resolver := &graph.Resolver{
-		HealthService: healthService,
-		UserService:   userService,
-		AssetService:  assetService,
+		HealthService:     healthService,
+		UserService:       userService,
+		AssetService:      assetService,
+		TaxBracketService: taxBracketService,
 	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 

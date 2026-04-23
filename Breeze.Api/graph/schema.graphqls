@@ -5,6 +5,8 @@ type Query {
   users: [User!]!
   asset(id: ID!): Asset
   assets(userId: ID!): [Asset!]!
+  taxBracket(id: ID!): TaxBracket
+  taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
 }
 
 type Mutation {
@@ -14,6 +16,9 @@ type Mutation {
   createAsset(input: CreateAssetInput!): Asset!
   updateAsset(input: UpdateAssetInput!): Asset!
   deleteAsset(id: ID!): Boolean!
+  createTaxBracket(input: CreateTaxBracketInput!): TaxBracket!
+  updateTaxBracket(input: UpdateTaxBracketInput!): TaxBracket!
+  deleteTaxBracket(id: ID!): Boolean!
 }
 
 type Health {
@@ -107,6 +112,34 @@ type Asset {
   lastValueUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
+}
+
+type TaxBracket {
+  id: ID!
+  year: Int!
+  filingStatus: FilingStatus!
+  minimumAmount: String!
+  maximumAmount: String
+  rate: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateTaxBracketInput {
+  year: Int!
+  filingStatus: FilingStatus!
+  minimumAmount: String!
+  maximumAmount: String
+  rate: String!
+}
+
+input UpdateTaxBracketInput {
+  id: ID!
+  year: Int!
+  filingStatus: FilingStatus!
+  minimumAmount: String!
+  maximumAmount: String
+  rate: String!
 }
 
 input CreateAssetInput {

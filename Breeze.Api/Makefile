@@ -16,7 +16,7 @@ SQLC=go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 GQLGEN=go run github.com/99designs/gqlgen@latest
 MIGRATION_NAME?=init
 
-.PHONY: gen migrate-diff migrate migrate-apply migrate-lint run tidy build
+.PHONY: gen migrate-diff migrate migrate-apply migrate-lint run tidy build db-up
 
 # Generate all code (sqlc then gqlgen — order matters)
 gen:
@@ -43,6 +43,10 @@ migrate-lint:
 # Run the API
 run:
 	go run ./cmd/api/...
+
+# Start Postgres from the shared compose file
+db-up:
+	docker compose -f ../compose.yaml up -d postgres
 
 # Run River job runner
 river:

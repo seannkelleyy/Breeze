@@ -52,21 +52,37 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateAsset func(childComplexity int, input model.CreateAssetInput) int
-		CreateUser  func(childComplexity int, input model.CreateUserInput) int
-		DeleteAsset func(childComplexity int, id string) int
-		DeleteUser  func(childComplexity int, id string) int
-		UpdateAsset func(childComplexity int, input model.UpdateAssetInput) int
-		UpdateUser  func(childComplexity int, input model.UpdateUserInput) int
+		CreateAsset      func(childComplexity int, input model.CreateAssetInput) int
+		CreateTaxBracket func(childComplexity int, input model.CreateTaxBracketInput) int
+		CreateUser       func(childComplexity int, input model.CreateUserInput) int
+		DeleteAsset      func(childComplexity int, id string) int
+		DeleteTaxBracket func(childComplexity int, id string) int
+		DeleteUser       func(childComplexity int, id string) int
+		UpdateAsset      func(childComplexity int, input model.UpdateAssetInput) int
+		UpdateTaxBracket func(childComplexity int, input model.UpdateTaxBracketInput) int
+		UpdateUser       func(childComplexity int, input model.UpdateUserInput) int
 	}
 
 	Query struct {
-		Asset  func(childComplexity int, id string) int
-		Assets func(childComplexity int, userID string) int
-		Health func(childComplexity int) int
-		Me     func(childComplexity int) int
-		User   func(childComplexity int, id string) int
-		Users  func(childComplexity int) int
+		Asset       func(childComplexity int, id string) int
+		Assets      func(childComplexity int, userID string) int
+		Health      func(childComplexity int) int
+		Me          func(childComplexity int) int
+		TaxBracket  func(childComplexity int, id string) int
+		TaxBrackets func(childComplexity int, year int, filingStatus model.FilingStatus) int
+		User        func(childComplexity int, id string) int
+		Users       func(childComplexity int) int
+	}
+
+	TaxBracket struct {
+		CreatedAt     func(childComplexity int) int
+		FilingStatus  func(childComplexity int) int
+		ID            func(childComplexity int) int
+		MaximumAmount func(childComplexity int) int
+		MinimumAmount func(childComplexity int) int
+		Rate          func(childComplexity int) int
+		UpdatedAt     func(childComplexity int) int
+		Year          func(childComplexity int) int
 	}
 
 	User struct {
@@ -94,6 +110,9 @@ type MutationResolver interface {
 	CreateAsset(ctx context.Context, input model.CreateAssetInput) (*model.Asset, error)
 	UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (*model.Asset, error)
 	DeleteAsset(ctx context.Context, id string) (bool, error)
+	CreateTaxBracket(ctx context.Context, input model.CreateTaxBracketInput) (*model.TaxBracket, error)
+	UpdateTaxBracket(ctx context.Context, input model.UpdateTaxBracketInput) (*model.TaxBracket, error)
+	DeleteTaxBracket(ctx context.Context, id string) (bool, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (*model.Health, error)
@@ -102,6 +121,8 @@ type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
 	Asset(ctx context.Context, id string) (*model.Asset, error)
 	Assets(ctx context.Context, userID string) ([]*model.Asset, error)
+	TaxBracket(ctx context.Context, id string) (*model.TaxBracket, error)
+	TaxBrackets(ctx context.Context, year int, filingStatus model.FilingStatus) ([]*model.TaxBracket, error)
 }
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -191,6 +212,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CreateAsset(childComplexity, args["input"].(model.CreateAssetInput)), true
+	case "Mutation.createTaxBracket":
+		if e.ComplexityRoot.Mutation.CreateTaxBracket == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createTaxBracket_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateTaxBracket(childComplexity, args["input"].(model.CreateTaxBracketInput)), true
 	case "Mutation.createUser":
 		if e.ComplexityRoot.Mutation.CreateUser == nil {
 			break
@@ -213,6 +245,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DeleteAsset(childComplexity, args["id"].(string)), true
+	case "Mutation.deleteTaxBracket":
+		if e.ComplexityRoot.Mutation.DeleteTaxBracket == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteTaxBracket_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteTaxBracket(childComplexity, args["id"].(string)), true
 	case "Mutation.deleteUser":
 		if e.ComplexityRoot.Mutation.DeleteUser == nil {
 			break
@@ -235,6 +278,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.UpdateAsset(childComplexity, args["input"].(model.UpdateAssetInput)), true
+	case "Mutation.updateTaxBracket":
+		if e.ComplexityRoot.Mutation.UpdateTaxBracket == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateTaxBracket_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpdateTaxBracket(childComplexity, args["input"].(model.UpdateTaxBracketInput)), true
 	case "Mutation.updateUser":
 		if e.ComplexityRoot.Mutation.UpdateUser == nil {
 			break
@@ -282,6 +336,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Me(childComplexity), true
+	case "Query.taxBracket":
+		if e.ComplexityRoot.Query.TaxBracket == nil {
+			break
+		}
+
+		args, err := ec.field_Query_taxBracket_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.TaxBracket(childComplexity, args["id"].(string)), true
+	case "Query.taxBrackets":
+		if e.ComplexityRoot.Query.TaxBrackets == nil {
+			break
+		}
+
+		args, err := ec.field_Query_taxBrackets_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.TaxBrackets(childComplexity, args["year"].(int), args["filingStatus"].(model.FilingStatus)), true
 	case "Query.user":
 		if e.ComplexityRoot.Query.User == nil {
 			break
@@ -299,6 +375,55 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Users(childComplexity), true
+
+	case "TaxBracket.createdAt":
+		if e.ComplexityRoot.TaxBracket.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxBracket.CreatedAt(childComplexity), true
+	case "TaxBracket.filingStatus":
+		if e.ComplexityRoot.TaxBracket.FilingStatus == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxBracket.FilingStatus(childComplexity), true
+	case "TaxBracket.id":
+		if e.ComplexityRoot.TaxBracket.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxBracket.ID(childComplexity), true
+	case "TaxBracket.maximumAmount":
+		if e.ComplexityRoot.TaxBracket.MaximumAmount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxBracket.MaximumAmount(childComplexity), true
+	case "TaxBracket.minimumAmount":
+		if e.ComplexityRoot.TaxBracket.MinimumAmount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxBracket.MinimumAmount(childComplexity), true
+	case "TaxBracket.rate":
+		if e.ComplexityRoot.TaxBracket.Rate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxBracket.Rate(childComplexity), true
+	case "TaxBracket.updatedAt":
+		if e.ComplexityRoot.TaxBracket.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxBracket.UpdatedAt(childComplexity), true
+	case "TaxBracket.year":
+		if e.ComplexityRoot.TaxBracket.Year == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxBracket.Year(childComplexity), true
 
 	case "User.createdAt":
 		if e.ComplexityRoot.User.CreatedAt == nil {
@@ -394,8 +519,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateAssetInput,
+		ec.unmarshalInputCreateTaxBracketInput,
 		ec.unmarshalInputCreateUserInput,
 		ec.unmarshalInputUpdateAssetInput,
+		ec.unmarshalInputUpdateTaxBracketInput,
 		ec.unmarshalInputUpdateUserInput,
 	)
 	first := true
@@ -479,6 +606,8 @@ var sources = []*ast.Source{
   users: [User!]!
   asset(id: ID!): Asset
   assets(userId: ID!): [Asset!]!
+  taxBracket(id: ID!): TaxBracket
+  taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
 }
 
 type Mutation {
@@ -488,6 +617,9 @@ type Mutation {
   createAsset(input: CreateAssetInput!): Asset!
   updateAsset(input: UpdateAssetInput!): Asset!
   deleteAsset(id: ID!): Boolean!
+  createTaxBracket(input: CreateTaxBracketInput!): TaxBracket!
+  updateTaxBracket(input: UpdateTaxBracketInput!): TaxBracket!
+  deleteTaxBracket(id: ID!): Boolean!
 }
 
 type Health {
@@ -583,6 +715,34 @@ type Asset {
   updatedAt: String!
 }
 
+type TaxBracket {
+  id: ID!
+  year: Int!
+  filingStatus: FilingStatus!
+  minimumAmount: String!
+  maximumAmount: String
+  rate: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateTaxBracketInput {
+  year: Int!
+  filingStatus: FilingStatus!
+  minimumAmount: String!
+  maximumAmount: String
+  rate: String!
+}
+
+input UpdateTaxBracketInput {
+  id: ID!
+  year: Int!
+  filingStatus: FilingStatus!
+  minimumAmount: String!
+  maximumAmount: String
+  rate: String!
+}
+
 input CreateAssetInput {
   userId: ID!
   name: String!
@@ -615,6 +775,17 @@ func (ec *executionContext) field_Mutation_createAsset_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createTaxBracket_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateTaxBracketInput2breezeᚗapiᚋgraphᚋmodelᚐCreateTaxBracketInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -627,6 +798,17 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 }
 
 func (ec *executionContext) field_Mutation_deleteAsset_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteTaxBracket_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
@@ -652,6 +834,17 @@ func (ec *executionContext) field_Mutation_updateAsset_args(ctx context.Context,
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateAssetInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateAssetInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateTaxBracket_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateTaxBracketInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateTaxBracketInput)
 	if err != nil {
 		return nil, err
 	}
@@ -700,6 +893,33 @@ func (ec *executionContext) field_Query_assets_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["userId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_taxBracket_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_taxBrackets_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "year", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["year"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "filingStatus", ec.unmarshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus)
+	if err != nil {
+		return nil, err
+	}
+	args["filingStatus"] = arg1
 	return args, nil
 }
 
@@ -1398,6 +1618,165 @@ func (ec *executionContext) fieldContext_Mutation_deleteAsset(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createTaxBracket(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_createTaxBracket,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().CreateTaxBracket(ctx, fc.Args["input"].(model.CreateTaxBracketInput))
+		},
+		nil,
+		ec.marshalNTaxBracket2ᚖbreezeᚗapiᚋgraphᚋmodelᚐTaxBracket,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createTaxBracket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TaxBracket_id(ctx, field)
+			case "year":
+				return ec.fieldContext_TaxBracket_year(ctx, field)
+			case "filingStatus":
+				return ec.fieldContext_TaxBracket_filingStatus(ctx, field)
+			case "minimumAmount":
+				return ec.fieldContext_TaxBracket_minimumAmount(ctx, field)
+			case "maximumAmount":
+				return ec.fieldContext_TaxBracket_maximumAmount(ctx, field)
+			case "rate":
+				return ec.fieldContext_TaxBracket_rate(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_TaxBracket_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_TaxBracket_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TaxBracket", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createTaxBracket_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateTaxBracket(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateTaxBracket,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().UpdateTaxBracket(ctx, fc.Args["input"].(model.UpdateTaxBracketInput))
+		},
+		nil,
+		ec.marshalNTaxBracket2ᚖbreezeᚗapiᚋgraphᚋmodelᚐTaxBracket,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateTaxBracket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TaxBracket_id(ctx, field)
+			case "year":
+				return ec.fieldContext_TaxBracket_year(ctx, field)
+			case "filingStatus":
+				return ec.fieldContext_TaxBracket_filingStatus(ctx, field)
+			case "minimumAmount":
+				return ec.fieldContext_TaxBracket_minimumAmount(ctx, field)
+			case "maximumAmount":
+				return ec.fieldContext_TaxBracket_maximumAmount(ctx, field)
+			case "rate":
+				return ec.fieldContext_TaxBracket_rate(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_TaxBracket_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_TaxBracket_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TaxBracket", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateTaxBracket_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteTaxBracket(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_deleteTaxBracket,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DeleteTaxBracket(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteTaxBracket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteTaxBracket_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_health(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1740,6 +2119,124 @@ func (ec *executionContext) fieldContext_Query_assets(ctx context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_taxBracket(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_taxBracket,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().TaxBracket(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalOTaxBracket2ᚖbreezeᚗapiᚋgraphᚋmodelᚐTaxBracket,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_taxBracket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TaxBracket_id(ctx, field)
+			case "year":
+				return ec.fieldContext_TaxBracket_year(ctx, field)
+			case "filingStatus":
+				return ec.fieldContext_TaxBracket_filingStatus(ctx, field)
+			case "minimumAmount":
+				return ec.fieldContext_TaxBracket_minimumAmount(ctx, field)
+			case "maximumAmount":
+				return ec.fieldContext_TaxBracket_maximumAmount(ctx, field)
+			case "rate":
+				return ec.fieldContext_TaxBracket_rate(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_TaxBracket_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_TaxBracket_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TaxBracket", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_taxBracket_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_taxBrackets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_taxBrackets,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().TaxBrackets(ctx, fc.Args["year"].(int), fc.Args["filingStatus"].(model.FilingStatus))
+		},
+		nil,
+		ec.marshalNTaxBracket2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐTaxBracketᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_taxBrackets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TaxBracket_id(ctx, field)
+			case "year":
+				return ec.fieldContext_TaxBracket_year(ctx, field)
+			case "filingStatus":
+				return ec.fieldContext_TaxBracket_filingStatus(ctx, field)
+			case "minimumAmount":
+				return ec.fieldContext_TaxBracket_minimumAmount(ctx, field)
+			case "maximumAmount":
+				return ec.fieldContext_TaxBracket_maximumAmount(ctx, field)
+			case "rate":
+				return ec.fieldContext_TaxBracket_rate(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_TaxBracket_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_TaxBracket_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TaxBracket", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_taxBrackets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1843,6 +2340,238 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxBracket_id(ctx context.Context, field graphql.CollectedField, obj *model.TaxBracket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxBracket_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxBracket_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxBracket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxBracket_year(ctx context.Context, field graphql.CollectedField, obj *model.TaxBracket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxBracket_year,
+		func(ctx context.Context) (any, error) {
+			return obj.Year, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxBracket_year(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxBracket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxBracket_filingStatus(ctx context.Context, field graphql.CollectedField, obj *model.TaxBracket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxBracket_filingStatus,
+		func(ctx context.Context) (any, error) {
+			return obj.FilingStatus, nil
+		},
+		nil,
+		ec.marshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxBracket_filingStatus(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxBracket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type FilingStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxBracket_minimumAmount(ctx context.Context, field graphql.CollectedField, obj *model.TaxBracket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxBracket_minimumAmount,
+		func(ctx context.Context) (any, error) {
+			return obj.MinimumAmount, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxBracket_minimumAmount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxBracket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxBracket_maximumAmount(ctx context.Context, field graphql.CollectedField, obj *model.TaxBracket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxBracket_maximumAmount,
+		func(ctx context.Context) (any, error) {
+			return obj.MaximumAmount, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxBracket_maximumAmount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxBracket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxBracket_rate(ctx context.Context, field graphql.CollectedField, obj *model.TaxBracket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxBracket_rate,
+		func(ctx context.Context) (any, error) {
+			return obj.Rate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxBracket_rate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxBracket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxBracket_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.TaxBracket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxBracket_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxBracket_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxBracket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxBracket_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.TaxBracket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxBracket_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxBracket_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxBracket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3751,6 +4480,64 @@ func (ec *executionContext) unmarshalInputCreateAssetInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCreateTaxBracketInput(ctx context.Context, obj any) (model.CreateTaxBracketInput, error) {
+	var it model.CreateTaxBracketInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"year", "filingStatus", "minimumAmount", "maximumAmount", "rate"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "year":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("year"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Year = data
+		case "filingStatus":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filingStatus"))
+			data, err := ec.unmarshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilingStatus = data
+		case "minimumAmount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("minimumAmount"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MinimumAmount = data
+		case "maximumAmount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maximumAmount"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MaximumAmount = data
+		case "rate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Rate = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, obj any) (model.CreateUserInput, error) {
 	var it model.CreateUserInput
 	if obj == nil {
@@ -3897,6 +4684,71 @@ func (ec *executionContext) unmarshalInputUpdateAssetInput(ctx context.Context, 
 				return it, err
 			}
 			it.CurrentValue = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateTaxBracketInput(ctx context.Context, obj any) (model.UpdateTaxBracketInput, error) {
+	var it model.UpdateTaxBracketInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "year", "filingStatus", "minimumAmount", "maximumAmount", "rate"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "year":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("year"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Year = data
+		case "filingStatus":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filingStatus"))
+			data, err := ec.unmarshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilingStatus = data
+		case "minimumAmount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("minimumAmount"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MinimumAmount = data
+		case "maximumAmount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maximumAmount"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MaximumAmount = data
+		case "rate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Rate = data
 		}
 	}
 	return it, nil
@@ -4196,6 +5048,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createTaxBracket":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createTaxBracket(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateTaxBracket":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateTaxBracket(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteTaxBracket":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteTaxBracket(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4361,6 +5234,47 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "taxBracket":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_taxBracket(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "taxBrackets":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_taxBrackets(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -4369,6 +5283,77 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var taxBracketImplementors = []string{"TaxBracket"}
+
+func (ec *executionContext) _TaxBracket(ctx context.Context, sel ast.SelectionSet, obj *model.TaxBracket) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, taxBracketImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TaxBracket")
+		case "id":
+			out.Values[i] = ec._TaxBracket_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "year":
+			out.Values[i] = ec._TaxBracket_year(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "filingStatus":
+			out.Values[i] = ec._TaxBracket_filingStatus(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "minimumAmount":
+			out.Values[i] = ec._TaxBracket_minimumAmount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "maximumAmount":
+			out.Values[i] = ec._TaxBracket_maximumAmount(ctx, field, obj)
+		case "rate":
+			out.Values[i] = ec._TaxBracket_rate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._TaxBracket_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._TaxBracket_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4886,6 +5871,11 @@ func (ec *executionContext) unmarshalNCreateAssetInput2breezeᚗapiᚋgraphᚋmo
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreateTaxBracketInput2breezeᚗapiᚋgraphᚋmodelᚐCreateTaxBracketInput(ctx context.Context, v any) (model.CreateTaxBracketInput, error) {
+	res, err := ec.unmarshalInputCreateTaxBracketInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateUserInput2breezeᚗapiᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v any) (model.CreateUserInput, error) {
 	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4941,6 +5931,22 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v any) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNPayoffStrategy2breezeᚗapiᚋgraphᚋmodelᚐPayoffStrategy(ctx context.Context, v any) (model.PayoffStrategy, error) {
 	var res model.PayoffStrategy
 	err := res.UnmarshalGQL(v)
@@ -4977,8 +5983,43 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) marshalNTaxBracket2breezeᚗapiᚋgraphᚋmodelᚐTaxBracket(ctx context.Context, sel ast.SelectionSet, v model.TaxBracket) graphql.Marshaler {
+	return ec._TaxBracket(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTaxBracket2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐTaxBracketᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.TaxBracket) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNTaxBracket2ᚖbreezeᚗapiᚋgraphᚋmodelᚐTaxBracket(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNTaxBracket2ᚖbreezeᚗapiᚋgraphᚋmodelᚐTaxBracket(ctx context.Context, sel ast.SelectionSet, v *model.TaxBracket) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TaxBracket(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNUpdateAssetInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateAssetInput(ctx context.Context, v any) (model.UpdateAssetInput, error) {
 	res, err := ec.unmarshalInputUpdateAssetInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateTaxBracketInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateTaxBracketInput(ctx context.Context, v any) (model.UpdateTaxBracketInput, error) {
+	res, err := ec.unmarshalInputUpdateTaxBracketInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -5229,6 +6270,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOTaxBracket2ᚖbreezeᚗapiᚋgraphᚋmodelᚐTaxBracket(ctx context.Context, sel ast.SelectionSet, v *model.TaxBracket) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TaxBracket(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {

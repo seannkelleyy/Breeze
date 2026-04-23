@@ -27,6 +27,14 @@ type CreateAssetInput struct {
 	CurrentValue string    `json:"currentValue"`
 }
 
+type CreateTaxBracketInput struct {
+	Year          int          `json:"year"`
+	FilingStatus  FilingStatus `json:"filingStatus"`
+	MinimumAmount string       `json:"minimumAmount"`
+	MaximumAmount *string      `json:"maximumAmount,omitempty"`
+	Rate          string       `json:"rate"`
+}
+
 type CreateUserInput struct {
 	IdentityProviderID string         `json:"identityProviderId"`
 	Email              string         `json:"email"`
@@ -52,11 +60,31 @@ type Mutation struct {
 type Query struct {
 }
 
+type TaxBracket struct {
+	ID            string       `json:"id"`
+	Year          int          `json:"year"`
+	FilingStatus  FilingStatus `json:"filingStatus"`
+	MinimumAmount string       `json:"minimumAmount"`
+	MaximumAmount *string      `json:"maximumAmount,omitempty"`
+	Rate          string       `json:"rate"`
+	CreatedAt     string       `json:"createdAt"`
+	UpdatedAt     string       `json:"updatedAt"`
+}
+
 type UpdateAssetInput struct {
 	ID           string    `json:"id"`
 	Name         string    `json:"name"`
 	AssetType    AssetType `json:"assetType"`
 	CurrentValue string    `json:"currentValue"`
+}
+
+type UpdateTaxBracketInput struct {
+	ID            string       `json:"id"`
+	Year          int          `json:"year"`
+	FilingStatus  FilingStatus `json:"filingStatus"`
+	MinimumAmount string       `json:"minimumAmount"`
+	MaximumAmount *string      `json:"maximumAmount,omitempty"`
+	Rate          string       `json:"rate"`
 }
 
 type UpdateUserInput struct {
