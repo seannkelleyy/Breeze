@@ -12,6 +12,9 @@ type Query {
   budgets(userId: ID!): [Budget!]!
   goal(id: ID!): Goal
   goals(userId: ID!): [Goal!]!
+  scenario(id: ID!): Scenario
+  scenarios(userId: ID!): [Scenario!]!
+  compareScenarios(userId: ID!): [ScenarioResult!]!
   retirementAccount(id: ID!): RetirementAccount
   retirementAccounts(userId: ID!): [RetirementAccount!]!
   contributionProgress(retirementAccountId: ID!, taxYear: Int!): ContributionProgress!
@@ -46,6 +49,9 @@ type Mutation {
   createGoal(input: CreateGoalInput!): Goal!
   updateGoal(input: UpdateGoalInput!): Goal!
   deleteGoal(id: ID!): Boolean!
+  createScenario(input: CreateScenarioInput!): Scenario!
+  updateScenario(input: UpdateScenarioInput!): Scenario!
+  deleteScenario(id: ID!): Boolean!
   createRetirementAccount(input: CreateRetirementAccountInput!): RetirementAccount!
   updateRetirementAccount(input: UpdateRetirementAccountInput!): RetirementAccount!
   deleteRetirementAccount(id: ID!): Boolean!
@@ -243,6 +249,39 @@ type Goal {
   updatedAt: String!
 }
 
+type Scenario {
+  id: ID!
+  userId: ID!
+  name: String!
+  currentAge: Int!
+  retirementAge: Int!
+  annualSpend: String!
+  safeWithdrawalRate: String!
+  inflationRate: String!
+  returnRate: String!
+  currentPortfolio: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ScenarioResult {
+  scenarioProfileId: ID!
+  name: String!
+  currentAge: Int!
+  retirementAge: Int!
+  annualSpend: String!
+  safeWithdrawalRate: String!
+  inflationRate: String!
+  returnRate: String!
+  currentPortfolio: String!
+  portfolioAtRetirement: String!
+  requiredPortfolio: String!
+  projectedDepletionAge: Int
+  isSustainable: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
 type RetirementAccount {
   id: ID!
   userId: ID!
@@ -402,10 +441,34 @@ input CreateGoalInput {
   isCompleted: Boolean!
 }
 
+input CreateScenarioInput {
+  userId: ID!
+  name: String!
+  currentAge: Int!
+  retirementAge: Int!
+  annualSpend: String!
+  safeWithdrawalRate: String!
+  inflationRate: String!
+  returnRate: String!
+  currentPortfolio: String!
+}
+
 input UpdateGoalInput {
   id: ID!
   description: String!
   isCompleted: Boolean!
+}
+
+input UpdateScenarioInput {
+  id: ID!
+  name: String!
+  currentAge: Int!
+  retirementAge: Int!
+  annualSpend: String!
+  safeWithdrawalRate: String!
+  inflationRate: String!
+  returnRate: String!
+  currentPortfolio: String!
 }
 
 input CreateExpenseCategoryInput {

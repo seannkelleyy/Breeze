@@ -10,6 +10,7 @@ type Resolver struct {
 	LiabilityService        *service.LiabilityService
 	BudgetService           *service.BudgetService
 	GoalService             *service.GoalService
+	ScenarioService         *service.ScenarioService
 	RetirementService       *service.RetirementAccountService
 	ExpenseCategoryService  *service.ExpenseCategoryService
 	ExpenseService          *service.ExpenseService

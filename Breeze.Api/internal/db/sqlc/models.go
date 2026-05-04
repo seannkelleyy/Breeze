@@ -661,6 +661,44 @@ type RetirementAccount struct {
 	DeletedAt               pgtype.Timestamptz     `json:"deleted_at"`
 }
 
+type ScenarioOverride struct {
+	ID                uuid.UUID          `json:"id"`
+	ScenarioProfileID uuid.UUID          `json:"scenario_profile_id"`
+	OverrideKey       string             `json:"override_key"`
+	OverrideValue     decimal.Decimal    `json:"override_value"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt         pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type ScenarioProfile struct {
+	ID                 uuid.UUID          `json:"id"`
+	UserID             uuid.UUID          `json:"user_id"`
+	Name               string             `json:"name"`
+	CurrentAge         int32              `json:"current_age"`
+	RetirementAge      int32              `json:"retirement_age"`
+	AnnualSpend        decimal.Decimal    `json:"annual_spend"`
+	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
+	InflationRate      decimal.Decimal    `json:"inflation_rate"`
+	ReturnRate         decimal.Decimal    `json:"return_rate"`
+	CurrentPortfolio   decimal.Decimal    `json:"current_portfolio"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type ScenarioResultsCache struct {
+	ID                    uuid.UUID          `json:"id"`
+	ScenarioProfileID     uuid.UUID          `json:"scenario_profile_id"`
+	PortfolioAtRetirement decimal.Decimal    `json:"portfolio_at_retirement"`
+	RequiredPortfolio     decimal.Decimal    `json:"required_portfolio"`
+	ProjectedDepletionAge *int32             `json:"projected_depletion_age"`
+	IsSustainable         bool               `json:"is_sustainable"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt             pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type TaxBracket struct {
 	ID            uuid.UUID          `json:"id"`
 	Year          int32              `json:"year"`

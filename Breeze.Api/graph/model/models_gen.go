@@ -143,6 +143,18 @@ type CreateRetirementAccountInput struct {
 	CurrentBalance string                 `json:"currentBalance"`
 }
 
+type CreateScenarioInput struct {
+	UserID             string `json:"userId"`
+	Name               string `json:"name"`
+	CurrentAge         int    `json:"currentAge"`
+	RetirementAge      int    `json:"retirementAge"`
+	AnnualSpend        string `json:"annualSpend"`
+	SafeWithdrawalRate string `json:"safeWithdrawalRate"`
+	InflationRate      string `json:"inflationRate"`
+	ReturnRate         string `json:"returnRate"`
+	CurrentPortfolio   string `json:"currentPortfolio"`
+}
+
 type CreateTaxBracketInput struct {
 	Year          int          `json:"year"`
 	FilingStatus  FilingStatus `json:"filingStatus"`
@@ -291,6 +303,39 @@ type RetirementAccount struct {
 	UpdatedAt               string                 `json:"updatedAt"`
 }
 
+type Scenario struct {
+	ID                 string `json:"id"`
+	UserID             string `json:"userId"`
+	Name               string `json:"name"`
+	CurrentAge         int    `json:"currentAge"`
+	RetirementAge      int    `json:"retirementAge"`
+	AnnualSpend        string `json:"annualSpend"`
+	SafeWithdrawalRate string `json:"safeWithdrawalRate"`
+	InflationRate      string `json:"inflationRate"`
+	ReturnRate         string `json:"returnRate"`
+	CurrentPortfolio   string `json:"currentPortfolio"`
+	CreatedAt          string `json:"createdAt"`
+	UpdatedAt          string `json:"updatedAt"`
+}
+
+type ScenarioResult struct {
+	ScenarioProfileID     string `json:"scenarioProfileId"`
+	Name                  string `json:"name"`
+	CurrentAge            int    `json:"currentAge"`
+	RetirementAge         int    `json:"retirementAge"`
+	AnnualSpend           string `json:"annualSpend"`
+	SafeWithdrawalRate    string `json:"safeWithdrawalRate"`
+	InflationRate         string `json:"inflationRate"`
+	ReturnRate            string `json:"returnRate"`
+	CurrentPortfolio      string `json:"currentPortfolio"`
+	PortfolioAtRetirement string `json:"portfolioAtRetirement"`
+	RequiredPortfolio     string `json:"requiredPortfolio"`
+	ProjectedDepletionAge *int   `json:"projectedDepletionAge,omitempty"`
+	IsSustainable         bool   `json:"isSustainable"`
+	CreatedAt             string `json:"createdAt"`
+	UpdatedAt             string `json:"updatedAt"`
+}
+
 type TaxBracket struct {
 	ID            string       `json:"id"`
 	Year          int          `json:"year"`
@@ -382,6 +427,18 @@ type UpdateRetirementAccountInput struct {
 	Owner          RetirementAccountOwner `json:"owner"`
 	TaxTreatment   RetirementTaxTreatment `json:"taxTreatment"`
 	CurrentBalance string                 `json:"currentBalance"`
+}
+
+type UpdateScenarioInput struct {
+	ID                 string `json:"id"`
+	Name               string `json:"name"`
+	CurrentAge         int    `json:"currentAge"`
+	RetirementAge      int    `json:"retirementAge"`
+	AnnualSpend        string `json:"annualSpend"`
+	SafeWithdrawalRate string `json:"safeWithdrawalRate"`
+	InflationRate      string `json:"inflationRate"`
+	ReturnRate         string `json:"returnRate"`
+	CurrentPortfolio   string `json:"currentPortfolio"`
 }
 
 type UpdateTaxBracketInput struct {

@@ -259,6 +259,54 @@ func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, err
 	return true, nil
 }
 
+// CreateScenario is the resolver for the createScenario field.
+func (r *mutationResolver) CreateScenario(ctx context.Context, input model.CreateScenarioInput) (*model.Scenario, error) {
+	svcInput, err := createScenarioInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	scenario, err := r.ScenarioService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapScenarioToModel(scenario), nil
+}
+
+// UpdateScenario is the resolver for the updateScenario field.
+func (r *mutationResolver) UpdateScenario(ctx context.Context, input model.UpdateScenarioInput) (*model.Scenario, error) {
+	svcInput, err := updateScenarioInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	scenario, err := r.ScenarioService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapScenarioToModel(scenario), nil
+}
+
+// DeleteScenario is the resolver for the deleteScenario field.
+func (r *mutationResolver) DeleteScenario(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid scenario id: %w", err)
+	}
+
+	err = r.ScenarioService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
 // CreateRetirementAccount is the resolver for the createRetirementAccount field.
 func (r *mutationResolver) CreateRetirementAccount(ctx context.Context, input model.CreateRetirementAccountInput) (*model.RetirementAccount, error) {
 	svcInput, err := createRetirementAccountInputFromModel(input)
@@ -850,6 +898,66 @@ func (r *queryResolver) Goals(ctx context.Context, userID string) ([]*model.Goal
 	for i := range goals {
 		goal := goals[i]
 		out = append(out, mapGoalToModel(&goal))
+	}
+
+	return out, nil
+}
+
+// Scenario is the resolver for the scenario field.
+func (r *queryResolver) Scenario(ctx context.Context, id string) (*model.Scenario, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid scenario id: %w", err)
+	}
+
+	scenario, err := r.ScenarioService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapScenarioToModel(scenario), nil
+}
+
+// Scenarios is the resolver for the scenarios field.
+func (r *queryResolver) Scenarios(ctx context.Context, userID string) ([]*model.Scenario, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	scenarios, err := r.ScenarioService.ListByUserID(ctx, parsedUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.Scenario, 0, len(scenarios))
+	for i := range scenarios {
+		scenario := scenarios[i]
+		out = append(out, mapScenarioToModel(&scenario))
+	}
+
+	return out, nil
+}
+
+// CompareScenarios is the resolver for the compareScenarios field.
+func (r *queryResolver) CompareScenarios(ctx context.Context, userID string) ([]*model.ScenarioResult, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	results, err := r.ScenarioService.CompareByUserID(ctx, parsedUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.ScenarioResult, 0, len(results))
+	for i := range results {
+		result := results[i]
+		out = append(out, mapScenarioResultToModel(&result))
 	}
 
 	return out, nil

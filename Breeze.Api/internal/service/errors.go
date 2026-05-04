@@ -10,4 +10,5 @@ var (
 	ErrSplitAmountNonPositive        = errors.New("split amount must be positive")
 	ErrContributionLimitExceeded     = errors.New("contribution exceeds annual limit")
 	ErrContributionAmountNonPositive = errors.New("contribution amount must be positive")
+	ErrInvalidScenarioInput          = errors.New("invalid scenario input")
 )

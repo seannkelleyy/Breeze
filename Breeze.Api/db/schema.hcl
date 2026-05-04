@@ -947,6 +947,238 @@ table "contribution_entries" {
   }
 }
 
+table "scenario_profiles" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "name" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "current_age" {
+    type = int
+    null = false
+  }
+
+  column "retirement_age" {
+    type = int
+    null = false
+  }
+
+  column "annual_spend" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "safe_withdrawal_rate" {
+    type = decimal(5,4)
+    null = false
+  }
+
+  column "inflation_rate" {
+    type = decimal(5,4)
+    null = false
+  }
+
+  column "return_rate" {
+    type = decimal(5,4)
+    null = false
+  }
+
+  column "current_portfolio" {
+    type = numeric(14,2)
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_scenario_profiles_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_scenario_profiles_user_id" {
+    columns = [column.user_id]
+  }
+
+  index "idx_scenario_profiles_user_active" {
+    columns = [column.user_id, column.created_at]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "scenario_profiles_current_age_non_negative" {
+    expr = "current_age >= 0 AND retirement_age >= current_age"
+  }
+
+  check "scenario_profiles_money_positive" {
+    expr = "annual_spend > 0 AND current_portfolio >= 0"
+  }
+}
+
+table "scenario_overrides" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "scenario_profile_id" {
+    type = uuid
+    null = false
+  }
+
+  column "override_key" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "override_value" {
+    type = decimal(12,4)
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_scenario_overrides_profile" {
+    columns     = [column.scenario_profile_id]
+    ref_columns = [table.scenario_profiles.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_scenario_overrides_profile_id" {
+    columns = [column.scenario_profile_id]
+  }
+
+  index "idx_scenario_overrides_profile_active" {
+    columns = [column.scenario_profile_id, column.override_key]
+    where   = "deleted_at IS NULL"
+  }
+}
+
+table "scenario_results_cache" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "scenario_profile_id" {
+    type = uuid
+    null = false
+  }
+
+  column "portfolio_at_retirement" {
+    type = numeric(14,2)
+    null = false
+  }
+
+  column "required_portfolio" {
+    type = numeric(14,2)
+    null = false
+  }
+
+  column "projected_depletion_age" {
+    type = int
+    null = true
+  }
+
+  column "is_sustainable" {
+    type = boolean
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_scenario_results_cache_profile" {
+    columns     = [column.scenario_profile_id]
+    ref_columns = [table.scenario_profiles.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_scenario_results_cache_profile_id" {
+    columns = [column.scenario_profile_id]
+    unique  = true
+  }
+
+  index "idx_scenario_results_cache_profile_active" {
+    columns = [column.scenario_profile_id, column.created_at]
+    where   = "deleted_at IS NULL"
+  }
+}
+
 table "expense_splits" {
   schema = schema.public
 
