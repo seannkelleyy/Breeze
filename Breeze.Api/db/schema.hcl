@@ -44,6 +44,21 @@ enum "income_source_type" {
   values = ["MANUAL", "RECURRING_TEMPLATE"]
 }
 
+enum "retirement_account_owner" {
+  schema = schema.public
+  values = ["SELF", "SPOUSE"]
+}
+
+enum "retirement_account_type" {
+  schema = schema.public
+  values = ["ACCOUNT_401K", "ACCOUNT_403B", "ACCOUNT_457", "ROTH_IRA", "TRADITIONAL_IRA", "HSA", "OTHER"]
+}
+
+enum "retirement_tax_treatment" {
+  schema = schema.public
+  values = ["PRE_TAX", "ROTH", "TAX_DEFERRED", "TAXABLE", "OTHER"]
+}
+
 table "tax_brackets" {
   schema = schema.public
 
@@ -695,6 +710,240 @@ table "goals" {
   index "idx_goals_user_active" {
     columns = [column.user_id, column.created_at]
     where   = "deleted_at IS NULL"
+  }
+}
+
+table "retirement_accounts" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "name" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "account_type" {
+    type = enum.retirement_account_type
+    null = false
+  }
+
+  column "owner" {
+    type = enum.retirement_account_owner
+    null = false
+  }
+
+  column "tax_treatment" {
+    type = enum.retirement_tax_treatment
+    null = false
+  }
+
+  column "current_balance" {
+    type    = numeric(14,2)
+    null    = false
+    default = sql("0")
+  }
+
+  column "annual_contribution_limit" {
+    type    = numeric(12,2)
+    null    = false
+    default = sql("0")
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_retirement_accounts_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_retirement_accounts_user_id" {
+    columns = [column.user_id]
+  }
+
+  index "idx_retirement_accounts_user_active" {
+    columns = [column.user_id, column.created_at]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "retirement_accounts_current_balance_non_negative" {
+    expr = "current_balance >= 0"
+  }
+
+  check "retirement_accounts_annual_contribution_limit_non_negative" {
+    expr = "annual_contribution_limit >= 0"
+  }
+}
+
+table "contribution_limits" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "account_type" {
+    type = enum.retirement_account_type
+    null = false
+  }
+
+  column "tax_year" {
+    type = int
+    null = false
+  }
+
+  column "annual_limit" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "catch_up_age" {
+    type = int
+    null = false
+  }
+
+  column "catch_up_amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_contribution_limits_account_year" {
+    columns = [column.account_type, column.tax_year]
+    unique  = true
+  }
+
+  check "contribution_limits_annual_limit_positive" {
+    expr = "annual_limit > 0"
+  }
+
+  check "contribution_limits_catch_up_non_negative" {
+    expr = "catch_up_amount >= 0 AND catch_up_age >= 0"
+  }
+}
+
+table "contribution_entries" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "retirement_account_id" {
+    type = uuid
+    null = false
+  }
+
+  column "tax_year" {
+    type = int
+    null = false
+  }
+
+  column "contribution_date" {
+    type = date
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_contribution_entries_retirement_account" {
+    columns     = [column.retirement_account_id]
+    ref_columns = [table.retirement_accounts.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_contribution_entries_account_id" {
+    columns = [column.retirement_account_id]
+  }
+
+  index "idx_contribution_entries_account_year" {
+    columns = [column.retirement_account_id, column.tax_year]
+  }
+
+  index "idx_contribution_entries_account_active" {
+    columns = [column.retirement_account_id, column.contribution_date]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "contribution_entries_amount_positive" {
+    expr = "amount > 0"
   }
 }
 

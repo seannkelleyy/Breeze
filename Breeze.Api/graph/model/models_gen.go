@@ -9,6 +9,12 @@ import (
 	"strconv"
 )
 
+type AddContributionInput struct {
+	RetirementAccountID string `json:"retirementAccountId"`
+	ContributionDate    string `json:"contributionDate"`
+	Amount              string `json:"amount"`
+}
+
 type Asset struct {
 	ID                 string    `json:"id"`
 	UserID             string    `json:"userId"`
@@ -28,6 +34,26 @@ type Budget struct {
 	MonthlyExpenses string `json:"monthlyExpenses"`
 	CreatedAt       string `json:"createdAt"`
 	UpdatedAt       string `json:"updatedAt"`
+}
+
+type ContributionEntry struct {
+	ID                  string `json:"id"`
+	RetirementAccountID string `json:"retirementAccountId"`
+	TaxYear             int    `json:"taxYear"`
+	ContributionDate    string `json:"contributionDate"`
+	Amount              string `json:"amount"`
+	CreatedAt           string `json:"createdAt"`
+	UpdatedAt           string `json:"updatedAt"`
+}
+
+type ContributionProgress struct {
+	RetirementAccountID string `json:"retirementAccountId"`
+	TaxYear             int    `json:"taxYear"`
+	AnnualLimit         string `json:"annualLimit"`
+	ContributedYtd      string `json:"contributedYtd"`
+	RemainingAmount     string `json:"remainingAmount"`
+	PercentUsed         string `json:"percentUsed"`
+	IsMaxed             bool   `json:"isMaxed"`
 }
 
 type CreateAssetInput struct {
@@ -106,6 +132,15 @@ type CreateRecurringIncomeInput struct {
 	PaydayDayOfMonth   *int               `json:"paydayDayOfMonth,omitempty"`
 	StartDate          string             `json:"startDate"`
 	EndDate            *string            `json:"endDate,omitempty"`
+}
+
+type CreateRetirementAccountInput struct {
+	UserID         string                 `json:"userId"`
+	Name           string                 `json:"name"`
+	AccountType    RetirementAccountType  `json:"accountType"`
+	Owner          RetirementAccountOwner `json:"owner"`
+	TaxTreatment   RetirementTaxTreatment `json:"taxTreatment"`
+	CurrentBalance string                 `json:"currentBalance"`
 }
 
 type CreateTaxBracketInput struct {
@@ -243,6 +278,19 @@ type RecurringIncome struct {
 	UpdatedAt          string             `json:"updatedAt"`
 }
 
+type RetirementAccount struct {
+	ID                      string                 `json:"id"`
+	UserID                  string                 `json:"userId"`
+	Name                    string                 `json:"name"`
+	AccountType             RetirementAccountType  `json:"accountType"`
+	Owner                   RetirementAccountOwner `json:"owner"`
+	TaxTreatment            RetirementTaxTreatment `json:"taxTreatment"`
+	CurrentBalance          string                 `json:"currentBalance"`
+	AnnualContributionLimit string                 `json:"annualContributionLimit"`
+	CreatedAt               string                 `json:"createdAt"`
+	UpdatedAt               string                 `json:"updatedAt"`
+}
+
 type TaxBracket struct {
 	ID            string       `json:"id"`
 	Year          int          `json:"year"`
@@ -325,6 +373,15 @@ type UpdateRecurringIncomeInput struct {
 	PaydayDayOfMonth   *int               `json:"paydayDayOfMonth,omitempty"`
 	StartDate          string             `json:"startDate"`
 	EndDate            *string            `json:"endDate,omitempty"`
+}
+
+type UpdateRetirementAccountInput struct {
+	ID             string                 `json:"id"`
+	Name           string                 `json:"name"`
+	AccountType    RetirementAccountType  `json:"accountType"`
+	Owner          RetirementAccountOwner `json:"owner"`
+	TaxTreatment   RetirementTaxTreatment `json:"taxTreatment"`
+	CurrentBalance string                 `json:"currentBalance"`
 }
 
 type UpdateTaxBracketInput struct {
@@ -776,6 +833,187 @@ func (e *RecurrenceInterval) UnmarshalJSON(b []byte) error {
 }
 
 func (e RecurrenceInterval) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type RetirementAccountOwner string
+
+const (
+	RetirementAccountOwnerSelf   RetirementAccountOwner = "SELF"
+	RetirementAccountOwnerSpouse RetirementAccountOwner = "SPOUSE"
+)
+
+var AllRetirementAccountOwner = []RetirementAccountOwner{
+	RetirementAccountOwnerSelf,
+	RetirementAccountOwnerSpouse,
+}
+
+func (e RetirementAccountOwner) IsValid() bool {
+	switch e {
+	case RetirementAccountOwnerSelf, RetirementAccountOwnerSpouse:
+		return true
+	}
+	return false
+}
+
+func (e RetirementAccountOwner) String() string {
+	return string(e)
+}
+
+func (e *RetirementAccountOwner) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RetirementAccountOwner(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RetirementAccountOwner", str)
+	}
+	return nil
+}
+
+func (e RetirementAccountOwner) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RetirementAccountOwner) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RetirementAccountOwner) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type RetirementAccountType string
+
+const (
+	RetirementAccountTypeAccount401k    RetirementAccountType = "ACCOUNT_401K"
+	RetirementAccountTypeAccount403b    RetirementAccountType = "ACCOUNT_403B"
+	RetirementAccountTypeAccount457     RetirementAccountType = "ACCOUNT_457"
+	RetirementAccountTypeRothIra        RetirementAccountType = "ROTH_IRA"
+	RetirementAccountTypeTraditionalIra RetirementAccountType = "TRADITIONAL_IRA"
+	RetirementAccountTypeHsa            RetirementAccountType = "HSA"
+	RetirementAccountTypeOther          RetirementAccountType = "OTHER"
+)
+
+var AllRetirementAccountType = []RetirementAccountType{
+	RetirementAccountTypeAccount401k,
+	RetirementAccountTypeAccount403b,
+	RetirementAccountTypeAccount457,
+	RetirementAccountTypeRothIra,
+	RetirementAccountTypeTraditionalIra,
+	RetirementAccountTypeHsa,
+	RetirementAccountTypeOther,
+}
+
+func (e RetirementAccountType) IsValid() bool {
+	switch e {
+	case RetirementAccountTypeAccount401k, RetirementAccountTypeAccount403b, RetirementAccountTypeAccount457, RetirementAccountTypeRothIra, RetirementAccountTypeTraditionalIra, RetirementAccountTypeHsa, RetirementAccountTypeOther:
+		return true
+	}
+	return false
+}
+
+func (e RetirementAccountType) String() string {
+	return string(e)
+}
+
+func (e *RetirementAccountType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RetirementAccountType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RetirementAccountType", str)
+	}
+	return nil
+}
+
+func (e RetirementAccountType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RetirementAccountType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RetirementAccountType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type RetirementTaxTreatment string
+
+const (
+	RetirementTaxTreatmentPreTax      RetirementTaxTreatment = "PRE_TAX"
+	RetirementTaxTreatmentRoth        RetirementTaxTreatment = "ROTH"
+	RetirementTaxTreatmentTaxDeferred RetirementTaxTreatment = "TAX_DEFERRED"
+	RetirementTaxTreatmentTaxable     RetirementTaxTreatment = "TAXABLE"
+	RetirementTaxTreatmentOther       RetirementTaxTreatment = "OTHER"
+)
+
+var AllRetirementTaxTreatment = []RetirementTaxTreatment{
+	RetirementTaxTreatmentPreTax,
+	RetirementTaxTreatmentRoth,
+	RetirementTaxTreatmentTaxDeferred,
+	RetirementTaxTreatmentTaxable,
+	RetirementTaxTreatmentOther,
+}
+
+func (e RetirementTaxTreatment) IsValid() bool {
+	switch e {
+	case RetirementTaxTreatmentPreTax, RetirementTaxTreatmentRoth, RetirementTaxTreatmentTaxDeferred, RetirementTaxTreatmentTaxable, RetirementTaxTreatmentOther:
+		return true
+	}
+	return false
+}
+
+func (e RetirementTaxTreatment) String() string {
+	return string(e)
+}
+
+func (e *RetirementTaxTreatment) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RetirementTaxTreatment(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RetirementTaxTreatment", str)
+	}
+	return nil
+}
+
+func (e RetirementTaxTreatment) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RetirementTaxTreatment) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RetirementTaxTreatment) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

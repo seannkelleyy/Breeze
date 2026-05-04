@@ -12,6 +12,9 @@ type Query {
   budgets(userId: ID!): [Budget!]!
   goal(id: ID!): Goal
   goals(userId: ID!): [Goal!]!
+  retirementAccount(id: ID!): RetirementAccount
+  retirementAccounts(userId: ID!): [RetirementAccount!]!
+  contributionProgress(retirementAccountId: ID!, taxYear: Int!): ContributionProgress!
   expenseCategory(id: ID!): ExpenseCategory
   expenseCategories(budgetId: ID!): [ExpenseCategory!]!
   expense(id: ID!): Expense
@@ -43,6 +46,10 @@ type Mutation {
   createGoal(input: CreateGoalInput!): Goal!
   updateGoal(input: UpdateGoalInput!): Goal!
   deleteGoal(id: ID!): Boolean!
+  createRetirementAccount(input: CreateRetirementAccountInput!): RetirementAccount!
+  updateRetirementAccount(input: UpdateRetirementAccountInput!): RetirementAccount!
+  deleteRetirementAccount(id: ID!): Boolean!
+  addContribution(input: AddContributionInput!): ContributionEntry!
   createExpenseCategory(input: CreateExpenseCategoryInput!): ExpenseCategory!
   updateExpenseCategory(input: UpdateExpenseCategoryInput!): ExpenseCategory!
   deleteExpenseCategory(id: ID!): Boolean!
@@ -110,6 +117,29 @@ enum AssetType {
   RETIREMENT
   REAL_ESTATE
   VEHICLE
+  OTHER
+}
+
+enum RetirementAccountOwner {
+  SELF
+  SPOUSE
+}
+
+enum RetirementAccountType {
+  ACCOUNT_401K
+  ACCOUNT_403B
+  ACCOUNT_457
+  ROTH_IRA
+  TRADITIONAL_IRA
+  HSA
+  OTHER
+}
+
+enum RetirementTaxTreatment {
+  PRE_TAX
+  ROTH
+  TAX_DEFERRED
+  TAXABLE
   OTHER
 }
 
@@ -211,6 +241,63 @@ type Goal {
   isCompleted: Boolean!
   createdAt: String!
   updatedAt: String!
+}
+
+type RetirementAccount {
+  id: ID!
+  userId: ID!
+  name: String!
+  accountType: RetirementAccountType!
+  owner: RetirementAccountOwner!
+  taxTreatment: RetirementTaxTreatment!
+  currentBalance: String!
+  annualContributionLimit: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ContributionEntry {
+  id: ID!
+  retirementAccountId: ID!
+  taxYear: Int!
+  contributionDate: String!
+  amount: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ContributionProgress {
+  retirementAccountId: ID!
+  taxYear: Int!
+  annualLimit: String!
+  contributedYtd: String!
+  remainingAmount: String!
+  percentUsed: String!
+  isMaxed: Boolean!
+}
+
+input CreateRetirementAccountInput {
+  userId: ID!
+  name: String!
+  accountType: RetirementAccountType!
+  owner: RetirementAccountOwner!
+  taxTreatment: RetirementTaxTreatment!
+  currentBalance: String!
+}
+
+input UpdateRetirementAccountInput {
+  id: ID!
+  name: String!
+  accountType: RetirementAccountType!
+  owner: RetirementAccountOwner!
+  taxTreatment: RetirementTaxTreatment!
+  currentBalance: String!
+}
+
+input AddContributionInput {
+  retirementAccountId: ID!
+  contributionDate: String!
+  amount: String!
 }
 
 type ExpenseCategory {

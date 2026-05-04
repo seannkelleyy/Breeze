@@ -259,6 +259,69 @@ func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, err
 	return true, nil
 }
 
+// CreateRetirementAccount is the resolver for the createRetirementAccount field.
+func (r *mutationResolver) CreateRetirementAccount(ctx context.Context, input model.CreateRetirementAccountInput) (*model.RetirementAccount, error) {
+	svcInput, err := createRetirementAccountInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	account, err := r.RetirementService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapRetirementAccountToModel(account), nil
+}
+
+// UpdateRetirementAccount is the resolver for the updateRetirementAccount field.
+func (r *mutationResolver) UpdateRetirementAccount(ctx context.Context, input model.UpdateRetirementAccountInput) (*model.RetirementAccount, error) {
+	svcInput, err := updateRetirementAccountInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	account, err := r.RetirementService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapRetirementAccountToModel(account), nil
+}
+
+// DeleteRetirementAccount is the resolver for the deleteRetirementAccount field.
+func (r *mutationResolver) DeleteRetirementAccount(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid retirement account id: %w", err)
+	}
+
+	err = r.RetirementService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+// AddContribution is the resolver for the addContribution field.
+func (r *mutationResolver) AddContribution(ctx context.Context, input model.AddContributionInput) (*model.ContributionEntry, error) {
+	svcInput, err := addContributionInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	entry, err := r.RetirementService.AddContribution(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapContributionEntryToModel(entry), nil
+}
+
 // CreateExpenseCategory is the resolver for the createExpenseCategory field.
 func (r *mutationResolver) CreateExpenseCategory(ctx context.Context, input model.CreateExpenseCategoryInput) (*model.ExpenseCategory, error) {
 	svcInput, err := createExpenseCategoryInputFromModel(input)
@@ -790,6 +853,63 @@ func (r *queryResolver) Goals(ctx context.Context, userID string) ([]*model.Goal
 	}
 
 	return out, nil
+}
+
+// RetirementAccount is the resolver for the retirementAccount field.
+func (r *queryResolver) RetirementAccount(ctx context.Context, id string) (*model.RetirementAccount, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid retirement account id: %w", err)
+	}
+
+	account, err := r.RetirementService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapRetirementAccountToModel(account), nil
+}
+
+// RetirementAccounts is the resolver for the retirementAccounts field.
+func (r *queryResolver) RetirementAccounts(ctx context.Context, userID string) ([]*model.RetirementAccount, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	accounts, err := r.RetirementService.ListByUserID(ctx, parsedUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.RetirementAccount, 0, len(accounts))
+	for i := range accounts {
+		account := accounts[i]
+		out = append(out, mapRetirementAccountToModel(&account))
+	}
+
+	return out, nil
+}
+
+// ContributionProgress is the resolver for the contributionProgress field.
+func (r *queryResolver) ContributionProgress(ctx context.Context, retirementAccountID string, taxYear int) (*model.ContributionProgress, error) {
+	parsedID, err := uuid.Parse(retirementAccountID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid retirement account id: %w", err)
+	}
+
+	progress, err := r.RetirementService.GetContributionProgress(ctx, parsedID, taxYear)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, fmt.Errorf("retirement account not found")
+		}
+		return nil, err
+	}
+
+	return mapContributionProgressToModel(progress), nil
 }
 
 // ExpenseCategory is the resolver for the expenseCategory field.
