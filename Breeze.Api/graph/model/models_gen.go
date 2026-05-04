@@ -61,6 +61,12 @@ type CreateExpenseInput struct {
 	Splits      []*ExpenseSplitInput `json:"splits"`
 }
 
+type CreateGoalInput struct {
+	UserID      string `json:"userId"`
+	Description string `json:"description"`
+	IsCompleted bool   `json:"isCompleted"`
+}
+
 type CreateIncomeInput struct {
 	UserID               string           `json:"userId"`
 	BudgetID             string           `json:"budgetId"`
@@ -161,6 +167,15 @@ type ExpenseSplitInput struct {
 	CategoryID  string  `json:"categoryId"`
 	Amount      string  `json:"amount"`
 	Description *string `json:"description,omitempty"`
+}
+
+type Goal struct {
+	ID          string `json:"id"`
+	UserID      string `json:"userId"`
+	Description string `json:"description"`
+	IsCompleted bool   `json:"isCompleted"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
 }
 
 type Health struct {
@@ -265,6 +280,12 @@ type UpdateExpenseInput struct {
 	Date        string               `json:"date"`
 	Description string               `json:"description"`
 	Splits      []*ExpenseSplitInput `json:"splits"`
+}
+
+type UpdateGoalInput struct {
+	ID          string `json:"id"`
+	Description string `json:"description"`
+	IsCompleted bool   `json:"isCompleted"`
 }
 
 type UpdateIncomeInput struct {

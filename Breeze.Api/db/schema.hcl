@@ -636,6 +636,68 @@ table "expenses" {
   }
 }
 
+table "goals" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "description" {
+    type = text
+    null = false
+  }
+
+  column "is_completed" {
+    type    = boolean
+    null    = false
+    default = sql("false")
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_goals_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_goals_user_id" {
+    columns = [column.user_id]
+  }
+
+  index "idx_goals_user_active" {
+    columns = [column.user_id, column.created_at]
+    where   = "deleted_at IS NULL"
+  }
+}
+
 table "expense_splits" {
   schema = schema.public
 

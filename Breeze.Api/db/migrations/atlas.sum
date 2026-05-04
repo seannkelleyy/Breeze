@@ -1,4 +1,4 @@
-h1:rr04238w3vKR+L7WN5SAczWeAxE7eTPeqiGsjrXU4Rg=
+h1:0i5nW3A6R31BkfiPjjJnHQBIdFoD0zf5DuZX7Su7JKU=
 20260401213128_initial_schema.sql h1:/GVoKJxw6oD5DTPSxCdkRcOHQLi/iT4Qe7Zz9XXGrc0=
 20260401214314_users_full_stack.sql h1:ZqbaWes3gnXoHUCh3t9e34eVE+n5ac85yzmIBzH8h7Y=
 20260415010436_assets_full_stack.sql h1:2O4xE9IkLsMLQR+aqZzQEm8ptOXh95J6w0GPjnHqzs4=
@@ -8,3 +8,4 @@ h1:rr04238w3vKR+L7WN5SAczWeAxE7eTPeqiGsjrXU4Rg=
 20260430215335_expense_categories_full_stack.sql h1:D6jrlJzZHio3d9zQmSxCP9KQ3q3MHAMDZPqHRnH9QhY=
 20260430221205_expenses_full_stack.sql h1:X5dOttmWeYoZVe/KATwaIZEd1oErjceJIngrd/9vJ2U=
 20260501215555_incomes_full_stack.sql h1:x3byizrmt7PnCR08W6xf8ORNtr9lTddWmCfCpjC0nto=
+20260504120000_goals_full_stack.sql h1:BLf3rWK2k1n1vh8GTW5fK9dpEkRBXH0baVJxSzaf440=

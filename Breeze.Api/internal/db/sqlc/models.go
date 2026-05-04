@@ -422,6 +422,16 @@ type ExpenseSplit struct {
 	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type Goal struct {
+	ID          uuid.UUID          `json:"id"`
+	UserID      uuid.UUID          `json:"user_id"`
+	Description string             `json:"description"`
+	IsCompleted bool               `json:"is_completed"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type Income struct {
 	ID                   uuid.UUID          `json:"id"`
 	UserID               uuid.UUID          `json:"user_id"`

@@ -10,6 +10,8 @@ type Query {
   budget(id: ID!): Budget
   budgetByDate(userId: ID!, date: String!): Budget
   budgets(userId: ID!): [Budget!]!
+  goal(id: ID!): Goal
+  goals(userId: ID!): [Goal!]!
   expenseCategory(id: ID!): ExpenseCategory
   expenseCategories(budgetId: ID!): [ExpenseCategory!]!
   expense(id: ID!): Expense
@@ -38,6 +40,9 @@ type Mutation {
   createBudget(input: CreateBudgetInput!): Budget!
   updateBudget(input: UpdateBudgetInput!): Budget!
   deleteBudget(id: ID!): Boolean!
+  createGoal(input: CreateGoalInput!): Goal!
+  updateGoal(input: UpdateGoalInput!): Goal!
+  deleteGoal(id: ID!): Boolean!
   createExpenseCategory(input: CreateExpenseCategoryInput!): ExpenseCategory!
   updateExpenseCategory(input: UpdateExpenseCategoryInput!): ExpenseCategory!
   deleteExpenseCategory(id: ID!): Boolean!
@@ -199,6 +204,15 @@ type Budget {
   updatedAt: String!
 }
 
+type Goal {
+  id: ID!
+  userId: ID!
+  description: String!
+  isCompleted: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
 type ExpenseCategory {
   id: ID!
   userId: ID!
@@ -293,6 +307,18 @@ input UpdateBudgetInput {
   id: ID!
   monthlyIncome: String!
   monthlyExpenses: String!
+}
+
+input CreateGoalInput {
+  userId: ID!
+  description: String!
+  isCompleted: Boolean!
+}
+
+input UpdateGoalInput {
+  id: ID!
+  description: String!
+  isCompleted: Boolean!
 }
 
 input CreateExpenseCategoryInput {

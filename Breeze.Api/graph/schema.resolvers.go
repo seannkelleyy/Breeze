@@ -211,6 +211,54 @@ func (r *mutationResolver) DeleteBudget(ctx context.Context, id string) (bool, e
 	return true, nil
 }
 
+// CreateGoal is the resolver for the createGoal field.
+func (r *mutationResolver) CreateGoal(ctx context.Context, input model.CreateGoalInput) (*model.Goal, error) {
+	svcInput, err := createGoalInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	goal, err := r.GoalService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapGoalToModel(goal), nil
+}
+
+// UpdateGoal is the resolver for the updateGoal field.
+func (r *mutationResolver) UpdateGoal(ctx context.Context, input model.UpdateGoalInput) (*model.Goal, error) {
+	svcInput, err := updateGoalInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	goal, err := r.GoalService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapGoalToModel(goal), nil
+}
+
+// DeleteGoal is the resolver for the deleteGoal field.
+func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid goal id: %w", err)
+	}
+
+	err = r.GoalService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
 // CreateExpenseCategory is the resolver for the createExpenseCategory field.
 func (r *mutationResolver) CreateExpenseCategory(ctx context.Context, input model.CreateExpenseCategoryInput) (*model.ExpenseCategory, error) {
 	svcInput, err := createExpenseCategoryInputFromModel(input)
@@ -700,6 +748,45 @@ func (r *queryResolver) Budgets(ctx context.Context, userID string) ([]*model.Bu
 	for i := range budgets {
 		budget := budgets[i]
 		out = append(out, mapBudgetToModel(&budget))
+	}
+
+	return out, nil
+}
+
+// Goal is the resolver for the goal field.
+func (r *queryResolver) Goal(ctx context.Context, id string) (*model.Goal, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid goal id: %w", err)
+	}
+
+	goal, err := r.GoalService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapGoalToModel(goal), nil
+}
+
+// Goals is the resolver for the goals field.
+func (r *queryResolver) Goals(ctx context.Context, userID string) ([]*model.Goal, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	goals, err := r.GoalService.ListByUserID(ctx, parsedUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.Goal, 0, len(goals))
+	for i := range goals {
+		goal := goals[i]
+		out = append(out, mapGoalToModel(&goal))
 	}
 
 	return out, nil

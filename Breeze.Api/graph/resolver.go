@@ -9,6 +9,7 @@ type Resolver struct {
 	AssetService            *service.AssetService
 	LiabilityService        *service.LiabilityService
 	BudgetService           *service.BudgetService
+	GoalService             *service.GoalService
 	ExpenseCategoryService  *service.ExpenseCategoryService
 	ExpenseService          *service.ExpenseService
 	IncomeService           *service.IncomeService
