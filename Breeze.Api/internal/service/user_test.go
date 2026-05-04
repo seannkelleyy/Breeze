@@ -182,23 +182,7 @@ func TestUserService_GetByID(t *testing.T) {
 		mock := &mockQuerier{
 			getUserByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetUserByIDRow, error) {
 				assert.Equal(t, testID, id)
-				return sqlc.GetUserByIDRow{
-					ID:                 userRow.ID,
-					Email:              userRow.Email,
-					IdentityProviderID: userRow.IdentityProviderID,
-					ReturnType:         userRow.ReturnType,
-					SafeWithdrawalRate: userRow.SafeWithdrawalRate,
-					CurrencyType:       userRow.CurrencyType,
-					InflationRate:      userRow.InflationRate,
-					DeductionType:      userRow.DeductionType,
-					DeductionAmount:    userRow.DeductionAmount,
-					MaxTaxBracketID:    userRow.MaxTaxBracketID,
-					FilingStatus:       userRow.FilingStatus,
-					PayoffStrategy:     userRow.PayoffStrategy,
-					CreatedAt:          userRow.CreatedAt,
-					UpdatedAt:          userRow.UpdatedAt,
-					DeletedAt:          userRow.DeletedAt,
-				}, nil
+				return sqlc.GetUserByIDRow(userRow), nil
 			},
 		}
 
@@ -250,23 +234,7 @@ func TestUserService_GetByIdentityProviderID(t *testing.T) {
 		mock := &mockQuerier{
 			getUserByIdentityProviderIDFunc: func(ctx context.Context, id string) (sqlc.GetUserByIdentityProviderIDRow, error) {
 				assert.Equal(t, providerID, id)
-				return sqlc.GetUserByIdentityProviderIDRow{
-					ID:                 userRow.ID,
-					Email:              userRow.Email,
-					IdentityProviderID: userRow.IdentityProviderID,
-					ReturnType:         userRow.ReturnType,
-					SafeWithdrawalRate: userRow.SafeWithdrawalRate,
-					CurrencyType:       userRow.CurrencyType,
-					InflationRate:      userRow.InflationRate,
-					DeductionType:      userRow.DeductionType,
-					DeductionAmount:    userRow.DeductionAmount,
-					MaxTaxBracketID:    userRow.MaxTaxBracketID,
-					FilingStatus:       userRow.FilingStatus,
-					PayoffStrategy:     userRow.PayoffStrategy,
-					CreatedAt:          userRow.CreatedAt,
-					UpdatedAt:          userRow.UpdatedAt,
-					DeletedAt:          userRow.DeletedAt,
-				}, nil
+				return sqlc.GetUserByIdentityProviderIDRow(userRow), nil
 			},
 		}
 

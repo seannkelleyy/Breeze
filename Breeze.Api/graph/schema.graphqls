@@ -7,8 +7,22 @@ type Query {
   assets(userId: ID!): [Asset!]!
   liability(id: ID!): Liability
   liabilities(userId: ID!): [Liability!]!
+  budget(id: ID!): Budget
+  budgetByDate(userId: ID!, date: String!): Budget
+  budgets(userId: ID!): [Budget!]!
+  expenseCategory(id: ID!): ExpenseCategory
+  expenseCategories(budgetId: ID!): [ExpenseCategory!]!
+  expense(id: ID!): Expense
+  expenses(budgetId: ID!): [Expense!]!
+  income(id: ID!): Income
+  incomes(budgetId: ID!): [Income!]!
+  recurringIncome(id: ID!): RecurringIncome
+  recurringIncomes(userId: ID!): [RecurringIncome!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
+  netWorthSnapshot(id: ID!): NetWorthSnapshot
+  netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
+  netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
 }
 
 type Mutation {
@@ -21,9 +35,27 @@ type Mutation {
   createLiability(input: CreateLiabilityInput!): Liability!
   updateLiability(input: UpdateLiabilityInput!): Liability!
   deleteLiability(id: ID!): Boolean!
+  createBudget(input: CreateBudgetInput!): Budget!
+  updateBudget(input: UpdateBudgetInput!): Budget!
+  deleteBudget(id: ID!): Boolean!
+  createExpenseCategory(input: CreateExpenseCategoryInput!): ExpenseCategory!
+  updateExpenseCategory(input: UpdateExpenseCategoryInput!): ExpenseCategory!
+  deleteExpenseCategory(id: ID!): Boolean!
+  createExpense(input: CreateExpenseInput!): Expense!
+  updateExpense(input: UpdateExpenseInput!): Expense!
+  deleteExpense(id: ID!): Boolean!
+  createIncome(input: CreateIncomeInput!): Income!
+  updateIncome(input: UpdateIncomeInput!): Income!
+  deleteIncome(id: ID!): Boolean!
+  createRecurringIncome(input: CreateRecurringIncomeInput!): RecurringIncome!
+  updateRecurringIncome(input: UpdateRecurringIncomeInput!): RecurringIncome!
+  deleteRecurringIncome(id: ID!): Boolean!
   createTaxBracket(input: CreateTaxBracketInput!): TaxBracket!
   updateTaxBracket(input: UpdateTaxBracketInput!): TaxBracket!
   deleteTaxBracket(id: ID!): Boolean!
+  createNetWorthSnapshot(input: CreateNetWorthSnapshotInput!): NetWorthSnapshot!
+  updateNetWorthSnapshot(input: UpdateNetWorthSnapshotInput!): NetWorthSnapshot!
+  deleteNetWorthSnapshot(id: ID!): Boolean!
 }
 
 type Health {
@@ -51,6 +83,20 @@ enum FilingStatus {
 enum PayoffStrategy {
   AVALANCHE
   SNOWBALL
+}
+
+enum RecurrenceInterval {
+  NONE
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum IncomeSourceType {
+  MANUAL
+  RECURRING_TEMPLATE
 }
 
 enum AssetType {
@@ -143,6 +189,77 @@ type Liability {
   updatedAt: String!
 }
 
+type Budget {
+  id: ID!
+  userId: ID!
+  date: String!
+  monthlyIncome: String!
+  monthlyExpenses: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ExpenseCategory {
+  id: ID!
+  userId: ID!
+  budgetId: ID!
+  name: String!
+  allocation: String!
+  currentSpend: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Expense {
+  id: ID!
+  userId: ID!
+  budgetId: ID!
+  amount: String!
+  date: String!
+  description: String!
+  splits: [ExpenseSplit!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ExpenseSplit {
+  id: ID!
+  expenseId: ID!
+  categoryId: ID!
+  amount: String!
+  description: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Income {
+  id: ID!
+  userId: ID!
+  budgetId: ID!
+  name: String!
+  amount: String!
+  date: String!
+  sourceType: IncomeSourceType!
+  sourceTemplateId: ID
+  sourceOccurrenceDate: String
+  generationMonth: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type RecurringIncome {
+  id: ID!
+  userId: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+  createdAt: String!
+  updatedAt: String!
+}
+
 input CreateLiabilityInput {
   userId: ID!
   name: String!
@@ -163,6 +280,100 @@ input UpdateLiabilityInput {
   minimumPayment: String!
   targetExtraPayment: String!
   payoffPriority: Int!
+}
+
+input CreateBudgetInput {
+  userId: ID!
+  date: String!
+  monthlyIncome: String!
+  monthlyExpenses: String!
+}
+
+input UpdateBudgetInput {
+  id: ID!
+  monthlyIncome: String!
+  monthlyExpenses: String!
+}
+
+input CreateExpenseCategoryInput {
+  userId: ID!
+  budgetId: ID!
+  name: String!
+  allocation: String!
+  currentSpend: String!
+}
+
+input UpdateExpenseCategoryInput {
+  id: ID!
+  name: String!
+  allocation: String!
+  currentSpend: String!
+}
+
+input CreateExpenseInput {
+  userId: ID!
+  budgetId: ID!
+  amount: String!
+  date: String!
+  description: String!
+  splits: [ExpenseSplitInput!]!
+}
+
+input UpdateExpenseInput {
+  id: ID!
+  amount: String!
+  date: String!
+  description: String!
+  splits: [ExpenseSplitInput!]!
+}
+
+input ExpenseSplitInput {
+  categoryId: ID!
+  amount: String!
+  description: String
+}
+
+input CreateIncomeInput {
+  userId: ID!
+  budgetId: ID!
+  name: String!
+  amount: String!
+  date: String!
+  sourceType: IncomeSourceType!
+  sourceTemplateId: ID
+  sourceOccurrenceDate: String
+  generationMonth: String
+}
+
+input UpdateIncomeInput {
+  id: ID!
+  name: String!
+  amount: String!
+  date: String!
+  sourceType: IncomeSourceType!
+  sourceTemplateId: ID
+  sourceOccurrenceDate: String
+  generationMonth: String
+}
+
+input CreateRecurringIncomeInput {
+  userId: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+}
+
+input UpdateRecurringIncomeInput {
+  id: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
 }
 
 type TaxBracket {
@@ -205,4 +416,31 @@ input UpdateAssetInput {
   name: String!
   assetType: AssetType!
   currentValue: String!
+}
+
+
+type NetWorthSnapshot {
+  id: ID!
+  userId: ID!
+  snapshotDate: String!
+  totalAssets: String!
+  totalLiabilities: String!
+  netWorth: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateNetWorthSnapshotInput {
+  userId: ID!
+  snapshotDate: String!
+  totalAssets: String!
+  totalLiabilities: String!
+  netWorth: String!
+}
+
+input UpdateNetWorthSnapshotInput {
+  id: ID!
+  totalAssets: String
+  totalLiabilities: String
+  netWorth: String
 }

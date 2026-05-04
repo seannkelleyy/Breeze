@@ -13,7 +13,7 @@ test-coverage:
 
 ATLAS=atlas
 SQLC=go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-GQLGEN=go run github.com/99designs/gqlgen@latest
+GQLGEN=go run github.com/99designs/gqlgen@v0.17.89
 MIGRATION_NAME?=init
 
 .PHONY: gen migrate-diff migrate migrate-apply migrate-lint run tidy build db-up

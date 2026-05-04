@@ -14,12 +14,12 @@ func WithTx(ctx context.Context, pool *pgx.Conn, fn func(tx pgx.Tx) error) error
 	}
 	defer func() {
 		if p := recover(); p != nil {
-			tx.Rollback(ctx)
+			_ = tx.Rollback(ctx)
 			panic(p)
 		}
 	}()
 	if err := fn(tx); err != nil {
-		tx.Rollback(ctx)
+		_ = tx.Rollback(ctx)
 		return err
 	}
 	return tx.Commit(ctx)

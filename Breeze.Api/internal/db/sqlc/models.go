@@ -145,6 +145,48 @@ func (ns NullFilingStatus) Value() (driver.Value, error) {
 	return string(ns.FilingStatus), nil
 }
 
+type IncomeSourceType string
+
+const (
+	IncomeSourceTypeMANUAL            IncomeSourceType = "MANUAL"
+	IncomeSourceTypeRECURRINGTEMPLATE IncomeSourceType = "RECURRING_TEMPLATE"
+)
+
+func (e *IncomeSourceType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = IncomeSourceType(s)
+	case string:
+		*e = IncomeSourceType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for IncomeSourceType: %T", src)
+	}
+	return nil
+}
+
+type NullIncomeSourceType struct {
+	IncomeSourceType IncomeSourceType `json:"income_source_type"`
+	Valid            bool             `json:"valid"` // Valid is true if IncomeSourceType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullIncomeSourceType) Scan(value interface{}) error {
+	if value == nil {
+		ns.IncomeSourceType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.IncomeSourceType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullIncomeSourceType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.IncomeSourceType), nil
+}
+
 type LiabilityType string
 
 const (
@@ -233,6 +275,52 @@ func (ns NullPayoffStrategy) Value() (driver.Value, error) {
 	return string(ns.PayoffStrategy), nil
 }
 
+type RecurrenceInterval string
+
+const (
+	RecurrenceIntervalNONE      RecurrenceInterval = "NONE"
+	RecurrenceIntervalWEEKLY    RecurrenceInterval = "WEEKLY"
+	RecurrenceIntervalBIWEEKLY  RecurrenceInterval = "BIWEEKLY"
+	RecurrenceIntervalMONTHLY   RecurrenceInterval = "MONTHLY"
+	RecurrenceIntervalQUARTERLY RecurrenceInterval = "QUARTERLY"
+	RecurrenceIntervalYEARLY    RecurrenceInterval = "YEARLY"
+)
+
+func (e *RecurrenceInterval) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = RecurrenceInterval(s)
+	case string:
+		*e = RecurrenceInterval(s)
+	default:
+		return fmt.Errorf("unsupported scan type for RecurrenceInterval: %T", src)
+	}
+	return nil
+}
+
+type NullRecurrenceInterval struct {
+	RecurrenceInterval RecurrenceInterval `json:"recurrence_interval"`
+	Valid              bool               `json:"valid"` // Valid is true if RecurrenceInterval is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullRecurrenceInterval) Scan(value interface{}) error {
+	if value == nil {
+		ns.RecurrenceInterval, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.RecurrenceInterval.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullRecurrenceInterval) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.RecurrenceInterval), nil
+}
+
 type ReturnType string
 
 const (
@@ -287,6 +375,69 @@ type Asset struct {
 	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type Budget struct {
+	ID              uuid.UUID          `json:"id"`
+	UserID          uuid.UUID          `json:"user_id"`
+	Date            pgtype.Date        `json:"date"`
+	MonthlyIncome   decimal.Decimal    `json:"monthly_income"`
+	MonthlyExpenses decimal.Decimal    `json:"monthly_expenses"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type Expense struct {
+	ID                uuid.UUID          `json:"id"`
+	UserID            uuid.UUID          `json:"user_id"`
+	BudgetID          uuid.UUID          `json:"budget_id"`
+	Amount            decimal.Decimal    `json:"amount"`
+	Date              pgtype.Date        `json:"date"`
+	Description       string             `json:"description"`
+	RecurringSourceID pgtype.UUID        `json:"recurring_source_id"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt         pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type ExpenseCategory struct {
+	ID           uuid.UUID          `json:"id"`
+	UserID       uuid.UUID          `json:"user_id"`
+	BudgetID     uuid.UUID          `json:"budget_id"`
+	Name         string             `json:"name"`
+	Allocation   decimal.Decimal    `json:"allocation"`
+	CurrentSpend decimal.Decimal    `json:"current_spend"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type ExpenseSplit struct {
+	ID          uuid.UUID          `json:"id"`
+	ExpenseID   uuid.UUID          `json:"expense_id"`
+	CategoryID  uuid.UUID          `json:"category_id"`
+	Amount      decimal.Decimal    `json:"amount"`
+	Description *string            `json:"description"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type Income struct {
+	ID                   uuid.UUID          `json:"id"`
+	UserID               uuid.UUID          `json:"user_id"`
+	BudgetID             uuid.UUID          `json:"budget_id"`
+	Name                 string             `json:"name"`
+	Amount               decimal.Decimal    `json:"amount"`
+	Date                 pgtype.Date        `json:"date"`
+	SourceType           IncomeSourceType   `json:"source_type"`
+	SourceTemplateID     pgtype.UUID        `json:"source_template_id"`
+	SourceOccurrenceDate pgtype.Date        `json:"source_occurrence_date"`
+	GenerationMonth      pgtype.Date        `json:"generation_month"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type Liability struct {
 	ID                   uuid.UUID          `json:"id"`
 	UserID               uuid.UUID          `json:"user_id"`
@@ -301,6 +452,32 @@ type Liability struct {
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type NetWorthSnapshot struct {
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	SnapshotDate     pgtype.Date        `json:"snapshot_date"`
+	TotalAssets      decimal.Decimal    `json:"total_assets"`
+	TotalLiabilities decimal.Decimal    `json:"total_liabilities"`
+	NetWorth         decimal.Decimal    `json:"net_worth"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type RecurringIncome struct {
+	ID                 uuid.UUID          `json:"id"`
+	UserID             uuid.UUID          `json:"user_id"`
+	Name               string             `json:"name"`
+	Amount             decimal.Decimal    `json:"amount"`
+	RecurrenceInterval RecurrenceInterval `json:"recurrence_interval"`
+	PaydayDayOfMonth   *int32             `json:"payday_day_of_month"`
+	StartDate          pgtype.Date        `json:"start_date"`
+	EndDate            pgtype.Date        `json:"end_date"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type TaxBracket struct {

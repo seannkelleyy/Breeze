@@ -8,10 +8,10 @@ import (
 )
 
 func TestLoad_ReturnsConfigFromEnv(t *testing.T) {
-	os.Setenv("DATABASE_URL", "postgres://user:pass@localhost:5432/db")
-	os.Setenv("CLERK_SECRET_KEY", "secret")
-	os.Setenv("ENV", "test")
-	os.Setenv("PORT", "1234")
+	assert.NoError(t, os.Setenv("DATABASE_URL", "postgres://user:pass@localhost:5432/db"))
+	assert.NoError(t, os.Setenv("CLERK_SECRET_KEY", "secret"))
+	assert.NoError(t, os.Setenv("ENV", "test"))
+	assert.NoError(t, os.Setenv("PORT", "1234"))
 	cfg := Load()
 	assert.Equal(t, "postgres://user:pass@localhost:5432/db", cfg.DatabaseURL)
 	assert.Equal(t, "secret", cfg.ClerkSecretKey)

@@ -5,10 +5,10 @@ Living tracker for the Go API and database work.
 
 ## Current Status
 
-- Done: Users, Assets, Liabilities, TaxBrackets
+- Done: Users, Assets, Liabilities, TaxBrackets, Net Worth Snapshots, Budgets, Expense Categories, Expenses + Expense Splits, Incomes + Recurring Rules
 - Backend validation: `make gen` and `go test ./...` pass
-- Last verified: April 22, 2026
-- Current focus: balance sheet and budgeting foundations
+- Last verified: May 1, 2026
+- Current focus: goals
 
 ## Readiness Check
 
@@ -21,31 +21,25 @@ Living tracker for the Go API and database work.
 
 Remaining backend slices from the roadmap:
 
-1. Net Worth Snapshots
-2. Budgets
-3. Expense Categories
-4. Expenses + Expense Splits
-5. Incomes + Recurring Rules
-6. Goals
-7. Retirement Accounts + Contribution Tracking
-8. Scenario Projections
-9. Plaid Connections + Account Sync
-10. Tax Planning Extensions
-11. Early Retirement Ladders
+1. Goals
+2. Retirement Accounts + Contribution Tracking
+3. Scenario Projections
+4. Plaid Connections + Account Sync
+5. Tax Planning Extensions
+6. Early Retirement Ladders
 
 ## Next Best Milestone
 
 Milestone A:
 - Net Worth Snapshots
+- Budgets
 
 Next task:
-- Build Net Worth Snapshots as the next backend slice
+- Build Goals as the next backend slice
 
 Milestone B:
-- Budgets
-- Expense Categories
-- Expenses + Expense Splits
 - Incomes + Recurring Rules
+- Goals
 
 ## Notes
 

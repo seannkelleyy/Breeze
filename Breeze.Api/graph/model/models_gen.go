@@ -20,11 +20,57 @@ type Asset struct {
 	UpdatedAt          string    `json:"updatedAt"`
 }
 
+type Budget struct {
+	ID              string `json:"id"`
+	UserID          string `json:"userId"`
+	Date            string `json:"date"`
+	MonthlyIncome   string `json:"monthlyIncome"`
+	MonthlyExpenses string `json:"monthlyExpenses"`
+	CreatedAt       string `json:"createdAt"`
+	UpdatedAt       string `json:"updatedAt"`
+}
+
 type CreateAssetInput struct {
 	UserID       string    `json:"userId"`
 	Name         string    `json:"name"`
 	AssetType    AssetType `json:"assetType"`
 	CurrentValue string    `json:"currentValue"`
+}
+
+type CreateBudgetInput struct {
+	UserID          string `json:"userId"`
+	Date            string `json:"date"`
+	MonthlyIncome   string `json:"monthlyIncome"`
+	MonthlyExpenses string `json:"monthlyExpenses"`
+}
+
+type CreateExpenseCategoryInput struct {
+	UserID       string `json:"userId"`
+	BudgetID     string `json:"budgetId"`
+	Name         string `json:"name"`
+	Allocation   string `json:"allocation"`
+	CurrentSpend string `json:"currentSpend"`
+}
+
+type CreateExpenseInput struct {
+	UserID      string               `json:"userId"`
+	BudgetID    string               `json:"budgetId"`
+	Amount      string               `json:"amount"`
+	Date        string               `json:"date"`
+	Description string               `json:"description"`
+	Splits      []*ExpenseSplitInput `json:"splits"`
+}
+
+type CreateIncomeInput struct {
+	UserID               string           `json:"userId"`
+	BudgetID             string           `json:"budgetId"`
+	Name                 string           `json:"name"`
+	Amount               string           `json:"amount"`
+	Date                 string           `json:"date"`
+	SourceType           IncomeSourceType `json:"sourceType"`
+	SourceTemplateID     *string          `json:"sourceTemplateId,omitempty"`
+	SourceOccurrenceDate *string          `json:"sourceOccurrenceDate,omitempty"`
+	GenerationMonth      *string          `json:"generationMonth,omitempty"`
 }
 
 type CreateLiabilityInput struct {
@@ -36,6 +82,24 @@ type CreateLiabilityInput struct {
 	MinimumPayment     string        `json:"minimumPayment"`
 	TargetExtraPayment string        `json:"targetExtraPayment"`
 	PayoffPriority     int           `json:"payoffPriority"`
+}
+
+type CreateNetWorthSnapshotInput struct {
+	UserID           string `json:"userId"`
+	SnapshotDate     string `json:"snapshotDate"`
+	TotalAssets      string `json:"totalAssets"`
+	TotalLiabilities string `json:"totalLiabilities"`
+	NetWorth         string `json:"netWorth"`
+}
+
+type CreateRecurringIncomeInput struct {
+	UserID             string             `json:"userId"`
+	Name               string             `json:"name"`
+	Amount             string             `json:"amount"`
+	RecurrenceInterval RecurrenceInterval `json:"recurrenceInterval"`
+	PaydayDayOfMonth   *int               `json:"paydayDayOfMonth,omitempty"`
+	StartDate          string             `json:"startDate"`
+	EndDate            *string            `json:"endDate,omitempty"`
 }
 
 type CreateTaxBracketInput struct {
@@ -60,9 +124,63 @@ type CreateUserInput struct {
 	PayoffStrategy     PayoffStrategy `json:"payoffStrategy"`
 }
 
+type Expense struct {
+	ID          string          `json:"id"`
+	UserID      string          `json:"userId"`
+	BudgetID    string          `json:"budgetId"`
+	Amount      string          `json:"amount"`
+	Date        string          `json:"date"`
+	Description string          `json:"description"`
+	Splits      []*ExpenseSplit `json:"splits"`
+	CreatedAt   string          `json:"createdAt"`
+	UpdatedAt   string          `json:"updatedAt"`
+}
+
+type ExpenseCategory struct {
+	ID           string `json:"id"`
+	UserID       string `json:"userId"`
+	BudgetID     string `json:"budgetId"`
+	Name         string `json:"name"`
+	Allocation   string `json:"allocation"`
+	CurrentSpend string `json:"currentSpend"`
+	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
+}
+
+type ExpenseSplit struct {
+	ID          string  `json:"id"`
+	ExpenseID   string  `json:"expenseId"`
+	CategoryID  string  `json:"categoryId"`
+	Amount      string  `json:"amount"`
+	Description *string `json:"description,omitempty"`
+	CreatedAt   string  `json:"createdAt"`
+	UpdatedAt   string  `json:"updatedAt"`
+}
+
+type ExpenseSplitInput struct {
+	CategoryID  string  `json:"categoryId"`
+	Amount      string  `json:"amount"`
+	Description *string `json:"description,omitempty"`
+}
+
 type Health struct {
 	Status    string `json:"status"`
 	Timestamp string `json:"timestamp"`
+}
+
+type Income struct {
+	ID                   string           `json:"id"`
+	UserID               string           `json:"userId"`
+	BudgetID             string           `json:"budgetId"`
+	Name                 string           `json:"name"`
+	Amount               string           `json:"amount"`
+	Date                 string           `json:"date"`
+	SourceType           IncomeSourceType `json:"sourceType"`
+	SourceTemplateID     *string          `json:"sourceTemplateId,omitempty"`
+	SourceOccurrenceDate *string          `json:"sourceOccurrenceDate,omitempty"`
+	GenerationMonth      *string          `json:"generationMonth,omitempty"`
+	CreatedAt            string           `json:"createdAt"`
+	UpdatedAt            string           `json:"updatedAt"`
 }
 
 type Liability struct {
@@ -83,7 +201,31 @@ type Liability struct {
 type Mutation struct {
 }
 
+type NetWorthSnapshot struct {
+	ID               string `json:"id"`
+	UserID           string `json:"userId"`
+	SnapshotDate     string `json:"snapshotDate"`
+	TotalAssets      string `json:"totalAssets"`
+	TotalLiabilities string `json:"totalLiabilities"`
+	NetWorth         string `json:"netWorth"`
+	CreatedAt        string `json:"createdAt"`
+	UpdatedAt        string `json:"updatedAt"`
+}
+
 type Query struct {
+}
+
+type RecurringIncome struct {
+	ID                 string             `json:"id"`
+	UserID             string             `json:"userId"`
+	Name               string             `json:"name"`
+	Amount             string             `json:"amount"`
+	RecurrenceInterval RecurrenceInterval `json:"recurrenceInterval"`
+	PaydayDayOfMonth   *int               `json:"paydayDayOfMonth,omitempty"`
+	StartDate          string             `json:"startDate"`
+	EndDate            *string            `json:"endDate,omitempty"`
+	CreatedAt          string             `json:"createdAt"`
+	UpdatedAt          string             `json:"updatedAt"`
 }
 
 type TaxBracket struct {
@@ -104,6 +246,38 @@ type UpdateAssetInput struct {
 	CurrentValue string    `json:"currentValue"`
 }
 
+type UpdateBudgetInput struct {
+	ID              string `json:"id"`
+	MonthlyIncome   string `json:"monthlyIncome"`
+	MonthlyExpenses string `json:"monthlyExpenses"`
+}
+
+type UpdateExpenseCategoryInput struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Allocation   string `json:"allocation"`
+	CurrentSpend string `json:"currentSpend"`
+}
+
+type UpdateExpenseInput struct {
+	ID          string               `json:"id"`
+	Amount      string               `json:"amount"`
+	Date        string               `json:"date"`
+	Description string               `json:"description"`
+	Splits      []*ExpenseSplitInput `json:"splits"`
+}
+
+type UpdateIncomeInput struct {
+	ID                   string           `json:"id"`
+	Name                 string           `json:"name"`
+	Amount               string           `json:"amount"`
+	Date                 string           `json:"date"`
+	SourceType           IncomeSourceType `json:"sourceType"`
+	SourceTemplateID     *string          `json:"sourceTemplateId,omitempty"`
+	SourceOccurrenceDate *string          `json:"sourceOccurrenceDate,omitempty"`
+	GenerationMonth      *string          `json:"generationMonth,omitempty"`
+}
+
 type UpdateLiabilityInput struct {
 	ID                 string        `json:"id"`
 	Name               string        `json:"name"`
@@ -113,6 +287,23 @@ type UpdateLiabilityInput struct {
 	MinimumPayment     string        `json:"minimumPayment"`
 	TargetExtraPayment string        `json:"targetExtraPayment"`
 	PayoffPriority     int           `json:"payoffPriority"`
+}
+
+type UpdateNetWorthSnapshotInput struct {
+	ID               string  `json:"id"`
+	TotalAssets      *string `json:"totalAssets,omitempty"`
+	TotalLiabilities *string `json:"totalLiabilities,omitempty"`
+	NetWorth         *string `json:"netWorth,omitempty"`
+}
+
+type UpdateRecurringIncomeInput struct {
+	ID                 string             `json:"id"`
+	Name               string             `json:"name"`
+	Amount             string             `json:"amount"`
+	RecurrenceInterval RecurrenceInterval `json:"recurrenceInterval"`
+	PaydayDayOfMonth   *int               `json:"paydayDayOfMonth,omitempty"`
+	StartDate          string             `json:"startDate"`
+	EndDate            *string            `json:"endDate,omitempty"`
 }
 
 type UpdateTaxBracketInput struct {
@@ -333,6 +524,61 @@ func (e FilingStatus) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type IncomeSourceType string
+
+const (
+	IncomeSourceTypeManual            IncomeSourceType = "MANUAL"
+	IncomeSourceTypeRecurringTemplate IncomeSourceType = "RECURRING_TEMPLATE"
+)
+
+var AllIncomeSourceType = []IncomeSourceType{
+	IncomeSourceTypeManual,
+	IncomeSourceTypeRecurringTemplate,
+}
+
+func (e IncomeSourceType) IsValid() bool {
+	switch e {
+	case IncomeSourceTypeManual, IncomeSourceTypeRecurringTemplate:
+		return true
+	}
+	return false
+}
+
+func (e IncomeSourceType) String() string {
+	return string(e)
+}
+
+func (e *IncomeSourceType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IncomeSourceType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IncomeSourceType", str)
+	}
+	return nil
+}
+
+func (e IncomeSourceType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *IncomeSourceType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e IncomeSourceType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type LiabilityType string
 
 const (
@@ -446,6 +692,69 @@ func (e *PayoffStrategy) UnmarshalJSON(b []byte) error {
 }
 
 func (e PayoffStrategy) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type RecurrenceInterval string
+
+const (
+	RecurrenceIntervalNone      RecurrenceInterval = "NONE"
+	RecurrenceIntervalWeekly    RecurrenceInterval = "WEEKLY"
+	RecurrenceIntervalBiweekly  RecurrenceInterval = "BIWEEKLY"
+	RecurrenceIntervalMonthly   RecurrenceInterval = "MONTHLY"
+	RecurrenceIntervalQuarterly RecurrenceInterval = "QUARTERLY"
+	RecurrenceIntervalYearly    RecurrenceInterval = "YEARLY"
+)
+
+var AllRecurrenceInterval = []RecurrenceInterval{
+	RecurrenceIntervalNone,
+	RecurrenceIntervalWeekly,
+	RecurrenceIntervalBiweekly,
+	RecurrenceIntervalMonthly,
+	RecurrenceIntervalQuarterly,
+	RecurrenceIntervalYearly,
+}
+
+func (e RecurrenceInterval) IsValid() bool {
+	switch e {
+	case RecurrenceIntervalNone, RecurrenceIntervalWeekly, RecurrenceIntervalBiweekly, RecurrenceIntervalMonthly, RecurrenceIntervalQuarterly, RecurrenceIntervalYearly:
+		return true
+	}
+	return false
+}
+
+func (e RecurrenceInterval) String() string {
+	return string(e)
+}
+
+func (e *RecurrenceInterval) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RecurrenceInterval(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RecurrenceInterval", str)
+	}
+	return nil
+}
+
+func (e RecurrenceInterval) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RecurrenceInterval) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RecurrenceInterval) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

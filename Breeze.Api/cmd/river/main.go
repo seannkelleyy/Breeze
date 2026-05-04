@@ -37,5 +37,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	riverClient.Start(ctx)
+	if err := riverClient.Start(ctx); err != nil {
+		os.Exit(1)
+	}
 }
