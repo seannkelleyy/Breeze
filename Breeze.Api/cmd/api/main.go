@@ -67,13 +67,25 @@ func main() {
 	userService := service.NewUserService(queries)
 	assetService := service.NewAssetService(queries)
 	liabilityService := service.NewLiabilityService(queries)
+	budgetService := service.NewBudgetService(queries)
+	expenseCategoryService := service.NewExpenseCategoryService(queries)
+	expenseService := service.NewExpenseService(queries, pool)
+	incomeService := service.NewIncomeService(queries)
+	recurringIncomeService := service.NewRecurringIncomeService(queries)
 	taxBracketService := service.NewTaxBracketService(queries)
+	netWorthSnapshotService := service.NewNetWorthSnapshotService(queries)
 	resolver := &graph.Resolver{
-		HealthService:     healthService,
-		UserService:       userService,
-		AssetService:      assetService,
-		LiabilityService:  liabilityService,
-		TaxBracketService: taxBracketService,
+		HealthService:           healthService,
+		UserService:             userService,
+		AssetService:            assetService,
+		LiabilityService:        liabilityService,
+		BudgetService:           budgetService,
+		ExpenseCategoryService:  expenseCategoryService,
+		ExpenseService:          expenseService,
+		IncomeService:           incomeService,
+		RecurringIncomeService:  recurringIncomeService,
+		TaxBracketService:       taxBracketService,
+		NetWorthSnapshotService: netWorthSnapshotService,
 	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 

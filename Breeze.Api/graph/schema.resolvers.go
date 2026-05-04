@@ -163,6 +163,246 @@ func (r *mutationResolver) DeleteLiability(ctx context.Context, id string) (bool
 	return true, nil
 }
 
+// CreateBudget is the resolver for the createBudget field.
+func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateBudgetInput) (*model.Budget, error) {
+	svcInput, err := createBudgetInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	budget, err := r.BudgetService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapBudgetToModel(budget), nil
+}
+
+// UpdateBudget is the resolver for the updateBudget field.
+func (r *mutationResolver) UpdateBudget(ctx context.Context, input model.UpdateBudgetInput) (*model.Budget, error) {
+	svcInput, err := updateBudgetInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	budget, err := r.BudgetService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapBudgetToModel(budget), nil
+}
+
+// DeleteBudget is the resolver for the deleteBudget field.
+func (r *mutationResolver) DeleteBudget(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid budget id: %w", err)
+	}
+
+	err = r.BudgetService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+// CreateExpenseCategory is the resolver for the createExpenseCategory field.
+func (r *mutationResolver) CreateExpenseCategory(ctx context.Context, input model.CreateExpenseCategoryInput) (*model.ExpenseCategory, error) {
+	svcInput, err := createExpenseCategoryInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	category, err := r.ExpenseCategoryService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapExpenseCategoryToModel(category), nil
+}
+
+// UpdateExpenseCategory is the resolver for the updateExpenseCategory field.
+func (r *mutationResolver) UpdateExpenseCategory(ctx context.Context, input model.UpdateExpenseCategoryInput) (*model.ExpenseCategory, error) {
+	svcInput, err := updateExpenseCategoryInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	category, err := r.ExpenseCategoryService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapExpenseCategoryToModel(category), nil
+}
+
+// DeleteExpenseCategory is the resolver for the deleteExpenseCategory field.
+func (r *mutationResolver) DeleteExpenseCategory(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid expense category id: %w", err)
+	}
+
+	err = r.ExpenseCategoryService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+// CreateExpense is the resolver for the createExpense field.
+func (r *mutationResolver) CreateExpense(ctx context.Context, input model.CreateExpenseInput) (*model.Expense, error) {
+	svcInput, err := createExpenseInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	expense, err := r.ExpenseService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapExpenseToModel(expense), nil
+}
+
+// UpdateExpense is the resolver for the updateExpense field.
+func (r *mutationResolver) UpdateExpense(ctx context.Context, input model.UpdateExpenseInput) (*model.Expense, error) {
+	svcInput, err := updateExpenseInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	expense, err := r.ExpenseService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapExpenseToModel(expense), nil
+}
+
+// DeleteExpense is the resolver for the deleteExpense field.
+func (r *mutationResolver) DeleteExpense(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid expense id: %w", err)
+	}
+
+	err = r.ExpenseService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+// CreateIncome is the resolver for the createIncome field.
+func (r *mutationResolver) CreateIncome(ctx context.Context, input model.CreateIncomeInput) (*model.Income, error) {
+	svcInput, err := createIncomeInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	income, err := r.IncomeService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapIncomeToModel(income), nil
+}
+
+// UpdateIncome is the resolver for the updateIncome field.
+func (r *mutationResolver) UpdateIncome(ctx context.Context, input model.UpdateIncomeInput) (*model.Income, error) {
+	svcInput, err := updateIncomeInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	income, err := r.IncomeService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapIncomeToModel(income), nil
+}
+
+// DeleteIncome is the resolver for the deleteIncome field.
+func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid income id: %w", err)
+	}
+
+	err = r.IncomeService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+// CreateRecurringIncome is the resolver for the createRecurringIncome field.
+func (r *mutationResolver) CreateRecurringIncome(ctx context.Context, input model.CreateRecurringIncomeInput) (*model.RecurringIncome, error) {
+	svcInput, err := createRecurringIncomeInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	income, err := r.RecurringIncomeService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapRecurringIncomeToModel(income), nil
+}
+
+// UpdateRecurringIncome is the resolver for the updateRecurringIncome field.
+func (r *mutationResolver) UpdateRecurringIncome(ctx context.Context, input model.UpdateRecurringIncomeInput) (*model.RecurringIncome, error) {
+	svcInput, err := updateRecurringIncomeInputFromModel(input)
+	if err != nil {
+		return nil, err
+	}
+
+	income, err := r.RecurringIncomeService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapRecurringIncomeToModel(income), nil
+}
+
+// DeleteRecurringIncome is the resolver for the deleteRecurringIncome field.
+func (r *mutationResolver) DeleteRecurringIncome(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid recurring income id: %w", err)
+	}
+
+	err = r.RecurringIncomeService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
 // CreateTaxBracket is the resolver for the createTaxBracket field.
 func (r *mutationResolver) CreateTaxBracket(ctx context.Context, input model.CreateTaxBracketInput) (*model.TaxBracket, error) {
 	svcInput, err := createTaxBracketInputFromModel(input)
@@ -201,6 +441,54 @@ func (r *mutationResolver) DeleteTaxBracket(ctx context.Context, id string) (boo
 	}
 
 	err = r.TaxBracketService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+// CreateNetWorthSnapshot is the resolver for the createNetWorthSnapshot field.
+func (r *mutationResolver) CreateNetWorthSnapshot(ctx context.Context, input model.CreateNetWorthSnapshotInput) (*model.NetWorthSnapshot, error) {
+	svcInput, err := mapCreateNetWorthSnapshotInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	snapshot, err := r.NetWorthSnapshotService.Create(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapNetWorthSnapshotToModel(snapshot), nil
+}
+
+// UpdateNetWorthSnapshot is the resolver for the updateNetWorthSnapshot field.
+func (r *mutationResolver) UpdateNetWorthSnapshot(ctx context.Context, input model.UpdateNetWorthSnapshotInput) (*model.NetWorthSnapshot, error) {
+	svcInput, err := mapUpdateNetWorthSnapshotInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	snapshot, err := r.NetWorthSnapshotService.Update(ctx, svcInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapNetWorthSnapshotToModel(snapshot), nil
+}
+
+// DeleteNetWorthSnapshot is the resolver for the deleteNetWorthSnapshot field.
+func (r *mutationResolver) DeleteNetWorthSnapshot(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid net worth snapshot id: %w", err)
+	}
+
+	err = r.NetWorthSnapshotService.Delete(ctx, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -355,6 +643,224 @@ func (r *queryResolver) Liabilities(ctx context.Context, userID string) ([]*mode
 	return out, nil
 }
 
+// Budget is the resolver for the budget field.
+func (r *queryResolver) Budget(ctx context.Context, id string) (*model.Budget, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid budget id: %w", err)
+	}
+
+	budget, err := r.BudgetService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapBudgetToModel(budget), nil
+}
+
+// BudgetByDate is the resolver for the budgetByDate field.
+func (r *queryResolver) BudgetByDate(ctx context.Context, userID string, date string) (*model.Budget, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	budgetDate, err := time.Parse(time.RFC3339, date)
+	if err != nil {
+		return nil, fmt.Errorf("invalid budget date: %w", err)
+	}
+
+	budget, err := r.BudgetService.GetByDate(ctx, parsedUserID, budgetDate)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapBudgetToModel(budget), nil
+}
+
+// Budgets is the resolver for the budgets field.
+func (r *queryResolver) Budgets(ctx context.Context, userID string) ([]*model.Budget, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	budgets, err := r.BudgetService.ListByUserID(ctx, parsedUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.Budget, 0, len(budgets))
+	for i := range budgets {
+		budget := budgets[i]
+		out = append(out, mapBudgetToModel(&budget))
+	}
+
+	return out, nil
+}
+
+// ExpenseCategory is the resolver for the expenseCategory field.
+func (r *queryResolver) ExpenseCategory(ctx context.Context, id string) (*model.ExpenseCategory, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid expense category id: %w", err)
+	}
+
+	category, err := r.ExpenseCategoryService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapExpenseCategoryToModel(category), nil
+}
+
+// ExpenseCategories is the resolver for the expenseCategories field.
+func (r *queryResolver) ExpenseCategories(ctx context.Context, budgetID string) ([]*model.ExpenseCategory, error) {
+	parsedBudgetID, err := uuid.Parse(budgetID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid budget id: %w", err)
+	}
+
+	categories, err := r.ExpenseCategoryService.ListByBudgetID(ctx, parsedBudgetID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.ExpenseCategory, 0, len(categories))
+	for i := range categories {
+		category := categories[i]
+		out = append(out, mapExpenseCategoryToModel(&category))
+	}
+
+	return out, nil
+}
+
+// Expense is the resolver for the expense field.
+func (r *queryResolver) Expense(ctx context.Context, id string) (*model.Expense, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid expense id: %w", err)
+	}
+
+	expense, err := r.ExpenseService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapExpenseToModel(expense), nil
+}
+
+// Expenses is the resolver for the expenses field.
+func (r *queryResolver) Expenses(ctx context.Context, budgetID string) ([]*model.Expense, error) {
+	parsedBudgetID, err := uuid.Parse(budgetID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid budget id: %w", err)
+	}
+
+	expenses, err := r.ExpenseService.ListByBudgetID(ctx, parsedBudgetID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.Expense, 0, len(expenses))
+	for i := range expenses {
+		expense := expenses[i]
+		out = append(out, mapExpenseToModel(&expense))
+	}
+
+	return out, nil
+}
+
+// Income is the resolver for the income field.
+func (r *queryResolver) Income(ctx context.Context, id string) (*model.Income, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid income id: %w", err)
+	}
+
+	income, err := r.IncomeService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapIncomeToModel(income), nil
+}
+
+// Incomes is the resolver for the incomes field.
+func (r *queryResolver) Incomes(ctx context.Context, budgetID string) ([]*model.Income, error) {
+	parsedBudgetID, err := uuid.Parse(budgetID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid budget id: %w", err)
+	}
+
+	incomes, err := r.IncomeService.ListByBudgetID(ctx, parsedBudgetID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.Income, 0, len(incomes))
+	for i := range incomes {
+		income := incomes[i]
+		out = append(out, mapIncomeToModel(&income))
+	}
+
+	return out, nil
+}
+
+// RecurringIncome is the resolver for the recurringIncome field.
+func (r *queryResolver) RecurringIncome(ctx context.Context, id string) (*model.RecurringIncome, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid recurring income id: %w", err)
+	}
+
+	income, err := r.RecurringIncomeService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapRecurringIncomeToModel(income), nil
+}
+
+// RecurringIncomes is the resolver for the recurringIncomes field.
+func (r *queryResolver) RecurringIncomes(ctx context.Context, userID string) ([]*model.RecurringIncome, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	incomes, err := r.RecurringIncomeService.ListByUserID(ctx, parsedUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.RecurringIncome, 0, len(incomes))
+	for i := range incomes {
+		income := incomes[i]
+		out = append(out, mapRecurringIncomeToModel(&income))
+	}
+
+	return out, nil
+}
+
 // TaxBracket is the resolver for the taxBracket field.
 func (r *queryResolver) TaxBracket(ctx context.Context, id string) (*model.TaxBracket, error) {
 	parsedID, err := taxBracketIDFromString(id)
@@ -389,6 +895,68 @@ func (r *queryResolver) TaxBrackets(ctx context.Context, year int, filingStatus 
 	for i := range brackets {
 		bracket := brackets[i]
 		out = append(out, mapTaxBracketToModel(&bracket))
+	}
+
+	return out, nil
+}
+
+// NetWorthSnapshot is the resolver for the netWorthSnapshot field.
+func (r *queryResolver) NetWorthSnapshot(ctx context.Context, id string) (*model.NetWorthSnapshot, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid net worth snapshot id: %w", err)
+	}
+
+	snapshot, err := r.NetWorthSnapshotService.Get(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapNetWorthSnapshotToModel(snapshot), nil
+}
+
+// NetWorthSnapshotByDate is the resolver for the netWorthSnapshotByDate field.
+func (r *queryResolver) NetWorthSnapshotByDate(ctx context.Context, userID string, date string) (*model.NetWorthSnapshot, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	snapshotDate, err := time.Parse(time.RFC3339, date)
+	if err != nil {
+		return nil, fmt.Errorf("invalid snapshot date: %w", err)
+	}
+
+	snapshot, err := r.NetWorthSnapshotService.GetByDate(ctx, parsedUserID, snapshotDate)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return mapNetWorthSnapshotToModel(snapshot), nil
+}
+
+// NetWorthSnapshots is the resolver for the netWorthSnapshots field.
+func (r *queryResolver) NetWorthSnapshots(ctx context.Context, userID string) ([]*model.NetWorthSnapshot, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	snapshots, err := r.NetWorthSnapshotService.List(ctx, parsedUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]*model.NetWorthSnapshot, 0, len(snapshots))
+	for i := range snapshots {
+		snapshot := snapshots[i]
+		out = append(out, mapNetWorthSnapshotToModel(&snapshot))
 	}
 
 	return out, nil

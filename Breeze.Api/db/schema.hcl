@@ -34,6 +34,16 @@ enum "liability_type" {
   values = ["MORTGAGE", "CREDIT_CARD", "STUDENT_LOAN", "AUTO_LOAN", "PERSONAL_LOAN", "OTHER"]
 }
 
+enum "recurrence_interval" {
+  schema = schema.public
+  values = ["NONE", "WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"]
+}
+
+enum "income_source_type" {
+  schema = schema.public
+  values = ["MANUAL", "RECURRING_TEMPLATE"]
+}
+
 table "tax_brackets" {
   schema = schema.public
 
@@ -367,6 +377,617 @@ table "liabilities" {
 
   index "idx_liabilities_user_active" {
     columns = [column.user_id, column.created_at]
+    where   = "deleted_at IS NULL"
+  }
+}
+
+table "budgets" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "date" {
+    type = date
+    null = false
+  }
+
+  column "monthly_income" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "monthly_expenses" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_budgets_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_budgets_user_id" {
+    columns = [column.user_id]
+  }
+
+  index "idx_budgets_user_date" {
+    columns = [column.user_id, column.date]
+    unique  = true
+  }
+
+  index "idx_budgets_user_active" {
+    columns = [column.user_id, column.date]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "budgets_amounts_nonnegative" {
+    expr = "monthly_income >= 0 AND monthly_expenses >= 0"
+  }
+}
+
+table "expense_categories" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "budget_id" {
+    type = uuid
+    null = false
+  }
+
+  column "name" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "allocation" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "current_spend" {
+    type    = numeric(12,2)
+    null    = false
+    default = sql("0")
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_expense_categories_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  foreign_key "fk_expense_categories_budget" {
+    columns     = [column.budget_id]
+    ref_columns = [table.budgets.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_expense_categories_user_id" {
+    columns = [column.user_id]
+  }
+
+  index "idx_expense_categories_budget_id" {
+    columns = [column.budget_id]
+  }
+
+  index "idx_expense_categories_budget_active" {
+    columns = [column.budget_id]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "expense_categories_amounts_nonnegative" {
+    expr = "allocation >= 0 AND current_spend >= 0"
+  }
+}
+
+table "expenses" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "budget_id" {
+    type = uuid
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "date" {
+    type = date
+    null = false
+  }
+
+  column "description" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "recurring_source_id" {
+    type = uuid
+    null = true
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_expenses_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  foreign_key "fk_expenses_budget" {
+    columns     = [column.budget_id]
+    ref_columns = [table.budgets.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_expenses_budget" {
+    columns = [column.budget_id]
+  }
+
+  index "idx_expenses_user_date" {
+    columns = [column.user_id, column.date]
+  }
+
+  index "idx_expenses_recurring" {
+    columns = [column.recurring_source_id]
+  }
+
+  index "idx_expenses_budget_active" {
+    columns = [column.budget_id]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "expenses_amount_positive" {
+    expr = "amount > 0"
+  }
+}
+
+table "expense_splits" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "expense_id" {
+    type = uuid
+    null = false
+  }
+
+  column "category_id" {
+    type = uuid
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "description" {
+    type = varchar(255)
+    null = true
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_splits_expense" {
+    columns     = [column.expense_id]
+    ref_columns = [table.expenses.column.id]
+    on_delete   = CASCADE
+  }
+
+  foreign_key "fk_splits_category" {
+    columns     = [column.category_id]
+    ref_columns = [table.expense_categories.column.id]
+    on_delete   = RESTRICT
+  }
+
+  index "idx_splits_expense" {
+    columns = [column.expense_id]
+  }
+
+  index "idx_splits_category" {
+    columns = [column.category_id]
+  }
+
+  index "idx_splits_category_active" {
+    columns = [column.category_id]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "splits_amount_positive" {
+    expr = "amount > 0"
+  }
+}
+
+table "recurring_income" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "name" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "recurrence_interval" {
+    type = enum.recurrence_interval
+    null = false
+  }
+
+  column "payday_day_of_month" {
+    type = int
+    null = true
+  }
+
+  column "start_date" {
+    type = date
+    null = false
+  }
+
+  column "end_date" {
+    type = date
+    null = true
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_recurring_income_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_recurring_income_user" {
+    columns = [column.user_id]
+  }
+
+  index "idx_recurring_income_user_dates" {
+    columns = [column.user_id, column.start_date, column.end_date]
+  }
+
+  check "recurring_income_amount_positive" {
+    expr = "amount > 0"
+  }
+
+  check "recurring_income_payday_valid" {
+    expr = "payday_day_of_month IS NULL OR (payday_day_of_month >= 1 AND payday_day_of_month <= 31)"
+  }
+}
+
+table "income" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "budget_id" {
+    type = uuid
+    null = false
+  }
+
+  column "name" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "date" {
+    type = date
+    null = false
+  }
+
+  column "source_type" {
+    type    = enum.income_source_type
+    null    = false
+    default = "MANUAL"
+  }
+
+  column "source_template_id" {
+    type = uuid
+    null = true
+  }
+
+  column "source_occurrence_date" {
+    type = date
+    null = true
+  }
+
+  column "generation_month" {
+    type = date
+    null = true
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_income_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  foreign_key "fk_income_budget" {
+    columns     = [column.budget_id]
+    ref_columns = [table.budgets.column.id]
+    on_delete   = CASCADE
+  }
+
+  foreign_key "fk_income_recur" {
+    columns     = [column.source_template_id]
+    ref_columns = [table.recurring_income.column.id]
+    on_delete   = SET_NULL
+  }
+
+  index "idx_income_budget" {
+    columns = [column.budget_id]
+  }
+
+  index "idx_income_user_date" {
+    columns = [column.user_id, column.date]
+  }
+
+  index "idx_income_source_template" {
+    columns = [column.source_template_id]
+  }
+
+  index "idx_income_budget_active" {
+    columns = [column.budget_id]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "income_amount_positive" {
+    expr = "amount > 0"
+  }
+}
+
+table "net_worth_snapshots" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "snapshot_date" {
+    type = date
+    null = false
+  }
+
+  column "total_assets" {
+    type = numeric(15,2)
+    null = false
+  }
+
+  column "total_liabilities" {
+    type = numeric(15,2)
+    null = false
+  }
+
+  column "net_worth" {
+    type = numeric(15,2)
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_net_worth_snapshots_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_net_worth_snapshots_user_id" {
+    columns = [column.user_id]
+  }
+
+  index "idx_net_worth_snapshots_user_date" {
+    columns = [column.user_id, column.snapshot_date]
+    unique  = true
     where   = "deleted_at IS NULL"
   }
 }
