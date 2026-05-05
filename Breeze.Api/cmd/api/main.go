@@ -77,6 +77,7 @@ func main() {
 	recurringIncomeService := service.NewRecurringIncomeService(queries)
 	taxBracketService := service.NewTaxBracketService(queries)
 	taxPlanningService := service.NewTaxPlanningService(queries)
+	retirementLadderService := service.NewRetirementLadderService(queries)
 	netWorthSnapshotService := service.NewNetWorthSnapshotService(queries)
 	// Plaid client/service (dev-mode when local)
 	var plaidClient service.PlaidClient
@@ -108,6 +109,7 @@ func main() {
 		RecurringIncomeService:  recurringIncomeService,
 		TaxBracketService:       taxBracketService,
 		TaxPlanningService:      taxPlanningService,
+		RetirementLadderService: retirementLadderService,
 		NetWorthSnapshotService: netWorthSnapshotService,
 	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))

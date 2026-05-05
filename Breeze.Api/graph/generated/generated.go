@@ -138,6 +138,18 @@ type ComplexityRoot struct {
 		UserID               func(childComplexity int) int
 	}
 
+	LadderStep struct {
+		Age                    func(childComplexity int) int
+		EarlyWithdrawalPenalty func(childComplexity int) int
+		EstimatedIncomeTax     func(childComplexity int) int
+		IsAccessible           func(childComplexity int) int
+		NetWithdrawal          func(childComplexity int) int
+		RemainingBalance       func(childComplexity int) int
+		TaxableWithdrawal      func(childComplexity int) int
+		WithdrawalAmount       func(childComplexity int) int
+		Year                   func(childComplexity int) int
+	}
+
 	Liability struct {
 		CreatedAt            func(childComplexity int) int
 		CurrentBalance       func(childComplexity int) int
@@ -236,42 +248,43 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Asset                  func(childComplexity int, id string) int
-		Assets                 func(childComplexity int, userID string) int
-		Budget                 func(childComplexity int, id string) int
-		BudgetByDate           func(childComplexity int, userID string, date string) int
-		Budgets                func(childComplexity int, userID string) int
-		CompareScenarios       func(childComplexity int, userID string) int
-		ContributionProgress   func(childComplexity int, retirementAccountID string, taxYear int) int
-		EstimateTaxesForYear   func(childComplexity int, year int, filingStatus model.FilingStatus, income string, deduction *string) int
-		Expense                func(childComplexity int, id string) int
-		ExpenseCategories      func(childComplexity int, budgetID string) int
-		ExpenseCategory        func(childComplexity int, id string) int
-		Expenses               func(childComplexity int, budgetID string) int
-		Goal                   func(childComplexity int, id string) int
-		Goals                  func(childComplexity int, userID string) int
-		Health                 func(childComplexity int) int
-		Income                 func(childComplexity int, id string) int
-		Incomes                func(childComplexity int, budgetID string) int
-		Liabilities            func(childComplexity int, userID string) int
-		Liability              func(childComplexity int, id string) int
-		Me                     func(childComplexity int) int
-		NetWorthSnapshot       func(childComplexity int, id string) int
-		NetWorthSnapshotByDate func(childComplexity int, userID string, date string) int
-		NetWorthSnapshots      func(childComplexity int, userID string) int
-		PlaidAccounts          func(childComplexity int, connectionID string) int
-		PlaidConnection        func(childComplexity int, id string) int
-		PlaidConnections       func(childComplexity int, userID string) int
-		RecurringIncome        func(childComplexity int, id string) int
-		RecurringIncomes       func(childComplexity int, userID string) int
-		RetirementAccount      func(childComplexity int, id string) int
-		RetirementAccounts     func(childComplexity int, userID string) int
-		Scenario               func(childComplexity int, id string) int
-		Scenarios              func(childComplexity int, userID string) int
-		TaxBracket             func(childComplexity int, id string) int
-		TaxBrackets            func(childComplexity int, year int, filingStatus model.FilingStatus) int
-		User                   func(childComplexity int, id string) int
-		Users                  func(childComplexity int) int
+		Asset                     func(childComplexity int, id string) int
+		Assets                    func(childComplexity int, userID string) int
+		Budget                    func(childComplexity int, id string) int
+		BudgetByDate              func(childComplexity int, userID string, date string) int
+		Budgets                   func(childComplexity int, userID string) int
+		CalculateRetirementLadder func(childComplexity int, initialBalance string, annualExpenses string, currentAge int, firstWithdrawalAge int, isRoth bool, year int, filingStatus model.FilingStatus, yearsToProject *int) int
+		CompareScenarios          func(childComplexity int, userID string) int
+		ContributionProgress      func(childComplexity int, retirementAccountID string, taxYear int) int
+		EstimateTaxesForYear      func(childComplexity int, year int, filingStatus model.FilingStatus, income string, deduction *string) int
+		Expense                   func(childComplexity int, id string) int
+		ExpenseCategories         func(childComplexity int, budgetID string) int
+		ExpenseCategory           func(childComplexity int, id string) int
+		Expenses                  func(childComplexity int, budgetID string) int
+		Goal                      func(childComplexity int, id string) int
+		Goals                     func(childComplexity int, userID string) int
+		Health                    func(childComplexity int) int
+		Income                    func(childComplexity int, id string) int
+		Incomes                   func(childComplexity int, budgetID string) int
+		Liabilities               func(childComplexity int, userID string) int
+		Liability                 func(childComplexity int, id string) int
+		Me                        func(childComplexity int) int
+		NetWorthSnapshot          func(childComplexity int, id string) int
+		NetWorthSnapshotByDate    func(childComplexity int, userID string, date string) int
+		NetWorthSnapshots         func(childComplexity int, userID string) int
+		PlaidAccounts             func(childComplexity int, connectionID string) int
+		PlaidConnection           func(childComplexity int, id string) int
+		PlaidConnections          func(childComplexity int, userID string) int
+		RecurringIncome           func(childComplexity int, id string) int
+		RecurringIncomes          func(childComplexity int, userID string) int
+		RetirementAccount         func(childComplexity int, id string) int
+		RetirementAccounts        func(childComplexity int, userID string) int
+		Scenario                  func(childComplexity int, id string) int
+		Scenarios                 func(childComplexity int, userID string) int
+		TaxBracket                func(childComplexity int, id string) int
+		TaxBrackets               func(childComplexity int, year int, filingStatus model.FilingStatus) int
+		User                      func(childComplexity int, id string) int
+		Users                     func(childComplexity int) int
 	}
 
 	RecurringIncome struct {
@@ -298,6 +311,17 @@ type ComplexityRoot struct {
 		TaxTreatment            func(childComplexity int) int
 		UpdatedAt               func(childComplexity int) int
 		UserID                  func(childComplexity int) int
+	}
+
+	RetirementLadderProjection struct {
+		AnnualExpenses        func(childComplexity int) int
+		CurrentAge            func(childComplexity int) int
+		FirstWithdrawalAge    func(childComplexity int) int
+		InitialBalance        func(childComplexity int) int
+		IsRoth                func(childComplexity int) int
+		IsSustainable         func(childComplexity int) int
+		ProjectedDepletionAge func(childComplexity int) int
+		ProjectedSteps        func(childComplexity int) int
 	}
 
 	Scenario struct {
@@ -448,6 +472,7 @@ type QueryResolver interface {
 	TaxBracket(ctx context.Context, id string) (*model.TaxBracket, error)
 	TaxBrackets(ctx context.Context, year int, filingStatus model.FilingStatus) ([]*model.TaxBracket, error)
 	EstimateTaxesForYear(ctx context.Context, year int, filingStatus model.FilingStatus, income string, deduction *string) (*model.TaxEstimate, error)
+	CalculateRetirementLadder(ctx context.Context, initialBalance string, annualExpenses string, currentAge int, firstWithdrawalAge int, isRoth bool, year int, filingStatus model.FilingStatus, yearsToProject *int) (*model.RetirementLadderProjection, error)
 	NetWorthSnapshot(ctx context.Context, id string) (*model.NetWorthSnapshot, error)
 	NetWorthSnapshotByDate(ctx context.Context, userID string, date string) (*model.NetWorthSnapshot, error)
 	NetWorthSnapshots(ctx context.Context, userID string) ([]*model.NetWorthSnapshot, error)
@@ -914,6 +939,61 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Income.UserID(childComplexity), true
+
+	case "LadderStep.age":
+		if e.ComplexityRoot.LadderStep.Age == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LadderStep.Age(childComplexity), true
+	case "LadderStep.earlyWithdrawalPenalty":
+		if e.ComplexityRoot.LadderStep.EarlyWithdrawalPenalty == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LadderStep.EarlyWithdrawalPenalty(childComplexity), true
+	case "LadderStep.estimatedIncomeTax":
+		if e.ComplexityRoot.LadderStep.EstimatedIncomeTax == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LadderStep.EstimatedIncomeTax(childComplexity), true
+	case "LadderStep.isAccessible":
+		if e.ComplexityRoot.LadderStep.IsAccessible == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LadderStep.IsAccessible(childComplexity), true
+	case "LadderStep.netWithdrawal":
+		if e.ComplexityRoot.LadderStep.NetWithdrawal == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LadderStep.NetWithdrawal(childComplexity), true
+	case "LadderStep.remainingBalance":
+		if e.ComplexityRoot.LadderStep.RemainingBalance == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LadderStep.RemainingBalance(childComplexity), true
+	case "LadderStep.taxableWithdrawal":
+		if e.ComplexityRoot.LadderStep.TaxableWithdrawal == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LadderStep.TaxableWithdrawal(childComplexity), true
+	case "LadderStep.withdrawalAmount":
+		if e.ComplexityRoot.LadderStep.WithdrawalAmount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LadderStep.WithdrawalAmount(childComplexity), true
+	case "LadderStep.year":
+		if e.ComplexityRoot.LadderStep.Year == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LadderStep.Year(childComplexity), true
 
 	case "Liability.createdAt":
 		if e.ComplexityRoot.Liability.CreatedAt == nil {
@@ -1682,6 +1762,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Budgets(childComplexity, args["userId"].(string)), true
+	case "Query.calculateRetirementLadder":
+		if e.ComplexityRoot.Query.CalculateRetirementLadder == nil {
+			break
+		}
+
+		args, err := ec.field_Query_calculateRetirementLadder_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.CalculateRetirementLadder(childComplexity, args["initialBalance"].(string), args["annualExpenses"].(string), args["currentAge"].(int), args["firstWithdrawalAge"].(int), args["isRoth"].(bool), args["year"].(int), args["filingStatus"].(model.FilingStatus), args["yearsToProject"].(*int)), true
 	case "Query.compareScenarios":
 		if e.ComplexityRoot.Query.CompareScenarios == nil {
 			break
@@ -2131,6 +2222,55 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.RetirementAccount.UserID(childComplexity), true
+
+	case "RetirementLadderProjection.annualExpenses":
+		if e.ComplexityRoot.RetirementLadderProjection.AnnualExpenses == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementLadderProjection.AnnualExpenses(childComplexity), true
+	case "RetirementLadderProjection.currentAge":
+		if e.ComplexityRoot.RetirementLadderProjection.CurrentAge == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementLadderProjection.CurrentAge(childComplexity), true
+	case "RetirementLadderProjection.firstWithdrawalAge":
+		if e.ComplexityRoot.RetirementLadderProjection.FirstWithdrawalAge == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementLadderProjection.FirstWithdrawalAge(childComplexity), true
+	case "RetirementLadderProjection.initialBalance":
+		if e.ComplexityRoot.RetirementLadderProjection.InitialBalance == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementLadderProjection.InitialBalance(childComplexity), true
+	case "RetirementLadderProjection.isRoth":
+		if e.ComplexityRoot.RetirementLadderProjection.IsRoth == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementLadderProjection.IsRoth(childComplexity), true
+	case "RetirementLadderProjection.isSustainable":
+		if e.ComplexityRoot.RetirementLadderProjection.IsSustainable == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementLadderProjection.IsSustainable(childComplexity), true
+	case "RetirementLadderProjection.projectedDepletionAge":
+		if e.ComplexityRoot.RetirementLadderProjection.ProjectedDepletionAge == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementLadderProjection.ProjectedDepletionAge(childComplexity), true
+	case "RetirementLadderProjection.projectedSteps":
+		if e.ComplexityRoot.RetirementLadderProjection.ProjectedSteps == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementLadderProjection.ProjectedSteps(childComplexity), true
 
 	case "Scenario.annualSpend":
 		if e.ComplexityRoot.Scenario.AnnualSpend == nil {
@@ -2600,6 +2740,7 @@ var sources = []*ast.Source{
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
   estimateTaxesForYear(year: Int!, filingStatus: FilingStatus!, income: String!, deduction: String): TaxEstimate
+  calculateRetirementLadder(initialBalance: String!, annualExpenses: String!, currentAge: Int!, firstWithdrawalAge: Int!, isRoth: Boolean!, year: Int!, filingStatus: FilingStatus!, yearsToProject: Int): RetirementLadderProjection
   netWorthSnapshot(id: ID!): NetWorthSnapshot
   netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
   netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
@@ -3227,6 +3368,29 @@ input UpdateNetWorthSnapshotInput {
   totalLiabilities: String
   netWorth: String
 }
+
+type LadderStep {
+  year: Int!
+  age: Int!
+  withdrawalAmount: String!
+  taxableWithdrawal: String!
+  estimatedIncomeTax: String!
+  earlyWithdrawalPenalty: String!
+  netWithdrawal: String!
+  remainingBalance: String!
+  isAccessible: Boolean!
+}
+
+type RetirementLadderProjection {
+  initialBalance: String!
+  annualExpenses: String!
+  currentAge: Int!
+  firstWithdrawalAge: Int!
+  isRoth: Boolean!
+  projectedSteps: [LadderStep!]!
+  isSustainable: Boolean!
+  projectedDepletionAge: Int
+}
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -3781,6 +3945,52 @@ func (ec *executionContext) field_Query_budgets_args(ctx context.Context, rawArg
 		return nil, err
 	}
 	args["userId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_calculateRetirementLadder_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "initialBalance", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["initialBalance"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "annualExpenses", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["annualExpenses"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "currentAge", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["currentAge"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "firstWithdrawalAge", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["firstWithdrawalAge"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "isRoth", ec.unmarshalNBoolean2bool)
+	if err != nil {
+		return nil, err
+	}
+	args["isRoth"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "year", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["year"] = arg5
+	arg6, err := graphql.ProcessArgField(ctx, rawArgs, "filingStatus", ec.unmarshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus)
+	if err != nil {
+		return nil, err
+	}
+	args["filingStatus"] = arg6
+	arg7, err := graphql.ProcessArgField(ctx, rawArgs, "yearsToProject", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["yearsToProject"] = arg7
 	return args, nil
 }
 
@@ -6302,6 +6512,267 @@ func (ec *executionContext) fieldContext_Income_updatedAt(_ context.Context, fie
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LadderStep_year(ctx context.Context, field graphql.CollectedField, obj *model.LadderStep) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LadderStep_year,
+		func(ctx context.Context) (any, error) {
+			return obj.Year, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LadderStep_year(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LadderStep",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LadderStep_age(ctx context.Context, field graphql.CollectedField, obj *model.LadderStep) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LadderStep_age,
+		func(ctx context.Context) (any, error) {
+			return obj.Age, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LadderStep_age(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LadderStep",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LadderStep_withdrawalAmount(ctx context.Context, field graphql.CollectedField, obj *model.LadderStep) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LadderStep_withdrawalAmount,
+		func(ctx context.Context) (any, error) {
+			return obj.WithdrawalAmount, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LadderStep_withdrawalAmount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LadderStep",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LadderStep_taxableWithdrawal(ctx context.Context, field graphql.CollectedField, obj *model.LadderStep) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LadderStep_taxableWithdrawal,
+		func(ctx context.Context) (any, error) {
+			return obj.TaxableWithdrawal, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LadderStep_taxableWithdrawal(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LadderStep",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LadderStep_estimatedIncomeTax(ctx context.Context, field graphql.CollectedField, obj *model.LadderStep) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LadderStep_estimatedIncomeTax,
+		func(ctx context.Context) (any, error) {
+			return obj.EstimatedIncomeTax, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LadderStep_estimatedIncomeTax(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LadderStep",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LadderStep_earlyWithdrawalPenalty(ctx context.Context, field graphql.CollectedField, obj *model.LadderStep) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LadderStep_earlyWithdrawalPenalty,
+		func(ctx context.Context) (any, error) {
+			return obj.EarlyWithdrawalPenalty, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LadderStep_earlyWithdrawalPenalty(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LadderStep",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LadderStep_netWithdrawal(ctx context.Context, field graphql.CollectedField, obj *model.LadderStep) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LadderStep_netWithdrawal,
+		func(ctx context.Context) (any, error) {
+			return obj.NetWithdrawal, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LadderStep_netWithdrawal(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LadderStep",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LadderStep_remainingBalance(ctx context.Context, field graphql.CollectedField, obj *model.LadderStep) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LadderStep_remainingBalance,
+		func(ctx context.Context) (any, error) {
+			return obj.RemainingBalance, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LadderStep_remainingBalance(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LadderStep",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LadderStep_isAccessible(ctx context.Context, field graphql.CollectedField, obj *model.LadderStep) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LadderStep_isAccessible,
+		func(ctx context.Context) (any, error) {
+			return obj.IsAccessible, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LadderStep_isAccessible(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LadderStep",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -11782,6 +12253,65 @@ func (ec *executionContext) fieldContext_Query_estimateTaxesForYear(ctx context.
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_calculateRetirementLadder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_calculateRetirementLadder,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().CalculateRetirementLadder(ctx, fc.Args["initialBalance"].(string), fc.Args["annualExpenses"].(string), fc.Args["currentAge"].(int), fc.Args["firstWithdrawalAge"].(int), fc.Args["isRoth"].(bool), fc.Args["year"].(int), fc.Args["filingStatus"].(model.FilingStatus), fc.Args["yearsToProject"].(*int))
+		},
+		nil,
+		ec.marshalORetirementLadderProjection2ᚖbreezeᚗapiᚋgraphᚋmodelᚐRetirementLadderProjection,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_calculateRetirementLadder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "initialBalance":
+				return ec.fieldContext_RetirementLadderProjection_initialBalance(ctx, field)
+			case "annualExpenses":
+				return ec.fieldContext_RetirementLadderProjection_annualExpenses(ctx, field)
+			case "currentAge":
+				return ec.fieldContext_RetirementLadderProjection_currentAge(ctx, field)
+			case "firstWithdrawalAge":
+				return ec.fieldContext_RetirementLadderProjection_firstWithdrawalAge(ctx, field)
+			case "isRoth":
+				return ec.fieldContext_RetirementLadderProjection_isRoth(ctx, field)
+			case "projectedSteps":
+				return ec.fieldContext_RetirementLadderProjection_projectedSteps(ctx, field)
+			case "isSustainable":
+				return ec.fieldContext_RetirementLadderProjection_isSustainable(ctx, field)
+			case "projectedDepletionAge":
+				return ec.fieldContext_RetirementLadderProjection_projectedDepletionAge(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RetirementLadderProjection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_calculateRetirementLadder_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_netWorthSnapshot(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -12642,6 +13172,258 @@ func (ec *executionContext) fieldContext_RetirementAccount_updatedAt(_ context.C
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementLadderProjection_initialBalance(ctx context.Context, field graphql.CollectedField, obj *model.RetirementLadderProjection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RetirementLadderProjection_initialBalance,
+		func(ctx context.Context) (any, error) {
+			return obj.InitialBalance, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RetirementLadderProjection_initialBalance(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementLadderProjection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementLadderProjection_annualExpenses(ctx context.Context, field graphql.CollectedField, obj *model.RetirementLadderProjection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RetirementLadderProjection_annualExpenses,
+		func(ctx context.Context) (any, error) {
+			return obj.AnnualExpenses, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RetirementLadderProjection_annualExpenses(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementLadderProjection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementLadderProjection_currentAge(ctx context.Context, field graphql.CollectedField, obj *model.RetirementLadderProjection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RetirementLadderProjection_currentAge,
+		func(ctx context.Context) (any, error) {
+			return obj.CurrentAge, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RetirementLadderProjection_currentAge(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementLadderProjection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementLadderProjection_firstWithdrawalAge(ctx context.Context, field graphql.CollectedField, obj *model.RetirementLadderProjection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RetirementLadderProjection_firstWithdrawalAge,
+		func(ctx context.Context) (any, error) {
+			return obj.FirstWithdrawalAge, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RetirementLadderProjection_firstWithdrawalAge(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementLadderProjection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementLadderProjection_isRoth(ctx context.Context, field graphql.CollectedField, obj *model.RetirementLadderProjection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RetirementLadderProjection_isRoth,
+		func(ctx context.Context) (any, error) {
+			return obj.IsRoth, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RetirementLadderProjection_isRoth(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementLadderProjection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementLadderProjection_projectedSteps(ctx context.Context, field graphql.CollectedField, obj *model.RetirementLadderProjection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RetirementLadderProjection_projectedSteps,
+		func(ctx context.Context) (any, error) {
+			return obj.ProjectedSteps, nil
+		},
+		nil,
+		ec.marshalNLadderStep2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐLadderStepᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RetirementLadderProjection_projectedSteps(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementLadderProjection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "year":
+				return ec.fieldContext_LadderStep_year(ctx, field)
+			case "age":
+				return ec.fieldContext_LadderStep_age(ctx, field)
+			case "withdrawalAmount":
+				return ec.fieldContext_LadderStep_withdrawalAmount(ctx, field)
+			case "taxableWithdrawal":
+				return ec.fieldContext_LadderStep_taxableWithdrawal(ctx, field)
+			case "estimatedIncomeTax":
+				return ec.fieldContext_LadderStep_estimatedIncomeTax(ctx, field)
+			case "earlyWithdrawalPenalty":
+				return ec.fieldContext_LadderStep_earlyWithdrawalPenalty(ctx, field)
+			case "netWithdrawal":
+				return ec.fieldContext_LadderStep_netWithdrawal(ctx, field)
+			case "remainingBalance":
+				return ec.fieldContext_LadderStep_remainingBalance(ctx, field)
+			case "isAccessible":
+				return ec.fieldContext_LadderStep_isAccessible(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LadderStep", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementLadderProjection_isSustainable(ctx context.Context, field graphql.CollectedField, obj *model.RetirementLadderProjection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RetirementLadderProjection_isSustainable,
+		func(ctx context.Context) (any, error) {
+			return obj.IsSustainable, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RetirementLadderProjection_isSustainable(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementLadderProjection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementLadderProjection_projectedDepletionAge(ctx context.Context, field graphql.CollectedField, obj *model.RetirementLadderProjection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RetirementLadderProjection_projectedDepletionAge,
+		func(ctx context.Context) (any, error) {
+			return obj.ProjectedDepletionAge, nil
+		},
+		nil,
+		ec.marshalOInt2ᚖint,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_RetirementLadderProjection_projectedDepletionAge(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementLadderProjection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -18144,6 +18926,85 @@ func (ec *executionContext) _Income(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var ladderStepImplementors = []string{"LadderStep"}
+
+func (ec *executionContext) _LadderStep(ctx context.Context, sel ast.SelectionSet, obj *model.LadderStep) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ladderStepImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LadderStep")
+		case "year":
+			out.Values[i] = ec._LadderStep_year(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "age":
+			out.Values[i] = ec._LadderStep_age(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "withdrawalAmount":
+			out.Values[i] = ec._LadderStep_withdrawalAmount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "taxableWithdrawal":
+			out.Values[i] = ec._LadderStep_taxableWithdrawal(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "estimatedIncomeTax":
+			out.Values[i] = ec._LadderStep_estimatedIncomeTax(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "earlyWithdrawalPenalty":
+			out.Values[i] = ec._LadderStep_earlyWithdrawalPenalty(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "netWithdrawal":
+			out.Values[i] = ec._LadderStep_netWithdrawal(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "remainingBalance":
+			out.Values[i] = ec._LadderStep_remainingBalance(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "isAccessible":
+			out.Values[i] = ec._LadderStep_isAccessible(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var liabilityImplementors = []string{"Liability"}
 
 func (ec *executionContext) _Liability(ctx context.Context, sel ast.SelectionSet, obj *model.Liability) graphql.Marshaler {
@@ -19494,6 +20355,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "calculateRetirementLadder":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_calculateRetirementLadder(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "netWorthSnapshot":
 			field := field
 
@@ -19724,6 +20604,77 @@ func (ec *executionContext) _RetirementAccount(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var retirementLadderProjectionImplementors = []string{"RetirementLadderProjection"}
+
+func (ec *executionContext) _RetirementLadderProjection(ctx context.Context, sel ast.SelectionSet, obj *model.RetirementLadderProjection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, retirementLadderProjectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RetirementLadderProjection")
+		case "initialBalance":
+			out.Values[i] = ec._RetirementLadderProjection_initialBalance(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "annualExpenses":
+			out.Values[i] = ec._RetirementLadderProjection_annualExpenses(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "currentAge":
+			out.Values[i] = ec._RetirementLadderProjection_currentAge(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "firstWithdrawalAge":
+			out.Values[i] = ec._RetirementLadderProjection_firstWithdrawalAge(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "isRoth":
+			out.Values[i] = ec._RetirementLadderProjection_isRoth(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "projectedSteps":
+			out.Values[i] = ec._RetirementLadderProjection_projectedSteps(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "isSustainable":
+			out.Values[i] = ec._RetirementLadderProjection_isSustainable(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "projectedDepletionAge":
+			out.Values[i] = ec._RetirementLadderProjection_projectedDepletionAge(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -20931,6 +21882,32 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) marshalNLadderStep2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐLadderStepᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.LadderStep) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNLadderStep2ᚖbreezeᚗapiᚋgraphᚋmodelᚐLadderStep(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNLadderStep2ᚖbreezeᚗapiᚋgraphᚋmodelᚐLadderStep(ctx context.Context, sel ast.SelectionSet, v *model.LadderStep) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LadderStep(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNLiability2breezeᚗapiᚋgraphᚋmodelᚐLiability(ctx context.Context, sel ast.SelectionSet, v model.Liability) graphql.Marshaler {
 	return ec._Liability(ctx, sel, &v)
 }
@@ -21656,6 +22633,13 @@ func (ec *executionContext) marshalORetirementAccount2ᚖbreezeᚗapiᚋgraphᚋ
 		return graphql.Null
 	}
 	return ec._RetirementAccount(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalORetirementLadderProjection2ᚖbreezeᚗapiᚋgraphᚋmodelᚐRetirementLadderProjection(ctx context.Context, sel ast.SelectionSet, v *model.RetirementLadderProjection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._RetirementLadderProjection(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOScenario2ᚖbreezeᚗapiᚋgraphᚋmodelᚐScenario(ctx context.Context, sel ast.SelectionSet, v *model.Scenario) graphql.Marshaler {

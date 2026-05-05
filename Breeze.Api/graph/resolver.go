@@ -19,5 +19,6 @@ type Resolver struct {
 	RecurringIncomeService  *service.RecurringIncomeService
 	TaxBracketService       *service.TaxBracketService
 	TaxPlanningService      *service.TaxPlanningService
+	RetirementLadderService *service.RetirementLadderService
 	NetWorthSnapshotService *service.NetWorthSnapshotService
 }

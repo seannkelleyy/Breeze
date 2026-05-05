@@ -1351,6 +1351,40 @@ func (r *queryResolver) EstimateTaxesForYear(ctx context.Context, year int, fili
 	return mapTaxEstimateToModel(est), nil
 }
 
+// CalculateRetirementLadder is the resolver for the calculateRetirementLadder field.
+func (r *queryResolver) CalculateRetirementLadder(ctx context.Context, initialBalance string, annualExpenses string, currentAge int, firstWithdrawalAge int, isRoth bool, year int, filingStatus model.FilingStatus, yearsToProject *int) (*model.RetirementLadderProjection, error) {
+	// Parse and validate inputs
+	balDecimal, expDecimal, yearInt32, sqlcFilingStatus, err := parseRetirementLadderInput(initialBalance, annualExpenses, currentAge, firstWithdrawalAge, isRoth, year, filingStatus)
+	if err != nil {
+		return nil, err
+	}
+
+	// Default yearsToProject to 20 if not specified
+	projectYears := 20
+	if yearsToProject != nil && *yearsToProject > 0 {
+		projectYears = *yearsToProject
+	}
+
+	// Call service to calculate ladder projection
+	proj, err := r.RetirementLadderService.CalculateLadderProjection(
+		ctx,
+		balDecimal,
+		expDecimal,
+		currentAge,
+		firstWithdrawalAge,
+		isRoth,
+		yearInt32,
+		sqlcFilingStatus,
+		projectYears,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("calculate retirement ladder: %w", err)
+	}
+
+	// Map to GraphQL model
+	return mapRetirementLadderProjectionToModel(proj), nil
+}
+
 // NetWorthSnapshot is the resolver for the netWorthSnapshot field.
 func (r *queryResolver) NetWorthSnapshot(ctx context.Context, id string) (*model.NetWorthSnapshot, error) {
 	parsedID, err := uuid.Parse(id)

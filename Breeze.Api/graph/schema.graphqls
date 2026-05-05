@@ -32,6 +32,7 @@ type Query {
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
   estimateTaxesForYear(year: Int!, filingStatus: FilingStatus!, income: String!, deduction: String): TaxEstimate
+  calculateRetirementLadder(initialBalance: String!, annualExpenses: String!, currentAge: Int!, firstWithdrawalAge: Int!, isRoth: Boolean!, year: Int!, filingStatus: FilingStatus!, yearsToProject: Int): RetirementLadderProjection
   netWorthSnapshot(id: ID!): NetWorthSnapshot
   netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
   netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
@@ -658,4 +659,27 @@ input UpdateNetWorthSnapshotInput {
   totalAssets: String
   totalLiabilities: String
   netWorth: String
+}
+
+type LadderStep {
+  year: Int!
+  age: Int!
+  withdrawalAmount: String!
+  taxableWithdrawal: String!
+  estimatedIncomeTax: String!
+  earlyWithdrawalPenalty: String!
+  netWithdrawal: String!
+  remainingBalance: String!
+  isAccessible: Boolean!
+}
+
+type RetirementLadderProjection {
+  initialBalance: String!
+  annualExpenses: String!
+  currentAge: Int!
+  firstWithdrawalAge: Int!
+  isRoth: Boolean!
+  projectedSteps: [LadderStep!]!
+  isSustainable: Boolean!
+  projectedDepletionAge: Int
 }

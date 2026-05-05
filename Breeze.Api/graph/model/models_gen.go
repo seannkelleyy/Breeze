@@ -245,6 +245,18 @@ type Income struct {
 	UpdatedAt            string           `json:"updatedAt"`
 }
 
+type LadderStep struct {
+	Year                   int    `json:"year"`
+	Age                    int    `json:"age"`
+	WithdrawalAmount       string `json:"withdrawalAmount"`
+	TaxableWithdrawal      string `json:"taxableWithdrawal"`
+	EstimatedIncomeTax     string `json:"estimatedIncomeTax"`
+	EarlyWithdrawalPenalty string `json:"earlyWithdrawalPenalty"`
+	NetWithdrawal          string `json:"netWithdrawal"`
+	RemainingBalance       string `json:"remainingBalance"`
+	IsAccessible           bool   `json:"isAccessible"`
+}
+
 type Liability struct {
 	ID                   string        `json:"id"`
 	UserID               string        `json:"userId"`
@@ -326,6 +338,17 @@ type RetirementAccount struct {
 	AnnualContributionLimit string                 `json:"annualContributionLimit"`
 	CreatedAt               string                 `json:"createdAt"`
 	UpdatedAt               string                 `json:"updatedAt"`
+}
+
+type RetirementLadderProjection struct {
+	InitialBalance        string        `json:"initialBalance"`
+	AnnualExpenses        string        `json:"annualExpenses"`
+	CurrentAge            int           `json:"currentAge"`
+	FirstWithdrawalAge    int           `json:"firstWithdrawalAge"`
+	IsRoth                bool          `json:"isRoth"`
+	ProjectedSteps        []*LadderStep `json:"projectedSteps"`
+	IsSustainable         bool          `json:"isSustainable"`
+	ProjectedDepletionAge *int          `json:"projectedDepletionAge,omitempty"`
 }
 
 type Scenario struct {
