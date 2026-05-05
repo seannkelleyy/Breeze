@@ -633,6 +633,34 @@ type NetWorthSnapshot struct {
 	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type PlaidAccount struct {
+	ID                uuid.UUID          `json:"id"`
+	PlaidConnectionID uuid.UUID          `json:"plaid_connection_id"`
+	ExternalID        string             `json:"external_id"`
+	Name              string             `json:"name"`
+	OfficialName      *string            `json:"official_name"`
+	Type              *string            `json:"type"`
+	Subtype           *string            `json:"subtype"`
+	CurrentBalance    pgtype.Numeric     `json:"current_balance"`
+	IsoCurrencyCode   *string            `json:"iso_currency_code"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt         pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type PlaidConnection struct {
+	ID              uuid.UUID          `json:"id"`
+	UserID          uuid.UUID          `json:"user_id"`
+	Environment     string             `json:"environment"`
+	InstitutionID   *string            `json:"institution_id"`
+	InstitutionName *string            `json:"institution_name"`
+	AccessToken     string             `json:"access_token"`
+	ItemID          string             `json:"item_id"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type RecurringIncome struct {
 	ID                 uuid.UUID          `json:"id"`
 	UserID             uuid.UUID          `json:"user_id"`

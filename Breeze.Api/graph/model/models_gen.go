@@ -274,6 +274,31 @@ type NetWorthSnapshot struct {
 	UpdatedAt        string `json:"updatedAt"`
 }
 
+type PlaidAccount struct {
+	ID                string  `json:"id"`
+	PlaidConnectionID string  `json:"plaidConnectionId"`
+	ExternalID        string  `json:"externalId"`
+	Name              string  `json:"name"`
+	OfficialName      *string `json:"officialName,omitempty"`
+	Type              *string `json:"type,omitempty"`
+	Subtype           *string `json:"subtype,omitempty"`
+	CurrentBalance    *string `json:"currentBalance,omitempty"`
+	IsoCurrencyCode   *string `json:"isoCurrencyCode,omitempty"`
+	CreatedAt         string  `json:"createdAt"`
+	UpdatedAt         string  `json:"updatedAt"`
+}
+
+type PlaidConnection struct {
+	ID              string  `json:"id"`
+	UserID          string  `json:"userId"`
+	Environment     string  `json:"environment"`
+	InstitutionID   *string `json:"institutionId,omitempty"`
+	InstitutionName *string `json:"institutionName,omitempty"`
+	ItemID          string  `json:"itemId"`
+	CreatedAt       string  `json:"createdAt"`
+	UpdatedAt       string  `json:"updatedAt"`
+}
+
 type Query struct {
 }
 
@@ -345,6 +370,13 @@ type TaxBracket struct {
 	Rate          string       `json:"rate"`
 	CreatedAt     string       `json:"createdAt"`
 	UpdatedAt     string       `json:"updatedAt"`
+}
+
+type TaxEstimate struct {
+	TaxOwed       string `json:"taxOwed"`
+	TaxableIncome string `json:"taxableIncome"`
+	EffectiveRate string `json:"effectiveRate"`
+	MarginalRate  string `json:"marginalRate"`
 }
 
 type UpdateAssetInput struct {

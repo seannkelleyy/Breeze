@@ -1259,6 +1259,163 @@ table "expense_splits" {
   }
 }
 
+table "plaid_connections" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "environment" {
+    type = varchar(32)
+    null = false
+  }
+
+  column "institution_id" {
+    type = varchar(255)
+    null = true
+  }
+
+  column "institution_name" {
+    type = varchar(255)
+    null = true
+  }
+
+  column "access_token" {
+    type = text
+    null = false
+  }
+
+  column "item_id" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_plaid_connections_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_plaid_connections_user_id" {
+    columns = [column.user_id]
+  }
+}
+
+table "plaid_accounts" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "plaid_connection_id" {
+    type = uuid
+    null = false
+  }
+
+  column "external_id" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "name" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "official_name" {
+    type = varchar(255)
+    null = true
+  }
+
+  column "type" {
+    type = varchar(128)
+    null = true
+  }
+
+  column "subtype" {
+    type = varchar(128)
+    null = true
+  }
+
+  column "current_balance" {
+    type = numeric(14,2)
+    null = true
+  }
+
+  column "iso_currency_code" {
+    type = varchar(8)
+    null = true
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_plaid_accounts_connection" {
+    columns     = [column.plaid_connection_id]
+    ref_columns = [table.plaid_connections.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_plaid_accounts_connection_id" {
+    columns = [column.plaid_connection_id]
+  }
+
+  index "idx_plaid_accounts_external_id" {
+    columns = [column.external_id]
+    unique  = true
+  }
+}
+
 table "recurring_income" {
   schema = schema.public
 

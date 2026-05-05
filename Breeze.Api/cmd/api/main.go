@@ -76,7 +76,22 @@ func main() {
 	incomeService := service.NewIncomeService(queries)
 	recurringIncomeService := service.NewRecurringIncomeService(queries)
 	taxBracketService := service.NewTaxBracketService(queries)
+	taxPlanningService := service.NewTaxPlanningService(queries)
 	netWorthSnapshotService := service.NewNetWorthSnapshotService(queries)
+	// Plaid client/service (dev-mode when local)
+	var plaidClient service.PlaidClient
+	if cfg.IsLocalEnv() {
+		plaidClient = service.NewDevPlaidClient()
+	} else {
+		plaidHTTP, err := service.NewPlaidHTTPClient(cfg)
+		if err != nil {
+			slog.Error("failed to init Plaid client", "error", err)
+			sentry.CaptureException(err)
+			os.Exit(1)
+		}
+		plaidClient = plaidHTTP
+	}
+	plaidService := service.NewPlaidService(queries, pool, plaidClient)
 	resolver := &graph.Resolver{
 		HealthService:           healthService,
 		UserService:             userService,
@@ -86,11 +101,13 @@ func main() {
 		GoalService:             goalService,
 		ScenarioService:         scenarioService,
 		RetirementService:       retirementService,
+		PlaidService:            plaidService,
 		ExpenseCategoryService:  expenseCategoryService,
 		ExpenseService:          expenseService,
 		IncomeService:           incomeService,
 		RecurringIncomeService:  recurringIncomeService,
 		TaxBracketService:       taxBracketService,
+		TaxPlanningService:      taxPlanningService,
 		NetWorthSnapshotService: netWorthSnapshotService,
 	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))

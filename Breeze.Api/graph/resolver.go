@@ -12,10 +12,12 @@ type Resolver struct {
 	GoalService             *service.GoalService
 	ScenarioService         *service.ScenarioService
 	RetirementService       *service.RetirementAccountService
+	PlaidService            *service.PlaidService
 	ExpenseCategoryService  *service.ExpenseCategoryService
 	ExpenseService          *service.ExpenseService
 	IncomeService           *service.IncomeService
 	RecurringIncomeService  *service.RecurringIncomeService
 	TaxBracketService       *service.TaxBracketService
+	TaxPlanningService      *service.TaxPlanningService
 	NetWorthSnapshotService *service.NetWorthSnapshotService
 }

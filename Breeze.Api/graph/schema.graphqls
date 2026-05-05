@@ -15,6 +15,9 @@ type Query {
   scenario(id: ID!): Scenario
   scenarios(userId: ID!): [Scenario!]!
   compareScenarios(userId: ID!): [ScenarioResult!]!
+  plaidConnection(id: ID!): PlaidConnection
+  plaidConnections(userId: ID!): [PlaidConnection!]!
+  plaidAccounts(connectionId: ID!): [PlaidAccount!]!
   retirementAccount(id: ID!): RetirementAccount
   retirementAccounts(userId: ID!): [RetirementAccount!]!
   contributionProgress(retirementAccountId: ID!, taxYear: Int!): ContributionProgress!
@@ -28,6 +31,7 @@ type Query {
   recurringIncomes(userId: ID!): [RecurringIncome!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
+  estimateTaxesForYear(year: Int!, filingStatus: FilingStatus!, income: String!, deduction: String): TaxEstimate
   netWorthSnapshot(id: ID!): NetWorthSnapshot
   netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
   netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
@@ -74,6 +78,9 @@ type Mutation {
   createNetWorthSnapshot(input: CreateNetWorthSnapshotInput!): NetWorthSnapshot!
   updateNetWorthSnapshot(input: UpdateNetWorthSnapshotInput!): NetWorthSnapshot!
   deleteNetWorthSnapshot(id: ID!): Boolean!
+  exchangePlaidPublicToken(userId: ID!, publicToken: String!): PlaidConnection!
+  syncPlaidConnection(id: ID!): Boolean!
+  deletePlaidConnection(id: ID!): Boolean!
 }
 
 type Health {
@@ -400,6 +407,31 @@ type RecurringIncome {
   updatedAt: String!
 }
 
+type PlaidConnection {
+  id: ID!
+  userId: ID!
+  environment: String!
+  institutionId: String
+  institutionName: String
+  itemId: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type PlaidAccount {
+  id: ID!
+  plaidConnectionId: ID!
+  externalId: String!
+  name: String!
+  officialName: String
+  type: String
+  subtype: String
+  currentBalance: String
+  isoCurrencyCode: String
+  createdAt: String!
+  updatedAt: String!
+}
+
 input CreateLiabilityInput {
   userId: ID!
   name: String!
@@ -561,6 +593,13 @@ type TaxBracket {
   rate: String!
   createdAt: String!
   updatedAt: String!
+}
+
+type TaxEstimate {
+  taxOwed: String!
+  taxableIncome: String!
+  effectiveRate: String!
+  marginalRate: String!
 }
 
 input CreateTaxBracketInput {

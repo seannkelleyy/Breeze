@@ -17,6 +17,7 @@ import (
 	"breeze.api/internal/middleware"
 	"breeze.api/internal/service"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // CreateUser is the resolver for the createUser field.
@@ -658,6 +659,58 @@ func (r *mutationResolver) DeleteNetWorthSnapshot(ctx context.Context, id string
 	return true, nil
 }
 
+// ExchangePlaidPublicToken exchanges a Link public token and creates a PlaidConnection.
+func (r *mutationResolver) ExchangePlaidPublicToken(ctx context.Context, userID string, publicToken string) (*model.PlaidConnection, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	conn, err := r.PlaidService.ExchangePublicToken(ctx, parsedUserID, publicToken)
+	if err != nil {
+		return nil, err
+	}
+
+	out := &model.PlaidConnection{
+		ID:              conn.ID.String(),
+		UserID:          conn.UserID.String(),
+		Environment:     conn.Environment,
+		InstitutionID:   conn.InstitutionID,
+		InstitutionName: conn.InstitutionName,
+		ItemID:          conn.ItemID,
+		CreatedAt:       timestamptzToRFC3339(conn.CreatedAt),
+		UpdatedAt:       timestamptzToRFC3339(conn.UpdatedAt),
+	}
+	return out, nil
+}
+
+// SyncPlaidConnection triggers a sync of accounts for a given connection.
+func (r *mutationResolver) SyncPlaidConnection(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid connection id: %w", err)
+	}
+	if err := r.PlaidService.SyncAccounts(ctx, parsedID); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// DeletePlaidConnection deletes (soft) a connection.
+func (r *mutationResolver) DeletePlaidConnection(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid connection id: %w", err)
+	}
+	if err := r.PlaidService.Delete(ctx, parsedID); err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
 // Health is the resolver for the health field.
 func (r *queryResolver) Health(ctx context.Context) (*model.Health, error) {
 	health, err := r.HealthService.Get(ctx)
@@ -963,6 +1016,56 @@ func (r *queryResolver) CompareScenarios(ctx context.Context, userID string) ([]
 	return out, nil
 }
 
+// PlaidConnection is the resolver for the plaidConnection field.
+func (r *queryResolver) PlaidConnection(ctx context.Context, id string) (*model.PlaidConnection, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid connection id: %w", err)
+	}
+	conn, err := r.PlaidService.GetByID(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return mapPlaidConnectionToModel(conn), nil
+}
+
+// PlaidConnections is the resolver for the plaidConnections field.
+func (r *queryResolver) PlaidConnections(ctx context.Context, userID string) ([]*model.PlaidConnection, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+	rows, err := r.PlaidService.ListByUserID(ctx, parsedUserID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*model.PlaidConnection, 0, len(rows))
+	for _, conn := range rows {
+		out = append(out, mapPlaidConnectionToModel(&conn))
+	}
+	return out, nil
+}
+
+// PlaidAccounts is the resolver for the plaidAccounts field.
+func (r *queryResolver) PlaidAccounts(ctx context.Context, connectionID string) ([]*model.PlaidAccount, error) {
+	parsedID, err := uuid.Parse(connectionID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid connection id: %w", err)
+	}
+	rows, err := r.PlaidService.ListAccountsByConnectionID(ctx, parsedID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*model.PlaidAccount, 0, len(rows))
+	for _, a := range rows {
+		out = append(out, mapPlaidAccountToModel(&a))
+	}
+	return out, nil
+}
+
 // RetirementAccount is the resolver for the retirementAccount field.
 func (r *queryResolver) RetirementAccount(ctx context.Context, id string) (*model.RetirementAccount, error) {
 	parsedID, err := uuid.Parse(id)
@@ -1213,6 +1316,39 @@ func (r *queryResolver) TaxBrackets(ctx context.Context, year int, filingStatus 
 	}
 
 	return out, nil
+}
+
+// EstimateTaxesForYear is the resolver for the estimateTaxesForYear field.
+func (r *queryResolver) EstimateTaxesForYear(ctx context.Context, year int, filingStatus model.FilingStatus, income string, deduction *string) (*model.TaxEstimate, error) {
+	// Parse income as decimal
+	incomeDecimal, err := decimalFromString(income)
+	if err != nil {
+		return nil, fmt.Errorf("parse income: %w", err)
+	}
+
+	// Parse optional deduction
+	var deductionNumeric *pgtype.Numeric
+	if deduction != nil {
+		deductionNumeric, err = pgNumericFromString(*deduction)
+		if err != nil {
+			return nil, fmt.Errorf("parse deduction: %w", err)
+		}
+	}
+
+	// Convert year to int32
+	yearInt32 := int32(year)
+
+	// Convert FilingStatus from model to sqlc
+	sqlcFilingStatus := parseFilingStatus(filingStatus)
+
+	// Call service to estimate taxes
+	est, err := r.TaxPlanningService.EstimateForYear(ctx, yearInt32, sqlcFilingStatus, incomeDecimal, deductionNumeric)
+	if err != nil {
+		return nil, fmt.Errorf("estimate taxes: %w", err)
+	}
+
+	// Map to GraphQL model
+	return mapTaxEstimateToModel(est), nil
 }
 
 // NetWorthSnapshot is the resolver for the netWorthSnapshot field.

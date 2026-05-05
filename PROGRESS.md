@@ -5,10 +5,10 @@ Living tracker for the Go API and database work.
 
 ## Current Status
 
-- Done: Users, Assets, Liabilities, TaxBrackets, Net Worth Snapshots, Budgets, Expense Categories, Expenses + Expense Splits, Incomes + Recurring Rules, Goals, Retirement Accounts + Contribution Tracking, Scenario Projections
+- Done: Users, Assets, Liabilities, TaxBrackets, Net Worth Snapshots, Budgets, Expense Categories, Expenses + Expense Splits, Incomes + Recurring Rules, Goals, Retirement Accounts + Contribution Tracking, Scenario Projections, Plaid Connections + Account Sync, Tax Planning Extensions
 - Backend validation: `make gen` and `go test ./...` pass
-- Last verified: May 4, 2026
-- Current focus: Plaid connections + account sync
+- Last verified: May 5, 2026
+- Current focus: Early Retirement Ladders (or next feature)
 
 ## Readiness Check
 
@@ -21,23 +21,15 @@ Living tracker for the Go API and database work.
 
 Remaining backend slices from the roadmap:
 
-1. Plaid Connections + Account Sync
-2. Tax Planning Extensions
-3. Early Retirement Ladders
+1. Early Retirement Ladders
 
 ## Next Best Milestone
 
-Milestone A:
-- Net Worth Snapshots
-- Budgets
+Milestone A (Complete):
+- Tax Planning Extensions ✅
 
 Next task:
-- Build Plaid Connections + Account Sync as the next backend slice
-
-Milestone B:
-- Incomes + Recurring Rules
-- Goals
-- Retirement Accounts + Contribution Tracking
+- Build Early Retirement Ladders or wire remaining Tax Planning / Retirement features to frontend
 
 ## Notes
 

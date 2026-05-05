@@ -154,46 +154,49 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddContribution         func(childComplexity int, input model.AddContributionInput) int
-		CreateAsset             func(childComplexity int, input model.CreateAssetInput) int
-		CreateBudget            func(childComplexity int, input model.CreateBudgetInput) int
-		CreateExpense           func(childComplexity int, input model.CreateExpenseInput) int
-		CreateExpenseCategory   func(childComplexity int, input model.CreateExpenseCategoryInput) int
-		CreateGoal              func(childComplexity int, input model.CreateGoalInput) int
-		CreateIncome            func(childComplexity int, input model.CreateIncomeInput) int
-		CreateLiability         func(childComplexity int, input model.CreateLiabilityInput) int
-		CreateNetWorthSnapshot  func(childComplexity int, input model.CreateNetWorthSnapshotInput) int
-		CreateRecurringIncome   func(childComplexity int, input model.CreateRecurringIncomeInput) int
-		CreateRetirementAccount func(childComplexity int, input model.CreateRetirementAccountInput) int
-		CreateScenario          func(childComplexity int, input model.CreateScenarioInput) int
-		CreateTaxBracket        func(childComplexity int, input model.CreateTaxBracketInput) int
-		CreateUser              func(childComplexity int, input model.CreateUserInput) int
-		DeleteAsset             func(childComplexity int, id string) int
-		DeleteBudget            func(childComplexity int, id string) int
-		DeleteExpense           func(childComplexity int, id string) int
-		DeleteExpenseCategory   func(childComplexity int, id string) int
-		DeleteGoal              func(childComplexity int, id string) int
-		DeleteIncome            func(childComplexity int, id string) int
-		DeleteLiability         func(childComplexity int, id string) int
-		DeleteNetWorthSnapshot  func(childComplexity int, id string) int
-		DeleteRecurringIncome   func(childComplexity int, id string) int
-		DeleteRetirementAccount func(childComplexity int, id string) int
-		DeleteScenario          func(childComplexity int, id string) int
-		DeleteTaxBracket        func(childComplexity int, id string) int
-		DeleteUser              func(childComplexity int, id string) int
-		UpdateAsset             func(childComplexity int, input model.UpdateAssetInput) int
-		UpdateBudget            func(childComplexity int, input model.UpdateBudgetInput) int
-		UpdateExpense           func(childComplexity int, input model.UpdateExpenseInput) int
-		UpdateExpenseCategory   func(childComplexity int, input model.UpdateExpenseCategoryInput) int
-		UpdateGoal              func(childComplexity int, input model.UpdateGoalInput) int
-		UpdateIncome            func(childComplexity int, input model.UpdateIncomeInput) int
-		UpdateLiability         func(childComplexity int, input model.UpdateLiabilityInput) int
-		UpdateNetWorthSnapshot  func(childComplexity int, input model.UpdateNetWorthSnapshotInput) int
-		UpdateRecurringIncome   func(childComplexity int, input model.UpdateRecurringIncomeInput) int
-		UpdateRetirementAccount func(childComplexity int, input model.UpdateRetirementAccountInput) int
-		UpdateScenario          func(childComplexity int, input model.UpdateScenarioInput) int
-		UpdateTaxBracket        func(childComplexity int, input model.UpdateTaxBracketInput) int
-		UpdateUser              func(childComplexity int, input model.UpdateUserInput) int
+		AddContribution          func(childComplexity int, input model.AddContributionInput) int
+		CreateAsset              func(childComplexity int, input model.CreateAssetInput) int
+		CreateBudget             func(childComplexity int, input model.CreateBudgetInput) int
+		CreateExpense            func(childComplexity int, input model.CreateExpenseInput) int
+		CreateExpenseCategory    func(childComplexity int, input model.CreateExpenseCategoryInput) int
+		CreateGoal               func(childComplexity int, input model.CreateGoalInput) int
+		CreateIncome             func(childComplexity int, input model.CreateIncomeInput) int
+		CreateLiability          func(childComplexity int, input model.CreateLiabilityInput) int
+		CreateNetWorthSnapshot   func(childComplexity int, input model.CreateNetWorthSnapshotInput) int
+		CreateRecurringIncome    func(childComplexity int, input model.CreateRecurringIncomeInput) int
+		CreateRetirementAccount  func(childComplexity int, input model.CreateRetirementAccountInput) int
+		CreateScenario           func(childComplexity int, input model.CreateScenarioInput) int
+		CreateTaxBracket         func(childComplexity int, input model.CreateTaxBracketInput) int
+		CreateUser               func(childComplexity int, input model.CreateUserInput) int
+		DeleteAsset              func(childComplexity int, id string) int
+		DeleteBudget             func(childComplexity int, id string) int
+		DeleteExpense            func(childComplexity int, id string) int
+		DeleteExpenseCategory    func(childComplexity int, id string) int
+		DeleteGoal               func(childComplexity int, id string) int
+		DeleteIncome             func(childComplexity int, id string) int
+		DeleteLiability          func(childComplexity int, id string) int
+		DeleteNetWorthSnapshot   func(childComplexity int, id string) int
+		DeletePlaidConnection    func(childComplexity int, id string) int
+		DeleteRecurringIncome    func(childComplexity int, id string) int
+		DeleteRetirementAccount  func(childComplexity int, id string) int
+		DeleteScenario           func(childComplexity int, id string) int
+		DeleteTaxBracket         func(childComplexity int, id string) int
+		DeleteUser               func(childComplexity int, id string) int
+		ExchangePlaidPublicToken func(childComplexity int, userID string, publicToken string) int
+		SyncPlaidConnection      func(childComplexity int, id string) int
+		UpdateAsset              func(childComplexity int, input model.UpdateAssetInput) int
+		UpdateBudget             func(childComplexity int, input model.UpdateBudgetInput) int
+		UpdateExpense            func(childComplexity int, input model.UpdateExpenseInput) int
+		UpdateExpenseCategory    func(childComplexity int, input model.UpdateExpenseCategoryInput) int
+		UpdateGoal               func(childComplexity int, input model.UpdateGoalInput) int
+		UpdateIncome             func(childComplexity int, input model.UpdateIncomeInput) int
+		UpdateLiability          func(childComplexity int, input model.UpdateLiabilityInput) int
+		UpdateNetWorthSnapshot   func(childComplexity int, input model.UpdateNetWorthSnapshotInput) int
+		UpdateRecurringIncome    func(childComplexity int, input model.UpdateRecurringIncomeInput) int
+		UpdateRetirementAccount  func(childComplexity int, input model.UpdateRetirementAccountInput) int
+		UpdateScenario           func(childComplexity int, input model.UpdateScenarioInput) int
+		UpdateTaxBracket         func(childComplexity int, input model.UpdateTaxBracketInput) int
+		UpdateUser               func(childComplexity int, input model.UpdateUserInput) int
 	}
 
 	NetWorthSnapshot struct {
@@ -207,6 +210,31 @@ type ComplexityRoot struct {
 		UserID           func(childComplexity int) int
 	}
 
+	PlaidAccount struct {
+		CreatedAt         func(childComplexity int) int
+		CurrentBalance    func(childComplexity int) int
+		ExternalID        func(childComplexity int) int
+		ID                func(childComplexity int) int
+		IsoCurrencyCode   func(childComplexity int) int
+		Name              func(childComplexity int) int
+		OfficialName      func(childComplexity int) int
+		PlaidConnectionID func(childComplexity int) int
+		Subtype           func(childComplexity int) int
+		Type              func(childComplexity int) int
+		UpdatedAt         func(childComplexity int) int
+	}
+
+	PlaidConnection struct {
+		CreatedAt       func(childComplexity int) int
+		Environment     func(childComplexity int) int
+		ID              func(childComplexity int) int
+		InstitutionID   func(childComplexity int) int
+		InstitutionName func(childComplexity int) int
+		ItemID          func(childComplexity int) int
+		UpdatedAt       func(childComplexity int) int
+		UserID          func(childComplexity int) int
+	}
+
 	Query struct {
 		Asset                  func(childComplexity int, id string) int
 		Assets                 func(childComplexity int, userID string) int
@@ -215,6 +243,7 @@ type ComplexityRoot struct {
 		Budgets                func(childComplexity int, userID string) int
 		CompareScenarios       func(childComplexity int, userID string) int
 		ContributionProgress   func(childComplexity int, retirementAccountID string, taxYear int) int
+		EstimateTaxesForYear   func(childComplexity int, year int, filingStatus model.FilingStatus, income string, deduction *string) int
 		Expense                func(childComplexity int, id string) int
 		ExpenseCategories      func(childComplexity int, budgetID string) int
 		ExpenseCategory        func(childComplexity int, id string) int
@@ -230,6 +259,9 @@ type ComplexityRoot struct {
 		NetWorthSnapshot       func(childComplexity int, id string) int
 		NetWorthSnapshotByDate func(childComplexity int, userID string, date string) int
 		NetWorthSnapshots      func(childComplexity int, userID string) int
+		PlaidAccounts          func(childComplexity int, connectionID string) int
+		PlaidConnection        func(childComplexity int, id string) int
+		PlaidConnections       func(childComplexity int, userID string) int
 		RecurringIncome        func(childComplexity int, id string) int
 		RecurringIncomes       func(childComplexity int, userID string) int
 		RetirementAccount      func(childComplexity int, id string) int
@@ -312,6 +344,13 @@ type ComplexityRoot struct {
 		Year          func(childComplexity int) int
 	}
 
+	TaxEstimate struct {
+		EffectiveRate func(childComplexity int) int
+		MarginalRate  func(childComplexity int) int
+		TaxOwed       func(childComplexity int) int
+		TaxableIncome func(childComplexity int) int
+	}
+
 	User struct {
 		CreatedAt          func(childComplexity int) int
 		CurrencyType       func(childComplexity int) int
@@ -371,6 +410,9 @@ type MutationResolver interface {
 	CreateNetWorthSnapshot(ctx context.Context, input model.CreateNetWorthSnapshotInput) (*model.NetWorthSnapshot, error)
 	UpdateNetWorthSnapshot(ctx context.Context, input model.UpdateNetWorthSnapshotInput) (*model.NetWorthSnapshot, error)
 	DeleteNetWorthSnapshot(ctx context.Context, id string) (bool, error)
+	ExchangePlaidPublicToken(ctx context.Context, userID string, publicToken string) (*model.PlaidConnection, error)
+	SyncPlaidConnection(ctx context.Context, id string) (bool, error)
+	DeletePlaidConnection(ctx context.Context, id string) (bool, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (*model.Health, error)
@@ -389,6 +431,9 @@ type QueryResolver interface {
 	Scenario(ctx context.Context, id string) (*model.Scenario, error)
 	Scenarios(ctx context.Context, userID string) ([]*model.Scenario, error)
 	CompareScenarios(ctx context.Context, userID string) ([]*model.ScenarioResult, error)
+	PlaidConnection(ctx context.Context, id string) (*model.PlaidConnection, error)
+	PlaidConnections(ctx context.Context, userID string) ([]*model.PlaidConnection, error)
+	PlaidAccounts(ctx context.Context, connectionID string) ([]*model.PlaidAccount, error)
 	RetirementAccount(ctx context.Context, id string) (*model.RetirementAccount, error)
 	RetirementAccounts(ctx context.Context, userID string) ([]*model.RetirementAccount, error)
 	ContributionProgress(ctx context.Context, retirementAccountID string, taxYear int) (*model.ContributionProgress, error)
@@ -402,6 +447,7 @@ type QueryResolver interface {
 	RecurringIncomes(ctx context.Context, userID string) ([]*model.RecurringIncome, error)
 	TaxBracket(ctx context.Context, id string) (*model.TaxBracket, error)
 	TaxBrackets(ctx context.Context, year int, filingStatus model.FilingStatus) ([]*model.TaxBracket, error)
+	EstimateTaxesForYear(ctx context.Context, year int, filingStatus model.FilingStatus, income string, deduction *string) (*model.TaxEstimate, error)
 	NetWorthSnapshot(ctx context.Context, id string) (*model.NetWorthSnapshot, error)
 	NetWorthSnapshotByDate(ctx context.Context, userID string, date string) (*model.NetWorthSnapshot, error)
 	NetWorthSnapshots(ctx context.Context, userID string) ([]*model.NetWorthSnapshot, error)
@@ -1184,6 +1230,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DeleteNetWorthSnapshot(childComplexity, args["id"].(string)), true
+	case "Mutation.deletePlaidConnection":
+		if e.ComplexityRoot.Mutation.DeletePlaidConnection == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deletePlaidConnection_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeletePlaidConnection(childComplexity, args["id"].(string)), true
 	case "Mutation.deleteRecurringIncome":
 		if e.ComplexityRoot.Mutation.DeleteRecurringIncome == nil {
 			break
@@ -1239,6 +1296,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DeleteUser(childComplexity, args["id"].(string)), true
+	case "Mutation.exchangePlaidPublicToken":
+		if e.ComplexityRoot.Mutation.ExchangePlaidPublicToken == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_exchangePlaidPublicToken_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.ExchangePlaidPublicToken(childComplexity, args["userId"].(string), args["publicToken"].(string)), true
+	case "Mutation.syncPlaidConnection":
+		if e.ComplexityRoot.Mutation.SyncPlaidConnection == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_syncPlaidConnection_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.SyncPlaidConnection(childComplexity, args["id"].(string)), true
 	case "Mutation.updateAsset":
 		if e.ComplexityRoot.Mutation.UpdateAsset == nil {
 			break
@@ -1432,6 +1511,122 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.NetWorthSnapshot.UserID(childComplexity), true
 
+	case "PlaidAccount.createdAt":
+		if e.ComplexityRoot.PlaidAccount.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.CreatedAt(childComplexity), true
+	case "PlaidAccount.currentBalance":
+		if e.ComplexityRoot.PlaidAccount.CurrentBalance == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.CurrentBalance(childComplexity), true
+	case "PlaidAccount.externalId":
+		if e.ComplexityRoot.PlaidAccount.ExternalID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.ExternalID(childComplexity), true
+	case "PlaidAccount.id":
+		if e.ComplexityRoot.PlaidAccount.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.ID(childComplexity), true
+	case "PlaidAccount.isoCurrencyCode":
+		if e.ComplexityRoot.PlaidAccount.IsoCurrencyCode == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.IsoCurrencyCode(childComplexity), true
+	case "PlaidAccount.name":
+		if e.ComplexityRoot.PlaidAccount.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.Name(childComplexity), true
+	case "PlaidAccount.officialName":
+		if e.ComplexityRoot.PlaidAccount.OfficialName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.OfficialName(childComplexity), true
+	case "PlaidAccount.plaidConnectionId":
+		if e.ComplexityRoot.PlaidAccount.PlaidConnectionID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.PlaidConnectionID(childComplexity), true
+	case "PlaidAccount.subtype":
+		if e.ComplexityRoot.PlaidAccount.Subtype == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.Subtype(childComplexity), true
+	case "PlaidAccount.type":
+		if e.ComplexityRoot.PlaidAccount.Type == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.Type(childComplexity), true
+	case "PlaidAccount.updatedAt":
+		if e.ComplexityRoot.PlaidAccount.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidAccount.UpdatedAt(childComplexity), true
+
+	case "PlaidConnection.createdAt":
+		if e.ComplexityRoot.PlaidConnection.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidConnection.CreatedAt(childComplexity), true
+	case "PlaidConnection.environment":
+		if e.ComplexityRoot.PlaidConnection.Environment == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidConnection.Environment(childComplexity), true
+	case "PlaidConnection.id":
+		if e.ComplexityRoot.PlaidConnection.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidConnection.ID(childComplexity), true
+	case "PlaidConnection.institutionId":
+		if e.ComplexityRoot.PlaidConnection.InstitutionID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidConnection.InstitutionID(childComplexity), true
+	case "PlaidConnection.institutionName":
+		if e.ComplexityRoot.PlaidConnection.InstitutionName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidConnection.InstitutionName(childComplexity), true
+	case "PlaidConnection.itemId":
+		if e.ComplexityRoot.PlaidConnection.ItemID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidConnection.ItemID(childComplexity), true
+	case "PlaidConnection.updatedAt":
+		if e.ComplexityRoot.PlaidConnection.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidConnection.UpdatedAt(childComplexity), true
+	case "PlaidConnection.userId":
+		if e.ComplexityRoot.PlaidConnection.UserID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlaidConnection.UserID(childComplexity), true
+
 	case "Query.asset":
 		if e.ComplexityRoot.Query.Asset == nil {
 			break
@@ -1509,6 +1704,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.ContributionProgress(childComplexity, args["retirementAccountId"].(string), args["taxYear"].(int)), true
+	case "Query.estimateTaxesForYear":
+		if e.ComplexityRoot.Query.EstimateTaxesForYear == nil {
+			break
+		}
+
+		args, err := ec.field_Query_estimateTaxesForYear_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.EstimateTaxesForYear(childComplexity, args["year"].(int), args["filingStatus"].(model.FilingStatus), args["income"].(string), args["deduction"].(*string)), true
 	case "Query.expense":
 		if e.ComplexityRoot.Query.Expense == nil {
 			break
@@ -1665,6 +1871,39 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.NetWorthSnapshots(childComplexity, args["userId"].(string)), true
+	case "Query.plaidAccounts":
+		if e.ComplexityRoot.Query.PlaidAccounts == nil {
+			break
+		}
+
+		args, err := ec.field_Query_plaidAccounts_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.PlaidAccounts(childComplexity, args["connectionId"].(string)), true
+	case "Query.plaidConnection":
+		if e.ComplexityRoot.Query.PlaidConnection == nil {
+			break
+		}
+
+		args, err := ec.field_Query_plaidConnection_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.PlaidConnection(childComplexity, args["id"].(string)), true
+	case "Query.plaidConnections":
+		if e.ComplexityRoot.Query.PlaidConnections == nil {
+			break
+		}
+
+		args, err := ec.field_Query_plaidConnections_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.PlaidConnections(childComplexity, args["userId"].(string)), true
 	case "Query.recurringIncome":
 		if e.ComplexityRoot.Query.RecurringIncome == nil {
 			break
@@ -2106,6 +2345,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.TaxBracket.Year(childComplexity), true
 
+	case "TaxEstimate.effectiveRate":
+		if e.ComplexityRoot.TaxEstimate.EffectiveRate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxEstimate.EffectiveRate(childComplexity), true
+	case "TaxEstimate.marginalRate":
+		if e.ComplexityRoot.TaxEstimate.MarginalRate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxEstimate.MarginalRate(childComplexity), true
+	case "TaxEstimate.taxOwed":
+		if e.ComplexityRoot.TaxEstimate.TaxOwed == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxEstimate.TaxOwed(childComplexity), true
+	case "TaxEstimate.taxableIncome":
+		if e.ComplexityRoot.TaxEstimate.TaxableIncome == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaxEstimate.TaxableIncome(childComplexity), true
+
 	case "User.createdAt":
 		if e.ComplexityRoot.User.CreatedAt == nil {
 			break
@@ -2319,6 +2583,9 @@ var sources = []*ast.Source{
   scenario(id: ID!): Scenario
   scenarios(userId: ID!): [Scenario!]!
   compareScenarios(userId: ID!): [ScenarioResult!]!
+  plaidConnection(id: ID!): PlaidConnection
+  plaidConnections(userId: ID!): [PlaidConnection!]!
+  plaidAccounts(connectionId: ID!): [PlaidAccount!]!
   retirementAccount(id: ID!): RetirementAccount
   retirementAccounts(userId: ID!): [RetirementAccount!]!
   contributionProgress(retirementAccountId: ID!, taxYear: Int!): ContributionProgress!
@@ -2332,6 +2599,7 @@ var sources = []*ast.Source{
   recurringIncomes(userId: ID!): [RecurringIncome!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
+  estimateTaxesForYear(year: Int!, filingStatus: FilingStatus!, income: String!, deduction: String): TaxEstimate
   netWorthSnapshot(id: ID!): NetWorthSnapshot
   netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
   netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
@@ -2378,6 +2646,9 @@ type Mutation {
   createNetWorthSnapshot(input: CreateNetWorthSnapshotInput!): NetWorthSnapshot!
   updateNetWorthSnapshot(input: UpdateNetWorthSnapshotInput!): NetWorthSnapshot!
   deleteNetWorthSnapshot(id: ID!): Boolean!
+  exchangePlaidPublicToken(userId: ID!, publicToken: String!): PlaidConnection!
+  syncPlaidConnection(id: ID!): Boolean!
+  deletePlaidConnection(id: ID!): Boolean!
 }
 
 type Health {
@@ -2704,6 +2975,31 @@ type RecurringIncome {
   updatedAt: String!
 }
 
+type PlaidConnection {
+  id: ID!
+  userId: ID!
+  environment: String!
+  institutionId: String
+  institutionName: String
+  itemId: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type PlaidAccount {
+  id: ID!
+  plaidConnectionId: ID!
+  externalId: String!
+  name: String!
+  officialName: String
+  type: String
+  subtype: String
+  currentBalance: String
+  isoCurrencyCode: String
+  createdAt: String!
+  updatedAt: String!
+}
+
 input CreateLiabilityInput {
   userId: ID!
   name: String!
@@ -2865,6 +3161,13 @@ type TaxBracket {
   rate: String!
   createdAt: String!
   updatedAt: String!
+}
+
+type TaxEstimate {
+  taxOwed: String!
+  taxableIncome: String!
+  effectiveRate: String!
+  marginalRate: String!
 }
 
 input CreateTaxBracketInput {
@@ -3174,6 +3477,17 @@ func (ec *executionContext) field_Mutation_deleteNetWorthSnapshot_args(ctx conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deletePlaidConnection_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteRecurringIncome_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -3219,6 +3533,33 @@ func (ec *executionContext) field_Mutation_deleteTaxBracket_args(ctx context.Con
 }
 
 func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_exchangePlaidPublicToken_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["userId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "publicToken", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["publicToken"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_syncPlaidConnection_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
@@ -3470,6 +3811,32 @@ func (ec *executionContext) field_Query_contributionProgress_args(ctx context.Co
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_estimateTaxesForYear_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "year", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["year"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "filingStatus", ec.unmarshalNFilingStatus2breezeᚗapiᚋgraphᚋmodelᚐFilingStatus)
+	if err != nil {
+		return nil, err
+	}
+	args["filingStatus"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "income", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["income"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "deduction", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["deduction"] = arg3
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_expenseCategories_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -3608,6 +3975,39 @@ func (ec *executionContext) field_Query_netWorthSnapshot_args(ctx context.Contex
 }
 
 func (ec *executionContext) field_Query_netWorthSnapshots_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["userId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_plaidAccounts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "connectionId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["connectionId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_plaidConnection_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_plaidConnections_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId", ec.unmarshalNID2string)
@@ -8459,6 +8859,147 @@ func (ec *executionContext) fieldContext_Mutation_deleteNetWorthSnapshot(ctx con
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_exchangePlaidPublicToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_exchangePlaidPublicToken,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().ExchangePlaidPublicToken(ctx, fc.Args["userId"].(string), fc.Args["publicToken"].(string))
+		},
+		nil,
+		ec.marshalNPlaidConnection2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_exchangePlaidPublicToken(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_PlaidConnection_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_PlaidConnection_userId(ctx, field)
+			case "environment":
+				return ec.fieldContext_PlaidConnection_environment(ctx, field)
+			case "institutionId":
+				return ec.fieldContext_PlaidConnection_institutionId(ctx, field)
+			case "institutionName":
+				return ec.fieldContext_PlaidConnection_institutionName(ctx, field)
+			case "itemId":
+				return ec.fieldContext_PlaidConnection_itemId(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_PlaidConnection_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_PlaidConnection_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PlaidConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_exchangePlaidPublicToken_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_syncPlaidConnection(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_syncPlaidConnection,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().SyncPlaidConnection(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_syncPlaidConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_syncPlaidConnection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deletePlaidConnection(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_deletePlaidConnection,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DeletePlaidConnection(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deletePlaidConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deletePlaidConnection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _NetWorthSnapshot_id(ctx context.Context, field graphql.CollectedField, obj *model.NetWorthSnapshot) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -8681,6 +9222,557 @@ func (ec *executionContext) _NetWorthSnapshot_updatedAt(ctx context.Context, fie
 func (ec *executionContext) fieldContext_NetWorthSnapshot_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "NetWorthSnapshot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_id(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_plaidConnectionId(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_plaidConnectionId,
+		func(ctx context.Context) (any, error) {
+			return obj.PlaidConnectionID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_plaidConnectionId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_externalId(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_externalId,
+		func(ctx context.Context) (any, error) {
+			return obj.ExternalID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_externalId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_name(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_officialName(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_officialName,
+		func(ctx context.Context) (any, error) {
+			return obj.OfficialName, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_officialName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_type(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_type,
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_subtype(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_subtype,
+		func(ctx context.Context) (any, error) {
+			return obj.Subtype, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_subtype(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_currentBalance(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_currentBalance,
+		func(ctx context.Context) (any, error) {
+			return obj.CurrentBalance, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_currentBalance(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_isoCurrencyCode(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_isoCurrencyCode,
+		func(ctx context.Context) (any, error) {
+			return obj.IsoCurrencyCode, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_isoCurrencyCode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidAccount_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidAccount_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidAccount_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidConnection_id(ctx context.Context, field graphql.CollectedField, obj *model.PlaidConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidConnection_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidConnection_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidConnection_userId(ctx context.Context, field graphql.CollectedField, obj *model.PlaidConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidConnection_userId,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidConnection_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidConnection_environment(ctx context.Context, field graphql.CollectedField, obj *model.PlaidConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidConnection_environment,
+		func(ctx context.Context) (any, error) {
+			return obj.Environment, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidConnection_environment(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidConnection_institutionId(ctx context.Context, field graphql.CollectedField, obj *model.PlaidConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidConnection_institutionId,
+		func(ctx context.Context) (any, error) {
+			return obj.InstitutionID, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidConnection_institutionId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidConnection_institutionName(ctx context.Context, field graphql.CollectedField, obj *model.PlaidConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidConnection_institutionName,
+		func(ctx context.Context) (any, error) {
+			return obj.InstitutionName, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidConnection_institutionName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidConnection_itemId(ctx context.Context, field graphql.CollectedField, obj *model.PlaidConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidConnection_itemId,
+		func(ctx context.Context) (any, error) {
+			return obj.ItemID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidConnection_itemId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidConnection_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.PlaidConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidConnection_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidConnection_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlaidConnection_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.PlaidConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlaidConnection_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlaidConnection_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlaidConnection",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -9655,6 +10747,189 @@ func (ec *executionContext) fieldContext_Query_compareScenarios(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_plaidConnection(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_plaidConnection,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().PlaidConnection(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalOPlaidConnection2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidConnection,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_plaidConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_PlaidConnection_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_PlaidConnection_userId(ctx, field)
+			case "environment":
+				return ec.fieldContext_PlaidConnection_environment(ctx, field)
+			case "institutionId":
+				return ec.fieldContext_PlaidConnection_institutionId(ctx, field)
+			case "institutionName":
+				return ec.fieldContext_PlaidConnection_institutionName(ctx, field)
+			case "itemId":
+				return ec.fieldContext_PlaidConnection_itemId(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_PlaidConnection_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_PlaidConnection_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PlaidConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_plaidConnection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_plaidConnections(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_plaidConnections,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().PlaidConnections(ctx, fc.Args["userId"].(string))
+		},
+		nil,
+		ec.marshalNPlaidConnection2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidConnectionᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_plaidConnections(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_PlaidConnection_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_PlaidConnection_userId(ctx, field)
+			case "environment":
+				return ec.fieldContext_PlaidConnection_environment(ctx, field)
+			case "institutionId":
+				return ec.fieldContext_PlaidConnection_institutionId(ctx, field)
+			case "institutionName":
+				return ec.fieldContext_PlaidConnection_institutionName(ctx, field)
+			case "itemId":
+				return ec.fieldContext_PlaidConnection_itemId(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_PlaidConnection_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_PlaidConnection_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PlaidConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_plaidConnections_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_plaidAccounts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_plaidAccounts,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().PlaidAccounts(ctx, fc.Args["connectionId"].(string))
+		},
+		nil,
+		ec.marshalNPlaidAccount2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidAccountᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_plaidAccounts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_PlaidAccount_id(ctx, field)
+			case "plaidConnectionId":
+				return ec.fieldContext_PlaidAccount_plaidConnectionId(ctx, field)
+			case "externalId":
+				return ec.fieldContext_PlaidAccount_externalId(ctx, field)
+			case "name":
+				return ec.fieldContext_PlaidAccount_name(ctx, field)
+			case "officialName":
+				return ec.fieldContext_PlaidAccount_officialName(ctx, field)
+			case "type":
+				return ec.fieldContext_PlaidAccount_type(ctx, field)
+			case "subtype":
+				return ec.fieldContext_PlaidAccount_subtype(ctx, field)
+			case "currentBalance":
+				return ec.fieldContext_PlaidAccount_currentBalance(ctx, field)
+			case "isoCurrencyCode":
+				return ec.fieldContext_PlaidAccount_isoCurrencyCode(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_PlaidAccount_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_PlaidAccount_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PlaidAccount", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_plaidAccounts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_retirementAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -10450,6 +11725,57 @@ func (ec *executionContext) fieldContext_Query_taxBrackets(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_taxBrackets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_estimateTaxesForYear(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_estimateTaxesForYear,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().EstimateTaxesForYear(ctx, fc.Args["year"].(int), fc.Args["filingStatus"].(model.FilingStatus), fc.Args["income"].(string), fc.Args["deduction"].(*string))
+		},
+		nil,
+		ec.marshalOTaxEstimate2ᚖbreezeᚗapiᚋgraphᚋmodelᚐTaxEstimate,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_estimateTaxesForYear(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "taxOwed":
+				return ec.fieldContext_TaxEstimate_taxOwed(ctx, field)
+			case "taxableIncome":
+				return ec.fieldContext_TaxEstimate_taxableIncome(ctx, field)
+			case "effectiveRate":
+				return ec.fieldContext_TaxEstimate_effectiveRate(ctx, field)
+			case "marginalRate":
+				return ec.fieldContext_TaxEstimate_marginalRate(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TaxEstimate", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_estimateTaxesForYear_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -12326,6 +13652,122 @@ func (ec *executionContext) _TaxBracket_updatedAt(ctx context.Context, field gra
 func (ec *executionContext) fieldContext_TaxBracket_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TaxBracket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxEstimate_taxOwed(ctx context.Context, field graphql.CollectedField, obj *model.TaxEstimate) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxEstimate_taxOwed,
+		func(ctx context.Context) (any, error) {
+			return obj.TaxOwed, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxEstimate_taxOwed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxEstimate",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxEstimate_taxableIncome(ctx context.Context, field graphql.CollectedField, obj *model.TaxEstimate) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxEstimate_taxableIncome,
+		func(ctx context.Context) (any, error) {
+			return obj.TaxableIncome, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxEstimate_taxableIncome(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxEstimate",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxEstimate_effectiveRate(ctx context.Context, field graphql.CollectedField, obj *model.TaxEstimate) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxEstimate_effectiveRate,
+		func(ctx context.Context) (any, error) {
+			return obj.EffectiveRate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxEstimate_effectiveRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxEstimate",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TaxEstimate_marginalRate(ctx context.Context, field graphql.CollectedField, obj *model.TaxEstimate) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TaxEstimate_marginalRate,
+		func(ctx context.Context) (any, error) {
+			return obj.MarginalRate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TaxEstimate_marginalRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TaxEstimate",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -17095,6 +18537,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "exchangePlaidPublicToken":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_exchangePlaidPublicToken(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "syncPlaidConnection":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_syncPlaidConnection(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deletePlaidConnection":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deletePlaidConnection(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -17166,6 +18629,148 @@ func (ec *executionContext) _NetWorthSnapshot(ctx context.Context, sel ast.Selec
 			}
 		case "updatedAt":
 			out.Values[i] = ec._NetWorthSnapshot_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var plaidAccountImplementors = []string{"PlaidAccount"}
+
+func (ec *executionContext) _PlaidAccount(ctx context.Context, sel ast.SelectionSet, obj *model.PlaidAccount) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, plaidAccountImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PlaidAccount")
+		case "id":
+			out.Values[i] = ec._PlaidAccount_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "plaidConnectionId":
+			out.Values[i] = ec._PlaidAccount_plaidConnectionId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "externalId":
+			out.Values[i] = ec._PlaidAccount_externalId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._PlaidAccount_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "officialName":
+			out.Values[i] = ec._PlaidAccount_officialName(ctx, field, obj)
+		case "type":
+			out.Values[i] = ec._PlaidAccount_type(ctx, field, obj)
+		case "subtype":
+			out.Values[i] = ec._PlaidAccount_subtype(ctx, field, obj)
+		case "currentBalance":
+			out.Values[i] = ec._PlaidAccount_currentBalance(ctx, field, obj)
+		case "isoCurrencyCode":
+			out.Values[i] = ec._PlaidAccount_isoCurrencyCode(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._PlaidAccount_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._PlaidAccount_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var plaidConnectionImplementors = []string{"PlaidConnection"}
+
+func (ec *executionContext) _PlaidConnection(ctx context.Context, sel ast.SelectionSet, obj *model.PlaidConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, plaidConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PlaidConnection")
+		case "id":
+			out.Values[i] = ec._PlaidConnection_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._PlaidConnection_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "environment":
+			out.Values[i] = ec._PlaidConnection_environment(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "institutionId":
+			out.Values[i] = ec._PlaidConnection_institutionId(ctx, field, obj)
+		case "institutionName":
+			out.Values[i] = ec._PlaidConnection_institutionName(ctx, field, obj)
+		case "itemId":
+			out.Values[i] = ec._PlaidConnection_itemId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._PlaidConnection_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._PlaidConnection_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -17539,6 +19144,69 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "plaidConnection":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_plaidConnection(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "plaidConnections":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_plaidConnections(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "plaidAccounts":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_plaidAccounts(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "retirementAccount":
 			field := field
 
@@ -17798,6 +19466,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "estimateTaxesForYear":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_estimateTaxesForYear(ctx, field)
 				return res
 			}
 
@@ -18305,6 +19992,60 @@ func (ec *executionContext) _TaxBracket(ctx context.Context, sel ast.SelectionSe
 			}
 		case "updatedAt":
 			out.Values[i] = ec._TaxBracket_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var taxEstimateImplementors = []string{"TaxEstimate"}
+
+func (ec *executionContext) _TaxEstimate(ctx context.Context, sel ast.SelectionSet, obj *model.TaxEstimate) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, taxEstimateImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TaxEstimate")
+		case "taxOwed":
+			out.Values[i] = ec._TaxEstimate_taxOwed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "taxableIncome":
+			out.Values[i] = ec._TaxEstimate_taxableIncome(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "effectiveRate":
+			out.Values[i] = ec._TaxEstimate_effectiveRate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "marginalRate":
+			out.Values[i] = ec._TaxEstimate_marginalRate(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -19270,6 +21011,62 @@ func (ec *executionContext) marshalNPayoffStrategy2breezeᚗapiᚋgraphᚋmodel�
 	return v
 }
 
+func (ec *executionContext) marshalNPlaidAccount2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PlaidAccount) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNPlaidAccount2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidAccount(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNPlaidAccount2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidAccount(ctx context.Context, sel ast.SelectionSet, v *model.PlaidAccount) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PlaidAccount(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPlaidConnection2breezeᚗapiᚋgraphᚋmodelᚐPlaidConnection(ctx context.Context, sel ast.SelectionSet, v model.PlaidConnection) graphql.Marshaler {
+	return ec._PlaidConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPlaidConnection2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidConnectionᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PlaidConnection) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNPlaidConnection2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidConnection(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNPlaidConnection2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidConnection(ctx context.Context, sel ast.SelectionSet, v *model.PlaidConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PlaidConnection(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNRecurrenceInterval2breezeᚗapiᚋgraphᚋmodelᚐRecurrenceInterval(ctx context.Context, v any) (model.RecurrenceInterval, error) {
 	var res model.RecurrenceInterval
 	err := res.UnmarshalGQL(v)
@@ -19840,6 +21637,13 @@ func (ec *executionContext) marshalONetWorthSnapshot2ᚖbreezeᚗapiᚋgraphᚋm
 	return ec._NetWorthSnapshot(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOPlaidConnection2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPlaidConnection(ctx context.Context, sel ast.SelectionSet, v *model.PlaidConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PlaidConnection(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalORecurringIncome2ᚖbreezeᚗapiᚋgraphᚋmodelᚐRecurringIncome(ctx context.Context, sel ast.SelectionSet, v *model.RecurringIncome) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -19884,6 +21688,13 @@ func (ec *executionContext) marshalOTaxBracket2ᚖbreezeᚗapiᚋgraphᚋmodel�
 		return graphql.Null
 	}
 	return ec._TaxBracket(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOTaxEstimate2ᚖbreezeᚗapiᚋgraphᚋmodelᚐTaxEstimate(ctx context.Context, sel ast.SelectionSet, v *model.TaxEstimate) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TaxEstimate(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {

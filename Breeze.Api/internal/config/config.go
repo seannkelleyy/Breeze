@@ -12,6 +12,9 @@ type Config struct {
 	Port           string
 	Env            string
 	SentryDSN      string
+	PlaidClientID  string
+	PlaidSecret    string
+	PlaidEnv       string
 }
 
 func Load() *Config {
@@ -33,6 +36,9 @@ func Load() *Config {
 		Port:           os.Getenv("PORT"), // Optional, defaults to 8080 in main.go
 		Env:            env,
 		SentryDSN:      os.Getenv("SENTRY_DSN"), // Optional, only needed if using Sentry
+		PlaidClientID:  os.Getenv("PLAID_CLIENT_ID"),
+		PlaidSecret:    os.Getenv("PLAID_SECRET"),
+		PlaidEnv:       os.Getenv("PLAID_ENV"),
 	}
 }
 
