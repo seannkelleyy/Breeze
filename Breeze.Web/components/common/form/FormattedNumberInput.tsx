@@ -39,6 +39,7 @@ export const FormattedNumberInput = ({
 
   useEffect(() => {
     if (!isFocused) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraftValue(String(value));
     }
   }, [value, isFocused]);

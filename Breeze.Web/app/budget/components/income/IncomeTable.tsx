@@ -12,7 +12,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import dayjs from 'dayjs';
-import { ArrowUpDown, Table as LucideTable } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 
 import { useBudgetContext } from '../../providers';
 
@@ -40,94 +40,97 @@ export const IncomeTable = () => {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const { incomes = [] } = useBudgetContext();
-  const recurrenceLabelByInterval: Record<string, string> = {
-    none: 'One-time',
-    weekly: 'Weekly',
-    biweekly: 'Biweekly',
-    monthly: 'Monthly',
-    quarterly: 'Quarterly',
-    yearly: 'Yearly',
-  };
 
   const columns = React.useMemo<ColumnDef<Income>[]>(
-    () => [
-      {
-        accessorKey: 'name',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Name
-              <ArrowUpDown />
-            </Button>
-          );
-        },
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <span>{row.original.name}</span>
-            {row.original.sourceType === 'recurring-template' ? (
-              <Badge variant="outline">Template</Badge>
-            ) : null}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'amount',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Amount
-              <ArrowUpDown />
-            </Button>
-          );
-        },
-        cell: ({ row }) => {
-          const amount = parseFloat(row.getValue('amount'));
-          const formatted = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-          }).format(amount);
-          return <div className="text-left font-medium">{formatted}</div>;
-        },
-      },
-      {
-        accessorKey: 'date',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Date
-              <ArrowUpDown />
-            </Button>
-          );
-        },
-        cell: ({ row }) => {
-          const date = row.getValue('date') as string | number | Date | null | undefined;
-          return dayjs(date).format('MMMM D, YYYY');
-        },
-      },
-      {
-        id: 'schedule',
-        header: 'Schedule',
-        cell: ({ row }) => {
-          const recurrenceInterval = row.original.recurrenceInterval ?? 'none';
-          if (recurrenceInterval === 'none') {
-            return 'One-time';
-          }
+    () => {
+      const recurrenceLabelByInterval: Record<string, string> = {
+        none: 'One-time',
+        weekly: 'Weekly',
+        biweekly: 'Biweekly',
+        monthly: 'Monthly',
+        quarterly: 'Quarterly',
+        yearly: 'Yearly',
+      };
 
-          const payday = row.original.paydayDayOfMonth;
-          return `${recurrenceLabelByInterval[recurrenceInterval] ?? 'Recurring'}${payday ? ` - day ${payday}` : ''}`;
+      return [
+        {
+          accessorKey: 'name',
+          header: ({ column }) => {
+            return (
+              <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              >
+                Name
+                <ArrowUpDown />
+              </Button>
+            );
+          },
+          cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+              <span>{row.original.name}</span>
+              {row.original.sourceType === 'recurring-template' ? (
+                <Badge variant="outline">Template</Badge>
+              ) : null}
+            </div>
+          ),
         },
-      },
-    ],
-    [recurrenceLabelByInterval],
+        {
+          accessorKey: 'amount',
+          header: ({ column }) => {
+            return (
+              <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              >
+                Amount
+                <ArrowUpDown />
+              </Button>
+            );
+          },
+          cell: ({ row }) => {
+            const amount = parseFloat(row.getValue('amount'));
+            const formatted = new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+            }).format(amount);
+            return <div className="text-left font-medium">{formatted}</div>;
+          },
+        },
+        {
+          accessorKey: 'date',
+          header: ({ column }) => {
+            return (
+              <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              >
+                Date
+                <ArrowUpDown />
+              </Button>
+            );
+          },
+          cell: ({ row }) => {
+            const date = row.getValue('date') as string | number | Date | null | undefined;
+            return dayjs(date).format('MMMM D, YYYY');
+          },
+        },
+        {
+          id: 'schedule',
+          header: 'Schedule',
+          cell: ({ row }) => {
+            const recurrenceInterval = row.original.recurrenceInterval ?? 'none';
+            if (recurrenceInterval === 'none') {
+              return 'One-time';
+            }
+
+            const payday = row.original.paydayDayOfMonth;
+            return `${recurrenceLabelByInterval[recurrenceInterval] ?? 'Recurring'}${payday ? ` - day ${payday}` : ''}`;
+          },
+        },
+      ];
+    },
+    [],
   );
 
   // Calculate total amount
@@ -158,7 +161,7 @@ export const IncomeTable = () => {
       <Input
         placeholder="Filter names..."
         value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-        onChange={(event: { target: { value: any } }) =>
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
           table.getColumn('name')?.setFilterValue(event.target.value)
         }
         className="my-2 w-full"

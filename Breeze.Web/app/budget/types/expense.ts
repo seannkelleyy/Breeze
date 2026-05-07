@@ -1,8 +1,8 @@
-import z from 'zod';
+import z from 'zod'
 
 export interface Expense {
   recurrenceInterval: string;
-  dueDayOfMonth: any;
+  dueDayOfMonth: number | null;
   id?: number;
   userId: string;
   name: string;

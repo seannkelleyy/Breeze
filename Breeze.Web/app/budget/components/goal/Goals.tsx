@@ -14,7 +14,11 @@ export const Goals = () => {
   const { userId } = useCurrentUser();
   const { data: goals, refetch, isLoading, isError } = useFetchGoals({ userId });
 
-  if (goals) goals.sort((a, b) => (a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1));
+  if (!userId) {
+    return null;
+  }
+
+  const sortedGoals = goals ? [...goals].sort((a, b) => (a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1)) : goals;
 
   if (isLoading) return <GoalSkeleton />;
 
@@ -26,7 +30,7 @@ export const Goals = () => {
       </Card>
     );
 
-  if (!goals || goals.length === 0) {
+  if (!sortedGoals || sortedGoals.length === 0) {
     return (
       <Card className="items-evenly my-4 flex w-[80%] max-w-[95%] flex-col space-y-4 rounded-md p-4 md:max-w-[400px]">
         <div className="flex items-center justify-between">
@@ -44,7 +48,7 @@ export const Goals = () => {
         <h1 className="text-2xl font-bold">Goals</h1>
       </div>
       <ul className="space-y-2">
-        {goals.map((goal) => (
+        {sortedGoals.map((goal) => (
           <EditGoalDialog existingGoal={goal} refetchGoals={refetch} key={goal.id}>
             <li
               className="hover:bg-accent mx-auto flex items-center justify-center gap-16 rounded-md p-2"

@@ -3,13 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { FormattedNumberInput } from '../../components/common/form/FormattedNumberInput';
-import { Navigation } from '../../components/common/navigation';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { PlannerToolsCard } from './components/PlannerToolsCard';
 import { useFetchPlanner } from '../planner/hooks/planner/index';
-import { de } from 'zod/v4/locales';
 
 interface PlannerAccountLite {
   owner: 'self' | 'spouse';
@@ -88,6 +86,7 @@ const MortgageTools = () => {
     );
     const homeAccount = homeWithLoan ?? accounts.find((account) => account.accountType === 'home');
     if (homeAccount) {
+      /* eslint-disable react-hooks/set-state-in-effect */
       setHomeValue(clamp(homeAccount.currentValue ?? homeAccount.startingBalance));
       setHomeAnnualGrowthRate(homeAccount.annualChangeRate ?? homeAccount.annualRate);
       setMortgageOriginalAmount(
@@ -111,6 +110,7 @@ const MortgageTools = () => {
       } else if (homeAccount.loanTermYears) {
         setMortgageRemainingMonths(Math.max(1, Math.round(clamp(homeAccount.loanTermYears) * 12)));
       }
+      /* eslint-enable react-hooks/set-state-in-effect */
     }
 
     hasHydratedFromPlannerRef.current = true;

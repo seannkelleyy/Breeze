@@ -32,7 +32,6 @@ const ProjectionChartCard = ({
   chartConfig,
   projectionRows,
   accounts,
-  accountLineColors,
 }: ProjectionChartCardProps) => {
   const { currencyCode, plannerSummary } = useCurrentUser();
   const targetAge = plannerSummary?.targetAge ?? currentAge;

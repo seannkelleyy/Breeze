@@ -88,6 +88,7 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
   } = usePlannerAccounts();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCollapsedAccountIds((previous) => {
       const next: Record<string, boolean> = {};
       for (const account of plannerAccounts) {
@@ -375,8 +376,8 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
                               selectedType === '401k' ? current.employerMatchMaxPercentOfSalary : 0,
                           }));
 
-                          setPlannerAssetFinanceDetailsByAccountId((prev: Record<string, any>) => {
-                            const next = { ...prev };
+                          setPlannerAssetFinanceDetailsByAccountId((prev) => {
+                            const next = { ...prev } as Record<string, AssetFinanceDetails>;
                             if (selectedTypeIsCombinedAsset) {
                               if (!next[account.id]) {
                                 next[account.id] = getDefaultAssetFinanceDetailsForAccount({

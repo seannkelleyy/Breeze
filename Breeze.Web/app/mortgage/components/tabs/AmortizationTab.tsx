@@ -4,7 +4,6 @@ import { ChartConfig } from '@/components/ui/chart';
 import { Label } from '@/components/ui/label';
 import { TabsContent } from '@/components/ui/tabs';
 import { Line } from 'recharts';
-import { de } from 'zod/v4/locales';
 
 interface HomeLoanContext {
   monthlyPayment: number;

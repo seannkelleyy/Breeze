@@ -38,7 +38,7 @@ const Dashboard = () => {
     getBudgetForDate(currentYear, currentMonth);
     setRegenerateMessage('');
     setConfirmRegenerate(false);
-  }, [currentMonth, currentYear]);
+  }, [currentMonth, currentYear, getBudgetForDate]);
 
   const getNextBudget = () => {
     if (currentMonth === 11) {

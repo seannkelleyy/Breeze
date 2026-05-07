@@ -14,13 +14,6 @@ interface BudgetProviderProps {
   children: React.ReactNode;
 }
 
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return 'Unknown error';
-};
-
 /**
  * BudgetDataProvider component to manage and provide budget-related data and state to the application.
  * Enables access to budget, incomes, categories, expenses, and refetch functions via context.
@@ -51,24 +44,10 @@ const BudgetDataProvider: React.FC<BudgetProviderProps> = ({ children }) => {
 
   const getBudgetForDate = useCallback(
     async (year: number, month: number) => {
-      try {
-        setBudgetDate(dayjs().year(year).month(month));
-        await refetchBudget();
-        await refetchIncomes();
-        await refetchCategories();
-        if (!budget) {
-          throw new Error('No budget found');
-        }
-        return { status: 200, budget };
-      } catch (error: unknown) {
-        console.error('An error occurred while fetching the budget:', error);
-        if (getErrorMessage(error) === 'No budget found') {
-          return { status: 404, error: 'No budget found' };
-        }
-        return { status: 500, error: 'A server error occurred' };
-      }
+      setBudgetDate(dayjs().year(year).month(month));
+      return { status: 200 };
     },
-    [budget, refetchBudget, refetchCategories, refetchIncomes],
+    [],
   );
 
   return (

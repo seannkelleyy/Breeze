@@ -33,8 +33,9 @@ export const CreateExpenseDialog = () => {
   });
 
   useEffect(() => {
-    if (budget?.id) {
-      form.setValue('categoryId', categories[0]?.id ?? 1);
+    const nextCategoryId = categories[0]?.id ?? 1;
+    if (budget?.id && form.getValues('categoryId') !== nextCategoryId) {
+      form.setValue('categoryId', nextCategoryId);
     }
   }, [form, categories, budget?.id]);
 

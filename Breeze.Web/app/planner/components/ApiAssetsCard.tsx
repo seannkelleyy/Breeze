@@ -77,8 +77,6 @@ const ApiAssetsCard = () => {
   const updateAssetMutation = useUpdateAsset({ userId: apiUserId });
   const deleteAssetMutation = useDeleteAsset({ userId: apiUserId });
 
-  const assets = assetsQuery.data ?? [];
-
   const isBusy =
     apiUserQuery.isLoading ||
     assetsQuery.isLoading ||
@@ -86,10 +84,10 @@ const ApiAssetsCard = () => {
     updateAssetMutation.isPending ||
     deleteAssetMutation.isPending;
 
-  const sortedAssets = useMemo(
-    () => [...assets].sort((a, b) => a.name.localeCompare(b.name)),
-    [assets],
-  );
+  const sortedAssets = useMemo(() => {
+    const assets = assetsQuery.data ?? [];
+    return [...assets].sort((a, b) => a.name.localeCompare(b.name));
+  }, [assetsQuery.data]);
 
   const getEditableAsset = (asset: ApiAsset): EditableAssetValues =>
     editByAssetId[asset.id] ?? {

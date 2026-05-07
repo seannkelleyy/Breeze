@@ -12,7 +12,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import dayjs from 'dayjs';
-import { ArrowUpDown, Table as LucideTable } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 
 import { useBudgetContext } from '../../providers';
 
@@ -41,17 +41,19 @@ export const ExpensesTable = () => {
   const [activeCategory, setActiveCategory] = React.useState('');
   const [nameFilter, setNameFilter] = React.useState('');
   const { categories, expenses } = useBudgetContext();
-  const recurrenceLabelByInterval: Record<string, string> = {
-    none: 'One-time',
-    weekly: 'Weekly',
-    biweekly: 'Biweekly',
-    monthly: 'Monthly',
-    quarterly: 'Quarterly',
-    yearly: 'Yearly',
-  };
 
   const columns = React.useMemo<ColumnDef<Expense>[]>(
-    () => [
+    () => {
+      const recurrenceLabelByInterval: Record<string, string> = {
+        none: 'One-time',
+        weekly: 'Weekly',
+        biweekly: 'Biweekly',
+        monthly: 'Monthly',
+        quarterly: 'Quarterly',
+        yearly: 'Yearly',
+      };
+
+      return [
       {
         accessorKey: 'name',
         header: ({ column }) => {
@@ -141,8 +143,9 @@ export const ExpensesTable = () => {
           return `${recurrenceLabelByInterval[recurrenceInterval] ?? 'Recurring'}${dueDay ? ` - day ${dueDay}` : ''}`;
         },
       },
-    ],
-    [categories, recurrenceLabelByInterval],
+    ];
+    },
+    [categories],
   );
 
   const filteredExpenses = React.useMemo(() => {

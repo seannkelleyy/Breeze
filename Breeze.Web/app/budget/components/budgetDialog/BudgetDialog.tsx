@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
@@ -25,7 +25,6 @@ import {
 import { BudgetFormData, budgetFormSchema } from '../../types/budget';
 import { useBudgetContext } from '../../providers/index';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { isMoneyGreaterThanOrEqualWithTolerance } from '@/app/planner/lib/constants';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 
@@ -168,7 +167,7 @@ export const BudgetDialog = () => {
     setOpen(false);
   };
 
-  const seedFromPreviousMonth = async (force = false) => {
+  const seedFromPreviousMonth = useCallback(async (force = false) => {
     if (!budget?.id || !budget?.date) {
       return;
     }
@@ -231,7 +230,7 @@ export const BudgetDialog = () => {
       'Auto-filled recurring incomes and last month expense categories. Save to persist.',
     );
     setIsSeeding(false);
-  };
+  }, [budget?.date, budget?.id, categories, form, getBudget, getCategories, getIncomes, incomes, userId]);
 
   const editableIncomeTotal = form
     .watch('incomes')
@@ -255,8 +254,17 @@ export const BudgetDialog = () => {
   );
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      return;
+    }
+
+    if (autoSeedMessage) {
       setAutoSeedMessage('');
+    }
+  }, [autoSeedMessage, open]);
+
+  useEffect(() => {
+    if (!open) {
       return;
     }
 
@@ -277,15 +285,15 @@ export const BudgetDialog = () => {
     }
 
     void seedFromPreviousMonth();
-  }, [open, incomes, categories, form, budget?.id, budget?.date]);
+  }, [open, incomes, categories, form, budget?.id, budget?.date, seedFromPreviousMonth]);
 
   const inputFields = (
     <>
       {(incomes ?? []).some((income) => income.sourceType === 'recurring-template') ||
       (categories ?? []).some((category) => category.sourceType === 'recurring-template') ? (
         <div className="border-primary/30 bg-primary/5 text-foreground/90 rounded-lg border px-3 py-2 text-sm">
-          Some rows are generated from recurring templates and are managed in "Manage Recurring
-          Templates".
+          Some rows are generated from recurring templates and are managed in &quot;Manage Recurring
+          Templates&quot;.
         </div>
       ) : null}
       <div className="bg-muted/20 flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">

@@ -95,7 +95,6 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const { user, isLoaded, isSignedIn } = useUser();
   const { getOne, put } = useHttp();
   const loadedPreferencesForUserRef = useRef<string | null>(null);
-  const hasResetSignedOutDefaultsRef = useRef(false);
   const [currencyCode, setCurrencyCode] = useState('USD');
   const [returnDisplayMode, setReturnDisplayMode] = useState<'real' | 'nominal'>(
     PLANNER_DEFAULT_RETURN_DISPLAY_MODE,
@@ -125,6 +124,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   );
   const [plannerAssetFinanceDetailsByAccountId, setPlannerAssetFinanceDetailsByAccountId] =
     useState<Record<string, AssetFinanceDetails>>({});
+  const providerKey = isSignedIn ? user?.id ?? 'signed-in' : 'signed-out';
 
   const persistPreferences = useCallback(
     async (
@@ -209,28 +209,8 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     }
 
     if (!isSignedIn) {
-      if (hasResetSignedOutDefaultsRef.current) {
-        return;
-      }
-
-      hasResetSignedOutDefaultsRef.current = true;
-      loadedPreferencesForUserRef.current = null;
-      setCurrencyCode('USD');
-      setReturnDisplayMode(PLANNER_DEFAULT_RETURN_DISPLAY_MODE);
-      setInflationRate(PLANNER_DEFAULT_INFLATION_RATE);
-      setSafeWithdrawalRate(PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE);
-      setPlannerDesiredInvestmentAmount(PLANNER_DEFAULT_DESIRED_INVESTMENT_AMOUNT);
-      setPlannerMonthlyExpenses(PLANNER_DEFAULT_MONTHLY_EXPENSES);
-      setPlannerRetirementMethod(PLANNER_DEFAULT_RETIREMENT_METHOD);
-      setPlannerFireLifestyleIndex(PLANNER_DEFAULT_FIRE_LIFESTYLE_INDEX);
-      setPlannerSummary(null);
-      setPlannerPeople(createDefaultPlannerPeople());
-      setPlannerAccounts(createDefaultPlannerAccounts());
-      setPlannerAssetFinanceDetailsByAccountId({});
       return;
     }
-
-    hasResetSignedOutDefaultsRef.current = false;
 
     const userId = user?.id ?? '';
     if (!userId) {
@@ -337,7 +317,11 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     ],
   );
 
-  return <CurrentUserContext.Provider value={value}>{children}</CurrentUserContext.Provider>;
+  return (
+    <CurrentUserContext.Provider key={providerKey} value={value}>
+      {children}
+    </CurrentUserContext.Provider>
+  );
 };
 
 // Custom hook for consuming the CurrentUserContext

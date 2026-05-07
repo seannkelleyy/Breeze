@@ -91,7 +91,7 @@ const BreezeLineChart = <TData extends Record<string, unknown>>({
             <ChartTooltipContent
               formatter={
                 tooltipFormatter
-                  ? (value: any, name: any, item: unknown) =>
+                  ? (value: unknown, name: unknown, item: unknown) =>
                       tooltipFormatter(Number(value), String(name ?? ''), item)
                   : undefined
               }

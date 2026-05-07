@@ -1,5 +1,5 @@
 'use client';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -32,7 +32,8 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
   const bonusModeOptions = plannerConstants.PLANNER_BONUS_MODE_OPTIONS;
   const targetAge = plannerSummary?.targetAge ?? currentAge;
   const [activePersonIndex, setActivePersonIndex] = useState(0);
-  const activePerson = people[activePersonIndex];
+  const safeActivePersonIndex = people.length === 0 ? 0 : Math.min(activePersonIndex, people.length - 1);
+  const activePerson = people[safeActivePersonIndex];
   const activePersonLabel = useMemo(() => {
     if (!activePerson) {
       return 'Person';
@@ -40,17 +41,6 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
 
     return activePerson.type === 'self' ? 'Self' : 'Spouse';
   }, [activePerson]);
-
-  useEffect(() => {
-    if (people.length === 0) {
-      setActivePersonIndex(0);
-      return;
-    }
-
-    if (activePersonIndex > people.length - 1) {
-      setActivePersonIndex(people.length - 1);
-    }
-  }, [activePersonIndex, people.length]);
 
   const showPreviousPerson = () => {
     if (people.length <= 1) {
@@ -85,7 +75,7 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
             <div>
               <p className="text-sm font-medium">{activePersonLabel}</p>
               <p className="text-muted-foreground text-xs">
-                Person {Math.min(activePersonIndex + 1, people.length)} of {people.length}
+                Person {Math.min(safeActivePersonIndex + 1, people.length)} of {people.length}
               </p>
             </div>
             <div className="flex items-center gap-2">

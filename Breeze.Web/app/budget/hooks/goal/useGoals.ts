@@ -1,22 +1,64 @@
-import useHttp from '@/lib/services/useHttp';
+import { CREATE_GOAL, DELETE_GOAL, GET_GOALS, UPDATE_GOAL } from '@/lib/services/queries/budget';
+import useGraphql from '@/lib/services/useGraphql';
+import { useCallback } from 'react';
 import { Goal } from '../../types/goal';
 
 /**
- * A hook for fetching goal data. This should only be used when creating new hooks with ReactQuery.
+ * A hook for fetching goal data via GraphQL. This should only be used when creating new hooks with ReactQuery.
  */
 const useGoals = () => {
-  const { getMany, post, patch, deleteOne } = useHttp();
+  const { request } = useGraphql();
 
-  const getGoals = async (userId: string): Promise<Goal[]> =>
-    await getMany<Goal>(`users/${userId}/goals`);
+  const getGoals = useCallback(
+    async (userId: string): Promise<Goal[]> => {
+      const resp = await request<{ goals: Goal[] }>(GET_GOALS, { userId } as unknown as Record<
+        string,
+        unknown
+      >);
+      return resp?.goals ?? [];
+    },
+    [request],
+  );
 
-  const postGoal = async (goal: Goal): Promise<number> =>
-    post<number, Goal>(`users/${goal.userId}/goals`, goal);
+  const postGoal = useCallback(
+    async (goal: Goal): Promise<string> => {
+      const input = {
+        userId: goal.userId,
+        description: goal.description,
+        isCompleted: goal.isCompleted ?? false,
+      };
+      const resp = await request<{ createGoal: { id: string } }>(CREATE_GOAL, {
+        input,
+      } as unknown as Record<string, unknown>);
+      return resp.createGoal.id;
+    },
+    [request],
+  );
 
-  const patchGoal = async (goal: Goal): Promise<number> =>
-    patch<number, Goal>(`users/${goal.userId}/goals`, goal);
+  const patchGoal = useCallback(
+    async (goal: Goal): Promise<string> => {
+      const input = {
+        id: goal.id,
+        description: goal.description,
+        isCompleted: goal.isCompleted,
+      };
+      const resp = await request<{ updateGoal: { id: string } }>(UPDATE_GOAL, {
+        input,
+      } as unknown as Record<string, unknown>);
+      return resp.updateGoal.id;
+    },
+    [request],
+  );
 
-  const deleteGoal = async (goal: Goal) => deleteOne<Goal>(`users/${goal.userId}/goals/${goal.id}`);
+  const deleteGoal = useCallback(
+    async (goal: Goal) => {
+      await request<{ deleteGoal: boolean }>(DELETE_GOAL, { id: goal.id } as unknown as Record<
+        string,
+        unknown
+      >);
+    },
+    [request],
+  );
 
   return { getGoals, postGoal, patchGoal, deleteGoal };
 };

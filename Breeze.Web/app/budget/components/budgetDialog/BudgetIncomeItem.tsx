@@ -25,7 +25,10 @@ export function BudgetIncomeItem({ index, form, deleteIncome }: BudgetIncomeItem
   const recurrenceInterval = form.watch(`incomes.${index}.recurrenceInterval`) ?? 'none';
 
   useEffect(() => {
-    if (!['monthly', 'quarterly', 'yearly'].includes(recurrenceInterval)) {
+    if (
+      !['monthly', 'quarterly', 'yearly'].includes(recurrenceInterval) &&
+      form.getValues(`incomes.${index}.paydayDayOfMonth`) !== null
+    ) {
       form.setValue(`incomes.${index}.paydayDayOfMonth`, null, {
         shouldValidate: true,
       });

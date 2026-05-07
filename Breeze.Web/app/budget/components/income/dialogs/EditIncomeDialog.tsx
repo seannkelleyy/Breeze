@@ -40,7 +40,10 @@ export const EditIncomeDialog = ({ existingIncome, children }: EditIncomeDialogP
   const recurrenceInterval = form.watch('recurrenceInterval') ?? 'none';
 
   useEffect(() => {
-    if (!['monthly', 'quarterly', 'yearly'].includes(recurrenceInterval)) {
+    if (
+      !['monthly', 'quarterly', 'yearly'].includes(recurrenceInterval) &&
+      form.getValues('paydayDayOfMonth') !== null
+    ) {
       form.setValue('paydayDayOfMonth', null, { shouldValidate: true });
     }
   }, [form, recurrenceInterval]);

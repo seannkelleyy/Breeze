@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { useBudgetContext } from '../../providers';
 import { BreezeDialog } from '../../../../components/common/dialog/BreezeDialog';
@@ -107,7 +107,7 @@ export const RecurringTemplatesDialog = () => {
   const [incomeTemplates, setIncomeTemplates] = useState<RecurringIncomeTemplate[]>([]);
   const [categoryTemplates, setCategoryTemplates] = useState<RecurringCategoryTemplate[]>([]);
 
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -122,14 +122,14 @@ export const RecurringTemplatesDialog = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getRecurringCategoryTemplates, getRecurringIncomeTemplates]);
 
   useEffect(() => {
     if (open) {
       setAttemptedSave(false);
       void loadTemplates();
     }
-  }, [open]);
+  }, [open, loadTemplates]);
 
   const refreshBudgetViews = async () => {
     await Promise.all([refetchBudget(), refetchIncomes(), refetchCategories()]);
@@ -286,7 +286,7 @@ export const RecurringTemplatesDialog = () => {
                       <label className="text-muted-foreground text-sm">Name</label>
                       <Input
                         value={template.name}
-                        onChange={(e: { target: { value: any } }) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setIncomeTemplates((curr) =>
                             curr.map((item, i) =>
                               i === index ? { ...item, name: e.target.value } : item,
@@ -305,7 +305,7 @@ export const RecurringTemplatesDialog = () => {
                       <Input
                         type="number"
                         value={template.amount}
-                        onChange={(e: { target: { value: any } }) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setIncomeTemplates((curr) =>
                             curr.map((item, i) =>
                               i === index
@@ -378,7 +378,7 @@ export const RecurringTemplatesDialog = () => {
                       <Input
                         type="date"
                         value={template.anchorDate}
-                        onChange={(e: { target: { value: any } }) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setIncomeTemplates((curr) =>
                             curr.map((item, i) =>
                               i === index ? { ...item, anchorDate: e.target.value } : item,
@@ -392,7 +392,7 @@ export const RecurringTemplatesDialog = () => {
                       <Input
                         type="date"
                         value={template.startDate}
-                        onChange={(e: { target: { value: any } }) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setIncomeTemplates((curr) =>
                             curr.map((item, i) =>
                               i === index ? { ...item, startDate: e.target.value } : item,
@@ -406,7 +406,7 @@ export const RecurringTemplatesDialog = () => {
                       <Input
                         type="date"
                         value={template.stopDate ?? ''}
-                        onChange={(e: { target: { value: any } }) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setIncomeTemplates((curr) =>
                             curr.map((item, i) =>
                               i === index ? { ...item, stopDate: e.target.value || null } : item,
@@ -425,7 +425,7 @@ export const RecurringTemplatesDialog = () => {
                         <Input
                           type="number"
                           value={template.monthlyDayOfMonth ?? ''}
-                          onChange={(e: { target: { value: any } }) =>
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             setIncomeTemplates((curr) =>
                               curr.map((item, i) =>
                                 i === index
@@ -447,7 +447,7 @@ export const RecurringTemplatesDialog = () => {
                           <Input
                             type="number"
                             value={template.semiMonthlyDay1 ?? ''}
-                            onChange={(e: { target: { value: any } }) =>
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               setIncomeTemplates((curr) =>
                                 curr.map((item, i) =>
                                   i === index
@@ -469,7 +469,7 @@ export const RecurringTemplatesDialog = () => {
                           <Input
                             type="number"
                             value={template.semiMonthlyDay2 ?? ''}
-                            onChange={(e: { target: { value: any } }) =>
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               setIncomeTemplates((curr) =>
                                 curr.map((item, i) =>
                                   i === index
@@ -563,7 +563,7 @@ export const RecurringTemplatesDialog = () => {
                       <label className="text-muted-foreground text-sm">Name</label>
                       <Input
                         value={template.name}
-                        onChange={(e: { target: { value: any } }) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setCategoryTemplates((curr) =>
                             curr.map((item, i) =>
                               i === index ? { ...item, name: e.target.value } : item,
@@ -582,7 +582,7 @@ export const RecurringTemplatesDialog = () => {
                       <Input
                         type="number"
                         value={template.allocation}
-                        onChange={(e: { target: { value: any } }) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setCategoryTemplates((curr) =>
                             curr.map((item, i) =>
                               i === index
@@ -605,7 +605,7 @@ export const RecurringTemplatesDialog = () => {
                       <Input
                         type="date"
                         value={template.startDate}
-                        onChange={(e: { target: { value: any } }) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setCategoryTemplates((curr) =>
                             curr.map((item, i) =>
                               i === index ? { ...item, startDate: e.target.value } : item,
@@ -619,7 +619,7 @@ export const RecurringTemplatesDialog = () => {
                       <Input
                         type="date"
                         value={template.stopDate ?? ''}
-                        onChange={(e: { target: { value: any } }) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setCategoryTemplates((curr) =>
                             curr.map((item, i) =>
                               i === index ? { ...item, stopDate: e.target.value || null } : item,

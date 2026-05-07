@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig } from '@/components/ui/chart';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import AmortizationTab from './tabs/AmortizationTab';
 import LoanCompareTab from './tabs/LoanCompareTab';
 import RefinanceTab from './tabs/RefinanceTab';
@@ -203,24 +203,16 @@ export const PlannerToolsCard = ({
   homeLoan,
 }: PlannerToolsCardProps) => {
   const [selectedTool, setSelectedTool] = useState('loan-compare');
-  const [refiRate, setRefiRate] = useState(6);
-  const [refiTermYears, setRefiTermYears] = useState(30);
+  const [refiRate, setRefiRate] = useState(0);
+  const [refiTermYears, setRefiTermYears] = useState(0);
   const [refiClosingCosts, setRefiClosingCosts] = useState(4500);
   const [refiCashOut, setRefiCashOut] = useState(0);
   const [refiDiscountRate, setRefiDiscountRate] = useState(5);
   const [extraMonthly, setExtraMonthly] = useState(200);
   const [extraOneTime, setExtraOneTime] = useState(0);
   const [ratioChartDisplayMode, setRatioChartDisplayMode] = useState<RatioChartDisplayMode>('both');
-
-  useEffect(() => {
-    if (!homeLoan) {
-      return;
-    }
-    setRefiRate((current) => (current > 0 ? current : homeLoan.interestRate));
-    setRefiTermYears((current) =>
-      current > 0 ? current : Math.max(1, Math.round(homeLoan.remainingMonths / 12)),
-    );
-  }, [homeLoan]);
+  const effectiveRefiRate = refiRate > 0 ? refiRate : homeLoan?.interestRate ?? 0;
+  const effectiveRefiTermYears = refiTermYears > 0 ? refiTermYears : Math.max(1, Math.round((homeLoan?.remainingMonths ?? 12) / 12));
 
   const baseLoanSummary = useMemo(() => {
     if (!homeLoan) {
@@ -322,12 +314,12 @@ export const PlannerToolsCard = ({
       homeLoan.currentBalance + clamp(refiClosingCosts) + clamp(refiCashOut);
     const refinancePayment = calculateMonthlyPayment(
       refinancePrincipal,
-      refiRate,
-      Math.max(1, refiTermYears) * 12,
+      effectiveRefiRate,
+      Math.max(1, effectiveRefiTermYears) * 12,
     );
     const refinanceLoanSummary = buildAmortization(
       refinancePrincipal,
-      refiRate,
+      effectiveRefiRate,
       refinancePayment,
       new Date(),
     );
@@ -431,8 +423,8 @@ export const PlannerToolsCard = ({
     baseLoanSummary,
     refiClosingCosts,
     refiCashOut,
-    refiRate,
-    refiTermYears,
+    effectiveRefiRate,
+    effectiveRefiTermYears,
     refiDiscountRate,
   ]);
 
@@ -604,8 +596,8 @@ export const PlannerToolsCard = ({
                 refinanceSummary,
               }}
               state={{
-                refiRate,
-                refiTermYears,
+                refiRate: effectiveRefiRate,
+                refiTermYears: effectiveRefiTermYears,
                 refiClosingCosts,
                 refiCashOut,
                 refiDiscountRate,

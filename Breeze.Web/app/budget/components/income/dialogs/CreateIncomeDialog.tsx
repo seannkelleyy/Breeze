@@ -32,7 +32,7 @@ export const CreateIncomeDialog = () => {
   });
 
   useEffect(() => {
-    if (budget?.id) {
+    if (budget?.id && form.getValues('budgetId') !== budget.id) {
       form.setValue('budgetId', budget.id);
     }
   }, [form, budget?.id]);
