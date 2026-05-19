@@ -13,22 +13,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 
-const today = new Date().toISOString().split('T')[0];
-
-const defaultIncomeTemplate = (): RecurringIncomeTemplate => ({
+const defaultIncomeTemplate = (
+  today: string,
+): Omit<RecurringIncomeTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'> => ({
   name: '',
-  amount: 0,
-  scheduleType: 'biweekly',
-  anchorDate: today,
-  semiMonthlyDay1: 1,
-  semiMonthlyDay2: 15,
-  monthlyDayOfMonth: 1,
+  amount: '0',
+  recurrenceInterval: 'BIWEEKLY',
+  paydayDayOfMonth: undefined,
   startDate: today,
-  stopDate: null,
-  isActive: true,
+  endDate: null,
 });
 
-const defaultCategoryTemplate = (): RecurringCategoryTemplate => ({
+const defaultCategoryTemplate = (today: string): RecurringCategoryTemplate => ({
   name: '',
   allocation: 0,
   startDate: today,
@@ -37,17 +33,17 @@ const defaultCategoryTemplate = (): RecurringCategoryTemplate => ({
 });
 
 const scheduleLabel: Record<ScheduleType, string> = {
-  weekly: 'Weekly',
-  biweekly: 'Biweekly',
-  semimonthly: 'Semi-Monthly',
-  monthly: 'Monthly',
+  WEEKLY: 'Weekly',
+  BIWEEKLY: 'Biweekly',
+  MONTHLY: 'Monthly',
+  QUARTERLY: 'Quarterly',
+  YEARLY: 'Yearly',
 };
 
 interface IncomeTemplateErrors {
   name?: string;
   amount?: string;
-  stopDate?: string;
-  semiMonthlyDays?: string;
+  endDate?: string;
 }
 
 interface CategoryTemplateErrors {
@@ -56,21 +52,17 @@ interface CategoryTemplateErrors {
   stopDate?: string;
 }
 
-const validateIncomeTemplate = (template: RecurringIncomeTemplate): IncomeTemplateErrors => {
+const validateIncomeTemplate = (
+  template:
+    | RecurringIncomeTemplate
+    | Omit<RecurringIncomeTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+): IncomeTemplateErrors => {
   const errors: IncomeTemplateErrors = {};
   if (!template.name.trim()) errors.name = 'Name is required.';
-  if (template.amount <= 0) errors.amount = 'Amount must be greater than 0.';
-  if (template.stopDate && template.startDate && template.stopDate < template.startDate) {
-    errors.stopDate = 'Stop date must be on or after start date.';
-  }
-  if (template.scheduleType === 'semimonthly') {
-    const d1 = template.semiMonthlyDay1 ?? 0;
-    const d2 = template.semiMonthlyDay2 ?? 0;
-    if (!d1 || !d2 || d1 < 1 || d1 > 31 || d2 < 1 || d2 > 31) {
-      errors.semiMonthlyDays = 'Both Day 1 and Day 2 are required for semi-monthly (1–31).';
-    } else if (d1 >= d2) {
-      errors.semiMonthlyDays = 'Day 1 must be earlier in the month than Day 2.';
-    }
+  const amountNum = parseFloat(template.amount);
+  if (isNaN(amountNum) || amountNum <= 0) errors.amount = 'Amount must be greater than 0.';
+  if (template.endDate && template.startDate && template.endDate < template.startDate) {
+    errors.endDate = 'End date must be on or after start date.';
   }
   return errors;
 };
@@ -103,8 +95,14 @@ export const RecurringTemplatesDialog = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [attemptedSave, setAttemptedSave] = useState(false);
+  const [today] = useState(() => new Date().toISOString().split('T')[0]);
 
-  const [incomeTemplates, setIncomeTemplates] = useState<RecurringIncomeTemplate[]>([]);
+  const [incomeTemplates, setIncomeTemplates] = useState<
+    (
+      | RecurringIncomeTemplate
+      | Omit<RecurringIncomeTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+    )[]
+  >([]);
   const [categoryTemplates, setCategoryTemplates] = useState<RecurringCategoryTemplate[]>([]);
 
   const loadTemplates = useCallback(async () => {
@@ -135,8 +133,14 @@ export const RecurringTemplatesDialog = () => {
     await Promise.all([refetchBudget(), refetchIncomes(), refetchCategories()]);
   };
 
-  const handleDeleteIncomeTemplate = async (template: RecurringIncomeTemplate, index: number) => {
-    if (!template.id) {
+  const handleDeleteIncomeTemplate = async (
+    template:
+      | RecurringIncomeTemplate
+      | Omit<RecurringIncomeTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+    index: number,
+  ) => {
+    const templateId = 'id' in template ? template.id : null;
+    if (!templateId) {
       setIncomeTemplates((current) => current.filter((_, i) => i !== index));
       return;
     }
@@ -144,7 +148,7 @@ export const RecurringTemplatesDialog = () => {
     setSaving(true);
     setError('');
     try {
-      await deleteRecurringIncomeTemplate(template.id);
+      await deleteRecurringIncomeTemplate(templateId);
       setIncomeTemplates((current) => current.filter((_, i) => i !== index));
       await refreshBudgetViews();
     } catch {
@@ -196,9 +200,14 @@ export const RecurringTemplatesDialog = () => {
     try {
       await Promise.all([
         ...incomeTemplates.map((template) =>
-          template.id
-            ? patchRecurringIncomeTemplate(template)
-            : postRecurringIncomeTemplate(template),
+          'id' in template && template.id
+            ? patchRecurringIncomeTemplate(template as RecurringIncomeTemplate)
+            : postRecurringIncomeTemplate(
+                template as Omit<
+                  RecurringIncomeTemplate,
+                  'id' | 'userId' | 'createdAt' | 'updatedAt'
+                >,
+              ),
         ),
         ...categoryTemplates.map((template) =>
           template.id
@@ -248,7 +257,7 @@ export const RecurringTemplatesDialog = () => {
               variant="secondary"
               onClick={() => {
                 setAttemptedSave(false);
-                setIncomeTemplates((curr) => [...curr, defaultIncomeTemplate()]);
+                setIncomeTemplates((curr) => [...curr, defaultIncomeTemplate(today)]);
               }}
             >
               Add Recurring Income
@@ -261,15 +270,11 @@ export const RecurringTemplatesDialog = () => {
             ) : null}
             {incomeTemplates.map((template, index) => {
               const errors = validateIncomeTemplate(template);
+              const templateId =
+                'id' in template && template.id ? template.id : `new-income-${index}`;
               return (
-                <div
-                  key={template.id ?? `new-income-${index}`}
-                  className="bg-background/80 rounded-lg border p-4"
-                >
+                <div key={templateId} className="bg-background/80 rounded-lg border p-4">
                   <div className="mb-3 flex items-center justify-between gap-2">
-                    <Badge variant={template.isActive ? 'secondary' : 'outline'}>
-                      {template.isActive ? 'Active' : 'Paused'}
-                    </Badge>
                     <Button
                       size="sm"
                       type="button"
@@ -311,7 +316,7 @@ export const RecurringTemplatesDialog = () => {
                               i === index
                                 ? {
                                     ...item,
-                                    amount: Number(e.target.value || 0),
+                                    amount: e.target.value || '0',
                                   }
                                 : item,
                             ),
@@ -327,14 +332,14 @@ export const RecurringTemplatesDialog = () => {
                       <label className="text-muted-foreground text-sm">Schedule</label>
                       <select
                         className="bg-background h-10 w-full rounded-md border px-3 text-sm"
-                        value={template.scheduleType}
+                        value={template.recurrenceInterval}
                         onChange={(e) =>
                           setIncomeTemplates((curr) =>
                             curr.map((item, i) =>
                               i === index
                                 ? {
                                     ...item,
-                                    scheduleType: e.target.value as ScheduleType,
+                                    recurrenceInterval: e.target.value as ScheduleType,
                                   }
                                 : item,
                             ),
@@ -348,45 +353,9 @@ export const RecurringTemplatesDialog = () => {
                         ))}
                       </select>
                     </div>
-                    <div>
-                      <label className="text-muted-foreground text-sm">Status</label>
-                      <select
-                        className="bg-background h-10 w-full rounded-md border px-3 text-sm"
-                        value={template.isActive ? 'active' : 'paused'}
-                        onChange={(e) =>
-                          setIncomeTemplates((curr) =>
-                            curr.map((item, i) =>
-                              i === index
-                                ? {
-                                    ...item,
-                                    isActive: e.target.value === 'active',
-                                  }
-                                : item,
-                            ),
-                          )
-                        }
-                      >
-                        <option value="active">Active</option>
-                        <option value="paused">Paused</option>
-                      </select>
-                    </div>
                   </div>
 
                   <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-5">
-                    <div>
-                      <label className="text-muted-foreground text-sm">Anchor Date</label>
-                      <Input
-                        type="date"
-                        value={template.anchorDate}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setIncomeTemplates((curr) =>
-                            curr.map((item, i) =>
-                              i === index ? { ...item, anchorDate: e.target.value } : item,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
                     <div>
                       <label className="text-muted-foreground text-sm">Start</label>
                       <Input
@@ -402,36 +371,36 @@ export const RecurringTemplatesDialog = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-muted-foreground text-sm">Stop (optional)</label>
+                      <label className="text-muted-foreground text-sm">End (optional)</label>
                       <Input
                         type="date"
-                        value={template.stopDate ?? ''}
+                        value={template.endDate ?? ''}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setIncomeTemplates((curr) =>
                             curr.map((item, i) =>
-                              i === index ? { ...item, stopDate: e.target.value || null } : item,
+                              i === index ? { ...item, endDate: e.target.value || null } : item,
                             ),
                           )
                         }
-                        className={attemptedSave && errors.stopDate ? 'border-destructive' : ''}
+                        className={attemptedSave && errors.endDate ? 'border-destructive' : ''}
                       />
-                      {attemptedSave && errors.stopDate ? (
-                        <p className="text-destructive mt-1 text-xs">{errors.stopDate}</p>
+                      {attemptedSave && errors.endDate ? (
+                        <p className="text-destructive mt-1 text-xs">{errors.endDate}</p>
                       ) : null}
                     </div>
-                    {template.scheduleType === 'monthly' ? (
+                    {template.recurrenceInterval === 'MONTHLY' ? (
                       <div>
-                        <label className="text-muted-foreground text-sm">Monthly Day</label>
+                        <label className="text-muted-foreground text-sm">Day of Month</label>
                         <Input
                           type="number"
-                          value={template.monthlyDayOfMonth ?? ''}
+                          value={template.paydayDayOfMonth ?? ''}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             setIncomeTemplates((curr) =>
                               curr.map((item, i) =>
                                 i === index
                                   ? {
                                       ...item,
-                                      monthlyDayOfMonth: Number(e.target.value || 1),
+                                      paydayDayOfMonth: Number(e.target.value || 1),
                                     }
                                   : item,
                               ),
@@ -439,59 +408,6 @@ export const RecurringTemplatesDialog = () => {
                           }
                         />
                       </div>
-                    ) : null}
-                    {template.scheduleType === 'semimonthly' ? (
-                      <>
-                        <div>
-                          <label className="text-muted-foreground text-sm">Day 1</label>
-                          <Input
-                            type="number"
-                            value={template.semiMonthlyDay1 ?? ''}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                              setIncomeTemplates((curr) =>
-                                curr.map((item, i) =>
-                                  i === index
-                                    ? {
-                                        ...item,
-                                        semiMonthlyDay1: Number(e.target.value || 1),
-                                      }
-                                    : item,
-                                ),
-                              )
-                            }
-                            className={
-                              attemptedSave && errors.semiMonthlyDays ? 'border-destructive' : ''
-                            }
-                          />
-                        </div>
-                        <div>
-                          <label className="text-muted-foreground text-sm">Day 2</label>
-                          <Input
-                            type="number"
-                            value={template.semiMonthlyDay2 ?? ''}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                              setIncomeTemplates((curr) =>
-                                curr.map((item, i) =>
-                                  i === index
-                                    ? {
-                                        ...item,
-                                        semiMonthlyDay2: Number(e.target.value || 15),
-                                      }
-                                    : item,
-                                ),
-                              )
-                            }
-                            className={
-                              attemptedSave && errors.semiMonthlyDays ? 'border-destructive' : ''
-                            }
-                          />
-                          {attemptedSave && errors.semiMonthlyDays ? (
-                            <p className="text-destructive mt-1 text-xs">
-                              {errors.semiMonthlyDays}
-                            </p>
-                          ) : null}
-                        </div>
-                      </>
                     ) : null}
                   </div>
                 </div>
@@ -503,7 +419,7 @@ export const RecurringTemplatesDialog = () => {
                 variant="outline"
                 onClick={() => {
                   setAttemptedSave(false);
-                  setIncomeTemplates((curr) => [...curr, defaultIncomeTemplate()]);
+                  setIncomeTemplates((curr) => [...curr, defaultIncomeTemplate(today)]);
                 }}
               >
                 Add Recurring Income
@@ -525,7 +441,7 @@ export const RecurringTemplatesDialog = () => {
               variant="secondary"
               onClick={() => {
                 setAttemptedSave(false);
-                setCategoryTemplates((curr) => [...curr, defaultCategoryTemplate()]);
+                setCategoryTemplates((curr) => [...curr, defaultCategoryTemplate(today)]);
               }}
             >
               Add Recurring Category
@@ -642,7 +558,7 @@ export const RecurringTemplatesDialog = () => {
                 variant="outline"
                 onClick={() => {
                   setAttemptedSave(false);
-                  setCategoryTemplates((curr) => [...curr, defaultCategoryTemplate()]);
+                  setCategoryTemplates((curr) => [...curr, defaultCategoryTemplate(today)]);
                 }}
               >
                 Add Recurring Category

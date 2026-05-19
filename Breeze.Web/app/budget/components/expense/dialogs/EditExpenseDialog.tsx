@@ -1,13 +1,13 @@
 'use client';
+
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
 import { useBudgetContext } from '../../../providers';
 import { BreezeFormDialog } from '../../../../../components/common/form/BreezeFormDialog';
 import { FormInputField } from '../../../../../components/common/form/FormInputField';
-import { FormSelectField } from '../../../../../components/common/form/FormSelectField';
 import { useDeleteExpense, usePatchExpense } from '@/app/budget/hooks/expense/index';
-import { Expense, expenseFormSchema } from '@/app/budget/types/expense';
-import { useForm } from 'react-hook-form';
+import { Expense, ExpenseFormData, expenseFormSchema } from '@/app/budget/types/expense';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import DeleteDialog from '@/components/common/dialog/DeleteDialog';
 
@@ -24,24 +24,25 @@ type EditExpenseDialogProps = {
  */
 export const EditExpenseDialog = ({ existingExpense, children }: EditExpenseDialogProps) => {
   const { userId } = useCurrentUser();
-  const { budget, categories, refetchBudget, refetchCategories, refetchExpenses } =
-    useBudgetContext();
+  const { budget, refetchBudget, refetchExpenses } = useBudgetContext();
 
-  const form = useForm<Expense>({
+  const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: {
-      ...existingExpense,
-      recurrenceInterval: existingExpense.recurrenceInterval ?? 'none',
-      dueDayOfMonth: existingExpense.dueDayOfMonth ?? new Date(existingExpense.date).getDate(),
+      amount: existingExpense.amount,
+      date: existingExpense.date,
+      description: existingExpense.description,
+      splits: existingExpense.splits.map((s) => ({
+        categoryId: s.categoryId,
+        amount: s.amount,
+        description: s.description,
+      })),
     },
   });
-
-  const recurrenceInterval = form.watch('recurrenceInterval') ?? 'none';
 
   const patchMutation = usePatchExpense({
     onSettled: () => {
       refetchBudget();
-      refetchCategories();
       refetchExpenses();
     },
   });
@@ -49,26 +50,27 @@ export const EditExpenseDialog = ({ existingExpense, children }: EditExpenseDial
   const deleteMutation = useDeleteExpense({
     onSettled: () => {
       refetchBudget();
-      refetchCategories();
       refetchExpenses();
     },
   });
 
-  const onSubmit = (values: Expense) => {
+  const onSubmit = (values: ExpenseFormData) => {
     if (!userId || !budget?.id) return;
 
+    const expense: Expense = {
+      ...existingExpense,
+      amount: values.amount,
+      date: values.date,
+      description: values.description,
+      splits: values.splits.map((s) => ({
+        categoryId: s.categoryId,
+        amount: s.amount,
+        description: s.description,
+      })),
+    };
+
     patchMutation.mutate({
-      budgetId: budget.id,
-      expense: {
-        ...values,
-        id: existingExpense.id,
-        userId,
-        recurrenceInterval: values.recurrenceInterval,
-        dueDayOfMonth:
-          values.recurrenceInterval === 'none'
-            ? null
-            : (values.dueDayOfMonth ?? new Date(values.date).getDate()),
-      },
+      expense,
     });
   };
 
@@ -76,43 +78,13 @@ export const EditExpenseDialog = ({ existingExpense, children }: EditExpenseDial
 
   const inputFields = (
     <>
-      <FormInputField form={form} name="name" label="Name" placeholder="e.g., Groceries" />
-      <FormSelectField
+      <FormInputField
         form={form}
-        name="categoryId"
-        label="Category"
-        placeholder="Select a category"
-        options={
-          categories.map((c) => ({
-            value: String(c.id),
-            label: c.name,
-          })) ?? []
-        }
+        name="description"
+        label="Description"
+        placeholder="e.g., Groceries"
       />
       <FormInputField form={form} name="amount" label="Amount" type="number" placeholder="0.00" />
-      <FormSelectField
-        form={form}
-        name="recurrenceInterval"
-        label="Schedule"
-        parseAsNumber={false}
-        options={[
-          { value: 'none', label: 'One-time expense' },
-          { value: 'weekly', label: 'Weekly' },
-          { value: 'biweekly', label: 'Biweekly' },
-          { value: 'monthly', label: 'Monthly' },
-          { value: 'quarterly', label: 'Quarterly' },
-          { value: 'yearly', label: 'Yearly' },
-        ]}
-      />
-      {recurrenceInterval !== 'none' ? (
-        <FormInputField
-          form={form}
-          name="dueDayOfMonth"
-          label="Due Day (Day of Month)"
-          type="number"
-          placeholder="1-31"
-        />
-      ) : null}
       <FormInputField form={form} name="date" label="Date" type="date" placeholder="YYYY-MM-DD" />
     </>
   );
@@ -131,12 +103,11 @@ export const EditExpenseDialog = ({ existingExpense, children }: EditExpenseDial
           key={existingExpense.id}
           onDelete={() =>
             deleteMutation.mutate({
-              budgetId: budget.id,
               expense: existingExpense,
             })
           }
           itemType="Expense"
-          additionalText={`You are about to delete the expense: ${existingExpense.name}`}
+          additionalText={`You are about to delete the expense: ${existingExpense.description}`}
         />
       }
     />

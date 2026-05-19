@@ -38,17 +38,14 @@ const BudgetDataProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   });
 
   const totalSpent = useMemo(
-    () => categories.reduce((sum, category) => sum + category.currentSpend, 0),
+    () => categories.reduce((sum, category) => sum + (Number(category.currentSpend) || 0), 0),
     [categories],
   );
 
-  const getBudgetForDate = useCallback(
-    async (year: number, month: number) => {
-      setBudgetDate(dayjs().year(year).month(month));
-      return { status: 200 };
-    },
-    [],
-  );
+  const getBudgetForDate = useCallback(async (year: number, month: number) => {
+    setBudgetDate(dayjs().year(year).month(month));
+    return { status: 200 };
+  }, []);
 
   return (
     <BudgetContext.Provider

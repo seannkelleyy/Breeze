@@ -9,7 +9,6 @@ import { useBudgetContext } from './providers/index';
 import { useRegenerateBudget } from './hooks/budget/index';
 import { Button } from '@/components/ui/button';
 import {
-  BudgetDialog,
   CreateExpenseDialog,
   CreateIncomeDialog,
   ExpensesTable,
@@ -58,7 +57,8 @@ const Dashboard = () => {
     }
   };
 
-  const budgetDifference = (budget?.monthlyIncome ?? 0) - (budget?.monthlyExpenses ?? 0);
+  const budgetDifference =
+    (Number(budget?.monthlyIncome) ?? 0) - (Number(budget?.monthlyExpenses) ?? 0);
   const isBudgetDifferencePositive = isMoneyGreaterThanOrEqualWithTolerance(budgetDifference, 0);
 
   const handleRegenerate = async () => {
@@ -115,7 +115,6 @@ const Dashboard = () => {
         <CreateIncomeDialog />
         <CreateExpenseDialog />
         <RecurringTemplatesDialog />
-        <BudgetDialog />
       </div>
       {confirmRegenerate ? (
         <div className="flex w-full flex-col items-center gap-3 rounded-lg border border-orange-300 bg-orange-50 px-4 py-3 text-sm sm:flex-row dark:border-orange-700 dark:bg-orange-950/30">

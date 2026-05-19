@@ -1,27 +1,48 @@
-import z from 'zod'
+import z from 'zod';
+
+export interface ExpenseSplit {
+  id?: string;
+  categoryId: string;
+  amount: string;
+  description?: string | null;
+}
 
 export interface Expense {
-  recurrenceInterval: string;
-  dueDayOfMonth: number | null;
-  id?: number;
+  id: string;
   userId: string;
-  name: string;
-  budgetId: number;
-  categoryId: number;
-  amount: number;
+  budgetId: string;
+  amount: string;
   date: string;
-  notes?: string;
+  description: string;
+  splits: ExpenseSplit[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExpenseFormData {
+  amount: string;
+  date: string;
+  description: string;
+  splits: {
+    categoryId: string;
+    amount: string;
+    description?: string | null;
+  }[];
 }
 
 export const expenseFormSchema = z.object({
-  id: z.number().optional(),
-  userId: z.string().min(1, 'User ID is required'),
-  name: z.string().min(1, 'Name is required'),
-  budgetId: z.number(),
-  categoryId: z.number(),
-  amount: z.number().min(0.01, 'Amount must be greater than 0'),
-  date: z.string(),
-  notes: z.string().optional(),
-  recurrenceInterval: z.string(),
-  dueDayOfMonth: z.number().nullable(),
+  amount: z.string().min(1, 'Amount is required'),
+  date: z.string().refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
+    message: 'Date must be in YYYY-MM-DD format',
+  }),
+  description: z.string().min(1, 'Description is required'),
+  splits: z
+    .array(
+      z.object({
+        categoryId: z.string().min(1, 'Category is required'),
+        amount: z.string().min(1, 'Amount is required'),
+        description: z.string().nullish(),
+      }),
+    )
+    .min(1, 'At least one category split is required'),
 });

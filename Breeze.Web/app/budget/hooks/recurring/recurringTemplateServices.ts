@@ -1,24 +1,24 @@
-import useHttp from '@/lib/services/useHttp';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import useGraphql from '@/lib/services/useGraphql';
+import { useCallback } from 'react';
 
-export type ScheduleType = 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
+export type ScheduleType = 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
 
 export interface RecurringIncomeTemplate {
-  id?: number;
-  userId?: string;
+  id: string;
+  userId: string;
   name: string;
-  amount: number;
-  scheduleType: ScheduleType;
-  anchorDate: string;
-  semiMonthlyDay1?: number | null;
-  semiMonthlyDay2?: number | null;
-  monthlyDayOfMonth?: number | null;
+  amount: string;
+  recurrenceInterval: ScheduleType;
+  paydayDayOfMonth?: number | null;
   startDate: string;
-  stopDate?: string | null;
-  isActive: boolean;
+  endDate?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RecurringCategoryTemplate {
-  id?: number;
+  id?: string;
   userId?: string;
   name: string;
   allocation: number;
@@ -28,51 +28,147 @@ export interface RecurringCategoryTemplate {
 }
 
 export const useRecurringTemplates = () => {
-  const { getMany, post, patch, deleteOne } = useHttp();
+  const { request: graphqlRequest } = useGraphql();
+  const { userId } = useCurrentUser();
 
-  const getRecurringIncomeTemplates = async (): Promise<RecurringIncomeTemplate[]> =>
-    await getMany<RecurringIncomeTemplate>('recurring-income-templates');
+  const getRecurringIncomeTemplates = useCallback(async (): Promise<RecurringIncomeTemplate[]> => {
+    if (!userId) return [];
+    const query = `
+        query RecurringIncomes($userId: ID!) {
+          recurringIncomes(userId: $userId) {
+            id
+            userId
+            name
+            amount
+            recurrenceInterval
+            paydayDayOfMonth
+            startDate
+            endDate
+            createdAt
+            updatedAt
+          }
+        }
+      `;
+    const response = await graphqlRequest<{ recurringIncomes: RecurringIncomeTemplate[] }>(query, {
+      userId,
+    });
+    return response.recurringIncomes;
+  }, [graphqlRequest, userId]);
 
-  const postRecurringIncomeTemplate = async (
-    template: RecurringIncomeTemplate,
-  ): Promise<RecurringIncomeTemplate> =>
-    await post<RecurringIncomeTemplate, RecurringIncomeTemplate>(
-      'recurring-income-templates',
-      template,
-    );
+  const postRecurringIncomeTemplate = useCallback(
+    async (
+      template: Omit<RecurringIncomeTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+    ): Promise<RecurringIncomeTemplate> => {
+      if (!userId) throw new Error('User not authenticated');
+      const mutation = `
+        mutation CreateRecurringIncome($input: CreateRecurringIncomeInput!) {
+          createRecurringIncome(input: $input) {
+            id
+            userId
+            name
+            amount
+            recurrenceInterval
+            paydayDayOfMonth
+            startDate
+            endDate
+            createdAt
+            updatedAt
+          }
+        }
+      `;
+      const input = {
+        userId,
+        name: template.name,
+        amount: template.amount,
+        recurrenceInterval: template.recurrenceInterval,
+        paydayDayOfMonth: template.paydayDayOfMonth,
+        startDate: template.startDate,
+        endDate: template.endDate,
+      };
+      const response = await graphqlRequest<{ createRecurringIncome: RecurringIncomeTemplate }>(
+        mutation,
+        { input },
+      );
+      return response.createRecurringIncome;
+    },
+    [graphqlRequest, userId],
+  );
 
-  const patchRecurringIncomeTemplate = async (
-    template: RecurringIncomeTemplate,
-  ): Promise<RecurringIncomeTemplate> =>
-    await patch<RecurringIncomeTemplate, RecurringIncomeTemplate>(
-      `recurring-income-templates/${template.id}`,
-      template,
-    );
+  const patchRecurringIncomeTemplate = useCallback(
+    async (template: RecurringIncomeTemplate): Promise<RecurringIncomeTemplate> => {
+      const mutation = `
+        mutation UpdateRecurringIncome($input: UpdateRecurringIncomeInput!) {
+          updateRecurringIncome(input: $input) {
+            id
+            userId
+            name
+            amount
+            recurrenceInterval
+            paydayDayOfMonth
+            startDate
+            endDate
+            createdAt
+            updatedAt
+          }
+        }
+      `;
+      const input = {
+        id: template.id,
+        name: template.name,
+        amount: template.amount,
+        recurrenceInterval: template.recurrenceInterval,
+        paydayDayOfMonth: template.paydayDayOfMonth,
+        startDate: template.startDate,
+        endDate: template.endDate,
+      };
+      const response = await graphqlRequest<{ updateRecurringIncome: RecurringIncomeTemplate }>(
+        mutation,
+        { input },
+      );
+      return response.updateRecurringIncome;
+    },
+    [graphqlRequest],
+  );
 
-  const deleteRecurringIncomeTemplate = async (id: number): Promise<void> =>
-    await deleteOne(`recurring-income-templates/${id}`);
+  const deleteRecurringIncomeTemplate = useCallback(
+    async (id: string): Promise<void> => {
+      const mutation = `
+        mutation DeleteRecurringIncome($id: ID!) {
+          deleteRecurringIncome(id: $id)
+        }
+      `;
+      await graphqlRequest<{ deleteRecurringIncome: boolean }>(mutation, { id });
+    },
+    [graphqlRequest],
+  );
 
-  const getRecurringCategoryTemplates = async (): Promise<RecurringCategoryTemplate[]> =>
-    await getMany<RecurringCategoryTemplate>('recurring-category-templates');
+  const getRecurringCategoryTemplates = useCallback(async (): Promise<
+    RecurringCategoryTemplate[]
+  > => {
+    // Placeholder - Category templates not yet in GraphQL schema
+    return [];
+  }, []);
 
-  const postRecurringCategoryTemplate = async (
-    template: RecurringCategoryTemplate,
-  ): Promise<RecurringCategoryTemplate> =>
-    await post<RecurringCategoryTemplate, RecurringCategoryTemplate>(
-      'recurring-category-templates',
-      template,
-    );
+  const postRecurringCategoryTemplate = useCallback(
+    async (_template: RecurringCategoryTemplate): Promise<RecurringCategoryTemplate> => {
+      // Placeholder - Category templates not yet in GraphQL schema
+      throw new Error('Recurring category templates not yet implemented');
+    },
+    [],
+  );
 
-  const patchRecurringCategoryTemplate = async (
-    template: RecurringCategoryTemplate,
-  ): Promise<RecurringCategoryTemplate> =>
-    await patch<RecurringCategoryTemplate, RecurringCategoryTemplate>(
-      `recurring-category-templates/${template.id}`,
-      template,
-    );
+  const patchRecurringCategoryTemplate = useCallback(
+    async (_template: RecurringCategoryTemplate): Promise<RecurringCategoryTemplate> => {
+      // Placeholder - Category templates not yet in GraphQL schema
+      throw new Error('Recurring category templates not yet implemented');
+    },
+    [],
+  );
 
-  const deleteRecurringCategoryTemplate = async (id: number): Promise<void> =>
-    await deleteOne(`recurring-category-templates/${id}`);
+  const deleteRecurringCategoryTemplate = useCallback(async (_id: string): Promise<void> => {
+    // Placeholder - Category templates not yet in GraphQL schema
+    throw new Error('Recurring category templates not yet implemented');
+  }, []);
 
   return {
     getRecurringIncomeTemplates,

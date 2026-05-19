@@ -17,13 +17,11 @@ interface DeleteExpenseProps {
  */
 
 interface DeleteExpenseMutationProps {
-  budgetId: number;
   expense: Expense;
 }
 
 /**
  * Mutation function for deleting an expense.
- * @param props.budgetId: The budget Id of the expense to delete.
  * @param props.expense: The expense to delete.
  */
 
@@ -31,7 +29,7 @@ const useDeleteExpense = ({ onSuccess, onSettled }: DeleteExpenseProps) => {
   const { deleteExpense } = useExpenses();
 
   const mutationFn = useCallback(
-    ({ budgetId, expense }: DeleteExpenseMutationProps) => deleteExpense(budgetId, expense),
+    ({ expense }: DeleteExpenseMutationProps) => deleteExpense(expense.id),
     [deleteExpense],
   );
 

@@ -1,13 +1,13 @@
 'use client';
-import { ReactNode, useEffect } from 'react';
+
+import { ReactNode } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { BreezeFormDialog } from '../../../../../components/common/form/BreezeFormDialog';
 import { FormInputField } from '../../../../../components/common/form/FormInputField';
-import { FormSelectField } from '../../../../../components/common/form/FormSelectField';
-import { Income, incomeFormSchema } from '@/app/budget/types/income';
+import { Income, IncomeFormData, incomeFormSchema } from '@/app/budget/types/income';
 import { useBudgetContext } from '@/app/budget/providers/index';
 import { useDeleteIncome, usePatchIncome } from '@/app/budget/hooks/income/index';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
@@ -28,25 +28,14 @@ export const EditIncomeDialog = ({ existingIncome, children }: EditIncomeDialogP
   const { userId } = useCurrentUser();
   const { budget, refetchIncomes, refetchBudget } = useBudgetContext();
 
-  const form = useForm<Income>({
+  const form = useForm<IncomeFormData>({
     resolver: zodResolver(incomeFormSchema),
     defaultValues: {
-      ...existingIncome,
-      recurrenceInterval: existingIncome.recurrenceInterval ?? 'none',
-      paydayDayOfMonth: existingIncome.paydayDayOfMonth ?? new Date(existingIncome.date).getDate(),
+      name: existingIncome.name,
+      amount: existingIncome.amount,
+      date: existingIncome.date,
     },
   });
-
-  const recurrenceInterval = form.watch('recurrenceInterval') ?? 'none';
-
-  useEffect(() => {
-    if (
-      !['monthly', 'quarterly', 'yearly'].includes(recurrenceInterval) &&
-      form.getValues('paydayDayOfMonth') !== null
-    ) {
-      form.setValue('paydayDayOfMonth', null, { shouldValidate: true });
-    }
-  }, [form, recurrenceInterval]);
 
   const patchMutation = usePatchIncome({
     onSettled: () => {
@@ -62,29 +51,18 @@ export const EditIncomeDialog = ({ existingIncome, children }: EditIncomeDialogP
     },
   });
 
-  const onSubmit = (values: Income) => {
+  const onSubmit = (values: IncomeFormData) => {
     if (!userId || !budget?.id) return;
-    const fallbackPayday = new Date(values.date).getDate();
-    const normalizedMonthlyPayday =
-      typeof values.paydayDayOfMonth === 'number' &&
-      values.paydayDayOfMonth >= 1 &&
-      values.paydayDayOfMonth <= 31
-        ? values.paydayDayOfMonth
-        : fallbackPayday;
+
+    const income: Income = {
+      ...existingIncome,
+      name: values.name,
+      amount: values.amount,
+      date: values.date,
+    };
 
     patchMutation.mutate({
-      income: {
-        ...values,
-        id: existingIncome.id,
-        userId,
-        budgetId: budget.id,
-        isRecurring: values.recurrenceInterval !== 'none',
-        paydayDayOfMonth: ['monthly', 'quarterly', 'yearly'].includes(
-          values.recurrenceInterval ?? 'none',
-        )
-          ? normalizedMonthlyPayday
-          : null,
-      },
+      income,
     });
   };
 
@@ -94,34 +72,6 @@ export const EditIncomeDialog = ({ existingIncome, children }: EditIncomeDialogP
     <>
       <FormInputField form={form} name="name" label="Name" placeholder="e.g., Paycheck" />
       <FormInputField form={form} name="amount" label="Amount" type="number" placeholder="0.00" />
-      <FormSelectField
-        form={form}
-        name="recurrenceInterval"
-        label="Pay Interval"
-        parseAsNumber={false}
-        options={[
-          { value: 'none', label: 'One-time income' },
-          { value: 'weekly', label: 'Weekly' },
-          { value: 'biweekly', label: 'Biweekly' },
-          { value: 'monthly', label: 'Monthly' },
-          { value: 'quarterly', label: 'Quarterly' },
-          { value: 'yearly', label: 'Yearly' },
-        ]}
-      />
-      {['monthly', 'quarterly', 'yearly'].includes(recurrenceInterval) ? (
-        <FormInputField
-          form={form}
-          name="paydayDayOfMonth"
-          label="Payday (Day of Month)"
-          type="number"
-          placeholder="1-31"
-        />
-      ) : null}
-      {recurrenceInterval === 'weekly' || recurrenceInterval === 'biweekly' ? (
-        <p className="text-muted-foreground text-sm">
-          Date is your pay anchor (for example, your first Thursday paycheck).
-        </p>
-      ) : null}
       <FormInputField form={form} name="date" label="Date" type="date" placeholder="YYYY-MM-DD" />
     </>
   );
@@ -131,16 +81,20 @@ export const EditIncomeDialog = ({ existingIncome, children }: EditIncomeDialogP
       dialogTrigger={dialogTrigger}
       title="Edit Income"
       itemType="Income"
-      description="Make changes to your income here."
+      description="Make changes to your income here. Click save when you're done."
       form={form}
       onSubmit={onSubmit}
       inputFields={inputFields}
       destructiveElements={
         <DeleteDialog
           key={existingIncome.id}
-          onDelete={() => deleteMutation.mutate({ income: existingIncome })}
-          additionalText={`You are about to delete the income: ${existingIncome.name}`}
+          onDelete={() =>
+            deleteMutation.mutate({
+              income: existingIncome,
+            })
+          }
           itemType="Income"
+          additionalText={`You are about to delete the income: ${existingIncome.name}`}
         />
       }
     />

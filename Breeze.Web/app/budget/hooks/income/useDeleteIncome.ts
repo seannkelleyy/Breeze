@@ -28,7 +28,7 @@ const useDeleteIncome = ({ onSuccess, onSettled }: DeleteIncomeProps) => {
   const { deleteIncome } = useIncomes();
 
   const mutationFn = useCallback(
-    ({ income }: DeleteIncomeMutationProps) => deleteIncome(income),
+    ({ income }: DeleteIncomeMutationProps) => deleteIncome(income.id),
     [deleteIncome],
   );
 

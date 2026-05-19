@@ -1,21 +1,21 @@
 import z from 'zod';
-import { Category, categoryFormSchema } from './category';
-import { Income, incomeFormSchema } from './income';
 
 export interface Budget {
-  id: number;
+  id: string;
   userId: string;
-  monthlyIncome: number;
-  monthlyExpenses: number;
+  monthlyIncome: string;
+  monthlyExpenses: string;
   date: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const budgetFormSchema = z.object({
-  incomes: z.array(incomeFormSchema),
-  categories: z.array(categoryFormSchema),
+  monthlyIncome: z.string().min(1, 'Monthly income is required'),
+  monthlyExpenses: z.string().min(1, 'Monthly expenses is required'),
 });
 
 export interface BudgetFormData {
-  incomes: Income[];
-  categories: Category[];
+  monthlyIncome: string;
+  monthlyExpenses: string;
 }

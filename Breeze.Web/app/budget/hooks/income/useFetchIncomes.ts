@@ -5,7 +5,7 @@ import { Income } from '../../types/income';
 import { useIncomes } from './index';
 
 interface FetchIncomesProps {
-  budgetId: number;
+  budgetId: string;
   enabled?: boolean;
 }
 

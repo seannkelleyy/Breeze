@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from 'react';
 
 import {
@@ -41,103 +43,97 @@ export const IncomeTable = () => {
   const [rowSelection, setRowSelection] = React.useState({});
   const { incomes = [] } = useBudgetContext();
 
-  const columns = React.useMemo<ColumnDef<Income>[]>(
-    () => {
-      const recurrenceLabelByInterval: Record<string, string> = {
-        none: 'One-time',
-        weekly: 'Weekly',
-        biweekly: 'Biweekly',
-        monthly: 'Monthly',
-        quarterly: 'Quarterly',
-        yearly: 'Yearly',
-      };
+  const columns = React.useMemo<ColumnDef<Income>[]>(() => {
+    const recurrenceLabelByInterval: Record<string, string> = {
+      none: 'One-time',
+      weekly: 'Weekly',
+      biweekly: 'Biweekly',
+      monthly: 'Monthly',
+      quarterly: 'Quarterly',
+      yearly: 'Yearly',
+    };
 
-      return [
-        {
-          accessorKey: 'name',
-          header: ({ column }) => {
-            return (
-              <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-              >
-                Name
-                <ArrowUpDown />
-              </Button>
-            );
-          },
-          cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-              <span>{row.original.name}</span>
-              {row.original.sourceType === 'recurring-template' ? (
-                <Badge variant="outline">Template</Badge>
-              ) : null}
-            </div>
-          ),
+    return [
+      {
+        accessorKey: 'name',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            >
+              Name
+              <ArrowUpDown />
+            </Button>
+          );
         },
-        {
-          accessorKey: 'amount',
-          header: ({ column }) => {
-            return (
-              <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-              >
-                Amount
-                <ArrowUpDown />
-              </Button>
-            );
-          },
-          cell: ({ row }) => {
-            const amount = parseFloat(row.getValue('amount'));
-            const formatted = new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'USD',
-            }).format(amount);
-            return <div className="text-left font-medium">{formatted}</div>;
-          },
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <span>{row.original.name}</span>
+            {row.original.sourceType === 'RECURRING_TEMPLATE' ? (
+              <Badge variant="outline">Template</Badge>
+            ) : null}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'amount',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            >
+              Amount
+              <ArrowUpDown />
+            </Button>
+          );
         },
-        {
-          accessorKey: 'date',
-          header: ({ column }) => {
-            return (
-              <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-              >
-                Date
-                <ArrowUpDown />
-              </Button>
-            );
-          },
-          cell: ({ row }) => {
-            const date = row.getValue('date') as string | number | Date | null | undefined;
-            return dayjs(date).format('MMMM D, YYYY');
-          },
+        cell: ({ row }) => {
+          const amount = parseFloat(row.getValue('amount'));
+          const formatted = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+          }).format(amount);
+          return <div className="text-left font-medium">{formatted}</div>;
         },
-        {
-          id: 'schedule',
-          header: 'Schedule',
-          cell: ({ row }) => {
-            const recurrenceInterval = row.original.recurrenceInterval ?? 'none';
-            if (recurrenceInterval === 'none') {
-              return 'One-time';
-            }
+      },
+      {
+        accessorKey: 'date',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            >
+              Date
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => {
+          const date = row.getValue('date') as string | number | Date | null | undefined;
+          return dayjs(date).format('MMMM D, YYYY');
+        },
+      },
+      {
+        id: 'schedule',
+        header: 'Schedule',
+        cell: () => {
+          // Incomes are always one-time in the new schema
+          // Recurring income are managed through RecurringIncomeTemplate
+          return 'One-time';
+        },
+      },
+    ];
+  }, []);
 
-            const payday = row.original.paydayDayOfMonth;
-            return `${recurrenceLabelByInterval[recurrenceInterval] ?? 'Recurring'}${payday ? ` - day ${payday}` : ''}`;
-          },
-        },
-      ];
-    },
-    [],
-  );
-
-  // Calculate total amount
+  // Calculate total amount (convert string amounts to numbers)
   const totalAmount = React.useMemo(() => {
-    return incomes.reduce((sum, income) => sum + income.amount, 0);
+    return incomes.reduce((sum, income) => sum + (Number(income.amount) || 0), 0);
   }, [incomes]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: incomes ?? [],
     columns,
@@ -197,7 +193,7 @@ export const IncomeTable = () => {
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {row.original.sourceType === 'recurring-template' ? (
+                      {row.original.sourceType === 'RECURRING_TEMPLATE' ? (
                         <div className="text-muted-foreground">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </div>

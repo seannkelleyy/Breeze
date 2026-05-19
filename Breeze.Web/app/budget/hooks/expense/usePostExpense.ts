@@ -17,19 +17,22 @@ interface PostExpenseProps {
  */
 
 interface PostExpenseMutationProps {
-  budgetId: number;
-  expense: Expense;
+  budgetId: string;
+  userId: string;
+  expense: Omit<Expense, 'id' | 'userId' | 'budgetId' | 'createdAt' | 'updatedAt'>;
 }
 /**
  * Mutation function for posting an expense.
  * @param props.budgetId: The budget Id to post the expense to.
+ * @param props.userId: The user Id.
  * @param props.expense: The expense to post.
  */
 const usePostExpense = ({ onSuccess, onSettled }: PostExpenseProps) => {
   const { postExpense } = useExpenses();
 
   const mutationFn = useCallback(
-    ({ budgetId, expense }: PostExpenseMutationProps) => postExpense(budgetId, expense),
+    ({ budgetId, userId, expense }: PostExpenseMutationProps) =>
+      postExpense(budgetId, userId, expense),
     [postExpense],
   );
 

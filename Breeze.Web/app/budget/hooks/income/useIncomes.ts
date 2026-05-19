@@ -16,55 +16,59 @@ const useIncomes = () => {
   const { request } = useGraphql();
 
   const getIncomes = useCallback(
-    async (budgetId: number): Promise<Income[]> => {
+    async (budgetId: string): Promise<Income[]> => {
       const resp = await request<{ incomes: Income[] }>(GET_INCOMES_BY_BUDGET, {
         budgetId,
-      } as unknown as Record<string, unknown>);
+      });
       return resp?.incomes ?? [];
     },
     [request],
   );
 
   const postIncome = useCallback(
-    async (budgetId: number, income: Income): Promise<number> => {
+    async (
+      budgetId: string,
+      userId: string,
+      income: Omit<Income, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'sourceType'>,
+    ): Promise<string> => {
       const input = {
-        userId: income.userId,
+        userId,
         budgetId,
         name: income.name,
-        amount: String(income.amount ?? '0'),
+        amount: income.amount,
         date: income.date,
         sourceType: 'MANUAL',
       };
-      const resp = await request<{ createIncome: { id: number } }>(CREATE_INCOME, {
+      const resp = await request<{ createIncome: Income }>(CREATE_INCOME, {
         input,
-      } as unknown as Record<string, unknown>);
+      });
       return resp.createIncome.id;
     },
     [request],
   );
 
   const patchIncome = useCallback(
-    async (income: Income): Promise<number> => {
+    async (income: Income): Promise<string> => {
       const input = {
         id: income.id,
         name: income.name,
-        amount: String(income.amount ?? '0'),
+        amount: income.amount,
         date: income.date,
-        sourceType: 'MANUAL',
+        sourceType: income.sourceType,
       };
-      const resp = await request<{ updateIncome: { id: number } }>(UPDATE_INCOME, {
+      const resp = await request<{ updateIncome: Income }>(UPDATE_INCOME, {
         input,
-      } as unknown as Record<string, unknown>);
+      });
       return resp.updateIncome.id;
     },
     [request],
   );
 
   const deleteIncome = useCallback(
-    async (income: Income) => {
+    async (incomeId: string) => {
       await request<{ deleteIncome: boolean }>(DELETE_INCOME, {
-        id: income.id,
-      } as unknown as Record<string, unknown>);
+        id: incomeId,
+      });
       return true;
     },
     [request],

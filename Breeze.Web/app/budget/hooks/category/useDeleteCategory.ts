@@ -28,7 +28,7 @@ const useDeleteCategory = ({ onSuccess, onSettled }: DeleteCategoryProps) => {
   const { deleteCategory } = useCategories();
 
   const mutationFn = useCallback(
-    ({ category }: DeleteCategoryMutationProps) => deleteCategory(category),
+    ({ category }: DeleteCategoryMutationProps) => deleteCategory(category.id),
     [deleteCategory],
   );
 

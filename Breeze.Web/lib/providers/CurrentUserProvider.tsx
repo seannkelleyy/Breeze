@@ -4,7 +4,6 @@ import {
   Dispatch,
   type ReactNode,
   SetStateAction,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -12,7 +11,7 @@ import {
   useState,
 } from 'react';
 
-import useHttp from '../services/useHttp';
+import useGraphql from '../services/useGraphql';
 
 import {
   PLANNER_DEFAULT_PRIMARY_401K_ACCOUNT,
@@ -31,6 +30,59 @@ import { PlannerAccount } from '@/app/planner/types/account';
 import { AssetFinanceDetails } from '@/app/planner/types/finance';
 import { PlannerSummary } from '@/app/planner/types/planner';
 import { useUser } from '@clerk/nextjs';
+
+const DEV_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
+const UUID_V4_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const CURRENT_USER_QUERY = `
+  query CurrentUserPreferences {
+    me {
+      id
+      identityProviderId
+      email
+      returnType
+      safeWithdrawalRate
+      currencyType
+      inflationRate
+      deductionType
+      deductionAmount
+      maxTaxBracketId
+      filingStatus
+      payoffStrategy
+    }
+  }
+`;
+
+const UPDATE_USER_MUTATION = `
+  mutation UpdateUserPreferences($input: UpdateUserInput!) {
+    updateUser(input: $input) {
+      id
+    }
+  }
+`;
+
+const CREATE_USER_MUTATION = `
+  mutation CreateUserPreferences($input: CreateUserInput!) {
+    createUser(input: $input) {
+      id
+    }
+  }
+`;
+
+const getBackendUserID = (user: ReturnType<typeof useUser>['user']): string => {
+  const metadataUserID = user?.publicMetadata?.userId;
+  if (typeof metadataUserID === 'string' && UUID_V4_PATTERN.test(metadataUserID)) {
+    return metadataUserID;
+  }
+
+  const clerkUserID = user?.id;
+  if (typeof clerkUserID === 'string' && UUID_V4_PATTERN.test(clerkUserID)) {
+    return clerkUserID;
+  }
+
+  return DEV_USER_ID;
+};
 
 export type PlannerRetirementMethod = 'target-amount' | 'fire' | 'income-replacement';
 
@@ -75,25 +127,25 @@ type CurrentUserProviderProps = {
 
 const createDefaultPlannerAccounts = (): PlannerAccount[] => [
   {
-    id: crypto.randomUUID(),
+    id: '401k-default-uuid',
     ...PLANNER_DEFAULT_PRIMARY_401K_ACCOUNT,
   },
   {
-    id: crypto.randomUUID(),
+    id: 'roth-default-uuid',
     ...PLANNER_DEFAULT_PRIMARY_ROTH_ACCOUNT,
   },
 ];
 
 const createDefaultPlannerPeople = (): PlannerPerson[] => [
   {
-    id: crypto.randomUUID(),
+    id: 'self-default-uuid',
     ...PLANNER_DEFAULT_SELF_PERSON,
   },
 ];
 
 export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const { user, isLoaded, isSignedIn } = useUser();
-  const { getOne, put } = useHttp();
+  const { request } = useGraphql();
   const loadedPreferencesForUserRef = useRef<string | null>(null);
   const [currencyCode, setCurrencyCode] = useState('USD');
   const [returnDisplayMode, setReturnDisplayMode] = useState<'real' | 'nominal'>(
@@ -116,6 +168,11 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     PLANNER_DEFAULT_FIRE_LIFESTYLE_INDEX,
   );
   const [plannerSummary, setPlannerSummary] = useState<PlannerSummary | null>(null);
+  const [deductionType, setDeductionType] = useState<'STANDARD' | 'ITEMIZED'>('STANDARD');
+  const [deductionAmount, setDeductionAmount] = useState<string | null>(null);
+  const [maxTaxBracketId, setMaxTaxBracketId] = useState<string | null>(null);
+  const [filingStatus, setFilingStatus] = useState<'SINGLE' | 'MFJ' | 'MFS' | 'HOH'>('SINGLE');
+  const [payoffStrategy, setPayoffStrategy] = useState<'AVALANCHE' | 'SNOWBALL'>('AVALANCHE');
   const [plannerPeople, setPlannerPeople] = useState<PlannerPerson[]>(() =>
     createDefaultPlannerPeople(),
   );
@@ -124,84 +181,62 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   );
   const [plannerAssetFinanceDetailsByAccountId, setPlannerAssetFinanceDetailsByAccountId] =
     useState<Record<string, AssetFinanceDetails>>({});
-  const providerKey = isSignedIn ? user?.id ?? 'signed-in' : 'signed-out';
+  const providerKey = isSignedIn ? (user?.id ?? 'signed-in') : 'signed-out';
+  const backendUserID = useMemo(() => getBackendUserID(user), [user]);
 
-  const persistPreferences = useCallback(
-    async (
-      nextCurrencyCode: string,
-      nextReturnDisplayMode: 'real' | 'nominal',
-      nextInflationRate: number,
-      nextSafeWithdrawalRate: number,
-    ) => {
-      if (!isLoaded || !isSignedIn) {
-        return;
-      }
+  const persistPreferences = async (
+    nextCurrencyCode: string,
+    nextReturnDisplayMode: 'real' | 'nominal',
+    nextInflationRate: number,
+    nextSafeWithdrawalRate: number,
+  ) => {
+    if (!isLoaded || !isSignedIn) {
+      return;
+    }
 
-      try {
-        await put('/user-preferences', {
-          currencyCode: nextCurrencyCode,
-          returnDisplayMode: nextReturnDisplayMode,
-          inflationRate: nextInflationRate,
-          safeWithdrawalRate: nextSafeWithdrawalRate,
-        });
-      } catch {
-        // Keep optimistic UI state and allow future writes.
-      }
-    },
-    [isLoaded, isSignedIn, put],
-  );
+    try {
+      const input = {
+        id: backendUserID,
+        identityProviderId: user?.publicMetadata?.userId?.toString() ?? user?.id ?? '',
+        email: user?.emailAddresses[0]?.emailAddress ?? '',
+        returnType: nextReturnDisplayMode === 'real' ? 'REAL' : 'NOMINAL',
+        safeWithdrawalRate: (nextSafeWithdrawalRate / 100).toFixed(4),
+        currencyType: nextCurrencyCode,
+        inflationRate: (nextInflationRate / 100).toFixed(4),
+        deductionType,
+        deductionAmount,
+        maxTaxBracketId,
+        filingStatus,
+        payoffStrategy,
+      };
 
-  const updateCurrencyCode = useCallback(
-    (nextCurrencyCode: string) => {
-      setCurrencyCode(nextCurrencyCode);
-      void persistPreferences(
-        nextCurrencyCode,
-        returnDisplayMode,
-        inflationRate,
-        safeWithdrawalRate,
-      );
-    },
-    [inflationRate, persistPreferences, returnDisplayMode, safeWithdrawalRate],
-  );
+      await request<{ updateUser: { id: string } }, { input: typeof input }>(UPDATE_USER_MUTATION, {
+        input,
+      });
+    } catch {
+      // Keep optimistic UI state and allow future writes.
+    }
+  };
 
-  const updateReturnDisplayMode = useCallback(
-    (nextReturnDisplayMode: 'real' | 'nominal') => {
-      setReturnDisplayMode(nextReturnDisplayMode);
-      void persistPreferences(
-        currencyCode,
-        nextReturnDisplayMode,
-        inflationRate,
-        safeWithdrawalRate,
-      );
-    },
-    [currencyCode, inflationRate, persistPreferences, safeWithdrawalRate],
-  );
+  const updateCurrencyCode = (nextCurrencyCode: string) => {
+    setCurrencyCode(nextCurrencyCode);
+    void persistPreferences(nextCurrencyCode, returnDisplayMode, inflationRate, safeWithdrawalRate);
+  };
 
-  const updateInflationRate = useCallback(
-    (nextInflationRate: number) => {
-      setInflationRate(nextInflationRate);
-      void persistPreferences(
-        currencyCode,
-        returnDisplayMode,
-        nextInflationRate,
-        safeWithdrawalRate,
-      );
-    },
-    [currencyCode, persistPreferences, returnDisplayMode, safeWithdrawalRate],
-  );
+  const updateReturnDisplayMode = (nextReturnDisplayMode: 'real' | 'nominal') => {
+    setReturnDisplayMode(nextReturnDisplayMode);
+    void persistPreferences(currencyCode, nextReturnDisplayMode, inflationRate, safeWithdrawalRate);
+  };
 
-  const updateSafeWithdrawalRate = useCallback(
-    (nextSafeWithdrawalRate: number) => {
-      setSafeWithdrawalRate(nextSafeWithdrawalRate);
-      void persistPreferences(
-        currencyCode,
-        returnDisplayMode,
-        inflationRate,
-        nextSafeWithdrawalRate,
-      );
-    },
-    [currencyCode, inflationRate, persistPreferences, returnDisplayMode],
-  );
+  const updateInflationRate = (nextInflationRate: number) => {
+    setInflationRate(nextInflationRate);
+    void persistPreferences(currencyCode, returnDisplayMode, nextInflationRate, safeWithdrawalRate);
+  };
+
+  const updateSafeWithdrawalRate = (nextSafeWithdrawalRate: number) => {
+    setSafeWithdrawalRate(nextSafeWithdrawalRate);
+    void persistPreferences(currencyCode, returnDisplayMode, inflationRate, nextSafeWithdrawalRate);
+  };
 
   useEffect(() => {
     if (!isLoaded) {
@@ -212,7 +247,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       return;
     }
 
-    const userId = user?.id ?? '';
+    const userId = backendUserID;
     if (!userId) {
       return;
     }
@@ -227,22 +262,67 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
 
     const loadPreferences = async () => {
       try {
-        const response = await getOne<{
-          currencyCode?: string;
-          returnDisplayMode?: 'real' | 'nominal';
-          inflationRate?: number;
-          safeWithdrawalRate?: number;
-        }>('/user-preferences');
+        const response = await request<{
+          me: {
+            id: string;
+            identityProviderId: string;
+            email: string;
+            returnType: 'REAL' | 'NOMINAL';
+            safeWithdrawalRate: string;
+            currencyType: string;
+            inflationRate: string;
+            deductionType: 'STANDARD' | 'ITEMIZED';
+            deductionAmount: string | null;
+            maxTaxBracketId: string | null;
+            filingStatus: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH';
+            payoffStrategy: 'AVALANCHE' | 'SNOWBALL';
+          } | null;
+        }>(CURRENT_USER_QUERY);
+
         if (isCancelled) {
           return;
         }
 
-        if (response?.currencyCode) {
-          setCurrencyCode(response.currencyCode);
+        if (response?.me) {
+          setCurrencyCode(response.me.currencyType ?? 'USD');
+          setReturnDisplayMode(response.me.returnType === 'REAL' ? 'real' : 'nominal');
+          setInflationRate(
+            Number.parseFloat(response.me.inflationRate) * 100 || PLANNER_DEFAULT_INFLATION_RATE,
+          );
+          setSafeWithdrawalRate(
+            Number.parseFloat(response.me.safeWithdrawalRate) * 100 ||
+              PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE,
+          );
+          setDeductionType(response.me.deductionType ?? 'STANDARD');
+          setDeductionAmount(response.me.deductionAmount ?? null);
+          setMaxTaxBracketId(response.me.maxTaxBracketId ?? null);
+          setFilingStatus(response.me.filingStatus ?? 'SINGLE');
+          setPayoffStrategy(response.me.payoffStrategy ?? 'AVALANCHE');
+          loadedPreferencesForUserRef.current = backendUserID;
+          return;
         }
-        setReturnDisplayMode(response?.returnDisplayMode ?? PLANNER_DEFAULT_RETURN_DISPLAY_MODE);
-        setInflationRate(response?.inflationRate ?? PLANNER_DEFAULT_INFLATION_RATE);
-        setSafeWithdrawalRate(response?.safeWithdrawalRate ?? PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE);
+
+        const identityProviderId = user?.publicMetadata?.userId?.toString() ?? user?.id ?? '';
+        const email = user?.emailAddresses[0]?.emailAddress ?? '';
+        if (identityProviderId && email) {
+          await request<{ createUser: { id: string } }, { input: Record<string, unknown> }>(
+            CREATE_USER_MUTATION,
+            {
+              input: {
+                identityProviderId,
+                email,
+                returnType: returnDisplayMode === 'real' ? 'REAL' : 'NOMINAL',
+                safeWithdrawalRate: (safeWithdrawalRate / 100).toFixed(4),
+                currencyType: currencyCode,
+                inflationRate: (inflationRate / 100).toFixed(4),
+                deductionType,
+                deductionAmount,
+                filingStatus,
+                payoffStrategy,
+              },
+            },
+          );
+        }
       } catch {
         if (isCancelled) {
           return;
@@ -253,6 +333,11 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         setReturnDisplayMode(PLANNER_DEFAULT_RETURN_DISPLAY_MODE);
         setInflationRate(PLANNER_DEFAULT_INFLATION_RATE);
         setSafeWithdrawalRate(PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE);
+        setDeductionType('STANDARD');
+        setDeductionAmount(null);
+        setMaxTaxBracketId(null);
+        setFilingStatus('SINGLE');
+        setPayoffStrategy('AVALANCHE');
       }
     };
 
@@ -261,61 +346,54 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     return () => {
       isCancelled = true;
     };
-  }, [getOne, isLoaded, isSignedIn, user?.id]);
+  }, [
+    backendUserID,
+    currencyCode,
+    deductionAmount,
+    deductionType,
+    filingStatus,
+    inflationRate,
+    isLoaded,
+    isSignedIn,
+    payoffStrategy,
+    request,
+    returnDisplayMode,
+    safeWithdrawalRate,
+    user?.emailAddresses,
+    user?.id,
+    user?.publicMetadata,
+  ]);
 
-  const value = useMemo<CurrentUserContextValue>(
-    () => ({
-      user,
-      userId: user?.id ?? '',
-      isLoaded,
-      isSignedIn: Boolean(isSignedIn),
-      currencyCode,
-      setCurrencyCode: updateCurrencyCode,
-      returnDisplayMode,
-      setReturnDisplayMode: updateReturnDisplayMode,
-      inflationRate,
-      setInflationRate: updateInflationRate,
-      safeWithdrawalRate,
-      setSafeWithdrawalRate: updateSafeWithdrawalRate,
-      plannerDesiredInvestmentAmount,
-      setPlannerDesiredInvestmentAmount,
-      plannerMonthlyExpenses,
-      setPlannerMonthlyExpenses,
-      plannerRetirementMethod,
-      setPlannerRetirementMethod,
-      plannerFireLifestyleIndex,
-      setPlannerFireLifestyleIndex,
-      plannerSummary,
-      setPlannerSummary,
-      plannerPeople,
-      setPlannerPeople,
-      plannerAccounts,
-      setPlannerAccounts,
-      plannerAssetFinanceDetailsByAccountId,
-      setPlannerAssetFinanceDetailsByAccountId,
-    }),
-    [
-      user,
-      isLoaded,
-      isSignedIn,
-      currencyCode,
-      updateCurrencyCode,
-      returnDisplayMode,
-      updateReturnDisplayMode,
-      inflationRate,
-      updateInflationRate,
-      safeWithdrawalRate,
-      updateSafeWithdrawalRate,
-      plannerDesiredInvestmentAmount,
-      plannerMonthlyExpenses,
-      plannerRetirementMethod,
-      plannerFireLifestyleIndex,
-      plannerSummary,
-      plannerPeople,
-      plannerAccounts,
-      plannerAssetFinanceDetailsByAccountId,
-    ],
-  );
+  const value: CurrentUserContextValue = {
+    user,
+    userId: backendUserID,
+    isLoaded,
+    isSignedIn: Boolean(isSignedIn),
+    currencyCode,
+    setCurrencyCode: updateCurrencyCode,
+    returnDisplayMode,
+    setReturnDisplayMode: updateReturnDisplayMode,
+    inflationRate,
+    setInflationRate: updateInflationRate,
+    safeWithdrawalRate,
+    setSafeWithdrawalRate: updateSafeWithdrawalRate,
+    plannerDesiredInvestmentAmount,
+    setPlannerDesiredInvestmentAmount,
+    plannerMonthlyExpenses,
+    setPlannerMonthlyExpenses,
+    plannerRetirementMethod,
+    setPlannerRetirementMethod,
+    plannerFireLifestyleIndex,
+    setPlannerFireLifestyleIndex,
+    plannerSummary,
+    setPlannerSummary,
+    plannerPeople,
+    setPlannerPeople,
+    plannerAccounts,
+    setPlannerAccounts,
+    plannerAssetFinanceDetailsByAccountId,
+    setPlannerAssetFinanceDetailsByAccountId,
+  };
 
   return (
     <CurrentUserContext.Provider key={providerKey} value={value}>

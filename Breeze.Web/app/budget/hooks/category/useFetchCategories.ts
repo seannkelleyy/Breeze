@@ -5,7 +5,7 @@ import { Category } from '../../types/category';
 import { useCategories } from './index';
 
 interface FetchCategoryProps {
-  budgetId: number;
+  budgetId: string;
   enabled?: boolean;
 }
 

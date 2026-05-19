@@ -67,3 +67,40 @@ make gen
 ## Project Docs
 
 Detailed API architecture and workflow docs live in `.github/docs/api/go/`.
+
+Future Features:
+* Transaction scraping from accounts
+* Net worth that tracks values for home and vehicles
+* Ability to see change in spending over time
+* Excess carries to next month on certain categories
+* Sinking fund tracker
+* Add normal expense (i.e. mortgage) and special (i.e. trip back home)
+* Save monthly spending (Mortgage, subscriptions, utilities etc.)
+* Estimate utility payments based on previous months
+* Ability to choose what day payments are made
+* Account connection using Plaid
+* Stripe for payment
+* Split expenses into multiple categories
+* Support different types of budget strategies 
+* “Create a budget” feature that allows you to curate a budget and you can answer questions about this months potential spending and use AI to curate a better budget to start. 
+* Allow users to add tags to their categories to follow certain budget, like the 50/30/20.
+* Recurring charge checker
+
+History of Tech Stack
+Build 1:
+* HTML, CSS, React
+* .NET C#
+* SQL database
+* Auth0
+
+Build 2:
+* HTML, CSS, React (ShadCN, Tailwindcss) 
+* Clerk for Auth
+* .NET C#  with plans to switch to graphql later on
+* PostGres database
+
+Build 3:
+* Next.js (ShadCN, Tailwindcss)
+* Clerk for Auth
+* Go API with plans to switch to graphql later on
+* PostGres database

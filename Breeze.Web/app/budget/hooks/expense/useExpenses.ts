@@ -7,7 +7,6 @@ import {
   UPDATE_EXPENSE,
 } from '@/lib/services/queries/budget';
 import useGraphql from '@/lib/services/useGraphql';
-import { Category } from '../../types/category';
 import { Expense } from '../../types/expense';
 
 /**
@@ -16,67 +15,68 @@ import { Expense } from '../../types/expense';
 const useExpenses = () => {
   const { request } = useGraphql();
 
-  const getExpensesForCategory = useCallback(
-    async (category: Category): Promise<Expense[]> => {
-      const resp = await request<{ expenses: Expense[] }>(GET_EXPENSES_BY_BUDGET, {
-        budgetId: category.budgetId,
-      } as unknown as Record<string, unknown>);
-      const all = resp?.expenses ?? [];
-      return all.filter((e) => e.categoryId === category.id);
-    },
-    [request],
-  );
-
   const getExpensesForBudget = useCallback(
-    async (budgetId: number): Promise<Expense[]> => {
+    async (budgetId: string): Promise<Expense[]> => {
       const resp = await request<{ expenses: Expense[] }>(GET_EXPENSES_BY_BUDGET, {
         budgetId,
-      } as unknown as Record<string, unknown>);
+      });
       return resp?.expenses ?? [];
     },
     [request],
   );
 
   const postExpense = useCallback(
-    async (budgetId: number, expense: Expense): Promise<number> => {
+    async (
+      budgetId: string,
+      userId: string,
+      expense: Omit<Expense, 'id' | 'userId' | 'budgetId' | 'createdAt' | 'updatedAt'>,
+    ): Promise<string> => {
       const input = {
-        userId: expense.userId,
+        userId,
         budgetId,
-        amount: String(expense.amount ?? '0'),
+        amount: expense.amount,
         date: expense.date,
-        description: expense.notes ?? '',
-        splits: [],
+        description: expense.description,
+        splits: expense.splits.map((split) => ({
+          categoryId: split.categoryId,
+          amount: split.amount,
+          description: split.description,
+        })),
       };
-      const resp = await request<{ createExpense: { id: number } }>(CREATE_EXPENSE, {
+      const resp = await request<{ createExpense: Expense }>(CREATE_EXPENSE, {
         input,
-      } as unknown as Record<string, unknown>);
+      });
       return resp.createExpense.id;
     },
     [request],
   );
 
   const patchExpense = useCallback(
-    async (budgetId: number, expense: Expense): Promise<number> => {
+    async (expense: Expense): Promise<string> => {
       const input = {
         id: expense.id,
-        amount: String(expense.amount ?? '0'),
+        amount: expense.amount,
         date: expense.date,
-        description: expense.notes ?? '',
-        splits: [],
+        description: expense.description,
+        splits: expense.splits.map((split) => ({
+          categoryId: split.categoryId,
+          amount: split.amount,
+          description: split.description,
+        })),
       };
-      const resp = await request<{ updateExpense: { id: number } }>(UPDATE_EXPENSE, {
+      const resp = await request<{ updateExpense: Expense }>(UPDATE_EXPENSE, {
         input,
-      } as unknown as Record<string, unknown>);
+      });
       return resp.updateExpense.id;
     },
     [request],
   );
 
   const deleteExpense = useCallback(
-    async (budgetId: number, expense: Expense) => {
+    async (expenseId: string) => {
       await request<{ deleteExpense: boolean }>(DELETE_EXPENSE, {
-        id: expense.id,
-      } as unknown as Record<string, unknown>);
+        id: expenseId,
+      });
       return true;
     },
     [request],
@@ -84,13 +84,12 @@ const useExpenses = () => {
 
   return useMemo(
     () => ({
-      getExpensesForCategory,
       getExpensesForBudget,
       postExpense,
       patchExpense,
       deleteExpense,
     }),
-    [deleteExpense, getExpensesForBudget, getExpensesForCategory, patchExpense, postExpense],
+    [deleteExpense, getExpensesForBudget, patchExpense, postExpense],
   );
 };
 

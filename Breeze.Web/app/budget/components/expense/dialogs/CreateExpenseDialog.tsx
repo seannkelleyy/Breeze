@@ -8,7 +8,7 @@ import { BreezeFormDialog } from '../../../../../components/common/form/BreezeFo
 import { FormInputField } from '../../../../../components/common/form/FormInputField';
 import { useBudgetContext } from '@/app/budget/providers/index';
 import { usePostExpense } from '@/app/budget/hooks/expense/index';
-import { Expense, expenseFormSchema } from '@/app/budget/types/expense';
+import { Expense, ExpenseFormData, expenseFormSchema } from '@/app/budget/types/expense';
 import { FormSelectField } from '@/components/common/form/FormSelectField';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
@@ -21,23 +21,27 @@ export const CreateExpenseDialog = () => {
   const { budget, categories, refetchBudget, refetchCategories, refetchExpenses } =
     useBudgetContext();
 
-  const form = useForm<Expense>({
+  const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: {
-      userId,
-      categoryId: categories?.[0]?.id ?? 1,
-      name: '',
-      amount: 0,
+      amount: '',
       date: new Date().toISOString().split('T')[0],
+      description: '',
+      splits: [
+        {
+          categoryId: categories?.[0]?.id ?? '',
+          amount: '',
+        },
+      ],
     },
   });
 
   useEffect(() => {
-    const nextCategoryId = categories[0]?.id ?? 1;
-    if (budget?.id && form.getValues('categoryId') !== nextCategoryId) {
-      form.setValue('categoryId', nextCategoryId);
+    const nextCategoryId = categories[0]?.id ?? '';
+    if (nextCategoryId && form.getValues('splits.0.categoryId') !== nextCategoryId) {
+      form.setValue('splits.0.categoryId', nextCategoryId);
     }
-  }, [form, categories, budget?.id]);
+  }, [form, categories]);
 
   const postMutation = usePostExpense({
     onSettled: () => {
@@ -47,16 +51,18 @@ export const CreateExpenseDialog = () => {
     },
   });
 
-  const onSubmit = (values: Expense) => {
+  const onSubmit = (values: ExpenseFormData) => {
     if (!userId || !budget?.id) return;
+    const expense: Omit<Expense, 'id' | 'userId' | 'budgetId' | 'createdAt' | 'updatedAt'> = {
+      amount: values.amount,
+      date: values.date,
+      description: values.description,
+      splits: values.splits,
+    };
     postMutation.mutate({
       budgetId: budget.id,
-      expense: {
-        ...values,
-        userId,
-        recurrenceInterval: 'none',
-        dueDayOfMonth: null,
-      },
+      userId,
+      expense,
     });
   };
 
@@ -64,18 +70,11 @@ export const CreateExpenseDialog = () => {
 
   const inputFields = (
     <>
-      <FormInputField form={form} name="name" label="Name" placeholder="e.g., Groceries" />
-      <FormSelectField
+      <FormInputField
         form={form}
-        name="categoryId"
-        label="Category"
-        placeholder="Select a category"
-        options={
-          categories?.map((c) => ({
-            value: String(c.id),
-            label: c.name,
-          })) ?? []
-        }
+        name="description"
+        label="Description"
+        placeholder="e.g., Groceries"
       />
       <FormInputField form={form} name="amount" label="Amount" type="number" placeholder="0.00" />
       <FormInputField form={form} name="date" label="Date" type="date" />

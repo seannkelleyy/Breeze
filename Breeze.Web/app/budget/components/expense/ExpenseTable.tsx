@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 import {
@@ -42,18 +44,17 @@ export const ExpensesTable = () => {
   const [nameFilter, setNameFilter] = React.useState('');
   const { categories, expenses } = useBudgetContext();
 
-  const columns = React.useMemo<ColumnDef<Expense>[]>(
-    () => {
-      const recurrenceLabelByInterval: Record<string, string> = {
-        none: 'One-time',
-        weekly: 'Weekly',
-        biweekly: 'Biweekly',
-        monthly: 'Monthly',
-        quarterly: 'Quarterly',
-        yearly: 'Yearly',
-      };
+  const columns = React.useMemo<ColumnDef<Expense>[]>(() => {
+    const recurrenceLabelByInterval: Record<string, string> = {
+      none: 'One-time',
+      weekly: 'Weekly',
+      biweekly: 'Biweekly',
+      monthly: 'Monthly',
+      quarterly: 'Quarterly',
+      yearly: 'Yearly',
+    };
 
-      return [
+    return [
       {
         accessorKey: 'name',
         header: ({ column }) => {
@@ -111,7 +112,7 @@ export const ExpensesTable = () => {
         },
       },
       {
-        accessorKey: 'categoryId',
+        accessorKey: 'splits',
         header: ({ column }) => {
           return (
             <Button
@@ -119,43 +120,47 @@ export const ExpensesTable = () => {
               className="flex items-center px-1 text-xs sm:text-sm"
               onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             >
-              Category
+              Categories
               <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           );
         },
         cell: ({ row }) => {
-          const categoryId = row.getValue('categoryId') as number;
-          const category = categories.find((cat) => cat.id === categoryId);
-          return category ? category.name : 'Unknown';
+          const splits = row.getValue('splits') as { categoryId: string }[] | undefined;
+          if (!splits || splits.length === 0) return 'None';
+          const categoryNames = splits
+            .map((split) => {
+              const category = categories.find((cat) => cat.id === split.categoryId);
+              return category?.name ?? 'Unknown';
+            })
+            .join(', ');
+          return categoryNames;
         },
       },
       {
         id: 'schedule',
         header: 'Schedule',
-        cell: ({ row }) => {
-          const recurrenceInterval = row.original.recurrenceInterval ?? 'none';
-          if (recurrenceInterval === 'none') {
-            return 'One-time';
-          }
-
-          const dueDay = row.original.dueDayOfMonth;
-          return `${recurrenceLabelByInterval[recurrenceInterval] ?? 'Recurring'}${dueDay ? ` - day ${dueDay}` : ''}`;
+        cell: () => {
+          // Expenses are always one-time in the new schema
+          // Recurring expenses would be generated from templates
+          return 'One-time';
         },
       },
     ];
-    },
-    [categories],
-  );
+  }, [categories]);
 
   const filteredExpenses = React.useMemo(() => {
     if (!activeCategory) return expenses;
     return expenses.filter((expense) => {
-      const category = categories.find((cat) => cat.id === expense.categoryId);
-      return category?.name === activeCategory;
+      // Check if any split in this expense belongs to the active category
+      return expense.splits.some((split) => {
+        const category = categories.find((cat) => cat.id === split.categoryId);
+        return category?.name === activeCategory;
+      });
     });
   }, [activeCategory, expenses, categories]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: filteredExpenses,
     columns,

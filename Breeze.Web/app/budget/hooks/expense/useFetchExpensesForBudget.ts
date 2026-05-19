@@ -6,7 +6,7 @@ import { Expense } from '../../types/expense';
 import { useExpenses } from './index';
 
 interface FetchExpensesForBudgetProps {
-  budgetId: number;
+  budgetId: string;
 }
 
 /**

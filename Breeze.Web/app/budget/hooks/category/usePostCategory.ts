@@ -16,11 +16,18 @@ interface PostCategoryProps {
  */
 
 interface PostCategoryMutationProps {
-  category: Category;
+  budgetId: string;
+  userId: string;
+  category: Omit<
+    Category,
+    'id' | 'userId' | 'budgetId' | 'currentSpend' | 'createdAt' | 'updatedAt'
+  >;
 }
 
 /**
  * Mutation function for posting a category.
+ * @param props.budgetId: The budget ID.
+ * @param props.userId: The user ID.
  * @param props.category: The category to post.
  */
 
@@ -28,7 +35,8 @@ const usePostCategory = ({ onSuccess, onSettled }: PostCategoryProps) => {
   const { postCategory } = useCategories();
 
   const mutationFn = useCallback(
-    ({ category }: PostCategoryMutationProps) => postCategory(category),
+    ({ budgetId, userId, category }: PostCategoryMutationProps) =>
+      postCategory(budgetId, userId, category),
     [postCategory],
   );
 

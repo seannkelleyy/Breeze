@@ -1,4 +1,5 @@
 'use client';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
@@ -34,6 +35,9 @@ export const EditGoalDialog = ({ existingGoal, refetchGoals, children }: EditGoa
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const isCompleted = form.watch('isCompleted') ?? false;
+
   const updateGoalMutation = usePatchGoal({
     onSettled: () => {
       refetchGoals();
@@ -54,6 +58,10 @@ export const EditGoalDialog = ({ existingGoal, refetchGoals, children }: EditGoa
     updateGoalMutation.mutate({ goal: updatedGoal });
   };
 
+  const handleToggleComplete = () => {
+    form.setValue('isCompleted', !isCompleted);
+  };
+
   const dialogTrigger = <div className="hover:cursor-pointer">{children}</div>;
 
   const inputFields = (
@@ -66,10 +74,10 @@ export const EditGoalDialog = ({ existingGoal, refetchGoals, children }: EditGoa
       />
       <Button
         type="button"
-        variant={form.watch('isCompleted') ? 'default' : 'outline'}
-        onClick={() => form.setValue('isCompleted', !form.watch('isCompleted'))}
+        variant={isCompleted ? 'default' : 'outline'}
+        onClick={handleToggleComplete}
       >
-        {form.watch('isCompleted') ? 'Mark as Incomplete' : 'Mark as Complete'}
+        {isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'}
       </Button>
     </>
   );

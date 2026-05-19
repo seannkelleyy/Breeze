@@ -1,6 +1,3 @@
-export { BudgetDialog } from './budgetDialog/BudgetDialog';
-export { BudgetExpenseItem } from './budgetDialog/BudgetExpenseItem';
-export { BudgetIncomeItem } from './budgetDialog/BudgetIncomeItem';
 export { CreateExpenseDialog } from './expense/dialogs/CreateExpenseDialog';
 export { EditExpenseDialog } from './expense/dialogs/EditExpenseDialog';
 export { ExpensesTable } from './expense/ExpenseTable';

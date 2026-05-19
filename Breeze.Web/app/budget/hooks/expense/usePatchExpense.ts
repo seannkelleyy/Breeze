@@ -17,13 +17,11 @@ interface PatchExpenseProps {
  */
 
 interface PatchExpenseMutationProps {
-  budgetId: number;
   expense: Expense;
 }
 
 /**
  * Mutation function for patching an expense.
- * @param props.budgetId: The budget Id of the expense to patch.
  * @param props.expense: The expense to patch.
  */
 
@@ -31,7 +29,7 @@ const usePatchExpense = ({ onSuccess, onSettled }: PatchExpenseProps) => {
   const { patchExpense } = useExpenses();
 
   const mutationFn = useCallback(
-    ({ budgetId, expense }: PatchExpenseMutationProps) => patchExpense(budgetId, expense),
+    ({ expense }: PatchExpenseMutationProps) => patchExpense(expense),
     [patchExpense],
   );
 

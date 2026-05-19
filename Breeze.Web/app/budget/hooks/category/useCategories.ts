@@ -16,55 +16,60 @@ const useCategories = () => {
   const { request } = useGraphql();
 
   const getCategories = useCallback(
-    async (budgetId: number): Promise<Category[]> => {
+    async (budgetId: string): Promise<Category[]> => {
       const resp = await request<{ expenseCategories: Category[] }>(GET_CATEGORIES, {
         budgetId,
-      } as unknown as Record<string, unknown>);
+      });
       return resp?.expenseCategories ?? [];
     },
     [request],
   );
 
   const postCategory = useCallback(
-    async (category: Category): Promise<number> => {
+    async (
+      budgetId: string,
+      userId: string,
+      category: Omit<
+        Category,
+        'id' | 'userId' | 'budgetId' | 'currentSpend' | 'createdAt' | 'updatedAt'
+      >,
+    ): Promise<string> => {
       const input = {
-        userId: category.userId,
-        budgetId: category.budgetId,
+        userId,
+        budgetId,
         name: category.name,
-        allocation: String(category.allocation ?? 0),
-        currentSpend: String(category.currentSpend ?? 0),
+        allocation: category.allocation,
+        currentSpend: '0',
       };
-      const resp = await request<{ createExpenseCategory: { id: number } }>(
-        CREATE_EXPENSE_CATEGORY,
-        { input } as unknown as Record<string, unknown>,
-      );
+      const resp = await request<{ createExpenseCategory: Category }>(CREATE_EXPENSE_CATEGORY, {
+        input,
+      });
       return resp.createExpenseCategory.id;
     },
     [request],
   );
 
   const patchCategory = useCallback(
-    async (category: Category): Promise<number> => {
+    async (category: Category): Promise<string> => {
       const input = {
         id: category.id,
         name: category.name,
-        allocation: String(category.allocation ?? 0),
-        currentSpend: String(category.currentSpend ?? 0),
+        allocation: category.allocation,
+        currentSpend: category.currentSpend,
       };
-      const resp = await request<{ updateExpenseCategory: { id: number } }>(
-        UPDATE_EXPENSE_CATEGORY,
-        { input } as unknown as Record<string, unknown>,
-      );
+      const resp = await request<{ updateExpenseCategory: Category }>(UPDATE_EXPENSE_CATEGORY, {
+        input,
+      });
       return resp.updateExpenseCategory.id;
     },
     [request],
   );
 
   const deleteCategory = useCallback(
-    async (category: Category) => {
+    async (categoryId: string) => {
       await request<{ deleteExpenseCategory: boolean }>(DELETE_EXPENSE_CATEGORY, {
-        id: category.id,
-      } as unknown as Record<string, unknown>);
+        id: categoryId,
+      });
       return true;
     },
     [request],
