@@ -61,3 +61,18 @@ export const UPDATE_LIABILITY = `
     }
   }
 `;
+
+export const DELETE_ASSET = `
+  mutation DeleteAsset($id: ID!) {
+    deleteAsset(id: $id)
+  }
+`;
+
+export const DELETE_LIABILITY = `
+  mutation DeleteLiability($id: ID!) {
+    deleteLiability(id: $id)
+  }
+`;
+
+export const GET_ASSETS = GET_ASSETS_BY_USER;
+export const GET_LIABILITIES = GET_LIABILITIES_BY_USER;

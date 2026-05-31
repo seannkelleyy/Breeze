@@ -113,6 +113,111 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 	return i, err
 }
 
+const getOrCreateUserByEmail = `-- name: GetOrCreateUserByEmail :one
+INSERT INTO users (
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+ON CONFLICT (email) DO UPDATE
+SET
+  identity_provider_id = $2,
+  updated_at = now()
+WHERE users.deleted_at IS NULL
+RETURNING
+  id,
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy,
+  created_at,
+  updated_at,
+  deleted_at
+`
+
+type GetOrCreateUserByEmailParams struct {
+	Email              string          `json:"email"`
+	IdentityProviderID string          `json:"identity_provider_id"`
+	ReturnType         ReturnType      `json:"return_type"`
+	SafeWithdrawalRate decimal.Decimal `json:"safe_withdrawal_rate"`
+	CurrencyType       string          `json:"currency_type"`
+	InflationRate      decimal.Decimal `json:"inflation_rate"`
+	DeductionType      DeductionType   `json:"deduction_type"`
+	DeductionAmount    pgtype.Numeric  `json:"deduction_amount"`
+	MaxTaxBracketID    pgtype.UUID     `json:"max_tax_bracket_id"`
+	FilingStatus       FilingStatus    `json:"filing_status"`
+	PayoffStrategy     PayoffStrategy  `json:"payoff_strategy"`
+}
+
+type GetOrCreateUserByEmailRow struct {
+	ID                 uuid.UUID          `json:"id"`
+	Email              string             `json:"email"`
+	IdentityProviderID string             `json:"identity_provider_id"`
+	ReturnType         ReturnType         `json:"return_type"`
+	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType       string             `json:"currency_type"`
+	InflationRate      decimal.Decimal    `json:"inflation_rate"`
+	DeductionType      DeductionType      `json:"deduction_type"`
+	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus       FilingStatus       `json:"filing_status"`
+	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) GetOrCreateUserByEmail(ctx context.Context, arg GetOrCreateUserByEmailParams) (GetOrCreateUserByEmailRow, error) {
+	row := q.db.QueryRow(ctx, getOrCreateUserByEmail,
+		arg.Email,
+		arg.IdentityProviderID,
+		arg.ReturnType,
+		arg.SafeWithdrawalRate,
+		arg.CurrencyType,
+		arg.InflationRate,
+		arg.DeductionType,
+		arg.DeductionAmount,
+		arg.MaxTaxBracketID,
+		arg.FilingStatus,
+		arg.PayoffStrategy,
+	)
+	var i GetOrCreateUserByEmailRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.IdentityProviderID,
+		&i.ReturnType,
+		&i.SafeWithdrawalRate,
+		&i.CurrencyType,
+		&i.InflationRate,
+		&i.DeductionType,
+		&i.DeductionAmount,
+		&i.MaxTaxBracketID,
+		&i.FilingStatus,
+		&i.PayoffStrategy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const getUserByID = `-- name: GetUserByID :one
 SELECT
   id,

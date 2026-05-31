@@ -1,7 +1,7 @@
 'use client';
-import { useQuery } from '@tanstack/react-query'
-import { CALCULATE_TAX_ESTIMATE } from '../queries/taxPlanning'
-import useGraphql from '../useGraphql'
+import { useQuery } from '@tanstack/react-query';
+import { ESTIMATE_TAXES_FOR_YEAR } from '../queries/taxPlanning';
+import useGraphql from '../useGraphql';
 
 export interface TaxEstimate {
   taxOwed: string;
@@ -10,11 +10,11 @@ export interface TaxEstimate {
   marginalRate: string;
 }
 
-interface CalculateTaxEstimateInput {
+export interface CalculateTaxEstimateInput {
   year: number;
   filingStatus: string;
   income: string;
-  deductionAmount?: string;
+  deduction?: string;
 }
 
 export const useTaxEstimate = (
@@ -27,7 +27,10 @@ export const useTaxEstimate = (
     queryKey: ['taxEstimate', input],
     queryFn: async () => {
       if (!input) return null;
-      return request<TaxEstimate>(CALCULATE_TAX_ESTIMATE, input as unknown as Record<string, unknown>);
+      return request<TaxEstimate>(
+        ESTIMATE_TAXES_FOR_YEAR,
+        input as unknown as Record<string, unknown>,
+      );
     },
     enabled: enabled && !!input,
   });

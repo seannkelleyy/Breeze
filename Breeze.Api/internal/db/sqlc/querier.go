@@ -41,6 +41,7 @@ type Querier interface {
 	GetLiabilityByID(ctx context.Context, id uuid.UUID) (Liability, error)
 	GetNetWorthSnapshot(ctx context.Context, id uuid.UUID) (NetWorthSnapshot, error)
 	GetNetWorthSnapshotByDate(ctx context.Context, arg GetNetWorthSnapshotByDateParams) (NetWorthSnapshot, error)
+	GetOrCreateUserByEmail(ctx context.Context, arg GetOrCreateUserByEmailParams) (GetOrCreateUserByEmailRow, error)
 	GetPlaidAccountsByConnectionID(ctx context.Context, plaidConnectionID uuid.UUID) ([]PlaidAccount, error)
 	GetPlaidConnectionByID(ctx context.Context, id uuid.UUID) (PlaidConnection, error)
 	GetRecurringIncomeByID(ctx context.Context, id uuid.UUID) (RecurringIncome, error)

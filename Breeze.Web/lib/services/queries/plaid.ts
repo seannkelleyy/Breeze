@@ -1,6 +1,6 @@
-export const EXCHANGE_PLAID_TOKEN = `
-  mutation ExchangePlaidToken($publicToken: String!) {
-    exchangePlaidToken(publicToken: $publicToken) {
+export const EXCHANGE_PLAID_PUBLIC_TOKEN = `
+  mutation ExchangePlaidPublicToken($userId: ID!, $publicToken: String!) {
+    exchangePlaidPublicToken(userId: $userId, publicToken: $publicToken) {
       id
       accessToken
       institutionId
@@ -10,28 +10,15 @@ export const EXCHANGE_PLAID_TOKEN = `
   }
 `;
 
-export const SYNC_PLAID_ACCOUNTS = `
-  mutation SyncPlaidAccounts($connectionId: String!) {
-    syncPlaidAccounts(connectionId: $connectionId) {
-      connectionId
-      syncedAt
-      accounts {
-        id
-        name
-        officialName
-        mask
-        type
-        subtype
-        balance
-        currency
-      }
-    }
+export const SYNC_PLAID_CONNECTION = `
+  mutation SyncPlaidConnection($id: ID!) {
+    syncPlaidConnection(id: $id)
   }
 `;
 
-export const GET_PLAID_CONNECTIONS = `
-  query GetPlaidConnections {
-    getPlaidConnections {
+export const PLAID_CONNECTIONS = `
+  query PlaidConnections($userId: ID!) {
+    plaidConnections(userId: $userId) {
       id
       accessToken
       institutionId
@@ -41,9 +28,9 @@ export const GET_PLAID_CONNECTIONS = `
   }
 `;
 
-export const GET_PLAID_ACCOUNTS = `
-  query GetPlaidAccounts($connectionId: String!) {
-    getPlaidAccounts(connectionId: $connectionId) {
+export const PLAID_ACCOUNTS = `
+  query PlaidAccounts($connectionId: ID!) {
+    plaidAccounts(connectionId: $connectionId) {
       id
       name
       officialName

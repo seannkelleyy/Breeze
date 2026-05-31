@@ -27,7 +27,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		return nil, err
 	}
 
-	user, err := r.UserService.Create(ctx, svcInput)
+	user, err := r.UserService.GetOrCreate(ctx, svcInput)
 	if err != nil {
 		return nil, err
 	}

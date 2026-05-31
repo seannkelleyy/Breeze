@@ -1,15 +1,15 @@
-export const CALCULATE_TAX_ESTIMATE = `
-  query CalculateTaxEstimate(
+export const ESTIMATE_TAXES_FOR_YEAR = `
+  query EstimateTaxesForYear(
     $year: Int!
     $filingStatus: FilingStatus!
     $income: String!
-    $deductionAmount: String
+    $deduction: String
   ) {
-    calculateTaxEstimate(
+    estimateTaxesForYear(
       year: $year
       filingStatus: $filingStatus
       income: $income
-      deductionAmount: $deductionAmount
+      deduction: $deduction
     ) {
       taxOwed
       taxableIncome

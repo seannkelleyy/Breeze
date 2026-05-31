@@ -1,6 +1,6 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react';
 
-import useHttp from './useHttp'
+import useHttp from './useHttp';
 
 interface GraphQLErrorItem {
   message: string;
@@ -19,19 +19,21 @@ const useGraphql = () => {
       query: string,
       variables?: TVariables,
     ): Promise<TData> => {
-      const response = await post<GraphQLResponse<TData>, { query: string; variables?: TVariables }>(
-        'query',
-        {
-          query,
-          variables,
-        },
-      );
+      const response = await post<
+        GraphQLResponse<TData>,
+        { query: string; variables?: TVariables }
+      >('query', {
+        query,
+        variables,
+      });
 
       if (response.errors && response.errors.length > 0) {
         throw new Error(response.errors.map((item) => item.message).join('; '));
       }
 
-      if (!response.data) {
+      // `null` is a valid GraphQL response (e.g., user not found)
+      // Only throw if the response itself is missing or undefined
+      if (response.data === undefined) {
         throw new Error('GraphQL response did not include data');
       }
 

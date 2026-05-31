@@ -1,10 +1,10 @@
 'use client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-    EXCHANGE_PLAID_TOKEN,
-    GET_PLAID_ACCOUNTS,
-    GET_PLAID_CONNECTIONS,
-    SYNC_PLAID_ACCOUNTS,
+    EXCHANGE_PLAID_PUBLIC_TOKEN,
+    PLAID_ACCOUNTS,
+    PLAID_CONNECTIONS,
+    SYNC_PLAID_CONNECTION,
 } from '../queries/plaid'
 import useGraphql from '../useGraphql'
 
@@ -38,8 +38,8 @@ export const useExchangePlaidToken = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (publicToken: string) => {
-      return request<PlaidConnection>(EXCHANGE_PLAID_TOKEN, { publicToken } as unknown as Record<string, unknown>);
+    mutationFn: async ({ userId, publicToken }: { userId: string; publicToken: string }) => {
+      return request<PlaidConnection>(EXCHANGE_PLAID_PUBLIC_TOKEN, { userId, publicToken } as unknown as Record<string, unknown>);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plaidConnections'] });
@@ -47,29 +47,30 @@ export const useExchangePlaidToken = () => {
   });
 };
 
-export const useSyncPlaidAccounts = () => {
+export const useSyncPlaidConnection = () => {
   const { request } = useGraphql();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (connectionId: string) => {
-      return request<PlaidSyncResponse>(SYNC_PLAID_ACCOUNTS, { connectionId } as unknown as Record<string, unknown>);
+    mutationFn: async (id: string) => {
+      return request<boolean>(SYNC_PLAID_CONNECTION, { id } as unknown as Record<string, unknown>);
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['plaidAccounts', data.connectionId] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plaidAccounts'] });
     },
   });
 };
 
-export const usePlaidConnections = (enabled: boolean = true) => {
+export const usePlaidConnections = (userId: string | null, enabled: boolean = true) => {
   const { request } = useGraphql();
 
   return useQuery({
-    queryKey: ['plaidConnections'],
+    queryKey: ['plaidConnections', userId],
     queryFn: async () => {
-      return request<PlaidConnection[]>(GET_PLAID_CONNECTIONS);
+      if (!userId) return null;
+      return request<PlaidConnection[]>(PLAID_CONNECTIONS, { userId } as unknown as Record<string, unknown>);
     },
-    enabled,
+    enabled: enabled && !!userId,
   });
 };
 
@@ -80,7 +81,7 @@ export const usePlaidAccounts = (connectionId: string | null, enabled: boolean =
     queryKey: ['plaidAccounts', connectionId],
     queryFn: async () => {
       if (!connectionId) return null;
-      return request<PlaidAccount[]>(GET_PLAID_ACCOUNTS, { connectionId } as unknown as Record<string, unknown>);
+      return request<PlaidAccount[]>(PLAID_ACCOUNTS, { connectionId } as unknown as Record<string, unknown>);
     },
     enabled: enabled && !!connectionId,
   });

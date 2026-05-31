@@ -135,3 +135,40 @@ SET deleted_at = now(),
     updated_at = now()
 WHERE id = $1
   AND deleted_at IS NULL;
+
+-- name: GetOrCreateUserByEmail :one
+INSERT INTO users (
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+ON CONFLICT (email) DO UPDATE
+SET
+  identity_provider_id = $2,
+  updated_at = now()
+WHERE users.deleted_at IS NULL
+RETURNING
+  id,
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy,
+  created_at,
+  updated_at,
+  deleted_at;
