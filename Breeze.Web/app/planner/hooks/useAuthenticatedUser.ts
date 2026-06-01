@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react'
 export interface AuthenticatedUserData {
   id: string;
   email: string;
+  identityProviderId: string;
   inflationRate: string;
   safeWithdrawalRate: string;
   filingStatus: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH';
@@ -15,6 +16,10 @@ export interface AuthenticatedUserData {
   currencyType: string;
   deductionType: 'STANDARD' | 'ITEMIZED';
   deductionAmount?: string;
+  payoffStrategy: 'AVALANCHE' | 'SNOWBALL';
+  maxTaxBracketId?: string | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export function useAuthenticatedUser() {
@@ -59,6 +64,7 @@ export function useAuthenticatedUser() {
         deductionType: 'STANDARD',
         deductionAmount: '13850', // 2023 standard deduction for single
         payoffStrategy: 'AVALANCHE',
+        maxTaxBracketId: null,
       };
       const result = await request<{ createUser: AuthenticatedUserData }>(CREATE_USER_MUTATION, {
         input,

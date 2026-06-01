@@ -15,12 +15,10 @@ import {
 export interface AssetData {
   id: string;
   userId: string;
-  label: string;
-  category: string;
+  name: string;
+  assetType: 'CASH' | 'INVESTMENT' | 'REAL_ESTATE' | 'VEHICLE' | 'RETIREMENT' | 'OTHER';
   currentValue: string;
-  annualReturn: string;
-  isLiquid: boolean;
-  isActive: boolean;
+  lastValueUpdatedAt: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,12 +26,14 @@ export interface AssetData {
 export interface LiabilityData {
   id: string;
   userId: string;
-  label: string;
-  category: string;
+  name: string;
+  liabilityType: 'CREDIT_CARD' | 'MORTGAGE' | 'AUTO_LOAN' | 'STUDENT_LOAN' | 'PERSONAL_LOAN' | 'OTHER';
   currentBalance: string;
   interestRate: string;
   minimumPayment: string;
-  isActive: boolean;
+  targetExtraPayment: string;
+  payoffPriority: number;
+  lastBalanceUpdatedAt: string;
   createdAt: string;
   updatedAt: string;
 }

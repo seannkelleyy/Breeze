@@ -39,6 +39,63 @@ const isLiability = (account: PlannerAccount): boolean => {
   return account.accountType.includes('loan') || account.accountType.includes('mortgage') || account.accountType.includes('credit');
 };
 
+// Map frontend account types to backend asset types
+const mapAccountTypeToAssetType = (accountType: string): 'CASH' | 'INVESTMENT' | 'REAL_ESTATE' | 'VEHICLE' | 'RETIREMENT' | 'OTHER' => {
+  const type = accountType.toLowerCase();
+  
+  // Retirement accounts
+  if (type.includes('401k') || type.includes('403b') || type.includes('457') || 
+      type.includes('roth') || type.includes('traditional') || type.includes('hsa') || 
+      type.includes('sep') || type.includes('simple') || type.includes('solo')) {
+    return 'RETIREMENT';
+  }
+  
+  // Real estate
+  if (type.includes('home')) {
+    return 'REAL_ESTATE';
+  }
+  
+  // Vehicles
+  if (type.includes('vehicle')) {
+    return 'VEHICLE';
+  }
+  
+  // Cash/liquid accounts
+  if (type.includes('checking') || type.includes('emergency') || type.includes('savings')) {
+    return 'CASH';
+  }
+  
+  // Investment/brokerage
+  if (type.includes('brokerage') || type.includes('investment')) {
+    return 'INVESTMENT';
+  }
+  
+  return 'OTHER';
+};
+
+// Map frontend account types to backend liability types
+const mapAccountTypeLiabilityType = (accountType: string): 'CREDIT_CARD' | 'MORTGAGE' | 'AUTO_LOAN' | 'STUDENT_LOAN' | 'PERSONAL_LOAN' | 'OTHER' => {
+  const type = accountType.toLowerCase();
+  
+  if (type.includes('credit')) {
+    return 'CREDIT_CARD';
+  }
+  if (type.includes('mortgage')) {
+    return 'MORTGAGE';
+  }
+  if (type.includes('auto') || type.includes('vehicle')) {
+    return 'AUTO_LOAN';
+  }
+  if (type.includes('student')) {
+    return 'STUDENT_LOAN';
+  }
+  if (type.includes('personal')) {
+    return 'PERSONAL_LOAN';
+  }
+  
+  return 'OTHER';
+};
+
 export function useAccountsPersist(userId: string | null, accounts: PlannerAccount[], savedAccountIds: Set<string>) {
   const { request } = useGraphql();
   const queryClient = useQueryClient();
@@ -51,7 +108,7 @@ export function useAccountsPersist(userId: string | null, accounts: PlannerAccou
         input: {
           userId: userId || '',
           name: account.name,
-          assetType: account.accountType,
+          assetType: mapAccountTypeToAssetType(account.accountType),
           currentValue: account.startingBalance.toString(),
         },
       });
@@ -68,7 +125,7 @@ export function useAccountsPersist(userId: string | null, accounts: PlannerAccou
           userId: userId || '',
           id: account.id,
           name: account.name,
-          assetType: account.accountType,
+          assetType: mapAccountTypeToAssetType(account.accountType),
           currentValue: account.startingBalance.toString(),
         },
       });
@@ -84,7 +141,7 @@ export function useAccountsPersist(userId: string | null, accounts: PlannerAccou
         input: {
           userId: userId || '',
           name: account.name,
-          liabilityType: account.accountType,
+          liabilityType: mapAccountTypeLiabilityType(account.accountType),
           currentBalance: account.startingBalance.toString(),
           interestRate: (account.annualRate / 100).toFixed(4),
           minimumPayment: account.contributionValue?.toString() || '0',
@@ -105,7 +162,7 @@ export function useAccountsPersist(userId: string | null, accounts: PlannerAccou
           userId: userId || '',
           id: account.id,
           name: account.name,
-          liabilityType: account.accountType,
+          liabilityType: mapAccountTypeLiabilityType(account.accountType),
           currentBalance: account.startingBalance.toString(),
           interestRate: (account.annualRate / 100).toFixed(4),
           minimumPayment: account.contributionValue?.toString() || '0',
@@ -186,7 +243,7 @@ export function useAccountsPersist(userId: string | null, accounts: PlannerAccou
 
     // Update previous accounts reference
     previousAccountsRef.current = currentAccountsMap;
-  }, [userId, accounts, savedAccountIds, createAssetMutation, updateAssetMutation, deleteAssetMutation, createLiabilityMutation, updateLiabilityMutation, deleteLiabilityMutation]);
+  }, [userId, accounts, savedAccountIds]);
 }
 
 export default useAccountsPersist;

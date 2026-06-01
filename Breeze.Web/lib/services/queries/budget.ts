@@ -25,6 +25,7 @@ export const GET_EXPENSES_BY_BUDGET = `
         id
         categoryId
         amount
+        description
       }
       createdAt
       updatedAt
@@ -42,6 +43,9 @@ export const GET_INCOMES_BY_BUDGET = `
       amount
       date
       sourceType
+      sourceTemplateId
+      sourceOccurrenceDate
+      generationMonth
       createdAt
       updatedAt
     }
@@ -102,6 +106,14 @@ export const CREATE_EXPENSE = `
       amount
       date
       description
+      splits {
+        id
+        categoryId
+        amount
+        description
+      }
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -110,6 +122,19 @@ export const UPDATE_EXPENSE = `
   mutation UpdateExpense($input: UpdateExpenseInput!) {
     updateExpense(input: $input) {
       id
+      userId
+      budgetId
+      amount
+      date
+      description
+      splits {
+        id
+        categoryId
+        amount
+        description
+      }
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -129,6 +154,12 @@ export const CREATE_INCOME = `
       name
       amount
       date
+      sourceType
+      sourceTemplateId
+      sourceOccurrenceDate
+      generationMonth
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -137,6 +168,17 @@ export const UPDATE_INCOME = `
   mutation UpdateIncome($input: UpdateIncomeInput!) {
     updateIncome(input: $input) {
       id
+      userId
+      budgetId
+      name
+      amount
+      date
+      sourceType
+      sourceTemplateId
+      sourceOccurrenceDate
+      generationMonth
+      createdAt
+      updatedAt
     }
   }
 `;

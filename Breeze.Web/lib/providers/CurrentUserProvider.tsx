@@ -4,6 +4,7 @@ import {
   Dispatch,
   type ReactNode,
   SetStateAction,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -184,59 +185,87 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const providerKey = isSignedIn ? (user?.id ?? 'signed-in') : 'signed-out';
   const backendUserID = useMemo(() => getBackendUserID(user), [user]);
 
-  const persistPreferences = async (
-    nextCurrencyCode: string,
-    nextReturnDisplayMode: 'real' | 'nominal',
-    nextInflationRate: number,
-    nextSafeWithdrawalRate: number,
-  ) => {
-    if (!isLoaded || !isSignedIn) {
-      return;
-    }
+  const persistPreferences = useCallback(
+    async (
+      nextCurrencyCode: string,
+      nextReturnDisplayMode: 'real' | 'nominal',
+      nextInflationRate: number,
+      nextSafeWithdrawalRate: number,
+    ) => {
+      if (!isLoaded || !isSignedIn) {
+        return;
+      }
 
-    try {
-      const input = {
-        id: backendUserID,
-        identityProviderId: user?.publicMetadata?.userId?.toString() ?? user?.id ?? '',
-        email: user?.emailAddresses[0]?.emailAddress ?? '',
-        returnType: nextReturnDisplayMode === 'real' ? 'REAL' : 'NOMINAL',
-        safeWithdrawalRate: (nextSafeWithdrawalRate / 100).toFixed(4),
-        currencyType: nextCurrencyCode,
-        inflationRate: (nextInflationRate / 100).toFixed(4),
-        deductionType,
-        deductionAmount,
-        maxTaxBracketId,
-        filingStatus,
-        payoffStrategy,
-      };
+      try {
+        const input = {
+          id: backendUserID,
+          identityProviderId: user?.publicMetadata?.userId?.toString() ?? user?.id ?? '',
+          email: user?.emailAddresses[0]?.emailAddress ?? '',
+          returnType: nextReturnDisplayMode === 'real' ? 'REAL' : 'NOMINAL',
+          safeWithdrawalRate: (nextSafeWithdrawalRate / 100).toFixed(4),
+          currencyType: nextCurrencyCode,
+          inflationRate: (nextInflationRate / 100).toFixed(4),
+          deductionType,
+          deductionAmount,
+          maxTaxBracketId,
+          filingStatus,
+          payoffStrategy,
+        };
 
-      await request<{ updateUser: { id: string } }, { input: typeof input }>(UPDATE_USER_MUTATION, {
-        input,
-      });
-    } catch {
-      // Keep optimistic UI state and allow future writes.
-    }
-  };
+        await request<{ updateUser: { id: string } }, { input: typeof input }>(UPDATE_USER_MUTATION, {
+          input,
+        });
+      } catch {
+        // Keep optimistic UI state and allow future writes.
+      }
+    },
+    [
+      isLoaded,
+      isSignedIn,
+      backendUserID,
+      user?.publicMetadata?.userId,
+      user?.id,
+      user?.emailAddresses,
+      request,
+      deductionType,
+      deductionAmount,
+      maxTaxBracketId,
+      filingStatus,
+      payoffStrategy,
+    ],
+  );
 
-  const updateCurrencyCode = (nextCurrencyCode: string) => {
-    setCurrencyCode(nextCurrencyCode);
-    void persistPreferences(nextCurrencyCode, returnDisplayMode, inflationRate, safeWithdrawalRate);
-  };
+  const updateCurrencyCode = useCallback(
+    (nextCurrencyCode: string) => {
+      setCurrencyCode(nextCurrencyCode);
+      void persistPreferences(nextCurrencyCode, returnDisplayMode, inflationRate, safeWithdrawalRate);
+    },
+    [persistPreferences, returnDisplayMode, inflationRate, safeWithdrawalRate],
+  );
 
-  const updateReturnDisplayMode = (nextReturnDisplayMode: 'real' | 'nominal') => {
-    setReturnDisplayMode(nextReturnDisplayMode);
-    void persistPreferences(currencyCode, nextReturnDisplayMode, inflationRate, safeWithdrawalRate);
-  };
+  const updateReturnDisplayMode = useCallback(
+    (nextReturnDisplayMode: 'real' | 'nominal') => {
+      setReturnDisplayMode(nextReturnDisplayMode);
+      void persistPreferences(currencyCode, nextReturnDisplayMode, inflationRate, safeWithdrawalRate);
+    },
+    [persistPreferences, currencyCode, inflationRate, safeWithdrawalRate],
+  );
 
-  const updateInflationRate = (nextInflationRate: number) => {
-    setInflationRate(nextInflationRate);
-    void persistPreferences(currencyCode, returnDisplayMode, nextInflationRate, safeWithdrawalRate);
-  };
+  const updateInflationRate = useCallback(
+    (nextInflationRate: number) => {
+      setInflationRate(nextInflationRate);
+      void persistPreferences(currencyCode, returnDisplayMode, nextInflationRate, safeWithdrawalRate);
+    },
+    [persistPreferences, currencyCode, returnDisplayMode, safeWithdrawalRate],
+  );
 
-  const updateSafeWithdrawalRate = (nextSafeWithdrawalRate: number) => {
-    setSafeWithdrawalRate(nextSafeWithdrawalRate);
-    void persistPreferences(currencyCode, returnDisplayMode, inflationRate, nextSafeWithdrawalRate);
-  };
+  const updateSafeWithdrawalRate = useCallback(
+    (nextSafeWithdrawalRate: number) => {
+      setSafeWithdrawalRate(nextSafeWithdrawalRate);
+      void persistPreferences(currencyCode, returnDisplayMode, inflationRate, nextSafeWithdrawalRate);
+    },
+    [persistPreferences, currencyCode, returnDisplayMode, inflationRate],
+  );
 
   useEffect(() => {
     if (!isLoaded) {
@@ -317,6 +346,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
                 inflationRate: (inflationRate / 100).toFixed(4),
                 deductionType,
                 deductionAmount,
+                maxTaxBracketId,
                 filingStatus,
                 payoffStrategy,
               },
@@ -348,17 +378,9 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     };
   }, [
     backendUserID,
-    currencyCode,
-    deductionAmount,
-    deductionType,
-    filingStatus,
-    inflationRate,
     isLoaded,
     isSignedIn,
-    payoffStrategy,
     request,
-    returnDisplayMode,
-    safeWithdrawalRate,
     user?.emailAddresses,
     user?.id,
     user?.publicMetadata,

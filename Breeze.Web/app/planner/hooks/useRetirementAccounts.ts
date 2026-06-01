@@ -12,9 +12,9 @@ export interface RetirementAccountData {
   id: string;
   userId: string;
   name: string;
-  accountType: 'TRADITIONAL_IRA' | 'ROTH_IRA' | '401K' | '403B' | 'SEP_IRA' | 'SIMPLE_IRA' | 'SOLO_401K';
-  owner: 'PRIMARY' | 'SPOUSE' | 'JOINT';
-  taxTreatment: string;
+  accountType: 'ACCOUNT_401K' | 'ACCOUNT_403B' | 'ACCOUNT_457' | 'ROTH_IRA' | 'TRADITIONAL_IRA' | 'HSA' | 'OTHER';
+  owner: 'SELF' | 'SPOUSE';
+  taxTreatment: 'PRE_TAX' | 'ROTH' | 'TAX_DEFERRED' | 'TAXABLE' | 'OTHER';
   currentBalance: string;
   annualContributionLimit: string;
   createdAt: string;

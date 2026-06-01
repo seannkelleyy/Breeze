@@ -47,7 +47,7 @@ export default function PlannerPage() {
       userError: userError?.message,
       isCreatingUser,
     });
-  }, [userId, user, isUserLoading, isUserError, userError, clerkLoaded, isCreatingUser]);
+  }, [userId, isUserLoading, isUserError, userError?.message, clerkLoaded, isCreatingUser, user?.id, user?.email]);
 
   // Step 2: Load user's persisted data (hooks populate React Query cache for sections)
   useRetirementAccounts(userId);
@@ -82,7 +82,7 @@ export default function PlannerPage() {
         JSON.stringify(prev) !== JSON.stringify(newPreferences) ? newPreferences : prev,
       );
     }
-  }, [user]);
+  }, [user?.id, user?.inflationRate, user?.safeWithdrawalRate, user?.filingStatus, user?.returnType, user?.currencyType, user?.deductionType, user?.deductionAmount]);
 
   // Step 4: Setup persistence with debounced auto-save
   const { saveStatus, isSaving, isSaved, hasError } = usePlannerPersist(userId, preferences, user?.email || null);

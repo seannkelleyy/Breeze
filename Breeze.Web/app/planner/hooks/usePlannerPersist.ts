@@ -72,7 +72,7 @@ export function usePlannerPersist(userId: string | null, preferences: Persistabl
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [userId, preferences, updateUserMutation]);
+  }, [userId, preferences]);
 
   return {
     saveStatus,

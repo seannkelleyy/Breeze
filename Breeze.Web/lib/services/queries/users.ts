@@ -3,6 +3,7 @@ export const ME_QUERY = `
     me {
       id
       email
+      identityProviderId
       inflationRate
       safeWithdrawalRate
       filingStatus
@@ -10,6 +11,10 @@ export const ME_QUERY = `
       currencyType
       deductionType
       deductionAmount
+      payoffStrategy
+      maxTaxBracketId
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -19,6 +24,7 @@ export const CREATE_USER_MUTATION = `
     createUser(input: $input) {
       id
       email
+      identityProviderId
       inflationRate
       safeWithdrawalRate
       filingStatus
@@ -26,6 +32,10 @@ export const CREATE_USER_MUTATION = `
       currencyType
       deductionType
       deductionAmount
+      payoffStrategy
+      maxTaxBracketId
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -35,6 +45,7 @@ export const UPDATE_USER_MUTATION = `
     updateUser(input: $input) {
       id
       email
+      identityProviderId
       inflationRate
       safeWithdrawalRate
       filingStatus
@@ -42,6 +53,10 @@ export const UPDATE_USER_MUTATION = `
       currencyType
       deductionType
       deductionAmount
+      payoffStrategy
+      maxTaxBracketId
+      createdAt
+      updatedAt
     }
   }
 `;

@@ -10,21 +10,29 @@ import useGraphql from '../useGraphql'
 
 export interface PlaidConnection {
   id: string;
-  accessToken: string;
+  userId: string;
+  environment: string;
+  itemId: string;
   institutionId: string;
   institutionName: string;
+  updatedAt: string;
   createdAt: string;
 }
 
 export interface PlaidAccount {
   id: string;
+  userId: string;
+  environment: string;
+  itemId: string;
   name: string;
   officialName: string;
   mask: string;
   type: string;
   subtype: string;
-  balance: string;
-  currency: string;
+  currentBalance: string;
+  isoCurrencyCode: string;
+  updatedAt: string;
+  createdAt: string;
 }
 
 export interface PlaidSyncResponse {

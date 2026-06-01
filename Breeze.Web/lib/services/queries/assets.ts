@@ -6,6 +6,9 @@ export const GET_ASSETS_BY_USER = `
       name
       assetType
       currentValue
+      lastValueUpdatedAt
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -22,6 +25,9 @@ export const GET_LIABILITIES_BY_USER = `
       minimumPayment
       targetExtraPayment
       payoffPriority
+      lastBalanceUpdatedAt
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -30,7 +36,13 @@ export const CREATE_ASSET = `
   mutation CreateAsset($input: CreateAssetInput!) {
     createAsset(input: $input) {
       id
+      userId
       name
+      assetType
+      currentValue
+      lastValueUpdatedAt
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -39,7 +51,13 @@ export const UPDATE_ASSET = `
   mutation UpdateAsset($input: UpdateAssetInput!) {
     updateAsset(input: $input) {
       id
+      userId
       name
+      assetType
+      currentValue
+      lastValueUpdatedAt
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -48,7 +66,17 @@ export const CREATE_LIABILITY = `
   mutation CreateLiability($input: CreateLiabilityInput!) {
     createLiability(input: $input) {
       id
+      userId
       name
+      liabilityType
+      currentBalance
+      interestRate
+      minimumPayment
+      targetExtraPayment
+      payoffPriority
+      lastBalanceUpdatedAt
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -57,7 +85,17 @@ export const UPDATE_LIABILITY = `
   mutation UpdateLiability($input: UpdateLiabilityInput!) {
     updateLiability(input: $input) {
       id
+      userId
       name
+      liabilityType
+      currentBalance
+      interestRate
+      minimumPayment
+      targetExtraPayment
+      payoffPriority
+      lastBalanceUpdatedAt
+      createdAt
+      updatedAt
     }
   }
 `;
