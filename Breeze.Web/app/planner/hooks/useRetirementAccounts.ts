@@ -1,23 +1,22 @@
 'use client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import useGraphql from '@/lib/services/useGraphql';
-import { 
-  GET_RETIREMENT_ACCOUNTS,
-  CREATE_RETIREMENT_ACCOUNT,
-  UPDATE_RETIREMENT_ACCOUNT,
-  DELETE_RETIREMENT_ACCOUNT,
-} from '@/lib/services/queries/retirementAccounts';
+import {
+    CREATE_RETIREMENT_ACCOUNT,
+    DELETE_RETIREMENT_ACCOUNT,
+    GET_RETIREMENT_ACCOUNTS,
+    UPDATE_RETIREMENT_ACCOUNT,
+} from '@/lib/services/queries/retirementAccounts'
+import useGraphql from '@/lib/services/useGraphql'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 export interface RetirementAccountData {
   id: string;
   userId: string;
-  label: string;
-  type: 'TRADITIONAL_IRA' | 'ROTH_IRA' | '401K' | '403B' | 'SEP_IRA' | 'SIMPLE_IRA' | 'SOLO_401K';
-  balance: string;
-  currentValue: string;
-  monthlyContribution: string;
-  annualReturn: string;
-  isActive: boolean;
+  name: string;
+  accountType: 'TRADITIONAL_IRA' | 'ROTH_IRA' | '401K' | '403B' | 'SEP_IRA' | 'SIMPLE_IRA' | 'SOLO_401K';
+  owner: 'PRIMARY' | 'SPOUSE' | 'JOINT';
+  taxTreatment: string;
+  currentBalance: string;
+  annualContributionLimit: string;
   createdAt: string;
   updatedAt: string;
 }

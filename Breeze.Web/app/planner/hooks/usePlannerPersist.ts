@@ -14,7 +14,7 @@ export interface PersistablePreferences {
   deductionAmount?: string;
 }
 
-export function usePlannerPersist(userId: string | null, preferences: PersistablePreferences) {
+export function usePlannerPersist(userId: string | null, preferences: PersistablePreferences, userEmail: string | null = null) {
   const { request } = useGraphql();
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedRef = useRef<string>('');
@@ -33,8 +33,8 @@ export function usePlannerPersist(userId: string | null, preferences: Persistabl
         currencyType: prefs.currencyType,
         deductionType: prefs.deductionType,
         deductionAmount: prefs.deductionAmount,
-        identityProviderId: '',
-        email: '',
+        identityProviderId: userEmail || 'user@example.com',
+        email: userEmail || 'user@example.com',
         payoffStrategy: 'AVALANCHE',
         maxTaxBracketId: null,
       };

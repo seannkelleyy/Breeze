@@ -8,6 +8,7 @@ import { usePlannerModel } from './hooks/planner/index';
 import { useAuthenticatedUser } from './hooks/useAuthenticatedUser';
 import { usePlannerState } from './hooks/usePlannerState';
 import { usePlannerPersist, PersistablePreferences } from './hooks/usePlannerPersist';
+import { useAccountsPersist } from './hooks/useAccountsPersist';
 import { useRetirementAccounts } from './hooks/useRetirementAccounts';
 import { useAssetsLiabilities } from './hooks/useAssetsLiabilities';
 import {
@@ -50,7 +51,6 @@ export default function PlannerPage() {
 
   // Step 2: Load user's persisted data (hooks populate React Query cache for sections)
   useRetirementAccounts(userId);
-  useAssetsLiabilities(userId);
 
   // Step 3: Initialize preferences for persistence
   const [preferences, setPreferences] = useState<PersistablePreferences>({
@@ -85,7 +85,11 @@ export default function PlannerPage() {
   }, [user]);
 
   // Step 4: Setup persistence with debounced auto-save
-  const { saveStatus, isSaving, isSaved, hasError } = usePlannerPersist(userId, preferences);
+  const { saveStatus, isSaving, isSaved, hasError } = usePlannerPersist(userId, preferences, user?.email || null);
+
+  // Step 4b: Get saved accounts for persistence tracking
+  const { assets, liabilities } = useAssetsLiabilities(userId);
+  const savedAccountIds = new Set([...assets.map(a => a.id), ...liabilities.map(l => l.id)]);
 
   // Step 5: Manage local UI state
   const {
@@ -116,6 +120,9 @@ export default function PlannerPage() {
     incomeReplacementAnnualNeed,
     incomeReplacementTarget,
   } = usePlannerModel();
+
+  // Step 6b: Setup accounts persistence with debounced auto-save
+  useAccountsPersist(userId, accounts, savedAccountIds);
 
   // Track if data is ready
   const isDataReady = !isUserLoading && userId;

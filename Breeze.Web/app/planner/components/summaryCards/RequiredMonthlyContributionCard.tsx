@@ -58,7 +58,7 @@ const RequiredMonthlyContributionCard = ({
             Annual household income: {formatCurrency(annualHouseholdIncome)}
           </p>
           <p className="text-muted-foreground mt-2 text-sm">
-            Using weighted annual return of {weightedAnnualRate.toFixed(2)}% over {yearsToGoal}{' '}
+            Using weighted annual return of {weightedAnnualRate.toFixed(2)}% over {Number.isFinite(yearsToGoal) ? yearsToGoal : 0}{' '}
             years.
           </p>
           <p className="text-muted-foreground mt-1 text-sm">

@@ -3,13 +3,12 @@ export const GET_RETIREMENT_ACCOUNTS = `
     retirementAccounts(userId: $userId) {
       id
       userId
-      label
-      type
-      balance
-      currentValue
-      monthlyContribution
-      annualReturn
-      isActive
+      name
+      accountType
+      owner
+      taxTreatment
+      currentBalance
+      annualContributionLimit
       createdAt
       updatedAt
     }
@@ -21,13 +20,12 @@ export const CREATE_RETIREMENT_ACCOUNT = `
     createRetirementAccount(input: $input) {
       id
       userId
-      label
-      type
-      balance
-      currentValue
-      monthlyContribution
-      annualReturn
-      isActive
+      name
+      accountType
+      owner
+      taxTreatment
+      currentBalance
+      annualContributionLimit
       createdAt
       updatedAt
     }
@@ -39,13 +37,12 @@ export const UPDATE_RETIREMENT_ACCOUNT = `
     updateRetirementAccount(input: $input) {
       id
       userId
-      label
-      type
-      balance
-      currentValue
-      monthlyContribution
-      annualReturn
-      isActive
+      name
+      accountType
+      owner
+      taxTreatment
+      currentBalance
+      annualContributionLimit
       createdAt
       updatedAt
     }

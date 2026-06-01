@@ -1,9 +1,9 @@
 'use client';
-import { CREATE_USER_MUTATION, ME_QUERY } from '@/lib/services/queries/users';
-import useGraphql from '@/lib/services/useGraphql';
-import { useUser } from '@clerk/nextjs';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { CREATE_USER_MUTATION, ME_QUERY } from '@/lib/services/queries/users'
+import useGraphql from '@/lib/services/useGraphql'
+import { useUser } from '@clerk/nextjs'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useRef } from 'react'
 
 export interface AuthenticatedUserData {
   id: string;
@@ -67,21 +67,24 @@ export function useAuthenticatedUser() {
       return result.createUser;
     },
     onSuccess: (newUser) => {
-      console.log('Create user mutation succeeded, invalidating me query');
-      // Invalidate and refetch the me query
+      console.log('Create user mutation succeeded, updating cache');
+      // Update the query cache with the newly created user
+      // Don't refetch - we have the data from the mutation response
       queryClient.setQueryData(['me', clerkUser?.id], newUser);
-      meQuery.refetch();
     },
     onError: (error) => {
       console.error('Create user mutation failed:', error);
     },
   });
 
+  // Track if we've attempted to create the user to prevent infinite loops
+  const creationAttemptedRef = useRef(false);
+
   // Auto-create user if:
   // 1. Me query finished loading
   // 2. Me query succeeded but returned null (user doesn't exist by Clerk ID)
   // 3. Create mutation is not already pending
-  // 4. Create mutation hasn't failed yet (to prevent infinite retries)
+  // 4. We haven't already attempted creation (to prevent infinite retries)
   // 5. User has authenticated with Clerk
   useEffect(() => {
     const shouldCreateUser =
@@ -90,10 +93,11 @@ export function useAuthenticatedUser() {
       meQuery.isSuccess &&
       meQuery.data === null &&
       !createUserMutation.isPending &&
-      !createUserMutation.isError; // Don't retry if mutation already failed
+      !creationAttemptedRef.current;
 
     if (shouldCreateUser) {
       console.log('Auto-creating user: me query returned null, triggering create mutation');
+      creationAttemptedRef.current = true;
       createUserMutation.mutate();
     }
   }, [
@@ -102,7 +106,6 @@ export function useAuthenticatedUser() {
     meQuery.isSuccess,
     meQuery.data,
     createUserMutation.isPending,
-    createUserMutation.isError,
   ]);
 
   // Derive return values
