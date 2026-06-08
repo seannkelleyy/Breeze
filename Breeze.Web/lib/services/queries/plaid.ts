@@ -38,18 +38,16 @@ export const PLAID_ACCOUNTS = `
   query PlaidAccounts($connectionId: ID!) {
     plaidAccounts(connectionId: $connectionId) {
       id
-      userId
-      environment
-      itemId
+      plaidConnectionId
+      externalId
       name
       officialName
-      mask
       type
       subtype
       currentBalance
       isoCurrencyCode
-      updatedAt
       createdAt
+      updatedAt
     }
   }
 `;

@@ -39,3 +39,6 @@ pnpm-debug.log*
 /breeze.web/coverage
 /breeze.web/next-env.d.ts
 /breeze.web/*.tsbuildinfo
+
+# api keys
+.continue/

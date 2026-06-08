@@ -1,17 +1,28 @@
 'use client';
-import { useQuery } from '@tanstack/react-query'
-import { GET_EXPENSES_BY_BUDGET } from '../queries/budget'
-import useGraphql from '../useGraphql'
+import { useQuery } from '@tanstack/react-query';
+import { GET_EXPENSES_BY_BUDGET } from '../queries/budget';
+import useGraphql from '../useGraphql';
 
 export interface ExpenseItem {
-  id: number;
+  id: string;
   userId: string;
-  name: string;
+  budgetId: string;
   amount: string;
-  categoryId: number;
-  recurrenceInterval?: string;
-  dueDayOfMonth?: number | null;
-  sourceType?: string;
+  date: string;
+  description: string;
+  splits: ExpenseSplit[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExpenseSplit {
+  id: string;
+  expenseId: string;
+  categoryId: string;
+  amount: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const useExpenses = (budgetId: number | null, enabled = true) => {
@@ -25,7 +36,7 @@ export const useExpenses = (budgetId: number | null, enabled = true) => {
         budgetId,
       } as unknown as Record<string, unknown>);
     },
-    select: (data) => (Array.isArray(data) ? data : data?.getExpensesByBudget ?? []),
+    select: (data) => (Array.isArray(data) ? data : (data?.getExpensesByBudget ?? [])),
     enabled: enabled && !!budgetId,
   });
 };

@@ -1,15 +1,16 @@
 'use client';
-import { useQuery } from '@tanstack/react-query'
-import { GET_BUDGET_BY_DATE } from '../queries/budget'
-import useGraphql from '../useGraphql'
+import { useQuery } from '@tanstack/react-query';
+import { GET_BUDGET_BY_DATE } from '../queries/budget';
+import useGraphql from '../useGraphql';
 
 export interface Budget {
-  id: number;
+  id: string;
   userId: string;
   date: string;
-  name: string;
-  createdAt?: string;
-  updatedAt?: string;
+  monthlyIncome: string;
+  monthlyExpenses: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const useBudget = (year: number, month: number, enabled = true) => {
