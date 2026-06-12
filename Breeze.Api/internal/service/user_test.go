@@ -19,6 +19,7 @@ type mockQuerier struct {
 	createUserFunc                  func(context.Context, sqlc.CreateUserParams) (sqlc.CreateUserRow, error)
 	getUserByIDFunc                 func(context.Context, uuid.UUID) (sqlc.GetUserByIDRow, error)
 	getUserByIdentityProviderIDFunc func(context.Context, string) (sqlc.GetUserByIdentityProviderIDRow, error)
+	getOrCreateUserByEmailFunc      func(context.Context, sqlc.GetOrCreateUserByEmailParams) (sqlc.GetOrCreateUserByEmailRow, error)
 	listUsersFunc                   func(context.Context) ([]sqlc.ListUsersRow, error)
 	updateUserFunc                  func(context.Context, sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error)
 	softDeleteUserFunc              func(context.Context, uuid.UUID) (int64, error)
@@ -43,6 +44,13 @@ func (m *mockQuerier) GetUserByIdentityProviderID(ctx context.Context, id string
 		return m.getUserByIdentityProviderIDFunc(ctx, id)
 	}
 	return sqlc.GetUserByIdentityProviderIDRow{}, nil
+}
+
+func (m *mockQuerier) GetOrCreateUserByEmail(ctx context.Context, params sqlc.GetOrCreateUserByEmailParams) (sqlc.GetOrCreateUserByEmailRow, error) {
+	if m.getOrCreateUserByEmailFunc != nil {
+		return m.getOrCreateUserByEmailFunc(ctx, params)
+	}
+	return sqlc.GetOrCreateUserByEmailRow{}, nil
 }
 
 func (m *mockQuerier) ListUsers(ctx context.Context) ([]sqlc.ListUsersRow, error) {

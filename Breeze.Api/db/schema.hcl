@@ -26,7 +26,7 @@ enum "payoff_strategy" {
 
 enum "asset_type" {
   schema = schema.public
-  values = ["CASH", "INVESTMENT", "RETIREMENT", "REAL_ESTATE", "VEHICLE", "OTHER"]
+  values = ["CHECKING", "EMERGENCY_FUND", "BROKERAGE", "_401K", "_403B", "_457", "ROTH_IRA", "TRADITIONAL_IRA", "HSA", "HOME", "VEHICLE", "OTHER"]
 }
 
 enum "liability_type" {
@@ -259,6 +259,36 @@ table "assets" {
     null = false
   }
 
+  column "owner" {
+    type = varchar(64)
+    null = false
+  }
+
+  column "contribution_mode" {
+    type = varchar(32)
+    null = false
+  }
+
+  column "contribution_value" {
+    type = decimal(12,2)
+    null = false
+  }
+
+  column "employer_match_rate" {
+    type = decimal(5,4)
+    null = false
+  }
+
+  column "employer_match_max_percent_of_salary" {
+    type = decimal(5,4)
+    null = false
+  }
+
+  column "annual_rate" {
+    type = decimal(5,4)
+    null = false
+  }
+
   column "last_value_updated_at" {
     type    = timestamptz
     null    = false
@@ -351,6 +381,21 @@ table "liabilities" {
     type    = int
     null    = false
     default = 0
+  }
+
+  column "owner" {
+    type = varchar(64)
+    null = false
+  }
+
+  column "contribution_mode" {
+    type = varchar(32)
+    null = false
+  }
+
+  column "contribution_value" {
+    type = decimal(12,2)
+    null = false
   }
 
   column "last_balance_updated_at" {

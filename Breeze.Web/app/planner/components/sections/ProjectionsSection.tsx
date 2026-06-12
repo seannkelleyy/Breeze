@@ -6,6 +6,15 @@ import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { ChartConfig } from '@/components/ui/chart';
 
+type SectionCollapse = {
+  requiredMonthly: boolean;
+  plannedMonthly: boolean;
+  retirementEstimateCard: boolean;
+  yearlyProjection: boolean;
+  accountBreakdown: boolean;
+  onToggle: (section: string) => void;
+};
+
 type ProjectionRow = {
   age: number;
   totalBalance: number;
@@ -33,19 +42,15 @@ interface ProjectionsSectionProps {
   projectionRows: ProjectionRow[];
   accounts: Array<{ id: string; name: string }>;
   accountLineColors: string[];
-  projectionRowsData: ProjectionRow[];
-  accountBreakdownRowsData: AccountBreakdownRow[];
-  requiredMonthlyCollapsed: boolean;
-  plannedMonthlyCollapsed: boolean;
-  retirementNeedCollapsed: boolean;
-  yearlyCollapsed: boolean;
-  accountBreakdownCollapsed: boolean;
-  onToggleRequiredMonthly: () => void;
-  onTogglePlannedMonthly: () => void;
-  onToggleRetirementNeed: () => void;
-  onToggleYearly: () => void;
-  onToggleAccountBreakdown: () => void;
+  accountBreakdownRows: AccountBreakdownRow[];
+  collapses: SectionCollapse;
 }
+
+const ToggleBtn = ({ collapsed, onClick }: { collapsed: boolean; onClick: () => void }) => (
+  <Button type="button" variant="ghost" size="icon" onClick={onClick}>
+    {collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+  </Button>
+);
 
 export function ProjectionsSection({
   currentAge,
@@ -53,66 +58,35 @@ export function ProjectionsSection({
   projectionRows,
   accounts,
   accountLineColors,
-  projectionRowsData,
-  accountBreakdownRowsData,
-  requiredMonthlyCollapsed,
-  plannedMonthlyCollapsed,
-  retirementNeedCollapsed,
-  yearlyCollapsed,
-  accountBreakdownCollapsed,
-  onToggleRequiredMonthly,
-  onTogglePlannedMonthly,
-  onToggleRetirementNeed,
-  onToggleYearly,
-  onToggleAccountBreakdown,
+  accountBreakdownRows,
+  collapses,
 }: ProjectionsSectionProps) {
+  const {
+    requiredMonthly,
+    plannedMonthly,
+    retirementEstimateCard,
+    yearlyProjection,
+    accountBreakdown,
+    onToggle,
+  } = collapses;
+
   return (
     <div className="space-y-6">
       <SummaryCards
-        requiredMonthlyCollapsed={requiredMonthlyCollapsed}
+        requiredMonthlyCollapsed={requiredMonthly}
         requiredMonthlyToggleControl={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onToggleRequiredMonthly}
-          >
-            {requiredMonthlyCollapsed ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronUp className="h-4 w-4" />
-            )}
-          </Button>
+          <ToggleBtn collapsed={requiredMonthly} onClick={() => onToggle('requiredMonthly')} />
         }
-        plannedMonthlyCollapsed={plannedMonthlyCollapsed}
+        plannedMonthlyCollapsed={plannedMonthly}
         plannedMonthlyToggleControl={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onTogglePlannedMonthly}
-          >
-            {plannedMonthlyCollapsed ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronUp className="h-4 w-4" />
-            )}
-          </Button>
+          <ToggleBtn collapsed={plannedMonthly} onClick={() => onToggle('plannedMonthly')} />
         }
-        retirementNeedCollapsed={retirementNeedCollapsed}
+        retirementNeedCollapsed={retirementEstimateCard}
         retirementNeedToggleControl={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onToggleRetirementNeed}
-          >
-            {retirementNeedCollapsed ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronUp className="h-4 w-4" />
-            )}
-          </Button>
+          <ToggleBtn
+            collapsed={retirementEstimateCard}
+            onClick={() => onToggle('retirementEstimateCard')}
+          />
         }
       />
       <ProjectionChartCard
@@ -126,41 +100,16 @@ export function ProjectionsSection({
       />
       <ProjectionTables
         sections={{
-          yearlyCollapsed,
+          yearlyCollapsed: yearlyProjection,
           yearlyToggleControl: (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={onToggleYearly}
-            >
-              {yearlyCollapsed ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronUp className="h-4 w-4" />
-              )}
-            </Button>
+            <ToggleBtn collapsed={yearlyProjection} onClick={() => onToggle('yearlyProjection')} />
           ),
-          accountBreakdownCollapsed,
+          accountBreakdownCollapsed: accountBreakdown,
           accountBreakdownToggleControl: (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={onToggleAccountBreakdown}
-            >
-              {accountBreakdownCollapsed ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronUp className="h-4 w-4" />
-              )}
-            </Button>
+            <ToggleBtn collapsed={accountBreakdown} onClick={() => onToggle('accountBreakdown')} />
           ),
         }}
-        data={{
-          projectionRows: projectionRowsData,
-          accountBreakdownRows: accountBreakdownRowsData,
-        }}
+        data={{ projectionRows, accountBreakdownRows }}
       />
     </div>
   );

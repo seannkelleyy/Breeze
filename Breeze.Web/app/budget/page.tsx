@@ -9,6 +9,7 @@ import { useBudgetContext } from './providers/index';
 import { useRegenerateBudget } from './hooks/budget/index';
 import { Button } from '@/components/ui/button';
 import {
+  CategoriesTable,
   CreateExpenseDialog,
   CreateIncomeDialog,
   ExpensesTable,
@@ -163,9 +164,13 @@ const Dashboard = () => {
       <Goals />
       <Tabs defaultValue="expenses" className="m-4 flex flex-col items-center justify-center">
         <TabsList>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
           <TabsTrigger value="income">Incomes</TabsTrigger>
         </TabsList>
+        <TabsContent value="categories">
+          <CategoriesTable />
+        </TabsContent>
         <TabsContent value="expenses">
           <ExpensesTable />
         </TabsContent>

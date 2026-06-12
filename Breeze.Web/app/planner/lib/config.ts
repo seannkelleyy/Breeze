@@ -1,4 +1,10 @@
-import { AccountOwner, AccountRateProfile, AccountType, ContributionMode } from '../types/account';
+import {
+  AccountOwner,
+  AccountRateProfile,
+  AccountType,
+  ContributionMode,
+  LiabilityType,
+} from '../types/account';
 import { HomeGrowthProfile, VehicleDepreciationProfile } from '../types/finance';
 import {
   PLANNER_ACCOUNT_RATE_PROFILE_OPTIONS,
@@ -24,6 +30,8 @@ export const accountTypeOptions: ReadonlyArray<{
   { value: 'student-loan', label: 'Student Loan' },
   { value: 'credit-card', label: 'Credit Card' },
   { value: 'personal-loan', label: 'Personal Loan' },
+  { value: 'auto-loan', label: 'Auto Loan' },
+  { value: 'mortgage', label: 'Mortgage' },
   { value: 'other', label: 'Other' },
 ];
 
@@ -53,6 +61,17 @@ export const liabilityContributionModeOptions: ReadonlyArray<{
   { value: 'salary-percent', label: 'Payment % of Salary' },
 ];
 
+export const liabilityTypeOptions: ReadonlyArray<{
+  value: LiabilityType;
+  label: string;
+}> = [
+  { value: 'student-loan', label: 'Student Loan' },
+  { value: 'credit-card', label: 'Credit Card' },
+  { value: 'personal-loan', label: 'Personal Loan' },
+  { value: 'auto-loan', label: 'Auto Loan' },
+  { value: 'mortgage', label: 'Mortgage' },
+];
+
 export const homeGrowthProfileOptions: ReadonlyArray<{
   value: HomeGrowthProfile;
   label: string;
@@ -74,6 +93,8 @@ const liabilityAccountTypes = new Set<AccountType>([
   'student-loan',
   'credit-card',
   'personal-loan',
+  'auto-loan',
+  'mortgage',
 ]);
 const nonContributingAssetAccountTypes = new Set<AccountType>(['home', 'vehicle']);
 const depreciatingAssetAccountTypes = new Set<AccountType>(['vehicle']);
@@ -87,6 +108,8 @@ export const accountTypesWithoutIrsLimits = new Set<AccountType>([
   'student-loan',
   'credit-card',
   'personal-loan',
+  'auto-loan',
+  'mortgage',
   'other',
 ]);
 

@@ -126,10 +126,16 @@ enum IncomeSourceType {
 }
 
 enum AssetType {
-  CASH
-  INVESTMENT
-  RETIREMENT
-  REAL_ESTATE
+  CHECKING
+  EMERGENCY_FUND
+  BROKERAGE
+  _401K
+  _403B
+  _457
+  ROTH_IRA
+  TRADITIONAL_IRA
+  HSA
+  HOME
   VEHICLE
   OTHER
 }
@@ -218,6 +224,12 @@ type Asset {
   name: String!
   assetType: AssetType!
   currentValue: String!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
+  employerMatchRate: String!
+  employerMatchMaxPercentOfSalary: String!
+  annualRate: String!
   lastValueUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
@@ -233,6 +245,9 @@ type Liability {
   minimumPayment: String!
   targetExtraPayment: String!
   payoffPriority: Int!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
   lastBalanceUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
@@ -442,6 +457,9 @@ input CreateLiabilityInput {
   minimumPayment: String!
   targetExtraPayment: String!
   payoffPriority: Int!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
 }
 
 input UpdateLiabilityInput {
@@ -453,6 +471,9 @@ input UpdateLiabilityInput {
   minimumPayment: String!
   targetExtraPayment: String!
   payoffPriority: Int!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
 }
 
 input CreateBudgetInput {
@@ -625,6 +646,12 @@ input CreateAssetInput {
   name: String!
   assetType: AssetType!
   currentValue: String!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
+  employerMatchRate: String!
+  employerMatchMaxPercentOfSalary: String!
+  annualRate: String!
 }
 
 input UpdateAssetInput {
@@ -632,6 +659,12 @@ input UpdateAssetInput {
   name: String!
   assetType: AssetType!
   currentValue: String!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
+  employerMatchRate: String!
+  employerMatchMaxPercentOfSalary: String!
+  annualRate: String!
 }
 
 

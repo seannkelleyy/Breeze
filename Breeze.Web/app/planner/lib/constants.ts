@@ -113,30 +113,6 @@ export const PLANNER_DEFAULT_SPOUSE_PERSON = {
   incomeGrowthRate: PLANNER_DEFAULT_INCOME_GROWTH_RATE,
 } as const;
 
-export const PLANNER_DEFAULT_PRIMARY_401K_ACCOUNT = {
-  name: '401(k)',
-  owner: 'self',
-  accountType: '401k',
-  contributionMode: 'monthly',
-  contributionValue: 1000,
-  employerMatchRate: 100,
-  employerMatchMaxPercentOfSalary: 4,
-  startingBalance: 0,
-  annualRate: 7,
-} as const;
-
-export const PLANNER_DEFAULT_PRIMARY_ROTH_ACCOUNT = {
-  name: 'Roth IRA',
-  owner: 'self',
-  accountType: 'roth-ira',
-  contributionMode: 'monthly',
-  contributionValue: 500,
-  employerMatchRate: 0,
-  employerMatchMaxPercentOfSalary: 0,
-  startingBalance: 0,
-  annualRate: 7,
-} as const;
-
 export const PLANNER_DEFAULT_NEW_ACCOUNT = {
   owner: 'self',
   accountType: 'other',

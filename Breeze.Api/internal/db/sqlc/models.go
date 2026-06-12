@@ -16,12 +16,18 @@ import (
 type AssetType string
 
 const (
-	AssetTypeCASH       AssetType = "CASH"
-	AssetTypeINVESTMENT AssetType = "INVESTMENT"
-	AssetTypeRETIREMENT AssetType = "RETIREMENT"
-	AssetTypeREALESTATE AssetType = "REAL_ESTATE"
-	AssetTypeVEHICLE    AssetType = "VEHICLE"
-	AssetTypeOTHER      AssetType = "OTHER"
+	AssetTypeCHECKING       AssetType = "CHECKING"
+	AssetTypeEMERGENCYFUND  AssetType = "EMERGENCY_FUND"
+	AssetTypeBROKERAGE      AssetType = "BROKERAGE"
+	AssetType401K           AssetType = "_401K"
+	AssetType403B           AssetType = "_403B"
+	AssetType457            AssetType = "_457"
+	AssetTypeROTHIRA        AssetType = "ROTH_IRA"
+	AssetTypeTRADITIONALIRA AssetType = "TRADITIONAL_IRA"
+	AssetTypeHSA            AssetType = "HSA"
+	AssetTypeHOME           AssetType = "HOME"
+	AssetTypeVEHICLE        AssetType = "VEHICLE"
+	AssetTypeOTHER          AssetType = "OTHER"
 )
 
 func (e *AssetType) Scan(src interface{}) error {
@@ -498,15 +504,21 @@ func (ns NullReturnType) Value() (driver.Value, error) {
 }
 
 type Asset struct {
-	ID                 uuid.UUID          `json:"id"`
-	UserID             uuid.UUID          `json:"user_id"`
-	Name               string             `json:"name"`
-	AssetType          AssetType          `json:"asset_type"`
-	CurrentValue       decimal.Decimal    `json:"current_value"`
-	LastValueUpdatedAt pgtype.Timestamptz `json:"last_value_updated_at"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	ID                              uuid.UUID          `json:"id"`
+	UserID                          uuid.UUID          `json:"user_id"`
+	Name                            string             `json:"name"`
+	AssetType                       AssetType          `json:"asset_type"`
+	CurrentValue                    decimal.Decimal    `json:"current_value"`
+	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
+	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt                       pgtype.Timestamptz `json:"deleted_at"`
+	Owner                           string             `json:"owner"`
+	ContributionMode                string             `json:"contribution_mode"`
+	ContributionValue               decimal.Decimal    `json:"contribution_value"`
+	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
+	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
+	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
 }
 
 type Budget struct {
@@ -619,6 +631,9 @@ type Liability struct {
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+	Owner                string             `json:"owner"`
+	ContributionMode     string             `json:"contribution_mode"`
+	ContributionValue    decimal.Decimal    `json:"contribution_value"`
 }
 
 type NetWorthSnapshot struct {

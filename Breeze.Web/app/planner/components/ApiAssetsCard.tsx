@@ -26,10 +26,16 @@ import {
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 
 const assetTypeOptions: Array<{ value: ApiAssetType; label: string }> = [
-  { value: 'CASH', label: 'Cash' },
-  { value: 'INVESTMENT', label: 'Investment' },
-  { value: 'RETIREMENT', label: 'Retirement' },
-  { value: 'REAL_ESTATE', label: 'Real Estate' },
+  { value: 'CHECKING', label: 'Checking' },
+  { value: 'EMERGENCY_FUND', label: 'Emergency Fund' },
+  { value: 'BROKERAGE', label: 'Brokerage' },
+  { value: '_401K', label: '401(k)' },
+  { value: '_403B', label: '403(b)' },
+  { value: '_457', label: '457' },
+  { value: 'ROTH_IRA', label: 'Roth IRA' },
+  { value: 'TRADITIONAL_IRA', label: 'Traditional IRA' },
+  { value: 'HSA', label: 'HSA' },
+  { value: 'HOME', label: 'Home / Real Estate' },
   { value: 'VEHICLE', label: 'Vehicle' },
   { value: 'OTHER', label: 'Other' },
 ];
@@ -52,7 +58,7 @@ const ApiAssetsCard = () => {
   } = useCurrentUser();
 
   const [newAssetName, setNewAssetName] = useState('');
-  const [newAssetType, setNewAssetType] = useState<ApiAssetType>('INVESTMENT');
+  const [newAssetType, setNewAssetType] = useState<ApiAssetType>('BROKERAGE');
   const [newAssetValue, setNewAssetValue] = useState('0.00');
   const [editByAssetId, setEditByAssetId] = useState<Record<string, EditableAssetValues>>({});
 
@@ -109,7 +115,7 @@ const ApiAssetsCard = () => {
     });
 
     setNewAssetName('');
-    setNewAssetType('INVESTMENT');
+    setNewAssetType('BROKERAGE');
     setNewAssetValue('0.00');
   };
 

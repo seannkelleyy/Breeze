@@ -15,39 +15,39 @@ import (
 )
 
 type mockAssetQuerier struct {
-	createAssetFunc        func(context.Context, sqlc.CreateAssetParams) (sqlc.Asset, error)
-	getAssetByIDFunc       func(context.Context, uuid.UUID) (sqlc.Asset, error)
-	listAssetsByUserIDFunc func(context.Context, uuid.UUID) ([]sqlc.Asset, error)
-	updateAssetFunc        func(context.Context, sqlc.UpdateAssetParams) (sqlc.Asset, error)
+	createAssetFunc        func(context.Context, sqlc.CreateAssetParams) (sqlc.CreateAssetRow, error)
+	getAssetByIDFunc       func(context.Context, uuid.UUID) (sqlc.GetAssetByIDRow, error)
+	listAssetsByUserIDFunc func(context.Context, uuid.UUID) ([]sqlc.ListAssetsByUserIDRow, error)
+	updateAssetFunc        func(context.Context, sqlc.UpdateAssetParams) (sqlc.UpdateAssetRow, error)
 	softDeleteAssetFunc    func(context.Context, uuid.UUID) (int64, error)
 }
 
-func (m *mockAssetQuerier) CreateAsset(ctx context.Context, params sqlc.CreateAssetParams) (sqlc.Asset, error) {
+func (m *mockAssetQuerier) CreateAsset(ctx context.Context, params sqlc.CreateAssetParams) (sqlc.CreateAssetRow, error) {
 	if m.createAssetFunc != nil {
 		return m.createAssetFunc(ctx, params)
 	}
-	return sqlc.Asset{}, nil
+	return sqlc.CreateAssetRow{}, nil
 }
 
-func (m *mockAssetQuerier) GetAssetByID(ctx context.Context, id uuid.UUID) (sqlc.Asset, error) {
+func (m *mockAssetQuerier) GetAssetByID(ctx context.Context, id uuid.UUID) (sqlc.GetAssetByIDRow, error) {
 	if m.getAssetByIDFunc != nil {
 		return m.getAssetByIDFunc(ctx, id)
 	}
-	return sqlc.Asset{}, nil
+	return sqlc.GetAssetByIDRow{}, nil
 }
 
-func (m *mockAssetQuerier) ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Asset, error) {
+func (m *mockAssetQuerier) ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListAssetsByUserIDRow, error) {
 	if m.listAssetsByUserIDFunc != nil {
 		return m.listAssetsByUserIDFunc(ctx, userID)
 	}
-	return []sqlc.Asset{}, nil
+	return []sqlc.ListAssetsByUserIDRow{}, nil
 }
 
-func (m *mockAssetQuerier) UpdateAsset(ctx context.Context, params sqlc.UpdateAssetParams) (sqlc.Asset, error) {
+func (m *mockAssetQuerier) UpdateAsset(ctx context.Context, params sqlc.UpdateAssetParams) (sqlc.UpdateAssetRow, error) {
 	if m.updateAssetFunc != nil {
 		return m.updateAssetFunc(ctx, params)
 	}
-	return sqlc.Asset{}, nil
+	return sqlc.UpdateAssetRow{}, nil
 }
 
 func (m *mockAssetQuerier) SoftDeleteAsset(ctx context.Context, id uuid.UUID) (int64, error) {
@@ -67,7 +67,7 @@ func testAssetRow() sqlc.Asset {
 		ID:                 assetID,
 		UserID:             userID,
 		Name:               "Brokerage",
-		AssetType:          sqlc.AssetTypeINVESTMENT,
+		AssetType:          sqlc.AssetTypeBROKERAGE,
 		CurrentValue:       currentValue,
 		LastValueUpdatedAt: timestamp,
 		CreatedAt:          timestamp,
@@ -81,10 +81,26 @@ func TestAssetService_Create(t *testing.T) {
 	assetRow := testAssetRow()
 
 	mock := &mockAssetQuerier{
-		createAssetFunc: func(ctx context.Context, params sqlc.CreateAssetParams) (sqlc.Asset, error) {
+		createAssetFunc: func(ctx context.Context, params sqlc.CreateAssetParams) (sqlc.CreateAssetRow, error) {
 			assert.Equal(t, assetRow.UserID, params.UserID)
 			assert.Equal(t, "Brokerage", params.Name)
-			return assetRow, nil
+			return sqlc.CreateAssetRow{
+				ID:                              assetRow.ID,
+				UserID:                          assetRow.UserID,
+				Name:                            assetRow.Name,
+				AssetType:                       assetRow.AssetType,
+				CurrentValue:                    assetRow.CurrentValue,
+				Owner:                           assetRow.Owner,
+				ContributionMode:                assetRow.ContributionMode,
+				ContributionValue:               assetRow.ContributionValue,
+				EmployerMatchRate:               assetRow.EmployerMatchRate,
+				EmployerMatchMaxPercentOfSalary: assetRow.EmployerMatchMaxPercentOfSalary,
+				AnnualRate:                      assetRow.AnnualRate,
+				LastValueUpdatedAt:              assetRow.LastValueUpdatedAt,
+				CreatedAt:                       assetRow.CreatedAt,
+				UpdatedAt:                       assetRow.UpdatedAt,
+				DeletedAt:                       assetRow.DeletedAt,
+			}, nil
 		},
 	}
 
@@ -92,7 +108,7 @@ func TestAssetService_Create(t *testing.T) {
 	input := CreateAssetInput{
 		UserID:       assetRow.UserID,
 		Name:         "Brokerage",
-		AssetType:    sqlc.AssetTypeINVESTMENT,
+		AssetType:    sqlc.AssetTypeBROKERAGE,
 		CurrentValue: assetRow.CurrentValue,
 	}
 
@@ -110,9 +126,25 @@ func TestAssetService_GetByID(t *testing.T) {
 
 	t.Run("retrieves by id", func(t *testing.T) {
 		mock := &mockAssetQuerier{
-			getAssetByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.Asset, error) {
+			getAssetByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetAssetByIDRow, error) {
 				assert.Equal(t, assetRow.ID, id)
-				return assetRow, nil
+				return sqlc.GetAssetByIDRow{
+					ID:                              assetRow.ID,
+					UserID:                          assetRow.UserID,
+					Name:                            assetRow.Name,
+					AssetType:                       assetRow.AssetType,
+					CurrentValue:                    assetRow.CurrentValue,
+					Owner:                           assetRow.Owner,
+					ContributionMode:                assetRow.ContributionMode,
+					ContributionValue:               assetRow.ContributionValue,
+					EmployerMatchRate:               assetRow.EmployerMatchRate,
+					EmployerMatchMaxPercentOfSalary: assetRow.EmployerMatchMaxPercentOfSalary,
+					AnnualRate:                      assetRow.AnnualRate,
+					LastValueUpdatedAt:              assetRow.LastValueUpdatedAt,
+					CreatedAt:                       assetRow.CreatedAt,
+					UpdatedAt:                       assetRow.UpdatedAt,
+					DeletedAt:                       assetRow.DeletedAt,
+				}, nil
 			},
 		}
 
@@ -126,8 +158,8 @@ func TestAssetService_GetByID(t *testing.T) {
 
 	t.Run("returns not found", func(t *testing.T) {
 		mock := &mockAssetQuerier{
-			getAssetByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.Asset, error) {
-				return sqlc.Asset{}, pgx.ErrNoRows
+			getAssetByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetAssetByIDRow, error) {
+				return sqlc.GetAssetByIDRow{}, pgx.ErrNoRows
 			},
 		}
 
@@ -147,9 +179,44 @@ func TestAssetService_ListByUserID(t *testing.T) {
 	asset2.Name = "Checking"
 
 	mock := &mockAssetQuerier{
-		listAssetsByUserIDFunc: func(ctx context.Context, userID uuid.UUID) ([]sqlc.Asset, error) {
+		listAssetsByUserIDFunc: func(ctx context.Context, userID uuid.UUID) ([]sqlc.ListAssetsByUserIDRow, error) {
 			assert.Equal(t, asset1.UserID, userID)
-			return []sqlc.Asset{asset1, asset2}, nil
+			return []sqlc.ListAssetsByUserIDRow{
+				{
+					ID:                              asset1.ID,
+					UserID:                          asset1.UserID,
+					Name:                            asset1.Name,
+					AssetType:                       asset1.AssetType,
+					CurrentValue:                    asset1.CurrentValue,
+					Owner:                           asset1.Owner,
+					ContributionMode:                asset1.ContributionMode,
+					ContributionValue:               asset1.ContributionValue,
+					EmployerMatchRate:               asset1.EmployerMatchRate,
+					EmployerMatchMaxPercentOfSalary: asset1.EmployerMatchMaxPercentOfSalary,
+					AnnualRate:                      asset1.AnnualRate,
+					LastValueUpdatedAt:              asset1.LastValueUpdatedAt,
+					CreatedAt:                       asset1.CreatedAt,
+					UpdatedAt:                       asset1.UpdatedAt,
+					DeletedAt:                       asset1.DeletedAt,
+				},
+				{
+					ID:                              asset2.ID,
+					UserID:                          asset2.UserID,
+					Name:                            asset2.Name,
+					AssetType:                       asset2.AssetType,
+					CurrentValue:                    asset2.CurrentValue,
+					Owner:                           asset2.Owner,
+					ContributionMode:                asset2.ContributionMode,
+					ContributionValue:               asset2.ContributionValue,
+					EmployerMatchRate:               asset2.EmployerMatchRate,
+					EmployerMatchMaxPercentOfSalary: asset2.EmployerMatchMaxPercentOfSalary,
+					AnnualRate:                      asset2.AnnualRate,
+					LastValueUpdatedAt:              asset2.LastValueUpdatedAt,
+					CreatedAt:                       asset2.CreatedAt,
+					UpdatedAt:                       asset2.UpdatedAt,
+					DeletedAt:                       asset2.DeletedAt,
+				},
+			}, nil
 		},
 	}
 
@@ -168,13 +235,29 @@ func TestAssetService_Update(t *testing.T) {
 	updatedValue, _ := decimal.Parse("130000.00")
 
 	mock := &mockAssetQuerier{
-		updateAssetFunc: func(ctx context.Context, params sqlc.UpdateAssetParams) (sqlc.Asset, error) {
+		updateAssetFunc: func(ctx context.Context, params sqlc.UpdateAssetParams) (sqlc.UpdateAssetRow, error) {
 			assert.Equal(t, assetRow.ID, params.ID)
 			assert.Equal(t, "Brokerage Updated", params.Name)
 			updated := assetRow
 			updated.Name = params.Name
 			updated.CurrentValue = params.CurrentValue
-			return updated, nil
+			return sqlc.UpdateAssetRow{
+				ID:                              updated.ID,
+				UserID:                          updated.UserID,
+				Name:                            updated.Name,
+				AssetType:                       updated.AssetType,
+				CurrentValue:                    updated.CurrentValue,
+				Owner:                           updated.Owner,
+				ContributionMode:                updated.ContributionMode,
+				ContributionValue:               updated.ContributionValue,
+				EmployerMatchRate:               updated.EmployerMatchRate,
+				EmployerMatchMaxPercentOfSalary: updated.EmployerMatchMaxPercentOfSalary,
+				AnnualRate:                      updated.AnnualRate,
+				LastValueUpdatedAt:              updated.LastValueUpdatedAt,
+				CreatedAt:                       updated.CreatedAt,
+				UpdatedAt:                       updated.UpdatedAt,
+				DeletedAt:                       updated.DeletedAt,
+			}, nil
 		},
 	}
 
@@ -182,7 +265,7 @@ func TestAssetService_Update(t *testing.T) {
 	result, err := svc.Update(ctx, UpdateAssetInput{
 		ID:           assetRow.ID,
 		Name:         "Brokerage Updated",
-		AssetType:    sqlc.AssetTypeINVESTMENT,
+		AssetType:    sqlc.AssetTypeBROKERAGE,
 		CurrentValue: updatedValue,
 	})
 

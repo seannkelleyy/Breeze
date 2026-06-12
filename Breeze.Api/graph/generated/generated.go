@@ -36,14 +36,20 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Asset struct {
-		AssetType          func(childComplexity int) int
-		CreatedAt          func(childComplexity int) int
-		CurrentValue       func(childComplexity int) int
-		ID                 func(childComplexity int) int
-		LastValueUpdatedAt func(childComplexity int) int
-		Name               func(childComplexity int) int
-		UpdatedAt          func(childComplexity int) int
-		UserID             func(childComplexity int) int
+		AnnualRate                      func(childComplexity int) int
+		AssetType                       func(childComplexity int) int
+		ContributionMode                func(childComplexity int) int
+		ContributionValue               func(childComplexity int) int
+		CreatedAt                       func(childComplexity int) int
+		CurrentValue                    func(childComplexity int) int
+		EmployerMatchMaxPercentOfSalary func(childComplexity int) int
+		EmployerMatchRate               func(childComplexity int) int
+		ID                              func(childComplexity int) int
+		LastValueUpdatedAt              func(childComplexity int) int
+		Name                            func(childComplexity int) int
+		Owner                           func(childComplexity int) int
+		UpdatedAt                       func(childComplexity int) int
+		UserID                          func(childComplexity int) int
 	}
 
 	Budget struct {
@@ -151,6 +157,8 @@ type ComplexityRoot struct {
 	}
 
 	Liability struct {
+		ContributionMode     func(childComplexity int) int
+		ContributionValue    func(childComplexity int) int
 		CreatedAt            func(childComplexity int) int
 		CurrentBalance       func(childComplexity int) int
 		ID                   func(childComplexity int) int
@@ -159,6 +167,7 @@ type ComplexityRoot struct {
 		LiabilityType        func(childComplexity int) int
 		MinimumPayment       func(childComplexity int) int
 		Name                 func(childComplexity int) int
+		Owner                func(childComplexity int) int
 		PayoffPriority       func(childComplexity int) int
 		TargetExtraPayment   func(childComplexity int) int
 		UpdatedAt            func(childComplexity int) int
@@ -492,12 +501,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Asset.annualRate":
+		if e.ComplexityRoot.Asset.AnnualRate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Asset.AnnualRate(childComplexity), true
 	case "Asset.assetType":
 		if e.ComplexityRoot.Asset.AssetType == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Asset.AssetType(childComplexity), true
+	case "Asset.contributionMode":
+		if e.ComplexityRoot.Asset.ContributionMode == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Asset.ContributionMode(childComplexity), true
+	case "Asset.contributionValue":
+		if e.ComplexityRoot.Asset.ContributionValue == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Asset.ContributionValue(childComplexity), true
 	case "Asset.createdAt":
 		if e.ComplexityRoot.Asset.CreatedAt == nil {
 			break
@@ -510,6 +537,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Asset.CurrentValue(childComplexity), true
+	case "Asset.employerMatchMaxPercentOfSalary":
+		if e.ComplexityRoot.Asset.EmployerMatchMaxPercentOfSalary == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Asset.EmployerMatchMaxPercentOfSalary(childComplexity), true
+	case "Asset.employerMatchRate":
+		if e.ComplexityRoot.Asset.EmployerMatchRate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Asset.EmployerMatchRate(childComplexity), true
 	case "Asset.id":
 		if e.ComplexityRoot.Asset.ID == nil {
 			break
@@ -528,6 +567,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Asset.Name(childComplexity), true
+	case "Asset.owner":
+		if e.ComplexityRoot.Asset.Owner == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Asset.Owner(childComplexity), true
 	case "Asset.updatedAt":
 		if e.ComplexityRoot.Asset.UpdatedAt == nil {
 			break
@@ -995,6 +1040,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.LadderStep.Year(childComplexity), true
 
+	case "Liability.contributionMode":
+		if e.ComplexityRoot.Liability.ContributionMode == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.ContributionMode(childComplexity), true
+	case "Liability.contributionValue":
+		if e.ComplexityRoot.Liability.ContributionValue == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.ContributionValue(childComplexity), true
 	case "Liability.createdAt":
 		if e.ComplexityRoot.Liability.CreatedAt == nil {
 			break
@@ -1043,6 +1100,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Liability.Name(childComplexity), true
+	case "Liability.owner":
+		if e.ComplexityRoot.Liability.Owner == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.Owner(childComplexity), true
 	case "Liability.payoffPriority":
 		if e.ComplexityRoot.Liability.PayoffPriority == nil {
 			break
@@ -2834,10 +2897,16 @@ enum IncomeSourceType {
 }
 
 enum AssetType {
-  CASH
-  INVESTMENT
-  RETIREMENT
-  REAL_ESTATE
+  CHECKING
+  EMERGENCY_FUND
+  BROKERAGE
+  _401K
+  _403B
+  _457
+  ROTH_IRA
+  TRADITIONAL_IRA
+  HSA
+  HOME
   VEHICLE
   OTHER
 }
@@ -2926,6 +2995,12 @@ type Asset {
   name: String!
   assetType: AssetType!
   currentValue: String!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
+  employerMatchRate: String!
+  employerMatchMaxPercentOfSalary: String!
+  annualRate: String!
   lastValueUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
@@ -2941,6 +3016,9 @@ type Liability {
   minimumPayment: String!
   targetExtraPayment: String!
   payoffPriority: Int!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
   lastBalanceUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
@@ -3150,6 +3228,9 @@ input CreateLiabilityInput {
   minimumPayment: String!
   targetExtraPayment: String!
   payoffPriority: Int!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
 }
 
 input UpdateLiabilityInput {
@@ -3161,6 +3242,9 @@ input UpdateLiabilityInput {
   minimumPayment: String!
   targetExtraPayment: String!
   payoffPriority: Int!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
 }
 
 input CreateBudgetInput {
@@ -3333,6 +3417,12 @@ input CreateAssetInput {
   name: String!
   assetType: AssetType!
   currentValue: String!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
+  employerMatchRate: String!
+  employerMatchMaxPercentOfSalary: String!
+  annualRate: String!
 }
 
 input UpdateAssetInput {
@@ -3340,6 +3430,12 @@ input UpdateAssetInput {
   name: String!
   assetType: AssetType!
   currentValue: String!
+  owner: String!
+  contributionMode: String!
+  contributionValue: String!
+  employerMatchRate: String!
+  employerMatchMaxPercentOfSalary: String!
+  annualRate: String!
 }
 
 
@@ -4517,6 +4613,180 @@ func (ec *executionContext) _Asset_currentValue(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext_Asset_currentValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Asset",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Asset_owner(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Asset_owner,
+		func(ctx context.Context) (any, error) {
+			return obj.Owner, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Asset_owner(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Asset",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Asset_contributionMode(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Asset_contributionMode,
+		func(ctx context.Context) (any, error) {
+			return obj.ContributionMode, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Asset_contributionMode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Asset",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Asset_contributionValue(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Asset_contributionValue,
+		func(ctx context.Context) (any, error) {
+			return obj.ContributionValue, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Asset_contributionValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Asset",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Asset_employerMatchRate(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Asset_employerMatchRate,
+		func(ctx context.Context) (any, error) {
+			return obj.EmployerMatchRate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Asset_employerMatchRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Asset",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Asset_employerMatchMaxPercentOfSalary(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Asset_employerMatchMaxPercentOfSalary,
+		func(ctx context.Context) (any, error) {
+			return obj.EmployerMatchMaxPercentOfSalary, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Asset_employerMatchMaxPercentOfSalary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Asset",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Asset_annualRate(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Asset_annualRate,
+		func(ctx context.Context) (any, error) {
+			return obj.AnnualRate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Asset_annualRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Asset",
 		Field:      field,
@@ -7039,6 +7309,93 @@ func (ec *executionContext) fieldContext_Liability_payoffPriority(_ context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Liability_owner(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_owner,
+		func(ctx context.Context) (any, error) {
+			return obj.Owner, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_owner(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_contributionMode(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_contributionMode,
+		func(ctx context.Context) (any, error) {
+			return obj.ContributionMode, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_contributionMode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Liability_contributionValue(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_contributionValue,
+		func(ctx context.Context) (any, error) {
+			return obj.ContributionValue, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_contributionValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Liability_lastBalanceUpdatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -7344,6 +7701,18 @@ func (ec *executionContext) fieldContext_Mutation_createAsset(ctx context.Contex
 				return ec.fieldContext_Asset_assetType(ctx, field)
 			case "currentValue":
 				return ec.fieldContext_Asset_currentValue(ctx, field)
+			case "owner":
+				return ec.fieldContext_Asset_owner(ctx, field)
+			case "contributionMode":
+				return ec.fieldContext_Asset_contributionMode(ctx, field)
+			case "contributionValue":
+				return ec.fieldContext_Asset_contributionValue(ctx, field)
+			case "employerMatchRate":
+				return ec.fieldContext_Asset_employerMatchRate(ctx, field)
+			case "employerMatchMaxPercentOfSalary":
+				return ec.fieldContext_Asset_employerMatchMaxPercentOfSalary(ctx, field)
+			case "annualRate":
+				return ec.fieldContext_Asset_annualRate(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -7403,6 +7772,18 @@ func (ec *executionContext) fieldContext_Mutation_updateAsset(ctx context.Contex
 				return ec.fieldContext_Asset_assetType(ctx, field)
 			case "currentValue":
 				return ec.fieldContext_Asset_currentValue(ctx, field)
+			case "owner":
+				return ec.fieldContext_Asset_owner(ctx, field)
+			case "contributionMode":
+				return ec.fieldContext_Asset_contributionMode(ctx, field)
+			case "contributionValue":
+				return ec.fieldContext_Asset_contributionValue(ctx, field)
+			case "employerMatchRate":
+				return ec.fieldContext_Asset_employerMatchRate(ctx, field)
+			case "employerMatchMaxPercentOfSalary":
+				return ec.fieldContext_Asset_employerMatchMaxPercentOfSalary(ctx, field)
+			case "annualRate":
+				return ec.fieldContext_Asset_annualRate(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -7511,6 +7892,12 @@ func (ec *executionContext) fieldContext_Mutation_createLiability(ctx context.Co
 				return ec.fieldContext_Liability_targetExtraPayment(ctx, field)
 			case "payoffPriority":
 				return ec.fieldContext_Liability_payoffPriority(ctx, field)
+			case "owner":
+				return ec.fieldContext_Liability_owner(ctx, field)
+			case "contributionMode":
+				return ec.fieldContext_Liability_contributionMode(ctx, field)
+			case "contributionValue":
+				return ec.fieldContext_Liability_contributionValue(ctx, field)
 			case "lastBalanceUpdatedAt":
 				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
 			case "createdAt":
@@ -7578,6 +7965,12 @@ func (ec *executionContext) fieldContext_Mutation_updateLiability(ctx context.Co
 				return ec.fieldContext_Liability_targetExtraPayment(ctx, field)
 			case "payoffPriority":
 				return ec.fieldContext_Liability_payoffPriority(ctx, field)
+			case "owner":
+				return ec.fieldContext_Liability_owner(ctx, field)
+			case "contributionMode":
+				return ec.fieldContext_Liability_contributionMode(ctx, field)
+			case "contributionValue":
+				return ec.fieldContext_Liability_contributionValue(ctx, field)
 			case "lastBalanceUpdatedAt":
 				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
 			case "createdAt":
@@ -10513,6 +10906,18 @@ func (ec *executionContext) fieldContext_Query_asset(ctx context.Context, field 
 				return ec.fieldContext_Asset_assetType(ctx, field)
 			case "currentValue":
 				return ec.fieldContext_Asset_currentValue(ctx, field)
+			case "owner":
+				return ec.fieldContext_Asset_owner(ctx, field)
+			case "contributionMode":
+				return ec.fieldContext_Asset_contributionMode(ctx, field)
+			case "contributionValue":
+				return ec.fieldContext_Asset_contributionValue(ctx, field)
+			case "employerMatchRate":
+				return ec.fieldContext_Asset_employerMatchRate(ctx, field)
+			case "employerMatchMaxPercentOfSalary":
+				return ec.fieldContext_Asset_employerMatchMaxPercentOfSalary(ctx, field)
+			case "annualRate":
+				return ec.fieldContext_Asset_annualRate(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -10572,6 +10977,18 @@ func (ec *executionContext) fieldContext_Query_assets(ctx context.Context, field
 				return ec.fieldContext_Asset_assetType(ctx, field)
 			case "currentValue":
 				return ec.fieldContext_Asset_currentValue(ctx, field)
+			case "owner":
+				return ec.fieldContext_Asset_owner(ctx, field)
+			case "contributionMode":
+				return ec.fieldContext_Asset_contributionMode(ctx, field)
+			case "contributionValue":
+				return ec.fieldContext_Asset_contributionValue(ctx, field)
+			case "employerMatchRate":
+				return ec.fieldContext_Asset_employerMatchRate(ctx, field)
+			case "employerMatchMaxPercentOfSalary":
+				return ec.fieldContext_Asset_employerMatchMaxPercentOfSalary(ctx, field)
+			case "annualRate":
+				return ec.fieldContext_Asset_annualRate(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -10639,6 +11056,12 @@ func (ec *executionContext) fieldContext_Query_liability(ctx context.Context, fi
 				return ec.fieldContext_Liability_targetExtraPayment(ctx, field)
 			case "payoffPriority":
 				return ec.fieldContext_Liability_payoffPriority(ctx, field)
+			case "owner":
+				return ec.fieldContext_Liability_owner(ctx, field)
+			case "contributionMode":
+				return ec.fieldContext_Liability_contributionMode(ctx, field)
+			case "contributionValue":
+				return ec.fieldContext_Liability_contributionValue(ctx, field)
 			case "lastBalanceUpdatedAt":
 				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
 			case "createdAt":
@@ -10706,6 +11129,12 @@ func (ec *executionContext) fieldContext_Query_liabilities(ctx context.Context, 
 				return ec.fieldContext_Liability_targetExtraPayment(ctx, field)
 			case "payoffPriority":
 				return ec.fieldContext_Liability_payoffPriority(ctx, field)
+			case "owner":
+				return ec.fieldContext_Liability_owner(ctx, field)
+			case "contributionMode":
+				return ec.fieldContext_Liability_contributionMode(ctx, field)
+			case "contributionValue":
+				return ec.fieldContext_Liability_contributionValue(ctx, field)
 			case "lastBalanceUpdatedAt":
 				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
 			case "createdAt":
@@ -16467,7 +16896,7 @@ func (ec *executionContext) unmarshalInputCreateAssetInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "name", "assetType", "currentValue"}
+	fieldsInOrder := [...]string{"userId", "name", "assetType", "currentValue", "owner", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -16502,6 +16931,48 @@ func (ec *executionContext) unmarshalInputCreateAssetInput(ctx context.Context, 
 				return it, err
 			}
 			it.CurrentValue = data
+		case "owner":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("owner"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Owner = data
+		case "contributionMode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contributionMode"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContributionMode = data
+		case "contributionValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contributionValue"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContributionValue = data
+		case "employerMatchRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("employerMatchRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EmployerMatchRate = data
+		case "employerMatchMaxPercentOfSalary":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("employerMatchMaxPercentOfSalary"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EmployerMatchMaxPercentOfSalary = data
+		case "annualRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("annualRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AnnualRate = data
 		}
 	}
 	return it, nil
@@ -16822,7 +17293,7 @@ func (ec *executionContext) unmarshalInputCreateLiabilityInput(ctx context.Conte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "name", "liabilityType", "currentBalance", "interestRate", "minimumPayment", "targetExtraPayment", "payoffPriority"}
+	fieldsInOrder := [...]string{"userId", "name", "liabilityType", "currentBalance", "interestRate", "minimumPayment", "targetExtraPayment", "payoffPriority", "owner", "contributionMode", "contributionValue"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -16885,6 +17356,27 @@ func (ec *executionContext) unmarshalInputCreateLiabilityInput(ctx context.Conte
 				return it, err
 			}
 			it.PayoffPriority = data
+		case "owner":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("owner"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Owner = data
+		case "contributionMode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contributionMode"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContributionMode = data
+		case "contributionValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contributionValue"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContributionValue = data
 		}
 	}
 	return it, nil
@@ -17384,7 +17876,7 @@ func (ec *executionContext) unmarshalInputUpdateAssetInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "assetType", "currentValue"}
+	fieldsInOrder := [...]string{"id", "name", "assetType", "currentValue", "owner", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -17419,6 +17911,48 @@ func (ec *executionContext) unmarshalInputUpdateAssetInput(ctx context.Context, 
 				return it, err
 			}
 			it.CurrentValue = data
+		case "owner":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("owner"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Owner = data
+		case "contributionMode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contributionMode"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContributionMode = data
+		case "contributionValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contributionValue"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContributionValue = data
+		case "employerMatchRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("employerMatchRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EmployerMatchRate = data
+		case "employerMatchMaxPercentOfSalary":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("employerMatchMaxPercentOfSalary"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EmployerMatchMaxPercentOfSalary = data
+		case "annualRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("annualRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AnnualRate = data
 		}
 	}
 	return it, nil
@@ -17711,7 +18245,7 @@ func (ec *executionContext) unmarshalInputUpdateLiabilityInput(ctx context.Conte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "liabilityType", "currentBalance", "interestRate", "minimumPayment", "targetExtraPayment", "payoffPriority"}
+	fieldsInOrder := [...]string{"id", "name", "liabilityType", "currentBalance", "interestRate", "minimumPayment", "targetExtraPayment", "payoffPriority", "owner", "contributionMode", "contributionValue"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -17774,6 +18308,27 @@ func (ec *executionContext) unmarshalInputUpdateLiabilityInput(ctx context.Conte
 				return it, err
 			}
 			it.PayoffPriority = data
+		case "owner":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("owner"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Owner = data
+		case "contributionMode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contributionMode"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContributionMode = data
+		case "contributionValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contributionValue"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContributionValue = data
 		}
 	}
 	return it, nil
@@ -18266,6 +18821,36 @@ func (ec *executionContext) _Asset(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "currentValue":
 			out.Values[i] = ec._Asset_currentValue(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "owner":
+			out.Values[i] = ec._Asset_owner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "contributionMode":
+			out.Values[i] = ec._Asset_contributionMode(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "contributionValue":
+			out.Values[i] = ec._Asset_contributionValue(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "employerMatchRate":
+			out.Values[i] = ec._Asset_employerMatchRate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "employerMatchMaxPercentOfSalary":
+			out.Values[i] = ec._Asset_employerMatchMaxPercentOfSalary(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "annualRate":
+			out.Values[i] = ec._Asset_annualRate(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -19058,6 +19643,21 @@ func (ec *executionContext) _Liability(ctx context.Context, sel ast.SelectionSet
 			}
 		case "payoffPriority":
 			out.Values[i] = ec._Liability_payoffPriority(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "owner":
+			out.Values[i] = ec._Liability_owner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "contributionMode":
+			out.Values[i] = ec._Liability_contributionMode(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "contributionValue":
+			out.Values[i] = ec._Liability_contributionValue(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

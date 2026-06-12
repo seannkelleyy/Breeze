@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createLiability = `-- name: CreateLiability :one
@@ -21,9 +22,12 @@ INSERT INTO liabilities (
   interest_rate,
   minimum_payment,
   target_extra_payment,
-  payoff_priority
+  payoff_priority,
+  owner,
+  contribution_mode,
+  contribution_value
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 RETURNING
   id,
   user_id,
@@ -34,6 +38,9 @@ RETURNING
   minimum_payment,
   target_extra_payment,
   payoff_priority,
+  owner,
+  contribution_mode,
+  contribution_value,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -49,9 +56,31 @@ type CreateLiabilityParams struct {
 	MinimumPayment     decimal.Decimal `json:"minimum_payment"`
 	TargetExtraPayment decimal.Decimal `json:"target_extra_payment"`
 	PayoffPriority     int32           `json:"payoff_priority"`
+	Owner              string          `json:"owner"`
+	ContributionMode   string          `json:"contribution_mode"`
+	ContributionValue  decimal.Decimal `json:"contribution_value"`
 }
 
-func (q *Queries) CreateLiability(ctx context.Context, arg CreateLiabilityParams) (Liability, error) {
+type CreateLiabilityRow struct {
+	ID                   uuid.UUID          `json:"id"`
+	UserID               uuid.UUID          `json:"user_id"`
+	Name                 string             `json:"name"`
+	LiabilityType        LiabilityType      `json:"liability_type"`
+	CurrentBalance       decimal.Decimal    `json:"current_balance"`
+	InterestRate         decimal.Decimal    `json:"interest_rate"`
+	MinimumPayment       decimal.Decimal    `json:"minimum_payment"`
+	TargetExtraPayment   decimal.Decimal    `json:"target_extra_payment"`
+	PayoffPriority       int32              `json:"payoff_priority"`
+	Owner                string             `json:"owner"`
+	ContributionMode     string             `json:"contribution_mode"`
+	ContributionValue    decimal.Decimal    `json:"contribution_value"`
+	LastBalanceUpdatedAt pgtype.Timestamptz `json:"last_balance_updated_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) CreateLiability(ctx context.Context, arg CreateLiabilityParams) (CreateLiabilityRow, error) {
 	row := q.db.QueryRow(ctx, createLiability,
 		arg.UserID,
 		arg.Name,
@@ -61,8 +90,11 @@ func (q *Queries) CreateLiability(ctx context.Context, arg CreateLiabilityParams
 		arg.MinimumPayment,
 		arg.TargetExtraPayment,
 		arg.PayoffPriority,
+		arg.Owner,
+		arg.ContributionMode,
+		arg.ContributionValue,
 	)
-	var i Liability
+	var i CreateLiabilityRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -73,6 +105,9 @@ func (q *Queries) CreateLiability(ctx context.Context, arg CreateLiabilityParams
 		&i.MinimumPayment,
 		&i.TargetExtraPayment,
 		&i.PayoffPriority,
+		&i.Owner,
+		&i.ContributionMode,
+		&i.ContributionValue,
 		&i.LastBalanceUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -92,6 +127,9 @@ SELECT
   minimum_payment,
   target_extra_payment,
   payoff_priority,
+  owner,
+  contribution_mode,
+  contribution_value,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -102,9 +140,28 @@ WHERE id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetLiabilityByID(ctx context.Context, id uuid.UUID) (Liability, error) {
+type GetLiabilityByIDRow struct {
+	ID                   uuid.UUID          `json:"id"`
+	UserID               uuid.UUID          `json:"user_id"`
+	Name                 string             `json:"name"`
+	LiabilityType        LiabilityType      `json:"liability_type"`
+	CurrentBalance       decimal.Decimal    `json:"current_balance"`
+	InterestRate         decimal.Decimal    `json:"interest_rate"`
+	MinimumPayment       decimal.Decimal    `json:"minimum_payment"`
+	TargetExtraPayment   decimal.Decimal    `json:"target_extra_payment"`
+	PayoffPriority       int32              `json:"payoff_priority"`
+	Owner                string             `json:"owner"`
+	ContributionMode     string             `json:"contribution_mode"`
+	ContributionValue    decimal.Decimal    `json:"contribution_value"`
+	LastBalanceUpdatedAt pgtype.Timestamptz `json:"last_balance_updated_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) GetLiabilityByID(ctx context.Context, id uuid.UUID) (GetLiabilityByIDRow, error) {
 	row := q.db.QueryRow(ctx, getLiabilityByID, id)
-	var i Liability
+	var i GetLiabilityByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -115,6 +172,9 @@ func (q *Queries) GetLiabilityByID(ctx context.Context, id uuid.UUID) (Liability
 		&i.MinimumPayment,
 		&i.TargetExtraPayment,
 		&i.PayoffPriority,
+		&i.Owner,
+		&i.ContributionMode,
+		&i.ContributionValue,
 		&i.LastBalanceUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -134,6 +194,9 @@ SELECT
   minimum_payment,
   target_extra_payment,
   payoff_priority,
+  owner,
+  contribution_mode,
+  contribution_value,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -144,15 +207,34 @@ WHERE user_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID) ([]Liability, error) {
+type ListLiabilitiesByUserIDRow struct {
+	ID                   uuid.UUID          `json:"id"`
+	UserID               uuid.UUID          `json:"user_id"`
+	Name                 string             `json:"name"`
+	LiabilityType        LiabilityType      `json:"liability_type"`
+	CurrentBalance       decimal.Decimal    `json:"current_balance"`
+	InterestRate         decimal.Decimal    `json:"interest_rate"`
+	MinimumPayment       decimal.Decimal    `json:"minimum_payment"`
+	TargetExtraPayment   decimal.Decimal    `json:"target_extra_payment"`
+	PayoffPriority       int32              `json:"payoff_priority"`
+	Owner                string             `json:"owner"`
+	ContributionMode     string             `json:"contribution_mode"`
+	ContributionValue    decimal.Decimal    `json:"contribution_value"`
+	LastBalanceUpdatedAt pgtype.Timestamptz `json:"last_balance_updated_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID) ([]ListLiabilitiesByUserIDRow, error) {
 	rows, err := q.db.Query(ctx, listLiabilitiesByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Liability
+	var items []ListLiabilitiesByUserIDRow
 	for rows.Next() {
-		var i Liability
+		var i ListLiabilitiesByUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -163,6 +245,9 @@ func (q *Queries) ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID)
 			&i.MinimumPayment,
 			&i.TargetExtraPayment,
 			&i.PayoffPriority,
+			&i.Owner,
+			&i.ContributionMode,
+			&i.ContributionValue,
 			&i.LastBalanceUpdatedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -204,6 +289,9 @@ SET
   minimum_payment = $6,
   target_extra_payment = $7,
   payoff_priority = $8,
+  owner = $9,
+  contribution_mode = $10,
+  contribution_value = $11,
   last_balance_updated_at = CASE
     WHEN current_balance IS DISTINCT FROM $4 THEN now()
     ELSE last_balance_updated_at
@@ -221,6 +309,9 @@ RETURNING
   minimum_payment,
   target_extra_payment,
   payoff_priority,
+  owner,
+  contribution_mode,
+  contribution_value,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -236,9 +327,31 @@ type UpdateLiabilityParams struct {
 	MinimumPayment     decimal.Decimal `json:"minimum_payment"`
 	TargetExtraPayment decimal.Decimal `json:"target_extra_payment"`
 	PayoffPriority     int32           `json:"payoff_priority"`
+	Owner              string          `json:"owner"`
+	ContributionMode   string          `json:"contribution_mode"`
+	ContributionValue  decimal.Decimal `json:"contribution_value"`
 }
 
-func (q *Queries) UpdateLiability(ctx context.Context, arg UpdateLiabilityParams) (Liability, error) {
+type UpdateLiabilityRow struct {
+	ID                   uuid.UUID          `json:"id"`
+	UserID               uuid.UUID          `json:"user_id"`
+	Name                 string             `json:"name"`
+	LiabilityType        LiabilityType      `json:"liability_type"`
+	CurrentBalance       decimal.Decimal    `json:"current_balance"`
+	InterestRate         decimal.Decimal    `json:"interest_rate"`
+	MinimumPayment       decimal.Decimal    `json:"minimum_payment"`
+	TargetExtraPayment   decimal.Decimal    `json:"target_extra_payment"`
+	PayoffPriority       int32              `json:"payoff_priority"`
+	Owner                string             `json:"owner"`
+	ContributionMode     string             `json:"contribution_mode"`
+	ContributionValue    decimal.Decimal    `json:"contribution_value"`
+	LastBalanceUpdatedAt pgtype.Timestamptz `json:"last_balance_updated_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) UpdateLiability(ctx context.Context, arg UpdateLiabilityParams) (UpdateLiabilityRow, error) {
 	row := q.db.QueryRow(ctx, updateLiability,
 		arg.ID,
 		arg.Name,
@@ -248,8 +361,11 @@ func (q *Queries) UpdateLiability(ctx context.Context, arg UpdateLiabilityParams
 		arg.MinimumPayment,
 		arg.TargetExtraPayment,
 		arg.PayoffPriority,
+		arg.Owner,
+		arg.ContributionMode,
+		arg.ContributionValue,
 	)
-	var i Liability
+	var i UpdateLiabilityRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -260,6 +376,9 @@ func (q *Queries) UpdateLiability(ctx context.Context, arg UpdateLiabilityParams
 		&i.MinimumPayment,
 		&i.TargetExtraPayment,
 		&i.PayoffPriority,
+		&i.Owner,
+		&i.ContributionMode,
+		&i.ContributionValue,
 		&i.LastBalanceUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,

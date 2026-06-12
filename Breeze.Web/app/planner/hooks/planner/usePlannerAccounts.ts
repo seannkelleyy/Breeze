@@ -22,22 +22,9 @@ import {
   getSuggestedAnnualLimit,
   toIsoDate,
 } from '../../lib/plannerMath';
-import { AccountRateProfile, AccountType, PlannerAccount } from '../../types/account';
-import { AssetFinanceDetails } from '../../types/finance';
+import type { AccountRateProfile, AccountType, PlannerAccount } from '../../types/account';
+import type { AssetFinanceDetails } from '../../types/finance';
 import useIrsLimits from './useIrsLimits';
-
-const {
-  accountOwnerOptions,
-  accountTypeOptions,
-  contributionModeOptions,
-  homeGrowthProfileOptions,
-  isCombinedAssetType,
-  isDepreciatingAssetType,
-  isLiabilityAccountType,
-  isNonContributingAccountType,
-  liabilityContributionModeOptions,
-  vehicleDepreciationProfileOptions,
-} = plannerConfig;
 
 const usePlannerAccounts = () => {
   const {
@@ -57,32 +44,27 @@ const usePlannerAccounts = () => {
   const { hasSpouse, selfBirthday, selfAnnualIncome, spouseAnnualIncome } =
     getPlannerHouseholdSnapshot(people);
 
+  // ─── Derived options ──────────────────────────────────────
   const accountRateProfileOptions = useMemo(
     () =>
       plannerConfig.accountRateProfileOptions.map((option) => {
-        if (option.value === 'custom') {
-          return option;
-        }
-
+        if (option.value === 'custom') return option;
         const nominalRate = plannerConstants.PLANNER_ACCOUNT_RATE_PROFILE_RATES[option.value];
         const displayRate = useInflationAdjustedValues
           ? getRealAnnualRatePercent(nominalRate, inflationRate)
           : nominalRate;
         const labelPrefix = option.label.split(' (')[0];
-
-        return {
-          ...option,
-          label: `${labelPrefix} (${displayRate.toFixed(1)}%)`,
-        };
+        return { ...option, label: `${labelPrefix} (${displayRate.toFixed(1)}%)` };
       }),
     [inflationRate, useInflationAdjustedValues],
   );
 
+  // ─── Rate helpers ─────────────────────────────────────────
   const getDisplayedRateForAccount = (account: PlannerAccount) =>
     getDisplayedRatePercent(account, inflationRate, useInflationAdjustedValues);
   const getStoredAnnualRateForInput = (account: PlannerAccount, value: number) =>
     getStoredAnnualRateFromInput(account, value, inflationRate, useInflationAdjustedValues);
-  const getRateProfileFromAnnualRate = (annualRate: number) =>
+  const getRateProfileFromAnnualRate = (annualRate: number): AccountRateProfile =>
     getAccountRateProfileFromAnnualRate(annualRate, inflationRate, useInflationAdjustedValues);
   const getAnnualRateFromProfile = (profile: AccountRateProfile, currentAnnualRate: number) =>
     getAccountAnnualRateFromProfile(
@@ -97,30 +79,30 @@ const usePlannerAccounts = () => {
     includeSpouse: boolean,
   ) => getSuggestedAnnualLimit(accountType, age, irsLimits, includeSpouse);
 
+  // ─── Totals ───────────────────────────────────────────────
   const {
     totalPlannedMonthlyEmployee,
     totalPlannedMonthlyMatch,
-    totalPlannedMonthlyInvestment: computedTotalPlannedMonthlyInvestment,
+    totalPlannedMonthlyInvestment: computedTotal,
   } = useMemo(
     () => getPlannerContributionTotals(plannerAccounts, selfAnnualIncome, spouseAnnualIncome),
     [plannerAccounts, selfAnnualIncome, spouseAnnualIncome],
   );
   const totalPlannedMonthlyInvestment =
-    plannerSummary?.totalPlannedMonthlyInvestment ?? computedTotalPlannedMonthlyInvestment;
+    plannerSummary?.totalPlannedMonthlyInvestment ?? computedTotal;
   const weightedAnnualRate = plannerSummary?.weightedAnnualRate ?? 0;
 
+  // ─── Mutators ─────────────────────────────────────────────
   const updateAccount = (id: string, updater: (account: PlannerAccount) => PlannerAccount) => {
-    setPlannerAccounts((prev) =>
-      prev.map((account) => (account.id === id ? updater(account) : account)),
-    );
+    setPlannerAccounts((prev) => prev.map((a) => (a.id === id ? updater(a) : a)));
   };
 
   const updateAssetFinanceDetails = (
     accountId: string,
-    updater: (details: AssetFinanceDetails) => AssetFinanceDetails,
+    updater: (d: AssetFinanceDetails) => AssetFinanceDetails,
   ) => {
     setPlannerAssetFinanceDetailsByAccountId((prev) => {
-      const fallbackAccount = plannerAccounts.find((account) => account.id === accountId);
+      const fallbackAccount = plannerAccounts.find((a) => a.id === accountId);
       const fallback = fallbackAccount
         ? getDefaultAssetFinanceDetailsForAccount(fallbackAccount)
         : getDefaultAssetFinanceDetailsForAccount({
@@ -136,31 +118,20 @@ const usePlannerAccounts = () => {
             annualRate: 4,
           });
       const nextDetails = updater(prev[accountId] ?? fallback);
-
-      updateAccount(accountId, (current) => ({
-        ...current,
+      updateAccount(accountId, (c) => ({
+        ...c,
         startingBalance: clamp(nextDetails.currentValue),
         annualRate: nextDetails.annualChangeRate,
       }));
-
-      return {
-        ...prev,
-        [accountId]: nextDetails,
-      };
+      return { ...prev, [accountId]: nextDetails };
     });
   };
 
   const removeAccount = (id: string) => {
-    if (plannerAccounts.length === 1) {
-      return;
-    }
-
-    setPlannerAccounts((prev) => prev.filter((account) => account.id !== id));
+    if (plannerAccounts.length === 1) return;
+    setPlannerAccounts((prev) => prev.filter((a) => a.id !== id));
     setPlannerAssetFinanceDetailsByAccountId((prev) => {
-      if (!prev[id]) {
-        return prev;
-      }
-
+      if (!prev[id]) return prev;
       const next = { ...prev };
       delete next[id];
       return next;
@@ -171,7 +142,7 @@ const usePlannerAccounts = () => {
     setPlannerAccounts((prev) => [
       ...prev,
       {
-        id: crypto.randomUUID(),
+        id: `local-${crypto.randomUUID()}`,
         name: `Account ${prev.length + 1}`,
         ...plannerConstants.PLANNER_DEFAULT_NEW_ACCOUNT,
         annualRate: weightedAnnualRate,
@@ -180,69 +151,86 @@ const usePlannerAccounts = () => {
   };
 
   const addLiability = () => {
-    const newAccount: PlannerAccount = {
-      id: crypto.randomUUID(),
-      name: `Liability ${plannerAccounts.length + 1}`,
-      owner: 'self',
-      accountType: 'student-loan',
-      contributionMode: 'monthly',
-      contributionValue: 500,
-      employerMatchRate: 0,
-      employerMatchMaxPercentOfSalary: 0,
-      startingBalance: 25000,
-      annualRate: 6,
-    };
-
-    setPlannerAccounts((prev) => [...prev, newAccount]);
+    setPlannerAccounts((prev) => [
+      ...prev,
+      {
+        id: `local-${crypto.randomUUID()}`,
+        name: `Liability ${plannerAccounts.length + 1}`,
+        owner: 'self' as const,
+        accountType: 'student-loan' as const,
+        contributionMode: 'monthly' as const,
+        contributionValue: 500,
+        employerMatchRate: 0,
+        employerMatchMaxPercentOfSalary: 0,
+        startingBalance: 25000,
+        annualRate: 6,
+      },
+    ]);
   };
 
   return {
-    plannerAccounts,
-    assetFinanceDetailsByAccountId: plannerAssetFinanceDetailsByAccountId,
-    people,
-    hasSpouse,
-    selfBirthday,
-    selfAnnualIncome,
-    spouseAnnualIncome,
-    isIrsAccountsLoading,
-    isIrsAccountsError,
-    totalPlannedMonthlyEmployee,
-    totalPlannedMonthlyMatch,
-    totalPlannedMonthlyInvestment,
-    accountOwnerOptions,
-    accountRateProfileOptions,
-    accountTypeOptions,
-    contributionModeOptions,
-    liabilityContributionModeOptions,
-    homeGrowthProfileOptions,
-    vehicleDepreciationProfileOptions,
-    defaultHomeGrowthProfile: plannerConstants.PLANNER_DEFAULT_HOME_GROWTH_PROFILE,
-    defaultVehicleDepreciationProfile:
-      plannerConstants.PLANNER_DEFAULT_VEHICLE_DEPRECIATION_PROFILE,
-    defaultHomeAppreciationRate: plannerConstants.PLANNER_DEFAULT_HOME_APPRECIATION_RATE,
-    defaultVehicleDepreciationRate: plannerConstants.PLANNER_DEFAULT_VEHICLE_DEPRECIATION_RATE,
-    isLiabilityAccountType,
-    isCombinedAssetType,
-    isNonContributingAccountType,
-    isDepreciatingAssetType,
-    getEmployeeMonthlyContribution,
-    getEmployerMatchMonthly,
-    getSuggestedAnnualLimitForAccount,
-    getDisplayedRateForAccount,
-    getStoredAnnualRateForInput,
-    getRateProfileFromAnnualRate,
-    getAnnualRateFromProfile,
-    getAssetFinanceSnapshot,
-    getDefaultAssetFinanceDetailsForAccount,
-    getHomeAnnualGrowthRate,
-    getAgeFromBirthday,
-    toIsoDate,
-    updateAccount,
-    updateAssetFinanceDetails,
-    removeAccount,
-    addAccount,
-    addLiability,
-    setPlannerAssetFinanceDetailsByAccountId,
+    // Data
+    data: {
+      plannerAccounts,
+      assetFinanceDetailsByAccountId: plannerAssetFinanceDetailsByAccountId,
+      people,
+      hasSpouse,
+      selfBirthday,
+      selfAnnualIncome,
+      spouseAnnualIncome,
+      isIrsAccountsLoading,
+      isIrsAccountsError,
+      totalPlannedMonthlyEmployee,
+      totalPlannedMonthlyMatch,
+      totalPlannedMonthlyInvestment,
+    },
+    // Options (read-only config passthroughs)
+    options: {
+      accountOwnerOptions: plannerConfig.accountOwnerOptions,
+      accountRateProfileOptions,
+      accountTypeOptions: plannerConfig.accountTypeOptions,
+      contributionModeOptions: plannerConfig.contributionModeOptions,
+      liabilityContributionModeOptions: plannerConfig.liabilityContributionModeOptions,
+      liabilityTypeOptions: plannerConfig.liabilityTypeOptions,
+      homeGrowthProfileOptions: plannerConfig.homeGrowthProfileOptions,
+      vehicleDepreciationProfileOptions: plannerConfig.vehicleDepreciationProfileOptions,
+      defaultHomeGrowthProfile: plannerConstants.PLANNER_DEFAULT_HOME_GROWTH_PROFILE,
+      defaultVehicleDepreciationProfile:
+        plannerConstants.PLANNER_DEFAULT_VEHICLE_DEPRECIATION_PROFILE,
+      defaultHomeAppreciationRate: plannerConstants.PLANNER_DEFAULT_HOME_APPRECIATION_RATE,
+      defaultVehicleDepreciationRate: plannerConstants.PLANNER_DEFAULT_VEHICLE_DEPRECIATION_RATE,
+    },
+    // Type guards
+    typeGuards: {
+      isLiabilityAccountType: plannerConfig.isLiabilityAccountType,
+      isCombinedAssetType: plannerConfig.isCombinedAssetType,
+      isNonContributingAccountType: plannerConfig.isNonContributingAccountType,
+      isDepreciatingAssetType: plannerConfig.isDepreciatingAssetType,
+    },
+    // Pure helpers
+    helpers: {
+      getEmployeeMonthlyContribution,
+      getEmployerMatchMonthly,
+      getSuggestedAnnualLimitForAccount,
+      getDisplayedRateForAccount,
+      getStoredAnnualRateForInput,
+      getRateProfileFromAnnualRate,
+      getAnnualRateFromProfile,
+      getAssetFinanceSnapshot,
+      getDefaultAssetFinanceDetailsForAccount,
+      getHomeAnnualGrowthRate,
+      getAgeFromBirthday,
+      toIsoDate,
+    },
+    // Actions
+    actions: {
+      updateAccount,
+      updateAssetFinanceDetails,
+      removeAccount,
+      addAccount,
+      addLiability,
+      setPlannerAssetFinanceDetailsByAccountId,
+    },
   };
 };
 

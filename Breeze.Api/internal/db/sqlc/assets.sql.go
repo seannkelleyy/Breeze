@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createAsset = `-- name: CreateAsset :one
@@ -17,15 +18,27 @@ INSERT INTO assets (
   user_id,
   name,
   asset_type,
-  current_value
+  current_value,
+  owner,
+  contribution_mode,
+  contribution_value,
+  employer_match_rate,
+  employer_match_max_percent_of_salary,
+  annual_rate
 )
-VALUES ($1, $2, $3, $4)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING
   id,
   user_id,
   name,
   asset_type,
   current_value,
+  owner,
+  contribution_mode,
+  contribution_value,
+  employer_match_rate,
+  employer_match_max_percent_of_salary,
+  annual_rate,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -33,26 +46,62 @@ RETURNING
 `
 
 type CreateAssetParams struct {
-	UserID       uuid.UUID       `json:"user_id"`
-	Name         string          `json:"name"`
-	AssetType    AssetType       `json:"asset_type"`
-	CurrentValue decimal.Decimal `json:"current_value"`
+	UserID                          uuid.UUID       `json:"user_id"`
+	Name                            string          `json:"name"`
+	AssetType                       AssetType       `json:"asset_type"`
+	CurrentValue                    decimal.Decimal `json:"current_value"`
+	Owner                           string          `json:"owner"`
+	ContributionMode                string          `json:"contribution_mode"`
+	ContributionValue               decimal.Decimal `json:"contribution_value"`
+	EmployerMatchRate               decimal.Decimal `json:"employer_match_rate"`
+	EmployerMatchMaxPercentOfSalary decimal.Decimal `json:"employer_match_max_percent_of_salary"`
+	AnnualRate                      decimal.Decimal `json:"annual_rate"`
 }
 
-func (q *Queries) CreateAsset(ctx context.Context, arg CreateAssetParams) (Asset, error) {
+type CreateAssetRow struct {
+	ID                              uuid.UUID          `json:"id"`
+	UserID                          uuid.UUID          `json:"user_id"`
+	Name                            string             `json:"name"`
+	AssetType                       AssetType          `json:"asset_type"`
+	CurrentValue                    decimal.Decimal    `json:"current_value"`
+	Owner                           string             `json:"owner"`
+	ContributionMode                string             `json:"contribution_mode"`
+	ContributionValue               decimal.Decimal    `json:"contribution_value"`
+	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
+	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
+	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
+	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
+	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt                       pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) CreateAsset(ctx context.Context, arg CreateAssetParams) (CreateAssetRow, error) {
 	row := q.db.QueryRow(ctx, createAsset,
 		arg.UserID,
 		arg.Name,
 		arg.AssetType,
 		arg.CurrentValue,
+		arg.Owner,
+		arg.ContributionMode,
+		arg.ContributionValue,
+		arg.EmployerMatchRate,
+		arg.EmployerMatchMaxPercentOfSalary,
+		arg.AnnualRate,
 	)
-	var i Asset
+	var i CreateAssetRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
 		&i.Name,
 		&i.AssetType,
 		&i.CurrentValue,
+		&i.Owner,
+		&i.ContributionMode,
+		&i.ContributionValue,
+		&i.EmployerMatchRate,
+		&i.EmployerMatchMaxPercentOfSalary,
+		&i.AnnualRate,
 		&i.LastValueUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -68,6 +117,12 @@ SELECT
   name,
   asset_type,
   current_value,
+  owner,
+  contribution_mode,
+  contribution_value,
+  employer_match_rate,
+  employer_match_max_percent_of_salary,
+  annual_rate,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -78,15 +133,39 @@ WHERE id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetAssetByID(ctx context.Context, id uuid.UUID) (Asset, error) {
+type GetAssetByIDRow struct {
+	ID                              uuid.UUID          `json:"id"`
+	UserID                          uuid.UUID          `json:"user_id"`
+	Name                            string             `json:"name"`
+	AssetType                       AssetType          `json:"asset_type"`
+	CurrentValue                    decimal.Decimal    `json:"current_value"`
+	Owner                           string             `json:"owner"`
+	ContributionMode                string             `json:"contribution_mode"`
+	ContributionValue               decimal.Decimal    `json:"contribution_value"`
+	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
+	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
+	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
+	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
+	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt                       pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) GetAssetByID(ctx context.Context, id uuid.UUID) (GetAssetByIDRow, error) {
 	row := q.db.QueryRow(ctx, getAssetByID, id)
-	var i Asset
+	var i GetAssetByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
 		&i.Name,
 		&i.AssetType,
 		&i.CurrentValue,
+		&i.Owner,
+		&i.ContributionMode,
+		&i.ContributionValue,
+		&i.EmployerMatchRate,
+		&i.EmployerMatchMaxPercentOfSalary,
+		&i.AnnualRate,
 		&i.LastValueUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -102,6 +181,12 @@ SELECT
   name,
   asset_type,
   current_value,
+  owner,
+  contribution_mode,
+  contribution_value,
+  employer_match_rate,
+  employer_match_max_percent_of_salary,
+  annual_rate,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -112,21 +197,45 @@ WHERE user_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]Asset, error) {
+type ListAssetsByUserIDRow struct {
+	ID                              uuid.UUID          `json:"id"`
+	UserID                          uuid.UUID          `json:"user_id"`
+	Name                            string             `json:"name"`
+	AssetType                       AssetType          `json:"asset_type"`
+	CurrentValue                    decimal.Decimal    `json:"current_value"`
+	Owner                           string             `json:"owner"`
+	ContributionMode                string             `json:"contribution_mode"`
+	ContributionValue               decimal.Decimal    `json:"contribution_value"`
+	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
+	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
+	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
+	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
+	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt                       pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]ListAssetsByUserIDRow, error) {
 	rows, err := q.db.Query(ctx, listAssetsByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Asset
+	var items []ListAssetsByUserIDRow
 	for rows.Next() {
-		var i Asset
+		var i ListAssetsByUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
 			&i.Name,
 			&i.AssetType,
 			&i.CurrentValue,
+			&i.Owner,
+			&i.ContributionMode,
+			&i.ContributionValue,
+			&i.EmployerMatchRate,
+			&i.EmployerMatchMaxPercentOfSalary,
+			&i.AnnualRate,
 			&i.LastValueUpdatedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -164,6 +273,12 @@ SET
   name = $2,
   asset_type = $3,
   current_value = $4,
+  owner = $5,
+  contribution_mode = $6,
+  contribution_value = $7,
+  employer_match_rate = $8,
+  employer_match_max_percent_of_salary = $9,
+  annual_rate = $10,
   last_value_updated_at = CASE
     WHEN current_value IS DISTINCT FROM $4 THEN now()
     ELSE last_value_updated_at
@@ -177,6 +292,12 @@ RETURNING
   name,
   asset_type,
   current_value,
+  owner,
+  contribution_mode,
+  contribution_value,
+  employer_match_rate,
+  employer_match_max_percent_of_salary,
+  annual_rate,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -184,26 +305,62 @@ RETURNING
 `
 
 type UpdateAssetParams struct {
-	ID           uuid.UUID       `json:"id"`
-	Name         string          `json:"name"`
-	AssetType    AssetType       `json:"asset_type"`
-	CurrentValue decimal.Decimal `json:"current_value"`
+	ID                              uuid.UUID       `json:"id"`
+	Name                            string          `json:"name"`
+	AssetType                       AssetType       `json:"asset_type"`
+	CurrentValue                    decimal.Decimal `json:"current_value"`
+	Owner                           string          `json:"owner"`
+	ContributionMode                string          `json:"contribution_mode"`
+	ContributionValue               decimal.Decimal `json:"contribution_value"`
+	EmployerMatchRate               decimal.Decimal `json:"employer_match_rate"`
+	EmployerMatchMaxPercentOfSalary decimal.Decimal `json:"employer_match_max_percent_of_salary"`
+	AnnualRate                      decimal.Decimal `json:"annual_rate"`
 }
 
-func (q *Queries) UpdateAsset(ctx context.Context, arg UpdateAssetParams) (Asset, error) {
+type UpdateAssetRow struct {
+	ID                              uuid.UUID          `json:"id"`
+	UserID                          uuid.UUID          `json:"user_id"`
+	Name                            string             `json:"name"`
+	AssetType                       AssetType          `json:"asset_type"`
+	CurrentValue                    decimal.Decimal    `json:"current_value"`
+	Owner                           string             `json:"owner"`
+	ContributionMode                string             `json:"contribution_mode"`
+	ContributionValue               decimal.Decimal    `json:"contribution_value"`
+	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
+	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
+	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
+	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
+	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt                       pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) UpdateAsset(ctx context.Context, arg UpdateAssetParams) (UpdateAssetRow, error) {
 	row := q.db.QueryRow(ctx, updateAsset,
 		arg.ID,
 		arg.Name,
 		arg.AssetType,
 		arg.CurrentValue,
+		arg.Owner,
+		arg.ContributionMode,
+		arg.ContributionValue,
+		arg.EmployerMatchRate,
+		arg.EmployerMatchMaxPercentOfSalary,
+		arg.AnnualRate,
 	)
-	var i Asset
+	var i UpdateAssetRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
 		&i.Name,
 		&i.AssetType,
 		&i.CurrentValue,
+		&i.Owner,
+		&i.ContributionMode,
+		&i.ContributionValue,
+		&i.EmployerMatchRate,
+		&i.EmployerMatchMaxPercentOfSalary,
+		&i.AnnualRate,
 		&i.LastValueUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,

@@ -1,44 +1,58 @@
 'use client';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { Plus } from 'lucide-react';
 
-import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
-
-import { formatCurrencyWithCode } from '../lib/plannerMath';
-import * as plannerConstants from '../lib/constants';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { usePlannerAccounts } from '../hooks/planner/index';
-import { AccountOwner, AccountType, PlannerAccount } from '../types/account';
-import { AssetFinanceDetails } from '../types/finance';
-import CombinedAssetLoanFields from './accounts/CombinedAssetLoanFields';
-import HomeAccountFields from './accounts/HomeAccountFields';
-import InvestmentAccountFields from './accounts/InvestmentAccountFields';
-import LiabilityAccountFields from './accounts/LiabilityAccountFields';
-import VehicleAccountFields from './accounts/VehicleAccountFields';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { PlannerPerson } from '../types/person';
+import useGraphql from '@/lib/services/useGraphql';
+import { GET_ASSETS, GET_LIABILITIES } from '@/lib/services/queries/assets';
+import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { usePlannerAccounts } from '../hooks/planner/index';
+import { useAccountMutations } from '../hooks/planner/useAccountMutations';
+import { AccountListItem } from './accounts/AccountListItem';
+import { AccountType, PlannerAccount } from '../types/account';
+import { HomeGrowthProfile } from '../types/finance';
+import { apiAssetTypeToAccountType } from '../lib/typeMapping';
+import type { ApiAssetType } from '../types/apiAsset';
 
 export interface AccountsCardProps {
   collapsed: boolean;
   toggleControl: ReactNode;
 }
 
+type AccountFilter = 'all' | 'assets' | 'liabilities' | 'tax-advantaged';
+
+function mapAssetTypeToAccountType(assetType: string): AccountType {
+  return apiAssetTypeToAccountType(assetType as ApiAssetType);
+}
+
+function mapLiabilityTypeToAccountType(liabilityType: string): AccountType {
+  switch (liabilityType) {
+    case 'STUDENT_LOAN':
+      return 'student-loan';
+    case 'CREDIT_CARD':
+      return 'credit-card';
+    case 'PERSONAL_LOAN':
+      return 'personal-loan';
+    case 'AUTO_LOAN':
+      return 'auto-loan';
+    case 'MORTGAGE':
+      return 'mortgage';
+    default:
+      return 'other';
+  }
+}
+
 const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
-  const { currencyCode } = useCurrentUser();
+  const { currencyCode, userId, user, setPlannerAccounts } = useCurrentUser();
+  const { request } = useGraphql();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
-  type AccountFilter = 'all' | 'assets' | 'liabilities' | 'tax-advantaged';
+
   const [collapsedAccountIds, setCollapsedAccountIds] = useState<Record<string, boolean>>({});
   const [accountFilter, setAccountFilter] = useState<AccountFilter>('all');
+
+  const { data, options, typeGuards, helpers, actions } = usePlannerAccounts();
   const {
     plannerAccounts,
     assetFinanceDetailsByAccountId,
@@ -52,21 +66,28 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
     totalPlannedMonthlyEmployee,
     totalPlannedMonthlyMatch,
     totalPlannedMonthlyInvestment,
+  } = data;
+  const {
     accountOwnerOptions,
     accountRateProfileOptions,
     accountTypeOptions,
     contributionModeOptions,
     liabilityContributionModeOptions,
+    liabilityTypeOptions,
     homeGrowthProfileOptions,
     vehicleDepreciationProfileOptions,
     defaultHomeGrowthProfile,
     defaultVehicleDepreciationProfile,
     defaultHomeAppreciationRate,
     defaultVehicleDepreciationRate,
+  } = options;
+  const {
     isLiabilityAccountType,
     isCombinedAssetType,
     isNonContributingAccountType,
     isDepreciatingAssetType,
+  } = typeGuards;
+  const {
     getEmployeeMonthlyContribution,
     getEmployerMatchMonthly,
     getSuggestedAnnualLimitForAccount,
@@ -79,56 +100,148 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
     getHomeAnnualGrowthRate,
     getAgeFromBirthday,
     toIsoDate,
+  } = helpers;
+  const {
     updateAccount,
     updateAssetFinanceDetails,
     removeAccount,
     addAccount,
     addLiability,
     setPlannerAssetFinanceDetailsByAccountId,
-  } = usePlannerAccounts();
+  } = actions;
 
+  const mutations = useAccountMutations({
+    userId,
+    user: (user as { id: string; emailAddresses?: Array<{ emailAddress: string }> } | null) ?? null,
+    updateAccount,
+    removeAccount,
+  });
+
+  // Track per-account collapse
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCollapsedAccountIds((previous) => {
+    setCollapsedAccountIds((prev) => {
       const next: Record<string, boolean> = {};
-      for (const account of plannerAccounts) {
-        next[account.id] = previous[account.id] ?? false;
-      }
+      for (const a of plannerAccounts) next[a.id] = prev[a.id] ?? false;
       return next;
     });
   }, [plannerAccounts]);
 
-  const toggleAccountCollapsed = (accountId: string) => {
-    setCollapsedAccountIds((previous) => ({
-      ...previous,
-      [accountId]: !previous[accountId],
-    }));
-  };
+  // Load backend data on mount
+  useEffect(() => {
+    const load = async () => {
+      const buid = await mutations.ensureUserExists.mutateAsync();
+      if (!buid) return;
+      try {
+        const [assetsRes, liabsRes] = await Promise.all([
+          request(GET_ASSETS, { userId: buid }),
+          request(GET_LIABILITIES, { userId: buid }),
+        ]);
+        const assets = (assetsRes as { assets: Array<Record<string, unknown>> }).assets || [];
+        const liabilities =
+          (liabsRes as { liabilities: Array<Record<string, unknown>> }).liabilities || [];
+        if (assets.length === 0 && liabilities.length === 0) return;
+
+        const mappedAssets = assets.map((a): PlannerAccount => {
+          const name = String(a.name ?? '');
+          const owner = String(a.owner ?? 'self');
+          const assetType = String(a.assetType ?? '');
+          const contributionMode = String(a.contributionMode ?? 'monthly');
+          const currentValue = parseFloat(String(a.currentValue ?? '0'));
+          const annualRate = parseFloat(String(a.annualRate ?? '0'));
+          const contributionValue = parseFloat(String(a.contributionValue ?? '0'));
+          const employerMatchRate = parseFloat(String(a.employerMatchRate ?? '0'));
+          const employerMatchMaxPercentOfSalary = parseFloat(
+            String(a.employerMatchMaxPercentOfSalary ?? '0'),
+          );
+          const exist = plannerAccounts.find((pa) => pa.id === a.id);
+          if (exist)
+            return {
+              ...exist,
+              name,
+              owner: owner as 'self' | 'spouse',
+              startingBalance: currentValue,
+              annualRate,
+              contributionMode: contributionMode as 'monthly' | 'yearly' | 'salary-percent',
+              contributionValue,
+              employerMatchRate,
+              employerMatchMaxPercentOfSalary,
+            };
+          return {
+            id: String(a.id ?? ''),
+            name,
+            owner: owner as 'self' | 'spouse',
+            accountType: mapAssetTypeToAccountType(assetType),
+            contributionMode: contributionMode as 'monthly' | 'yearly' | 'salary-percent',
+            contributionValue,
+            employerMatchRate,
+            employerMatchMaxPercentOfSalary,
+            startingBalance: currentValue,
+            annualRate,
+          };
+        });
+
+        const mappedLiabs = liabilities.map((l): PlannerAccount => {
+          const name = String(l.name ?? '');
+          const owner = String(l.owner ?? 'self');
+          const liabilityType = String(l.liabilityType ?? '');
+          const contributionMode = String(l.contributionMode ?? 'monthly');
+          const balance = parseFloat(String(l.currentBalance ?? '0'));
+          const rate = parseFloat(String(l.interestRate ?? '0')) * 100;
+          const payment = parseFloat(String(l.contributionValue ?? l.minimumPayment ?? '0'));
+          const exist = plannerAccounts.find((pa) => pa.id === l.id);
+          if (exist)
+            return {
+              ...exist,
+              name,
+              owner: owner as 'self' | 'spouse',
+              accountType: mapLiabilityTypeToAccountType(liabilityType),
+              contributionMode: contributionMode as 'monthly' | 'yearly' | 'salary-percent',
+              contributionValue: payment,
+              startingBalance: balance,
+              annualRate: rate,
+            };
+          return {
+            id: String(l.id ?? ''),
+            name,
+            owner: owner as 'self' | 'spouse',
+            accountType: mapLiabilityTypeToAccountType(liabilityType),
+            contributionMode: contributionMode as 'monthly' | 'yearly' | 'salary-percent',
+            contributionValue: payment,
+            employerMatchRate: 0,
+            employerMatchMaxPercentOfSalary: 0,
+            startingBalance: balance,
+            annualRate: rate,
+          };
+        });
+
+        const backendIds = new Set([...mappedAssets, ...mappedLiabs].map((a) => a.id));
+        const localOnly = plannerAccounts.filter((a) => !backendIds.has(a.id));
+        setPlannerAccounts([...mappedAssets, ...mappedLiabs, ...localOnly]);
+      } catch {
+        /* silently ignore */
+      }
+    };
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const toggleCollapse = (id: string) => setCollapsedAccountIds((p) => ({ ...p, [id]: !p[id] }));
 
   const filteredAccounts = useMemo(() => {
     switch (accountFilter) {
       case 'assets':
-        return plannerAccounts.filter(
-          (account: PlannerAccount) => !isLiabilityAccountType(account.accountType),
-        );
+        return plannerAccounts.filter((a) => !isLiabilityAccountType(a.accountType));
       case 'liabilities':
-        return plannerAccounts.filter((account: PlannerAccount) => {
-          if (isLiabilityAccountType(account.accountType)) {
-            return true;
-          }
-
-          if (!isCombinedAssetType(account.accountType)) {
-            return false;
-          }
-
-          return assetFinanceDetailsByAccountId[account.id]?.hasLoan ?? false;
+        return plannerAccounts.filter((a) => {
+          if (isLiabilityAccountType(a.accountType)) return true;
+          if (isCombinedAssetType(a.accountType))
+            return assetFinanceDetailsByAccountId[a.id]?.hasLoan ?? false;
+          return false;
         });
       case 'tax-advantaged':
         return plannerAccounts.filter(
-          (account: PlannerAccount) =>
-            getSuggestedAnnualLimitForAccount(account.accountType, 40, hasSpouse) > 0,
+          (a) => getSuggestedAnnualLimitForAccount(a.accountType, 40, hasSpouse) > 0,
         );
-      case 'all':
       default:
         return plannerAccounts;
     }
@@ -136,11 +249,51 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
     accountFilter,
     plannerAccounts,
     assetFinanceDetailsByAccountId,
+    isLiabilityAccountType,
+    isCombinedAssetType,
     getSuggestedAnnualLimitForAccount,
     hasSpouse,
-    isCombinedAssetType,
-    isLiabilityAccountType,
   ]);
+
+  const handleSave = (account: PlannerAccount) => {
+    const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      account.id,
+    );
+    const isLiability = isLiabilityAccountType(account.accountType);
+    if (isLiability) {
+      if (!isValidUuid) mutations.createLiabilityMutation.mutate(account);
+      else mutations.updateLiabilityMutation.mutate(account);
+    } else {
+      if (!isValidUuid) mutations.createAssetMutation.mutate(account);
+      else mutations.updateAssetMutation.mutate(account);
+    }
+  };
+
+  const handleDelete = (account: PlannerAccount) => {
+    const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      account.id,
+    );
+    const isLiability = isLiabilityAccountType(account.accountType);
+    if (isValidUuid) {
+      if (isLiability) mutations.deleteLiabilityMutation.mutate(account.id);
+      else mutations.deleteAssetMutation.mutate(account.id);
+    } else {
+      removeAccount(account.id);
+    }
+  };
+
+  const isSaving =
+    mutations.createAssetMutation.isPending ||
+    mutations.updateAssetMutation.isPending ||
+    mutations.createLiabilityMutation.isPending ||
+    mutations.updateLiabilityMutation.isPending;
+
+  const filterButtons: { key: AccountFilter; label: string }[] = [
+    { key: 'all', label: 'All' },
+    { key: 'assets', label: 'Assets' },
+    { key: 'liabilities', label: 'Liabilities + Loans' },
+    { key: 'tax-advantaged', label: 'Tax-Advantaged' },
+  ];
 
   return (
     <Card>
@@ -154,398 +307,90 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
         </div>
         {toggleControl}
       </CardHeader>
-      {!collapsed ? (
+      {!collapsed && (
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-muted-foreground text-xs">
               IRS limits apply only to tax-advantaged account types.
             </p>
-            {isIrsAccountsLoading ? (
+            {isIrsAccountsLoading && (
               <p className="text-muted-foreground text-xs">Loading latest IRS limits...</p>
-            ) : null}
-            {isIrsAccountsError ? (
+            )}
+            {isIrsAccountsError && (
               <p className="text-destructive text-xs">
                 Unable to load IRS limits. Using fallback defaults.
               </p>
-            ) : null}
+            )}
           </div>
+
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant={accountFilter === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setAccountFilter('all')}
-            >
-              All
-            </Button>
-            <Button
-              type="button"
-              variant={accountFilter === 'assets' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setAccountFilter('assets')}
-            >
-              Assets
-            </Button>
-            <Button
-              type="button"
-              variant={accountFilter === 'liabilities' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setAccountFilter('liabilities')}
-            >
-              Liabilities + Loans
-            </Button>
-            <Button
-              type="button"
-              variant={accountFilter === 'tax-advantaged' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setAccountFilter('tax-advantaged')}
-            >
-              Tax-Advantaged
-            </Button>
+            {filterButtons.map(({ key, label }) => (
+              <Button
+                key={key}
+                type="button"
+                variant={accountFilter === key ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setAccountFilter(key)}
+              >
+                {label}
+              </Button>
+            ))}
           </div>
+
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            {filteredAccounts.map((account: PlannerAccount) => {
-              const isLiability = isLiabilityAccountType(account.accountType);
-              const isCombinedAsset = isCombinedAssetType(account.accountType);
-              const isAccountCollapsed = collapsedAccountIds[account.id] ?? false;
-              const assetFinanceDetails = assetFinanceDetailsByAccountId[account.id];
-              const assetFinanceSnapshot =
-                isCombinedAsset && assetFinanceDetails
-                  ? getAssetFinanceSnapshot(assetFinanceDetails, new Date())
-                  : null;
-              const hidesContributionInputs =
-                !isLiability && isNonContributingAccountType(account.accountType);
-              const usesDepreciationInput = isDepreciatingAssetType(account.accountType);
-              const selectedRateProfile = getRateProfileFromAnnualRate(
-                getDisplayedRateForAccount(account),
-              );
-              const employeeMonthly = getEmployeeMonthlyContribution(
-                account,
-                selfAnnualIncome,
-                spouseAnnualIncome,
-              );
-              const employerMatchMonthly = getEmployerMatchMonthly(
-                account,
-                selfAnnualIncome,
-                spouseAnnualIncome,
-              );
-              const employeeAnnual = employeeMonthly * 12;
-              const ownerAge = getAgeFromBirthday(
-                (people.find((person: PlannerPerson) => person.type === account.owner)?.birthday ??
-                  selfBirthday) ||
-                  '',
-              );
-              const suggestedLimit = getSuggestedAnnualLimitForAccount(
-                account.accountType,
-                ownerAge,
-                hasSpouse,
-              );
-              const isUsingIrsMaxContribution =
-                suggestedLimit > 0 &&
-                plannerConstants.isMoneyEqualWithinTolerance(employeeAnnual, suggestedLimit);
-              const modeOptions = isLiability
-                ? liabilityContributionModeOptions
-                : contributionModeOptions;
-              const contributionInputLabel =
-                account.contributionMode === 'monthly'
-                  ? isLiability
-                    ? 'Monthly Payment'
-                    : 'Monthly Contribution'
-                  : account.contributionMode === 'yearly'
-                    ? isLiability
-                      ? 'Yearly Payment'
-                      : 'Yearly Contribution'
-                    : isLiability
-                      ? 'Payment % of Salary'
-                      : 'Contribution % of Salary';
-              const onUpdateAccount = (updater: (current: typeof account) => typeof account) =>
-                updateAccount(account.id, updater);
-              const onUpdateAssetFinanceDetails = (
-                updater: (current: AssetFinanceDetails) => AssetFinanceDetails,
-              ) => updateAssetFinanceDetails(account.id, updater);
-              const onSetContributionToIrsMax = () => {
-                onUpdateAccount((current) => ({
-                  ...current,
-                  contributionMode: 'monthly',
-                  contributionValue:
-                    suggestedLimit > 0
-                      ? Number((suggestedLimit / 12).toFixed(2))
-                      : current.contributionValue,
-                }));
-              };
-
-              return (
-                <div key={account.id} className="h-fit space-y-3 rounded-md border p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">{account.name}</p>
-                      <Badge variant={isLiability ? 'destructive' : 'secondary'}>
-                        {isLiability ? 'Liability' : 'Asset'}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => toggleAccountCollapsed(account.id)}
-                      >
-                        {isAccountCollapsed ? <ChevronDown /> : <ChevronUp />}
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => removeAccount(account.id)}
-                        disabled={plannerAccounts.length === 1}
-                      >
-                        <Trash2 />
-                      </Button>
-                    </div>
-                  </div>
-                  <div
-                    className={`grid grid-cols-1 items-end gap-3 overflow-hidden transition-all duration-300 md:grid-cols-2 ${
-                      isAccountCollapsed
-                        ? 'pointer-events-none max-h-0 opacity-0'
-                        : 'max-h-[2400px] opacity-100'
-                    }`}
-                  >
-                    <div className="space-y-2">
-                      <Label>Account Name</Label>
-                      <Input
-                        value={account.name}
-                        onChange={(event) =>
-                          onUpdateAccount((current) => ({
-                            ...current,
-                            name: event.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Owner</Label>
-                      <Select
-                        value={account.owner}
-                        onValueChange={(value) =>
-                          onUpdateAccount((current) => ({
-                            ...current,
-                            owner: value as AccountOwner,
-                          }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select owner" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {accountOwnerOptions.map((ownerOption) => (
-                            <SelectItem key={ownerOption.value} value={ownerOption.value}>
-                              {ownerOption.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Account Type</Label>
-                      <Select
-                        value={account.accountType}
-                        onValueChange={(value) => {
-                          const selectedType = value as AccountType;
-                          const selectedTypeIsNonContributing =
-                            isNonContributingAccountType(selectedType);
-                          const selectedTypeIsCombinedAsset = isCombinedAssetType(selectedType);
-                          onUpdateAccount((current) => ({
-                            ...current,
-                            accountType: selectedType,
-                            annualRate:
-                              selectedType === 'vehicle'
-                                ? current.accountType !== 'vehicle'
-                                  ? -12
-                                  : -Math.abs(current.annualRate)
-                                : selectedType === 'home' && current.annualRate <= 0
-                                  ? 4
-                                  : current.annualRate,
-                            contributionMode: selectedTypeIsNonContributing
-                              ? 'monthly'
-                              : current.contributionMode,
-                            contributionValue: selectedTypeIsNonContributing
-                              ? 0
-                              : current.contributionValue,
-                            employerMatchRate:
-                              selectedType === '401k' ? current.employerMatchRate : 0,
-                            employerMatchMaxPercentOfSalary:
-                              selectedType === '401k' ? current.employerMatchMaxPercentOfSalary : 0,
-                          }));
-
-                          setPlannerAssetFinanceDetailsByAccountId((prev) => {
-                            const next = { ...prev } as Record<string, AssetFinanceDetails>;
-                            if (selectedTypeIsCombinedAsset) {
-                              if (!next[account.id]) {
-                                next[account.id] = getDefaultAssetFinanceDetailsForAccount({
-                                  ...account,
-                                  accountType: selectedType,
-                                });
-                              }
-                            } else if (next[account.id]) {
-                              delete next[account.id];
-                            }
-                            return next;
-                          });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {accountTypeOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {!isCombinedAsset ? (
-                      isLiability ? (
-                        <LiabilityAccountFields
-                          account={account}
-                          contributionInputLabel={contributionInputLabel}
-                          modeOptions={modeOptions}
-                          accountRateProfileOptions={accountRateProfileOptions}
-                          selectedRateProfile={selectedRateProfile}
-                          usesDepreciationInput={usesDepreciationInput}
-                          onUpdateAccount={onUpdateAccount}
-                          onSetContributionToIrsMax={onSetContributionToIrsMax}
-                          getDisplayedRateForAccount={getDisplayedRateForAccount}
-                          getAnnualRateFromProfile={getAnnualRateFromProfile}
-                          getStoredAnnualRateForInput={getStoredAnnualRateForInput}
-                        />
-                      ) : (
-                        <InvestmentAccountFields
-                          account={account}
-                          hidesContributionInputs={hidesContributionInputs}
-                          contributionInputLabel={contributionInputLabel}
-                          modeOptions={modeOptions}
-                          suggestedLimit={suggestedLimit}
-                          isUsingIrsMaxContribution={isUsingIrsMaxContribution}
-                          accountRateProfileOptions={accountRateProfileOptions}
-                          selectedRateProfile={selectedRateProfile}
-                          usesDepreciationInput={usesDepreciationInput}
-                          onUpdateAccount={onUpdateAccount}
-                          onSetContributionToIrsMax={onSetContributionToIrsMax}
-                          getDisplayedRateForAccount={getDisplayedRateForAccount}
-                          getAnnualRateFromProfile={getAnnualRateFromProfile}
-                          getStoredAnnualRateForInput={getStoredAnnualRateForInput}
-                        />
-                      )
-                    ) : (
-                      <>
-                        {account.accountType === 'home' ? (
-                          <HomeAccountFields
-                            assetFinanceDetails={assetFinanceDetails}
-                            defaultHomeGrowthProfile={defaultHomeGrowthProfile}
-                            defaultHomeAppreciationRate={defaultHomeAppreciationRate}
-                            homeGrowthProfileOptions={homeGrowthProfileOptions}
-                            onUpdateAssetFinanceDetails={onUpdateAssetFinanceDetails}
-                            toIsoDate={toIsoDate}
-                            getHomeAnnualGrowthRate={getHomeAnnualGrowthRate}
-                          />
-                        ) : (
-                          <VehicleAccountFields
-                            assetFinanceDetails={assetFinanceDetails}
-                            defaultVehicleDepreciationProfile={defaultVehicleDepreciationProfile}
-                            defaultVehicleDepreciationRate={defaultVehicleDepreciationRate}
-                            vehicleDepreciationProfileOptions={vehicleDepreciationProfileOptions}
-                            onUpdateAssetFinanceDetails={onUpdateAssetFinanceDetails}
-                            toIsoDate={toIsoDate}
-                          />
-                        )}
-                        <CombinedAssetLoanFields
-                          assetFinanceDetails={assetFinanceDetails}
-                          onUpdateAssetFinanceDetails={onUpdateAssetFinanceDetails}
-                          formatCurrency={formatCurrency}
-                        />
-                      </>
-                    )}
-                  </div>
-                  <div className="text-muted-foreground text-xs">
-                    {isAccountCollapsed ? (
-                      <p>
-                        {isLiability ? 'Payment' : 'Employee'}: {formatCurrency(employeeMonthly)}/mo
-                        {account.accountType === '401k'
-                          ? `, Match: ${formatCurrency(employerMatchMonthly)}/mo`
-                          : ''}
-                        {assetFinanceSnapshot
-                          ? `, Equity: ${formatCurrency(assetFinanceSnapshot.equity)}`
-                          : `, Balance: ${formatCurrency(account.startingBalance)}`}
-                      </p>
-                    ) : null}
-                    {hidesContributionInputs ? (
-                      <p>
-                        {isCombinedAsset
-                          ? 'This account combines asset value and optional loan in one place.'
-                          : 'This account type tracks value/depreciation only. Contribution inputs are hidden.'}
-                      </p>
-                    ) : isLiability ? (
-                      <p>Liability payments are not IRS-limited.</p>
-                    ) : (
-                      <>
-                        <p>
-                          IRS annual limit for age {ownerAge}: {formatCurrency(suggestedLimit)}
-                        </p>
-                        {suggestedLimit > 0 ? (
-                          <span
-                            className={
-                              plannerConstants.isMoneyGreaterThanWithTolerance(
-                                employeeAnnual,
-                                suggestedLimit,
-                              )
-                                ? 'text-destructive font-medium'
-                                : ''
-                            }
-                          >
-                            Annual contribution {formatCurrency(employeeAnnual)} / limit{' '}
-                            {formatCurrency(suggestedLimit)}
-                          </span>
-                        ) : (
-                          <span>No annual limit set for this account.</span>
-                        )}
-                      </>
-                    )}
-                    {!hidesContributionInputs ? (
-                      <span className="ml-2">
-                        {isLiability ? 'Monthly payment' : 'Employee monthly equivalent'}:{' '}
-                        {formatCurrency(employeeMonthly)}
-                      </span>
-                    ) : null}
-
-                    {assetFinanceSnapshot ? (
-                      <span className="ml-2">
-                        Estimated equity now: {formatCurrency(assetFinanceSnapshot.equity)} (
-                        {formatCurrency(assetFinanceSnapshot.assetValue)} - Loan{' '}
-                        {formatCurrency(assetFinanceSnapshot.loanBalance)})
-                      </span>
-                    ) : null}
-                    {usesDepreciationInput ? (
-                      <span className="ml-2">
-                        Vehicle depreciation uses a tapered curve by age (faster early years, slower
-                        later years), unless Custom is selected.
-                      </span>
-                    ) : null}
-                    {account.accountType === '401k' ? (
-                      <span className="ml-2">
-                        Employer match applied monthly: {formatCurrency(employerMatchMonthly)}
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-              );
-            })}
-            {filteredAccounts.length === 0 ? (
+            {filteredAccounts.map((account) => (
+              <AccountListItem
+                key={account.id}
+                account={account}
+                currencyCode={currencyCode}
+                people={people}
+                selfBirthday={selfBirthday}
+                selfAnnualIncome={selfAnnualIncome}
+                spouseAnnualIncome={spouseAnnualIncome}
+                hasSpouse={hasSpouse}
+                assetFinanceDetails={assetFinanceDetailsByAccountId[account.id]}
+                isAccountCollapsed={collapsedAccountIds[account.id] ?? false}
+                isLastAccount={plannerAccounts.length === 1}
+                isLiabilityAccountType={isLiabilityAccountType}
+                isCombinedAssetType={isCombinedAssetType}
+                isNonContributingAccountType={isNonContributingAccountType}
+                isDepreciatingAssetType={isDepreciatingAssetType}
+                getSuggestedAnnualLimitForAccount={getSuggestedAnnualLimitForAccount}
+                getDisplayedRateForAccount={getDisplayedRateForAccount}
+                getStoredAnnualRateForInput={getStoredAnnualRateForInput}
+                getRateProfileFromAnnualRate={getRateProfileFromAnnualRate}
+                getAnnualRateFromProfile={getAnnualRateFromProfile}
+                accountOwnerOptions={accountOwnerOptions}
+                accountRateProfileOptions={accountRateProfileOptions}
+                accountTypeOptions={accountTypeOptions}
+                contributionModeOptions={contributionModeOptions}
+                liabilityContributionModeOptions={liabilityContributionModeOptions}
+                liabilityTypeOptions={liabilityTypeOptions}
+                homeGrowthProfileOptions={homeGrowthProfileOptions}
+                vehicleDepreciationProfileOptions={vehicleDepreciationProfileOptions}
+                defaultHomeGrowthProfile={defaultHomeGrowthProfile as HomeGrowthProfile}
+                defaultVehicleDepreciationProfile={defaultVehicleDepreciationProfile}
+                defaultHomeAppreciationRate={defaultHomeAppreciationRate}
+                defaultVehicleDepreciationRate={defaultVehicleDepreciationRate}
+                onToggleCollapse={toggleCollapse}
+                onSave={handleSave}
+                onDelete={handleDelete}
+                isSaving={isSaving}
+                onUpdateAccount={(u) => updateAccount(account.id, u)}
+                onUpdateAssetFinanceDetails={(u) => updateAssetFinanceDetails(account.id, u)}
+                setPlannerAssetFinanceDetailsByAccountId={setPlannerAssetFinanceDetailsByAccountId}
+                getDefaultAssetFinanceDetailsForAccount={getDefaultAssetFinanceDetailsForAccount}
+                toIsoDate={toIsoDate}
+                getHomeAnnualGrowthRate={getHomeAnnualGrowthRate}
+              />
+            ))}
+            {filteredAccounts.length === 0 && (
               <div className="text-muted-foreground rounded-md border p-4 text-sm xl:col-span-2">
                 No accounts match this filter.
               </div>
-            ) : null}
+            )}
           </div>
+
           <div className="flex items-center justify-between">
             <div className="text-muted-foreground text-sm">
               <p>
@@ -566,6 +411,7 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
               </Button>
             </div>
           </div>
+
           <p className="text-muted-foreground text-xs">
             Annual limits are read from your IRS account configuration in the API.
           </p>
@@ -574,7 +420,7 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
             x match rate %.
           </p>
         </CardContent>
-      ) : null}
+      )}
     </Card>
   );
 };

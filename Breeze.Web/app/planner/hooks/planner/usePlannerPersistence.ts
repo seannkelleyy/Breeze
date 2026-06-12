@@ -2,7 +2,6 @@
 import { type Dispatch, type SetStateAction, useEffect, useRef, useState } from 'react';
 
 import type { UseMutationResult } from '@tanstack/react-query';
-
 import * as plannerConfig from '../../lib/config';
 import * as plannerConstants from '../../lib/constants';
 import {
@@ -10,310 +9,247 @@ import {
   getDefaultAssetFinanceDetailsForAccount,
   normalizeBonusMode,
 } from '../../lib/plannerMath';
-import { AccountType, ContributionMode, PlannerAccount } from '../../types/account';
-import {
+import type { AccountType, ContributionMode, PlannerAccount } from '../../types/account';
+import type {
   AssetFinanceDetails,
   HomeGrowthProfile,
   VehicleDepreciationProfile,
 } from '../../types/finance';
-import { PersonType, PlannerPerson } from '../../types/person';
-import { PlannerResponse, PlannerUpsertRequest } from '../../types/planner';
+import type { PersonType, PlannerPerson } from '../../types/person';
+import type { PlannerResponse, PlannerUpsertRequest } from '../../types/planner';
 
 const { accountTypeOptions, contributionModeOptions, isCombinedAssetType } = plannerConfig;
 
-interface UsePlannerPersistenceParams {
+// ─── Pure hydration helpers ───────────────────────────────
+
+function mapPeopleFromResponse(apiPeople: PlannerResponse['people']): PlannerPerson[] {
+  return apiPeople.map((person) => {
+    const personType: PersonType = person.personType === 'spouse' ? 'spouse' : 'self';
+    return {
+      id: crypto.randomUUID(),
+      type: personType,
+      name: person.name,
+      birthday: person.birthday?.slice(0, 10) ?? '',
+      retirementAge: clamp(person.retirementAge),
+      annualSalary: clamp(person.annualSalary),
+      bonusMode: normalizeBonusMode(person.bonusMode),
+      annualBonus: clamp(person.annualBonus ?? plannerConstants.PLANNER_DEFAULT_ANNUAL_BONUS),
+      incomeGrowthRate:
+        person.incomeGrowthRate ?? plannerConstants.PLANNER_DEFAULT_INCOME_GROWTH_RATE,
+    };
+  });
+}
+
+function mapAccountsFromResponse(apiAccounts: PlannerResponse['accounts']): PlannerAccount[] {
+  return apiAccounts.map((account, index) => ({
+    id: `${account.owner}-${account.accountType}-${account.name}-${index}`,
+    name: account.name,
+    owner: (account.owner === 'spouse' ? 'spouse' : 'self') as PlannerAccount['owner'],
+    accountType: (accountTypeOptions.find((o) => o.value === (account.accountType as AccountType))
+      ?.value ?? 'other') as AccountType,
+    contributionMode: (contributionModeOptions.find(
+      (o) => o.value === (account.contributionMode as ContributionMode),
+    )?.value ?? 'monthly') as ContributionMode,
+    contributionValue: clamp(account.contributionValue),
+    employerMatchRate: clamp(account.employerMatchRate),
+    employerMatchMaxPercentOfSalary: clamp(account.employerMatchMaxPercentOfSalary),
+    startingBalance: clamp(account.startingBalance),
+    annualRate: account.annualRate,
+  }));
+}
+
+function mapAssetFinanceDetailsFromResponse(
+  apiAccounts: PlannerResponse['accounts'],
+  mappedAccounts: PlannerAccount[],
+  existing: Record<string, AssetFinanceDetails>,
+): Record<string, AssetFinanceDetails> {
+  const next = { ...existing };
+  for (let i = 0; i < mappedAccounts.length; i += 1) {
+    const mapped = mappedAccounts[i];
+    const api = apiAccounts[i];
+    if (!isCombinedAssetType(mapped.accountType)) continue;
+    const fallback = getDefaultAssetFinanceDetailsForAccount(mapped);
+    next[mapped.id] = {
+      purchaseDate: api.purchaseDate?.slice(0, 10) ?? fallback.purchaseDate,
+      purchasePrice: clamp(api.purchasePrice ?? fallback.purchasePrice),
+      currentValue: clamp(api.currentValue ?? mapped.startingBalance),
+      annualChangeRate: api.annualChangeRate ?? mapped.annualRate,
+      homeGrowthProfile:
+        (api.homeGrowthProfile as HomeGrowthProfile | undefined) ?? fallback.homeGrowthProfile,
+      vehicleDepreciationProfile:
+        (api.vehicleDepreciationProfile as VehicleDepreciationProfile | undefined) ??
+        fallback.vehicleDepreciationProfile,
+      hasLoan: api.hasLoan ?? fallback.hasLoan,
+      loanInterestRate: api.loanInterestRate ?? fallback.loanInterestRate,
+      originalLoanAmount: clamp(api.originalLoanAmount ?? fallback.originalLoanAmount),
+      loanMonthlyPayment: clamp(api.loanMonthlyPayment ?? fallback.loanMonthlyPayment),
+      loanTermYears: api.loanTermYears ?? fallback.loanTermYears,
+      loanStartDate: api.loanStartDate?.slice(0, 10) ?? fallback.loanStartDate,
+      currentLoanBalance: clamp(api.currentLoanBalance ?? fallback.currentLoanBalance),
+    };
+  }
+  return next;
+}
+
+// ─── Hook ─────────────────────────────────────────────────
+
+interface Params {
   isSignedIn: boolean;
   isPlannerLoading: boolean;
   isPlannerError: boolean;
   plannerData?: PlannerResponse;
   putPlannerMutation: UseMutationResult<number, Error, PlannerUpsertRequest, unknown>;
   createPlannerPayload: (
-    nextDesiredInvestmentAmount: number,
-    nextMonthlyExpenses: number,
-    nextInflationRate: number,
-    nextSafeWithdrawalRate: number,
-    nextPeople: PlannerPerson[],
-    nextAccounts: PlannerAccount[],
-    nextAssetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>,
+    desired: number,
+    expenses: number,
+    inflation: number,
+    swr: number,
+    people: PlannerPerson[],
+    accounts: PlannerAccount[],
+    afd: Record<string, AssetFinanceDetails>,
   ) => PlannerUpsertRequest;
-  desiredInvestmentAmount: number;
-  monthlyExpenses: number;
-  inflationRate: number;
-  safeWithdrawalRate: number;
-  people: PlannerPerson[];
-  accounts: PlannerAccount[];
-  assetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>;
-  setDesiredInvestmentAmount: Dispatch<SetStateAction<number>>;
-  setMonthlyExpenses: Dispatch<SetStateAction<number>>;
-  setInflationRate: (nextInflationRate: number) => void;
-  setSafeWithdrawalRate: (nextSafeWithdrawalRate: number) => void;
-  setPeople: Dispatch<SetStateAction<PlannerPerson[]>>;
-  setAccounts: Dispatch<SetStateAction<PlannerAccount[]>>;
-  setAssetFinanceDetailsByAccountId: Dispatch<SetStateAction<Record<string, AssetFinanceDetails>>>;
+  state: {
+    desiredInvestmentAmount: number;
+    monthlyExpenses: number;
+    inflationRate: number;
+    safeWithdrawalRate: number;
+    people: PlannerPerson[];
+    accounts: PlannerAccount[];
+    assetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>;
+  };
+  setters: {
+    setDesiredInvestmentAmount: Dispatch<SetStateAction<number>>;
+    setMonthlyExpenses: Dispatch<SetStateAction<number>>;
+    setInflationRate: (v: number) => void;
+    setSafeWithdrawalRate: (v: number) => void;
+    setPeople: Dispatch<SetStateAction<PlannerPerson[]>>;
+    setAccounts: Dispatch<SetStateAction<PlannerAccount[]>>;
+    setAssetFinanceDetailsByAccountId: Dispatch<
+      SetStateAction<Record<string, AssetFinanceDetails>>
+    >;
+  };
 }
 
-interface UsePlannerPersistenceResult {
-  hasPlannerSaveError: boolean;
-  lastPlannerSavedAt: Date | null;
-}
-
-const usePlannerPersistence = ({
+function usePlannerPersistence({
   isSignedIn,
   isPlannerLoading,
   isPlannerError,
   plannerData,
   putPlannerMutation,
   createPlannerPayload,
-  desiredInvestmentAmount,
-  monthlyExpenses,
-  inflationRate,
-  safeWithdrawalRate,
-  people,
-  accounts,
-  assetFinanceDetailsByAccountId,
-  setDesiredInvestmentAmount,
-  setMonthlyExpenses,
-  setInflationRate,
-  setSafeWithdrawalRate,
-  setPeople,
-  setAccounts,
-  setAssetFinanceDetailsByAccountId,
-}: UsePlannerPersistenceParams): UsePlannerPersistenceResult => {
-  const hasHydratedPlannerRef = useRef(false);
-  const lastSavedPayloadRef = useRef('');
-  const [hasPlannerSaveError, setHasPlannerSaveError] = useState(false);
-  const [lastPlannerSavedAt, setLastPlannerSavedAt] = useState<Date | null>(null);
+  state,
+  setters,
+}: Params) {
+  const hasHydrated = useRef(false);
+  const lastSavedPayload = useRef('');
+  const [hasSaveError, setHasSaveError] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
+  // Hydrate from planner API response on mount
   useEffect(() => {
-    if (!isSignedIn || hasHydratedPlannerRef.current || isPlannerLoading || isPlannerError) {
-      return;
-    }
+    if (!isSignedIn || hasHydrated.current || isPlannerLoading || isPlannerError) return;
 
     if (plannerData && plannerData.monthlyExpenses > 0) {
-      setMonthlyExpenses(clamp(plannerData.monthlyExpenses));
+      setters.setMonthlyExpenses(clamp(plannerData.monthlyExpenses));
     }
 
-    const hasExistingPlannerData = Boolean(
+    const hasExistingData = Boolean(
       plannerData &&
       (plannerData.id > 0 ||
         (plannerData.people ?? []).length > 0 ||
         (plannerData.accounts ?? []).length > 0),
     );
 
-    if (hasExistingPlannerData && plannerData) {
-      const hydratedDesiredInvestmentAmount = clamp(plannerData.desiredInvestmentAmount);
-      const hydratedMonthlyExpenses = clamp(plannerData.monthlyExpenses);
-      const nextDesiredInvestmentAmount =
-        hydratedDesiredInvestmentAmount > 0
-          ? hydratedDesiredInvestmentAmount
+    if (hasExistingData && plannerData) {
+      const desired =
+        plannerData.desiredInvestmentAmount > 0
+          ? clamp(plannerData.desiredInvestmentAmount)
           : plannerConstants.PLANNER_DEFAULT_DESIRED_INVESTMENT_AMOUNT;
-      const nextMonthlyExpenses =
-        hydratedMonthlyExpenses > 0
-          ? hydratedMonthlyExpenses
+      const expenses =
+        plannerData.monthlyExpenses > 0
+          ? clamp(plannerData.monthlyExpenses)
           : plannerConstants.PLANNER_DEFAULT_MONTHLY_EXPENSES;
 
-      const mappedPeople: PlannerPerson[] = plannerData.people.map((person) => {
-        const personType: PersonType = person.personType === 'spouse' ? 'spouse' : 'self';
-        const bonusMode = normalizeBonusMode(person.bonusMode);
-        const annualBonus = person.annualBonus ?? plannerConstants.PLANNER_DEFAULT_ANNUAL_BONUS;
-        const incomeGrowthRate =
-          person.incomeGrowthRate ?? plannerConstants.PLANNER_DEFAULT_INCOME_GROWTH_RATE;
+      const mappedPeople = mapPeopleFromResponse(plannerData.people);
+      const mappedAccounts = mapAccountsFromResponse(plannerData.accounts);
 
-        return {
-          id: crypto.randomUUID(),
-          type: personType,
-          name: person.name,
-          birthday: person.birthday?.slice(0, 10) ?? '',
-          retirementAge: clamp(person.retirementAge),
-          annualSalary: clamp(person.annualSalary),
-          bonusMode,
-          annualBonus: clamp(annualBonus),
-          incomeGrowthRate,
-        };
-      });
-
-      const mappedAccounts: PlannerAccount[] = plannerData.accounts.map((account, index) => {
-        const normalizedAccountType =
-          accountTypeOptions.find((option) => option.value === (account.accountType as AccountType))
-            ?.value ?? ('other' as AccountType);
-        const normalizedOwner = account.owner === 'spouse' ? 'spouse' : 'self';
-        const normalizedContributionMode =
-          contributionModeOptions.find(
-            (option) => option.value === (account.contributionMode as ContributionMode),
-          )?.value ?? ('monthly' as ContributionMode);
-
-        return {
-          id: `${account.owner}-${normalizedAccountType}-${account.name}-${index}`,
-          name: account.name,
-          owner: normalizedOwner,
-          accountType: normalizedAccountType,
-          contributionMode: normalizedContributionMode,
-          contributionValue: clamp(account.contributionValue),
-          employerMatchRate: clamp(account.employerMatchRate),
-          employerMatchMaxPercentOfSalary: clamp(account.employerMatchMaxPercentOfSalary),
-          startingBalance: clamp(account.startingBalance),
-          annualRate: account.annualRate,
-        };
-      });
-
-      setDesiredInvestmentAmount(nextDesiredInvestmentAmount);
-      setMonthlyExpenses(nextMonthlyExpenses);
-      // Inflation and SWR are user preference values from CurrentUser context.
-      // Do not overwrite them from planner payload hydration.
-
-      if (mappedPeople.length > 0) {
-        setPeople(mappedPeople);
-      }
-
+      setters.setDesiredInvestmentAmount(desired);
+      setters.setMonthlyExpenses(expenses);
+      if (mappedPeople.length > 0) setters.setPeople(mappedPeople);
       if (mappedAccounts.length > 0) {
-        setAccounts(mappedAccounts);
-        setAssetFinanceDetailsByAccountId((prev) => {
-          const next = { ...prev };
-
-          for (let i = 0; i < mappedAccounts.length; i += 1) {
-            const mappedAccount = mappedAccounts[i];
-            const apiAccount = plannerData.accounts[i];
-
-            if (!isCombinedAssetType(mappedAccount.accountType)) {
-              continue;
-            }
-
-            const fallback = getDefaultAssetFinanceDetailsForAccount(mappedAccount);
-
-            next[mappedAccount.id] = {
-              purchaseDate: apiAccount.purchaseDate?.slice(0, 10) ?? fallback.purchaseDate,
-              purchasePrice: clamp(apiAccount.purchasePrice ?? fallback.purchasePrice),
-              currentValue: clamp(apiAccount.currentValue ?? mappedAccount.startingBalance),
-              annualChangeRate: apiAccount.annualChangeRate ?? mappedAccount.annualRate,
-              homeGrowthProfile:
-                (apiAccount.homeGrowthProfile as HomeGrowthProfile | undefined) ??
-                fallback.homeGrowthProfile,
-              vehicleDepreciationProfile:
-                (apiAccount.vehicleDepreciationProfile as VehicleDepreciationProfile | undefined) ??
-                fallback.vehicleDepreciationProfile,
-              hasLoan: apiAccount.hasLoan ?? fallback.hasLoan,
-              loanInterestRate: apiAccount.loanInterestRate ?? fallback.loanInterestRate,
-              originalLoanAmount: clamp(
-                apiAccount.originalLoanAmount ?? fallback.originalLoanAmount,
-              ),
-              loanMonthlyPayment: clamp(
-                apiAccount.loanMonthlyPayment ?? fallback.loanMonthlyPayment,
-              ),
-              loanTermYears: apiAccount.loanTermYears ?? fallback.loanTermYears,
-              loanStartDate: apiAccount.loanStartDate?.slice(0, 10) ?? fallback.loanStartDate,
-              currentLoanBalance: clamp(
-                apiAccount.currentLoanBalance ?? fallback.currentLoanBalance,
-              ),
-            };
-          }
-
-          return next;
-        });
+        setters.setAccounts(mappedAccounts);
+        setters.setAssetFinanceDetailsByAccountId((prev) =>
+          mapAssetFinanceDetailsFromResponse(plannerData.accounts, mappedAccounts, prev),
+        );
       }
 
-      lastSavedPayloadRef.current = JSON.stringify(
+      lastSavedPayload.current = JSON.stringify(
         createPlannerPayload(
-          nextDesiredInvestmentAmount,
-          nextMonthlyExpenses,
-          inflationRate,
-          safeWithdrawalRate,
-          mappedPeople.length > 0 ? mappedPeople : people,
-          mappedAccounts.length > 0 ? mappedAccounts : accounts,
-          assetFinanceDetailsByAccountId,
+          desired,
+          expenses,
+          state.inflationRate,
+          state.safeWithdrawalRate,
+          mappedPeople.length > 0 ? mappedPeople : state.people,
+          mappedAccounts.length > 0 ? mappedAccounts : state.accounts,
+          state.assetFinanceDetailsByAccountId,
         ),
       );
     } else {
-      lastSavedPayloadRef.current = JSON.stringify(
+      lastSavedPayload.current = JSON.stringify(
         createPlannerPayload(
-          desiredInvestmentAmount,
-          plannerData && plannerData.monthlyExpenses > 0
-            ? clamp(plannerData.monthlyExpenses)
-            : monthlyExpenses,
-          inflationRate,
-          safeWithdrawalRate,
-          people,
-          accounts,
-          assetFinanceDetailsByAccountId,
+          state.desiredInvestmentAmount,
+          plannerData?.monthlyExpenses ? clamp(plannerData.monthlyExpenses) : state.monthlyExpenses,
+          state.inflationRate,
+          state.safeWithdrawalRate,
+          state.people,
+          state.accounts,
+          state.assetFinanceDetailsByAccountId,
         ),
       );
     }
 
-    hasHydratedPlannerRef.current = true;
+    hasHydrated.current = true;
   }, [
     isSignedIn,
     isPlannerLoading,
     isPlannerError,
     plannerData,
     createPlannerPayload,
-    desiredInvestmentAmount,
-    monthlyExpenses,
-    inflationRate,
-    safeWithdrawalRate,
-    people,
-    accounts,
-    assetFinanceDetailsByAccountId,
-    setDesiredInvestmentAmount,
-    setMonthlyExpenses,
-    setInflationRate,
-    setSafeWithdrawalRate,
-    setPeople,
-    setAccounts,
-    setAssetFinanceDetailsByAccountId,
+    state,
+    setters,
   ]);
 
+  // Autosave on state change
   useEffect(() => {
-    if (!isSignedIn || !hasHydratedPlannerRef.current || putPlannerMutation.isPending) {
-      return;
-    }
+    if (!isSignedIn || !hasHydrated.current || putPlannerMutation.isPending) return;
 
     const payload = createPlannerPayload(
-      desiredInvestmentAmount,
-      monthlyExpenses,
-      inflationRate,
-      safeWithdrawalRate,
-      people,
-      accounts,
-      assetFinanceDetailsByAccountId,
+      state.desiredInvestmentAmount,
+      state.monthlyExpenses,
+      state.inflationRate,
+      state.safeWithdrawalRate,
+      state.people,
+      state.accounts,
+      state.assetFinanceDetailsByAccountId,
     );
-    const serializedPayload = JSON.stringify(payload);
+    const serialized = JSON.stringify(payload);
+    if (serialized === lastSavedPayload.current) return;
 
-    if (serializedPayload === lastSavedPayloadRef.current) {
-      return;
-    }
-
-    const saveTimeout = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       putPlannerMutation.mutate(payload, {
         onSuccess: () => {
-          lastSavedPayloadRef.current = serializedPayload;
-          setHasPlannerSaveError(false);
-          setLastPlannerSavedAt(new Date());
+          lastSavedPayload.current = serialized;
+          setHasSaveError(false);
+          setLastSavedAt(new Date());
         },
-        onError: () => {
-          setHasPlannerSaveError(true);
-        },
+        onError: () => setHasSaveError(true),
       });
     }, plannerConstants.PLANNER_AUTOSAVE_DEBOUNCE_MS);
 
-    return () => {
-      window.clearTimeout(saveTimeout);
-    };
-  }, [
-    isSignedIn,
-    desiredInvestmentAmount,
-    monthlyExpenses,
-    inflationRate,
-    safeWithdrawalRate,
-    people,
-    accounts,
-    assetFinanceDetailsByAccountId,
-    createPlannerPayload,
-    putPlannerMutation,
-  ]);
+    return () => window.clearTimeout(timer);
+  }, [isSignedIn, state, createPlannerPayload, putPlannerMutation]);
 
-  return {
-    hasPlannerSaveError,
-    lastPlannerSavedAt,
-  };
-};
+  return { hasPlannerSaveError: hasSaveError, lastPlannerSavedAt: lastSavedAt };
+}
 
 export default usePlannerPersistence;

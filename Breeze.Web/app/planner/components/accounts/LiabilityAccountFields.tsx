@@ -1,5 +1,4 @@
 import { FormattedNumberInput } from '../../../../components/common/form/FormattedNumberInput';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -8,85 +7,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PlannerAccount, ContributionMode, AccountRateProfile } from '../../types/account';
+import { PlannerAccount, LiabilityType } from '../../types/account';
 
 type Option<T extends string> = { value: T; label: string };
 
 interface LiabilityAccountFieldsProps {
   account: PlannerAccount;
-  contributionInputLabel: string;
-  modeOptions: ReadonlyArray<Option<ContributionMode>>;
-  accountRateProfileOptions: ReadonlyArray<Option<AccountRateProfile>>;
-  selectedRateProfile: AccountRateProfile;
-  usesDepreciationInput: boolean;
+  liabilityTypeOptions: ReadonlyArray<Option<LiabilityType>>;
   onUpdateAccount: (updater: (current: PlannerAccount) => PlannerAccount) => void;
-  onSetContributionToIrsMax: () => void;
-  getDisplayedRateForAccount: (account: PlannerAccount) => number;
-  getAnnualRateFromProfile: (profile: AccountRateProfile, currentAnnualRate: number) => number;
-  getStoredAnnualRateForInput: (account: PlannerAccount, value: number) => number;
 }
 
 const LiabilityAccountFields = ({
   account,
-  contributionInputLabel,
-  modeOptions,
-  accountRateProfileOptions,
-  selectedRateProfile,
-  usesDepreciationInput,
+  liabilityTypeOptions,
   onUpdateAccount,
-  onSetContributionToIrsMax,
-  getDisplayedRateForAccount,
-  getAnnualRateFromProfile,
-  getStoredAnnualRateForInput,
 }: LiabilityAccountFieldsProps) => {
   return (
     <>
       <div className="space-y-2">
-        <Label>Payment Type</Label>
+        <Label>Liability Type</Label>
         <Select
-          value={account.contributionMode}
+          value={account.accountType}
           onValueChange={(value) =>
             onUpdateAccount((current) => ({
               ...current,
-              contributionMode: value as ContributionMode,
+              accountType: value as LiabilityType,
             }))
           }
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select payment type" />
+            <SelectValue placeholder="Select liability type" />
           </SelectTrigger>
           <SelectContent>
-            {modeOptions.map((modeOption) => (
-              <SelectItem key={modeOption.value} value={modeOption.value}>
-                {modeOption.label}
+            {liabilityTypeOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </div>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <Label>{contributionInputLabel}</Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onSetContributionToIrsMax}
-            disabled
-          >
-            Max It Out
-          </Button>
-        </div>
-        <FormattedNumberInput
-          value={account.contributionValue}
-          onValueChange={(value) =>
-            onUpdateAccount((current) => ({
-              ...current,
-              contributionValue: value,
-            }))
-          }
-          maxFractionDigits={2}
-        />
       </div>
       <div className="space-y-2">
         <Label>Current Balance Owed</Label>
@@ -102,48 +61,42 @@ const LiabilityAccountFields = ({
         />
       </div>
       <div className="space-y-2">
-        <Label>Interest Profile</Label>
-        <Select
-          value={selectedRateProfile}
+        <Label>Interest Rate (%)</Label>
+        <FormattedNumberInput
+          value={account.annualRate}
           onValueChange={(value) =>
             onUpdateAccount((current) => ({
               ...current,
-              annualRate: getStoredAnnualRateForInput(
-                current,
-                getAnnualRateFromProfile(
-                  value as AccountRateProfile,
-                  getDisplayedRateForAccount(current),
-                ),
-              ),
+              annualRate: value,
             }))
           }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select rate profile" />
-          </SelectTrigger>
-          <SelectContent>
-            {accountRateProfileOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {selectedRateProfile === 'custom' ? (
-          <div className="mt-2 space-y-2">
-            <Label>{usesDepreciationInput ? 'Custom Depreciation %' : 'Custom Interest %'}</Label>
-            <FormattedNumberInput
-              value={getDisplayedRateForAccount(account)}
-              onValueChange={(value) =>
-                onUpdateAccount((current) => ({
-                  ...current,
-                  annualRate: getStoredAnnualRateForInput(current, value),
-                }))
-              }
-              maxFractionDigits={2}
-            />
-          </div>
-        ) : null}
+          maxFractionDigits={2}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Minimum Payment</Label>
+        <FormattedNumberInput
+          value={account.contributionValue}
+          onValueChange={(value) =>
+            onUpdateAccount((current) => ({
+              ...current,
+              contributionValue: value,
+            }))
+          }
+          maxFractionDigits={2}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Target Extra Payment</Label>
+        <FormattedNumberInput
+          value={0}
+          onValueChange={(value) =>
+            onUpdateAccount((current) => ({
+              ...current,
+            }))
+          }
+          maxFractionDigits={2}
+        />
       </div>
     </>
   );

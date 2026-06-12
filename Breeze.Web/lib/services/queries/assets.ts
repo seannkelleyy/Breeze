@@ -6,6 +6,12 @@ export const GET_ASSETS_BY_USER = `
       name
       assetType
       currentValue
+      owner
+      contributionMode
+      contributionValue
+      employerMatchRate
+      employerMatchMaxPercentOfSalary
+      annualRate
       lastValueUpdatedAt
       createdAt
       updatedAt
@@ -25,6 +31,9 @@ export const GET_LIABILITIES_BY_USER = `
       minimumPayment
       targetExtraPayment
       payoffPriority
+      owner
+      contributionMode
+      contributionValue
       lastBalanceUpdatedAt
       createdAt
       updatedAt
@@ -40,6 +49,12 @@ export const CREATE_ASSET = `
       name
       assetType
       currentValue
+      owner
+      contributionMode
+      contributionValue
+      employerMatchRate
+      employerMatchMaxPercentOfSalary
+      annualRate
       lastValueUpdatedAt
       createdAt
       updatedAt
@@ -55,6 +70,12 @@ export const UPDATE_ASSET = `
       name
       assetType
       currentValue
+      owner
+      contributionMode
+      contributionValue
+      employerMatchRate
+      employerMatchMaxPercentOfSalary
+      annualRate
       lastValueUpdatedAt
       createdAt
       updatedAt
@@ -74,6 +95,9 @@ export const CREATE_LIABILITY = `
       minimumPayment
       targetExtraPayment
       payoffPriority
+      owner
+      contributionMode
+      contributionValue
       lastBalanceUpdatedAt
       createdAt
       updatedAt
@@ -93,6 +117,9 @@ export const UPDATE_LIABILITY = `
       minimumPayment
       targetExtraPayment
       payoffPriority
+      owner
+      contributionMode
+      contributionValue
       lastBalanceUpdatedAt
       createdAt
       updatedAt

@@ -1,3 +1,6 @@
+export { CategoriesTable } from './category/CategoriesTable';
+export { CreateCategoryDialog } from './category/dialogs/CreateCategoryDialog';
+export { EditCategoryDialog } from './category/dialogs/EditCategoryDialog';
 export { CreateExpenseDialog } from './expense/dialogs/CreateExpenseDialog';
 export { EditExpenseDialog } from './expense/dialogs/EditExpenseDialog';
 export { ExpensesTable } from './expense/ExpenseTable';

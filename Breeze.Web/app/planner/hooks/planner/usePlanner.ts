@@ -126,16 +126,18 @@ const usePlanner = () => {
       // Persist accounts
       for (const acct of payload.accounts as PlannerAccountDto[]) {
         if (isLiabilityType(acct.accountType)) {
-          // build liability input
           const liabilityInput = {
             userId,
             name: acct.name,
             liabilityType: mapToLiabilityType(acct.accountType),
-            currentBalance: String(acct.currentLoanBalance ?? acct.startingBalance ?? 0),
-            interestRate: String(acct.loanInterestRate ?? 0),
-            minimumPayment: String(acct.loanMonthlyPayment ?? 0),
-            targetExtraPayment: String(0),
+            currentBalance: String(acct.startingBalance ?? 0),
+            interestRate: ((acct.annualRate ?? 0) / 100).toFixed(4),
+            minimumPayment: String(acct.contributionValue ?? 0),
+            targetExtraPayment: '0',
             payoffPriority: 0,
+            owner: acct.owner,
+            contributionMode: acct.contributionMode,
+            contributionValue: String(acct.contributionValue ?? 0),
           };
 
           const existing = existingLiabilities.find(
@@ -143,11 +145,11 @@ const usePlanner = () => {
           );
 
           if (existing) {
-            const updateInput = { id: existing.id, ...liabilityInput };
+            const { userId: _userId, ...updateFields } = liabilityInput;
             // eslint-disable-next-line no-await-in-loop
-            await request<{ updateLiability: { id: string } }, { input: typeof updateInput }>(
+            await request<{ updateLiability: { id: string } }, { input: typeof updateFields & { id: string } }>(
               UPDATE_LIABILITY,
-              { input: updateInput },
+              { input: { id: existing.id, ...updateFields } },
             );
           } else {
             // eslint-disable-next-line no-await-in-loop
@@ -162,6 +164,12 @@ const usePlanner = () => {
             name: acct.name,
             assetType: mapToAssetType(acct.accountType),
             currentValue: String(acct.currentValue ?? acct.startingBalance ?? 0),
+            owner: acct.owner,
+            contributionMode: acct.contributionMode,
+            contributionValue: String(acct.contributionValue ?? 0),
+            employerMatchRate: String(acct.employerMatchRate ?? 0),
+            employerMatchMaxPercentOfSalary: String(acct.employerMatchMaxPercentOfSalary ?? 0),
+            annualRate: String(acct.annualRate ?? 0),
           };
 
           const existing = existingAssets.find(
@@ -169,11 +177,11 @@ const usePlanner = () => {
           );
 
           if (existing) {
-            const updateInput = { id: existing.id, ...assetInput };
+            const { userId: _userId, ...updateFields } = assetInput;
             // eslint-disable-next-line no-await-in-loop
-            await request<{ updateAsset: { id: string } }, { input: typeof updateInput }>(
+            await request<{ updateAsset: { id: string } }, { input: typeof updateFields & { id: string } }>(
               UPDATE_ASSET,
-              { input: updateInput },
+              { input: { id: existing.id, ...updateFields } },
             );
           } else {
             // eslint-disable-next-line no-await-in-loop

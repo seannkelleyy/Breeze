@@ -7,9 +7,12 @@ INSERT INTO liabilities (
   interest_rate,
   minimum_payment,
   target_extra_payment,
-  payoff_priority
+  payoff_priority,
+  owner,
+  contribution_mode,
+  contribution_value
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 RETURNING
   id,
   user_id,
@@ -20,6 +23,9 @@ RETURNING
   minimum_payment,
   target_extra_payment,
   payoff_priority,
+  owner,
+  contribution_mode,
+  contribution_value,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -36,6 +42,9 @@ SELECT
   minimum_payment,
   target_extra_payment,
   payoff_priority,
+  owner,
+  contribution_mode,
+  contribution_value,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -56,6 +65,9 @@ SELECT
   minimum_payment,
   target_extra_payment,
   payoff_priority,
+  owner,
+  contribution_mode,
+  contribution_value,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -75,6 +87,9 @@ SET
   minimum_payment = $6,
   target_extra_payment = $7,
   payoff_priority = $8,
+  owner = $9,
+  contribution_mode = $10,
+  contribution_value = $11,
   last_balance_updated_at = CASE
     WHEN current_balance IS DISTINCT FROM $4 THEN now()
     ELSE last_balance_updated_at
@@ -92,6 +107,9 @@ RETURNING
   minimum_payment,
   target_extra_payment,
   payoff_priority,
+  owner,
+  contribution_mode,
+  contribution_value,
   last_balance_updated_at,
   created_at,
   updated_at,

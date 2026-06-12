@@ -13,35 +13,53 @@ import (
 )
 
 type Asset struct {
-	ID                 uuid.UUID
-	UserID             uuid.UUID
-	Name               string
-	AssetType          sqlc.AssetType
-	CurrentValue       decimal.Decimal
-	LastValueUpdatedAt time.Time
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
+	ID                              uuid.UUID
+	UserID                          uuid.UUID
+	Name                            string
+	AssetType                       sqlc.AssetType
+	CurrentValue                    decimal.Decimal
+	Owner                           string
+	ContributionMode                string
+	ContributionValue               decimal.Decimal
+	EmployerMatchRate               decimal.Decimal
+	EmployerMatchMaxPercentOfSalary decimal.Decimal
+	AnnualRate                      decimal.Decimal
+	LastValueUpdatedAt              time.Time
+	CreatedAt                       time.Time
+	UpdatedAt                       time.Time
 }
 
 type CreateAssetInput struct {
-	UserID       uuid.UUID
-	Name         string
-	AssetType    sqlc.AssetType
-	CurrentValue decimal.Decimal
+	UserID                          uuid.UUID
+	Name                            string
+	AssetType                       sqlc.AssetType
+	CurrentValue                    decimal.Decimal
+	Owner                           string
+	ContributionMode                string
+	ContributionValue               decimal.Decimal
+	EmployerMatchRate               decimal.Decimal
+	EmployerMatchMaxPercentOfSalary decimal.Decimal
+	AnnualRate                      decimal.Decimal
 }
 
 type UpdateAssetInput struct {
-	ID           uuid.UUID
-	Name         string
-	AssetType    sqlc.AssetType
-	CurrentValue decimal.Decimal
+	ID                              uuid.UUID
+	Name                            string
+	AssetType                       sqlc.AssetType
+	CurrentValue                    decimal.Decimal
+	Owner                           string
+	ContributionMode                string
+	ContributionValue               decimal.Decimal
+	EmployerMatchRate               decimal.Decimal
+	EmployerMatchMaxPercentOfSalary decimal.Decimal
+	AnnualRate                      decimal.Decimal
 }
 
 type assetQuerier interface {
-	CreateAsset(ctx context.Context, arg sqlc.CreateAssetParams) (sqlc.Asset, error)
-	GetAssetByID(ctx context.Context, id uuid.UUID) (sqlc.Asset, error)
-	ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Asset, error)
-	UpdateAsset(ctx context.Context, arg sqlc.UpdateAssetParams) (sqlc.Asset, error)
+	CreateAsset(ctx context.Context, arg sqlc.CreateAssetParams) (sqlc.CreateAssetRow, error)
+	GetAssetByID(ctx context.Context, id uuid.UUID) (sqlc.GetAssetByIDRow, error)
+	ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListAssetsByUserIDRow, error)
+	UpdateAsset(ctx context.Context, arg sqlc.UpdateAssetParams) (sqlc.UpdateAssetRow, error)
 	SoftDeleteAsset(ctx context.Context, id uuid.UUID) (int64, error)
 }
 
@@ -55,16 +73,22 @@ func NewAssetService(queries assetQuerier) *AssetService {
 
 func (s *AssetService) Create(ctx context.Context, input CreateAssetInput) (*Asset, error) {
 	row, err := s.queries.CreateAsset(ctx, sqlc.CreateAssetParams{
-		UserID:       input.UserID,
-		Name:         input.Name,
-		AssetType:    input.AssetType,
-		CurrentValue: input.CurrentValue,
+		UserID:                          input.UserID,
+		Name:                            input.Name,
+		AssetType:                       input.AssetType,
+		CurrentValue:                    input.CurrentValue,
+		Owner:                           input.Owner,
+		ContributionMode:                input.ContributionMode,
+		ContributionValue:               input.ContributionValue,
+		EmployerMatchRate:               input.EmployerMatchRate,
+		EmployerMatchMaxPercentOfSalary: input.EmployerMatchMaxPercentOfSalary,
+		AnnualRate:                      input.AnnualRate,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create asset: %w", err)
 	}
 
-	asset := mapAssetRecord(row)
+	asset := mapCreateAssetRow(row)
 	return &asset, nil
 }
 
@@ -77,7 +101,7 @@ func (s *AssetService) GetByID(ctx context.Context, id uuid.UUID) (*Asset, error
 		return nil, fmt.Errorf("get asset by id: %w", err)
 	}
 
-	asset := mapAssetRecord(row)
+	asset := mapGetAssetByIDRow(row)
 	return &asset, nil
 }
 
@@ -89,7 +113,7 @@ func (s *AssetService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]As
 
 	assets := make([]Asset, 0, len(rows))
 	for _, row := range rows {
-		assets = append(assets, mapAssetRecord(row))
+		assets = append(assets, mapListAssetsByUserIDRow(row))
 	}
 
 	return assets, nil
@@ -97,10 +121,16 @@ func (s *AssetService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]As
 
 func (s *AssetService) Update(ctx context.Context, input UpdateAssetInput) (*Asset, error) {
 	row, err := s.queries.UpdateAsset(ctx, sqlc.UpdateAssetParams{
-		ID:           input.ID,
-		Name:         input.Name,
-		AssetType:    input.AssetType,
-		CurrentValue: input.CurrentValue,
+		ID:                              input.ID,
+		Name:                            input.Name,
+		AssetType:                       input.AssetType,
+		CurrentValue:                    input.CurrentValue,
+		Owner:                           input.Owner,
+		ContributionMode:                input.ContributionMode,
+		ContributionValue:               input.ContributionValue,
+		EmployerMatchRate:               input.EmployerMatchRate,
+		EmployerMatchMaxPercentOfSalary: input.EmployerMatchMaxPercentOfSalary,
+		AnnualRate:                      input.AnnualRate,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -109,7 +139,7 @@ func (s *AssetService) Update(ctx context.Context, input UpdateAssetInput) (*Ass
 		return nil, fmt.Errorf("update asset: %w", err)
 	}
 
-	asset := mapAssetRecord(row)
+	asset := mapUpdateAssetRow(row)
 	return &asset, nil
 }
 
@@ -126,13 +156,95 @@ func (s *AssetService) Delete(ctx context.Context, id uuid.UUID) error {
 
 func mapAssetRecord(row sqlc.Asset) Asset {
 	return Asset{
-		ID:                 row.ID,
-		UserID:             row.UserID,
-		Name:               row.Name,
-		AssetType:          row.AssetType,
-		CurrentValue:       row.CurrentValue,
-		LastValueUpdatedAt: timestamptzToTime(row.LastValueUpdatedAt),
-		CreatedAt:          timestamptzToTime(row.CreatedAt),
-		UpdatedAt:          timestamptzToTime(row.UpdatedAt),
+		ID:                              row.ID,
+		UserID:                          row.UserID,
+		Name:                            row.Name,
+		AssetType:                       row.AssetType,
+		CurrentValue:                    row.CurrentValue,
+		Owner:                           row.Owner,
+		ContributionMode:                row.ContributionMode,
+		ContributionValue:               row.ContributionValue,
+		EmployerMatchRate:               row.EmployerMatchRate,
+		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
+		AnnualRate:                      row.AnnualRate,
+		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
+		CreatedAt:                       timestamptzToTime(row.CreatedAt),
+		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapCreateAssetRow(row sqlc.CreateAssetRow) Asset {
+	return Asset{
+		ID:                              row.ID,
+		UserID:                          row.UserID,
+		Name:                            row.Name,
+		AssetType:                       row.AssetType,
+		CurrentValue:                    row.CurrentValue,
+		Owner:                           row.Owner,
+		ContributionMode:                row.ContributionMode,
+		ContributionValue:               row.ContributionValue,
+		EmployerMatchRate:               row.EmployerMatchRate,
+		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
+		AnnualRate:                      row.AnnualRate,
+		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
+		CreatedAt:                       timestamptzToTime(row.CreatedAt),
+		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapGetAssetByIDRow(row sqlc.GetAssetByIDRow) Asset {
+	return Asset{
+		ID:                              row.ID,
+		UserID:                          row.UserID,
+		Name:                            row.Name,
+		AssetType:                       row.AssetType,
+		CurrentValue:                    row.CurrentValue,
+		Owner:                           row.Owner,
+		ContributionMode:                row.ContributionMode,
+		ContributionValue:               row.ContributionValue,
+		EmployerMatchRate:               row.EmployerMatchRate,
+		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
+		AnnualRate:                      row.AnnualRate,
+		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
+		CreatedAt:                       timestamptzToTime(row.CreatedAt),
+		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapListAssetsByUserIDRow(row sqlc.ListAssetsByUserIDRow) Asset {
+	return Asset{
+		ID:                              row.ID,
+		UserID:                          row.UserID,
+		Name:                            row.Name,
+		AssetType:                       row.AssetType,
+		CurrentValue:                    row.CurrentValue,
+		Owner:                           row.Owner,
+		ContributionMode:                row.ContributionMode,
+		ContributionValue:               row.ContributionValue,
+		EmployerMatchRate:               row.EmployerMatchRate,
+		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
+		AnnualRate:                      row.AnnualRate,
+		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
+		CreatedAt:                       timestamptzToTime(row.CreatedAt),
+		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapUpdateAssetRow(row sqlc.UpdateAssetRow) Asset {
+	return Asset{
+		ID:                              row.ID,
+		UserID:                          row.UserID,
+		Name:                            row.Name,
+		AssetType:                       row.AssetType,
+		CurrentValue:                    row.CurrentValue,
+		Owner:                           row.Owner,
+		ContributionMode:                row.ContributionMode,
+		ContributionValue:               row.ContributionValue,
+		EmployerMatchRate:               row.EmployerMatchRate,
+		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
+		AnnualRate:                      row.AnnualRate,
+		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
+		CreatedAt:                       timestamptzToTime(row.CreatedAt),
+		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
 	}
 }

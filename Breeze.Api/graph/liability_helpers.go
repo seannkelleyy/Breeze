@@ -37,6 +37,11 @@ func createLiabilityInputFromModel(input model.CreateLiabilityInput) (service.Cr
 		return service.CreateLiabilityInput{}, fmt.Errorf("invalid target extra payment: %w", err)
 	}
 
+	contributionValue, err := decimal.Parse(input.ContributionValue)
+	if err != nil {
+		return service.CreateLiabilityInput{}, fmt.Errorf("invalid contribution value: %w", err)
+	}
+
 	return service.CreateLiabilityInput{
 		UserID:             userID,
 		Name:               input.Name,
@@ -46,6 +51,9 @@ func createLiabilityInputFromModel(input model.CreateLiabilityInput) (service.Cr
 		MinimumPayment:     minimumPayment,
 		TargetExtraPayment: targetExtraPayment,
 		PayoffPriority:     int32(input.PayoffPriority),
+		Owner:              input.Owner,
+		ContributionMode:   input.ContributionMode,
+		ContributionValue:  contributionValue,
 	}, nil
 }
 
@@ -75,6 +83,11 @@ func updateLiabilityInputFromModel(input model.UpdateLiabilityInput) (service.Up
 		return service.UpdateLiabilityInput{}, fmt.Errorf("invalid target extra payment: %w", err)
 	}
 
+	contributionValue, err := decimal.Parse(input.ContributionValue)
+	if err != nil {
+		return service.UpdateLiabilityInput{}, fmt.Errorf("invalid contribution value: %w", err)
+	}
+
 	return service.UpdateLiabilityInput{
 		ID:                 id,
 		Name:               input.Name,
@@ -84,6 +97,9 @@ func updateLiabilityInputFromModel(input model.UpdateLiabilityInput) (service.Up
 		MinimumPayment:     minimumPayment,
 		TargetExtraPayment: targetExtraPayment,
 		PayoffPriority:     int32(input.PayoffPriority),
+		Owner:              input.Owner,
+		ContributionMode:   input.ContributionMode,
+		ContributionValue:  contributionValue,
 	}, nil
 }
 
@@ -98,6 +114,9 @@ func mapLiabilityToModel(liability *service.Liability) *model.Liability {
 		MinimumPayment:       liability.MinimumPayment.String(),
 		TargetExtraPayment:   liability.TargetExtraPayment.String(),
 		PayoffPriority:       int(liability.PayoffPriority),
+		Owner:                liability.Owner,
+		ContributionMode:     liability.ContributionMode,
+		ContributionValue:    liability.ContributionValue.String(),
 		LastBalanceUpdatedAt: liability.LastBalanceUpdatedAt.Format(time.RFC3339),
 		CreatedAt:            liability.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:            liability.UpdatedAt.Format(time.RFC3339),

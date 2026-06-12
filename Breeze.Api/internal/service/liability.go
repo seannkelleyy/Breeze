@@ -22,6 +22,9 @@ type Liability struct {
 	MinimumPayment       decimal.Decimal
 	TargetExtraPayment   decimal.Decimal
 	PayoffPriority       int32
+	Owner                string
+	ContributionMode     string
+	ContributionValue    decimal.Decimal
 	LastBalanceUpdatedAt time.Time
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
@@ -36,6 +39,9 @@ type CreateLiabilityInput struct {
 	MinimumPayment     decimal.Decimal
 	TargetExtraPayment decimal.Decimal
 	PayoffPriority     int32
+	Owner              string
+	ContributionMode   string
+	ContributionValue  decimal.Decimal
 }
 
 type UpdateLiabilityInput struct {
@@ -47,13 +53,16 @@ type UpdateLiabilityInput struct {
 	MinimumPayment     decimal.Decimal
 	TargetExtraPayment decimal.Decimal
 	PayoffPriority     int32
+	Owner              string
+	ContributionMode   string
+	ContributionValue  decimal.Decimal
 }
 
 type liabilityQuerier interface {
-	CreateLiability(ctx context.Context, arg sqlc.CreateLiabilityParams) (sqlc.Liability, error)
-	GetLiabilityByID(ctx context.Context, id uuid.UUID) (sqlc.Liability, error)
-	ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Liability, error)
-	UpdateLiability(ctx context.Context, arg sqlc.UpdateLiabilityParams) (sqlc.Liability, error)
+	CreateLiability(ctx context.Context, arg sqlc.CreateLiabilityParams) (sqlc.CreateLiabilityRow, error)
+	GetLiabilityByID(ctx context.Context, id uuid.UUID) (sqlc.GetLiabilityByIDRow, error)
+	ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListLiabilitiesByUserIDRow, error)
+	UpdateLiability(ctx context.Context, arg sqlc.UpdateLiabilityParams) (sqlc.UpdateLiabilityRow, error)
 	SoftDeleteLiability(ctx context.Context, id uuid.UUID) (int64, error)
 }
 
@@ -75,17 +84,16 @@ func (s *LiabilityService) Create(ctx context.Context, input CreateLiabilityInpu
 		MinimumPayment:     input.MinimumPayment,
 		TargetExtraPayment: input.TargetExtraPayment,
 		PayoffPriority:     input.PayoffPriority,
+		Owner:              input.Owner,
+		ContributionMode:   input.ContributionMode,
+		ContributionValue:  input.ContributionValue,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create liability: %w", err)
 	}
 
-	liability, err := mapLiabilityRecord(row)
-	if err != nil {
-		return nil, fmt.Errorf("map created liability: %w", err)
-	}
-
-	return liability, nil
+	liability := mapCreateLiabilityRow(row)
+	return &liability, nil
 }
 
 func (s *LiabilityService) GetByID(ctx context.Context, id uuid.UUID) (*Liability, error) {
@@ -97,12 +105,8 @@ func (s *LiabilityService) GetByID(ctx context.Context, id uuid.UUID) (*Liabilit
 		return nil, fmt.Errorf("get liability by id: %w", err)
 	}
 
-	liability, err := mapLiabilityRecord(row)
-	if err != nil {
-		return nil, fmt.Errorf("map liability: %w", err)
-	}
-
-	return liability, nil
+	liability := mapGetLiabilityByIDRow(row)
+	return &liability, nil
 }
 
 func (s *LiabilityService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]Liability, error) {
@@ -113,11 +117,7 @@ func (s *LiabilityService) ListByUserID(ctx context.Context, userID uuid.UUID) (
 
 	liabilities := make([]Liability, 0, len(rows))
 	for _, row := range rows {
-		liability, mapErr := mapLiabilityRecord(row)
-		if mapErr != nil {
-			return nil, fmt.Errorf("map liability: %w", mapErr)
-		}
-		liabilities = append(liabilities, *liability)
+		liabilities = append(liabilities, mapListLiabilitiesByUserIDRow(row))
 	}
 
 	return liabilities, nil
@@ -133,6 +133,9 @@ func (s *LiabilityService) Update(ctx context.Context, input UpdateLiabilityInpu
 		MinimumPayment:     input.MinimumPayment,
 		TargetExtraPayment: input.TargetExtraPayment,
 		PayoffPriority:     input.PayoffPriority,
+		Owner:              input.Owner,
+		ContributionMode:   input.ContributionMode,
+		ContributionValue:  input.ContributionValue,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -141,12 +144,8 @@ func (s *LiabilityService) Update(ctx context.Context, input UpdateLiabilityInpu
 		return nil, fmt.Errorf("update liability: %w", err)
 	}
 
-	liability, err := mapLiabilityRecord(row)
-	if err != nil {
-		return nil, fmt.Errorf("map updated liability: %w", err)
-	}
-
-	return liability, nil
+	liability := mapUpdateLiabilityRow(row)
+	return &liability, nil
 }
 
 func (s *LiabilityService) Delete(ctx context.Context, id uuid.UUID) error {
@@ -160,8 +159,8 @@ func (s *LiabilityService) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func mapLiabilityRecord(row sqlc.Liability) (*Liability, error) {
-	return &Liability{
+func mapCreateLiabilityRow(row sqlc.CreateLiabilityRow) Liability {
+	return Liability{
 		ID:                   row.ID,
 		UserID:               row.UserID,
 		Name:                 row.Name,
@@ -171,8 +170,71 @@ func mapLiabilityRecord(row sqlc.Liability) (*Liability, error) {
 		MinimumPayment:       row.MinimumPayment,
 		TargetExtraPayment:   row.TargetExtraPayment,
 		PayoffPriority:       row.PayoffPriority,
+		Owner:                row.Owner,
+		ContributionMode:     row.ContributionMode,
+		ContributionValue:    row.ContributionValue,
 		LastBalanceUpdatedAt: timestamptzToTime(row.LastBalanceUpdatedAt),
 		CreatedAt:            timestamptzToTime(row.CreatedAt),
 		UpdatedAt:            timestamptzToTime(row.UpdatedAt),
-	}, nil
+	}
+}
+
+func mapGetLiabilityByIDRow(row sqlc.GetLiabilityByIDRow) Liability {
+	return Liability{
+		ID:                   row.ID,
+		UserID:               row.UserID,
+		Name:                 row.Name,
+		LiabilityType:        row.LiabilityType,
+		CurrentBalance:       row.CurrentBalance,
+		InterestRate:         row.InterestRate,
+		MinimumPayment:       row.MinimumPayment,
+		TargetExtraPayment:   row.TargetExtraPayment,
+		PayoffPriority:       row.PayoffPriority,
+		Owner:                row.Owner,
+		ContributionMode:     row.ContributionMode,
+		ContributionValue:    row.ContributionValue,
+		LastBalanceUpdatedAt: timestamptzToTime(row.LastBalanceUpdatedAt),
+		CreatedAt:            timestamptzToTime(row.CreatedAt),
+		UpdatedAt:            timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapListLiabilitiesByUserIDRow(row sqlc.ListLiabilitiesByUserIDRow) Liability {
+	return Liability{
+		ID:                   row.ID,
+		UserID:               row.UserID,
+		Name:                 row.Name,
+		LiabilityType:        row.LiabilityType,
+		CurrentBalance:       row.CurrentBalance,
+		InterestRate:         row.InterestRate,
+		MinimumPayment:       row.MinimumPayment,
+		TargetExtraPayment:   row.TargetExtraPayment,
+		PayoffPriority:       row.PayoffPriority,
+		Owner:                row.Owner,
+		ContributionMode:     row.ContributionMode,
+		ContributionValue:    row.ContributionValue,
+		LastBalanceUpdatedAt: timestamptzToTime(row.LastBalanceUpdatedAt),
+		CreatedAt:            timestamptzToTime(row.CreatedAt),
+		UpdatedAt:            timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapUpdateLiabilityRow(row sqlc.UpdateLiabilityRow) Liability {
+	return Liability{
+		ID:                   row.ID,
+		UserID:               row.UserID,
+		Name:                 row.Name,
+		LiabilityType:        row.LiabilityType,
+		CurrentBalance:       row.CurrentBalance,
+		InterestRate:         row.InterestRate,
+		MinimumPayment:       row.MinimumPayment,
+		TargetExtraPayment:   row.TargetExtraPayment,
+		PayoffPriority:       row.PayoffPriority,
+		Owner:                row.Owner,
+		ContributionMode:     row.ContributionMode,
+		ContributionValue:    row.ContributionValue,
+		LastBalanceUpdatedAt: timestamptzToTime(row.LastBalanceUpdatedAt),
+		CreatedAt:            timestamptzToTime(row.CreatedAt),
+		UpdatedAt:            timestamptzToTime(row.UpdatedAt),
+	}
 }

@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/preserve-manual-memoization */
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
@@ -67,7 +69,7 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
             onSuccess: () => {
               onSuccess?.();
             },
-            onError: (err) => {
+            onError: () => {
               setError('Failed to connect account');
               onError?.('Failed to connect account');
             },
@@ -76,9 +78,6 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
       },
       onExit: () => {
         // User closed the Link flow
-      },
-      onEvent: (eventName: string) => {
-        console.log('Plaid event:', eventName);
       },
     }).open();
   }, [user?.id, exchangeToken, onSuccess, onError]);
@@ -99,7 +98,7 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
           'Connect Institution'
         )}
       </Button>
-      {error && <p className="text-sm text-destructive mt-2">{error}</p>}
+      {error && <p className="text-destructive mt-2 text-sm">{error}</p>}
     </>
   );
 };

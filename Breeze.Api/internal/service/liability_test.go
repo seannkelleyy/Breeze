@@ -15,39 +15,39 @@ import (
 )
 
 type mockLiabilityQuerier struct {
-	createLiabilityFunc         func(context.Context, sqlc.CreateLiabilityParams) (sqlc.Liability, error)
-	getLiabilityByIDFunc        func(context.Context, uuid.UUID) (sqlc.Liability, error)
-	listLiabilitiesByUserIDFunc func(context.Context, uuid.UUID) ([]sqlc.Liability, error)
-	updateLiabilityFunc         func(context.Context, sqlc.UpdateLiabilityParams) (sqlc.Liability, error)
+	createLiabilityFunc         func(context.Context, sqlc.CreateLiabilityParams) (sqlc.CreateLiabilityRow, error)
+	getLiabilityByIDFunc        func(context.Context, uuid.UUID) (sqlc.GetLiabilityByIDRow, error)
+	listLiabilitiesByUserIDFunc func(context.Context, uuid.UUID) ([]sqlc.ListLiabilitiesByUserIDRow, error)
+	updateLiabilityFunc         func(context.Context, sqlc.UpdateLiabilityParams) (sqlc.UpdateLiabilityRow, error)
 	softDeleteLiabilityFunc     func(context.Context, uuid.UUID) (int64, error)
 }
 
-func (m *mockLiabilityQuerier) CreateLiability(ctx context.Context, arg sqlc.CreateLiabilityParams) (sqlc.Liability, error) {
+func (m *mockLiabilityQuerier) CreateLiability(ctx context.Context, arg sqlc.CreateLiabilityParams) (sqlc.CreateLiabilityRow, error) {
 	if m.createLiabilityFunc != nil {
 		return m.createLiabilityFunc(ctx, arg)
 	}
-	return sqlc.Liability{}, nil
+	return sqlc.CreateLiabilityRow{}, nil
 }
 
-func (m *mockLiabilityQuerier) GetLiabilityByID(ctx context.Context, id uuid.UUID) (sqlc.Liability, error) {
+func (m *mockLiabilityQuerier) GetLiabilityByID(ctx context.Context, id uuid.UUID) (sqlc.GetLiabilityByIDRow, error) {
 	if m.getLiabilityByIDFunc != nil {
 		return m.getLiabilityByIDFunc(ctx, id)
 	}
-	return sqlc.Liability{}, nil
+	return sqlc.GetLiabilityByIDRow{}, nil
 }
 
-func (m *mockLiabilityQuerier) ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Liability, error) {
+func (m *mockLiabilityQuerier) ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListLiabilitiesByUserIDRow, error) {
 	if m.listLiabilitiesByUserIDFunc != nil {
 		return m.listLiabilitiesByUserIDFunc(ctx, userID)
 	}
-	return []sqlc.Liability{}, nil
+	return []sqlc.ListLiabilitiesByUserIDRow{}, nil
 }
 
-func (m *mockLiabilityQuerier) UpdateLiability(ctx context.Context, arg sqlc.UpdateLiabilityParams) (sqlc.Liability, error) {
+func (m *mockLiabilityQuerier) UpdateLiability(ctx context.Context, arg sqlc.UpdateLiabilityParams) (sqlc.UpdateLiabilityRow, error) {
 	if m.updateLiabilityFunc != nil {
 		return m.updateLiabilityFunc(ctx, arg)
 	}
-	return sqlc.Liability{}, nil
+	return sqlc.UpdateLiabilityRow{}, nil
 }
 
 func (m *mockLiabilityQuerier) SoftDeleteLiability(ctx context.Context, id uuid.UUID) (int64, error) {
@@ -62,6 +62,7 @@ func testLiabilityRow() sqlc.Liability {
 	interestRate, _ := decimal.Parse("0.0650")
 	minimumPayment, _ := decimal.Parse("1800.00")
 	targetExtraPayment, _ := decimal.Parse("500.00")
+	contributionValue, _ := decimal.Parse("1800.00")
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
 	return sqlc.Liability{
@@ -74,6 +75,9 @@ func testLiabilityRow() sqlc.Liability {
 		MinimumPayment:       minimumPayment,
 		TargetExtraPayment:   targetExtraPayment,
 		PayoffPriority:       1,
+		Owner:                "self",
+		ContributionMode:     "monthly",
+		ContributionValue:    contributionValue,
 		LastBalanceUpdatedAt: timestamp,
 		CreatedAt:            timestamp,
 		UpdatedAt:            timestamp,
@@ -86,10 +90,27 @@ func TestLiabilityService_Create(t *testing.T) {
 	row := testLiabilityRow()
 
 	mock := &mockLiabilityQuerier{
-		createLiabilityFunc: func(ctx context.Context, arg sqlc.CreateLiabilityParams) (sqlc.Liability, error) {
+		createLiabilityFunc: func(ctx context.Context, arg sqlc.CreateLiabilityParams) (sqlc.CreateLiabilityRow, error) {
 			assert.Equal(t, row.UserID, arg.UserID)
 			assert.Equal(t, row.Name, arg.Name)
-			return row, nil
+			return sqlc.CreateLiabilityRow{
+				ID:                   row.ID,
+				UserID:               row.UserID,
+				Name:                 row.Name,
+				LiabilityType:        row.LiabilityType,
+				CurrentBalance:       row.CurrentBalance,
+				InterestRate:         row.InterestRate,
+				MinimumPayment:       row.MinimumPayment,
+				TargetExtraPayment:   row.TargetExtraPayment,
+				PayoffPriority:       row.PayoffPriority,
+				Owner:                row.Owner,
+				ContributionMode:     row.ContributionMode,
+				ContributionValue:    row.ContributionValue,
+				LastBalanceUpdatedAt: row.LastBalanceUpdatedAt,
+				CreatedAt:            row.CreatedAt,
+				UpdatedAt:            row.UpdatedAt,
+				DeletedAt:            row.DeletedAt,
+			}, nil
 		},
 	}
 
@@ -103,6 +124,9 @@ func TestLiabilityService_Create(t *testing.T) {
 		MinimumPayment:     row.MinimumPayment,
 		TargetExtraPayment: row.TargetExtraPayment,
 		PayoffPriority:     row.PayoffPriority,
+		Owner:              row.Owner,
+		ContributionMode:   row.ContributionMode,
+		ContributionValue:  row.ContributionValue,
 	})
 
 	assert.NoError(t, err)
@@ -116,9 +140,26 @@ func TestLiabilityService_GetByID(t *testing.T) {
 
 	t.Run("retrieves by id", func(t *testing.T) {
 		mock := &mockLiabilityQuerier{
-			getLiabilityByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.Liability, error) {
+			getLiabilityByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetLiabilityByIDRow, error) {
 				assert.Equal(t, row.ID, id)
-				return row, nil
+				return sqlc.GetLiabilityByIDRow{
+					ID:                   row.ID,
+					UserID:               row.UserID,
+					Name:                 row.Name,
+					LiabilityType:        row.LiabilityType,
+					CurrentBalance:       row.CurrentBalance,
+					InterestRate:         row.InterestRate,
+					MinimumPayment:       row.MinimumPayment,
+					TargetExtraPayment:   row.TargetExtraPayment,
+					PayoffPriority:       row.PayoffPriority,
+					Owner:                row.Owner,
+					ContributionMode:     row.ContributionMode,
+					ContributionValue:    row.ContributionValue,
+					LastBalanceUpdatedAt: row.LastBalanceUpdatedAt,
+					CreatedAt:            row.CreatedAt,
+					UpdatedAt:            row.UpdatedAt,
+					DeletedAt:            row.DeletedAt,
+				}, nil
 			},
 		}
 
@@ -132,8 +173,8 @@ func TestLiabilityService_GetByID(t *testing.T) {
 
 	t.Run("returns not found", func(t *testing.T) {
 		mock := &mockLiabilityQuerier{
-			getLiabilityByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.Liability, error) {
-				return sqlc.Liability{}, pgx.ErrNoRows
+			getLiabilityByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetLiabilityByIDRow, error) {
+				return sqlc.GetLiabilityByIDRow{}, pgx.ErrNoRows
 			},
 		}
 
@@ -153,9 +194,46 @@ func TestLiabilityService_ListByUserID(t *testing.T) {
 	row2.Name = "Credit Card"
 
 	mock := &mockLiabilityQuerier{
-		listLiabilitiesByUserIDFunc: func(ctx context.Context, userID uuid.UUID) ([]sqlc.Liability, error) {
+		listLiabilitiesByUserIDFunc: func(ctx context.Context, userID uuid.UUID) ([]sqlc.ListLiabilitiesByUserIDRow, error) {
 			assert.Equal(t, row1.UserID, userID)
-			return []sqlc.Liability{row1, row2}, nil
+			return []sqlc.ListLiabilitiesByUserIDRow{
+				{
+					ID:                   row1.ID,
+					UserID:               row1.UserID,
+					Name:                 row1.Name,
+					LiabilityType:        row1.LiabilityType,
+					CurrentBalance:       row1.CurrentBalance,
+					InterestRate:         row1.InterestRate,
+					MinimumPayment:       row1.MinimumPayment,
+					TargetExtraPayment:   row1.TargetExtraPayment,
+					PayoffPriority:       row1.PayoffPriority,
+					Owner:                row1.Owner,
+					ContributionMode:     row1.ContributionMode,
+					ContributionValue:    row1.ContributionValue,
+					LastBalanceUpdatedAt: row1.LastBalanceUpdatedAt,
+					CreatedAt:            row1.CreatedAt,
+					UpdatedAt:            row1.UpdatedAt,
+					DeletedAt:            row1.DeletedAt,
+				},
+				{
+					ID:                   row2.ID,
+					UserID:               row2.UserID,
+					Name:                 row2.Name,
+					LiabilityType:        row2.LiabilityType,
+					CurrentBalance:       row2.CurrentBalance,
+					InterestRate:         row2.InterestRate,
+					MinimumPayment:       row2.MinimumPayment,
+					TargetExtraPayment:   row2.TargetExtraPayment,
+					PayoffPriority:       row2.PayoffPriority,
+					Owner:                row2.Owner,
+					ContributionMode:     row2.ContributionMode,
+					ContributionValue:    row2.ContributionValue,
+					LastBalanceUpdatedAt: row2.LastBalanceUpdatedAt,
+					CreatedAt:            row2.CreatedAt,
+					UpdatedAt:            row2.UpdatedAt,
+					DeletedAt:            row2.DeletedAt,
+				},
+			}, nil
 		},
 	}
 
@@ -174,12 +252,29 @@ func TestLiabilityService_Update(t *testing.T) {
 	updatedBalance, _ := decimal.Parse("240000.00")
 
 	mock := &mockLiabilityQuerier{
-		updateLiabilityFunc: func(ctx context.Context, arg sqlc.UpdateLiabilityParams) (sqlc.Liability, error) {
+		updateLiabilityFunc: func(ctx context.Context, arg sqlc.UpdateLiabilityParams) (sqlc.UpdateLiabilityRow, error) {
 			assert.Equal(t, row.ID, arg.ID)
 			assert.Equal(t, updatedBalance, arg.CurrentBalance)
 			updated := row
 			updated.CurrentBalance = arg.CurrentBalance
-			return updated, nil
+			return sqlc.UpdateLiabilityRow{
+				ID:                   updated.ID,
+				UserID:               updated.UserID,
+				Name:                 updated.Name,
+				LiabilityType:        updated.LiabilityType,
+				CurrentBalance:       updated.CurrentBalance,
+				InterestRate:         updated.InterestRate,
+				MinimumPayment:       updated.MinimumPayment,
+				TargetExtraPayment:   updated.TargetExtraPayment,
+				PayoffPriority:       updated.PayoffPriority,
+				Owner:                updated.Owner,
+				ContributionMode:     updated.ContributionMode,
+				ContributionValue:    updated.ContributionValue,
+				LastBalanceUpdatedAt: updated.LastBalanceUpdatedAt,
+				CreatedAt:            updated.CreatedAt,
+				UpdatedAt:            updated.UpdatedAt,
+				DeletedAt:            updated.DeletedAt,
+			}, nil
 		},
 	}
 
@@ -193,6 +288,9 @@ func TestLiabilityService_Update(t *testing.T) {
 		MinimumPayment:     row.MinimumPayment,
 		TargetExtraPayment: row.TargetExtraPayment,
 		PayoffPriority:     row.PayoffPriority,
+		Owner:              row.Owner,
+		ContributionMode:   row.ContributionMode,
+		ContributionValue:  row.ContributionValue,
 	})
 
 	assert.NoError(t, err)

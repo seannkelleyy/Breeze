@@ -15,8 +15,6 @@ import {
 import useGraphql from '../services/useGraphql';
 
 import {
-  PLANNER_DEFAULT_PRIMARY_401K_ACCOUNT,
-  PLANNER_DEFAULT_PRIMARY_ROTH_ACCOUNT,
   PLANNER_DEFAULT_SELF_PERSON,
   PLANNER_DEFAULT_RETURN_DISPLAY_MODE,
   PLANNER_DEFAULT_INFLATION_RATE,
@@ -126,24 +124,6 @@ type CurrentUserProviderProps = {
   children: ReactNode;
 };
 
-const createDefaultPlannerAccounts = (): PlannerAccount[] => [
-  {
-    id: '401k-default-uuid',
-    ...PLANNER_DEFAULT_PRIMARY_401K_ACCOUNT,
-  },
-  {
-    id: 'roth-default-uuid',
-    ...PLANNER_DEFAULT_PRIMARY_ROTH_ACCOUNT,
-  },
-];
-
-const createDefaultPlannerPeople = (): PlannerPerson[] => [
-  {
-    id: 'self-default-uuid',
-    ...PLANNER_DEFAULT_SELF_PERSON,
-  },
-];
-
 export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const { user, isLoaded, isSignedIn } = useUser();
   const { request } = useGraphql();
@@ -174,12 +154,8 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const [maxTaxBracketId, setMaxTaxBracketId] = useState<string | null>(null);
   const [filingStatus, setFilingStatus] = useState<'SINGLE' | 'MFJ' | 'MFS' | 'HOH'>('SINGLE');
   const [payoffStrategy, setPayoffStrategy] = useState<'AVALANCHE' | 'SNOWBALL'>('AVALANCHE');
-  const [plannerPeople, setPlannerPeople] = useState<PlannerPerson[]>(() =>
-    createDefaultPlannerPeople(),
-  );
-  const [plannerAccounts, setPlannerAccounts] = useState<PlannerAccount[]>(() =>
-    createDefaultPlannerAccounts(),
-  );
+  const [plannerPeople, setPlannerPeople] = useState<PlannerPerson[]>([]);
+  const [plannerAccounts, setPlannerAccounts] = useState<PlannerAccount[]>([]);
   const [plannerAssetFinanceDetailsByAccountId, setPlannerAssetFinanceDetailsByAccountId] =
     useState<Record<string, AssetFinanceDetails>>({});
   const providerKey = isSignedIn ? (user?.id ?? 'signed-in') : 'signed-out';
@@ -212,9 +188,12 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
           payoffStrategy,
         };
 
-        await request<{ updateUser: { id: string } }, { input: typeof input }>(UPDATE_USER_MUTATION, {
-          input,
-        });
+        await request<{ updateUser: { id: string } }, { input: typeof input }>(
+          UPDATE_USER_MUTATION,
+          {
+            input,
+          },
+        );
       } catch {
         // Keep optimistic UI state and allow future writes.
       }
@@ -238,7 +217,12 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const updateCurrencyCode = useCallback(
     (nextCurrencyCode: string) => {
       setCurrencyCode(nextCurrencyCode);
-      void persistPreferences(nextCurrencyCode, returnDisplayMode, inflationRate, safeWithdrawalRate);
+      void persistPreferences(
+        nextCurrencyCode,
+        returnDisplayMode,
+        inflationRate,
+        safeWithdrawalRate,
+      );
     },
     [persistPreferences, returnDisplayMode, inflationRate, safeWithdrawalRate],
   );
@@ -246,7 +230,12 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const updateReturnDisplayMode = useCallback(
     (nextReturnDisplayMode: 'real' | 'nominal') => {
       setReturnDisplayMode(nextReturnDisplayMode);
-      void persistPreferences(currencyCode, nextReturnDisplayMode, inflationRate, safeWithdrawalRate);
+      void persistPreferences(
+        currencyCode,
+        nextReturnDisplayMode,
+        inflationRate,
+        safeWithdrawalRate,
+      );
     },
     [persistPreferences, currencyCode, inflationRate, safeWithdrawalRate],
   );
@@ -254,7 +243,12 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const updateInflationRate = useCallback(
     (nextInflationRate: number) => {
       setInflationRate(nextInflationRate);
-      void persistPreferences(currencyCode, returnDisplayMode, nextInflationRate, safeWithdrawalRate);
+      void persistPreferences(
+        currencyCode,
+        returnDisplayMode,
+        nextInflationRate,
+        safeWithdrawalRate,
+      );
     },
     [persistPreferences, currencyCode, returnDisplayMode, safeWithdrawalRate],
   );
@@ -262,7 +256,12 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const updateSafeWithdrawalRate = useCallback(
     (nextSafeWithdrawalRate: number) => {
       setSafeWithdrawalRate(nextSafeWithdrawalRate);
-      void persistPreferences(currencyCode, returnDisplayMode, inflationRate, nextSafeWithdrawalRate);
+      void persistPreferences(
+        currencyCode,
+        returnDisplayMode,
+        inflationRate,
+        nextSafeWithdrawalRate,
+      );
     },
     [persistPreferences, currencyCode, returnDisplayMode, inflationRate],
   );
@@ -378,9 +377,18 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     };
   }, [
     backendUserID,
+    currencyCode,
+    deductionAmount,
+    deductionType,
+    filingStatus,
+    inflationRate,
     isLoaded,
     isSignedIn,
+    maxTaxBracketId,
+    payoffStrategy,
     request,
+    returnDisplayMode,
+    safeWithdrawalRate,
     user?.emailAddresses,
     user?.id,
     user?.publicMetadata,

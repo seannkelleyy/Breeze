@@ -16,14 +16,20 @@ type AddContributionInput struct {
 }
 
 type Asset struct {
-	ID                 string    `json:"id"`
-	UserID             string    `json:"userId"`
-	Name               string    `json:"name"`
-	AssetType          AssetType `json:"assetType"`
-	CurrentValue       string    `json:"currentValue"`
-	LastValueUpdatedAt string    `json:"lastValueUpdatedAt"`
-	CreatedAt          string    `json:"createdAt"`
-	UpdatedAt          string    `json:"updatedAt"`
+	ID                              string    `json:"id"`
+	UserID                          string    `json:"userId"`
+	Name                            string    `json:"name"`
+	AssetType                       AssetType `json:"assetType"`
+	CurrentValue                    string    `json:"currentValue"`
+	Owner                           string    `json:"owner"`
+	ContributionMode                string    `json:"contributionMode"`
+	ContributionValue               string    `json:"contributionValue"`
+	EmployerMatchRate               string    `json:"employerMatchRate"`
+	EmployerMatchMaxPercentOfSalary string    `json:"employerMatchMaxPercentOfSalary"`
+	AnnualRate                      string    `json:"annualRate"`
+	LastValueUpdatedAt              string    `json:"lastValueUpdatedAt"`
+	CreatedAt                       string    `json:"createdAt"`
+	UpdatedAt                       string    `json:"updatedAt"`
 }
 
 type Budget struct {
@@ -57,10 +63,16 @@ type ContributionProgress struct {
 }
 
 type CreateAssetInput struct {
-	UserID       string    `json:"userId"`
-	Name         string    `json:"name"`
-	AssetType    AssetType `json:"assetType"`
-	CurrentValue string    `json:"currentValue"`
+	UserID                          string    `json:"userId"`
+	Name                            string    `json:"name"`
+	AssetType                       AssetType `json:"assetType"`
+	CurrentValue                    string    `json:"currentValue"`
+	Owner                           string    `json:"owner"`
+	ContributionMode                string    `json:"contributionMode"`
+	ContributionValue               string    `json:"contributionValue"`
+	EmployerMatchRate               string    `json:"employerMatchRate"`
+	EmployerMatchMaxPercentOfSalary string    `json:"employerMatchMaxPercentOfSalary"`
+	AnnualRate                      string    `json:"annualRate"`
 }
 
 type CreateBudgetInput struct {
@@ -114,6 +126,9 @@ type CreateLiabilityInput struct {
 	MinimumPayment     string        `json:"minimumPayment"`
 	TargetExtraPayment string        `json:"targetExtraPayment"`
 	PayoffPriority     int           `json:"payoffPriority"`
+	Owner              string        `json:"owner"`
+	ContributionMode   string        `json:"contributionMode"`
+	ContributionValue  string        `json:"contributionValue"`
 }
 
 type CreateNetWorthSnapshotInput struct {
@@ -267,6 +282,9 @@ type Liability struct {
 	MinimumPayment       string        `json:"minimumPayment"`
 	TargetExtraPayment   string        `json:"targetExtraPayment"`
 	PayoffPriority       int           `json:"payoffPriority"`
+	Owner                string        `json:"owner"`
+	ContributionMode     string        `json:"contributionMode"`
+	ContributionValue    string        `json:"contributionValue"`
 	LastBalanceUpdatedAt string        `json:"lastBalanceUpdatedAt"`
 	CreatedAt            string        `json:"createdAt"`
 	UpdatedAt            string        `json:"updatedAt"`
@@ -403,10 +421,16 @@ type TaxEstimate struct {
 }
 
 type UpdateAssetInput struct {
-	ID           string    `json:"id"`
-	Name         string    `json:"name"`
-	AssetType    AssetType `json:"assetType"`
-	CurrentValue string    `json:"currentValue"`
+	ID                              string    `json:"id"`
+	Name                            string    `json:"name"`
+	AssetType                       AssetType `json:"assetType"`
+	CurrentValue                    string    `json:"currentValue"`
+	Owner                           string    `json:"owner"`
+	ContributionMode                string    `json:"contributionMode"`
+	ContributionValue               string    `json:"contributionValue"`
+	EmployerMatchRate               string    `json:"employerMatchRate"`
+	EmployerMatchMaxPercentOfSalary string    `json:"employerMatchMaxPercentOfSalary"`
+	AnnualRate                      string    `json:"annualRate"`
 }
 
 type UpdateBudgetInput struct {
@@ -456,6 +480,9 @@ type UpdateLiabilityInput struct {
 	MinimumPayment     string        `json:"minimumPayment"`
 	TargetExtraPayment string        `json:"targetExtraPayment"`
 	PayoffPriority     int           `json:"payoffPriority"`
+	Owner              string        `json:"owner"`
+	ContributionMode   string        `json:"contributionMode"`
+	ContributionValue  string        `json:"contributionValue"`
 }
 
 type UpdateNetWorthSnapshotInput struct {
@@ -540,26 +567,38 @@ type User struct {
 type AssetType string
 
 const (
-	AssetTypeCash       AssetType = "CASH"
-	AssetTypeInvestment AssetType = "INVESTMENT"
-	AssetTypeRetirement AssetType = "RETIREMENT"
-	AssetTypeRealEstate AssetType = "REAL_ESTATE"
-	AssetTypeVehicle    AssetType = "VEHICLE"
-	AssetTypeOther      AssetType = "OTHER"
+	AssetTypeChecking       AssetType = "CHECKING"
+	AssetTypeEmergencyFund  AssetType = "EMERGENCY_FUND"
+	AssetTypeBrokerage      AssetType = "BROKERAGE"
+	AssetType401k           AssetType = "_401K"
+	AssetType403b           AssetType = "_403B"
+	AssetType457            AssetType = "_457"
+	AssetTypeRothIra        AssetType = "ROTH_IRA"
+	AssetTypeTraditionalIra AssetType = "TRADITIONAL_IRA"
+	AssetTypeHsa            AssetType = "HSA"
+	AssetTypeHome           AssetType = "HOME"
+	AssetTypeVehicle        AssetType = "VEHICLE"
+	AssetTypeOther          AssetType = "OTHER"
 )
 
 var AllAssetType = []AssetType{
-	AssetTypeCash,
-	AssetTypeInvestment,
-	AssetTypeRetirement,
-	AssetTypeRealEstate,
+	AssetTypeChecking,
+	AssetTypeEmergencyFund,
+	AssetTypeBrokerage,
+	AssetType401k,
+	AssetType403b,
+	AssetType457,
+	AssetTypeRothIra,
+	AssetTypeTraditionalIra,
+	AssetTypeHsa,
+	AssetTypeHome,
 	AssetTypeVehicle,
 	AssetTypeOther,
 }
 
 func (e AssetType) IsValid() bool {
 	switch e {
-	case AssetTypeCash, AssetTypeInvestment, AssetTypeRetirement, AssetTypeRealEstate, AssetTypeVehicle, AssetTypeOther:
+	case AssetTypeChecking, AssetTypeEmergencyFund, AssetTypeBrokerage, AssetType401k, AssetType403b, AssetType457, AssetTypeRothIra, AssetTypeTraditionalIra, AssetTypeHsa, AssetTypeHome, AssetTypeVehicle, AssetTypeOther:
 		return true
 	}
 	return false

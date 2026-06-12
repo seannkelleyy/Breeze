@@ -25,10 +25,450 @@ import {
   getTotalMonthlyForAccount,
   plannerChartConfig,
 } from '../../lib/plannerMath';
+import type { AssetFinanceDetails } from '../../types/finance';
+import type { IrsLimitConfig } from '../../types/irs';
+import type { ProjectionRow } from '../../types/projection';
 import useIrsLimits from './useIrsLimits';
 
 const { accountTypeOptions, isCombinedAssetType, isLiabilityAccountType } = plannerConfig;
 
+// ─── Household ────────────────────────────────────────────
+function useHouseholdCalculation(people: ReturnType<typeof useCurrentUser>['plannerPeople']) {
+  return useMemo(() => {
+    const { selfPerson, spousePerson, hasSpouse, selfAnnualIncome, spouseAnnualIncome } =
+      getPlannerHouseholdSnapshot(people);
+    const selfIncomeGrowthRate =
+      selfPerson?.incomeGrowthRate ?? plannerConstants.PLANNER_DEFAULT_INCOME_GROWTH_RATE;
+    const spouseIncomeGrowthRate =
+      spousePerson?.incomeGrowthRate ?? plannerConstants.PLANNER_DEFAULT_INCOME_GROWTH_RATE;
+    const currentAge = selfPerson ? getAgeFromBirthday(selfPerson.birthday) : 0;
+    const targetAge =
+      people.length > 0 ? Math.max(...people.map((p) => p.retirementAge)) : currentAge;
+    const yearsToGoal = Math.max(0, targetAge - currentAge);
+    const annualHouseholdIncome = selfAnnualIncome + spouseAnnualIncome;
+
+    return {
+      selfPerson,
+      spousePerson,
+      hasSpouse,
+      selfAnnualIncome,
+      spouseAnnualIncome,
+      selfIncomeGrowthRate,
+      spouseIncomeGrowthRate,
+      currentAge,
+      targetAge,
+      yearsToGoal,
+      annualHouseholdIncome,
+    };
+  }, [people]);
+}
+
+// ─── Portfolio & Rates ────────────────────────────────────
+function usePortfolioCalculation(
+  accounts: ReturnType<typeof useCurrentUser>['plannerAccounts'],
+  assetFinanceDetailsByAccountId: ReturnType<
+    typeof useCurrentUser
+  >['plannerAssetFinanceDetailsByAccountId'],
+  household: ReturnType<typeof useHouseholdCalculation>,
+  inflationRate: number,
+  useInflationAdjustedValues: boolean,
+) {
+  const totalStartingBalance = useMemo(
+    () =>
+      accounts.reduce((sum, account) => {
+        if (isCombinedAssetType(account.accountType)) {
+          const details = assetFinanceDetailsByAccountId[account.id];
+          if (details) return sum + getAssetFinanceSnapshot(details, new Date()).equity;
+        }
+        return sum + getNetWorthStartingBalance(account);
+      }, 0),
+    [accounts, assetFinanceDetailsByAccountId],
+  );
+
+  const totalAssets = useMemo(
+    () =>
+      accounts
+        .filter((a) => !isLiabilityAccountType(a.accountType))
+        .reduce((sum, a) => {
+          if (isCombinedAssetType(a.accountType))
+            return (
+              sum + clamp(assetFinanceDetailsByAccountId[a.id]?.currentValue ?? a.startingBalance)
+            );
+          return sum + clamp(a.startingBalance);
+        }, 0),
+    [accounts, assetFinanceDetailsByAccountId],
+  );
+
+  const totalLiabilities = useMemo(
+    () =>
+      accounts.reduce((sum, a) => {
+        if (isLiabilityAccountType(a.accountType)) return sum + clamp(a.startingBalance);
+        if (isCombinedAssetType(a.accountType)) {
+          const d = assetFinanceDetailsByAccountId[a.id];
+          if (d?.hasLoan) return sum + clamp(d.currentLoanBalance);
+        }
+        return sum;
+      }, 0),
+    [accounts, assetFinanceDetailsByAccountId],
+  );
+
+  const { totalPlannedMonthlyEmployee, totalPlannedMonthlyInvestment } = useMemo(
+    () =>
+      getPlannerContributionTotals(
+        accounts,
+        household.selfAnnualIncome,
+        household.spouseAnnualIncome,
+      ),
+    [accounts, household.selfAnnualIncome, household.spouseAnnualIncome],
+  );
+
+  const weightedAnnualRate = useMemo(() => {
+    const totalWeight = accounts.reduce(
+      (s, a) =>
+        s + getTotalMonthlyForAccount(a, household.selfAnnualIncome, household.spouseAnnualIncome),
+      0,
+    );
+    if (totalWeight === 0)
+      return accounts.length > 0
+        ? accounts.reduce((s, a) => s + a.annualRate, 0) / accounts.length
+        : 0;
+    return accounts.reduce(
+      (s, a) =>
+        s +
+        (getTotalMonthlyForAccount(a, household.selfAnnualIncome, household.spouseAnnualIncome) /
+          totalWeight) *
+          a.annualRate,
+      0,
+    );
+  }, [accounts, household.selfAnnualIncome, household.spouseAnnualIncome]);
+
+  const effectiveWeightedAnnualRate = useMemo(
+    () =>
+      getEffectiveAnnualRatePercent(weightedAnnualRate, inflationRate, useInflationAdjustedValues),
+    [weightedAnnualRate, inflationRate, useInflationAdjustedValues],
+  );
+
+  const currentSavingsRateEmployee =
+    household.annualHouseholdIncome > 0
+      ? (totalPlannedMonthlyEmployee * 12 * 100) / household.annualHouseholdIncome
+      : 0;
+  const currentSavingsRateTotal =
+    household.annualHouseholdIncome > 0
+      ? (totalPlannedMonthlyInvestment * 12 * 100) / household.annualHouseholdIncome
+      : 0;
+
+  return {
+    totalStartingBalance,
+    totalAssets,
+    totalLiabilities,
+    totalPlannedMonthlyEmployee,
+    totalPlannedMonthlyInvestment,
+    effectiveWeightedAnnualRate,
+    currentSavingsRateEmployee,
+    currentSavingsRateTotal,
+  };
+}
+
+// ─── FIRE & Retirement Targets ────────────────────────────
+function useRetirementTargets(
+  household: ReturnType<typeof useHouseholdCalculation>,
+  portfolio: ReturnType<typeof usePortfolioCalculation>,
+  inflationRate: number,
+  safeWithdrawalRate: number,
+  monthlyExpenses: number,
+  desiredInvestmentAmount: number,
+  retirementMethod: string,
+  useInflationAdjustedValues: boolean,
+) {
+  const inflationFactor = (1 + inflationRate / 100) ** household.yearsToGoal;
+  const annualNeedToday = monthlyExpenses * 12;
+  const annualNeedAtRetirement = useInflationAdjustedValues
+    ? annualNeedToday
+    : annualNeedToday * inflationFactor;
+  const baseFinancialFreedomTarget =
+    safeWithdrawalRate > 0 ? annualNeedAtRetirement / (safeWithdrawalRate / 100) : 0;
+  const retirementHorizonYears = Math.max(
+    1,
+    plannerConstants.PLANNER_DEFAULT_LONGEVITY_AGE - household.targetAge,
+  );
+  const suggestedSafeWithdrawalRate = getSuggestedSafeWithdrawalRate(retirementHorizonYears);
+
+  const fireTargets = useMemo(
+    () =>
+      plannerConstants.PLANNER_FIRE_LIFESTYLE_OPTIONS.map((o) => ({
+        label: o.label,
+        target: baseFinancialFreedomTarget * o.multiplier,
+        monthlySpendSupported:
+          safeWithdrawalRate > 0
+            ? (baseFinancialFreedomTarget * o.multiplier * (safeWithdrawalRate / 100)) / 12
+            : 0,
+      })),
+    [baseFinancialFreedomTarget, safeWithdrawalRate],
+  );
+
+  const financialFreedomTarget =
+    fireTargets[plannerConstants.PLANNER_DEFAULT_FIRE_LIFESTYLE_INDEX]?.target ??
+    baseFinancialFreedomTarget;
+
+  // Income replacement
+  const getRealGrowthRate = (nominal: number) => {
+    const d = inflationRate / 100;
+    if (d <= -1) return nominal;
+    return ((1 + nominal / 100) / (1 + d) - 1) * 100;
+  };
+  const selfEffGrowth = useInflationAdjustedValues
+    ? getRealGrowthRate(household.selfIncomeGrowthRate)
+    : household.selfIncomeGrowthRate;
+  const spouseEffGrowth = useInflationAdjustedValues
+    ? getRealGrowthRate(household.spouseIncomeGrowthRate)
+    : household.spouseIncomeGrowthRate;
+  const projectedHouseholdIncomeAtRetirement =
+    getAnnualIncomeWithGrowth(household.selfAnnualIncome, selfEffGrowth, household.yearsToGoal) +
+    getAnnualIncomeWithGrowth(household.spouseAnnualIncome, spouseEffGrowth, household.yearsToGoal);
+  const incomeReplacementAnnualNeedToday =
+    household.annualHouseholdIncome *
+    (plannerConstants.PLANNER_DEFAULT_INCOME_REPLACEMENT_RATE / 100);
+  const incomeReplacementAnnualNeed = useInflationAdjustedValues
+    ? incomeReplacementAnnualNeedToday
+    : incomeReplacementAnnualNeedToday * inflationFactor;
+  const incomeReplacementTarget =
+    safeWithdrawalRate > 0 ? incomeReplacementAnnualNeed / (safeWithdrawalRate / 100) : 0;
+
+  const selectedRetirementTarget =
+    retirementMethod === 'target-amount'
+      ? desiredInvestmentAmount
+      : retirementMethod === 'income-replacement'
+        ? incomeReplacementTarget
+        : financialFreedomTarget;
+  const selectedRetirementMethodLabel =
+    plannerConstants.PLANNER_RETIREMENT_METHOD_OPTIONS.find((o) => o.value === retirementMethod)
+      ?.label ?? 'Selected Method';
+
+  const monthlyNeededForDesiredTarget = getMonthlyContribution(
+    selectedRetirementTarget,
+    portfolio.totalStartingBalance,
+    portfolio.effectiveWeightedAnnualRate,
+    household.yearsToGoal,
+  );
+  const monthlyNeededForFreedomTarget = getMonthlyContribution(
+    financialFreedomTarget,
+    portfolio.totalStartingBalance,
+    portfolio.effectiveWeightedAnnualRate,
+    household.yearsToGoal,
+  );
+  const requiredSavingsRate =
+    household.annualHouseholdIncome > 0
+      ? (monthlyNeededForDesiredTarget * 12 * 100) / household.annualHouseholdIncome
+      : 0;
+  const savingsRateGap = portfolio.currentSavingsRateTotal - requiredSavingsRate;
+  const monthlyGap = portfolio.totalPlannedMonthlyInvestment - monthlyNeededForDesiredTarget;
+  const isMonthlyGapPositive = plannerConstants.isMoneyGreaterThanOrEqualWithTolerance(
+    monthlyGap,
+    0,
+  );
+
+  const annualReturnFactor = 1 + portfolio.effectiveWeightedAnnualRate / 100;
+  const coastFireTargetToday =
+    annualReturnFactor > 0
+      ? financialFreedomTarget / annualReturnFactor ** household.yearsToGoal
+      : financialFreedomTarget;
+  const coastFireGap = portfolio.totalStartingBalance - coastFireTargetToday;
+  const hasReachedCoastFire = plannerConstants.isMoneyGreaterThanOrEqualWithTolerance(
+    coastFireGap,
+    0,
+  );
+
+  return {
+    fireTargets,
+    baseFinancialFreedomTarget,
+    financialFreedomTarget,
+    retirementHorizonYears,
+    suggestedSafeWithdrawalRate,
+    projectedHouseholdIncomeAtRetirement,
+    incomeReplacementAnnualNeed,
+    incomeReplacementAnnualNeedToday,
+    incomeReplacementTarget,
+    selectedRetirementTarget,
+    selectedRetirementMethodLabel,
+    monthlyNeededForDesiredTarget,
+    monthlyNeededForFreedomTarget,
+    requiredSavingsRate,
+    savingsRateGap,
+    monthlyGap,
+    isMonthlyGapPositive,
+    annualNeedAtRetirement,
+    coastFireTargetToday,
+    coastFireGap,
+    hasReachedCoastFire,
+  };
+}
+
+// ─── Financial Math Snapshot ──────────────────────────────
+function useFinancialMathSnapshot(
+  monthlyExpenses: number,
+  household: ReturnType<typeof useHouseholdCalculation>,
+  safeWithdrawalRate: number,
+  portfolio: ReturnType<typeof usePortfolioCalculation>,
+) {
+  return useMemo(
+    () =>
+      getFinancialMathSnapshot({
+        monthlyExpenses,
+        selfSalary: household.selfAnnualIncome,
+        spouseSalary: household.spouseAnnualIncome,
+        safeWithdrawalRate,
+        currentPortfolio: portfolio.totalStartingBalance,
+      }),
+    [
+      monthlyExpenses,
+      household.selfAnnualIncome,
+      household.spouseAnnualIncome,
+      safeWithdrawalRate,
+      portfolio.totalStartingBalance,
+    ],
+  );
+}
+
+// ─── Projections ──────────────────────────────────────────
+function useProjections(
+  accounts: ReturnType<typeof useCurrentUser>['plannerAccounts'],
+  household: ReturnType<typeof useHouseholdCalculation>,
+  assetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>,
+  irsLimits: IrsLimitConfig,
+  inflationRate: number,
+  useInflationAdjustedValues: boolean,
+) {
+  const { projectionRows, finalBalances } = useMemo(
+    () =>
+      getProjection(
+        accounts,
+        household.currentAge,
+        household.targetAge,
+        household.selfAnnualIncome,
+        household.spouseAnnualIncome,
+        household.selfIncomeGrowthRate,
+        household.spouseIncomeGrowthRate,
+        assetFinanceDetailsByAccountId,
+        irsLimits,
+        household.hasSpouse,
+        plannerConstants.PLANNER_DEFAULT_IRS_LIMIT_GROWTH_RATE,
+        household.currentAge,
+        household.spousePerson
+          ? getAgeFromBirthday(household.spousePerson.birthday)
+          : household.currentAge,
+        inflationRate,
+        useInflationAdjustedValues,
+      ),
+    [
+      accounts,
+      household.currentAge,
+      household.targetAge,
+      household.selfAnnualIncome,
+      household.spouseAnnualIncome,
+      household.selfIncomeGrowthRate,
+      household.spouseIncomeGrowthRate,
+      assetFinanceDetailsByAccountId,
+      irsLimits,
+      household.hasSpouse,
+      household.spousePerson,
+      inflationRate,
+      useInflationAdjustedValues,
+    ],
+  );
+
+  const projectedNetWorthAtTargetAge = projectionRows[projectionRows.length - 1]?.totalBalance ?? 0;
+
+  return { projectionRows, finalBalances, projectedNetWorthAtTargetAge };
+}
+
+// ─── Financial Freedom Age ────────────────────────────────
+function useFinancialFreedomAge(projectionRows: ProjectionRow[], financialFreedomTarget: number) {
+  return useMemo(() => {
+    const hit = projectionRows.find((r) => r.totalBalance >= financialFreedomTarget);
+    return hit?.age ?? null;
+  }, [projectionRows, financialFreedomTarget]);
+}
+
+// ─── Account Breakdown ────────────────────────────────────
+function useAccountBreakdown(
+  accounts: ReturnType<typeof useCurrentUser>['plannerAccounts'],
+  household: ReturnType<typeof useHouseholdCalculation>,
+  people: ReturnType<typeof useCurrentUser>['plannerPeople'],
+  irsLimits: IrsLimitConfig,
+  finalBalances: number[],
+) {
+  return useMemo(
+    () =>
+      accounts.map((account, index) => {
+        const employeeMonthly = getEmployeeMonthlyContribution(
+          account,
+          household.selfAnnualIncome,
+          household.spouseAnnualIncome,
+        );
+        const annualEmployee = employeeMonthly * 12;
+        const ownerBirthday =
+          people.find((p) => p.type === account.owner)?.birthday ??
+          household.selfPerson?.birthday ??
+          '';
+        const ownerAge = getAgeFromBirthday(ownerBirthday);
+        const suggestedLimit = getSuggestedAnnualLimit(
+          account.accountType,
+          ownerAge,
+          irsLimits,
+          household.hasSpouse,
+        );
+        const matchMonthly = getEmployerMatchMonthly(
+          account,
+          household.selfAnnualIncome,
+          household.spouseAnnualIncome,
+        );
+        const typeLabel =
+          accountTypeOptions.find((o) => o.value === account.accountType)?.label ?? 'Other';
+        const ownerLabel = account.owner === 'spouse' ? 'Spouse' : 'Self';
+
+        return {
+          id: account.id,
+          name: account.name,
+          ownerLabel,
+          accountTypeLabel: typeLabel,
+          employeeMonthly,
+          matchMonthly,
+          totalMonthly: employeeMonthly + matchMonthly,
+          annualEmployee,
+          suggestedLimit,
+          exceedsLimit:
+            suggestedLimit > 0 &&
+            plannerConstants.isMoneyGreaterThanWithTolerance(annualEmployee, suggestedLimit),
+          projectedValue: finalBalances[index] ?? 0,
+        };
+      }),
+    [
+      accounts,
+      household.selfAnnualIncome,
+      household.spouseAnnualIncome,
+      household.selfPerson,
+      household.hasSpouse,
+      people,
+      irsLimits,
+      finalBalances,
+    ],
+  );
+}
+
+// ─── Chart Config ─────────────────────────────────────────
+function useChartConfig(accounts: ReturnType<typeof useCurrentUser>['plannerAccounts']) {
+  return useMemo(() => {
+    const entries = Object.fromEntries(
+      accounts.map((a, i) => [
+        `account-${i}`,
+        { label: a.name, color: accountLineColors[i % accountLineColors.length] },
+      ]),
+    );
+    return { ...plannerChartConfig, ...entries } satisfies ChartConfig;
+  }, [accounts]);
+}
+
+// ─── Main Hook ────────────────────────────────────────────
 const usePlannerModel = () => {
   const {
     returnDisplayMode,
@@ -46,426 +486,118 @@ const usePlannerModel = () => {
   const { irsLimits } = useIrsLimits();
 
   const useInflationAdjustedValues = returnDisplayMode === 'real';
-  const desiredInvestmentAmount = plannerDesiredInvestmentAmount;
-  const monthlyExpenses = plannerMonthlyExpenses;
-  const retirementMethod = plannerRetirementMethod;
-  const fireLifestyleIndex = plannerFireLifestyleIndex;
-  const people = plannerPeople;
-  const accounts = plannerAccounts;
-  const assetFinanceDetailsByAccountId = plannerAssetFinanceDetailsByAccountId;
 
-  const { selfPerson, spousePerson, hasSpouse, selfAnnualIncome, spouseAnnualIncome } = useMemo(
-    () => getPlannerHouseholdSnapshot(people),
-    [people],
+  const household = useHouseholdCalculation(plannerPeople);
+  const portfolio = usePortfolioCalculation(
+    plannerAccounts,
+    plannerAssetFinanceDetailsByAccountId,
+    household,
+    inflationRate,
+    useInflationAdjustedValues,
   );
-  const selfIncomeGrowthRate =
-    selfPerson?.incomeGrowthRate ?? plannerConstants.PLANNER_DEFAULT_INCOME_GROWTH_RATE;
-  const spouseIncomeGrowthRate =
-    spousePerson?.incomeGrowthRate ?? plannerConstants.PLANNER_DEFAULT_INCOME_GROWTH_RATE;
-  const currentAge = selfPerson ? getAgeFromBirthday(selfPerson.birthday) : 0;
-  const targetAge =
-    people.length > 0 ? Math.max(...people.map((person) => person.retirementAge)) : currentAge;
-  const yearsToGoal = Math.max(0, targetAge - currentAge);
-
-  const totalStartingBalance = useMemo(
-    () =>
-      accounts.reduce((sum, account) => {
-        if (isCombinedAssetType(account.accountType)) {
-          const details = assetFinanceDetailsByAccountId[account.id];
-          if (details) {
-            return sum + getAssetFinanceSnapshot(details, new Date()).equity;
-          }
-        }
-
-        return sum + getNetWorthStartingBalance(account);
-      }, 0),
-    [accounts, assetFinanceDetailsByAccountId],
+  const targets = useRetirementTargets(
+    household,
+    portfolio,
+    inflationRate,
+    safeWithdrawalRate,
+    plannerMonthlyExpenses,
+    plannerDesiredInvestmentAmount,
+    plannerRetirementMethod,
+    useInflationAdjustedValues,
   );
-
-  const totalAssets = useMemo(
-    () =>
-      accounts
-        .filter((account) => !isLiabilityAccountType(account.accountType))
-        .reduce((sum, account) => {
-          if (isCombinedAssetType(account.accountType)) {
-            return (
-              sum +
-              clamp(
-                assetFinanceDetailsByAccountId[account.id]?.currentValue ?? account.startingBalance,
-              )
-            );
-          }
-
-          return sum + clamp(account.startingBalance);
-        }, 0),
-    [accounts, assetFinanceDetailsByAccountId],
+  const financialMathSnapshot = useFinancialMathSnapshot(
+    plannerMonthlyExpenses,
+    household,
+    safeWithdrawalRate,
+    portfolio,
   );
-
-  const totalLiabilities = useMemo(
-    () =>
-      accounts.reduce((sum, account) => {
-        if (isLiabilityAccountType(account.accountType)) {
-          return sum + clamp(account.startingBalance);
-        }
-
-        if (isCombinedAssetType(account.accountType)) {
-          const details = assetFinanceDetailsByAccountId[account.id];
-          if (details?.hasLoan) {
-            return sum + clamp(details.currentLoanBalance);
-          }
-        }
-
-        return sum;
-      }, 0),
-    [accounts, assetFinanceDetailsByAccountId],
+  const { projectionRows, finalBalances, projectedNetWorthAtTargetAge } = useProjections(
+    plannerAccounts,
+    household,
+    plannerAssetFinanceDetailsByAccountId,
+    irsLimits,
+    inflationRate,
+    useInflationAdjustedValues,
   );
-
-  const { totalPlannedMonthlyEmployee, totalPlannedMonthlyInvestment } = useMemo(
-    () => getPlannerContributionTotals(accounts, selfAnnualIncome, spouseAnnualIncome),
-    [accounts, selfAnnualIncome, spouseAnnualIncome],
+  const financialFreedomAge = useFinancialFreedomAge(
+    projectionRows,
+    targets.financialFreedomTarget,
   );
-  const annualHouseholdIncome = selfAnnualIncome + spouseAnnualIncome;
-  const currentSavingsRateEmployeePercent =
-    annualHouseholdIncome > 0
-      ? (totalPlannedMonthlyEmployee * 12 * 100) / annualHouseholdIncome
-      : 0;
-  const currentSavingsRateTotalPercent =
-    annualHouseholdIncome > 0
-      ? (totalPlannedMonthlyInvestment * 12 * 100) / annualHouseholdIncome
-      : 0;
-
-  const weightedAnnualRate = useMemo(() => {
-    const totalWeightedContribution = accounts.reduce(
-      (sum, account) =>
-        sum + getTotalMonthlyForAccount(account, selfAnnualIncome, spouseAnnualIncome),
-      0,
-    );
-    if (totalWeightedContribution === 0) {
-      return accounts.length > 0
-        ? accounts.reduce((sum, account) => sum + account.annualRate, 0) / accounts.length
-        : 0;
-    }
-
-    return accounts.reduce(
-      (sum, account) =>
-        sum +
-        (getTotalMonthlyForAccount(account, selfAnnualIncome, spouseAnnualIncome) /
-          totalWeightedContribution) *
-          account.annualRate,
-      0,
-    );
-  }, [accounts, selfAnnualIncome, spouseAnnualIncome]);
-
-  const effectiveWeightedAnnualRate = useMemo(
-    () =>
-      getEffectiveAnnualRatePercent(weightedAnnualRate, inflationRate, useInflationAdjustedValues),
-    [weightedAnnualRate, inflationRate, useInflationAdjustedValues],
+  const accountBreakdownRows = useAccountBreakdown(
+    plannerAccounts,
+    household,
+    plannerPeople,
+    irsLimits,
+    finalBalances,
   );
+  const dynamicChartConfig = useChartConfig(plannerAccounts);
 
-  const annualNeedToday = monthlyExpenses * 12;
-  const inflationFactor = (1 + inflationRate / 100) ** yearsToGoal;
-  const annualNeedAtRetirement = useInflationAdjustedValues
-    ? annualNeedToday
-    : annualNeedToday * inflationFactor;
-  const baseFinancialFreedomTarget =
-    safeWithdrawalRate > 0 ? annualNeedAtRetirement / (safeWithdrawalRate / 100) : 0;
-  const retirementHorizonYears = Math.max(
-    1,
-    plannerConstants.PLANNER_DEFAULT_LONGEVITY_AGE - targetAge,
-  );
-  const suggestedSafeWithdrawalRate = getSuggestedSafeWithdrawalRate(retirementHorizonYears);
-  const inflationDecimal = inflationRate / 100;
-  const getRealGrowthRatePercent = (nominalGrowthRatePercent: number) => {
-    if (inflationDecimal <= -1) {
-      return nominalGrowthRatePercent;
-    }
-
-    return ((1 + nominalGrowthRatePercent / 100) / (1 + inflationDecimal) - 1) * 100;
-  };
-  const selfEffectiveIncomeGrowthRate = useInflationAdjustedValues
-    ? getRealGrowthRatePercent(selfIncomeGrowthRate)
-    : selfIncomeGrowthRate;
-  const spouseEffectiveIncomeGrowthRate = useInflationAdjustedValues
-    ? getRealGrowthRatePercent(spouseIncomeGrowthRate)
-    : spouseIncomeGrowthRate;
-  const selfAnnualIncomeAtRetirement = getAnnualIncomeWithGrowth(
-    selfAnnualIncome,
-    selfEffectiveIncomeGrowthRate,
-    yearsToGoal,
-  );
-  const spouseAnnualIncomeAtRetirement = getAnnualIncomeWithGrowth(
-    spouseAnnualIncome,
-    spouseEffectiveIncomeGrowthRate,
-    yearsToGoal,
-  );
-  const projectedHouseholdIncomeAtRetirement =
-    selfAnnualIncomeAtRetirement + spouseAnnualIncomeAtRetirement;
-  // Income replacement is based on current income in today's dollars, then adjusted for real vs nominal
-  // the same way FIRE targets are — this keeps the income guide chip proportional to FIRE tiers.
-  const incomeReplacementAnnualNeedToday =
-    annualHouseholdIncome * (plannerConstants.PLANNER_DEFAULT_INCOME_REPLACEMENT_RATE / 100);
-  const incomeReplacementAnnualNeed = useInflationAdjustedValues
-    ? incomeReplacementAnnualNeedToday
-    : incomeReplacementAnnualNeedToday * inflationFactor;
-  const incomeReplacementTarget =
-    safeWithdrawalRate > 0 ? incomeReplacementAnnualNeed / (safeWithdrawalRate / 100) : 0;
-  const fireTargets = useMemo(
-    () =>
-      plannerConstants.PLANNER_FIRE_LIFESTYLE_OPTIONS.map((option) => ({
-        label: option.label,
-        target: baseFinancialFreedomTarget * option.multiplier,
-        monthlySpendSupported:
-          safeWithdrawalRate > 0
-            ? (baseFinancialFreedomTarget * option.multiplier * (safeWithdrawalRate / 100)) / 12
-            : 0,
-      })),
-    [baseFinancialFreedomTarget, safeWithdrawalRate],
-  );
-  const safeFireLifestyleIndex = Math.max(0, Math.min(fireLifestyleIndex, fireTargets.length - 1));
-  const fireTarget = fireTargets[safeFireLifestyleIndex]?.target ?? baseFinancialFreedomTarget;
-  const annualReturnFactor = 1 + effectiveWeightedAnnualRate / 100;
-  const coastFireTargetToday =
-    annualReturnFactor > 0 ? fireTarget / annualReturnFactor ** yearsToGoal : fireTarget;
-  const coastFireGap = totalStartingBalance - coastFireTargetToday;
-  const hasReachedCoastFire = plannerConstants.isMoneyGreaterThanOrEqualWithTolerance(
-    coastFireGap,
-    0,
-  );
-  const selectedRetirementTarget =
-    retirementMethod === 'target-amount'
-      ? desiredInvestmentAmount
-      : retirementMethod === 'income-replacement'
-        ? incomeReplacementTarget
-        : fireTarget;
-  const selectedRetirementMethodLabel =
-    plannerConstants.PLANNER_RETIREMENT_METHOD_OPTIONS.find(
-      (option) => option.value === retirementMethod,
-    )?.label ?? 'Selected Method';
-  const financialFreedomTarget = fireTarget;
-
-  const monthlyNeededForDesiredTarget = getMonthlyContribution(
-    selectedRetirementTarget,
-    totalStartingBalance,
-    effectiveWeightedAnnualRate,
-    yearsToGoal,
-  );
-  const monthlyNeededForFreedomTarget = getMonthlyContribution(
-    financialFreedomTarget,
-    totalStartingBalance,
-    effectiveWeightedAnnualRate,
-    yearsToGoal,
-  );
-  const requiredSavingsRatePercent =
-    annualHouseholdIncome > 0
-      ? (monthlyNeededForDesiredTarget * 12 * 100) / annualHouseholdIncome
-      : 0;
-  const savingsRateGapPercent = currentSavingsRateTotalPercent - requiredSavingsRatePercent;
-
-  const { projectionRows, finalBalances } = useMemo(
-    () =>
-      getProjection(
-        accounts,
-        currentAge,
-        targetAge,
-        selfAnnualIncome,
-        spouseAnnualIncome,
-        selfIncomeGrowthRate,
-        spouseIncomeGrowthRate,
-        assetFinanceDetailsByAccountId,
-        irsLimits,
-        hasSpouse,
-        plannerConstants.PLANNER_DEFAULT_IRS_LIMIT_GROWTH_RATE,
-        currentAge,
-        spousePerson ? getAgeFromBirthday(spousePerson.birthday) : currentAge,
-        inflationRate,
-        useInflationAdjustedValues,
-      ),
-    [
-      accounts,
-      currentAge,
-      targetAge,
-      selfAnnualIncome,
-      spouseAnnualIncome,
-      selfIncomeGrowthRate,
-      spouseIncomeGrowthRate,
-      assetFinanceDetailsByAccountId,
-      irsLimits,
-      hasSpouse,
-      spousePerson,
-      inflationRate,
-      useInflationAdjustedValues,
-    ],
-  );
-
-  const projectedNetWorthAtTargetAge =
-    projectionRows[projectionRows.length - 1]?.totalBalance ?? totalStartingBalance;
-  const financialFreedomAge = useMemo(() => {
-    const firstFreedomRow = projectionRows.find(
-      (row) => row.totalBalance >= financialFreedomTarget,
-    );
-    return firstFreedomRow?.age ?? null;
-  }, [projectionRows, financialFreedomTarget]);
-
-  const accountBreakdownRows = useMemo(
-    () =>
-      accounts.map((account, index) => {
-        const employeeMonthly = getEmployeeMonthlyContribution(
-          account,
-          selfAnnualIncome,
-          spouseAnnualIncome,
-        );
-        const annualEmployee = employeeMonthly * 12;
-        const ownerBirthday =
-          people.find((person) => person.type === account.owner)?.birthday ??
-          selfPerson?.birthday ??
-          '';
-        const ownerAge = getAgeFromBirthday(ownerBirthday);
-        const suggestedLimit = getSuggestedAnnualLimit(
-          account.accountType,
-          ownerAge,
-          irsLimits,
-          hasSpouse,
-        );
-        const exceedsLimit =
-          suggestedLimit > 0 &&
-          plannerConstants.isMoneyGreaterThanWithTolerance(annualEmployee, suggestedLimit);
-        const matchMonthly = getEmployerMatchMonthly(account, selfAnnualIncome, spouseAnnualIncome);
-        const accountTypeLabel =
-          accountTypeOptions.find((option) => option.value === account.accountType)?.label ??
-          'Other';
-        const ownerLabel = account.owner === 'spouse' ? 'Spouse' : 'Self';
-
-        return {
-          id: account.id,
-          name: account.name,
-          ownerLabel,
-          accountTypeLabel,
-          employeeMonthly,
-          matchMonthly,
-          totalMonthly: employeeMonthly + matchMonthly,
-          annualEmployee,
-          suggestedLimit,
-          exceedsLimit,
-          projectedValue: finalBalances[index] ?? 0,
-        };
-      }),
-    [
-      accounts,
-      selfAnnualIncome,
-      spouseAnnualIncome,
-      people,
-      selfPerson,
-      irsLimits,
-      hasSpouse,
-      finalBalances,
-    ],
-  );
-
-  const dynamicChartConfig = useMemo(() => {
-    const accountEntries = Object.fromEntries(
-      accounts.map((account, index) => [
-        `account-${index}`,
-        {
-          label: account.name,
-          color: accountLineColors[index % accountLineColors.length],
-        },
-      ]),
-    );
-
-    return {
-      ...plannerChartConfig,
-      ...accountEntries,
-    } satisfies ChartConfig;
-  }, [accounts]);
-
-  const monthlyGapToGoal = totalPlannedMonthlyInvestment - monthlyNeededForDesiredTarget;
-  const isMonthlyGapPositive = plannerConstants.isMoneyGreaterThanOrEqualWithTolerance(
-    monthlyGapToGoal,
-    0,
-  );
-  const financialMathSnapshot = useMemo(
-    () =>
-      getFinancialMathSnapshot({
-        monthlyExpenses,
-        selfSalary: selfAnnualIncome,
-        spouseSalary: spouseAnnualIncome,
-        safeWithdrawalRate,
-        currentPortfolio: totalStartingBalance,
-      }),
-    [
-      monthlyExpenses,
-      selfAnnualIncome,
-      spouseAnnualIncome,
-      safeWithdrawalRate,
-      totalStartingBalance,
-    ],
-  );
-
+  // Sync summary to context
   useEffect(() => {
     setPlannerSummary({
-      monthlyNeededForDesiredTarget,
-      requiredMonthlyTargetLabel: selectedRetirementMethodLabel,
-      annualHouseholdIncome,
-      currentSavingsRateEmployeePercent,
-      currentSavingsRateTotalPercent,
-      requiredSavingsRatePercent,
-      savingsRateGapPercent,
-      weightedAnnualRate: effectiveWeightedAnnualRate,
-      yearsToGoal,
-      monthlyGapToGoal,
-      isMonthlyGapPositive,
-      totalStartingBalance,
-      totalAssets,
-      totalLiabilities,
-      targetAge,
+      monthlyNeededForDesiredTarget: targets.monthlyNeededForDesiredTarget,
+      requiredMonthlyTargetLabel: targets.selectedRetirementMethodLabel,
+      annualHouseholdIncome: household.annualHouseholdIncome,
+      currentSavingsRateEmployeePercent: portfolio.currentSavingsRateEmployee,
+      currentSavingsRateTotalPercent: portfolio.currentSavingsRateTotal,
+      requiredSavingsRatePercent: targets.requiredSavingsRate,
+      savingsRateGapPercent: targets.savingsRateGap,
+      weightedAnnualRate: portfolio.effectiveWeightedAnnualRate,
+      yearsToGoal: household.yearsToGoal,
+      monthlyGapToGoal: targets.monthlyGap,
+      isMonthlyGapPositive: targets.isMonthlyGapPositive,
+      totalStartingBalance: portfolio.totalStartingBalance,
+      totalAssets: portfolio.totalAssets,
+      totalLiabilities: portfolio.totalLiabilities,
+      targetAge: household.targetAge,
       projectedNetWorthAtTargetAge,
-      totalPlannedMonthlyInvestment,
-      annualNeedAtRetirement,
-      financialFreedomTarget,
-      monthlyNeededForFreedomTarget,
+      totalPlannedMonthlyInvestment: portfolio.totalPlannedMonthlyInvestment,
+      annualNeedAtRetirement: targets.annualNeedAtRetirement,
+      financialFreedomTarget: targets.financialFreedomTarget,
+      monthlyNeededForFreedomTarget: targets.monthlyNeededForFreedomTarget,
     });
   }, [
-    monthlyNeededForDesiredTarget,
-    selectedRetirementMethodLabel,
-    annualHouseholdIncome,
-    currentSavingsRateEmployeePercent,
-    currentSavingsRateTotalPercent,
-    requiredSavingsRatePercent,
-    savingsRateGapPercent,
-    effectiveWeightedAnnualRate,
-    yearsToGoal,
-    monthlyGapToGoal,
-    isMonthlyGapPositive,
-    totalStartingBalance,
-    totalAssets,
-    totalLiabilities,
-    targetAge,
+    targets.monthlyNeededForDesiredTarget,
+    targets.selectedRetirementMethodLabel,
+    household.annualHouseholdIncome,
+    portfolio.currentSavingsRateEmployee,
+    portfolio.currentSavingsRateTotal,
+    targets.requiredSavingsRate,
+    targets.savingsRateGap,
+    portfolio.effectiveWeightedAnnualRate,
+    household.yearsToGoal,
+    targets.monthlyGap,
+    targets.isMonthlyGapPositive,
+    portfolio.totalStartingBalance,
+    portfolio.totalAssets,
+    portfolio.totalLiabilities,
+    household.targetAge,
     projectedNetWorthAtTargetAge,
-    totalPlannedMonthlyInvestment,
-    annualNeedAtRetirement,
-    financialFreedomTarget,
-    monthlyNeededForFreedomTarget,
+    portfolio.totalPlannedMonthlyInvestment,
+    targets.annualNeedAtRetirement,
+    targets.financialFreedomTarget,
+    targets.monthlyNeededForFreedomTarget,
     setPlannerSummary,
   ]);
 
   return {
-    accounts,
-    currentAge,
+    accounts: plannerAccounts,
+    currentAge: household.currentAge,
     financialMathSnapshot,
     projectionRows,
     accountBreakdownRows,
     dynamicChartConfig,
-    fireTargets,
-    baseFinancialFreedomTarget,
-    retirementHorizonYears,
-    suggestedSafeWithdrawalRate,
+    fireTargets: targets.fireTargets,
+    baseFinancialFreedomTarget: targets.baseFinancialFreedomTarget,
+    retirementHorizonYears: targets.retirementHorizonYears,
+    suggestedSafeWithdrawalRate: targets.suggestedSafeWithdrawalRate,
     financialFreedomAge,
-    coastFireTargetToday,
-    coastFireGap,
-    hasReachedCoastFire,
-    projectedHouseholdIncomeAtRetirement,
-    incomeReplacementAnnualNeed,
-    incomeReplacementTarget,
+    coastFireTargetToday: targets.coastFireTargetToday,
+    coastFireGap: targets.coastFireGap,
+    hasReachedCoastFire: targets.hasReachedCoastFire,
+    projectedHouseholdIncomeAtRetirement: targets.projectedHouseholdIncomeAtRetirement,
+    incomeReplacementAnnualNeed: targets.incomeReplacementAnnualNeed,
+    incomeReplacementTarget: targets.incomeReplacementTarget,
   };
 };
 
