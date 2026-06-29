@@ -154,25 +154,6 @@ func (s *AssetService) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func mapAssetRecord(row sqlc.Asset) Asset {
-	return Asset{
-		ID:                              row.ID,
-		UserID:                          row.UserID,
-		Name:                            row.Name,
-		AssetType:                       row.AssetType,
-		CurrentValue:                    row.CurrentValue,
-		Owner:                           row.Owner,
-		ContributionMode:                row.ContributionMode,
-		ContributionValue:               row.ContributionValue,
-		EmployerMatchRate:               row.EmployerMatchRate,
-		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
-		AnnualRate:                      row.AnnualRate,
-		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
-		CreatedAt:                       timestamptzToTime(row.CreatedAt),
-		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
-	}
-}
-
 func mapCreateAssetRow(row sqlc.CreateAssetRow) Asset {
 	return Asset{
 		ID:                              row.ID,

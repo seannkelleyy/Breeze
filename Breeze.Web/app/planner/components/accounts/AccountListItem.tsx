@@ -327,11 +327,7 @@ export function AccountListItem({
 
         {!isCombinedAsset ? (
           isLiability ? (
-            <LiabilityAccountFields
-              account={account}
-              liabilityTypeOptions={liabilityTypeOptions}
-              onUpdateAccount={onUpdateAccount}
-            />
+            <LiabilityAccountFields account={account} onUpdateAccount={onUpdateAccount} />
           ) : (
             <InvestmentAccountFields
               account={account}

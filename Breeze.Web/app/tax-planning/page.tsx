@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useTaxEstimate, type CalculateTaxEstimateInput } from '@/lib/services/hooks/useTaxEstimate';
+import {
+  useTaxEstimate,
+  type CalculateTaxEstimateInput,
+} from '@/lib/services/hooks/useTaxEstimate';
 import { TaxForm, TaxFormInputs } from './components/TaxForm';
 import { TaxResults } from './components/TaxResults';
 
@@ -31,7 +34,7 @@ const TaxPlanning = () => {
       <TaxForm onCalculate={handleCalculate} isLoading={isPending} />
 
       {error && (
-        <div className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-destructive">
+        <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-md border p-4">
           <p className="font-semibold">Error calculating tax estimate</p>
           <p className="text-sm">{error?.message || 'Please check your inputs and try again.'}</p>
         </div>

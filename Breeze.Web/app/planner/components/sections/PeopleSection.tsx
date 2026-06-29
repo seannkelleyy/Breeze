@@ -20,10 +20,7 @@ export function PeopleSection({ isCollapsed, onToggle }: PeopleSectionProps) {
       </CardHeader>
       {!isCollapsed && (
         <CardContent>
-          <PeopleCard
-            collapsed={false}
-            toggleControl={null}
-          />
+          <PeopleCard collapsed={false} toggleControl={null} />
         </CardContent>
       )}
     </Card>

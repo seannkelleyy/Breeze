@@ -16,7 +16,7 @@ SQLC=go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 GQLGEN=go run github.com/99designs/gqlgen@v0.17.89
 MIGRATION_NAME?=init
 
-.PHONY: gen migrate-diff migrate migrate-apply migrate-lint run tidy build db-up
+.PHONY: gen migrate-diff migrate migrate-apply migrate-lint run tidy build db-up dev
 
 # Generate all code (sqlc then gqlgen — order matters)
 gen:
@@ -63,12 +63,40 @@ tidy:
 # Run all generators then tidy
 setup: gen tidy
 
+# ─── Code Quality ────────────────────────────────────────────────
+
+# Format Go code (in-place)
+fmt:
+	go fmt ./...
+
 # Lint Go code
 lint:
 	golangci-lint run ./... 
 
-# Format Go code
-fmt:
-	go fmt ./...
+# Full API clean+check: format → tidy → gen → vet → lint → test → build
+# This is what CI runs and what you run before committing.
+check: fmt tidy gen
+	@echo "==> [api] Vet"
+	go vet ./...
+	@echo "==> [api] Lint"
+	golangci-lint run ./...
+	@echo "==> [api] Test"
+	go test ./... -count=1
+	@echo "==> [api] Build"
+	go build -o bin/api ./cmd/api/...
 
-clean: lint fmt
+# Dev: start db, migrate, gen, and run the API
+dev:
+	@echo "🚀 Starting dev environment..."
+	@if ! docker ps --format '{{.Names}}' | grep -q 'breeze-postgres'; then \
+		echo "📦 Starting PostgreSQL..."; \
+		docker compose -f ../compose.yaml up -d postgres; \
+		sleep 2; \
+	fi
+	@echo "🗄️  Applying migrations..."
+	export $(shell cat .env | xargs) && $(ATLAS) migrate apply --env local
+	@echo "⚙️  Generating code..."
+	$(SQLC) generate
+	$(GQLGEN) generate
+	@echo "🏃 Running API..."
+	go run ./cmd/api/...

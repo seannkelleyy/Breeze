@@ -211,8 +211,11 @@ export const PlannerToolsCard = ({
   const [extraMonthly, setExtraMonthly] = useState(200);
   const [extraOneTime, setExtraOneTime] = useState(0);
   const [ratioChartDisplayMode, setRatioChartDisplayMode] = useState<RatioChartDisplayMode>('both');
-  const effectiveRefiRate = refiRate > 0 ? refiRate : homeLoan?.interestRate ?? 0;
-  const effectiveRefiTermYears = refiTermYears > 0 ? refiTermYears : Math.max(1, Math.round((homeLoan?.remainingMonths ?? 12) / 12));
+  const effectiveRefiRate = refiRate > 0 ? refiRate : (homeLoan?.interestRate ?? 0);
+  const effectiveRefiTermYears =
+    refiTermYears > 0
+      ? refiTermYears
+      : Math.max(1, Math.round((homeLoan?.remainingMonths ?? 12) / 12));
 
   const baseLoanSummary = useMemo(() => {
     if (!homeLoan) {

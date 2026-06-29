@@ -60,15 +60,19 @@ go get github.com/aws/aws-sdk-go-v2/service/s3  # for Tigris / R2
 ## Make Commands
 
 ```bash
-make dev            # docker postgres up + go run ./cmd/api
+make dev            # start db (if needed) + migrate + gen + run
 make gen            # sqlc generate + gqlgen generate
+make migrate        # apply pending migrations
 make migrate-diff   # generate migration from schema.hcl changes
-make migrate-apply  # apply migrations to local DB
+make migrate-hash   # re-hash atlas.sum after manual changes
+make migrate-clean  # wipe database schema
 make migrate-lint   # lint latest migration for destructive changes
-make build          # cross-compile Linux ARM64 binary
-make test           # go test ./... -race -count=1
-make lint           # go vet ./...
-make deploy         # build + migrate + deploy
+make build          # go build -o bin/api ./cmd/api/...
+make test           # go test ./...
+make lint           # golangci-lint run ./...
+make fmt            # go fmt ./...
+make run            # go run ./cmd/api/...
+make river          # go run ./cmd/river/...
 ```
 
 ---

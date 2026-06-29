@@ -5,15 +5,18 @@ This guide provides detailed instructions for updating all budget dialogs to wor
 ## Overview of Changes
 
 ### 1. ID Type Changes (number → string)
+
 - All IDs are now strings: `id`, `budgetId`, `userId`, `categoryId`
 - Update all type annotations and function parameters
 
 ### 2. Decimal Amount Changes (number → string)
+
 - All monetary values: `amount`, `allocation`, `currentSpend`, `monthlyIncome`, `monthlyExpenses`
 - Keep as strings throughout, convert to/from number only for display/input
 - Use Decimal arithmetic if needed: parse string, calculate, convert back to string
 
 ### 3. Form Schema Changes
+
 - Remove complex nested structures
 - Use simplified schemas from `types/` directory
 - Examples:
@@ -28,19 +31,21 @@ This guide provides detailed instructions for updating all budget dialogs to wor
 **Current State**: Handles creating/editing budget with monthly income and expenses summaries
 
 **Changes Needed**:
+
 1. Update type from `number` to `string` for IDs
 2. Update amount fields from `number` to `string`
 3. Update form submission to use GraphQL mutations from `useBudgets`
 4. Format string values for display (convert to number for currency formatting)
 
 **Example**:
+
 ```typescript
 // Before
 const budget: Budget = {
   id: 123,
   monthlyIncome: 5000,
   monthlyExpenses: 3000,
-}
+};
 
 // After
 const budget: Budget = {
@@ -50,7 +55,7 @@ const budget: Budget = {
   date: '2024-05-01',
   createdAt: '2024-05-01T00:00:00Z',
   updatedAt: '2024-05-01T00:00:00Z',
-}
+};
 ```
 
 ### IncomeDialog
@@ -58,6 +63,7 @@ const budget: Budget = {
 **Current State**: Creates individual income entries
 
 **Changes Needed**:
+
 1. Update `budgetId` from `number` to `string`
 2. Update `amount` from `number` to `string`
 3. Use `incomeFormSchema` for validation
@@ -66,6 +72,7 @@ const budget: Budget = {
 6. Set `sourceType: 'MANUAL'` for manual income entries
 
 **Example Form**:
+
 ```typescript
 const form = useForm<Income>({
   resolver: zodResolver(incomeFormSchema),
@@ -74,16 +81,16 @@ const form = useForm<Income>({
     amount: '0',
     date: new Date().toISOString().split('T')[0],
   },
-})
+});
 
 const onSubmit = async (data: Income) => {
   const incomeData = {
     ...data,
     userId: currentUser.userId,
     sourceType: 'MANUAL' as const,
-  }
-  const incomeId = await postIncome(budgetId, incomeData)
-}
+  };
+  const incomeId = await postIncome(budgetId, incomeData);
+};
 ```
 
 ### ExpenseDialog
@@ -91,6 +98,7 @@ const onSubmit = async (data: Income) => {
 **Current State**: Creates single expense entries (likely needs refactoring for splits)
 
 **Changes Needed**:
+
 1. Update ID types to strings
 2. Update `amount` to string
 3. **NEW**: Handle `splits` array (expense allocation across categories)
@@ -99,31 +107,32 @@ const onSubmit = async (data: Income) => {
 6. Total of all splits must equal total expense amount
 
 **Example Form**:
+
 ```typescript
 const expenseForm = useForm<{
-  description: string
-  amount: string
-  date: string
-  splits: Array<{ categoryId: string; amount: string }>
+  description: string;
+  amount: string;
+  date: string;
+  splits: Array<{ categoryId: string; amount: string }>;
 }>({
   resolver: zodResolver(expenseFormSchema),
-})
+});
 
 const onSubmit = async (data) => {
   // Validate splits sum to total amount
   const splitsTotal = data.splits.reduce((sum, s) => {
-    return sum + parseFloat(s.amount)
-  }, 0)
-  
+    return sum + parseFloat(s.amount);
+  }, 0);
+
   if (parseFloat(data.amount) !== splitsTotal) {
-    throw new Error('Splits must equal total expense amount')
+    throw new Error('Splits must equal total expense amount');
   }
-  
+
   const expenseId = await postExpense(budgetId, userId, {
     ...data,
     userId,
-  })
-}
+  });
+};
 ```
 
 ### ExpenseCategoryDialog
@@ -131,6 +140,7 @@ const onSubmit = async (data) => {
 **Current State**: Creates category allocations
 
 **Changes Needed**:
+
 1. Update ID types to strings
 2. Update `allocation` from `number` to `string`
 3. Remove `currentSpend` (it's calculated from actual expenses)
@@ -138,6 +148,7 @@ const onSubmit = async (data) => {
 5. Call `postCategory(budgetId, userId, categoryData)`
 
 **Example**:
+
 ```typescript
 const categoryForm = useForm<Category>({
   resolver: zodResolver(categoryFormSchema),
@@ -145,11 +156,11 @@ const categoryForm = useForm<Category>({
     name: '',
     allocation: '0',
   },
-})
+});
 
 const onSubmit = async (data) => {
-  const categoryId = await postCategory(budgetId, userId, data)
-}
+  const categoryId = await postCategory(budgetId, userId, data);
+};
 ```
 
 ### GoalDialog
@@ -157,6 +168,7 @@ const onSubmit = async (data) => {
 **Current State**: Creates financial goals
 
 **Changes Needed**:
+
 1. Check if `Goal` type needs updates (currently minimal)
 2. Update ID types if needed
 3. Verify GraphQL mutations work correctly
@@ -179,52 +191,56 @@ For each dialog, ensure:
 ## Common Patterns
 
 ### String to Number Conversion for Display
+
 ```typescript
 // For currency display
-const displayAmount = parseFloat(stringAmount).toFixed(2)
+const displayAmount = parseFloat(stringAmount).toFixed(2);
 
 // For currency input
-const stringAmount = numberInput.toString()
+const stringAmount = numberInput.toString();
 ```
 
 ### Handling Decimal Precision
+
 ```typescript
 // When doing calculations
 const total = (a: string, b: string): string => {
-  return (parseFloat(a) + parseFloat(b)).toString()
-}
+  return (parseFloat(a) + parseFloat(b)).toString();
+};
 
 // Or use a decimal library
-import Decimal from 'decimal.js'
-const result = new Decimal(a).plus(b).toString()
+import Decimal from 'decimal.js';
+const result = new Decimal(a).plus(b).toString();
 ```
 
 ### Form Schema Usage
+
 ```typescript
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { incomeFormSchema } from '@/app/budget/types/income'
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { incomeFormSchema } from '@/app/budget/types/income';
 
 const form = useForm({
   resolver: zodResolver(incomeFormSchema),
-})
+});
 ```
 
 ### GraphQL Mutation Calls
+
 ```typescript
-const { postIncome, patchIncome, deleteIncome } = useIncomes()
+const { postIncome, patchIncome, deleteIncome } = useIncomes();
 
 // Create
-const newId = await postIncome(budgetId, incomeData)
+const newId = await postIncome(budgetId, incomeData);
 
 // Update
 const updatedId = await patchIncome({
   ...existingIncome,
   ...updates,
-})
+});
 
 // Delete
-await deleteIncome(incomeId)
+await deleteIncome(incomeId);
 ```
 
 ## Testing Updated Dialogs

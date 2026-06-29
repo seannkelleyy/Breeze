@@ -58,7 +58,9 @@ export const TaxForm = ({ onCalculate, isLoading = false }: TaxFormProps) => {
     <Card>
       <CardHeader>
         <CardTitle>Tax Calculator</CardTitle>
-        <CardDescription>Enter your income and deduction details to estimate your tax liability.</CardDescription>
+        <CardDescription>
+          Enter your income and deduction details to estimate your tax liability.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

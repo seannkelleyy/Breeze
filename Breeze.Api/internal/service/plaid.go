@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"breeze.api/internal/db/sqlc"
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -87,6 +89,9 @@ func (s *PlaidService) ExchangePublicToken(ctx context.Context, userID uuid.UUID
 func (s *PlaidService) GetByID(ctx context.Context, id uuid.UUID) (*sqlc.PlaidConnection, error) {
 	row, err := s.queries.GetPlaidConnectionByID(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
 		return nil, fmt.Errorf("get plaid connection: %w", err)
 	}
 	return &row, nil

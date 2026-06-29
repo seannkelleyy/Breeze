@@ -16,8 +16,7 @@ import { PlannerUpsertRequest } from '../../types/planner';
 
 const usePlanner = () => {
   const { request } = useGraphql();
-  const { user, userId, currencyCode, returnDisplayMode, inflationRate, safeWithdrawalRate } =
-    useCurrentUser();
+  const { user, userId, currencyCode, returnDisplayMode } = useCurrentUser();
 
   const getLatestBudgetMonthlyExpenses = useCallback(async (): Promise<number> => {
     const today = new Date();
@@ -66,10 +65,12 @@ const usePlanner = () => {
       });
 
       // Fetch existing assets and liabilities to decide create vs update
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const existingAssetsResp = await request<{ assets: Array<any> }, { userId: string }>(
         GET_ASSETS_BY_USER,
         { userId },
       );
+       
       const existingLiabilitiesResp = await request<
         { liabilities: Array<any> },
         { userId: string }
@@ -145,14 +146,14 @@ const usePlanner = () => {
           );
 
           if (existing) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { userId: _userId, ...updateFields } = liabilityInput;
-            // eslint-disable-next-line no-await-in-loop
-            await request<{ updateLiability: { id: string } }, { input: typeof updateFields & { id: string } }>(
-              UPDATE_LIABILITY,
-              { input: { id: existing.id, ...updateFields } },
-            );
+
+            await request<
+              { updateLiability: { id: string } },
+              { input: typeof updateFields & { id: string } }
+            >(UPDATE_LIABILITY, { input: { id: existing.id, ...updateFields } });
           } else {
-            // eslint-disable-next-line no-await-in-loop
             await request<{ createLiability: { id: string } }, { input: typeof liabilityInput }>(
               CREATE_LIABILITY,
               { input: liabilityInput },
@@ -177,14 +178,14 @@ const usePlanner = () => {
           );
 
           if (existing) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { userId: _userId, ...updateFields } = assetInput;
-            // eslint-disable-next-line no-await-in-loop
-            await request<{ updateAsset: { id: string } }, { input: typeof updateFields & { id: string } }>(
-              UPDATE_ASSET,
-              { input: { id: existing.id, ...updateFields } },
-            );
+
+            await request<
+              { updateAsset: { id: string } },
+              { input: typeof updateFields & { id: string } }
+            >(UPDATE_ASSET, { input: { id: existing.id, ...updateFields } });
           } else {
-            // eslint-disable-next-line no-await-in-loop
             await request<{ createAsset: { id: string } }, { input: typeof assetInput }>(
               CREATE_ASSET,
               { input: assetInput },

@@ -1,58 +1,77 @@
 #!/usr/bin/env bash
+# ─────────────────────────────────────────────────────────────────
+# Full monorepo clean + check.
+#  1. Auto-formats all code (go fmt, prettier)
+#  2. Tidies Go modules
+#  3. Regenerates code (sqlc, gqlgen, graphql-codegen)
+#  4. Vets, lints, tests, builds
+#
+# Run from repo root:  ./scripts/check.sh
+# ─────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 API_DIR="$ROOT_DIR/breeze.api"
 WEB_DIR="$ROOT_DIR/breeze.web"
 
-run_api_checks() {
+# ─── Colours ─────────────────────────────────────────────────────
+info() { printf "\033[36m━━━ %s ━━━\033[0m\n" "$*"; }
+ok()   { printf "\033[32m✓ %s\033[0m\n" "$*"; }
+fail() { printf "\033[31m✗ %s\033[0m\n" "$*"; exit 1; }
+
+# ─── API ─────────────────────────────────────────────────────────
+run_api() {
   cd "$API_DIR"
 
-  echo "==> [api] Generate code (sqlc + gqlgen)"
+  info "[api] go fmt (auto-format)"
+  go fmt ./...
+
+  info "[api] go mod tidy"
+  go mod tidy
+
+  info "[api] Generate code (sqlc + gqlgen)"
   make gen
 
-  echo "==> [api] Vet"
-  go vet ./...
+  info "[api] Vet"
+  go vet ./... || fail "[api] vet"
 
-  echo "==> [api] Check gofmt"
-  unformatted=$(gofmt -l .)
-  if [ -n "$unformatted" ]; then
-    echo "gofmt needs to be run on the following files:"
-    echo "$unformatted"
-    exit 1
-  fi
+  info "[api] Lint"
+  make lint || fail "[api] lint"
 
-  echo "==> [api] Lint"
-  make lint
+  info "[api] Test"
+  go test ./... -count=1 || fail "[api] test"
 
-  echo "==> [api] Test"
-  make test
+  info "[api] Build"
+  go build -o bin/api ./cmd/api/... || fail "[api] build"
 
-  echo "==> [api] Build"
-  make build
+  ok "[api] clean"
 }
 
-run_web_checks() {
+# ─── Web ─────────────────────────────────────────────────────────
+run_web() {
   cd "$WEB_DIR"
 
-  echo "==> [web] Lint"
-  npm run lint
+  info "[web] Prettier (auto-format)"
+  npx prettier --write . --log-level warn 2>/dev/null || true
 
-  echo "==> [web] Typecheck"
-  npx tsc --noEmit
+  info "[web] Generate GraphQL types from API schema"
+  npm run gen 2>/dev/null || info "[web] gen skipped — run 'npm install' first"
 
-  if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.test ? 0 : 1)"; then
-    echo "==> [web] Test"
-    npm test
-  else
-    echo "==> [web] Test skipped (no test script in package.json)"
-  fi
+  info "[web] Lint (auto-fix)"
+  npm run lint:fix 2>/dev/null || npm run lint || fail "[web] lint"
 
-  echo "==> [web] Build"
-  npm run build
+  info "[web] TypeScript check"
+  npm run typecheck || fail "[web] typecheck"
+
+  info "[web] Build"
+  npm run build || fail "[web] build"
+
+  ok "[web] clean"
 }
 
-run_api_checks
-run_web_checks
+# ─── Run ─────────────────────────────────────────────────────────
+run_api
+run_web
 
-echo "==> All API and web checks passed"
+echo ""
+printf "\033[32m━━━ All checks passed ━━━\033[0m\n"

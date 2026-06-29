@@ -1,7 +1,7 @@
 'use client';
-import { useQuery } from '@tanstack/react-query'
-import { CALCULATE_RETIREMENT_LADDER } from '../queries/retirementLadder'
-import useGraphql from '../useGraphql'
+import { useQuery } from '@tanstack/react-query';
+import { CALCULATE_RETIREMENT_LADDER } from '../queries/retirementLadder';
+import useGraphql from '../useGraphql';
 
 export interface LadderStep {
   year: number;
@@ -47,7 +47,10 @@ export const useRetirementLadder = (
     queryKey: ['retirementLadder', input],
     queryFn: async () => {
       if (!input) return null;
-      return request<RetirementLadderProjection>(CALCULATE_RETIREMENT_LADDER, input as unknown as Record<string, unknown>);
+      return request<RetirementLadderProjection>(
+        CALCULATE_RETIREMENT_LADDER,
+        input as unknown as Record<string, unknown>,
+      );
     },
     enabled: enabled && !!input,
   });

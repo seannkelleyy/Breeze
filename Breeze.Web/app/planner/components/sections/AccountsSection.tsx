@@ -20,10 +20,7 @@ export function AccountsSection({ isCollapsed, onToggle }: AccountsSectionProps)
       </CardHeader>
       {!isCollapsed && (
         <CardContent>
-          <AccountsCard
-            collapsed={false}
-            toggleControl={null}
-          />
+          <AccountsCard collapsed={false} toggleControl={null} />
         </CardContent>
       )}
     </Card>

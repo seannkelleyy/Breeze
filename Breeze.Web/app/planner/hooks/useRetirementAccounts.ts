@@ -1,18 +1,25 @@
 'use client';
 import {
-    CREATE_RETIREMENT_ACCOUNT,
-    DELETE_RETIREMENT_ACCOUNT,
-    GET_RETIREMENT_ACCOUNTS,
-    UPDATE_RETIREMENT_ACCOUNT,
-} from '@/lib/services/queries/retirementAccounts'
-import useGraphql from '@/lib/services/useGraphql'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+  CREATE_RETIREMENT_ACCOUNT,
+  DELETE_RETIREMENT_ACCOUNT,
+  GET_RETIREMENT_ACCOUNTS,
+  UPDATE_RETIREMENT_ACCOUNT,
+} from '@/lib/services/queries/retirementAccounts';
+import useGraphql from '@/lib/services/useGraphql';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export interface RetirementAccountData {
   id: string;
   userId: string;
   name: string;
-  accountType: 'ACCOUNT_401K' | 'ACCOUNT_403B' | 'ACCOUNT_457' | 'ROTH_IRA' | 'TRADITIONAL_IRA' | 'HSA' | 'OTHER';
+  accountType:
+    | 'ACCOUNT_401K'
+    | 'ACCOUNT_403B'
+    | 'ACCOUNT_457'
+    | 'ROTH_IRA'
+    | 'TRADITIONAL_IRA'
+    | 'HSA'
+    | 'OTHER';
   owner: 'SELF' | 'SPOUSE';
   taxTreatment: 'PRE_TAX' | 'ROTH' | 'TAX_DEFERRED' | 'TAXABLE' | 'OTHER';
   currentBalance: string;
@@ -43,7 +50,9 @@ interface QueryVariables {
 }
 
 interface CreateAccountInput {
-  input: Omit<RetirementAccountData, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & { userId: string };
+  input: Omit<RetirementAccountData, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & {
+    userId: string;
+  };
 }
 
 interface UpdateAccountInput {
@@ -62,7 +71,10 @@ export function useRetirementAccounts(userId: string | null) {
   const accountsQuery = useQuery({
     queryKey: ['retirement-accounts', userId],
     queryFn: async () => {
-      const result = await request<GetRetirementAccountsPayload, QueryVariables>(GET_RETIREMENT_ACCOUNTS, { userId: userId || '' });
+      const result = await request<GetRetirementAccountsPayload, QueryVariables>(
+        GET_RETIREMENT_ACCOUNTS,
+        { userId: userId || '' },
+      );
       return result.retirementAccounts as RetirementAccountData[];
     },
     enabled: !!userId,
@@ -71,13 +83,18 @@ export function useRetirementAccounts(userId: string | null) {
 
   // Mutation: Create account
   const createMutation = useMutation({
-    mutationFn: async (input: Omit<RetirementAccountData, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
-      const result = await request<CreateRetirementAccountPayload, CreateAccountInput>(CREATE_RETIREMENT_ACCOUNT, {
-        input: {
-          ...input,
-          userId: userId || '',
+    mutationFn: async (
+      input: Omit<RetirementAccountData, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+    ) => {
+      const result = await request<CreateRetirementAccountPayload, CreateAccountInput>(
+        CREATE_RETIREMENT_ACCOUNT,
+        {
+          input: {
+            ...input,
+            userId: userId || '',
+          },
         },
-      });
+      );
       return result.createRetirementAccount as RetirementAccountData;
     },
     onSuccess: () => {
@@ -88,7 +105,10 @@ export function useRetirementAccounts(userId: string | null) {
   // Mutation: Update account
   const updateMutation = useMutation({
     mutationFn: async (input: Partial<RetirementAccountData> & { id: string }) => {
-      const result = await request<UpdateRetirementAccountPayload, UpdateAccountInput>(UPDATE_RETIREMENT_ACCOUNT, { input });
+      const result = await request<UpdateRetirementAccountPayload, UpdateAccountInput>(
+        UPDATE_RETIREMENT_ACCOUNT,
+        { input },
+      );
       return result.updateRetirementAccount as RetirementAccountData;
     },
     onSuccess: () => {
@@ -111,16 +131,16 @@ export function useRetirementAccounts(userId: string | null) {
     isLoading: accountsQuery.isLoading,
     isError: accountsQuery.isError,
     error: accountsQuery.error,
-    
+
     // CRUD operations
     createAccount: createMutation.mutate,
     isCreating: createMutation.isPending,
     createError: createMutation.error,
-    
+
     updateAccount: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
     updateError: updateMutation.error,
-    
+
     deleteAccount: deleteMutation.mutate,
     isDeleting: deleteMutation.isPending,
     deleteError: deleteMutation.error,

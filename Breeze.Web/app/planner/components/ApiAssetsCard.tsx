@@ -112,6 +112,12 @@ const ApiAssetsCard = () => {
       name: newAssetName.trim(),
       assetType: newAssetType,
       currentValue: newAssetValue,
+      owner: 'self',
+      contributionMode: 'monthly',
+      contributionValue: '0',
+      employerMatchRate: '0',
+      employerMatchMaxPercentOfSalary: '0',
+      annualRate: '0',
     });
 
     setNewAssetName('');
@@ -125,6 +131,12 @@ const ApiAssetsCard = () => {
       name: values.name.trim(),
       assetType: values.assetType,
       currentValue: values.currentValue,
+      owner: 'self',
+      contributionMode: 'monthly',
+      contributionValue: '0',
+      employerMatchRate: '0',
+      employerMatchMaxPercentOfSalary: '0',
+      annualRate: '0',
     });
 
     setEditByAssetId((current) => {

@@ -15,7 +15,6 @@ import {
 import useGraphql from '../services/useGraphql';
 
 import {
-  PLANNER_DEFAULT_SELF_PERSON,
   PLANNER_DEFAULT_RETURN_DISPLAY_MODE,
   PLANNER_DEFAULT_INFLATION_RATE,
   PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE,
@@ -202,9 +201,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       isLoaded,
       isSignedIn,
       backendUserID,
-      user?.publicMetadata?.userId,
-      user?.id,
-      user?.emailAddresses,
+      user,
       request,
       deductionType,
       deductionAmount,

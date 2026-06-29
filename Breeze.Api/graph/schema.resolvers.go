@@ -24,12 +24,12 @@ import (
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
 	svcInput, err := createUserInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	user, err := r.UserService.GetOrCreate(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapUserToModel(user), nil
@@ -39,12 +39,12 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
 	svcInput, err := updateUserInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	user, err := r.UserService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapUserToModel(user), nil
@@ -62,7 +62,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -72,12 +72,12 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 func (r *mutationResolver) CreateAsset(ctx context.Context, input model.CreateAssetInput) (*model.Asset, error) {
 	svcInput, err := createAssetInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	asset, err := r.AssetService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapAssetToModel(asset), nil
@@ -87,12 +87,12 @@ func (r *mutationResolver) CreateAsset(ctx context.Context, input model.CreateAs
 func (r *mutationResolver) UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (*model.Asset, error) {
 	svcInput, err := updateAssetInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	asset, err := r.AssetService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapAssetToModel(asset), nil
@@ -110,7 +110,7 @@ func (r *mutationResolver) DeleteAsset(ctx context.Context, id string) (bool, er
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -120,12 +120,12 @@ func (r *mutationResolver) DeleteAsset(ctx context.Context, id string) (bool, er
 func (r *mutationResolver) CreateLiability(ctx context.Context, input model.CreateLiabilityInput) (*model.Liability, error) {
 	svcInput, err := createLiabilityInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	liability, err := r.LiabilityService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapLiabilityToModel(liability), nil
@@ -135,12 +135,12 @@ func (r *mutationResolver) CreateLiability(ctx context.Context, input model.Crea
 func (r *mutationResolver) UpdateLiability(ctx context.Context, input model.UpdateLiabilityInput) (*model.Liability, error) {
 	svcInput, err := updateLiabilityInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	liability, err := r.LiabilityService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapLiabilityToModel(liability), nil
@@ -158,7 +158,7 @@ func (r *mutationResolver) DeleteLiability(ctx context.Context, id string) (bool
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -168,12 +168,12 @@ func (r *mutationResolver) DeleteLiability(ctx context.Context, id string) (bool
 func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateBudgetInput) (*model.Budget, error) {
 	svcInput, err := createBudgetInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	budget, err := r.BudgetService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapBudgetToModel(budget), nil
@@ -183,12 +183,12 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 func (r *mutationResolver) UpdateBudget(ctx context.Context, input model.UpdateBudgetInput) (*model.Budget, error) {
 	svcInput, err := updateBudgetInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	budget, err := r.BudgetService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapBudgetToModel(budget), nil
@@ -206,7 +206,7 @@ func (r *mutationResolver) DeleteBudget(ctx context.Context, id string) (bool, e
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -216,12 +216,12 @@ func (r *mutationResolver) DeleteBudget(ctx context.Context, id string) (bool, e
 func (r *mutationResolver) CreateGoal(ctx context.Context, input model.CreateGoalInput) (*model.Goal, error) {
 	svcInput, err := createGoalInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	goal, err := r.GoalService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapGoalToModel(goal), nil
@@ -231,12 +231,12 @@ func (r *mutationResolver) CreateGoal(ctx context.Context, input model.CreateGoa
 func (r *mutationResolver) UpdateGoal(ctx context.Context, input model.UpdateGoalInput) (*model.Goal, error) {
 	svcInput, err := updateGoalInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	goal, err := r.GoalService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapGoalToModel(goal), nil
@@ -254,7 +254,7 @@ func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, err
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -264,12 +264,12 @@ func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, err
 func (r *mutationResolver) CreateScenario(ctx context.Context, input model.CreateScenarioInput) (*model.Scenario, error) {
 	svcInput, err := createScenarioInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	scenario, err := r.ScenarioService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapScenarioToModel(scenario), nil
@@ -279,12 +279,12 @@ func (r *mutationResolver) CreateScenario(ctx context.Context, input model.Creat
 func (r *mutationResolver) UpdateScenario(ctx context.Context, input model.UpdateScenarioInput) (*model.Scenario, error) {
 	svcInput, err := updateScenarioInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	scenario, err := r.ScenarioService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapScenarioToModel(scenario), nil
@@ -302,7 +302,7 @@ func (r *mutationResolver) DeleteScenario(ctx context.Context, id string) (bool,
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -312,12 +312,12 @@ func (r *mutationResolver) DeleteScenario(ctx context.Context, id string) (bool,
 func (r *mutationResolver) CreateRetirementAccount(ctx context.Context, input model.CreateRetirementAccountInput) (*model.RetirementAccount, error) {
 	svcInput, err := createRetirementAccountInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	account, err := r.RetirementService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapRetirementAccountToModel(account), nil
@@ -327,12 +327,12 @@ func (r *mutationResolver) CreateRetirementAccount(ctx context.Context, input mo
 func (r *mutationResolver) UpdateRetirementAccount(ctx context.Context, input model.UpdateRetirementAccountInput) (*model.RetirementAccount, error) {
 	svcInput, err := updateRetirementAccountInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	account, err := r.RetirementService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapRetirementAccountToModel(account), nil
@@ -350,7 +350,7 @@ func (r *mutationResolver) DeleteRetirementAccount(ctx context.Context, id strin
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -360,12 +360,12 @@ func (r *mutationResolver) DeleteRetirementAccount(ctx context.Context, id strin
 func (r *mutationResolver) AddContribution(ctx context.Context, input model.AddContributionInput) (*model.ContributionEntry, error) {
 	svcInput, err := addContributionInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	entry, err := r.RetirementService.AddContribution(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapContributionEntryToModel(entry), nil
@@ -375,12 +375,12 @@ func (r *mutationResolver) AddContribution(ctx context.Context, input model.AddC
 func (r *mutationResolver) CreateExpenseCategory(ctx context.Context, input model.CreateExpenseCategoryInput) (*model.ExpenseCategory, error) {
 	svcInput, err := createExpenseCategoryInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	category, err := r.ExpenseCategoryService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapExpenseCategoryToModel(category), nil
@@ -390,12 +390,12 @@ func (r *mutationResolver) CreateExpenseCategory(ctx context.Context, input mode
 func (r *mutationResolver) UpdateExpenseCategory(ctx context.Context, input model.UpdateExpenseCategoryInput) (*model.ExpenseCategory, error) {
 	svcInput, err := updateExpenseCategoryInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	category, err := r.ExpenseCategoryService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapExpenseCategoryToModel(category), nil
@@ -413,7 +413,7 @@ func (r *mutationResolver) DeleteExpenseCategory(ctx context.Context, id string)
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -423,12 +423,12 @@ func (r *mutationResolver) DeleteExpenseCategory(ctx context.Context, id string)
 func (r *mutationResolver) CreateExpense(ctx context.Context, input model.CreateExpenseInput) (*model.Expense, error) {
 	svcInput, err := createExpenseInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	expense, err := r.ExpenseService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapExpenseToModel(expense), nil
@@ -438,12 +438,12 @@ func (r *mutationResolver) CreateExpense(ctx context.Context, input model.Create
 func (r *mutationResolver) UpdateExpense(ctx context.Context, input model.UpdateExpenseInput) (*model.Expense, error) {
 	svcInput, err := updateExpenseInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	expense, err := r.ExpenseService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapExpenseToModel(expense), nil
@@ -461,7 +461,7 @@ func (r *mutationResolver) DeleteExpense(ctx context.Context, id string) (bool, 
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -471,12 +471,12 @@ func (r *mutationResolver) DeleteExpense(ctx context.Context, id string) (bool, 
 func (r *mutationResolver) CreateIncome(ctx context.Context, input model.CreateIncomeInput) (*model.Income, error) {
 	svcInput, err := createIncomeInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	income, err := r.IncomeService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapIncomeToModel(income), nil
@@ -486,12 +486,12 @@ func (r *mutationResolver) CreateIncome(ctx context.Context, input model.CreateI
 func (r *mutationResolver) UpdateIncome(ctx context.Context, input model.UpdateIncomeInput) (*model.Income, error) {
 	svcInput, err := updateIncomeInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	income, err := r.IncomeService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapIncomeToModel(income), nil
@@ -509,7 +509,7 @@ func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, e
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -519,12 +519,12 @@ func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, e
 func (r *mutationResolver) CreateRecurringIncome(ctx context.Context, input model.CreateRecurringIncomeInput) (*model.RecurringIncome, error) {
 	svcInput, err := createRecurringIncomeInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	income, err := r.RecurringIncomeService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapRecurringIncomeToModel(income), nil
@@ -534,12 +534,12 @@ func (r *mutationResolver) CreateRecurringIncome(ctx context.Context, input mode
 func (r *mutationResolver) UpdateRecurringIncome(ctx context.Context, input model.UpdateRecurringIncomeInput) (*model.RecurringIncome, error) {
 	svcInput, err := updateRecurringIncomeInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	income, err := r.RecurringIncomeService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapRecurringIncomeToModel(income), nil
@@ -557,7 +557,7 @@ func (r *mutationResolver) DeleteRecurringIncome(ctx context.Context, id string)
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -567,12 +567,12 @@ func (r *mutationResolver) DeleteRecurringIncome(ctx context.Context, id string)
 func (r *mutationResolver) CreateTaxBracket(ctx context.Context, input model.CreateTaxBracketInput) (*model.TaxBracket, error) {
 	svcInput, err := createTaxBracketInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	bracket, err := r.TaxBracketService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapTaxBracketToModel(bracket), nil
@@ -582,12 +582,12 @@ func (r *mutationResolver) CreateTaxBracket(ctx context.Context, input model.Cre
 func (r *mutationResolver) UpdateTaxBracket(ctx context.Context, input model.UpdateTaxBracketInput) (*model.TaxBracket, error) {
 	svcInput, err := updateTaxBracketInputFromModel(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	bracket, err := r.TaxBracketService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapTaxBracketToModel(bracket), nil
@@ -597,7 +597,7 @@ func (r *mutationResolver) UpdateTaxBracket(ctx context.Context, input model.Upd
 func (r *mutationResolver) DeleteTaxBracket(ctx context.Context, id string) (bool, error) {
 	parsedID, err := taxBracketIDFromString(id)
 	if err != nil {
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	err = r.TaxBracketService.Delete(ctx, parsedID)
@@ -605,7 +605,7 @@ func (r *mutationResolver) DeleteTaxBracket(ctx context.Context, id string) (boo
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -615,12 +615,12 @@ func (r *mutationResolver) DeleteTaxBracket(ctx context.Context, id string) (boo
 func (r *mutationResolver) CreateNetWorthSnapshot(ctx context.Context, input model.CreateNetWorthSnapshotInput) (*model.NetWorthSnapshot, error) {
 	svcInput, err := mapCreateNetWorthSnapshotInput(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	snapshot, err := r.NetWorthSnapshotService.Create(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapNetWorthSnapshotToModel(snapshot), nil
@@ -630,12 +630,12 @@ func (r *mutationResolver) CreateNetWorthSnapshot(ctx context.Context, input mod
 func (r *mutationResolver) UpdateNetWorthSnapshot(ctx context.Context, input model.UpdateNetWorthSnapshotInput) (*model.NetWorthSnapshot, error) {
 	svcInput, err := mapUpdateNetWorthSnapshotInput(input)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	snapshot, err := r.NetWorthSnapshotService.Update(ctx, svcInput)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapNetWorthSnapshotToModel(snapshot), nil
@@ -653,7 +653,7 @@ func (r *mutationResolver) DeleteNetWorthSnapshot(ctx context.Context, id string
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 
 	return true, nil
@@ -668,7 +668,7 @@ func (r *mutationResolver) ExchangePlaidPublicToken(ctx context.Context, userID 
 
 	conn, err := r.PlaidService.ExchangePublicToken(ctx, parsedUserID, publicToken)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := &model.PlaidConnection{
@@ -691,7 +691,7 @@ func (r *mutationResolver) SyncPlaidConnection(ctx context.Context, id string) (
 		return false, fmt.Errorf("invalid connection id: %w", err)
 	}
 	if err := r.PlaidService.SyncAccounts(ctx, parsedID); err != nil {
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 	return true, nil
 }
@@ -706,7 +706,7 @@ func (r *mutationResolver) DeletePlaidConnection(ctx context.Context, id string)
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
-		return false, err
+		return false, r.mapErr(ctx, err)
 	}
 	return true, nil
 }
@@ -715,7 +715,7 @@ func (r *mutationResolver) DeletePlaidConnection(ctx context.Context, id string)
 func (r *queryResolver) Health(ctx context.Context) (*model.Health, error) {
 	health, err := r.HealthService.Get(ctx)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return &model.Health{
@@ -736,7 +736,7 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapUserToModel(user), nil
@@ -754,7 +754,7 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapUserToModel(user), nil
@@ -764,7 +764,7 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	users, err := r.UserService.List(ctx)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.User, 0, len(users))
@@ -789,7 +789,7 @@ func (r *queryResolver) Asset(ctx context.Context, id string) (*model.Asset, err
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapAssetToModel(asset), nil
@@ -804,7 +804,7 @@ func (r *queryResolver) Assets(ctx context.Context, userID string) ([]*model.Ass
 
 	assets, err := r.AssetService.ListByUserID(ctx, parsedUserID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.Asset, 0, len(assets))
@@ -828,7 +828,7 @@ func (r *queryResolver) Liability(ctx context.Context, id string) (*model.Liabil
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapLiabilityToModel(liability), nil
@@ -843,7 +843,7 @@ func (r *queryResolver) Liabilities(ctx context.Context, userID string) ([]*mode
 
 	liabilities, err := r.LiabilityService.ListByUserID(ctx, parsedUserID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.Liability, 0, len(liabilities))
@@ -867,7 +867,7 @@ func (r *queryResolver) Budget(ctx context.Context, id string) (*model.Budget, e
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapBudgetToModel(budget), nil
@@ -890,7 +890,7 @@ func (r *queryResolver) BudgetByDate(ctx context.Context, userID string, date st
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapBudgetToModel(budget), nil
@@ -905,7 +905,7 @@ func (r *queryResolver) Budgets(ctx context.Context, userID string) ([]*model.Bu
 
 	budgets, err := r.BudgetService.ListByUserID(ctx, parsedUserID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.Budget, 0, len(budgets))
@@ -929,7 +929,7 @@ func (r *queryResolver) Goal(ctx context.Context, id string) (*model.Goal, error
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapGoalToModel(goal), nil
@@ -944,7 +944,7 @@ func (r *queryResolver) Goals(ctx context.Context, userID string) ([]*model.Goal
 
 	goals, err := r.GoalService.ListByUserID(ctx, parsedUserID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.Goal, 0, len(goals))
@@ -968,7 +968,7 @@ func (r *queryResolver) Scenario(ctx context.Context, id string) (*model.Scenari
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapScenarioToModel(scenario), nil
@@ -983,7 +983,7 @@ func (r *queryResolver) Scenarios(ctx context.Context, userID string) ([]*model.
 
 	scenarios, err := r.ScenarioService.ListByUserID(ctx, parsedUserID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.Scenario, 0, len(scenarios))
@@ -1004,7 +1004,7 @@ func (r *queryResolver) CompareScenarios(ctx context.Context, userID string) ([]
 
 	results, err := r.ScenarioService.CompareByUserID(ctx, parsedUserID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.ScenarioResult, 0, len(results))
@@ -1027,7 +1027,7 @@ func (r *queryResolver) PlaidConnection(ctx context.Context, id string) (*model.
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 	return mapPlaidConnectionToModel(conn), nil
 }
@@ -1040,7 +1040,7 @@ func (r *queryResolver) PlaidConnections(ctx context.Context, userID string) ([]
 	}
 	rows, err := r.PlaidService.ListByUserID(ctx, parsedUserID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 	out := make([]*model.PlaidConnection, 0, len(rows))
 	for _, conn := range rows {
@@ -1057,7 +1057,7 @@ func (r *queryResolver) PlaidAccounts(ctx context.Context, connectionID string) 
 	}
 	rows, err := r.PlaidService.ListAccountsByConnectionID(ctx, parsedID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 	out := make([]*model.PlaidAccount, 0, len(rows))
 	for _, a := range rows {
@@ -1078,7 +1078,7 @@ func (r *queryResolver) RetirementAccount(ctx context.Context, id string) (*mode
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapRetirementAccountToModel(account), nil
@@ -1093,7 +1093,7 @@ func (r *queryResolver) RetirementAccounts(ctx context.Context, userID string) (
 
 	accounts, err := r.RetirementService.ListByUserID(ctx, parsedUserID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.RetirementAccount, 0, len(accounts))
@@ -1117,7 +1117,7 @@ func (r *queryResolver) ContributionProgress(ctx context.Context, retirementAcco
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, fmt.Errorf("retirement account not found")
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapContributionProgressToModel(progress), nil
@@ -1135,7 +1135,7 @@ func (r *queryResolver) ExpenseCategory(ctx context.Context, id string) (*model.
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapExpenseCategoryToModel(category), nil
@@ -1150,7 +1150,7 @@ func (r *queryResolver) ExpenseCategories(ctx context.Context, budgetID string) 
 
 	categories, err := r.ExpenseCategoryService.ListByBudgetID(ctx, parsedBudgetID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.ExpenseCategory, 0, len(categories))
@@ -1174,7 +1174,7 @@ func (r *queryResolver) Expense(ctx context.Context, id string) (*model.Expense,
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapExpenseToModel(expense), nil
@@ -1189,7 +1189,7 @@ func (r *queryResolver) Expenses(ctx context.Context, budgetID string) ([]*model
 
 	expenses, err := r.ExpenseService.ListByBudgetID(ctx, parsedBudgetID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.Expense, 0, len(expenses))
@@ -1213,7 +1213,7 @@ func (r *queryResolver) Income(ctx context.Context, id string) (*model.Income, e
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapIncomeToModel(income), nil
@@ -1228,7 +1228,7 @@ func (r *queryResolver) Incomes(ctx context.Context, budgetID string) ([]*model.
 
 	incomes, err := r.IncomeService.ListByBudgetID(ctx, parsedBudgetID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.Income, 0, len(incomes))
@@ -1252,7 +1252,7 @@ func (r *queryResolver) RecurringIncome(ctx context.Context, id string) (*model.
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapRecurringIncomeToModel(income), nil
@@ -1267,7 +1267,7 @@ func (r *queryResolver) RecurringIncomes(ctx context.Context, userID string) ([]
 
 	incomes, err := r.RecurringIncomeService.ListByUserID(ctx, parsedUserID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.RecurringIncome, 0, len(incomes))
@@ -1283,7 +1283,7 @@ func (r *queryResolver) RecurringIncomes(ctx context.Context, userID string) ([]
 func (r *queryResolver) TaxBracket(ctx context.Context, id string) (*model.TaxBracket, error) {
 	parsedID, err := taxBracketIDFromString(id)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	bracket, err := r.TaxBracketService.GetByID(ctx, parsedID)
@@ -1291,7 +1291,7 @@ func (r *queryResolver) TaxBracket(ctx context.Context, id string) (*model.TaxBr
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapTaxBracketToModel(bracket), nil
@@ -1301,12 +1301,12 @@ func (r *queryResolver) TaxBracket(ctx context.Context, id string) (*model.TaxBr
 func (r *queryResolver) TaxBrackets(ctx context.Context, year int, filingStatus model.FilingStatus) ([]*model.TaxBracket, error) {
 	serviceYear, err := taxBracketYearFromInput(year)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	brackets, err := r.TaxBracketService.ListByYearAndFilingStatus(ctx, serviceYear, sqlc.FilingStatus(filingStatus))
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.TaxBracket, 0, len(brackets))
@@ -1356,7 +1356,7 @@ func (r *queryResolver) CalculateRetirementLadder(ctx context.Context, initialBa
 	// Parse and validate inputs
 	balDecimal, expDecimal, yearInt32, sqlcFilingStatus, err := parseRetirementLadderInput(initialBalance, annualExpenses, currentAge, firstWithdrawalAge, isRoth, year, filingStatus)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	// Default yearsToProject to 20 if not specified
@@ -1397,7 +1397,7 @@ func (r *queryResolver) NetWorthSnapshot(ctx context.Context, id string) (*model
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapNetWorthSnapshotToModel(snapshot), nil
@@ -1420,7 +1420,7 @@ func (r *queryResolver) NetWorthSnapshotByDate(ctx context.Context, userID strin
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	return mapNetWorthSnapshotToModel(snapshot), nil
@@ -1435,7 +1435,7 @@ func (r *queryResolver) NetWorthSnapshots(ctx context.Context, userID string) ([
 
 	snapshots, err := r.NetWorthSnapshotService.List(ctx, parsedUserID)
 	if err != nil {
-		return nil, err
+		return nil, r.mapErr(ctx, err)
 	}
 
 	out := make([]*model.NetWorthSnapshot, 0, len(snapshots))

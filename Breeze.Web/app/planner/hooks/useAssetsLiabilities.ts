@@ -27,7 +27,13 @@ export interface LiabilityData {
   id: string;
   userId: string;
   name: string;
-  liabilityType: 'CREDIT_CARD' | 'MORTGAGE' | 'AUTO_LOAN' | 'STUDENT_LOAN' | 'PERSONAL_LOAN' | 'OTHER';
+  liabilityType:
+    | 'CREDIT_CARD'
+    | 'MORTGAGE'
+    | 'AUTO_LOAN'
+    | 'STUDENT_LOAN'
+    | 'PERSONAL_LOAN'
+    | 'OTHER';
   currentBalance: string;
   interestRate: string;
   minimumPayment: string;
@@ -103,7 +109,9 @@ export function useAssetsLiabilities(userId: string | null) {
   const assetsQuery = useQuery({
     queryKey: ['assets', userId],
     queryFn: async () => {
-      const result = await request<GetAssetsPayload, QueryVariables>(GET_ASSETS, { userId: userId || '' });
+      const result = await request<GetAssetsPayload, QueryVariables>(GET_ASSETS, {
+        userId: userId || '',
+      });
       return result.assets as AssetData[];
     },
     enabled: !!userId,
@@ -114,7 +122,9 @@ export function useAssetsLiabilities(userId: string | null) {
   const liabilitiesQuery = useQuery({
     queryKey: ['liabilities', userId],
     queryFn: async () => {
-      const result = await request<GetLiabilitiesPayload, QueryVariables>(GET_LIABILITIES, { userId: userId || '' });
+      const result = await request<GetLiabilitiesPayload, QueryVariables>(GET_LIABILITIES, {
+        userId: userId || '',
+      });
       return result.liabilities as LiabilityData[];
     },
     enabled: !!userId,
@@ -168,7 +178,9 @@ export function useAssetsLiabilities(userId: string | null) {
 
   const updateLiabilityMutation = useMutation({
     mutationFn: async (input: Partial<LiabilityData> & { id: string }) => {
-      const result = await request<UpdateLiabilityPayload, UpdateLiabilityInput>(UPDATE_LIABILITY, { input });
+      const result = await request<UpdateLiabilityPayload, UpdateLiabilityInput>(UPDATE_LIABILITY, {
+        input,
+      });
       return result.updateLiability as LiabilityData;
     },
     onSuccess: () => {
@@ -193,7 +205,10 @@ export function useAssetsLiabilities(userId: string | null) {
     createAsset: createAssetMutation.mutate,
     updateAsset: updateAssetMutation.mutate,
     deleteAsset: deleteAssetMutation.mutate,
-    isAssetPending: createAssetMutation.isPending || updateAssetMutation.isPending || deleteAssetMutation.isPending,
+    isAssetPending:
+      createAssetMutation.isPending ||
+      updateAssetMutation.isPending ||
+      deleteAssetMutation.isPending,
 
     // Liabilities
     liabilities: liabilitiesQuery.data || [],
@@ -202,7 +217,10 @@ export function useAssetsLiabilities(userId: string | null) {
     createLiability: createLiabilityMutation.mutate,
     updateLiability: updateLiabilityMutation.mutate,
     deleteLiability: deleteLiabilityMutation.mutate,
-    isLiabilityPending: createLiabilityMutation.isPending || updateLiabilityMutation.isPending || deleteLiabilityMutation.isPending,
+    isLiabilityPending:
+      createLiabilityMutation.isPending ||
+      updateLiabilityMutation.isPending ||
+      deleteLiabilityMutation.isPending,
 
     // Combined
     isLoading: assetsQuery.isLoading || liabilitiesQuery.isLoading,

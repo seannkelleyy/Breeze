@@ -38,7 +38,10 @@ pnpm-debug.log*
 /breeze.web/.vercel
 /breeze.web/coverage
 /breeze.web/next-env.d.ts
+# Generated code (graphql-codegen)
+/breeze.web/lib/__generated__/
 /breeze.web/*.tsbuildinfo
 
 # api keys
 .continue/
+.DS_Store

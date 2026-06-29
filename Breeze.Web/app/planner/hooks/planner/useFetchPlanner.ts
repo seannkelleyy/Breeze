@@ -21,17 +21,17 @@ const useFetchPlanner = () => {
       monthlyExpenses: plannerMonthlyExpenses,
       inflationRate,
       safeWithdrawalRate,
-      people: (plannerPeople || []).map((person: any) => ({
-        personType: person.type,
-        name: person.name,
-        birthday: person.birthday,
-        retirementAge: person.retirementAge,
-        annualSalary: person.annualSalary,
-        bonusMode: person.bonusMode,
-        annualBonus: person.annualBonus,
-        incomeGrowthRate: person.incomeGrowthRate,
+      people: (plannerPeople || []).map((person: Record<string, unknown>) => ({
+        personType: person.type as string,
+        name: person.name as string,
+        birthday: person.birthday as string,
+        retirementAge: person.retirementAge as number,
+        annualSalary: person.annualSalary as number,
+        bonusMode: person.bonusMode as string,
+        annualBonus: person.annualBonus as number,
+        incomeGrowthRate: person.incomeGrowthRate as number,
       })),
-      accounts: (plannerAccounts || []).map((account: any) => ({
+      accounts: (plannerAccounts || []).map((account: Record<string, unknown>) => ({
         name: account.name,
         owner: account.owner,
         accountType: account.accountType,
@@ -62,7 +62,7 @@ const useFetchPlanner = () => {
 
   return useQuery<PlannerResponse, Error>({
     queryKey: ['planner'],
-    queryFn: fetchPlanner,
+    queryFn: () => fetchPlanner(),
     refetchInterval: false,
     retryDelay: 1 * 1000,
     retry: 0,

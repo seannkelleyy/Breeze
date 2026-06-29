@@ -9,12 +9,14 @@ This document outlines the changes made to the budget directory to work with the
 All TypeScript interfaces have been updated to match the GraphQL backend schema:
 
 #### Budget (`types/budget.ts`)
+
 - ✅ `id`, `userId` are now `string` (IDs)
 - ✅ `monthlyIncome`, `monthlyExpenses` are now `string` (Decimal type)
 - ✅ Added `createdAt`, `updatedAt` timestamps
 - ✅ Form schema simplified to only include editable fields
 
 #### Income (`types/income.ts`)
+
 - ✅ `id`, `userId`, `budgetId` are now `string`
 - ✅ `amount` is now `string` (Decimal type)
 - ✅ `sourceType` is `'MANUAL' | 'RECURRING_TEMPLATE'` (enum)
@@ -23,6 +25,7 @@ All TypeScript interfaces have been updated to match the GraphQL backend schema:
 - ✅ Added `createdAt`, `updatedAt` timestamps
 
 #### Expense (`types/expense.ts`)
+
 - ✅ `id`, `userId`, `budgetId` are now `string`
 - ✅ `amount` is now `string` (Decimal type)
 - ✅ Added `ExpenseSplit` interface for expense split allocation
@@ -32,6 +35,7 @@ All TypeScript interfaces have been updated to match the GraphQL backend schema:
 - ✅ Added `createdAt`, `updatedAt` timestamps
 
 #### Category (`types/category.ts`)
+
 - ✅ `id`, `userId`, `budgetId` are now `string`
 - ✅ `allocation`, `currentSpend` are now `string` (Decimal type)
 - ✅ Removed `sourceType`, `sourceTemplateId`, `generationMonth`
@@ -43,6 +47,7 @@ All TypeScript interfaces have been updated to match the GraphQL backend schema:
 All data-fetching hooks have been updated to work with string IDs and Decimal amounts:
 
 #### `hooks/income/useIncomes.ts`
+
 - ✅ Changed `budgetId` parameter from `number` to `string`
 - ✅ `postIncome` returns `string` ID instead of `number`
 - ✅ `patchIncome` returns `string` ID instead of `number`
@@ -50,6 +55,7 @@ All data-fetching hooks have been updated to work with string IDs and Decimal am
 - ✅ Removed `as unknown as Record<string, unknown>` type casts
 
 #### `hooks/expense/useExpenses.ts`
+
 - ✅ Changed `budgetId` parameter from `number` to `string`
 - ✅ Removed `getExpensesForCategory` (filter by categoryId locally instead)
 - ✅ Updated expense payload to include `splits` array
@@ -57,6 +63,7 @@ All data-fetching hooks have been updated to work with string IDs and Decimal am
 - ✅ Removed type casts
 
 #### `hooks/category/useCategories.ts`
+
 - ✅ Changed `budgetId` parameter from `number` to `string`
 - ✅ `postCategory` now takes `budgetId` and `userId` as separate parameters
 - ✅ Returns `string` ID instead of `number`
@@ -80,30 +87,33 @@ The following dialogs and components still need updates:
 When updating dialogs and components:
 
 1. **ID Handling**: All IDs are now strings (not numbers)
+
    ```typescript
    // Before
-   const budgetId: number = 123
-   
+   const budgetId: number = 123;
+
    // After
-   const budgetId: string = '550e8400-e29b-41d4-a716-446655440000'
+   const budgetId: string = '550e8400-e29b-41d4-a716-446655440000';
    ```
 
 2. **Decimal Values**: Amounts/allocations are strings, not numbers
+
    ```typescript
    // Before
-   const amount: number = 100.50
-   
+   const amount: number = 100.5;
+
    // After
-   const amount: string = '100.50'
+   const amount: string = '100.50';
    ```
 
 3. **Form Handling**: Use form schemas from types
+
    ```typescript
-   import { incomeFormSchema } from '@/app/budget/types/income'
-   
+   import { incomeFormSchema } from '@/app/budget/types/income';
+
    const form = useForm<Income>({
      resolver: zodResolver(incomeFormSchema),
-   })
+   });
    ```
 
 4. **Expense Splits**: Expenses now require splits across categories
@@ -116,7 +126,7 @@ When updating dialogs and components:
        { categoryId: 'cat-123', amount: '100.00' },
        { categoryId: 'cat-456', amount: '50.00' },
      ],
-   }
+   };
    ```
 
 ## GraphQL Queries Available

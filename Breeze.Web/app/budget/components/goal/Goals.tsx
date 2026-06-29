@@ -18,7 +18,9 @@ export const Goals = () => {
     return null;
   }
 
-  const sortedGoals = goals ? [...goals].sort((a, b) => (a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1)) : goals;
+  const sortedGoals = goals
+    ? [...goals].sort((a, b) => (a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1))
+    : goals;
 
   if (isLoading) return <GoalSkeleton />;
 

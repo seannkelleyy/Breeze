@@ -17,7 +17,12 @@ export type AccountType =
   | 'mortgage'
   | 'other';
 
-export type LiabilityType = 'student-loan' | 'credit-card' | 'personal-loan' | 'auto-loan' | 'mortgage';
+export type LiabilityType =
+  | 'student-loan'
+  | 'credit-card'
+  | 'personal-loan'
+  | 'auto-loan'
+  | 'mortgage';
 
 export type AccountOwner = 'self' | 'spouse';
 export type ContributionMode = 'monthly' | 'yearly' | 'salary-percent';

@@ -32,7 +32,8 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
   const bonusModeOptions = plannerConstants.PLANNER_BONUS_MODE_OPTIONS;
   const targetAge = plannerSummary?.targetAge ?? currentAge;
   const [activePersonIndex, setActivePersonIndex] = useState(0);
-  const safeActivePersonIndex = people.length === 0 ? 0 : Math.min(activePersonIndex, people.length - 1);
+  const safeActivePersonIndex =
+    people.length === 0 ? 0 : Math.min(activePersonIndex, people.length - 1);
   const activePerson = people[safeActivePersonIndex];
   const activePersonLabel = useMemo(() => {
     if (!activePerson) {

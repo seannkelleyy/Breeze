@@ -49,7 +49,7 @@ const PlaidConnections = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto space-y-6 py-8">
       <div>
         <h1 className="text-3xl font-bold">Plaid Connections</h1>
         <p className="text-muted-foreground mt-1">
@@ -102,7 +102,9 @@ const PlaidConnections = () => {
               variant="outline"
               size="sm"
             >
-              <RotateCw className={`h-4 w-4 mr-2 ${syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+              <RotateCw
+                className={`mr-2 h-4 w-4 ${syncStatus === 'syncing' ? 'animate-spin' : ''}`}
+              />
               {syncStatus === 'syncing' ? 'Syncing...' : 'Sync Now'}
             </Button>
           </CardHeader>
@@ -123,7 +125,8 @@ const PlaidConnections = () => {
                   </CardTitle>
                   <CardDescription>
                     Connected {new Date(connection.connectedAt).toLocaleDateString()}
-                    {connection.lastSync && ` • Last synced ${new Date(connection.lastSync).toLocaleDateString()}`}
+                    {connection.lastSync &&
+                      ` • Last synced ${new Date(connection.lastSync).toLocaleDateString()}`}
                   </CardDescription>
                 </div>
                 <Button
@@ -139,9 +142,8 @@ const PlaidConnections = () => {
                   <h4 className="font-medium">Accounts</h4>
                   <ul className="space-y-1">
                     {connection.accounts.map((account) => (
-                      <li key={account.id} className="text-sm text-muted-foreground">
-                        {account.name} ({account.type})
-                        {account.mask && ` ···· ${account.mask}`}
+                      <li key={account.id} className="text-muted-foreground text-sm">
+                        {account.name} ({account.type}){account.mask && ` ···· ${account.mask}`}
                         {account.balance && ` - ${account.balance}`}
                       </li>
                     ))}
@@ -157,9 +159,9 @@ const PlaidConnections = () => {
       {connections.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <LinkIcon className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
+            <LinkIcon className="text-muted-foreground mb-4 h-12 w-12 opacity-50" />
             <p className="text-muted-foreground">No connected accounts yet</p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-1 text-sm">
               Connect your first account to get started
             </p>
           </CardContent>

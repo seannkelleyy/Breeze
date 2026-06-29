@@ -7,7 +7,7 @@ The Go build produces a single self-contained binary with no runtime dependencie
 ```bash
 # Cross-compile for Linux ARM64
 CGO_ENABLED=0 GOOS=linux GOARCH=arm64 \
-  go build -ldflags="-w -s" -o budget-api ./cmd/api
+  go build -ldflags="-w -s" -o bin/api ./cmd/api
 
 # Result: a single ~10MB binary
 # Copy it to any Linux server and run it — that's the entire deployment

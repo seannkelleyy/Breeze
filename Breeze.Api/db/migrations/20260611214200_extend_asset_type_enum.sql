@@ -21,10 +21,19 @@ CREATE TYPE asset_type AS ENUM (
   'OTHER'
 );
 
--- 3. Migrate assets table column to new enum type
+-- 3. Migrate assets table column to new enum type with value mapping
+-- Old values: CASH, INVESTMENT, RETIREMENT, REAL_ESTATE, VEHICLE, OTHER
 ALTER TABLE assets
   ALTER COLUMN asset_type TYPE asset_type
-  USING asset_type::text::asset_type;
+  USING (
+    CASE asset_type::text
+      WHEN 'CASH'        THEN 'CHECKING'::asset_type
+      WHEN 'INVESTMENT'  THEN 'BROKERAGE'::asset_type
+      WHEN 'RETIREMENT'  THEN 'TRADITIONAL_IRA'::asset_type
+      WHEN 'REAL_ESTATE' THEN 'OTHER'::asset_type
+      ELSE asset_type::text::asset_type
+    END
+  );
 
 -- 4. Drop old enum type
 DROP TYPE asset_type_old;

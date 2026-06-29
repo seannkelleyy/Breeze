@@ -7,14 +7,15 @@ on:
       - develop
     paths:
       - "breeze.web/**"
+      - "breeze.api/graph/schema.graphqls"
       - ".github/workflows/azure-static-web-apps-happy-forest-080eee10f.yml"
   pull_request:
     paths:
       - "breeze.web/**"
-      - ".github/workflows/azure-static-web-apps-happy-forest-080eee10f.yml"
+      - "breeze.api/graph/schema.graphqls"
 
 jobs:
-  lint-and-build:
+  check:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,8 +35,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run lint
-        run: npm run lint --if-present
+      - name: Generate GraphQL types from API schema
+        run: npm run gen
 
-      - name: Run build
+      - name: TypeScript check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
         run: npm run build

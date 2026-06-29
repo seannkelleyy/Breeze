@@ -163,18 +163,3 @@ func mapIncomeRecord(row sqlc.Income) Income {
 		UpdatedAt:            timestamptzToTime(row.UpdatedAt),
 	}
 }
-
-func dateToPGDate(value *time.Time) pgtype.Date {
-	if value == nil {
-		return pgtype.Date{}
-	}
-	return pgtype.Date{Time: *value, Valid: true}
-}
-
-func dateFromPGDate(value pgtype.Date) *time.Time {
-	if !value.Valid {
-		return nil
-	}
-	date := value.Time
-	return &date
-}

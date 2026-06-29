@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
-const handleError = (error: AxiosError) => {
-  if (error instanceof AxiosError) {
-    throw error;
+/** Throws an error, preserving Axios errors as-is and wrapping others. */
+const toError = (error: unknown, context?: string): Error => {
+  if (axios.isAxiosError(error)) {
+    return error;
   }
+  return new Error(context ? `Unexpected error in ${context}` : 'An unexpected error occurred');
 };
 
 const useHttp = () => {
@@ -27,36 +29,31 @@ const useHttp = () => {
         }
         return config;
       },
-      (error) => {
-        return Promise.reject(error);
-      },
+      (error) => Promise.reject(error),
     );
 
     const getOne = async <T>(relativeUri: string): Promise<T> => {
       try {
         return (await axiosInstance.get<T>(relativeUri)).data as T;
       } catch (error) {
-        handleError(error as AxiosError);
+        throw toError(error, 'getOne');
       }
-      return undefined as unknown as T;
     };
 
     const getMany = async <T>(relativeUri: string): Promise<T[]> => {
       try {
         return (await axiosInstance.get<T[]>(relativeUri)).data;
       } catch (error) {
-        handleError(error as AxiosError);
+        throw toError(error, 'getMany');
       }
-      return [] as T[];
     };
 
     const getManyArray = async <T>(relativeUri: string): Promise<T[][]> => {
       try {
         return (await axiosInstance.get<T[][]>(relativeUri)).data;
       } catch (error) {
-        handleError(error as AxiosError);
+        throw toError(error, 'getManyArray');
       }
-      return [[]] as T[][];
     };
 
     const getManyHeader = async <T>(
@@ -66,19 +63,15 @@ const useHttp = () => {
         const response = await axiosInstance.get<T[]>(relativeUri);
         return { data: response.data, headers: response.headers };
       } catch (error) {
-        handleError(error as AxiosError);
+        throw toError(error, 'getManyHeader');
       }
-      return { data: [] as T[], headers: {} };
     };
 
     const post = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
       try {
         return (await axiosInstance.post<T>(relativeUri, rq)).data as T;
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          throw error;
-        }
-        throw new Error('An unexpected error occurred');
+        throw toError(error, 'post');
       }
     };
 
@@ -86,25 +79,23 @@ const useHttp = () => {
       try {
         return (await axiosInstance.patch<T>(relativeUri, rq)).data;
       } catch (error) {
-        handleError(error as AxiosError);
+        throw toError(error, 'patch');
       }
-      return {} as T;
     };
 
     const put = async <T, S>(relativeUri: string, rq: S): Promise<T> => {
       try {
         return (await axiosInstance.put<T>(relativeUri, rq)).data;
       } catch (error) {
-        handleError(error as AxiosError);
+        throw toError(error, 'put');
       }
-      return {} as T;
     };
 
     const deleteOne = async <T>(relativeUri: string): Promise<void> => {
       try {
         await axiosInstance.delete<T>(relativeUri);
       } catch (error) {
-        handleError(error as AxiosError);
+        throw toError(error, 'deleteOne');
       }
     };
 

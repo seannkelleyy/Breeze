@@ -134,46 +134,40 @@ export interface UpdateGoalInput {
   isCompleted?: boolean;
 }
 
-export const createPlannerApi = (requestFn: (query: string, variables?: any) => Promise<any>) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RequestFn = (query: string, variables?: Record<string, unknown>) => Promise<any>;
+
+export const createPlannerApi = (requestFn: RequestFn) => ({
   // Assets
-  getAssets: (userId: string) =>
-    requestFn(GET_ASSETS_BY_USER, { userId }),
+  getAssets: (userId: string) => requestFn(GET_ASSETS_BY_USER, { userId }),
 
-  createAsset: (input: CreateAssetInput) =>
-    requestFn(CREATE_ASSET, { input }),
+  createAsset: (input: CreateAssetInput) => requestFn(CREATE_ASSET, { input }),
 
-  updateAsset: (input: UpdateAssetInput) =>
-    requestFn(UPDATE_ASSET, { input }),
+  updateAsset: (input: UpdateAssetInput) => requestFn(UPDATE_ASSET, { input }),
 
   // Liabilities
-  getLiabilities: (userId: string) =>
-    requestFn(GET_LIABILITIES_BY_USER, { userId }),
+  getLiabilities: (userId: string) => requestFn(GET_LIABILITIES_BY_USER, { userId }),
 
-  createLiability: (input: CreateLiabilityInput) =>
-    requestFn(CREATE_LIABILITY, { input }),
+  createLiability: (input: CreateLiabilityInput) => requestFn(CREATE_LIABILITY, { input }),
 
-  updateLiability: (input: UpdateLiabilityInput) =>
-    requestFn(UPDATE_LIABILITY, { input }),
+  updateLiability: (input: UpdateLiabilityInput) => requestFn(UPDATE_LIABILITY, { input }),
 
   // Tax planning
   estimateTaxes: (input: EstimateTaxesInput) =>
-    requestFn(ESTIMATE_TAXES_FOR_YEAR, input as any),
+    requestFn(ESTIMATE_TAXES_FOR_YEAR, input as unknown as Record<string, unknown>),
 
   calculateRetirementLadder: (input: RetirementLadderInput) =>
-    requestFn(CALCULATE_RETIREMENT_LADDER, input as any),
+    requestFn(CALCULATE_RETIREMENT_LADDER, input as unknown as Record<string, unknown>),
 
   // Budget operations
   getBudgetByDate: (userId: string, date: string) =>
     requestFn(GET_BUDGET_BY_DATE, { userId, date }),
 
-  getExpensesByBudget: (budgetId: string) =>
-    requestFn(GET_EXPENSES_BY_BUDGET, { budgetId }),
+  getExpensesByBudget: (budgetId: string) => requestFn(GET_EXPENSES_BY_BUDGET, { budgetId }),
 
-  getIncomesByBudget: (budgetId: string) =>
-    requestFn(GET_INCOMES_BY_BUDGET, { budgetId }),
+  getIncomesByBudget: (budgetId: string) => requestFn(GET_INCOMES_BY_BUDGET, { budgetId }),
 
-  getCategories: (budgetId: string) =>
-    requestFn(GET_CATEGORIES, { budgetId }),
+  getCategories: (budgetId: string) => requestFn(GET_CATEGORIES, { budgetId }),
 
   createExpenseCategory: (input: CreateExpenseCategoryInput) =>
     requestFn(CREATE_EXPENSE_CATEGORY, { input }),
@@ -181,38 +175,27 @@ export const createPlannerApi = (requestFn: (query: string, variables?: any) => 
   updateExpenseCategory: (input: UpdateExpenseCategoryInput) =>
     requestFn(UPDATE_EXPENSE_CATEGORY, { input }),
 
-  deleteExpenseCategory: (id: string) =>
-    requestFn(DELETE_EXPENSE_CATEGORY, { id }),
+  deleteExpenseCategory: (id: string) => requestFn(DELETE_EXPENSE_CATEGORY, { id }),
 
-  createExpense: (input: CreateExpenseInput) =>
-    requestFn(CREATE_EXPENSE, { input }),
+  createExpense: (input: CreateExpenseInput) => requestFn(CREATE_EXPENSE, { input }),
 
-  updateExpense: (input: UpdateExpenseInput) =>
-    requestFn(UPDATE_EXPENSE, { input }),
+  updateExpense: (input: UpdateExpenseInput) => requestFn(UPDATE_EXPENSE, { input }),
 
-  deleteExpense: (id: string) =>
-    requestFn(DELETE_EXPENSE, { id }),
+  deleteExpense: (id: string) => requestFn(DELETE_EXPENSE, { id }),
 
-  createIncome: (input: CreateIncomeInput) =>
-    requestFn(CREATE_INCOME, { input }),
+  createIncome: (input: CreateIncomeInput) => requestFn(CREATE_INCOME, { input }),
 
-  updateIncome: (input: UpdateIncomeInput) =>
-    requestFn(UPDATE_INCOME, { input }),
+  updateIncome: (input: UpdateIncomeInput) => requestFn(UPDATE_INCOME, { input }),
 
-  deleteIncome: (id: string) =>
-    requestFn(DELETE_INCOME, { id }),
+  deleteIncome: (id: string) => requestFn(DELETE_INCOME, { id }),
 
-  getGoals: (userId: string) =>
-    requestFn(GET_GOALS, { userId }),
+  getGoals: (userId: string) => requestFn(GET_GOALS, { userId }),
 
-  createGoal: (input: CreateGoalInput) =>
-    requestFn(CREATE_GOAL, { input }),
+  createGoal: (input: CreateGoalInput) => requestFn(CREATE_GOAL, { input }),
 
-  updateGoal: (input: UpdateGoalInput) =>
-    requestFn(UPDATE_GOAL, { input }),
+  updateGoal: (input: UpdateGoalInput) => requestFn(UPDATE_GOAL, { input }),
 
-  deleteGoal: (id: string) =>
-    requestFn(DELETE_GOAL, { id }),
+  deleteGoal: (id: string) => requestFn(DELETE_GOAL, { id }),
 });
 
 export type PlannerApi = ReturnType<typeof createPlannerApi>;

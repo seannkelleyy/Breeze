@@ -22,9 +22,10 @@
 | IaC | Pulumi (Go) | ✓ Chosen |
 | Database | PostgreSQL 16 (Neon serverless) | ✓ Chosen |
 | Hosting | Fly.io or Hetzner VPS | ✓ Chosen |
-| Frontend build | Vite | ✓ Chosen |
-| Frontend UI | React + shadcn/ui + Tailwind | ✓ Chosen |
-| Frontend GraphQL | urql + graphql-codegen | ✓ Chosen |
+| Frontend framework | Next.js 16 + React 19 | ✓ Chosen |
+| Frontend UI | shadcn/ui + Radix + Tailwind v4 | ✓ Chosen |
+| Frontend data fetching | TanStack React Query v5 | ✓ Chosen |
+| Frontend HTTP client | Axios | ✓ Chosen |
 
 ---
 
