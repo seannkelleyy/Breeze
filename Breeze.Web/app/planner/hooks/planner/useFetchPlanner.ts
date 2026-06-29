@@ -60,9 +60,9 @@ const useFetchPlanner = () => {
     });
   };
 
-  return useQuery<PlannerResponse, Error>({
+  return useQuery({
     queryKey: ['planner'],
-    queryFn: () => fetchPlanner(),
+    queryFn: fetchPlanner,
     refetchInterval: false,
     retryDelay: 1 * 1000,
     retry: 0,

@@ -70,8 +70,9 @@ const usePlanner = () => {
         GET_ASSETS_BY_USER,
         { userId },
       );
-       
+
       const existingLiabilitiesResp = await request<
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         { liabilities: Array<any> },
         { userId: string }
       >(GET_LIABILITIES_BY_USER, { userId });
