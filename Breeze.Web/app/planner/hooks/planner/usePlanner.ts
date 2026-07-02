@@ -29,10 +29,6 @@ const usePlanner = () => {
     return response.budgetByDate ? Number.parseFloat(response.budgetByDate.monthlyExpenses) : 0;
   }, [request, userId]);
 
-  const getPlanner = async (): Promise<never> => {
-    throw new Error('Planner persistence has moved off the REST planner record');
-  };
-
   const upsertPlanner = async (payload: PlannerUpsertRequest): Promise<number> => {
     // Persist minimal user preference fields so planner edits produce network activity.
     // Full planner persistence (assets/liabilities/people) is handled separately.
@@ -202,7 +198,7 @@ const usePlanner = () => {
     }
   };
 
-  return { getPlanner, getLatestBudgetMonthlyExpenses, upsertPlanner };
+  return { getLatestBudgetMonthlyExpenses, upsertPlanner };
 };
 
 export default usePlanner;

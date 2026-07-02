@@ -134,8 +134,13 @@ export interface UpdateGoalInput {
   isCompleted?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type RequestFn = (query: string, variables?: Record<string, unknown>) => Promise<any>;
+import type { DocumentNode } from 'graphql';
+
+type RequestFn = (
+  query: string | DocumentNode,
+  variables?: Record<string, unknown>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => Promise<any>;
 
 export const createPlannerApi = (requestFn: RequestFn) => ({
   // Assets

@@ -1,10 +1,12 @@
 'use client';
+import { useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
-import { usePlannerModel } from './hooks/planner/index';
+import { usePlannerModel, useFetchPlanner } from './hooks/planner/index';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from './hooks/usePlannerState';
+
 import {
   RetirementInputsSection,
   PeopleSection,
@@ -28,6 +30,33 @@ export default function PlannerPage() {
     toggleSection,
     setActiveTab,
   } = usePlannerState();
+
+  // Load planner data from API on mount and hydrate state
+  const { data: plannerData, isLoading: isPlannerLoading } = useFetchPlanner();
+
+  const {
+    setPlannerAccounts,
+    setInflationRate,
+    setSafeWithdrawalRate,
+    setCurrencyCode,
+    setReturnDisplayMode,
+  } = useCurrentUser();
+
+  useEffect(() => {
+    if (!plannerData) return;
+    setPlannerAccounts(plannerData.accounts);
+    setInflationRate(plannerData.inflationRate);
+    setSafeWithdrawalRate(plannerData.safeWithdrawalRate);
+    setCurrencyCode(plannerData.currencyCode);
+    setReturnDisplayMode(plannerData.returnDisplayMode);
+  }, [
+    plannerData,
+    setPlannerAccounts,
+    setInflationRate,
+    setSafeWithdrawalRate,
+    setCurrencyCode,
+    setReturnDisplayMode,
+  ]);
 
   // Calculate projections with user's preferences
   const {

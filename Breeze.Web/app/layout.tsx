@@ -4,6 +4,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import Providers from './providers';
 import { Navigation } from '@/components/common/navigation/index';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 const geistSans = Geist({
@@ -49,7 +50,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col">
         <Providers>
           <Navigation />
-          {children}
+          <ErrorBoundary>{children}</ErrorBoundary>
         </Providers>
       </body>
     </html>

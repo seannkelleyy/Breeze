@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from 'react';
-
 import useHttp from './useHttp';
 
 interface GraphQLErrorItem {
@@ -31,8 +30,6 @@ const useGraphql = () => {
         throw new Error(response.errors.map((item) => item.message).join('; '));
       }
 
-      // `null` is a valid GraphQL response (e.g., user not found)
-      // Only throw if the response itself is missing or undefined
       if (response.data === undefined) {
         throw new Error('GraphQL response did not include data');
       }

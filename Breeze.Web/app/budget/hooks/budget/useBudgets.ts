@@ -11,13 +11,12 @@ const useBudgets = () => {
 
   const getBudget = useCallback(
     async (year: number, month: number): Promise<Budget> => {
-      // Format date as RFC3339 (YYYY-MM-DDTHH:MM:SSZ)
       const date = new Date(year, month - 1, 1).toISOString();
 
       const res = await request<{ budgetByDate: Budget | null }>(GET_BUDGET_BY_DATE, {
         userId,
         date,
-      } as unknown as Record<string, unknown>);
+      } as Record<string, unknown>);
       if (!res || !res.budgetByDate) throw new Error('No budget found');
       return res.budgetByDate;
     },

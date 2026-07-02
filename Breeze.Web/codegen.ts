@@ -1,14 +1,22 @@
 import type { CodegenConfig } from '@graphql-codegen/cli';
 
+/**
+ * graphql-codegen configuration.
+ *
+ * Reads the canonical GraphQL schema from the Go API and generates
+ * TypeScript types into lib/gql/.
+ *
+ * The generated types serve as a reference contract between API and UI.
+ * When the API schema changes, re-run `npm run gen` to update them.
+ * Cross-reference the generated types when using API response data.
+ */
 const config: CodegenConfig = {
   schema: '../breeze.api/graph/schema.graphqls',
   generates: {
-    './lib/__generated__/gql.ts': {
-      plugins: ['typescript'],
+    './lib/gql/': {
+      preset: 'client',
       config: {
-        // Enums as types avoids TS errors for numeric-starting values (_401K, _403B)
         enumsAsTypes: true,
-        maybeValue: 'T | null | undefined',
         scalars: {
           ID: 'string',
           UUID: 'string',

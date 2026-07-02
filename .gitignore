@@ -38,7 +38,7 @@ pnpm-debug.log*
 /breeze.web/.vercel
 /breeze.web/coverage
 /breeze.web/next-env.d.ts
-# Generated code (graphql-codegen)
+# Generated code (graphql-codegen) — old location
 /breeze.web/lib/__generated__/
 /breeze.web/*.tsbuildinfo
 

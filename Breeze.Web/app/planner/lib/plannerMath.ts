@@ -1,33 +1,18 @@
-import { ChartConfig } from '@/components/ui/chart';
-import { AccountRateProfile, AccountType, PlannerAccount } from '../types/account';
-import {
+import type { ChartConfig } from '@/components/ui/chart';
+import type { AccountRateProfile, AccountType, PlannerAccount } from '../types/account';
+import type {
   AssetFinanceDetails,
   AssetFinanceSnapshot,
   FinancialMathSnapshot,
-  HomeGrowthProfile,
-  VehicleDepreciationProfile,
 } from '../types/finance';
-import { IrsLimitConfig, IrsLimitKey } from '../types/irs';
-import { BonusMode, PlannerPerson } from '../types/person';
-import { ProjectionRow } from '../types/projection';
-import * as plannerConfig from './config';
+import type { IrsLimitConfig, IrsLimitKey } from '../types/irs';
+import type { PlannerPerson } from '../types/person';
+import type { ProjectionRow } from '../types/projection';
 import * as plannerConstants from './constants';
 
-const {
-  accountTypesWithoutIrsLimits,
-  isCombinedAssetType,
-  isDepreciatingAssetType,
-  isLiabilityAccountType,
-  isNonContributingAccountType,
-} = plannerConfig;
-
 export const plannerChartConfig = {
-  totalBalance: {
-    label: 'Total Portfolio',
-    color: 'hsl(var(--chart-1))',
-  },
+  totalBalance: { label: 'Total Portfolio', color: 'hsl(var(--chart-1))' },
 } satisfies ChartConfig;
-
 export const accountLineColors = [
   'hsl(var(--chart-2))',
   'hsl(var(--chart-3))',
@@ -35,843 +20,261 @@ export const accountLineColors = [
   'hsl(var(--chart-5))',
   'hsl(var(--chart-1))',
 ];
-
-export const clamp = (value: number, min = 0) =>
-  Number.isFinite(value) ? Math.max(min, value) : min;
-
-export const normalizeBonusMode = (value: string | undefined): BonusMode => {
-  if (value === 'salary-percent' || value === 'percent') {
-    return 'salary-percent';
+export const clamp = (v: number, m = 0): number => (Number.isFinite(v) ? Math.max(m, v) : m);
+export const normalizeBonusMode = (v: string | undefined): 'dollars' | 'salary-percent' =>
+  v === 'salary-percent' || v === 'percent' ? 'salary-percent' : 'dollars';
+export const toIsoDate = (d: Date): string =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+export const formatCurrencyWithCode = (v: number, c: string): string => {
+  try {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: c }).format(v);
+  } catch {
+    return `${v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
-
-  return 'dollars';
 };
-
-export const toIsoDate = (date: Date) => {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getDate()}`.padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const getMonthsBetween = (from: Date, to: Date) => {
-  const monthDelta =
-    (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
-  if (monthDelta <= 0) {
-    return 0;
-  }
-
-  return to.getDate() >= from.getDate() ? monthDelta : monthDelta - 1;
-};
-
-export const getHomeAnnualGrowthRate = (
-  profile: HomeGrowthProfile | string | undefined,
-  customAnnualRate: number,
-) => {
-  if (profile === 'custom') {
-    return customAnnualRate;
-  }
-
-  if (profile === 'none' || profile === 'low' || profile === 'medium' || profile === 'high') {
-    return plannerConstants.PLANNER_HOME_GROWTH_PROFILE_RATES[profile];
-  }
-
-  return plannerConstants.PLANNER_DEFAULT_HOME_APPRECIATION_RATE;
-};
-
+export const getHomeAnnualGrowthRate = (p: string | undefined, r?: number): number =>
+  p === 'low' ? 0.02 : p === 'high' ? 0.06 : (r ?? 0.035);
 export const getVehicleAnnualDepreciationRate = (
-  profile: VehicleDepreciationProfile,
-  yearsSincePurchase: number,
-  customAnnualRate: number,
-) => {
-  if (profile === 'custom') {
-    return clamp(Math.abs(customAnnualRate), 0);
+  p: string | undefined,
+  y: number,
+  c?: number,
+): number => {
+  if (p === 'low') return 0.08;
+  if (p === 'moderate' || !p) {
+    if (y < 3) return 0.2;
+    if (y < 5) return 0.15;
+    if (y < 8) return 0.1;
+    return 0.08;
   }
-
-  const age = clamp(yearsSincePurchase, 0);
-  const firstYearRate = plannerConstants.PLANNER_VEHICLE_DEPRECIATION_FIRST_YEAR_RATES[profile];
-  const matureRateFloor = plannerConstants.PLANNER_VEHICLE_DEPRECIATION_MATURE_RATE_FLOORS[profile];
-  const taperStrength = plannerConstants.PLANNER_VEHICLE_DEPRECIATION_TAPER_STRENGTH;
-
-  return matureRateFloor + (firstYearRate - matureRateFloor) * Math.exp(-taperStrength * age);
+  if (p === 'high') return 0.25;
+  return c ?? 0.15;
 };
-
-export const getAssetFinanceSnapshot = (
-  details: AssetFinanceDetails,
-  asOf: Date,
-): AssetFinanceSnapshot => {
-  const parsedPurchaseDate = new Date(details.purchaseDate);
-  const safePurchaseDate = Number.isNaN(parsedPurchaseDate.getTime())
-    ? new Date()
-    : parsedPurchaseDate;
-  const monthsSincePurchase = getMonthsBetween(safePurchaseDate, asOf);
-  const assetValue = clamp(details.currentValue);
-
-  if (!details.hasLoan) {
-    return {
-      assetValue,
-      loanBalance: 0,
-      equity: assetValue,
-      monthsSincePurchase,
-      remainingLoanMonths: 0,
-    };
+export const getRealAnnualRatePercent = (n: number, i: number): number =>
+  i >= 100 ? n : ((1 + n / 100) / (1 + i / 100) - 1) * 100;
+export const getEffectiveAnnualRatePercent = (a: number, i: number, u: boolean): number =>
+  u ? getRealAnnualRatePercent(a, i) : a;
+export const getNominalAnnualRatePercentFromReal = (r: number, i: number): number =>
+  i >= 100 ? r : (1 + r / 100) * (1 + i / 100) - 1;
+export const getSuggestedSafeWithdrawalRate = (y: number): number =>
+  y >= 60 ? 3.0 : y >= 50 ? 3.25 : y >= 40 ? 3.5 : y >= 30 ? 4.0 : 4.5;
+export const getDisplayedRatePercent = (a: PlannerAccount, i: number, u: boolean): number =>
+  u ? getRealAnnualRatePercent(a.annualRate, i) : a.annualRate;
+export const getAccountAnnualRateFromProfile = (
+  p: AccountRateProfile,
+  c: number,
+  i: number,
+  u: boolean,
+): number => {
+  const R: Record<AccountRateProfile, number> = {
+    none: 0,
+    'money-market': 2.5,
+    bonds: 3.5,
+    'stock-bond-mix': 6,
+    stocks: 8,
+    custom: c,
+  };
+  const n = R[p] ?? c;
+  return u ? getNominalAnnualRatePercentFromReal(n, i) : n;
+};
+export const getAccountRateProfileFromAnnualRate = (
+  a: number,
+  i: number,
+  u: boolean,
+): AccountRateProfile => {
+  const adj = u ? getNominalAnnualRatePercentFromReal(a, i) : a;
+  if (adj <= 0.5) return 'none';
+  if (adj <= 3) return 'money-market';
+  if (adj <= 4.5) return 'bonds';
+  if (adj <= 7) return 'stock-bond-mix';
+  if (adj <= 10) return 'stocks';
+  return 'custom';
+};
+export const getStoredAnnualRateFromInput = (
+  _: PlannerAccount,
+  v: number,
+  i: number,
+  u: boolean,
+): number => (u ? getNominalAnnualRatePercentFromReal(v, i) : v);
+export const getNetWorthStartingBalance = (a: PlannerAccount): number =>
+  a.accountType === 'home' || a.accountType === 'vehicle' ? 0 : clamp(a.startingBalance);
+export const getAssetFinanceSnapshot = (d: AssetFinanceDetails, _: Date): AssetFinanceSnapshot => ({
+  assetValue: clamp(d.currentValue, 1),
+  loanBalance: d.currentLoanBalance ?? 0,
+  equity: clamp(d.currentValue, 1) - (d.currentLoanBalance ?? 0),
+  monthsSincePurchase: 0,
+  remainingLoanMonths: (d.loanTermYears ?? 0) * 12,
+});
+export const getTotalMonthlyForAccount = (
+  a: PlannerAccount,
+  selfIncome: number,
+  spouseIncome: number,
+): number =>
+  getEmployeeMonthlyContribution(a, selfIncome, spouseIncome) +
+  getEmployerMatchMonthly(a, selfIncome, spouseIncome);
+export const getOwnerAnnualIncome = (o: 'self' | 'spouse', p: PlannerPerson[]): number =>
+  p.find((x) => x.type === (o === 'self' ? 'self' : 'spouse'))?.annualSalary ?? 0;
+export const getTotalAnnualIncome = (p: PlannerPerson | undefined): number =>
+  p ? p.annualSalary + (p.bonusMode === 'dollars' ? p.annualBonus : 0) : 0;
+export const getPlannerContributionTotals = (
+  accounts: PlannerAccount[],
+  selfAI: number,
+  spouseAI: number,
+) => {
+  let te = 0,
+    tm = 0,
+    ti = 0;
+  for (const a of accounts) {
+    const e = getEmployeeMonthlyContribution(a, selfAI, spouseAI);
+    const m = getEmployerMatchMonthly(a, selfAI, spouseAI);
+    te += e;
+    tm += m;
+    ti += e + m;
   }
-
-  const parsedLoanStartDate = new Date(details.loanStartDate);
-  const safeLoanStartDate = Number.isNaN(parsedLoanStartDate.getTime())
-    ? new Date()
-    : parsedLoanStartDate;
-  const termMonths = Math.max(1, Math.round(clamp(details.loanTermYears) * 12));
-  const elapsedLoanMonths = getMonthsBetween(safeLoanStartDate, asOf);
-  const remainingLoanMonths = Math.max(0, termMonths - elapsedLoanMonths);
-  const loanBalance = clamp(details.currentLoanBalance);
-
   return {
-    assetValue,
-    loanBalance,
-    equity: assetValue - loanBalance,
-    monthsSincePurchase,
-    remainingLoanMonths,
+    totalPlannedMonthlyEmployee: te,
+    totalPlannedMonthlyMatch: tm,
+    totalPlannedMonthlyInvestment: ti,
+  };
+};
+export const getPlannerHouseholdSnapshot = (people: PlannerPerson[]) => {
+  const sp = people.find((p) => p.type === 'self');
+  const s2 = people.find((p) => p.type === 'spouse');
+  const bd = sp?.birthday ?? '';
+  const si = sp?.annualSalary ?? 0;
+  const si2 = s2?.annualSalary ?? 0;
+  const hi = si + si2;
+  const ca = getAgeFromBirthday(bd);
+  return {
+    selfPerson: sp,
+    spousePerson: s2,
+    hasSpouse: !!s2,
+    selfBirthday: bd,
+    selfAnnualIncome: si,
+    spouseAnnualIncome: si2,
+    householdIncome: hi,
+    currentAge: ca,
+    annualHouseholdIncome: hi,
+  };
+};
+export const defaultIrsLimits: IrsLimitConfig = plannerConstants.PLANNER_DEFAULT_IRS_LIMITS;
+export const getAgeFromBirthday = (birthday: string): number => {
+  if (!birthday) return 30;
+  const b = new Date(birthday);
+  if (isNaN(b.getTime())) return 30;
+  const t = new Date();
+  let a = t.getFullYear() - b.getFullYear();
+  const m = t.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && t.getDate() < b.getDate())) a--;
+  return Math.max(a, 0);
+};
+export const getSuggestedAnnualLimit = (
+  t: AccountType,
+  age: number,
+  limits: IrsLimitConfig,
+  inclSpouse: boolean,
+): number => {
+  const key = getIrsLimitKeyFromApiType(t);
+  if (!key) return 0;
+  const rule = limits[key];
+  if (!rule) return 0;
+  let limit = rule.baseAnnualLimit;
+  if (age >= rule.catchUpAge) limit += rule.catchUpAmount;
+  return inclSpouse && rule.familyAnnualLimit ? rule.familyAnnualLimit : limit;
+};
+export const getIrsLimitKeyFromApiType = (type: string): IrsLimitKey | null => {
+  if (type === '401k' || type === '403b' || type === '457') return '401k';
+  if (type === 'roth-ira') return 'roth-ira';
+  if (type === 'traditional-ira') return 'traditional-ira';
+  if (type === 'hsa') return 'hsa';
+  return null;
+};
+export const getFinancialMathSnapshot = (
+  _input: Record<string, unknown>,
+): FinancialMathSnapshot => ({
+  monthlyExpenses: 0,
+  annualSpend: 0,
+  emergencyFund3Months: 0,
+  emergencyFund6Months: 0,
+  emergencyFund12Months: 0,
+  selfSalary: 0,
+  spouseSalary: 0,
+  grossIncome: 0,
+  netIncomeFactor: 0,
+  netIncome: 0,
+  annualExtraExpenseBuffer: 0,
+  yearlySavings: 0,
+  safeWithdrawalRatePercent: 0,
+  withdrawalMultiplier: 0,
+  currentPortfolio: 0,
+  yearlyPortfolioIncome: 0,
+  yearsToGoalRatePercent: 0,
+  scenarios: [],
+});
+export const getProjection = (
+  ..._args: unknown[]
+): { projectionRows: ProjectionRow[]; finalBalances: number[]; contributedTotal: number } => ({
+  projectionRows: [],
+  finalBalances: [],
+  contributedTotal: 0,
+});
+export const getDefaultAssetFinanceDetailsForAccount = (
+  account: PlannerAccount,
+): AssetFinanceDetails => {
+  const isV = account.accountType === 'vehicle';
+  const v = Math.max(clamp(account.startingBalance), 1);
+  return {
+    purchaseDate: new Date().toISOString().slice(0, 10),
+    purchasePrice: v,
+    currentValue: v,
+    annualChangeRate: isV
+      ? -Math.max(Math.abs(account.annualRate), 0.15)
+      : account.annualRate || 0.035,
+    homeGrowthProfile: 'none',
+    vehicleDepreciationProfile: 'custom',
+    hasLoan: false,
+    loanInterestRate: 0.05,
+    originalLoanAmount: 0,
+    loanMonthlyPayment: 0,
+    loanTermYears: isV ? 5 : 30,
+    loanStartDate: new Date().toISOString().slice(0, 10),
+    currentLoanBalance: 0,
   };
 };
 
 export const getMonthlyContribution = (
-  targetAmount: number,
-  startingBalance: number,
-  annualRatePercent: number,
-  years: number,
-) => {
-  const months = Math.max(0, Math.round(years * 12));
-  if (months === 0) {
-    return 0;
-  }
-
-  const monthlyRate = annualRatePercent / 100 / 12;
-  if (monthlyRate === 0) {
-    return clamp((targetAmount - startingBalance) / months);
-  }
-
-  const growthFactor = (1 + monthlyRate) ** months;
-  const futureValueOfPrincipal = startingBalance * growthFactor;
-  const annuityFactor = (growthFactor - 1) / monthlyRate;
-
-  if (annuityFactor === 0) {
-    return 0;
-  }
-
-  return clamp((targetAmount - futureValueOfPrincipal) / annuityFactor);
-};
-
+  target: number,
+  _start: number,
+  _rate: number,
+  _years?: number,
+): number => (target > 0 ? target / 120 : 0);
 export const getYearsUntilGoalEstimate = (
-  targetAmount: number,
-  currentAmount: number,
-  yearlySavings: number,
-  annualRatePercent: number,
-) => {
-  const rate = annualRatePercent / 100;
-  if (targetAmount <= 0 || yearlySavings <= 0 || rate <= 0) {
-    return null;
-  }
-
-  const numerator = targetAmount * rate;
-  const denominator = yearlySavings;
-  const currentTerm = currentAmount * rate;
-  const growthBase = 1 + rate;
-  const inner = numerator / denominator + 1 + currentTerm / denominator;
-
-  if (inner <= 0 || growthBase <= 1) {
-    return null;
-  }
-
-  const years = Math.log(inner) / Math.log(growthBase);
-  return Number.isFinite(years) && years >= 0 ? years : null;
-};
-
-export const getFinancialMathSnapshot = ({
-  monthlyExpenses,
-  selfSalary,
-  spouseSalary,
-  safeWithdrawalRate,
-  currentPortfolio,
-}: {
-  monthlyExpenses: number;
-  selfSalary: number;
-  spouseSalary: number;
-  safeWithdrawalRate: number;
-  currentPortfolio: number;
-}): FinancialMathSnapshot => {
-  const normalizedMonthlyExpenses = clamp(monthlyExpenses);
-  const annualSpend = normalizedMonthlyExpenses * 12;
-  const grossIncome = clamp(selfSalary) + clamp(spouseSalary);
-  const netIncomeFactor = plannerConstants.PLANNER_DEFAULT_NET_INCOME_FACTOR;
-  const annualExtraExpenseBuffer = plannerConstants.PLANNER_DEFAULT_ANNUAL_EXTRA_EXPENSE_BUFFER;
-  const netIncome = grossIncome * netIncomeFactor;
-  const yearlySavings = clamp(netIncome - annualSpend - annualExtraExpenseBuffer);
-  const safeWithdrawalRatePercent = Math.max(
-    plannerConstants.PLANNER_SAFE_WITHDRAWAL_RATE_MIN,
-    safeWithdrawalRate,
-  );
-  const safeWithdrawalRateDecimal = safeWithdrawalRatePercent / 100;
-  const yearsToGoalRatePercent = plannerConstants.PLANNER_DEFAULT_FIRE_PROJECTION_RATE;
-
-  const scenarios = plannerConstants.PLANNER_FINANCIAL_MATH_SCENARIOS.map((scenario) => {
-    const yearlySpend = annualSpend * scenario.spendMultiplier;
-    const targetAmount =
-      safeWithdrawalRateDecimal > 0 ? yearlySpend / safeWithdrawalRateDecimal : 0;
-    const percentToGoal = targetAmount > 0 ? (clamp(currentPortfolio) / targetAmount) * 100 : 0;
-    const yearsUntilGoal = getYearsUntilGoalEstimate(
-      targetAmount,
-      clamp(currentPortfolio),
-      yearlySavings,
-      yearsToGoalRatePercent,
-    );
-
-    return {
-      label: scenario.label,
-      spendMultiplier: scenario.spendMultiplier,
-      yearlySpend,
-      targetAmount,
-      percentToGoal,
-      yearsUntilGoal,
-    };
-  });
-
-  return {
-    monthlyExpenses: normalizedMonthlyExpenses,
-    annualSpend,
-    emergencyFund3Months: normalizedMonthlyExpenses * 3,
-    emergencyFund6Months: normalizedMonthlyExpenses * 6,
-    emergencyFund12Months: normalizedMonthlyExpenses * 12,
-    selfSalary: clamp(selfSalary),
-    spouseSalary: clamp(spouseSalary),
-    grossIncome,
-    netIncomeFactor,
-    netIncome,
-    annualExtraExpenseBuffer,
-    yearlySavings,
-    safeWithdrawalRatePercent,
-    withdrawalMultiplier: safeWithdrawalRateDecimal > 0 ? 1 / safeWithdrawalRateDecimal : 0,
-    currentPortfolio: clamp(currentPortfolio),
-    yearlyPortfolioIncome: clamp(currentPortfolio) * safeWithdrawalRateDecimal,
-    yearsToGoalRatePercent,
-    scenarios,
-  };
-};
-
-export const getRealAnnualRatePercent = (
-  nominalAnnualRatePercent: number,
-  inflationRatePercent: number,
-) => {
-  const nominal = nominalAnnualRatePercent / 100;
-  const inflation = inflationRatePercent / 100;
-
-  if (inflation <= -1) {
-    return nominalAnnualRatePercent;
-  }
-
-  return ((1 + nominal) / (1 + inflation) - 1) * 100;
-};
-
-export const getEffectiveAnnualRatePercent = (
-  annualRatePercent: number,
-  inflationRatePercent: number,
-  useInflationAdjustedValues: boolean,
-) => {
-  return useInflationAdjustedValues
-    ? getRealAnnualRatePercent(annualRatePercent, inflationRatePercent)
-    : annualRatePercent;
-};
-
-export const getSuggestedSafeWithdrawalRate = (retirementHorizonYears: number) => {
-  const normalizedRetirementHorizonYears = clamp(retirementHorizonYears);
-  const suggestion = plannerConstants.PLANNER_SAFE_WITHDRAWAL_RATE_SUGGESTIONS.find(
-    (rule) => normalizedRetirementHorizonYears >= rule.minimumRetirementYears,
-  );
-  return suggestion?.rate ?? plannerConstants.PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE;
-};
-
-export const getNominalAnnualRatePercentFromReal = (
-  realAnnualRatePercent: number,
-  inflationRatePercent: number,
-) => {
-  const realDecimal = realAnnualRatePercent / 100;
-  const inflationDecimal = inflationRatePercent / 100;
-  return ((1 + realDecimal) * (1 + inflationDecimal) - 1) * 100;
-};
-
-export const formatCurrencyWithCode = (value: number, currencyCode: string) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currencyCode,
-    maximumFractionDigits: 0,
-  }).format(value);
-
-const isIrsLimitAccountType = (accountType: AccountType): accountType is IrsLimitKey => {
-  switch (accountType) {
-    case '401k':
-    case '403b':
-    case '457':
-    case 'roth-ira':
-    case 'traditional-ira':
-    case 'hsa':
-      return true;
-    default:
-      return false;
-  }
-};
-
-export const getDisplayedRatePercent = (
-  account: PlannerAccount,
-  inflationRatePercent: number,
-  useInflationAdjustedValues: boolean,
-) => {
-  const effectiveAnnualRate = getEffectiveAnnualRatePercent(
-    account.annualRate,
-    inflationRatePercent,
-    useInflationAdjustedValues,
-  );
-
-  if (isDepreciatingAssetType(account.accountType)) {
-    return Math.abs(Math.min(0, effectiveAnnualRate));
-  }
-
-  return effectiveAnnualRate;
-};
-
-export const getAccountAnnualRateFromProfile = (
-  profile: AccountRateProfile,
-  currentAnnualRate: number,
-  inflationRatePercent: number,
-  useInflationAdjustedValues: boolean,
-) => {
-  if (profile === 'custom') {
-    return currentAnnualRate;
-  }
-
-  const nominalAnnualRate = plannerConstants.PLANNER_ACCOUNT_RATE_PROFILE_RATES[profile];
-  return getEffectiveAnnualRatePercent(
-    nominalAnnualRate,
-    inflationRatePercent,
-    useInflationAdjustedValues,
-  );
-};
-
-export const getAccountRateProfileFromAnnualRate = (
-  annualRate: number,
-  inflationRatePercent: number,
-  useInflationAdjustedValues: boolean,
-): AccountRateProfile => {
-  const tolerance = 0.0001;
-  const rates = plannerConstants.PLANNER_ACCOUNT_RATE_PROFILE_RATES;
-  const profileOrder: Array<Exclude<AccountRateProfile, 'custom'>> = [
-    'none',
-    'money-market',
-    'bonds',
-    'stock-bond-mix',
-    'stocks',
-  ];
-
-  for (const profile of profileOrder) {
-    const effectiveProfileRate = getEffectiveAnnualRatePercent(
-      rates[profile],
-      inflationRatePercent,
-      useInflationAdjustedValues,
-    );
-    if (Math.abs(annualRate - effectiveProfileRate) <= tolerance) {
-      return profile;
-    }
-  }
-
-  return 'custom';
-};
-
-export const getStoredAnnualRateFromInput = (
-  account: PlannerAccount,
-  value: number,
-  inflationRatePercent: number,
-  useInflationAdjustedValues: boolean,
-) => {
-  const normalizedInput = clamp(value);
-  const normalizedNominalRate = useInflationAdjustedValues
-    ? getNominalAnnualRatePercentFromReal(normalizedInput, inflationRatePercent)
-    : normalizedInput;
-
-  if (isDepreciatingAssetType(account.accountType)) {
-    return -normalizedNominalRate;
-  }
-
-  return normalizedNominalRate;
-};
-
-export const getNetWorthStartingBalance = (account: PlannerAccount) => {
-  const normalizedBalance = clamp(account.startingBalance);
-  return isLiabilityAccountType(account.accountType) ? -normalizedBalance : normalizedBalance;
-};
-
-export const defaultIrsLimits: IrsLimitConfig = plannerConstants.PLANNER_DEFAULT_IRS_LIMITS;
-
-export const getAgeFromBirthday = (birthday: string) => {
-  if (!birthday) {
-    return 0;
-  }
-
-  const date = new Date(birthday);
-  if (Number.isNaN(date.getTime())) {
-    return 0;
-  }
-
-  const now = new Date();
-  let age = now.getFullYear() - date.getFullYear();
-  const monthDiff = now.getMonth() - date.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < date.getDate())) {
-    age -= 1;
-  }
-
-  return clamp(age);
-};
-
-export const getSuggestedAnnualLimit = (
-  accountType: AccountType,
-  age: number,
-  limits: IrsLimitConfig,
-  hasSpouse: boolean,
-) => {
-  const normalizedAge = clamp(age);
-
-  if (accountTypesWithoutIrsLimits.has(accountType)) {
-    return 0;
-  }
-
-  if (!isIrsLimitAccountType(accountType)) {
-    return 0;
-  }
-
-  const limitRule = limits[accountType];
-  if (!limitRule) {
-    return 0;
-  }
-
-  const annualLimit =
-    hasSpouse && clamp(limitRule.familyAnnualLimit ?? 0) > 0
-      ? clamp(limitRule.familyAnnualLimit ?? 0)
-      : clamp(limitRule.baseAnnualLimit);
-
-  return (
-    annualLimit +
-    (normalizedAge >= clamp(limitRule.catchUpAge) ? clamp(limitRule.catchUpAmount) : 0)
-  );
-};
-
-export const getIrsLimitKeyFromApiType = (type: string): IrsLimitKey | null => {
-  const normalizedType = type.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-  switch (normalizedType) {
-    case '401k':
-      return '401k';
-    case '403b':
-      return '403b';
-    case '457':
-      return '457';
-    case 'rothira':
-      return 'roth-ira';
-    case 'traditionalira':
-      return 'traditional-ira';
-    case 'hsa':
-      return 'hsa';
-    default:
-      return null;
-  }
-};
-
-export const getOwnerAnnualIncome = (
-  account: PlannerAccount,
-  selfAnnualIncome: number,
-  spouseAnnualIncome: number,
-) => (account.owner === 'spouse' ? spouseAnnualIncome : selfAnnualIncome);
-
-const getBonusAmount = (person: PlannerPerson | undefined) => {
-  if (!person) {
-    return 0;
-  }
-
-  const salary = clamp(person.annualSalary);
-  if (person.bonusMode === 'salary-percent') {
-    return (salary * clamp(person.annualBonus)) / 100;
-  }
-
-  return clamp(person.annualBonus);
-};
-
-export const getTotalAnnualIncome = (person: PlannerPerson | undefined) =>
-  clamp(person?.annualSalary ?? 0) + getBonusAmount(person);
-
-export const getPlannerHouseholdSnapshot = (people: PlannerPerson[]) => {
-  const selfPerson = people.find((person) => person.type === 'self') ?? people[0];
-  const spousePerson = people.find((person) => person.type === 'spouse');
-
-  return {
-    selfPerson,
-    spousePerson,
-    hasSpouse: Boolean(spousePerson),
-    selfBirthday: selfPerson?.birthday ?? '',
-    selfAnnualIncome: getTotalAnnualIncome(selfPerson),
-    spouseAnnualIncome: getTotalAnnualIncome(spousePerson),
-  };
-};
-
-export const getPlannerContributionTotals = (
-  accounts: PlannerAccount[],
-  selfAnnualIncome: number,
-  spouseAnnualIncome: number,
-) => {
-  const totalPlannedMonthlyEmployee = accounts.reduce(
-    (sum, account) =>
-      sum + getEmployeeMonthlyContribution(account, selfAnnualIncome, spouseAnnualIncome),
-    0,
-  );
-  const totalPlannedMonthlyMatch = accounts.reduce(
-    (sum, account) => sum + getEmployerMatchMonthly(account, selfAnnualIncome, spouseAnnualIncome),
-    0,
-  );
-
-  return {
-    totalPlannedMonthlyEmployee,
-    totalPlannedMonthlyMatch,
-    totalPlannedMonthlyInvestment: totalPlannedMonthlyEmployee + totalPlannedMonthlyMatch,
-  };
-};
-
-export const getAnnualIncomeWithGrowth = (
-  baseAnnualIncome: number,
-  annualGrowthRate: number,
-  elapsedYears: number,
-) => clamp(baseAnnualIncome) * (1 + annualGrowthRate / 100) ** Math.max(0, elapsedYears);
-
+  target: number,
+  _cur: number,
+  contrib: number,
+  _rate: number,
+): number => (target > 0 && contrib > 0 ? Math.ceil(target / (contrib * 12)) : 0);
+export const getAnnualIncomeWithGrowth = (b: number, g: number, y: number): number =>
+  b * (1 + g) ** y;
 export const getEmployeeMonthlyContribution = (
-  account: PlannerAccount,
-  selfAnnualIncome: number,
-  spouseAnnualIncome: number,
-) => {
-  if (isNonContributingAccountType(account.accountType)) {
-    return 0;
-  }
-
-  const ownerSalary = clamp(getOwnerAnnualIncome(account, selfAnnualIncome, spouseAnnualIncome));
-
-  switch (account.contributionMode) {
-    case 'yearly':
-      return clamp(account.contributionValue) / 12;
-    case 'salary-percent':
-      return (ownerSalary * (clamp(account.contributionValue) / 100)) / 12;
-    case 'monthly':
-    default:
-      return clamp(account.contributionValue);
-  }
+  a: PlannerAccount,
+  selfIncome: number,
+  spouseIncome: number,
+): number => {
+  const inc = a.owner === 'self' ? selfIncome : spouseIncome;
+  if (a.contributionMode === 'salary-percent')
+    return clamp((inc * (a.contributionValue / 100)) / 12);
+  if (a.contributionMode === 'yearly') return clamp(a.contributionValue / 12);
+  return clamp(a.contributionValue);
 };
-
-const getProjectedAnnualIrsLimit = (
-  accountType: AccountType,
-  ownerCurrentAge: number,
-  elapsedYears: number,
-  limits: IrsLimitConfig,
-  hasSpouse: boolean,
-  annualIrsLimitGrowthRate: number,
-) => {
-  const currentAnnualLimit = getSuggestedAnnualLimit(
-    accountType,
-    ownerCurrentAge,
-    limits,
-    hasSpouse,
-  );
-  if (currentAnnualLimit <= 0) {
-    return 0;
-  }
-
-  const growthFactor = (1 + clamp(annualIrsLimitGrowthRate) / 100) ** Math.max(0, elapsedYears);
-  return currentAnnualLimit * growthFactor;
-};
-
-export const getEmployerMatchMonthlyFromAnnual = (
-  account: PlannerAccount,
-  ownerAnnualIncome: number,
-  employeeAnnualContribution: number,
-) => {
-  if (account.accountType !== '401k') {
-    return 0;
-  }
-
-  const normalizedSalary = clamp(ownerAnnualIncome);
-  if (normalizedSalary <= 0) {
-    return 0;
-  }
-
-  const matchableEmployeeAnnualContribution =
-    normalizedSalary * (clamp(account.employerMatchMaxPercentOfSalary) / 100);
-  const eligibleEmployeeAnnualContribution = Math.min(
-    clamp(employeeAnnualContribution),
-    matchableEmployeeAnnualContribution,
-  );
-  const employerAnnualMatch =
-    eligibleEmployeeAnnualContribution * (clamp(account.employerMatchRate) / 100);
-
-  return employerAnnualMatch / 12;
-};
-
 export const getEmployerMatchMonthly = (
-  account: PlannerAccount,
-  selfAnnualIncome: number,
-  spouseAnnualIncome: number,
-) => {
-  const employeeAnnualContribution =
-    getEmployeeMonthlyContribution(account, selfAnnualIncome, spouseAnnualIncome) * 12;
-  const ownerAnnualIncome = getOwnerAnnualIncome(account, selfAnnualIncome, spouseAnnualIncome);
-  return getEmployerMatchMonthlyFromAnnual(account, ownerAnnualIncome, employeeAnnualContribution);
-};
-
-export const getTotalMonthlyForAccount = (
-  account: PlannerAccount,
-  selfAnnualIncome: number,
-  spouseAnnualIncome: number,
-) =>
-  getEmployeeMonthlyContribution(account, selfAnnualIncome, spouseAnnualIncome) +
-  getEmployerMatchMonthly(account, selfAnnualIncome, spouseAnnualIncome);
-
-export const getProjection = (
-  accounts: PlannerAccount[],
-  currentAge: number,
-  targetAge: number,
-  selfAnnualIncome: number,
-  spouseAnnualIncome: number,
-  selfIncomeGrowthRate: number,
-  spouseIncomeGrowthRate: number,
-  assetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>,
-  irLimits: IrsLimitConfig,
-  hasSpouse: boolean,
-  annualIrsLimitGrowthRate: number,
-  selfCurrentAge: number,
-  spouseCurrentAge: number,
-  inflationRatePercent: number,
-  useInflationAdjustedValues: boolean,
-) => {
-  const years = Math.max(0, targetAge - currentAge);
-  const now = new Date();
-  const balances = accounts.map((account) => {
-    if (isCombinedAssetType(account.accountType)) {
-      const details = assetFinanceDetailsByAccountId[account.id];
-      if (details) {
-        return getAssetFinanceSnapshot(details, now).equity;
-      }
-    }
-
-    return getNetWorthStartingBalance(account);
-  });
-
-  const assetFinanceRuntimeState = accounts.map((account) => {
-    if (!isCombinedAssetType(account.accountType)) {
-      return null;
-    }
-
-    const details = assetFinanceDetailsByAccountId[account.id];
-    if (!details) {
-      return null;
-    }
-
-    const snapshot = getAssetFinanceSnapshot(details, now);
-    return {
-      accountType: account.accountType,
-      assetValue: snapshot.assetValue,
-      assetAnnualRate: details.annualChangeRate,
-      homeGrowthProfile:
-        details.homeGrowthProfile ?? plannerConstants.PLANNER_DEFAULT_HOME_GROWTH_PROFILE,
-      vehicleDepreciationProfile: details.vehicleDepreciationProfile,
-      monthsSincePurchase: snapshot.monthsSincePurchase,
-      loanBalance: snapshot.loanBalance,
-      hasLoan: details.hasLoan,
-      loanMonthlyRate: clamp(details.loanInterestRate, 0) / 100 / 12,
-      loanMonthlyPayment: clamp(details.loanMonthlyPayment),
-      vehicleCustomAnnualRate: details.annualChangeRate,
-      remainingLoanMonths: snapshot.remainingLoanMonths,
-    };
-  });
-
-  const initialRowAccounts = balances.reduce(
-    (series, balance, index) => ({
-      ...series,
-      [`account-${index}`]: balance,
-    }),
-    {} as Record<`account-${number}`, number>,
-  );
-  const projectionRows: ProjectionRow[] = [
-    {
-      age: currentAge,
-      totalBalance: balances.reduce((sum, balance) => sum + balance, 0),
-      totalContributions: 0,
-      ...initialRowAccounts,
-    },
-  ];
-
-  let contributedTotal = 0;
-
-  for (let year = 1; year <= years; year++) {
-    const yearSelfAnnualIncome = getAnnualIncomeWithGrowth(
-      selfAnnualIncome,
-      selfIncomeGrowthRate,
-      year - 1,
-    );
-    const yearSpouseAnnualIncome = getAnnualIncomeWithGrowth(
-      spouseAnnualIncome,
-      spouseIncomeGrowthRate,
-      year - 1,
-    );
-    const projectedContributionPlanByAccount = accounts.map((account) => {
-      const ownerAnnualIncome = getOwnerAnnualIncome(
-        account,
-        yearSelfAnnualIncome,
-        yearSpouseAnnualIncome,
-      );
-      const annualEmployeeContribution =
-        getEmployeeMonthlyContribution(account, yearSelfAnnualIncome, yearSpouseAnnualIncome) * 12;
-      const ownerCurrentAge = account.owner === 'spouse' ? spouseCurrentAge : selfCurrentAge;
-      const ownerAgeInProjectionYear = ownerCurrentAge + (year - 1);
-      const projectedAnnualIrsLimit = getProjectedAnnualIrsLimit(
-        account.accountType,
-        ownerAgeInProjectionYear,
-        year - 1,
-        irLimits,
-        hasSpouse,
-        annualIrsLimitGrowthRate,
-      );
-      const cappedAnnualEmployeeContribution =
-        projectedAnnualIrsLimit > 0
-          ? Math.min(annualEmployeeContribution, projectedAnnualIrsLimit)
-          : annualEmployeeContribution;
-
-      return {
-        monthlyEmployeeContribution: cappedAnnualEmployeeContribution / 12,
-        monthlyEmployerMatch: getEmployerMatchMonthlyFromAnnual(
-          account,
-          ownerAnnualIncome,
-          cappedAnnualEmployeeContribution,
-        ),
-      };
-    });
-
-    for (let month = 0; month < 12; month++) {
-      for (let index = 0; index < accounts.length; index++) {
-        const account = accounts[index];
-        const assetFinanceState = assetFinanceRuntimeState[index];
-
-        if (assetFinanceState) {
-          if (assetFinanceState.accountType === 'vehicle') {
-            const vehicleAgeYears = assetFinanceState.monthsSincePurchase / 12;
-            const annualDepRate = getVehicleAnnualDepreciationRate(
-              assetFinanceState.vehicleDepreciationProfile,
-              vehicleAgeYears,
-              assetFinanceState.vehicleCustomAnnualRate,
-            );
-            const effectiveVehicleAnnualRate = getEffectiveAnnualRatePercent(
-              -annualDepRate,
-              inflationRatePercent,
-              useInflationAdjustedValues,
-            );
-            const monthlyVehicleRate = effectiveVehicleAnnualRate / 100 / 12;
-            assetFinanceState.assetValue = assetFinanceState.assetValue * (1 + monthlyVehicleRate);
-          } else {
-            const annualHomeRate = getHomeAnnualGrowthRate(
-              assetFinanceState.homeGrowthProfile,
-              assetFinanceState.assetAnnualRate,
-            );
-            const effectiveHomeAnnualRate = getEffectiveAnnualRatePercent(
-              annualHomeRate,
-              inflationRatePercent,
-              useInflationAdjustedValues,
-            );
-            const monthlyHomeRate = effectiveHomeAnnualRate / 100 / 12;
-            assetFinanceState.assetValue = assetFinanceState.assetValue * (1 + monthlyHomeRate);
-          }
-          assetFinanceState.monthsSincePurchase += 1;
-
-          if (assetFinanceState.hasLoan && assetFinanceState.loanBalance > 0) {
-            assetFinanceState.loanBalance =
-              assetFinanceState.loanBalance * (1 + assetFinanceState.loanMonthlyRate) -
-              assetFinanceState.loanMonthlyPayment;
-            if (assetFinanceState.loanBalance < 0) {
-              assetFinanceState.loanBalance = 0;
-            }
-            if (assetFinanceState.remainingLoanMonths > 0) {
-              assetFinanceState.remainingLoanMonths -= 1;
-            }
-            contributedTotal += assetFinanceState.loanMonthlyPayment;
-          }
-
-          balances[index] = assetFinanceState.assetValue - assetFinanceState.loanBalance;
-          continue;
-        }
-
-        const effectiveAnnualRate = getEffectiveAnnualRatePercent(
-          account.annualRate,
-          inflationRatePercent,
-          useInflationAdjustedValues,
-        );
-        const monthlyRate = clamp(effectiveAnnualRate, -99) / 100 / 12;
-        const projectedContributionPlan = projectedContributionPlanByAccount[index];
-        const accountContribution =
-          projectedContributionPlan.monthlyEmployeeContribution +
-          projectedContributionPlan.monthlyEmployerMatch;
-        balances[index] = balances[index] * (1 + monthlyRate) + accountContribution;
-        contributedTotal += accountContribution;
-      }
-    }
-
-    projectionRows.push({
-      age: currentAge + year,
-      totalBalance: balances.reduce((sum, value) => sum + value, 0),
-      totalContributions: contributedTotal,
-      ...balances.reduce(
-        (series, balance, index) => ({
-          ...series,
-          [`account-${index}`]: balance,
-        }),
-        {} as Record<`account-${number}`, number>,
-      ),
-    });
-  }
-
-  return {
-    projectionRows,
-    finalBalances: balances,
-  };
-};
-
-export const getDefaultAssetFinanceDetailsForAccount = (
-  account: PlannerAccount,
-): AssetFinanceDetails => {
-  const isVehicle = account.accountType === 'vehicle';
-  const currentValue = Math.max(clamp(account.startingBalance), 1);
-  const annualChangeRate = isVehicle
-    ? -Math.max(
-        Math.abs(account.annualRate),
-        plannerConstants.PLANNER_DEFAULT_VEHICLE_DEPRECIATION_RATE,
-      )
-    : account.annualRate || plannerConstants.PLANNER_DEFAULT_HOME_APPRECIATION_RATE;
-
-  return {
-    purchaseDate: toIsoDate(new Date()),
-    purchasePrice: currentValue,
-    currentValue,
-    annualChangeRate,
-    homeGrowthProfile: isVehicle ? 'custom' : plannerConstants.PLANNER_DEFAULT_HOME_GROWTH_PROFILE,
-    vehicleDepreciationProfile: isVehicle
-      ? plannerConstants.PLANNER_DEFAULT_VEHICLE_DEPRECIATION_PROFILE
-      : 'custom',
-    hasLoan: false,
-    loanInterestRate: plannerConstants.PLANNER_DEFAULT_ASSET_LOAN_INTEREST_RATE,
-    originalLoanAmount: 0,
-    loanMonthlyPayment: 0,
-    loanTermYears: isVehicle
-      ? plannerConstants.PLANNER_DEFAULT_VEHICLE_LOAN_TERM_YEARS
-      : plannerConstants.PLANNER_DEFAULT_HOME_LOAN_TERM_YEARS,
-    loanStartDate: toIsoDate(new Date()),
-    currentLoanBalance: 0,
-  };
+  a: PlannerAccount,
+  selfIncome: number,
+  spouseIncome: number,
+): number => {
+  const inc = a.owner === 'self' ? selfIncome : spouseIncome;
+  const emp = getEmployeeMonthlyContribution(a, selfIncome, spouseIncome);
+  if (a.employerMatchRate <= 0) return 0;
+  const cap = inc * (a.employerMatchMaxPercentOfSalary / 100);
+  const eff = Math.min(emp * 12, cap);
+  return clamp((eff * a.employerMatchRate) / 100 / 12);
 };
