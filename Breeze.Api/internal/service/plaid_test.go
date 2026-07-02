@@ -7,6 +7,7 @@ import (
 
 	"breeze.api/internal/db/sqlc"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
@@ -127,4 +128,17 @@ func TestSyncAccountsUpserts(t *testing.T) {
 	assert.NoError(t, err)
 	// dev client returns 2 accounts
 	assert.Equal(t, 2, len(upserted))
+}
+
+func TestSyncAccountsReturnsNotFoundForMissingConnection(t *testing.T) {
+	ctx := context.Background()
+	mock := &mockPlaidQuerier{
+		getPlaidConnectionByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.PlaidConnection, error) {
+			return sqlc.PlaidConnection{}, pgx.ErrNoRows
+		},
+	}
+
+	svc := NewPlaidService(mock, nil, NewDevPlaidClient())
+	err := svc.SyncAccounts(ctx, uuid.New())
+	assert.ErrorIs(t, err, ErrNotFound)
 }

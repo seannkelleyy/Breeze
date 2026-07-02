@@ -47,6 +47,11 @@ type plaidQuerier interface {
 	SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error)
 }
 
+type plaidTxQuerier interface {
+	plaidQuerier
+	WithTx(tx pgx.Tx) *sqlc.Queries
+}
+
 func NewPlaidService(queries plaidQuerier, pool *pgxpool.Pool, client PlaidClient) *PlaidService {
 	return &PlaidService{queries: queries, pool: pool, client: client}
 }
@@ -128,16 +133,74 @@ func (s *PlaidService) ListAccountsByConnectionID(ctx context.Context, connectio
 func (s *PlaidService) SyncAccounts(ctx context.Context, connectionID uuid.UUID) error {
 	conn, err := s.queries.GetPlaidConnectionByID(ctx, connectionID)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
 		return fmt.Errorf("get plaid connection: %w", err)
 	}
 
-	// call external Plaid client
 	accounts, err := s.client.FetchAccounts(ctx, conn.AccessToken)
 	if err != nil {
 		return fmt.Errorf("fetch accounts: %w", err)
 	}
 
-	// Upsert each account
+	if s.pool == nil {
+		for _, a := range accounts {
+			var balance decimal.Decimal
+			if a.CurrentBalance != nil {
+				balance = *a.CurrentBalance
+			} else {
+				balance = decimal.MustParse("0")
+			}
+
+			numeric, err := decimalToPGNumeric(&balance)
+			if err != nil {
+				return fmt.Errorf("convert balance: %w", err)
+			}
+
+			_, err = s.queries.UpsertPlaidAccount(ctx, sqlc.UpsertPlaidAccountParams{
+				PlaidConnectionID: conn.ID,
+				ExternalID:        a.ExternalID,
+				Name:              a.Name,
+				OfficialName:      a.OfficialName,
+				Type:              a.Type,
+				Subtype:           a.Subtype,
+				CurrentBalance:    numeric,
+				IsoCurrencyCode:   a.ISOCurrencyCode,
+			})
+			if err != nil {
+				return fmt.Errorf("upsert plaid account: %w", err)
+			}
+		}
+
+		_, err = s.queries.UpdatePlaidConnection(ctx, sqlc.UpdatePlaidConnectionParams{
+			ID:              conn.ID,
+			InstitutionID:   conn.InstitutionID,
+			InstitutionName: conn.InstitutionName,
+			AccessToken:     conn.AccessToken,
+			ItemID:          conn.ItemID,
+		})
+		if err != nil {
+			return fmt.Errorf("refresh plaid connection timestamp: %w", err)
+		}
+
+		return nil
+	}
+
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("begin transaction: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
+	txQueries, ok := s.queries.(plaidTxQuerier)
+	if !ok {
+		return fmt.Errorf("plaid queries do not support transactions")
+	}
+
+	q := txQueries.WithTx(tx)
 	for _, a := range accounts {
 		var balance decimal.Decimal
 		if a.CurrentBalance != nil {
@@ -151,7 +214,7 @@ func (s *PlaidService) SyncAccounts(ctx context.Context, connectionID uuid.UUID)
 			return fmt.Errorf("convert balance: %w", err)
 		}
 
-		_, err = s.queries.UpsertPlaidAccount(ctx, sqlc.UpsertPlaidAccountParams{
+		_, err = q.UpsertPlaidAccount(ctx, sqlc.UpsertPlaidAccountParams{
 			PlaidConnectionID: conn.ID,
 			ExternalID:        a.ExternalID,
 			Name:              a.Name,
@@ -166,8 +229,7 @@ func (s *PlaidService) SyncAccounts(ctx context.Context, connectionID uuid.UUID)
 		}
 	}
 
-	// update connection updated_at
-	_, err = s.queries.UpdatePlaidConnection(ctx, sqlc.UpdatePlaidConnectionParams{
+	_, err = q.UpdatePlaidConnection(ctx, sqlc.UpdatePlaidConnectionParams{
 		ID:              conn.ID,
 		InstitutionID:   conn.InstitutionID,
 		InstitutionName: conn.InstitutionName,
@@ -176,6 +238,10 @@ func (s *PlaidService) SyncAccounts(ctx context.Context, connectionID uuid.UUID)
 	})
 	if err != nil {
 		return fmt.Errorf("refresh plaid connection timestamp: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("commit transaction: %w", err)
 	}
 
 	return nil

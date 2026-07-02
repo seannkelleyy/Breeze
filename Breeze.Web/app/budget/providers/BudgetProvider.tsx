@@ -35,6 +35,7 @@ const BudgetDataProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   });
   const { data: expenses = [], refetch: refetchExpenses } = useFetchExpensesForBudget({
     budgetId: budget?.id,
+    enabled: !!budget.id,
   });
 
   const totalSpent = useMemo(

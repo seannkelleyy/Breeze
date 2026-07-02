@@ -10,7 +10,7 @@ All schema changes go in `db/schema.hcl`. After editing, run:
 
 ```bash
 make migrate-diff   # generates migration file
-make migrate-apply  # applies to local DB
+make migrate        # applies to local DB
 make gen            # regenerates sqlc types
 ```
 

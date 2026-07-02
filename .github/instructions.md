@@ -3,6 +3,8 @@
 This is the single authoritative guide for AI agents working on Breeze.
 **Start here before reading any other doc.**
 
+For full documentation navigation and workflow entry points, use `.github/docs/README.md`.
+
 ## Repository Layout
 
 ```
@@ -22,7 +24,7 @@ breeze/
     ├── copilot-instructions.md    # Agent-facing quick ref
     ├── instructions.md            # This file — master agent guide
     └── docs/
-        ├── api/go/               # Numbered reference docs (01-12)
+        ├── api/                  # Numbered API reference docs
         ├── api/*.instructions.md  # Scoped API rules (applyTo)
         └── ui/*.instructions.md   # Web app checklists + spec docs
 ```
@@ -130,40 +132,40 @@ npm run dev
 
 ## 📚 Reference Docs
 
-
+Primary index: [`docs/README.md`](docs/README.md)
 
 ### API (`docs/api/`)
 | # | File | What it covers |
 |---|---|---|
-| 1 | [`api/01-stack.md`](api/01-stack.md) | Go, gqlgen, sqlc, Atlas — toolset and rationale |
-| 2 | [`api/02-project-structure.md`](api/02-project-structure.md) | Directory tree, import rules, generated code boundaries |
-| 3 | [`api/03-architecture.md`](api/03-architecture.md) | Three-layer rule, transactions, DataLoaders, auth, error handling |
-| 4 | [`api/04-dev-workflow.md`](api/04-dev-workflow.md) | Makefile, commands, testing, config files |
-| 5 | [`api/05-quick-reference.md`](api/05-quick-reference.md) | Naming, decimal cheatsheet, context helpers, domain rules |
-| 6 | [`api/06-vertical-slice.md`](api/06-vertical-slice.md) | End-to-end playbook for adding a new backend slice |
-| 7 | [`api/07-testing.md`](api/07-testing.md) | Test patterns: mock structure, happy path, error paths |
+| 1 | [`api/01-stack.md`](docs/api/01-stack.md) | Go, gqlgen, sqlc, Atlas — toolset and rationale |
+| 2 | [`api/02-project-structure.md`](docs/api/02-project-structure.md) | Directory tree, import rules, generated code boundaries |
+| 3 | [`api/03-architecture.md`](docs/api/03-architecture.md) | Three-layer rule, transactions, DataLoaders, auth, error handling |
+| 4 | [`api/04-dev-workflow.md`](docs/api/04-dev-workflow.md) | Makefile, commands, testing, config files |
+| 5 | [`api/05-quick-reference.md`](docs/api/05-quick-reference.md) | Naming, decimal cheatsheet, context helpers, domain rules |
+| 6 | [`api/06-vertical-slice.md`](docs/api/06-vertical-slice.md) | End-to-end playbook for adding a new backend slice |
+| 7 | [`api/07-testing.md`](docs/api/07-testing.md) | Test patterns: mock structure, happy path, error paths |
 
 ### DB (`docs/db/`)
 | # | File | What it covers |
 |---|---|---|
-| 1 | [`db/01-schema-conventions.md`](db/01-schema-conventions.md) | All table schemas, column types, indexes, constraints |
+| 1 | [`db/01-schema-conventions.md`](docs/db/01-schema-conventions.md) | All table schemas, column types, indexes, constraints |
 
 ### UI (`docs/ui/`)
 | # | File | What it covers |
 |---|---|---|
-| 1 | [`ui/01-stack.md`](ui/01-stack.md) | Next.js, TanStack Query, shadcn — stack and patterns |
+| 1 | [`ui/01-stack.md`](docs/ui/01-stack.md) | Next.js, TanStack Query, shadcn — stack and patterns |
 
 ### Product (`docs/product/`)
 | # | File | What it covers |
 |---|---|---|
-| 1 | [`product/01-vision.md`](product/01-vision.md) | Product vision, positioning, build order |
-| 2 | [`product/02-business-model.md`](product/02-business-model.md) | Pricing, GTM strategy, competitive landscape |
-| 3 | [`product/03-next-slices.md`](product/03-next-slices.md) | Prioritized build order + definition of done |
+| 1 | [`product/01-vision.md`](docs/product/01-vision.md) | Product vision, positioning, build order |
+| 2 | [`product/02-business-model.md`](docs/product/02-business-model.md) | Pricing, GTM strategy, competitive landscape |
+| 3 | [`product/03-next-slices.md`](docs/product/03-next-slices.md) | Prioritized build order + definition of done |
 
 ### Deployment (`docs/deployment/`)
 | # | File | What it covers |
 |---|---|---|
-| 1 | [`deployment/01-hosting.md`](deployment/01-hosting.md) | Hosting options, Docker, CI/CD |
+| 1 | [`deployment/01-hosting.md`](docs/deployment/01-hosting.md) | Hosting options, Docker, CI/CD |
 
 ### Scoped Agent Rules (`.github/docs/`)
 | File | Scope | Use for |
@@ -171,6 +173,9 @@ npm run dev
 | [`resolvers.instructions.md`](docs/api/resolvers.instructions.md) | `graph/**` | Resolver patterns, error mapping, DataLoaders |
 | [`schema.instructions.md`](docs/api/schema.instructions.md) | `db/**` | Atlas schema conventions, sqlc query rules |
 | [`services.instructions.md`](docs/api/services.instructions.md) | `internal/service/**` | Service structure, transactions, auth, projections |
+| [`hooks.instructions.md`](docs/ui/hooks.instructions.md) | `app/planner/hooks/**` | React Query hook conventions in planner module |
+| [`components.instructions.md`](docs/ui/components.instructions.md) | `app/planner/components/**` | Planner component conventions and UI patterns |
+| [`budget.instructions.md`](docs/ui/budget.instructions.md) | `app/budget/**` | Budget module hook/provider/component conventions |
 
 ---
 
@@ -183,15 +188,15 @@ Docs are read by every agent on every task. Stale docs cause bad code. When you 
 
 | If you change... | Update this doc |
 |---|---|
-| **Project structure** (new directories, new key files) | [`api/02-project-structure.md`](api/02-project-structure.md) — directory tree |
-| **Makefile targets, build commands, test setup** | [`api/04-dev-workflow.md`](api/04-dev-workflow.md) — Makefile, testing |
-| **Domain rules, naming conventions, decimal patterns** | [`api/05-quick-reference.md`](api/05-quick-reference.md) — cheatsheets, rules |
-| **Schema conventions** (new column type, new constraint pattern) | [`db/01-schema-conventions.md`](db/01-schema-conventions.md) — table defs, conventions |
-| **Frontend stack, data fetching, component patterns** | [`ui/01-stack.md`](ui/01-stack.md) — stack, patterns, conventions |
+| **Project structure** (new directories, new key files) | [`api/02-project-structure.md`](docs/api/02-project-structure.md) — directory tree |
+| **Makefile targets, build commands, test setup** | [`api/04-dev-workflow.md`](docs/api/04-dev-workflow.md) — Makefile, testing |
+| **Domain rules, naming conventions, decimal patterns** | [`api/05-quick-reference.md`](docs/api/05-quick-reference.md) — cheatsheets, rules |
+| **Schema conventions** (new column type, new constraint pattern) | [`db/01-schema-conventions.md`](docs/db/01-schema-conventions.md) — table defs, conventions |
+| **Frontend stack, data fetching, component patterns** | [`ui/01-stack.md`](docs/ui/01-stack.md) — stack, patterns, conventions |
 | **Scoped `.instructions.md` rules** | The matching file in `api/` or `ui/` — update the code examples |
 | **Product vision, build order, business model** | `product/01-vision.md`, `product/02-business-model.md`, `product/03-next-slices.md` |
-| **Test patterns** (mock structure, new testing approach) | [`api/07-testing.md`](api/07-testing.md) — patterns, examples |
-| **The vertical slice process** (new file types in the pipeline) | [`api/06-vertical-slice.md`](api/06-vertical-slice.md) — playbook |
+| **Test patterns** (mock structure, new testing approach) | [`api/07-testing.md`](docs/api/07-testing.md) — patterns, examples |
+| **The vertical slice process** (new file types in the pipeline) | [`api/06-vertical-slice.md`](docs/api/06-vertical-slice.md) — playbook |
 | **Anything else** | If it's a pattern another agent would benefit from, add a sentence or example to the most relevant doc. A one-line addition is better than a stale doc. |
 
 **Rule of thumb:** if you had to read a doc to write your code, update that doc with what you learned.
@@ -204,7 +209,7 @@ Docs are read by every agent on every task. Stale docs cause bad code. When you 
 | **Add a new enum value** | `schema.hcl` → migration (RENAME + CREATE NEW + MIGRATE + DROP OLD) → `make migrate` → `make gen` → frontend `typeMapping.ts` → frontend component |
 | **Add a new GraphQL query** | `graph/schema.graphqls` → `make gen` → implement resolver stub in `graph/schema.resolvers.go` → helper in `graph/*_helpers.go` → frontend query definition → TanStack Query hook |
 | **Add a new GraphQL mutation** | `graph/schema.graphqls` → `make gen` → implement resolver stub → service method → sqlc query (if needed) → frontend mutation hook → UI save flow |
-| **Add a new table (full slice)** | Follow the [vertical slice playbook](api/06-vertical-slice.md) |
+| **Add a new table (full slice)** | Follow the [vertical slice playbook](docs/api/06-vertical-slice.md) |
 | **Fix an Atlas checksum error** | `cd breeze.api && export $(cat .env \| xargs) && atlas migrate hash --env local` |
 | **Add columns that already exist in the DB** | Migration must use `ADD COLUMN IF NOT EXISTS` with reasonable defaults — see `20260627133813_add_asset_liability_fields.sql` for an example |
 | **Rename a migration value** | Change the migration SQL directly, then re-hash. Do not write adapter code |
@@ -214,7 +219,7 @@ Docs are read by every agent on every task. Stale docs cause bad code. When you 
 ## 📋 Full Slice Checklist
 
 ### Adding a new API slice (backend)
-Follow the [vertical slice playbook](api/06-vertical-slice.md):
+Follow the [vertical slice playbook](docs/api/06-vertical-slice.md):
 1. Edit `db/schema.hcl` → `make migrate-diff`
 2. Add sqlc queries in `db/queries/*.sql`
 3. `make gen`

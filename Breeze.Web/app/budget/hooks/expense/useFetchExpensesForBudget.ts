@@ -7,19 +7,20 @@ import { useExpenses } from './index';
 
 interface FetchExpensesForBudgetProps {
   budgetId: string;
+  enabled?: boolean;
 }
 
 /**
  * A hook for fetching expenses.
  * @param props.budget: The category to fetch expenses from.
  */
-const useFetchExpensesForBudget = ({ budgetId }: FetchExpensesForBudgetProps) => {
+const useFetchExpensesForBudget = ({ budgetId, enabled }: FetchExpensesForBudgetProps) => {
   const { getExpensesForBudget } = useExpenses();
 
   const fetchExpenses = useCallback(() => {
-    if (!budgetId) return [];
+    if (!enabled) return [];
     return getExpensesForBudget(budgetId);
-  }, [getExpensesForBudget, budgetId]);
+  }, [getExpensesForBudget, budgetId, enabled]);
 
   return useQuery<Expense[], Error>({
     queryKey: ['expensesBudget', budgetId],
@@ -27,6 +28,7 @@ const useFetchExpensesForBudget = ({ budgetId }: FetchExpensesForBudgetProps) =>
     refetchInterval: 180 * 1000,
     retryDelay: 1 * 1000,
     retry: 3,
+    enabled,
   });
 };
 

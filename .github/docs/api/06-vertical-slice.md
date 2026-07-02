@@ -1,4 +1,4 @@
-# 11 — Vertical Slice Whole-Stack Playbook
+# 06 — Vertical Slice Whole-Stack Playbook
 
 This guide is the generic, reusable process for adding a new backend slice in this repo.
 

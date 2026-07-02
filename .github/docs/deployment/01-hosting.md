@@ -1,4 +1,4 @@
-# 06 — Deployment & Hosting
+# 01 — Deployment & Hosting
 
 ## The Binary Advantage
 

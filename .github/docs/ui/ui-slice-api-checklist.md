@@ -15,8 +15,8 @@ Goal:
 - Use lib/services/useGraphql.ts for GraphQL request/response handling.
 
 2. Shared API-user bootstrap
-- Use lib/services/useApiUserBootstrap.ts to resolve/create backend user.
-- Do not duplicate createUser/me bootstrap logic inside domain hooks.
+- Use `lib/providers/CurrentUserProvider.tsx` as the source of authenticated user context.
+- Do not duplicate user bootstrap logic inside domain hooks.
 
 3. Domain API service hook
 - Create app/<module>/hooks/<slice>/use<Slice>Api.ts.
@@ -43,7 +43,7 @@ Goal:
 - [ ] Add/extend use<Slice>Api.ts with slice-only operations
 - [ ] Add fetch hook with useQuery and stable queryKey
 - [ ] Add mutation hooks with useMutation and query invalidation
-- [ ] Resolve backend user via useApiUserBootstrap where user_id is required
+- [ ] Resolve authenticated user context via CurrentUserProvider where user_id is required
 - [ ] Add UI component for list/create/update/delete flow
 - [ ] Gate behavior for signed-out state
 - [ ] Validate decimal string input formatting before mutation calls
@@ -64,19 +64,17 @@ Goal:
 
 Reference implementation:
 
-- app/planner/hooks/assets/useAssetsApi.ts
-- app/planner/hooks/assets/useApiUser.ts
-- app/planner/hooks/assets/useFetchAssets.ts
-- app/planner/hooks/assets/useCreateAsset.ts
-- app/planner/hooks/assets/useUpdateAsset.ts
-- app/planner/hooks/assets/useDeleteAsset.ts
-- app/planner/components/ApiAssetsCard.tsx
+- app/planner/hooks/planner/useFetchPlanner.ts
+- app/planner/hooks/planner/usePlannerAccounts.ts
+- app/planner/hooks/planner/useAccountMutations.ts
+- app/planner/hooks/planner/usePlanner.ts
+- app/planner/components/AccountsCard.tsx
 - lib/services/useGraphql.ts
-- lib/services/useApiUserBootstrap.ts
+- lib/providers/CurrentUserProvider.tsx
 
 ## Common Pitfalls
 
-- Mixing API-user bootstrap into each domain hook.
+- Mixing user bootstrap into each domain hook instead of using CurrentUserProvider.
 - Querying all users client-side when me is sufficient.
 - Using numbers for money/rates instead of strings over API.
 - Forgetting query invalidation after create/update/delete.

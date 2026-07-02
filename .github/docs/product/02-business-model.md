@@ -1,4 +1,4 @@
-# 09 — Product & Business Model
+# 02 — Product & Business Model
 
 ## Pricing Tiers
 

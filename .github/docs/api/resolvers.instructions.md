@@ -1,5 +1,5 @@
 ---
-applyTo: "breeze.api/internal/graph/**"
+applyTo: "breeze.api/graph/**"
 ---
 
 # GraphQL Resolver Instructions
@@ -41,7 +41,7 @@ No business logic. No validation. No SQL. No direct DB calls. If you are doing a
 
 ## Error Mapping
 
-Map domain errors to GraphQL errors in a central `mapServiceError` function in `internal/graph/resolver/mapping.go`:
+Map domain errors to GraphQL errors in a central helper in the `graph` package:
 
 ```go
 func mapServiceError(err error) error {
@@ -126,7 +126,7 @@ DataLoaders live in `internal/loader/`. One DataLoader per batched query pattern
 
 ## Mapping Functions
 
-Keep all `map*` functions in `internal/graph/resolver/mapping.go`. Never inline complex mapping logic in resolver functions.
+Keep all `map*` functions in helper files under `graph/` (for example, `graph/asset_helpers.go`). Never inline complex mapping logic in resolver functions.
 
 ```go
 func mapExpense(e *db.Expense) *model.Expense {
@@ -157,7 +157,7 @@ func mapSplitInputs(inputs []model.ExpenseSplitInput) []service.SplitInput {
 Parse decimal from string input in every mutation. Use the helper:
 
 ```go
-// internal/graph/resolver/helpers.go
+// graph helpers
 func parseDecimal(s string) (decimal.Decimal, error) {
     d, err := decimal.Parse(s)
     if err != nil {
@@ -189,7 +189,7 @@ Derived fields that require DB access (TotalSpent, Remaining, Progress) must use
 
 ## Generated Files — Never Edit
 
-- `internal/graph/generated/` — gqlgen output, regenerated with `make gen`
-- `internal/graph/model/models_gen.go` — gqlgen generated models
+- `graph/generated/` — gqlgen output, regenerated with `make gen`
+- `graph/model/models_gen.go` — gqlgen generated models
 
-After any change to `internal/graph/schema.graphqls` run `make gen`. The compiler will tell you which resolver stubs need implementing.
+After any change to `graph/schema.graphqls` run `make gen`. The compiler will tell you which resolver stubs need implementing.
