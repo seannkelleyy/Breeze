@@ -219,6 +219,12 @@ func (r *mutationResolver) CreateGoal(ctx context.Context, input model.CreateGoa
 		return nil, r.mapErr(ctx, err)
 	}
 
+	// Resolve the authenticated user from context and override the userId
+	// to prevent foreign-key violations when the client sends an invalid ID.
+	if userID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
+		svcInput.UserID = userID
+	}
+
 	goal, err := r.GoalService.Create(ctx, svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)

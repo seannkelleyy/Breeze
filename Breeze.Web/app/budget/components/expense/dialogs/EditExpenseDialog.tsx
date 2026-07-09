@@ -54,7 +54,7 @@ export const EditExpenseDialog = ({ existingExpense, children }: EditExpenseDial
     },
   });
 
-  const onSubmit = (values: ExpenseFormData) => {
+  const onSubmit = async (values: ExpenseFormData) => {
     if (!userId || !budget?.id) return;
 
     const expense: Expense = {
@@ -69,7 +69,7 @@ export const EditExpenseDialog = ({ existingExpense, children }: EditExpenseDial
       })),
     };
 
-    patchMutation.mutate({
+    await patchMutation.mutateAsync({
       expense,
     });
   };

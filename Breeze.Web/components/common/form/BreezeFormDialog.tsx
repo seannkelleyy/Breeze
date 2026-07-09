@@ -12,7 +12,7 @@ interface BreezeFormDialogProps<TFormValues extends FieldValues> {
   description: string;
   itemType: string;
   form: UseFormReturn<TFormValues>;
-  onSubmit: (values: TFormValues) => void;
+  onSubmit: (values: TFormValues) => Promise<void>;
   inputFields: ReactNode;
   destructiveElements?: ReactNode;
   dialogContentClassName?: string;
@@ -36,11 +36,17 @@ export const BreezeFormDialog = <TFormValues extends FieldValues>({
   disableSubmitUntilValid = true,
 }: BreezeFormDialogProps<TFormValues>) => {
   const [open, setOpen] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (values: TFormValues) => {
-    onSubmit(values);
-    form.reset();
-    setOpen(false);
+  const handleSubmit = async (values: TFormValues) => {
+    setSubmitError(null);
+    try {
+      await onSubmit(values);
+      form.reset();
+      setOpen(false);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    }
   };
 
   const handleCancel = () => {
@@ -59,6 +65,11 @@ export const BreezeFormDialog = <TFormValues extends FieldValues>({
     >
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {inputFields}
+        {submitError ? (
+          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {submitError}
+          </div>
+        ) : null}
         <DialogFooter
           className={footerClassName ?? 'flex w-full flex-row items-center justify-center gap-2'}
         >

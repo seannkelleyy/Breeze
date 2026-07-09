@@ -51,7 +51,7 @@ export const CreateExpenseDialog = () => {
     },
   });
 
-  const onSubmit = (values: ExpenseFormData) => {
+  const onSubmit = async (values: ExpenseFormData) => {
     if (!userId || !budget?.id) return;
     const expense: Omit<Expense, 'id' | 'userId' | 'budgetId' | 'createdAt' | 'updatedAt'> = {
       amount: values.amount,
@@ -59,7 +59,7 @@ export const CreateExpenseDialog = () => {
       description: values.description,
       splits: values.splits,
     };
-    postMutation.mutate({
+    await postMutation.mutateAsync({
       budgetId: budget.id,
       userId,
       expense,

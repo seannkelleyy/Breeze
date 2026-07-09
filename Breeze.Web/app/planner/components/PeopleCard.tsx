@@ -32,6 +32,7 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
   const bonusModeOptions = plannerConstants.PLANNER_BONUS_MODE_OPTIONS;
   const targetAge = plannerSummary?.targetAge ?? currentAge;
   const [activePersonIndex, setActivePersonIndex] = useState(0);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const safeActivePersonIndex =
     people.length === 0 ? 0 : Math.min(activePersonIndex, people.length - 1);
   const activePerson = people[safeActivePersonIndex];
@@ -57,6 +58,11 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
     }
 
     setActivePersonIndex((previous) => (previous + 1) % people.length);
+  };
+
+  const handleSave = () => {
+    setSaveMessage(`Saved ${people.length} household member${people.length !== 1 ? 's' : ''}.`);
+    setTimeout(() => setSaveMessage(null), 2000);
   };
 
   return (
@@ -232,6 +238,16 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
               </Button>
             </div>
           ) : null}
+          <div className="flex justify-end sm:col-span-2">
+            <Button type="button" onClick={handleSave} disabled={people.length === 0}>
+              Save People
+            </Button>
+            {saveMessage ? (
+              <p className="text-muted-foreground text-xs text-green-600 sm:col-span-2">
+                {saveMessage}
+              </p>
+            ) : null}
+          </div>
           <p className="text-muted-foreground text-xs sm:col-span-2">
             Projection timeline currently uses age {currentAge} to {targetAge} (max retirement age
             across people).
