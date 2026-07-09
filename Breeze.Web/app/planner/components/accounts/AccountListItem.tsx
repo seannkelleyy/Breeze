@@ -1,6 +1,6 @@
 'use client';
 import { type ReactNode, useMemo } from 'react';
-import { ChevronDown, ChevronUp, Loader2, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Loader2, Save, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -257,7 +257,7 @@ export function AccountListItem({
             {isAccountCollapsed ? <ChevronDown /> : <ChevronUp />}
           </Button>
           <Button variant="outline" size="icon" onClick={() => onSave(account)} disabled={isSaving}>
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           </Button>
           <Button
             variant="destructive"

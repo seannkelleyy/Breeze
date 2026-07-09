@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import * as plannerConstants from '../../lib/constants';
 
@@ -10,6 +10,20 @@ const usePlannerPeople = () => {
   const { plannerPeople, setPlannerPeople, setPlannerAccounts } = useCurrentUser();
 
   const people = plannerPeople;
+
+  // Initialize self person if people array is empty
+  useEffect(() => {
+    if (people.length === 0) {
+      const selfPerson: PlannerPerson = {
+        id: crypto.randomUUID(),
+        ...plannerConstants.PLANNER_DEFAULT_SELF_PERSON,
+      };
+      setPlannerPeople([selfPerson]);
+    }
+    // Only run when people is empty on first load
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const selfPerson = useMemo(
     () => people.find((person) => person.type === 'self') ?? people[0],
     [people],

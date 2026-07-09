@@ -1,8 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/lib/services/queries/assets';
 import { ME_QUERY } from '@/lib/services/queries/users';
 import useGraphql from '@/lib/services/useGraphql';
-import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { useQuery } from '@tanstack/react-query';
 import { PlannerAccount } from '../../types/account';
 import { PlannerPerson } from '../../types/person';
 
@@ -91,7 +91,7 @@ const useFetchPlanner = () => {
         employerMatchRate: Number(a.employerMatchRate) || 0,
         employerMatchMaxPercentOfSalary: Number(a.employerMatchMaxPercentOfSalary) || 0,
         startingBalance: Number(a.currentValue) || 0,
-        annualRate: Number(a.annualRate) || 0,
+        annualRate: (Number(a.annualRate) || 0) * 100,
       }));
 
       const mappedLiabilities: PlannerAccount[] = liabilities.map((l) => ({
@@ -104,7 +104,7 @@ const useFetchPlanner = () => {
         employerMatchRate: 0,
         employerMatchMaxPercentOfSalary: 0,
         startingBalance: Number(l.currentBalance) || 0,
-        annualRate: Number(l.interestRate) || 0,
+        annualRate: (Number(l.interestRate) || 0) * 100,
       }));
 
       return {

@@ -151,12 +151,9 @@ const InvestmentAccountFields = ({
           onValueChange={(value) =>
             onUpdateAccount((current) => ({
               ...current,
-              annualRate: getStoredAnnualRateForInput(
-                current,
-                getAnnualRateFromProfile(
-                  value as AccountRateProfile,
-                  getDisplayedRateForAccount(current),
-                ),
+              annualRate: getAnnualRateFromProfile(
+                value as AccountRateProfile,
+                getDisplayedRateForAccount(current),
               ),
             }))
           }

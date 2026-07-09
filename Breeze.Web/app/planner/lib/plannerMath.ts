@@ -65,28 +65,32 @@ export const getAccountAnnualRateFromProfile = (
   i: number,
   u: boolean,
 ): number => {
+  // Profile nominal rates must match PLANNER_ACCOUNT_RATE_PROFILE_RATES in constants.ts
   const R: Record<AccountRateProfile, number> = {
     none: 0,
-    'money-market': 2.5,
-    bonds: 3.5,
-    'stock-bond-mix': 6,
-    stocks: 8,
+    'money-market': 3,
+    bonds: 4,
+    'stock-bond-mix': 7,
+    stocks: 10,
     custom: c,
   };
   const n = R[p] ?? c;
-  return u ? getNominalAnnualRatePercentFromReal(n, i) : n;
+  // Profile rates (none, money-market, bonds, stock-bond-mix, stocks) are already nominal rates.
+  // Only 'custom' receives a displayed rate (possibly real/inflation-adjusted) that needs conversion.
+  return p === 'custom' && u ? getNominalAnnualRatePercentFromReal(n, i) : n;
 };
 export const getAccountRateProfileFromAnnualRate = (
   a: number,
   i: number,
   u: boolean,
 ): AccountRateProfile => {
+  // Thresholds are midpoints between profile nominal rates: 0, 3, 4, 7, 10
   const adj = u ? getNominalAnnualRatePercentFromReal(a, i) : a;
-  if (adj <= 0.5) return 'none';
-  if (adj <= 3) return 'money-market';
-  if (adj <= 4.5) return 'bonds';
-  if (adj <= 7) return 'stock-bond-mix';
-  if (adj <= 10) return 'stocks';
+  if (adj <= 1.5) return 'none';
+  if (adj <= 3.5) return 'money-market';
+  if (adj <= 5.5) return 'bonds';
+  if (adj <= 8.5) return 'stock-bond-mix';
+  if (adj <= 10 + 1e-6) return 'stocks';
   return 'custom';
 };
 export const getStoredAnnualRateFromInput = (

@@ -59,7 +59,7 @@ const Dashboard = () => {
   };
 
   const budgetDifference =
-    (Number(budget?.monthlyIncome) ?? 0) - (Number(budget?.monthlyExpenses) ?? 0);
+    Number(budget?.monthlyIncome ?? 0) - Number(budget?.monthlyExpenses ?? 0);
   const isBudgetDifferencePositive = isMoneyGreaterThanOrEqualWithTolerance(budgetDifference, 0);
 
   const handleRegenerate = async () => {

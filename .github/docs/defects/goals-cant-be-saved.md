@@ -1,0 +1,4 @@
+I cannot save a goal. I get this api error: 
+time=2026-07-09T18:04:24.299-04:00 level=ERROR msg="unexpected service error" error="create goal: ERROR: insert or update on table \"goals\" violates foreign key constraint \"fk_goals_user\" (SQLSTATE 23503)"
+time=2026-07-09T18:11:44.679-04:00 level=ERROR msg="unexpected service error" error="create goal: ERROR: insert or update on table \"goals\" violates foreign key constraint \"fk_goals_user\" (SQLSTATE 23503)"
+time=2026-07-09T18:11:48.339-04:00 level=ERROR msg="unexpected service error" error="create goal: ERROR: insert or update on table \"goals\" violates foreign key constraint \"fk_goals_user\" (SQLSTATE 23503)"

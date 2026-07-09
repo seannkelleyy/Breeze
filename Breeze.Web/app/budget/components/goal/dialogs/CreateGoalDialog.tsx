@@ -64,7 +64,7 @@ export const CreateGoalDialog = ({ refetchGoals }: CreateGoalDialogProps) => {
       dialogTrigger={dialogTrigger}
       title="Create Goal"
       itemType="Goal"
-      description="Create a new goal. Click save when you’re done."
+      description="Create a new goal. Click save when you're done."
       form={form}
       onSubmit={onSubmit}
       inputFields={inputFields}
