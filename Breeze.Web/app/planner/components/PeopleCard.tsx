@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { usePlannerPeople } from '../hooks/planner/index';
+import { usePlannerPeople, usePersonMutations } from '../hooks/planner/index';
 import { BonusMode } from '../types/person';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 
@@ -26,9 +26,11 @@ export interface PeopleCardProps {
 }
 
 const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
-  const { plannerSummary } = useCurrentUser();
+  const { plannerSummary, userId } = useCurrentUser();
   const { people, hasSpouse, currentAge, updatePerson, removeSpouse, addSpouse } =
     usePlannerPeople();
+  const { upsertPersonMutation, isSaving } = usePersonMutations(userId);
+
   const bonusModeOptions = plannerConstants.PLANNER_BONUS_MODE_OPTIONS;
   const targetAge = plannerSummary?.targetAge ?? currentAge;
   const [activePersonIndex, setActivePersonIndex] = useState(0);
@@ -60,8 +62,13 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
     setActivePersonIndex((previous) => (previous + 1) % people.length);
   };
 
-  const handleSave = () => {
-    setSaveMessage(`Saved ${people.length} household member${people.length !== 1 ? 's' : ''}.`);
+  const handleSave = async () => {
+    try {
+      await Promise.all(people.map((person) => upsertPersonMutation.mutateAsync(person)));
+      setSaveMessage(`Saved ${people.length} household member${people.length !== 1 ? 's' : ''}.`);
+    } catch {
+      setSaveMessage('Failed to save household members.');
+    }
     setTimeout(() => setSaveMessage(null), 2000);
   };
 
@@ -239,8 +246,8 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
             </div>
           ) : null}
           <div className="flex justify-end sm:col-span-2">
-            <Button type="button" onClick={handleSave} disabled={people.length === 0}>
-              Save People
+            <Button type="button" onClick={handleSave} disabled={people.length === 0 || isSaving}>
+              {isSaving ? 'Saving...' : 'Save People'}
             </Button>
             {saveMessage ? (
               <p className="text-muted-foreground text-xs text-green-600 sm:col-span-2">

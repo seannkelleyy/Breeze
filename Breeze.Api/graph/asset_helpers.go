@@ -53,6 +53,7 @@ func createAssetInputFromModel(input model.CreateAssetInput) (service.CreateAsse
 		EmployerMatchRate:               employerMatchRate,
 		EmployerMatchMaxPercentOfSalary: employerMatchMaxPercentOfSalary,
 		AnnualRate:                      annualRate,
+		ReturnProfile:                   input.ReturnProfile,
 	}, nil
 }
 
@@ -98,6 +99,7 @@ func updateAssetInputFromModel(input model.UpdateAssetInput) (service.UpdateAsse
 		EmployerMatchRate:               employerMatchRate,
 		EmployerMatchMaxPercentOfSalary: employerMatchMaxPercentOfSalary,
 		AnnualRate:                      annualRate,
+		ReturnProfile:                   input.ReturnProfile,
 	}, nil
 }
 
@@ -114,6 +116,7 @@ func mapAssetToModel(asset *service.Asset) *model.Asset {
 		EmployerMatchRate:               asset.EmployerMatchRate.String(),
 		EmployerMatchMaxPercentOfSalary: asset.EmployerMatchMaxPercentOfSalary.String(),
 		AnnualRate:                      asset.AnnualRate.String(),
+		ReturnProfile:                   asset.ReturnProfile,
 		LastValueUpdatedAt:              asset.LastValueUpdatedAt.Format(time.RFC3339),
 		CreatedAt:                       asset.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:                       asset.UpdatedAt.Format(time.RFC3339),

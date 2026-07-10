@@ -1,6 +1,6 @@
 import { CREATE_BUDGET } from '@/lib/services/queries/budget';
-import useGraphql from '@/lib/services/useGraphql';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import useGraphql from '@/lib/services/useGraphql';
 import { Budget } from '../../types/budget';
 
 /**

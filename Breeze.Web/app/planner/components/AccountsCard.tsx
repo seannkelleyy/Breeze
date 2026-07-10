@@ -5,16 +5,12 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import useGraphql from '@/lib/services/useGraphql';
-import { GET_ASSETS, GET_LIABILITIES } from '@/lib/services/queries/assets';
 import { formatCurrencyWithCode } from '../lib/plannerMath';
 import { usePlannerAccounts } from '../hooks/planner/index';
 import { useAccountMutations } from '../hooks/planner/useAccountMutations';
 import { AccountListItem } from './accounts/AccountListItem';
-import { AccountType, PlannerAccount } from '../types/account';
+import { PlannerAccount } from '../types/account';
 import { HomeGrowthProfile } from '../types/finance';
-import { apiAssetTypeToAccountType } from '../lib/typeMapping';
-import type { ApiAssetType } from '../types/apiAsset';
 
 export interface AccountsCardProps {
   collapsed: boolean;
@@ -23,34 +19,13 @@ export interface AccountsCardProps {
 
 type AccountFilter = 'all' | 'assets' | 'liabilities' | 'tax-advantaged';
 
-function mapAssetTypeToAccountType(assetType: string): AccountType {
-  return apiAssetTypeToAccountType(assetType as ApiAssetType);
-}
-
-function mapLiabilityTypeToAccountType(liabilityType: string): AccountType {
-  switch (liabilityType) {
-    case 'STUDENT_LOAN':
-      return 'student-loan';
-    case 'CREDIT_CARD':
-      return 'credit-card';
-    case 'PERSONAL_LOAN':
-      return 'personal-loan';
-    case 'AUTO_LOAN':
-      return 'auto-loan';
-    case 'MORTGAGE':
-      return 'mortgage';
-    default:
-      return 'other';
-  }
-}
-
 const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
-  const { currencyCode, userId, user, setPlannerAccounts } = useCurrentUser();
-  const { request } = useGraphql();
+  const { currencyCode, userId, setPlannerAccounts } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
 
   const [collapsedAccountIds, setCollapsedAccountIds] = useState<Record<string, boolean>>({});
   const [accountFilter, setAccountFilter] = useState<AccountFilter>('all');
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const { data, options, typeGuards, helpers, actions } = usePlannerAccounts();
   const {
@@ -112,7 +87,6 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
 
   const mutations = useAccountMutations({
     userId,
-    user: (user as { id: string; emailAddresses?: Array<{ emailAddress: string }> } | null) ?? null,
     updateAccount,
     removeAccount,
   });
@@ -125,105 +99,6 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
       return next;
     });
   }, [plannerAccounts]);
-
-  // Load backend data on mount
-  useEffect(() => {
-    const load = async () => {
-      const buid = await mutations.ensureUserExists.mutateAsync();
-      if (!buid) return;
-      try {
-        const [assetsRes, liabsRes] = await Promise.all([
-          request(GET_ASSETS, { userId: buid }),
-          request(GET_LIABILITIES, { userId: buid }),
-        ]);
-        const assets = (assetsRes as { assets: Array<Record<string, unknown>> }).assets || [];
-        const liabilities =
-          (liabsRes as { liabilities: Array<Record<string, unknown>> }).liabilities || [];
-        if (assets.length === 0 && liabilities.length === 0) return;
-
-        const mappedAssets = assets.map((a): PlannerAccount => {
-          const name = String(a.name ?? '');
-          const owner = String(a.owner ?? 'self');
-          const assetType = String(a.assetType ?? '');
-          const contributionMode = String(a.contributionMode ?? 'monthly');
-          const currentValue = parseFloat(String(a.currentValue ?? '0'));
-          const annualRate = parseFloat(String(a.annualRate ?? '0'));
-          const contributionValue = parseFloat(String(a.contributionValue ?? '0'));
-          const employerMatchRate = parseFloat(String(a.employerMatchRate ?? '0'));
-          const employerMatchMaxPercentOfSalary = parseFloat(
-            String(a.employerMatchMaxPercentOfSalary ?? '0'),
-          );
-          const exist = plannerAccounts.find((pa) => pa.id === a.id);
-          if (exist)
-            return {
-              ...exist,
-              name,
-              owner: owner as 'self' | 'spouse',
-              startingBalance: currentValue,
-              annualRate,
-              contributionMode: contributionMode as 'monthly' | 'yearly' | 'salary-percent',
-              contributionValue,
-              employerMatchRate,
-              employerMatchMaxPercentOfSalary,
-            };
-          return {
-            id: String(a.id ?? ''),
-            name,
-            owner: owner as 'self' | 'spouse',
-            accountType: mapAssetTypeToAccountType(assetType),
-            contributionMode: contributionMode as 'monthly' | 'yearly' | 'salary-percent',
-            contributionValue,
-            employerMatchRate,
-            employerMatchMaxPercentOfSalary,
-            startingBalance: currentValue,
-            annualRate,
-          };
-        });
-
-        const mappedLiabs = liabilities.map((l): PlannerAccount => {
-          const name = String(l.name ?? '');
-          const owner = String(l.owner ?? 'self');
-          const liabilityType = String(l.liabilityType ?? '');
-          const contributionMode = String(l.contributionMode ?? 'monthly');
-          const balance = parseFloat(String(l.currentBalance ?? '0'));
-          const rate = parseFloat(String(l.interestRate ?? '0')) * 100;
-          const payment = parseFloat(String(l.contributionValue ?? l.minimumPayment ?? '0'));
-          const exist = plannerAccounts.find((pa) => pa.id === l.id);
-          if (exist)
-            return {
-              ...exist,
-              name,
-              owner: owner as 'self' | 'spouse',
-              accountType: mapLiabilityTypeToAccountType(liabilityType),
-              contributionMode: contributionMode as 'monthly' | 'yearly' | 'salary-percent',
-              contributionValue: payment,
-              startingBalance: balance,
-              annualRate: rate,
-            };
-          return {
-            id: String(l.id ?? ''),
-            name,
-            owner: owner as 'self' | 'spouse',
-            accountType: mapLiabilityTypeToAccountType(liabilityType),
-            contributionMode: contributionMode as 'monthly' | 'yearly' | 'salary-percent',
-            contributionValue: payment,
-            employerMatchRate: 0,
-            employerMatchMaxPercentOfSalary: 0,
-            startingBalance: balance,
-            annualRate: rate,
-          };
-        });
-
-        const backendIds = new Set([...mappedAssets, ...mappedLiabs].map((a) => a.id));
-        const localOnly = plannerAccounts.filter((a) => !backendIds.has(a.id));
-        setPlannerAccounts([...mappedAssets, ...mappedLiabs, ...localOnly]);
-      } catch {
-        /* silently ignore */
-      }
-    };
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const toggleCollapse = (id: string) => setCollapsedAccountIds((p) => ({ ...p, [id]: !p[id] }));
 
@@ -255,17 +130,22 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
     hasSpouse,
   ]);
 
-  const handleSave = (account: PlannerAccount) => {
+  const handleSave = async (account: PlannerAccount) => {
+    setSaveError(null);
     const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       account.id,
     );
     const isLiability = isLiabilityAccountType(account.accountType);
-    if (isLiability) {
-      if (!isValidUuid) mutations.createLiabilityMutation.mutate(account);
-      else mutations.updateLiabilityMutation.mutate(account);
-    } else {
-      if (!isValidUuid) mutations.createAssetMutation.mutate(account);
-      else mutations.updateAssetMutation.mutate(account);
+    try {
+      if (isLiability) {
+        if (!isValidUuid) await mutations.createLiabilityMutation.mutateAsync(account);
+        else await mutations.updateLiabilityMutation.mutateAsync(account);
+      } else {
+        if (!isValidUuid) await mutations.createAssetMutation.mutateAsync(account);
+        else await mutations.updateAssetMutation.mutateAsync(account);
+      }
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save account');
     }
   };
 
@@ -411,6 +291,12 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
               </Button>
             </div>
           </div>
+
+          {saveError ? (
+            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {saveError}
+            </div>
+          ) : null}
 
           <p className="text-muted-foreground text-xs">
             Annual limits are read from your IRS account configuration in the API.

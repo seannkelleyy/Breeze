@@ -1,5 +1,4 @@
 'use client';
-import { useState } from 'react';
 
 import {
   CREATE_ASSET,
@@ -9,7 +8,6 @@ import {
   UPDATE_ASSET,
   UPDATE_LIABILITY,
 } from '@/lib/services/queries/assets';
-import { CREATE_USER_MUTATION, ME_QUERY } from '@/lib/services/queries/users';
 import useGraphql from '@/lib/services/useGraphql';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { accountTypeToApiAssetType } from '../../lib/typeMapping';
@@ -17,7 +15,6 @@ import { AccountType, PlannerAccount } from '../../types/account';
 
 interface UseAccountMutationsParams {
   userId: string;
-  user: { id: string; emailAddresses?: Array<{ emailAddress: string }> } | null;
   updateAccount: (id: string, updater: (current: PlannerAccount) => PlannerAccount) => void;
   removeAccount: (id: string) => void;
 }
@@ -61,59 +58,27 @@ function buildLiabilityInput(account: PlannerAccount, liabilityUserId: string) {
 
 export function useAccountMutations({
   userId,
-  user,
   updateAccount,
   removeAccount,
 }: UseAccountMutationsParams) {
   const { request } = useGraphql();
   const queryClient = useQueryClient();
-  const [backendUserId, setBackendUserId] = useState<string | null>(null);
-
-  // Ensure user exists in backend before creating assets
-  const ensureUserExists = useMutation({
-    mutationFn: async (): Promise<string> => {
-      if (backendUserId) return backendUserId;
-      try {
-        const response = await request(ME_QUERY);
-        const uid = (response as { me: { id: string } }).me.id;
-        setBackendUserId(uid);
-        return uid;
-      } catch {
-        const response = await request(CREATE_USER_MUTATION, {
-          input: {
-            identityProviderId: user?.id || '',
-            email: user?.emailAddresses?.[0]?.emailAddress || '',
-            returnType: 'REAL',
-            safeWithdrawalRate: '0.04',
-            currencyType: 'USD',
-            inflationRate: '0.03',
-            deductionType: 'STANDARD',
-            filingStatus: 'SINGLE',
-            payoffStrategy: 'AVALANCHE',
-          },
-        });
-        const uid = (response as { createUser: { id: string } }).createUser.id;
-        setBackendUserId(uid);
-        return uid;
-      }
-    },
-  });
 
   const createAssetMutation = useMutation({
     mutationFn: async (account: PlannerAccount) => {
-      const buid = await ensureUserExists.mutateAsync();
       const response = await request(CREATE_ASSET, {
         input: {
-          userId: buid,
+          userId,
           name: account.name,
           assetType: mapAccountTypeToApiType(account.accountType),
           currentValue: account.startingBalance.toString(),
           owner: account.owner,
           contributionMode: account.contributionMode,
           contributionValue: account.contributionValue.toString(),
-          employerMatchRate: account.employerMatchRate.toString(),
-          employerMatchMaxPercentOfSalary: account.employerMatchMaxPercentOfSalary.toString(),
-          annualRate: account.annualRate.toString(),
+          employerMatchRate: (account.employerMatchRate / 100).toString(),
+          employerMatchMaxPercentOfSalary: (account.employerMatchMaxPercentOfSalary / 100).toString(),
+          annualRate: (account.annualRate / 100).toString(),
+          returnProfile: account.returnProfile ?? null,
         },
       });
       updateAccount(account.id, (current) => ({
@@ -136,9 +101,10 @@ export function useAccountMutations({
           owner: account.owner,
           contributionMode: account.contributionMode,
           contributionValue: account.contributionValue.toString(),
-          employerMatchRate: account.employerMatchRate.toString(),
-          employerMatchMaxPercentOfSalary: account.employerMatchMaxPercentOfSalary.toString(),
-          annualRate: account.annualRate.toString(),
+          employerMatchRate: (account.employerMatchRate / 100).toString(),
+          employerMatchMaxPercentOfSalary: (account.employerMatchMaxPercentOfSalary / 100).toString(),
+          annualRate: (account.annualRate / 100).toString(),
+          returnProfile: account.returnProfile ?? null,
         },
       });
     },
@@ -157,9 +123,8 @@ export function useAccountMutations({
 
   const createLiabilityMutation = useMutation({
     mutationFn: async (account: PlannerAccount) => {
-      const buid = await ensureUserExists.mutateAsync();
       const response = await request(CREATE_LIABILITY, {
-        input: buildLiabilityInput(account, buid),
+        input: buildLiabilityInput(account, userId),
       });
       updateAccount(account.id, (current) => ({
         ...current,
@@ -189,8 +154,6 @@ export function useAccountMutations({
   });
 
   return {
-    backendUserId,
-    ensureUserExists,
     createAssetMutation,
     updateAssetMutation,
     deleteAssetMutation,

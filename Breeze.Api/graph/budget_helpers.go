@@ -10,6 +10,10 @@ import (
 	"github.com/govalues/decimal"
 )
 
+func decimalZero() decimal.Decimal {
+	return decimal.MustParse("0")
+}
+
 func createBudgetInputFromModel(input model.CreateBudgetInput) (service.CreateBudgetInput, error) {
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {

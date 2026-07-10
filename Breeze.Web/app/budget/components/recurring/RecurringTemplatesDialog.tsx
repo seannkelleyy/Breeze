@@ -27,7 +27,7 @@ export const RecurringTemplatesDialog = () => {
     patchRecurringCategoryTemplate,
     deleteRecurringCategoryTemplate,
   } = useRecurringTemplates();
-  const { refetchBudget, refetchIncomes, refetchCategories } = useBudgetContext();
+  const { refetchBudget, refetchIncomes, refetchCategories, budget } = useBudgetContext();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,12 +40,14 @@ export const RecurringTemplatesDialog = () => {
   const [categoryTemplates, setCategoryTemplates] = useState<RecurringCategoryTemplate[]>([]);
 
   const loadTemplates = useCallback(async () => {
+    if (!budget?.id) return;
     setLoading(true);
     setError('');
+    const budgetMonth = budget.date ? budget.date.slice(0, 7) + '-01' : undefined;
     try {
       const [incomeData, categoryData] = await Promise.all([
         getRecurringIncomeTemplates(),
-        getRecurringCategoryTemplates(),
+        getRecurringCategoryTemplates(budget.id, budgetMonth),
       ]);
       setIncomeTemplates(incomeData);
       setCategoryTemplates(categoryData);
@@ -54,7 +56,7 @@ export const RecurringTemplatesDialog = () => {
     } finally {
       setLoading(false);
     }
-  }, [getRecurringCategoryTemplates, getRecurringIncomeTemplates]);
+  }, [getRecurringCategoryTemplates, getRecurringIncomeTemplates, budget?.id]);
 
   useEffect(() => {
     if (open) {
@@ -135,7 +137,7 @@ export const RecurringTemplatesDialog = () => {
         ...categoryTemplates.map((template) =>
           template.id
             ? patchRecurringCategoryTemplate(template)
-            : postRecurringCategoryTemplate(template),
+            : postRecurringCategoryTemplate(template, budget?.id ?? ''),
         ),
       ]);
       await loadTemplates();

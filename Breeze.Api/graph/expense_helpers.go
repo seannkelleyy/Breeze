@@ -26,7 +26,7 @@ func createExpenseInputFromModel(input model.CreateExpenseInput) (service.Create
 		return service.CreateExpenseInput{}, fmt.Errorf("invalid amount: %w", err)
 	}
 
-	expenseDate, err := time.Parse(time.RFC3339, input.Date)
+	expenseDate, err := parseDate(input.Date)
 	if err != nil {
 		return service.CreateExpenseInput{}, fmt.Errorf("invalid expense date: %w", err)
 	}
@@ -57,7 +57,7 @@ func updateExpenseInputFromModel(input model.UpdateExpenseInput) (service.Update
 		return service.UpdateExpenseInput{}, fmt.Errorf("invalid amount: %w", err)
 	}
 
-	expenseDate, err := time.Parse(time.RFC3339, input.Date)
+	expenseDate, err := parseDate(input.Date)
 	if err != nil {
 		return service.UpdateExpenseInput{}, fmt.Errorf("invalid expense date: %w", err)
 	}

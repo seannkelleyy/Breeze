@@ -48,14 +48,14 @@ export const EditGoalDialog = ({ existingGoal, refetchGoals, children }: EditGoa
     onSettled: () => refetchGoals(),
   });
 
-  const onSubmit = (values: Goal) => {
+  const onSubmit = async (values: Goal) => {
     const updatedGoal = {
       ...existingGoal,
       userId,
       description: values.description,
       isCompleted: values.isCompleted ?? false,
     };
-    updateGoalMutation.mutate({ goal: updatedGoal });
+    await updateGoalMutation.mutateAsync({ goal: updatedGoal });
   };
 
   const handleToggleComplete = () => {

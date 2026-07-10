@@ -1,4 +1,4 @@
-h1:O04ghBRIQh7K8pAHgHluIndwFKHhpEhE/fd038PJ69Y=
+h1:sZdLLScFmiscj0G9/7bW+kg5pH0f+iTS+l17b5GpEOM=
 20260401213128_initial_schema.sql h1:/GVoKJxw6oD5DTPSxCdkRcOHQLi/iT4Qe7Zz9XXGrc0=
 20260401214314_users_full_stack.sql h1:ZqbaWes3gnXoHUCh3t9e34eVE+n5ac85yzmIBzH8h7Y=
 20260415010436_assets_full_stack.sql h1:2O4xE9IkLsMLQR+aqZzQEm8ptOXh95J6w0GPjnHqzs4=
@@ -14,3 +14,5 @@ h1:O04ghBRIQh7K8pAHgHluIndwFKHhpEhE/fd038PJ69Y=
 20260504150000_plaid_connections_full_stack.sql h1:27cnnhJDbhlIB0IcO4NLTVNnJSWbaQQLVpcGIhLJ5hY=
 20260611214200_extend_asset_type_enum.sql h1:d9JzGwXyLkYzA+Aq7KiznAfVnEw2ysWOxZu9G9cR3Rs=
 20260627133813_add_asset_liability_fields.sql h1:I0gRza14wyV8MbUXtcj97fOorXDbK5+VFHlOnV9vbzs=
+20260709000000_planner_people.sql h1:St+pEvXSPUuMJu80WRkkUa+AQlgDiBntBOn32OX7T4U=
+20260710150000_add_return_profile.sql h1:/INjdEW6hCP2zCFFRJJcute9GYcz/6GvRywbZJ8Yh9I=

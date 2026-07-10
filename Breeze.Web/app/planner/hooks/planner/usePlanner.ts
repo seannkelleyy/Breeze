@@ -165,9 +165,10 @@ const usePlanner = () => {
             owner: acct.owner,
             contributionMode: acct.contributionMode,
             contributionValue: String(acct.contributionValue ?? 0),
-            employerMatchRate: String(acct.employerMatchRate ?? 0),
-            employerMatchMaxPercentOfSalary: String(acct.employerMatchMaxPercentOfSalary ?? 0),
-            annualRate: String(acct.annualRate ?? 0),
+            employerMatchRate: String((acct.employerMatchRate ?? 0) / 100),
+            employerMatchMaxPercentOfSalary: String((acct.employerMatchMaxPercentOfSalary ?? 0) / 100),
+            annualRate: String((acct.annualRate ?? 0) / 100),
+            returnProfile: acct.returnProfile ?? null,
           };
 
           const existing = existingAssets.find(

@@ -116,6 +116,7 @@ const usePlannerAccounts = () => {
             employerMatchMaxPercentOfSalary: 0,
             startingBalance: 1,
             annualRate: 4,
+            returnProfile: null,
           });
       const nextDetails = updater(prev[accountId] ?? fallback);
       updateAccount(accountId, (c) => ({
@@ -164,6 +165,7 @@ const usePlannerAccounts = () => {
         employerMatchMaxPercentOfSalary: 0,
         startingBalance: 25000,
         annualRate: 6,
+        returnProfile: null,
       },
     ]);
   };

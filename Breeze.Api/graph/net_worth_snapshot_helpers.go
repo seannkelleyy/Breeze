@@ -33,7 +33,7 @@ func mapCreateNetWorthSnapshotInput(input model.CreateNetWorthSnapshotInput) (se
 		return service.CreateNetWorthSnapshotInput{}, fmt.Errorf("invalid user id: %w", err)
 	}
 
-	snapshotDate, err := time.Parse(time.RFC3339, input.SnapshotDate)
+	snapshotDate, err := parseDate(input.SnapshotDate)
 	if err != nil {
 		return service.CreateNetWorthSnapshotInput{}, fmt.Errorf("invalid snapshot date: %w", err)
 	}

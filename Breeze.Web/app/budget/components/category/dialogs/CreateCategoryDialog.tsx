@@ -29,7 +29,7 @@ export const CreateCategoryDialog = () => {
     },
   });
 
-  const onSubmit = (values: CategoryFormData) => {
+  const onSubmit = async (values: CategoryFormData) => {
     if (!userId || !budget?.id) return;
     const category: Omit<
       Category,
@@ -38,7 +38,7 @@ export const CreateCategoryDialog = () => {
       name: values.name,
       allocation: values.allocation,
     };
-    postMutation.mutate({ budgetId: budget.id, userId, category });
+    await postMutation.mutateAsync({ budgetId: budget.id, userId, category });
   };
 
   const dialogTrigger = (

@@ -177,7 +177,6 @@ export const ExpensesTable = () => {
 
   const handleCategoryClick = (category: React.SetStateAction<string>) => {
     setActiveCategory(category);
-    table.getColumn('categoryId')?.setFilterValue(category);
   };
 
   return (

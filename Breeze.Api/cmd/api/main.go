@@ -47,8 +47,9 @@ func main() {
 
 	slog.Info("starting server", "port", cfg.Port, "env", cfg.Env)
 
-	// Init Clerk when auth is enforced.
-	if !cfg.IsLocalEnv() {
+	// Init Clerk for JWT validation (required in all environments for
+	// auth context resolution; CLERK_SECRET_KEY must be set locally too).
+	if cfg.ClerkSecretKey != "" {
 		clerk.SetKey(cfg.ClerkSecretKey)
 	}
 
@@ -79,6 +80,7 @@ func main() {
 	taxPlanningService := service.NewTaxPlanningService(queries)
 	retirementLadderService := service.NewRetirementLadderService(queries)
 	netWorthSnapshotService := service.NewNetWorthSnapshotService(queries)
+	plannerPersonService := service.NewPlannerPersonService(queries)
 	// Plaid client/service (dev-mode when local)
 	var plaidClient service.PlaidClient
 	if cfg.IsLocalEnv() {
@@ -111,6 +113,7 @@ func main() {
 		TaxPlanningService:      taxPlanningService,
 		RetirementLadderService: retirementLadderService,
 		NetWorthSnapshotService: netWorthSnapshotService,
+		PlannerPersonService:    plannerPersonService,
 	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 
@@ -126,7 +129,15 @@ func main() {
 	})
 
 	mux.Handle("/graphql", playground.Handler("GraphQL", "/query"))
-	mux.Handle("/query", srv)
+
+	// Apply Clerk auth to the query endpoint when configured.
+	if cfg.ClerkSecretKey != "" {
+		slog.Info("auth middleware enabled")
+		mux.Handle("/query", middleware.RequireAuth(srv))
+	} else {
+		slog.Info("auth middleware disabled (no CLERK_SECRET_KEY)")
+		mux.Handle("/query", srv)
+	}
 
 	port := cfg.Port
 	if port == "" {
@@ -138,12 +149,9 @@ func main() {
 		Burst:             60,
 	}
 
-	var handler http.Handler = mux
-	if cfg.IsLocalEnv() {
-		slog.Info("running without auth and rate limiting", "env", cfg.Env)
-		handler = middleware.CORS(handler)
-	} else {
-		handler = middleware.CORS(middleware.RateLimit(rateLimitCfg, middleware.RequireAuth(handler)))
+	handler := middleware.CORS(mux)
+	if !cfg.IsLocalEnv() {
+		handler = middleware.RateLimit(rateLimitCfg, handler)
 	}
 
 	slog.Info("server running", "port", port)

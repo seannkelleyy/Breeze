@@ -36,10 +36,10 @@ export const CreateGoalDialog = ({ refetchGoals }: CreateGoalDialogProps) => {
     },
   });
 
-  const onSubmit = (values: Goal) => {
+  const onSubmit = async (values: Goal) => {
     if (!userId) return;
 
-    postGoalMutation.mutate({
+    await postGoalMutation.mutateAsync({
       goal: {
         userId,
         description: values.description,

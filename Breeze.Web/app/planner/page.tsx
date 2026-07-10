@@ -36,6 +36,7 @@ export default function PlannerPage() {
 
   const {
     setPlannerAccounts,
+    setPlannerPeople,
     setInflationRate,
     setSafeWithdrawalRate,
     setCurrencyCode,
@@ -45,6 +46,9 @@ export default function PlannerPage() {
   useEffect(() => {
     if (!plannerData) return;
     setPlannerAccounts(plannerData.accounts);
+    if (plannerData.people.length > 0) {
+      setPlannerPeople(plannerData.people);
+    }
     setInflationRate(plannerData.inflationRate);
     setSafeWithdrawalRate(plannerData.safeWithdrawalRate);
     setCurrencyCode(plannerData.currencyCode);
@@ -52,6 +56,7 @@ export default function PlannerPage() {
   }, [
     plannerData,
     setPlannerAccounts,
+    setPlannerPeople,
     setInflationRate,
     setSafeWithdrawalRate,
     setCurrencyCode,

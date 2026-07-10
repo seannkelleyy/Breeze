@@ -27,6 +27,7 @@ type Asset struct {
 	EmployerMatchRate               string    `json:"employerMatchRate"`
 	EmployerMatchMaxPercentOfSalary string    `json:"employerMatchMaxPercentOfSalary"`
 	AnnualRate                      string    `json:"annualRate"`
+	ReturnProfile                   *string   `json:"returnProfile,omitempty"`
 	LastValueUpdatedAt              string    `json:"lastValueUpdatedAt"`
 	CreatedAt                       string    `json:"createdAt"`
 	UpdatedAt                       string    `json:"updatedAt"`
@@ -73,6 +74,7 @@ type CreateAssetInput struct {
 	EmployerMatchRate               string    `json:"employerMatchRate"`
 	EmployerMatchMaxPercentOfSalary string    `json:"employerMatchMaxPercentOfSalary"`
 	AnnualRate                      string    `json:"annualRate"`
+	ReturnProfile                   *string   `json:"returnProfile,omitempty"`
 }
 
 type CreateBudgetInput struct {
@@ -329,6 +331,21 @@ type PlaidConnection struct {
 	UpdatedAt       string  `json:"updatedAt"`
 }
 
+type PlannerPerson struct {
+	ID               string `json:"id"`
+	UserID           string `json:"userId"`
+	PersonType       string `json:"personType"`
+	Name             string `json:"name"`
+	Birthday         string `json:"birthday"`
+	RetirementAge    int    `json:"retirementAge"`
+	AnnualSalary     string `json:"annualSalary"`
+	BonusMode        string `json:"bonusMode"`
+	AnnualBonus      string `json:"annualBonus"`
+	IncomeGrowthRate string `json:"incomeGrowthRate"`
+	CreatedAt        string `json:"createdAt"`
+	UpdatedAt        string `json:"updatedAt"`
+}
+
 type Query struct {
 }
 
@@ -431,6 +448,7 @@ type UpdateAssetInput struct {
 	EmployerMatchRate               string    `json:"employerMatchRate"`
 	EmployerMatchMaxPercentOfSalary string    `json:"employerMatchMaxPercentOfSalary"`
 	AnnualRate                      string    `json:"annualRate"`
+	ReturnProfile                   *string   `json:"returnProfile,omitempty"`
 }
 
 type UpdateBudgetInput struct {
@@ -545,6 +563,19 @@ type UpdateUserInput struct {
 	MaxTaxBracketID    *string        `json:"maxTaxBracketId,omitempty"`
 	FilingStatus       FilingStatus   `json:"filingStatus"`
 	PayoffStrategy     PayoffStrategy `json:"payoffStrategy"`
+}
+
+type UpsertPlannerPersonInput struct {
+	ID               string `json:"id"`
+	UserID           string `json:"userId"`
+	PersonType       string `json:"personType"`
+	Name             string `json:"name"`
+	Birthday         string `json:"birthday"`
+	RetirementAge    int    `json:"retirementAge"`
+	AnnualSalary     string `json:"annualSalary"`
+	BonusMode        string `json:"bonusMode"`
+	AnnualBonus      string `json:"annualBonus"`
+	IncomeGrowthRate string `json:"incomeGrowthRate"`
 }
 
 type User struct {

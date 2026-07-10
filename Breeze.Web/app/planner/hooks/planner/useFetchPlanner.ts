@@ -1,5 +1,6 @@
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/lib/services/queries/assets';
+import { GET_PLANNER_PEOPLE } from '@/lib/services/queries/plannerPeople';
 import { ME_QUERY } from '@/lib/services/queries/users';
 import useGraphql from '@/lib/services/useGraphql';
 import { useQuery } from '@tanstack/react-query';
@@ -14,6 +15,23 @@ interface MeResponse {
     currencyType: string;
     returnType: 'REAL' | 'NOMINAL';
   } | null;
+}
+
+interface PlannerPeopleResponse {
+  plannerPeople: Array<{
+    id: string;
+    userId: string;
+    personType: string;
+    name: string;
+    birthday: string;
+    retirementAge: number;
+    annualSalary: string;
+    bonusMode: string;
+    annualBonus: string;
+    incomeGrowthRate: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
 }
 
 interface AssetsResponse {
@@ -67,8 +85,9 @@ const useFetchPlanner = () => {
   return useQuery<PlannerLoadResult>({
     queryKey: ['planner', userId],
     queryFn: async () => {
-      const [meResp, assetsResp, liabilitiesResp] = await Promise.all([
+      const [meResp, plannerPeopleResp, assetsResp, liabilitiesResp] = await Promise.all([
         request<MeResponse>(ME_QUERY),
+        request<PlannerPeopleResponse>(GET_PLANNER_PEOPLE, { userId } as Record<string, unknown>),
         request<AssetsResponse>(GET_ASSETS_BY_USER, { userId } as Record<string, unknown>),
         request<LiabilitiesResponse>(GET_LIABILITIES_BY_USER, { userId } as Record<
           string,
@@ -77,8 +96,21 @@ const useFetchPlanner = () => {
       ]);
 
       const me = meResp?.me;
+      const plannerPeople = plannerPeopleResp?.plannerPeople ?? [];
       const assets = assetsResp?.assets ?? [];
       const liabilities = liabilitiesResp?.liabilities ?? [];
+
+      const mappedPeople: PlannerPerson[] = plannerPeople.map((p) => ({
+        id: p.id,
+        type: p.personType as 'self' | 'spouse',
+        name: p.name,
+        birthday: p.birthday,
+        retirementAge: p.retirementAge,
+        annualSalary: Number(p.annualSalary),
+        bonusMode: (p.bonusMode === 'salary-percent' ? 'salary-percent' : 'dollars') as 'dollars' | 'salary-percent',
+        annualBonus: Number(p.annualBonus),
+        incomeGrowthRate: Number(p.incomeGrowthRate),
+      }));
 
       // Map API assets and liabilities into the planner's local account format
       const mappedAssets: PlannerAccount[] = assets.map((a) => ({
@@ -88,10 +120,11 @@ const useFetchPlanner = () => {
         accountType: mapApiAssetTypeToPlanner(a.assetType),
         contributionMode: (a.contributionMode || 'monthly') as PlannerAccount['contributionMode'],
         contributionValue: Number(a.contributionValue) || 0,
-        employerMatchRate: Number(a.employerMatchRate) || 0,
-        employerMatchMaxPercentOfSalary: Number(a.employerMatchMaxPercentOfSalary) || 0,
+        employerMatchRate: (Number(a.employerMatchRate) || 0) * 100,
+        employerMatchMaxPercentOfSalary: (Number(a.employerMatchMaxPercentOfSalary) || 0) * 100,
         startingBalance: Number(a.currentValue) || 0,
         annualRate: (Number(a.annualRate) || 0) * 100,
+        returnProfile: a.returnProfile as PlannerAccount['returnProfile'] | null,
       }));
 
       const mappedLiabilities: PlannerAccount[] = liabilities.map((l) => ({
@@ -105,10 +138,11 @@ const useFetchPlanner = () => {
         employerMatchMaxPercentOfSalary: 0,
         startingBalance: Number(l.currentBalance) || 0,
         annualRate: (Number(l.interestRate) || 0) * 100,
+        returnProfile: null,
       }));
 
       return {
-        people: [] as PlannerPerson[],
+        people: mappedPeople,
         accounts: [...mappedAssets, ...mappedLiabilities],
         inflationRate: me ? Number(me.inflationRate) * 100 : 3,
         safeWithdrawalRate: me ? Number(me.safeWithdrawalRate) * 100 : 4,

@@ -9,9 +9,10 @@ INSERT INTO assets (
   contribution_value,
   employer_match_rate,
   employer_match_max_percent_of_salary,
-  annual_rate
+  annual_rate,
+  return_profile
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 RETURNING
   id,
   user_id,
@@ -24,6 +25,7 @@ RETURNING
   employer_match_rate,
   employer_match_max_percent_of_salary,
   annual_rate,
+  return_profile,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -42,6 +44,7 @@ SELECT
   employer_match_rate,
   employer_match_max_percent_of_salary,
   annual_rate,
+  return_profile,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -64,6 +67,7 @@ SELECT
   employer_match_rate,
   employer_match_max_percent_of_salary,
   annual_rate,
+  return_profile,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -85,6 +89,7 @@ SET
   employer_match_rate = $8,
   employer_match_max_percent_of_salary = $9,
   annual_rate = $10,
+  return_profile = $11,
   last_value_updated_at = CASE
     WHEN current_value IS DISTINCT FROM $4 THEN now()
     ELSE last_value_updated_at
@@ -104,6 +109,7 @@ RETURNING
   employer_match_rate,
   employer_match_max_percent_of_salary,
   annual_rate,
+  return_profile,
   last_value_updated_at,
   created_at,
   updated_at,

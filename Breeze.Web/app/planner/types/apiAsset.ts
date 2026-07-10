@@ -42,6 +42,7 @@ export interface ApiAsset {
   employerMatchRate: string;
   employerMatchMaxPercentOfSalary: string;
   annualRate: string;
+  returnProfile: string | null;
   lastValueUpdatedAt: string;
   createdAt: string;
   updatedAt: string;
@@ -58,6 +59,7 @@ export interface CreateApiAssetInput {
   employerMatchRate: string;
   employerMatchMaxPercentOfSalary: string;
   annualRate: string;
+  returnProfile?: string | null;
 }
 
 export interface UpdateApiAssetInput {
@@ -71,6 +73,7 @@ export interface UpdateApiAssetInput {
   employerMatchRate: string;
   employerMatchMaxPercentOfSalary: string;
   annualRate: string;
+  returnProfile?: string | null;
 }
 
 /**

@@ -8,7 +8,10 @@ import type {
 import type { IrsLimitConfig, IrsLimitKey } from '../types/irs';
 import type { PlannerPerson } from '../types/person';
 import type { ProjectionRow } from '../types/projection';
+import * as plannerConfig from './config';
 import * as plannerConstants from './constants';
+
+const { accountTypesWithoutIrsLimits, isCombinedAssetType, isDepreciatingAssetType, isLiabilityAccountType, isNonContributingAccountType } = plannerConfig;
 
 export const plannerChartConfig = {
   totalBalance: { label: 'Total Portfolio', color: 'hsl(var(--chart-1))' },
@@ -101,13 +104,47 @@ export const getStoredAnnualRateFromInput = (
 ): number => (u ? getNominalAnnualRatePercentFromReal(v, i) : v);
 export const getNetWorthStartingBalance = (a: PlannerAccount): number =>
   a.accountType === 'home' || a.accountType === 'vehicle' ? 0 : clamp(a.startingBalance);
-export const getAssetFinanceSnapshot = (d: AssetFinanceDetails, _: Date): AssetFinanceSnapshot => ({
-  assetValue: clamp(d.currentValue, 1),
-  loanBalance: d.currentLoanBalance ?? 0,
-  equity: clamp(d.currentValue, 1) - (d.currentLoanBalance ?? 0),
-  monthsSincePurchase: 0,
-  remainingLoanMonths: (d.loanTermYears ?? 0) * 12,
-});
+const getMonthsBetween = (from: Date, to: Date): number => {
+  const monthDelta =
+    (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+  if (monthDelta <= 0) return 0;
+  return to.getDate() >= from.getDate() ? monthDelta : monthDelta - 1;
+};
+export const getAssetFinanceSnapshot = (
+  details: AssetFinanceDetails,
+  asOf: Date,
+): AssetFinanceSnapshot => {
+  const parsedPurchaseDate = new Date(details.purchaseDate);
+  const safePurchaseDate = Number.isNaN(parsedPurchaseDate.getTime())
+    ? new Date()
+    : parsedPurchaseDate;
+  const monthsSincePurchase = getMonthsBetween(safePurchaseDate, asOf);
+  const assetValue = clamp(details.currentValue);
+  if (!details.hasLoan) {
+    return {
+      assetValue,
+      loanBalance: 0,
+      equity: assetValue,
+      monthsSincePurchase,
+      remainingLoanMonths: 0,
+    };
+  }
+  const parsedLoanStartDate = new Date(details.loanStartDate);
+  const safeLoanStartDate = Number.isNaN(parsedLoanStartDate.getTime())
+    ? new Date()
+    : parsedLoanStartDate;
+  const termMonths = Math.max(1, Math.round(clamp(details.loanTermYears) * 12));
+  const elapsedLoanMonths = getMonthsBetween(safeLoanStartDate, asOf);
+  const remainingLoanMonths = Math.max(0, termMonths - elapsedLoanMonths);
+  const loanBalance = clamp(details.currentLoanBalance);
+  return {
+    assetValue,
+    loanBalance,
+    equity: assetValue - loanBalance,
+    monthsSincePurchase,
+    remainingLoanMonths,
+  };
+};
 export const getTotalMonthlyForAccount = (
   a: PlannerAccount,
   selfIncome: number,
@@ -214,13 +251,191 @@ export const getFinancialMathSnapshot = (
   yearsToGoalRatePercent: 0,
   scenarios: [],
 });
+export const getEmployerMatchMonthlyFromAnnual = (
+  account: PlannerAccount,
+  ownerAnnualIncome: number,
+  employeeAnnualContribution: number,
+): number => {
+  if (account.accountType !== '401k') return 0;
+  const normalizedSalary = clamp(ownerAnnualIncome);
+  if (normalizedSalary <= 0) return 0;
+  const matchable =
+    normalizedSalary * (clamp(account.employerMatchMaxPercentOfSalary) / 100);
+  const eligible = Math.min(clamp(employeeAnnualContribution), matchable);
+  const annualMatch = eligible * (clamp(account.employerMatchRate) / 100);
+  return annualMatch / 12;
+};
+
+const getProjectedAnnualIrsLimit = (
+  accountType: AccountType,
+  ownerCurrentAge: number,
+  elapsedYears: number,
+  limits: IrsLimitConfig,
+  hasSpouse: boolean,
+  annualIrsLimitGrowthRate: number,
+): number => {
+  const currentAnnualLimit = getSuggestedAnnualLimit(accountType, ownerCurrentAge, limits, hasSpouse);
+  if (currentAnnualLimit <= 0) return 0;
+  const growthFactor = (1 + clamp(annualIrsLimitGrowthRate) / 100) ** Math.max(0, elapsedYears);
+  return currentAnnualLimit * growthFactor;
+};
+
 export const getProjection = (
-  ..._args: unknown[]
-): { projectionRows: ProjectionRow[]; finalBalances: number[]; contributedTotal: number } => ({
-  projectionRows: [],
-  finalBalances: [],
-  contributedTotal: 0,
-});
+  accounts: PlannerAccount[],
+  currentAge: number,
+  targetAge: number,
+  selfAnnualIncome: number,
+  spouseAnnualIncome: number,
+  selfIncomeGrowthRate: number,
+  spouseIncomeGrowthRate: number,
+  assetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>,
+  irLimits: IrsLimitConfig,
+  hasSpouse: boolean,
+  annualIrsLimitGrowthRate: number,
+  selfCurrentAge: number,
+  spouseCurrentAge: number,
+  inflationRatePercent: number,
+  useInflationAdjustedValues: boolean,
+): { projectionRows: ProjectionRow[]; finalBalances: number[] } => {
+  const years = Math.max(0, targetAge - currentAge);
+  const now = new Date();
+  const balances = accounts.map((account) => {
+    if (isCombinedAssetType(account.accountType)) {
+      const details = assetFinanceDetailsByAccountId[account.id];
+      if (details) return getAssetFinanceSnapshot(details, now).equity;
+    }
+    return getNetWorthStartingBalance(account);
+  });
+  const assetFinanceRuntimeState = accounts.map((account) => {
+    if (!isCombinedAssetType(account.accountType)) return null;
+    const details = assetFinanceDetailsByAccountId[account.id];
+    if (!details) return null;
+    const snapshot = getAssetFinanceSnapshot(details, now);
+    return {
+      accountType: account.accountType,
+      assetValue: snapshot.assetValue,
+      assetAnnualRate: details.annualChangeRate,
+      homeGrowthProfile:
+        details.homeGrowthProfile ?? plannerConstants.PLANNER_DEFAULT_HOME_GROWTH_PROFILE,
+      vehicleDepreciationProfile: details.vehicleDepreciationProfile,
+      monthsSincePurchase: snapshot.monthsSincePurchase,
+      loanBalance: snapshot.loanBalance,
+      hasLoan: details.hasLoan,
+      loanMonthlyRate: clamp(details.loanInterestRate, 0) / 100 / 12,
+      loanMonthlyPayment: clamp(details.loanMonthlyPayment),
+      vehicleCustomAnnualRate: details.annualChangeRate,
+      remainingLoanMonths: snapshot.remainingLoanMonths,
+    };
+  });
+  const initialRowAccounts = balances.reduce(
+    (series, balance, index) => ({ ...series, [`account-${index}`]: balance }),
+    {} as Record<`account-${number}`, number>,
+  );
+  const projectionRows: ProjectionRow[] = [
+    {
+      age: currentAge,
+      totalBalance: balances.reduce((sum, b) => sum + b, 0),
+      totalContributions: 0,
+      ...initialRowAccounts,
+    },
+  ];
+  let contributedTotal = 0;
+  for (let year = 1; year <= years; year++) {
+    const yearSelfAnnualIncome = getAnnualIncomeWithGrowth(selfAnnualIncome, selfIncomeGrowthRate, year - 1);
+    const yearSpouseAnnualIncome = getAnnualIncomeWithGrowth(spouseAnnualIncome, spouseIncomeGrowthRate, year - 1);
+    const projectedContributionPlanByAccount = accounts.map((account) => {
+      const ownerAnnualIncome =
+        account.owner === 'spouse' ? yearSpouseAnnualIncome : yearSelfAnnualIncome;
+      const annualEmployeeContribution =
+        getEmployeeMonthlyContribution(account, yearSelfAnnualIncome, yearSpouseAnnualIncome) * 12;
+      const ownerCurrentAge = account.owner === 'spouse' ? spouseCurrentAge : selfCurrentAge;
+      const ownerAgeInProjectionYear = ownerCurrentAge + (year - 1);
+      const projectedAnnualIrsLimit = getProjectedAnnualIrsLimit(
+        account.accountType,
+        ownerAgeInProjectionYear,
+        year - 1,
+        irLimits,
+        hasSpouse,
+        annualIrsLimitGrowthRate,
+      );
+      const cappedAnnualEmployeeContribution =
+        projectedAnnualIrsLimit > 0
+          ? Math.min(annualEmployeeContribution, projectedAnnualIrsLimit)
+          : annualEmployeeContribution;
+      return {
+        monthlyEmployeeContribution: cappedAnnualEmployeeContribution / 12,
+        monthlyEmployerMatch: getEmployerMatchMonthlyFromAnnual(
+          account,
+          ownerAnnualIncome,
+          cappedAnnualEmployeeContribution,
+        ),
+      };
+    });
+    for (let month = 0; month < 12; month++) {
+      for (let index = 0; index < accounts.length; index++) {
+        const account = accounts[index];
+        const afState = assetFinanceRuntimeState[index];
+        if (afState) {
+          if (afState.accountType === 'vehicle') {
+            const vehicleAgeYears = afState.monthsSincePurchase / 12;
+            const annualDepRate = getVehicleAnnualDepreciationRate(
+              afState.vehicleDepreciationProfile,
+              vehicleAgeYears,
+              afState.vehicleCustomAnnualRate,
+            );
+            const effRate = getEffectiveAnnualRatePercent(
+              -annualDepRate,
+              inflationRatePercent,
+              useInflationAdjustedValues,
+            );
+            afState.assetValue *= 1 + effRate / 100 / 12;
+          } else {
+            const annualHomeRate = getHomeAnnualGrowthRate(
+              afState.homeGrowthProfile,
+              afState.assetAnnualRate,
+            );
+            const effRate = getEffectiveAnnualRatePercent(
+              annualHomeRate,
+              inflationRatePercent,
+              useInflationAdjustedValues,
+            );
+            afState.assetValue *= 1 + effRate / 100 / 12;
+          }
+          afState.monthsSincePurchase += 1;
+          if (afState.hasLoan && afState.loanBalance > 0) {
+            afState.loanBalance =
+              afState.loanBalance * (1 + afState.loanMonthlyRate) - afState.loanMonthlyPayment;
+            if (afState.loanBalance < 0) afState.loanBalance = 0;
+            if (afState.remainingLoanMonths > 0) afState.remainingLoanMonths -= 1;
+            contributedTotal += afState.loanMonthlyPayment;
+          }
+          balances[index] = afState.assetValue - afState.loanBalance;
+          continue;
+        }
+        const effAnnualRate = getEffectiveAnnualRatePercent(
+          account.annualRate,
+          inflationRatePercent,
+          useInflationAdjustedValues,
+        );
+        const monthlyRate = clamp(effAnnualRate, -99) / 100 / 12;
+        const plan = projectedContributionPlanByAccount[index];
+        const contrib = plan.monthlyEmployeeContribution + plan.monthlyEmployerMatch;
+        balances[index] = balances[index] * (1 + monthlyRate) + contrib;
+        contributedTotal += contrib;
+      }
+    }
+    projectionRows.push({
+      age: currentAge + year,
+      totalBalance: balances.reduce((sum, v) => sum + v, 0),
+      totalContributions: contributedTotal,
+      ...balances.reduce(
+        (series, balance, index) => ({ ...series, [`account-${index}`]: balance }),
+        {} as Record<`account-${number}`, number>,
+      ),
+    });
+  }
+  return { projectionRows, finalBalances: balances };
+};
 export const getDefaultAssetFinanceDetailsForAccount = (
   account: PlannerAccount,
 ): AssetFinanceDetails => {
@@ -264,6 +479,7 @@ export const getEmployeeMonthlyContribution = (
   selfIncome: number,
   spouseIncome: number,
 ): number => {
+  if (isNonContributingAccountType(a.accountType)) return 0;
   const inc = a.owner === 'self' ? selfIncome : spouseIncome;
   if (a.contributionMode === 'salary-percent')
     return clamp((inc * (a.contributionValue / 100)) / 12);

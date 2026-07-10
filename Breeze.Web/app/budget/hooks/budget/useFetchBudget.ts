@@ -21,7 +21,7 @@ export const useFetchBudget = ({ date }: FetchBudgetProps) => {
     return getBudget(date.year(), date.month() + 1);
   }, [getBudget, date]);
 
-  return useQuery<Budget, Error>({
+  return useQuery<Budget | null, Error>({
     queryKey: ['budget', date.format('YYYY-MM')],
     queryFn: fetchBudget,
     refetchInterval: 180 * 1000,

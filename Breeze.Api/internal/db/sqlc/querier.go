@@ -61,6 +61,7 @@ type Querier interface {
 	ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID) ([]ListLiabilitiesByUserIDRow, error)
 	ListNetWorthSnapshots(ctx context.Context, userID uuid.UUID) ([]NetWorthSnapshot, error)
 	ListPlaidConnectionsByUserID(ctx context.Context, userID uuid.UUID) ([]PlaidConnection, error)
+	ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]PlannerPerson, error)
 	ListRecurringIncomeByUserID(ctx context.Context, userID uuid.UUID) ([]RecurringIncome, error)
 	ListRetirementAccountsByUserID(ctx context.Context, userID uuid.UUID) ([]RetirementAccount, error)
 	ListScenarioComparisonsByUserID(ctx context.Context, userID uuid.UUID) ([]ListScenarioComparisonsByUserIDRow, error)
@@ -77,6 +78,8 @@ type Querier interface {
 	SoftDeleteLiability(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeletePlaidAccount(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeletePlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) (int64, error)
+	SoftDeletePlannerPerson(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteRecurringIncome(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteRetirementAccount(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteScenarioProfile(ctx context.Context, id uuid.UUID) (int64, error)
@@ -97,6 +100,7 @@ type Querier interface {
 	UpdateTaxBracket(ctx context.Context, arg UpdateTaxBracketParams) (TaxBracket, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error)
 	UpsertPlaidAccount(ctx context.Context, arg UpsertPlaidAccountParams) (PlaidAccount, error)
+	UpsertPlannerPerson(ctx context.Context, arg UpsertPlannerPersonParams) (PlannerPerson, error)
 	UpsertScenarioResultCache(ctx context.Context, arg UpsertScenarioResultCacheParams) (ScenarioResultsCache, error)
 }
 

@@ -33,6 +33,7 @@ type Query {
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
   estimateTaxesForYear(year: Int!, filingStatus: FilingStatus!, income: String!, deduction: String): TaxEstimate
   calculateRetirementLadder(initialBalance: String!, annualExpenses: String!, currentAge: Int!, firstWithdrawalAge: Int!, isRoth: Boolean!, year: Int!, filingStatus: FilingStatus!, yearsToProject: Int): RetirementLadderProjection
+  plannerPeople(userId: ID!): [PlannerPerson!]!
   netWorthSnapshot(id: ID!): NetWorthSnapshot
   netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
   netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
@@ -82,6 +83,8 @@ type Mutation {
   exchangePlaidPublicToken(userId: ID!, publicToken: String!): PlaidConnection!
   syncPlaidConnection(id: ID!): Boolean!
   deletePlaidConnection(id: ID!): Boolean!
+  upsertPlannerPerson(input: UpsertPlannerPersonInput!): PlannerPerson!
+  deletePlannerPerson(id: ID!): Boolean!
 }
 
 type Health {
@@ -230,6 +233,7 @@ type Asset {
   employerMatchRate: String!
   employerMatchMaxPercentOfSalary: String!
   annualRate: String!
+  returnProfile: String
   lastValueUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
@@ -270,6 +274,34 @@ type Goal {
   isCompleted: Boolean!
   createdAt: String!
   updatedAt: String!
+}
+
+type PlannerPerson {
+  id: ID!
+  userId: ID!
+  personType: String!
+  name: String!
+  birthday: String!
+  retirementAge: Int!
+  annualSalary: String!
+  bonusMode: String!
+  annualBonus: String!
+  incomeGrowthRate: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input UpsertPlannerPersonInput {
+  id: ID!
+  userId: ID!
+  personType: String!
+  name: String!
+  birthday: String!
+  retirementAge: Int!
+  annualSalary: String!
+  bonusMode: String!
+  annualBonus: String!
+  incomeGrowthRate: String!
 }
 
 type Scenario {
@@ -652,6 +684,7 @@ input CreateAssetInput {
   employerMatchRate: String!
   employerMatchMaxPercentOfSalary: String!
   annualRate: String!
+  returnProfile: String
 }
 
 input UpdateAssetInput {
@@ -665,6 +698,7 @@ input UpdateAssetInput {
   employerMatchRate: String!
   employerMatchMaxPercentOfSalary: String!
   annualRate: String!
+  returnProfile: String
 }
 
 

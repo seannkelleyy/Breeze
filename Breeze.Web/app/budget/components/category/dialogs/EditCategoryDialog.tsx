@@ -42,14 +42,14 @@ export const EditCategoryDialog = ({ existingCategory, children }: EditCategoryD
     },
   });
 
-  const onSubmit = (values: CategoryFormData) => {
+  const onSubmit = async (values: CategoryFormData) => {
     if (!userId || !budget?.id) return;
     const category: Category = {
       ...existingCategory,
       name: values.name,
       allocation: values.allocation,
     };
-    patchMutation.mutate({ category });
+    await patchMutation.mutateAsync({ category });
   };
 
   const dialogTrigger = <div className="hover:cursor-pointer">{children}</div>;
@@ -79,7 +79,7 @@ export const EditCategoryDialog = ({ existingCategory, children }: EditCategoryD
       destructiveElements={
         <DeleteDialog
           key={existingCategory.id}
-          onDelete={() => deleteMutation.mutate({ category: existingCategory })}
+          onDelete={async () => deleteMutation.mutateAsync({ category: existingCategory })}
           itemType="Category"
           additionalText={`You are about to delete the category: ${existingCategory.name}`}
         />

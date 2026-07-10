@@ -29,7 +29,7 @@ func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := os.Getenv("ALLOWED_ORIGIN")
 		if origin == "" {
-			origin = "http://localhost:5173"
+			origin = "http://localhost:3000"
 		}
 
 		w.Header().Set("Access-Control-Allow-Origin", origin)

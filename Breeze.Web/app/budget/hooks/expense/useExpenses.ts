@@ -6,6 +6,7 @@ import {
   GET_EXPENSES_BY_BUDGET,
   UPDATE_EXPENSE,
 } from '@/lib/services/queries/budget';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import { Expense } from '../../types/expense';
 
@@ -14,6 +15,7 @@ import { Expense } from '../../types/expense';
  */
 const useExpenses = () => {
   const { request } = useGraphql();
+  const { userId } = useCurrentUser();
 
   const getExpensesForBudget = useCallback(
     async (budgetId: string): Promise<Expense[]> => {
@@ -28,7 +30,7 @@ const useExpenses = () => {
   const postExpense = useCallback(
     async (
       budgetId: string,
-      userId: string,
+      _userId: string,
       expense: Omit<Expense, 'id' | 'userId' | 'budgetId' | 'createdAt' | 'updatedAt'>,
     ): Promise<string> => {
       const input = {
@@ -48,7 +50,7 @@ const useExpenses = () => {
       });
       return resp.createExpense.id;
     },
-    [request],
+    [request, userId],
   );
 
   const patchExpense = useCallback(

@@ -8,8 +8,8 @@ Track what is done, what is next, and where to find implementation patterns.
 
 ## Last Updated
 
-- Date: 2026-07-02
-- Scope: Documentation and workflow consolidation completed
+- Date: 2026-07-09
+- Scope: All 4 documented defects resolved
 
 ## Current Status
 
@@ -25,12 +25,20 @@ Track what is done, what is next, and where to find implementation patterns.
 - Web app: 🔨 Wiring in progress
 - Deployment: ✅ Local docker compose + Go test/build workflow in place
 
+## Defects Resolved
+
+1. **Asset Return Profile Selector** ✅ — Fixes applied: removed double-conversion wrapper, corrected profile rate values (0,3,4,7,10) in `plannerMath.ts`, corrected profile thresholds. Math round-trip is now lossless.
+2. **Goals Can't Be Saved (FK Constraint)** ✅ — `resolveUserIDFromCtx` in `resolver.go` extracts authenticated user UUID; `CreateGoal` resolver overrides `userId` from auth context.
+3. **Household Self Person Not Editable** ✅ — `usePlannerPeople.ts` initializes default self person from `PLANNER_DEFAULT_SELF_PERSON` when people array is empty.
+4. **People Data Not Persisted** ✅ — Full stack implementation: backend (`planner_people` table, service, GraphQL schema/resolvers), frontend (mutations hook, save button wiring, data loading).
+
 ## What Is Left
 
 - Plaid connections UI end-to-end integration and sync visibility
 - Planner/Budget page decomposition into smaller maintainable units
 - Additional regression coverage for high-risk user flows
 - UI/UX refinements and performance optimizations
+- Run `make dev` in `Breeze.Api/` to apply migrations, regenerate code, and start the API
 
 ## Notes
 

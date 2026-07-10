@@ -6,6 +6,7 @@ import {
   GET_INCOMES_BY_BUDGET,
   UPDATE_INCOME,
 } from '@/lib/services/queries/budget';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import { Income } from '../../types/income';
 
@@ -14,6 +15,7 @@ import { Income } from '../../types/income';
  */
 const useIncomes = () => {
   const { request } = useGraphql();
+  const { userId } = useCurrentUser();
 
   const getIncomes = useCallback(
     async (budgetId: string): Promise<Income[]> => {
@@ -28,7 +30,7 @@ const useIncomes = () => {
   const postIncome = useCallback(
     async (
       budgetId: string,
-      userId: string,
+      _userId: string,
       income: Omit<Income, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'sourceType'>,
     ): Promise<string> => {
       const input = {
@@ -44,7 +46,7 @@ const useIncomes = () => {
       });
       return resp.createIncome.id;
     },
-    [request],
+    [request, userId],
   );
 
   const patchIncome = useCallback(

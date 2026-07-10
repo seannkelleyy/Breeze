@@ -29,6 +29,7 @@ type Resolver struct {
 	TaxPlanningService      *service.TaxPlanningService
 	RetirementLadderService *service.RetirementLadderService
 	NetWorthSnapshotService *service.NetWorthSnapshotService
+	PlannerPersonService    *service.PlannerPersonService
 }
 
 // resolveUserIDFromCtx extracts the authenticated user's internal UUID from

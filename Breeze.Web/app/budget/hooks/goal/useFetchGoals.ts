@@ -12,15 +12,15 @@ interface FetchGoalProps {
  * A hook for fetching goal data.
  * @param props.userId: The user id to fetch goals from.
  */
-const useFetchGoals = ({ userId }: FetchGoalProps) => {
+const useFetchGoals = ({}: FetchGoalProps) => {
   const { getGoals } = useGoals();
 
   const fetchGoals = useCallback(() => {
-    return getGoals(userId);
-  }, [getGoals, userId]);
+    return getGoals();
+  }, [getGoals]);
 
   return useQuery<Goal[], Error>({
-    queryKey: ['goals', userId],
+    queryKey: ['goals'],
     queryFn: fetchGoals,
     refetchInterval: 180 * 1000,
     retryDelay: 1 * 1000,

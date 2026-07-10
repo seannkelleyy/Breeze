@@ -27,7 +27,7 @@ func createIncomeInputFromModel(input model.CreateIncomeInput) (service.CreateIn
 		return service.CreateIncomeInput{}, fmt.Errorf("invalid amount: %w", err)
 	}
 
-	incomeDate, err := time.Parse(time.RFC3339, input.Date)
+	incomeDate, err := parseDate(input.Date)
 	if err != nil {
 		return service.CreateIncomeInput{}, fmt.Errorf("invalid income date: %w", err)
 	}
@@ -71,7 +71,7 @@ func updateIncomeInputFromModel(input model.UpdateIncomeInput) (service.UpdateIn
 		return service.UpdateIncomeInput{}, fmt.Errorf("invalid amount: %w", err)
 	}
 
-	incomeDate, err := time.Parse(time.RFC3339, input.Date)
+	incomeDate, err := parseDate(input.Date)
 	if err != nil {
 		return service.UpdateIncomeInput{}, fmt.Errorf("invalid income date: %w", err)
 	}
@@ -114,7 +114,7 @@ func createRecurringIncomeInputFromModel(input model.CreateRecurringIncomeInput)
 		return service.CreateRecurringIncomeInput{}, fmt.Errorf("invalid amount: %w", err)
 	}
 
-	startDate, err := time.Parse(time.RFC3339, input.StartDate)
+	startDate, err := parseDate(input.StartDate)
 	if err != nil {
 		return service.CreateRecurringIncomeInput{}, fmt.Errorf("invalid start date: %w", err)
 	}
@@ -148,7 +148,7 @@ func updateRecurringIncomeInputFromModel(input model.UpdateRecurringIncomeInput)
 		return service.UpdateRecurringIncomeInput{}, fmt.Errorf("invalid amount: %w", err)
 	}
 
-	startDate, err := time.Parse(time.RFC3339, input.StartDate)
+	startDate, err := parseDate(input.StartDate)
 	if err != nil {
 		return service.UpdateRecurringIncomeInput{}, fmt.Errorf("invalid start date: %w", err)
 	}
@@ -222,13 +222,25 @@ func parseOptionalUUID(value *string) (*uuid.UUID, error) {
 	return &parsed, nil
 }
 
+func parseDate(value string) (time.Time, error) {
+	parsed, err := time.Parse(time.RFC3339, value)
+	if err == nil {
+		return parsed, nil
+	}
+	parsed, err = time.Parse("2006-01-02", value)
+	if err == nil {
+		return parsed, nil
+	}
+	return time.Time{}, fmt.Errorf("cannot parse date %q: expected RFC3339 or YYYY-MM-DD", value)
+}
+
 func parseOptionalDate(value *string) (*time.Time, error) {
 	if value == nil || *value == "" {
 		return nil, nil
 	}
-	parsed, err := time.Parse(time.RFC3339, *value)
+	parsed, err := parseDate(*value)
 	if err != nil {
-		return nil, fmt.Errorf("invalid date: %w", err)
+		return nil, err
 	}
 	return &parsed, nil
 }

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -23,6 +23,7 @@ export const CreateExpenseDialog = () => {
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseFormSchema),
+    mode: 'onChange',
     defaultValues: {
       amount: '',
       date: new Date().toISOString().split('T')[0],
@@ -30,7 +31,7 @@ export const CreateExpenseDialog = () => {
       splits: [
         {
           categoryId: categories?.[0]?.id ?? '',
-          amount: '',
+          amount: '0',
         },
       ],
     },
@@ -53,11 +54,13 @@ export const CreateExpenseDialog = () => {
 
   const onSubmit = async (values: ExpenseFormData) => {
     if (!userId || !budget?.id) return;
+    const firstCategoryId = categories?.[0]?.id ?? '';
+    const categoryId = values.splits?.[0]?.categoryId || firstCategoryId;
     const expense: Omit<Expense, 'id' | 'userId' | 'budgetId' | 'createdAt' | 'updatedAt'> = {
       amount: values.amount,
       date: values.date,
       description: values.description,
-      splits: values.splits,
+      splits: [{ categoryId, amount: values.amount }],
     };
     await postMutation.mutateAsync({
       budgetId: budget.id,
@@ -67,6 +70,11 @@ export const CreateExpenseDialog = () => {
   };
 
   const dialogTrigger = <Button>Add Expense</Button>;
+
+  const categoryOptions = React.useMemo(
+    () => categories.map((c) => ({ value: c.id, label: c.name })),
+    [categories],
+  );
 
   const inputFields = (
     <>
@@ -78,6 +86,13 @@ export const CreateExpenseDialog = () => {
       />
       <FormInputField form={form} name="amount" label="Amount" type="number" placeholder="0.00" />
       <FormInputField form={form} name="date" label="Date" type="date" />
+      <FormSelectField
+        form={form}
+        name="splits.0.categoryId"
+        label="Category"
+        options={categoryOptions}
+        parseAsNumber={false}
+      />
     </>
   );
 

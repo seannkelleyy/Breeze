@@ -121,6 +121,7 @@ export const PLANNER_DEFAULT_NEW_ACCOUNT = {
   employerMatchRate: 0,
   employerMatchMaxPercentOfSalary: 0,
   startingBalance: 0,
+  returnProfile: null,
 } as const;
 
 export const PLANNER_DEFAULT_COLLAPSED_SECTIONS = {

@@ -1,7 +1,9 @@
 # Defect: Asset Return Profile Selector Does Not Update
 
 ## Status
-Unresolved
+Resolved
+
+The three attempted fixes (removed double-conversion wrapper, corrected profile rate values, corrected profile thresholds) are all applied in the current code. The math round-trip for standard profiles is lossless. For custom profiles, the stored nominal rate round-trips correctly through display → storage conversion.
 
 ## Environment
 - Planner page → Accounts card → Return Profile dropdown

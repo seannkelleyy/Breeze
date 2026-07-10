@@ -16,6 +16,11 @@ const scheduleLabel: Record<ScheduleType, string> = {
   YEARLY: 'Yearly',
 };
 
+function toDateInputValue(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  return dateStr.slice(0, 10);
+}
+
 export function makeDefaultIncomeTemplate(
   today: string,
 ): Omit<RecurringIncomeTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'> {
@@ -174,7 +179,7 @@ export const RecurringIncomeSection = ({
                   <label className="text-muted-foreground text-sm">Start</label>
                   <Input
                     type="date"
-                    value={template.startDate}
+                    value={toDateInputValue(template.startDate)}
                     onChange={(e) =>
                       onUpdate((curr) =>
                         curr.map((item, i) =>
@@ -188,7 +193,7 @@ export const RecurringIncomeSection = ({
                   <label className="text-muted-foreground text-sm">End (optional)</label>
                   <Input
                     type="date"
-                    value={template.endDate ?? ''}
+                    value={toDateInputValue(template.endDate)}
                     onChange={(e) =>
                       onUpdate((curr) =>
                         curr.map((item, i) =>

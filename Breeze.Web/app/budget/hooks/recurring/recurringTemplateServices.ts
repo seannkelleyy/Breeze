@@ -1,3 +1,9 @@
+import {
+  GET_CATEGORIES,
+  CREATE_EXPENSE_CATEGORY,
+  UPDATE_EXPENSE_CATEGORY,
+  DELETE_EXPENSE_CATEGORY,
+} from '@/lib/services/queries/budget';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import { useCallback } from 'react';
@@ -32,7 +38,6 @@ export const useRecurringTemplates = () => {
   const { userId } = useCurrentUser();
 
   const getRecurringIncomeTemplates = useCallback(async (): Promise<RecurringIncomeTemplate[]> => {
-    if (!userId) return [];
     const query = `
         query RecurringIncomes($userId: ID!) {
           recurringIncomes(userId: $userId) {
@@ -59,7 +64,6 @@ export const useRecurringTemplates = () => {
     async (
       template: Omit<RecurringIncomeTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
     ): Promise<RecurringIncomeTemplate> => {
-      if (!userId) throw new Error('User not authenticated');
       const mutation = `
         mutation CreateRecurringIncome($input: CreateRecurringIncomeInput!) {
           createRecurringIncome(input: $input) {
@@ -142,33 +146,73 @@ export const useRecurringTemplates = () => {
     [graphqlRequest],
   );
 
-  const getRecurringCategoryTemplates = useCallback(async (): Promise<
-    RecurringCategoryTemplate[]
-  > => {
-    // Placeholder - Category templates not yet in GraphQL schema
-    return [];
-  }, []);
+  const getRecurringCategoryTemplates = useCallback(
+    async (budgetId: string, budgetMonth?: string): Promise<RecurringCategoryTemplate[]> => {
+      const response = await graphqlRequest<{
+        expenseCategories: Array<{
+          id: string;
+          name: string;
+          allocation: string;
+        }>;
+      }>(GET_CATEGORIES, { budgetId } as Record<string, unknown>);
+      const defaultStart = budgetMonth ?? `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
+      return (response?.expenseCategories ?? []).map((c) => ({
+        id: c.id,
+        name: c.name,
+        allocation: Number(c.allocation),
+        startDate: defaultStart,
+        stopDate: null,
+        isActive: true,
+      }));
+    },
+    [graphqlRequest],
+  );
 
   const postRecurringCategoryTemplate = useCallback(
-    async (_template: RecurringCategoryTemplate): Promise<RecurringCategoryTemplate> => {
-      // Placeholder - Category templates not yet in GraphQL schema
-      throw new Error('Recurring category templates not yet implemented');
+    async (
+      template: RecurringCategoryTemplate,
+      budgetId: string,
+    ): Promise<RecurringCategoryTemplate> => {
+      const response = await graphqlRequest<{
+        createExpenseCategory: { id: string; name: string; allocation: string };
+      }>(CREATE_EXPENSE_CATEGORY, {
+        input: {
+          userId,
+          budgetId,
+          name: template.name,
+          allocation: template.allocation.toString(),
+          currentSpend: '0',
+        },
+      });
+      return {
+        ...template,
+        id: response.createExpenseCategory.id,
+      };
     },
-    [],
+    [graphqlRequest, userId],
   );
 
   const patchRecurringCategoryTemplate = useCallback(
-    async (_template: RecurringCategoryTemplate): Promise<RecurringCategoryTemplate> => {
-      // Placeholder - Category templates not yet in GraphQL schema
-      throw new Error('Recurring category templates not yet implemented');
+    async (
+      template: RecurringCategoryTemplate,
+    ): Promise<RecurringCategoryTemplate> => {
+      if (!template.id) throw new Error('Cannot update a category without an ID');
+      await graphqlRequest(UPDATE_EXPENSE_CATEGORY, {
+        input: {
+          id: template.id,
+          name: template.name,
+          allocation: template.allocation.toString(),
+          currentSpend: '0',
+        },
+      });
+      return template;
     },
-    [],
+    [graphqlRequest],
   );
 
-  const deleteRecurringCategoryTemplate = useCallback(async (_id: string): Promise<void> => {
-    // Placeholder - Category templates not yet in GraphQL schema
-    throw new Error('Recurring category templates not yet implemented');
-  }, []);
+  const deleteRecurringCategoryTemplate = useCallback(async (id: string): Promise<void> => {
+    await graphqlRequest(DELETE_EXPENSE_CATEGORY, { id });
+  }, [graphqlRequest]);
 
   return {
     getRecurringIncomeTemplates,

@@ -150,7 +150,16 @@ export function AccountListItem({
       ? getAssetFinanceSnapshot(assetFinanceDetails, new Date())
       : null;
 
-  const selectedRateProfile = getRateProfileFromAnnualRate(getDisplayedRateForAccount(account));
+  const derivedRateProfile = getRateProfileFromAnnualRate(getDisplayedRateForAccount(account));
+  const selectedRateProfile = account.returnProfile ?? derivedRateProfile;
+
+  const handleRateProfileChange = (value: AccountRateProfile) => {
+    onUpdateAccount((current) => ({
+      ...current,
+      returnProfile: value,
+      annualRate: getAnnualRateFromProfile(value, getDisplayedRateForAccount(current)),
+    }));
+  };
 
   const employeeMonthly = getEmployeeMonthlyContribution(
     account,
@@ -206,6 +215,7 @@ export function AccountListItem({
     onUpdateAccount((current) => ({
       ...current,
       accountType: selectedType,
+      returnProfile: null,
       annualRate:
         selectedType === 'vehicle'
           ? current.accountType !== 'vehicle'
@@ -340,6 +350,7 @@ export function AccountListItem({
               selectedRateProfile={selectedRateProfile}
               usesDepreciationInput={usesDepreciationInput}
               onUpdateAccount={onUpdateAccount}
+              onRateProfileChange={handleRateProfileChange}
               onSetContributionToIrsMax={onSetContributionToIrsMax}
               getDisplayedRateForAccount={getDisplayedRateForAccount}
               getAnnualRateFromProfile={getAnnualRateFromProfile}

@@ -22,20 +22,20 @@ interface BudgetProviderProps {
  */
 const BudgetDataProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   const [budgetDate, setBudgetDate] = useState<Dayjs>(dayjs(new Date()));
-  const { data: budget = {} as Budget, refetch: refetchBudget } = useFetchBudget({
+  const { data: budget, refetch: refetchBudget } = useFetchBudget({
     date: budgetDate,
   });
   const { data: incomes = [], refetch: refetchIncomes } = useFetchIncomes({
-    budgetId: budget?.id,
-    enabled: !!budget.id,
+    budgetId: budget?.id ?? '',
+    enabled: !!budget?.id,
   });
   const { data: categories = [], refetch: refetchCategories } = useFetchCategories({
-    budgetId: budget?.id,
-    enabled: !!budget.id,
+    budgetId: budget?.id ?? '',
+    enabled: !!budget?.id,
   });
   const { data: expenses = [], refetch: refetchExpenses } = useFetchExpensesForBudget({
-    budgetId: budget?.id,
-    enabled: !!budget.id,
+    budgetId: budget?.id ?? '',
+    enabled: !!budget?.id,
   });
 
   const totalSpent = useMemo(

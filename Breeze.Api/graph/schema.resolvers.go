@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"breeze.api/graph/generated"
@@ -171,9 +172,19 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 		return nil, r.mapErr(ctx, err)
 	}
 
+	// Resolve the authenticated user from context when available.
+	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
+		svcInput.UserID = resolvedID
+	}
+
 	budget, err := r.BudgetService.Create(ctx, svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
+	}
+
+	// Generate incomes from recurring templates for the new budget month.
+	if genErr := generateIncomesForBudget(ctx, r.RecurringIncomeService, r.IncomeService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
+		slog.Warn("failed to generate recurring incomes for new budget", "error", genErr)
 	}
 
 	return mapBudgetToModel(budget), nil
@@ -219,8 +230,8 @@ func (r *mutationResolver) CreateGoal(ctx context.Context, input model.CreateGoa
 		return nil, r.mapErr(ctx, err)
 	}
 
-	// Resolve the authenticated user from context and override the userId
-	// to prevent foreign-key violations when the client sends an invalid ID.
+	// Resolve the user from the auth context first (production path).
+	// If that fails (local dev without Clerk), use the input userId directly.
 	if userID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
 		svcInput.UserID = userID
 	}
@@ -717,6 +728,43 @@ func (r *mutationResolver) DeletePlaidConnection(ctx context.Context, id string)
 	return true, nil
 }
 
+// UpsertPlannerPerson is the resolver for the upsertPlannerPerson field.
+func (r *mutationResolver) UpsertPlannerPerson(ctx context.Context, input model.UpsertPlannerPersonInput) (*model.PlannerPerson, error) {
+	svcInput, err := upsertPlannerPersonInputFromModel(input)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	if userID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
+		svcInput.UserID = userID
+	}
+
+	person, err := r.PlannerPersonService.Upsert(ctx, svcInput)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	return mapPlannerPersonToModel(person), nil
+}
+
+// DeletePlannerPerson is the resolver for the deletePlannerPerson field.
+func (r *mutationResolver) DeletePlannerPerson(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid planner person id: %w", err)
+	}
+
+	err = r.PlannerPersonService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, r.mapErr(ctx, err)
+	}
+
+	return true, nil
+}
+
 // Health is the resolver for the health field.
 func (r *queryResolver) Health(ctx context.Context) (*model.Health, error) {
 	health, err := r.HealthService.Get(ctx)
@@ -886,6 +934,11 @@ func (r *queryResolver) BudgetByDate(ctx context.Context, userID string, date st
 		return nil, fmt.Errorf("invalid user id: %w", err)
 	}
 
+	// Resolve the authenticated user from context when available.
+	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
+		parsedUserID = resolvedID
+	}
+
 	budgetDate, err := time.Parse(time.RFC3339, date)
 	if err != nil {
 		return nil, fmt.Errorf("invalid budget date: %w", err)
@@ -893,10 +946,25 @@ func (r *queryResolver) BudgetByDate(ctx context.Context, userID string, date st
 
 	budget, err := r.BudgetService.GetByDate(ctx, parsedUserID, budgetDate)
 	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
-			return nil, nil
+		if !errors.Is(err, service.ErrNotFound) {
+			return nil, r.mapErr(ctx, err)
 		}
-		return nil, r.mapErr(ctx, err)
+
+		// Auto-create a budget for this month when none exists.
+		budget, err = r.BudgetService.Create(ctx, service.CreateBudgetInput{
+			UserID:          parsedUserID,
+			Date:            budgetDate,
+			MonthlyIncome:   decimalZero(),
+			MonthlyExpenses: decimalZero(),
+		})
+		if err != nil {
+			return nil, r.mapErr(ctx, err)
+		}
+
+		// Generate incomes from recurring templates for the new budget month.
+		if genErr := generateIncomesForBudget(ctx, r.RecurringIncomeService, r.IncomeService, parsedUserID, budget.ID, budgetDate); genErr != nil {
+			slog.Warn("failed to generate recurring incomes for new budget", "error", genErr)
+		}
 	}
 
 	return mapBudgetToModel(budget), nil
@@ -1389,6 +1457,31 @@ func (r *queryResolver) CalculateRetirementLadder(ctx context.Context, initialBa
 
 	// Map to GraphQL model
 	return mapRetirementLadderProjectionToModel(proj), nil
+}
+
+// PlannerPeople is the resolver for the plannerPeople field.
+func (r *queryResolver) PlannerPeople(ctx context.Context, userID string) ([]*model.PlannerPerson, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
+		parsedUserID = resolvedID
+	}
+
+	people, err := r.PlannerPersonService.ListByUserID(ctx, parsedUserID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	out := make([]*model.PlannerPerson, 0, len(people))
+	for i := range people {
+		person := people[i]
+		out = append(out, mapPlannerPersonToModel(&person))
+	}
+
+	return out, nil
 }
 
 // NetWorthSnapshot is the resolver for the netWorthSnapshot field.

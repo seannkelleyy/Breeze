@@ -519,6 +519,7 @@ type Asset struct {
 	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
+	ReturnProfile                   *string            `json:"return_profile"`
 }
 
 type Budget struct {
@@ -674,6 +675,22 @@ type PlaidConnection struct {
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type PlannerPerson struct {
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	PersonType       string             `json:"person_type"`
+	Name             string             `json:"name"`
+	Birthday         string             `json:"birthday"`
+	RetirementAge    int32              `json:"retirement_age"`
+	AnnualSalary     decimal.Decimal    `json:"annual_salary"`
+	BonusMode        string             `json:"bonus_mode"`
+	AnnualBonus      decimal.Decimal    `json:"annual_bonus"`
+	IncomeGrowthRate decimal.Decimal    `json:"income_growth_rate"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type RecurringIncome struct {

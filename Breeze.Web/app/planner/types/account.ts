@@ -45,6 +45,7 @@ export type PlannerAccount = {
   employerMatchMaxPercentOfSalary: number;
   startingBalance: number;
   annualRate: number;
+  returnProfile: AccountRateProfile | null;
 };
 
 export interface PlannerAccountDto {
@@ -57,6 +58,7 @@ export interface PlannerAccountDto {
   employerMatchMaxPercentOfSalary: number;
   startingBalance: number;
   annualRate: number;
+  returnProfile: string | null;
   purchaseDate?: string | null;
   purchasePrice?: number | null;
   currentValue?: number | null;

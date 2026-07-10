@@ -48,6 +48,7 @@ type ComplexityRoot struct {
 		LastValueUpdatedAt              func(childComplexity int) int
 		Name                            func(childComplexity int) int
 		Owner                           func(childComplexity int) int
+		ReturnProfile                   func(childComplexity int) int
 		UpdatedAt                       func(childComplexity int) int
 		UserID                          func(childComplexity int) int
 	}
@@ -198,6 +199,7 @@ type ComplexityRoot struct {
 		DeleteLiability          func(childComplexity int, id string) int
 		DeleteNetWorthSnapshot   func(childComplexity int, id string) int
 		DeletePlaidConnection    func(childComplexity int, id string) int
+		DeletePlannerPerson      func(childComplexity int, id string) int
 		DeleteRecurringIncome    func(childComplexity int, id string) int
 		DeleteRetirementAccount  func(childComplexity int, id string) int
 		DeleteScenario           func(childComplexity int, id string) int
@@ -218,6 +220,7 @@ type ComplexityRoot struct {
 		UpdateScenario           func(childComplexity int, input model.UpdateScenarioInput) int
 		UpdateTaxBracket         func(childComplexity int, input model.UpdateTaxBracketInput) int
 		UpdateUser               func(childComplexity int, input model.UpdateUserInput) int
+		UpsertPlannerPerson      func(childComplexity int, input model.UpsertPlannerPersonInput) int
 	}
 
 	NetWorthSnapshot struct {
@@ -256,6 +259,21 @@ type ComplexityRoot struct {
 		UserID          func(childComplexity int) int
 	}
 
+	PlannerPerson struct {
+		AnnualBonus      func(childComplexity int) int
+		AnnualSalary     func(childComplexity int) int
+		Birthday         func(childComplexity int) int
+		BonusMode        func(childComplexity int) int
+		CreatedAt        func(childComplexity int) int
+		ID               func(childComplexity int) int
+		IncomeGrowthRate func(childComplexity int) int
+		Name             func(childComplexity int) int
+		PersonType       func(childComplexity int) int
+		RetirementAge    func(childComplexity int) int
+		UpdatedAt        func(childComplexity int) int
+		UserID           func(childComplexity int) int
+	}
+
 	Query struct {
 		Asset                     func(childComplexity int, id string) int
 		Assets                    func(childComplexity int, userID string) int
@@ -284,6 +302,7 @@ type ComplexityRoot struct {
 		PlaidAccounts             func(childComplexity int, connectionID string) int
 		PlaidConnection           func(childComplexity int, id string) int
 		PlaidConnections          func(childComplexity int, userID string) int
+		PlannerPeople             func(childComplexity int, userID string) int
 		RecurringIncome           func(childComplexity int, id string) int
 		RecurringIncomes          func(childComplexity int, userID string) int
 		RetirementAccount         func(childComplexity int, id string) int
@@ -446,6 +465,8 @@ type MutationResolver interface {
 	ExchangePlaidPublicToken(ctx context.Context, userID string, publicToken string) (*model.PlaidConnection, error)
 	SyncPlaidConnection(ctx context.Context, id string) (bool, error)
 	DeletePlaidConnection(ctx context.Context, id string) (bool, error)
+	UpsertPlannerPerson(ctx context.Context, input model.UpsertPlannerPersonInput) (*model.PlannerPerson, error)
+	DeletePlannerPerson(ctx context.Context, id string) (bool, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (*model.Health, error)
@@ -482,6 +503,7 @@ type QueryResolver interface {
 	TaxBrackets(ctx context.Context, year int, filingStatus model.FilingStatus) ([]*model.TaxBracket, error)
 	EstimateTaxesForYear(ctx context.Context, year int, filingStatus model.FilingStatus, income string, deduction *string) (*model.TaxEstimate, error)
 	CalculateRetirementLadder(ctx context.Context, initialBalance string, annualExpenses string, currentAge int, firstWithdrawalAge int, isRoth bool, year int, filingStatus model.FilingStatus, yearsToProject *int) (*model.RetirementLadderProjection, error)
+	PlannerPeople(ctx context.Context, userID string) ([]*model.PlannerPerson, error)
 	NetWorthSnapshot(ctx context.Context, id string) (*model.NetWorthSnapshot, error)
 	NetWorthSnapshotByDate(ctx context.Context, userID string, date string) (*model.NetWorthSnapshot, error)
 	NetWorthSnapshots(ctx context.Context, userID string) ([]*model.NetWorthSnapshot, error)
@@ -573,6 +595,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Asset.Owner(childComplexity), true
+	case "Asset.returnProfile":
+		if e.ComplexityRoot.Asset.ReturnProfile == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Asset.ReturnProfile(childComplexity), true
 	case "Asset.updatedAt":
 		if e.ComplexityRoot.Asset.UpdatedAt == nil {
 			break
@@ -1384,6 +1412,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DeletePlaidConnection(childComplexity, args["id"].(string)), true
+	case "Mutation.deletePlannerPerson":
+		if e.ComplexityRoot.Mutation.DeletePlannerPerson == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deletePlannerPerson_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeletePlannerPerson(childComplexity, args["id"].(string)), true
 	case "Mutation.deleteRecurringIncome":
 		if e.ComplexityRoot.Mutation.DeleteRecurringIncome == nil {
 			break
@@ -1604,6 +1643,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.UpdateUser(childComplexity, args["input"].(model.UpdateUserInput)), true
+	case "Mutation.upsertPlannerPerson":
+		if e.ComplexityRoot.Mutation.UpsertPlannerPerson == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_upsertPlannerPerson_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpsertPlannerPerson(childComplexity, args["input"].(model.UpsertPlannerPersonInput)), true
 
 	case "NetWorthSnapshot.createdAt":
 		if e.ComplexityRoot.NetWorthSnapshot.CreatedAt == nil {
@@ -1769,6 +1819,79 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.PlaidConnection.UserID(childComplexity), true
+
+	case "PlannerPerson.annualBonus":
+		if e.ComplexityRoot.PlannerPerson.AnnualBonus == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.AnnualBonus(childComplexity), true
+	case "PlannerPerson.annualSalary":
+		if e.ComplexityRoot.PlannerPerson.AnnualSalary == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.AnnualSalary(childComplexity), true
+	case "PlannerPerson.birthday":
+		if e.ComplexityRoot.PlannerPerson.Birthday == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.Birthday(childComplexity), true
+	case "PlannerPerson.bonusMode":
+		if e.ComplexityRoot.PlannerPerson.BonusMode == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.BonusMode(childComplexity), true
+	case "PlannerPerson.createdAt":
+		if e.ComplexityRoot.PlannerPerson.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.CreatedAt(childComplexity), true
+	case "PlannerPerson.id":
+		if e.ComplexityRoot.PlannerPerson.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.ID(childComplexity), true
+	case "PlannerPerson.incomeGrowthRate":
+		if e.ComplexityRoot.PlannerPerson.IncomeGrowthRate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.IncomeGrowthRate(childComplexity), true
+	case "PlannerPerson.name":
+		if e.ComplexityRoot.PlannerPerson.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.Name(childComplexity), true
+	case "PlannerPerson.personType":
+		if e.ComplexityRoot.PlannerPerson.PersonType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.PersonType(childComplexity), true
+	case "PlannerPerson.retirementAge":
+		if e.ComplexityRoot.PlannerPerson.RetirementAge == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.RetirementAge(childComplexity), true
+	case "PlannerPerson.updatedAt":
+		if e.ComplexityRoot.PlannerPerson.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.UpdatedAt(childComplexity), true
+	case "PlannerPerson.userId":
+		if e.ComplexityRoot.PlannerPerson.UserID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.UserID(childComplexity), true
 
 	case "Query.asset":
 		if e.ComplexityRoot.Query.Asset == nil {
@@ -2058,6 +2181,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.PlaidConnections(childComplexity, args["userId"].(string)), true
+	case "Query.plannerPeople":
+		if e.ComplexityRoot.Query.PlannerPeople == nil {
+			break
+		}
+
+		args, err := ec.field_Query_plannerPeople_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.PlannerPeople(childComplexity, args["userId"].(string)), true
 	case "Query.recurringIncome":
 		if e.ComplexityRoot.Query.RecurringIncome == nil {
 			break
@@ -2694,6 +2828,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUpdateScenarioInput,
 		ec.unmarshalInputUpdateTaxBracketInput,
 		ec.unmarshalInputUpdateUserInput,
+		ec.unmarshalInputUpsertPlannerPersonInput,
 	)
 	first := true
 
@@ -2804,6 +2939,7 @@ var sources = []*ast.Source{
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
   estimateTaxesForYear(year: Int!, filingStatus: FilingStatus!, income: String!, deduction: String): TaxEstimate
   calculateRetirementLadder(initialBalance: String!, annualExpenses: String!, currentAge: Int!, firstWithdrawalAge: Int!, isRoth: Boolean!, year: Int!, filingStatus: FilingStatus!, yearsToProject: Int): RetirementLadderProjection
+  plannerPeople(userId: ID!): [PlannerPerson!]!
   netWorthSnapshot(id: ID!): NetWorthSnapshot
   netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
   netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
@@ -2853,6 +2989,8 @@ type Mutation {
   exchangePlaidPublicToken(userId: ID!, publicToken: String!): PlaidConnection!
   syncPlaidConnection(id: ID!): Boolean!
   deletePlaidConnection(id: ID!): Boolean!
+  upsertPlannerPerson(input: UpsertPlannerPersonInput!): PlannerPerson!
+  deletePlannerPerson(id: ID!): Boolean!
 }
 
 type Health {
@@ -3001,6 +3139,7 @@ type Asset {
   employerMatchRate: String!
   employerMatchMaxPercentOfSalary: String!
   annualRate: String!
+  returnProfile: String
   lastValueUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
@@ -3041,6 +3180,34 @@ type Goal {
   isCompleted: Boolean!
   createdAt: String!
   updatedAt: String!
+}
+
+type PlannerPerson {
+  id: ID!
+  userId: ID!
+  personType: String!
+  name: String!
+  birthday: String!
+  retirementAge: Int!
+  annualSalary: String!
+  bonusMode: String!
+  annualBonus: String!
+  incomeGrowthRate: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input UpsertPlannerPersonInput {
+  id: ID!
+  userId: ID!
+  personType: String!
+  name: String!
+  birthday: String!
+  retirementAge: Int!
+  annualSalary: String!
+  bonusMode: String!
+  annualBonus: String!
+  incomeGrowthRate: String!
 }
 
 type Scenario {
@@ -3423,6 +3590,7 @@ input CreateAssetInput {
   employerMatchRate: String!
   employerMatchMaxPercentOfSalary: String!
   annualRate: String!
+  returnProfile: String
 }
 
 input UpdateAssetInput {
@@ -3436,6 +3604,7 @@ input UpdateAssetInput {
   employerMatchRate: String!
   employerMatchMaxPercentOfSalary: String!
   annualRate: String!
+  returnProfile: String
 }
 
 
@@ -3748,6 +3917,17 @@ func (ec *executionContext) field_Mutation_deletePlaidConnection_args(ctx contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deletePlannerPerson_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteRecurringIncome_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -3966,6 +4146,17 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateUserInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateUserInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_upsertPlannerPerson_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpsertPlannerPersonInput2breezeᚗapiᚋgraphᚋmodelᚐUpsertPlannerPersonInput)
 	if err != nil {
 		return nil, err
 	}
@@ -4314,6 +4505,17 @@ func (ec *executionContext) field_Query_plaidConnection_args(ctx context.Context
 }
 
 func (ec *executionContext) field_Query_plaidConnections_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["userId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_plannerPeople_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId", ec.unmarshalNID2string)
@@ -4787,6 +4989,35 @@ func (ec *executionContext) _Asset_annualRate(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext_Asset_annualRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Asset",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Asset_returnProfile(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Asset_returnProfile,
+		func(ctx context.Context) (any, error) {
+			return obj.ReturnProfile, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Asset_returnProfile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Asset",
 		Field:      field,
@@ -7713,6 +7944,8 @@ func (ec *executionContext) fieldContext_Mutation_createAsset(ctx context.Contex
 				return ec.fieldContext_Asset_employerMatchMaxPercentOfSalary(ctx, field)
 			case "annualRate":
 				return ec.fieldContext_Asset_annualRate(ctx, field)
+			case "returnProfile":
+				return ec.fieldContext_Asset_returnProfile(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -7784,6 +8017,8 @@ func (ec *executionContext) fieldContext_Mutation_updateAsset(ctx context.Contex
 				return ec.fieldContext_Asset_employerMatchMaxPercentOfSalary(ctx, field)
 			case "annualRate":
 				return ec.fieldContext_Asset_annualRate(ctx, field)
+			case "returnProfile":
+				return ec.fieldContext_Asset_returnProfile(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -9864,6 +10099,114 @@ func (ec *executionContext) fieldContext_Mutation_deletePlaidConnection(ctx cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_upsertPlannerPerson(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_upsertPlannerPerson,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().UpsertPlannerPerson(ctx, fc.Args["input"].(model.UpsertPlannerPersonInput))
+		},
+		nil,
+		ec.marshalNPlannerPerson2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPlannerPerson,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_upsertPlannerPerson(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_PlannerPerson_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_PlannerPerson_userId(ctx, field)
+			case "personType":
+				return ec.fieldContext_PlannerPerson_personType(ctx, field)
+			case "name":
+				return ec.fieldContext_PlannerPerson_name(ctx, field)
+			case "birthday":
+				return ec.fieldContext_PlannerPerson_birthday(ctx, field)
+			case "retirementAge":
+				return ec.fieldContext_PlannerPerson_retirementAge(ctx, field)
+			case "annualSalary":
+				return ec.fieldContext_PlannerPerson_annualSalary(ctx, field)
+			case "bonusMode":
+				return ec.fieldContext_PlannerPerson_bonusMode(ctx, field)
+			case "annualBonus":
+				return ec.fieldContext_PlannerPerson_annualBonus(ctx, field)
+			case "incomeGrowthRate":
+				return ec.fieldContext_PlannerPerson_incomeGrowthRate(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_PlannerPerson_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_PlannerPerson_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PlannerPerson", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_upsertPlannerPerson_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deletePlannerPerson(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_deletePlannerPerson,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DeletePlannerPerson(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deletePlannerPerson(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deletePlannerPerson_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _NetWorthSnapshot_id(ctx context.Context, field graphql.CollectedField, obj *model.NetWorthSnapshot) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -10647,6 +10990,354 @@ func (ec *executionContext) fieldContext_PlaidConnection_updatedAt(_ context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _PlannerPerson_id(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_userId(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_userId,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_personType(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_personType,
+		func(ctx context.Context) (any, error) {
+			return obj.PersonType, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_personType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_name(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_birthday(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_birthday,
+		func(ctx context.Context) (any, error) {
+			return obj.Birthday, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_birthday(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_retirementAge(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_retirementAge,
+		func(ctx context.Context) (any, error) {
+			return obj.RetirementAge, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_retirementAge(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_annualSalary(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_annualSalary,
+		func(ctx context.Context) (any, error) {
+			return obj.AnnualSalary, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_annualSalary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_bonusMode(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_bonusMode,
+		func(ctx context.Context) (any, error) {
+			return obj.BonusMode, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_bonusMode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_annualBonus(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_annualBonus,
+		func(ctx context.Context) (any, error) {
+			return obj.AnnualBonus, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_annualBonus(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_incomeGrowthRate(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_incomeGrowthRate,
+		func(ctx context.Context) (any, error) {
+			return obj.IncomeGrowthRate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_incomeGrowthRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlannerPerson_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PlannerPerson_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PlannerPerson_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlannerPerson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_health(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -10918,6 +11609,8 @@ func (ec *executionContext) fieldContext_Query_asset(ctx context.Context, field 
 				return ec.fieldContext_Asset_employerMatchMaxPercentOfSalary(ctx, field)
 			case "annualRate":
 				return ec.fieldContext_Asset_annualRate(ctx, field)
+			case "returnProfile":
+				return ec.fieldContext_Asset_returnProfile(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -10989,6 +11682,8 @@ func (ec *executionContext) fieldContext_Query_assets(ctx context.Context, field
 				return ec.fieldContext_Asset_employerMatchMaxPercentOfSalary(ctx, field)
 			case "annualRate":
 				return ec.fieldContext_Asset_annualRate(ctx, field)
+			case "returnProfile":
+				return ec.fieldContext_Asset_returnProfile(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -12735,6 +13430,73 @@ func (ec *executionContext) fieldContext_Query_calculateRetirementLadder(ctx con
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_calculateRetirementLadder_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_plannerPeople(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_plannerPeople,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().PlannerPeople(ctx, fc.Args["userId"].(string))
+		},
+		nil,
+		ec.marshalNPlannerPerson2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐPlannerPersonᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_plannerPeople(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_PlannerPerson_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_PlannerPerson_userId(ctx, field)
+			case "personType":
+				return ec.fieldContext_PlannerPerson_personType(ctx, field)
+			case "name":
+				return ec.fieldContext_PlannerPerson_name(ctx, field)
+			case "birthday":
+				return ec.fieldContext_PlannerPerson_birthday(ctx, field)
+			case "retirementAge":
+				return ec.fieldContext_PlannerPerson_retirementAge(ctx, field)
+			case "annualSalary":
+				return ec.fieldContext_PlannerPerson_annualSalary(ctx, field)
+			case "bonusMode":
+				return ec.fieldContext_PlannerPerson_bonusMode(ctx, field)
+			case "annualBonus":
+				return ec.fieldContext_PlannerPerson_annualBonus(ctx, field)
+			case "incomeGrowthRate":
+				return ec.fieldContext_PlannerPerson_incomeGrowthRate(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_PlannerPerson_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_PlannerPerson_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PlannerPerson", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_plannerPeople_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -16896,7 +17658,7 @@ func (ec *executionContext) unmarshalInputCreateAssetInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "name", "assetType", "currentValue", "owner", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate"}
+	fieldsInOrder := [...]string{"userId", "name", "assetType", "currentValue", "owner", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate", "returnProfile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -16973,6 +17735,13 @@ func (ec *executionContext) unmarshalInputCreateAssetInput(ctx context.Context, 
 				return it, err
 			}
 			it.AnnualRate = data
+		case "returnProfile":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("returnProfile"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ReturnProfile = data
 		}
 	}
 	return it, nil
@@ -17876,7 +18645,7 @@ func (ec *executionContext) unmarshalInputUpdateAssetInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "assetType", "currentValue", "owner", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate"}
+	fieldsInOrder := [...]string{"id", "name", "assetType", "currentValue", "owner", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate", "returnProfile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -17953,6 +18722,13 @@ func (ec *executionContext) unmarshalInputUpdateAssetInput(ctx context.Context, 
 				return it, err
 			}
 			it.AnnualRate = data
+		case "returnProfile":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("returnProfile"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ReturnProfile = data
 		}
 	}
 	return it, nil
@@ -18780,6 +19556,99 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpsertPlannerPersonInput(ctx context.Context, obj any) (model.UpsertPlannerPersonInput, error) {
+	var it model.UpsertPlannerPersonInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "userId", "personType", "name", "birthday", "retirementAge", "annualSalary", "bonusMode", "annualBonus", "incomeGrowthRate"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "userId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserID = data
+		case "personType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("personType"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PersonType = data
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "birthday":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("birthday"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Birthday = data
+		case "retirementAge":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("retirementAge"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RetirementAge = data
+		case "annualSalary":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("annualSalary"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AnnualSalary = data
+		case "bonusMode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bonusMode"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.BonusMode = data
+		case "annualBonus":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("annualBonus"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AnnualBonus = data
+		case "incomeGrowthRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("incomeGrowthRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IncomeGrowthRate = data
+		}
+	}
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -18854,6 +19723,8 @@ func (ec *executionContext) _Asset(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "returnProfile":
+			out.Values[i] = ec._Asset_returnProfile(ctx, field, obj)
 		case "lastValueUpdatedAt":
 			out.Values[i] = ec._Asset_lastValueUpdatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -20019,6 +20890,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "upsertPlannerPerson":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_upsertPlannerPerson(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deletePlannerPerson":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deletePlannerPerson(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -20232,6 +21117,100 @@ func (ec *executionContext) _PlaidConnection(ctx context.Context, sel ast.Select
 			}
 		case "updatedAt":
 			out.Values[i] = ec._PlaidConnection_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var plannerPersonImplementors = []string{"PlannerPerson"}
+
+func (ec *executionContext) _PlannerPerson(ctx context.Context, sel ast.SelectionSet, obj *model.PlannerPerson) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, plannerPersonImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PlannerPerson")
+		case "id":
+			out.Values[i] = ec._PlannerPerson_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._PlannerPerson_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "personType":
+			out.Values[i] = ec._PlannerPerson_personType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._PlannerPerson_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "birthday":
+			out.Values[i] = ec._PlannerPerson_birthday(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "retirementAge":
+			out.Values[i] = ec._PlannerPerson_retirementAge(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "annualSalary":
+			out.Values[i] = ec._PlannerPerson_annualSalary(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "bonusMode":
+			out.Values[i] = ec._PlannerPerson_bonusMode(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "annualBonus":
+			out.Values[i] = ec._PlannerPerson_annualBonus(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "incomeGrowthRate":
+			out.Values[i] = ec._PlannerPerson_incomeGrowthRate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._PlannerPerson_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._PlannerPerson_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -20965,6 +21944,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_calculateRetirementLadder(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "plannerPeople":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_plannerPeople(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -22644,6 +23645,36 @@ func (ec *executionContext) marshalNPlaidConnection2ᚖbreezeᚗapiᚋgraphᚋmo
 	return ec._PlaidConnection(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNPlannerPerson2breezeᚗapiᚋgraphᚋmodelᚐPlannerPerson(ctx context.Context, sel ast.SelectionSet, v model.PlannerPerson) graphql.Marshaler {
+	return ec._PlannerPerson(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPlannerPerson2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐPlannerPersonᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PlannerPerson) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNPlannerPerson2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPlannerPerson(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNPlannerPerson2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPlannerPerson(ctx context.Context, sel ast.SelectionSet, v *model.PlannerPerson) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PlannerPerson(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNRecurrenceInterval2breezeᚗapiᚋgraphᚋmodelᚐRecurrenceInterval(ctx context.Context, v any) (model.RecurrenceInterval, error) {
 	var res model.RecurrenceInterval
 	err := res.UnmarshalGQL(v)
@@ -22918,6 +23949,11 @@ func (ec *executionContext) unmarshalNUpdateTaxBracketInput2breezeᚗapiᚋgraph
 
 func (ec *executionContext) unmarshalNUpdateUserInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v any) (model.UpdateUserInput, error) {
 	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpsertPlannerPersonInput2breezeᚗapiᚋgraphᚋmodelᚐUpsertPlannerPersonInput(ctx context.Context, v any) (model.UpsertPlannerPersonInput, error) {
+	res, err := ec.unmarshalInputUpsertPlannerPersonInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

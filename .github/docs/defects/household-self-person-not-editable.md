@@ -1,7 +1,9 @@
 # Defect: Household Self Person Cannot Be Edited
 
 ## Status
-Unresolved
+Resolved
+
+A `useEffect` in `usePlannerPeople.ts` (line 15-25) now initializes a default self person from `PLANNER_DEFAULT_SELF_PERSON` when the people array is empty. The self person is always present and editable on page load.
 
 ## Environment
 - Planner page → Household section → People card

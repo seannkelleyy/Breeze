@@ -23,6 +23,7 @@ interface InvestmentAccountFieldsProps {
   selectedRateProfile: AccountRateProfile;
   usesDepreciationInput: boolean;
   onUpdateAccount: (updater: (current: PlannerAccount) => PlannerAccount) => void;
+  onRateProfileChange: (profile: AccountRateProfile) => void;
   onSetContributionToIrsMax: () => void;
   getDisplayedRateForAccount: (account: PlannerAccount) => number;
   getAnnualRateFromProfile: (profile: AccountRateProfile, currentAnnualRate: number) => number;
@@ -40,6 +41,7 @@ const InvestmentAccountFields = ({
   selectedRateProfile,
   usesDepreciationInput,
   onUpdateAccount,
+  onRateProfileChange,
   onSetContributionToIrsMax,
   getDisplayedRateForAccount,
   getAnnualRateFromProfile,
@@ -148,15 +150,7 @@ const InvestmentAccountFields = ({
         <Label>Return Profile</Label>
         <Select
           value={selectedRateProfile}
-          onValueChange={(value) =>
-            onUpdateAccount((current) => ({
-              ...current,
-              annualRate: getAnnualRateFromProfile(
-                value as AccountRateProfile,
-                getDisplayedRateForAccount(current),
-              ),
-            }))
-          }
+          onValueChange={(value) => onRateProfileChange(value as AccountRateProfile)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select rate profile" />

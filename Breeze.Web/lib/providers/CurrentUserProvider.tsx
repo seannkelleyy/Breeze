@@ -157,6 +157,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const [plannerAccounts, setPlannerAccounts] = useState<PlannerAccount[]>([]);
   const [plannerAssetFinanceDetailsByAccountId, setPlannerAssetFinanceDetailsByAccountId] =
     useState<Record<string, AssetFinanceDetails>>({});
+  const [resolvedUserId, setResolvedUserId] = useState<string>('');
   const providerKey = isSignedIn ? (user?.id ?? 'signed-in') : 'signed-out';
   const backendUserID = useMemo(() => getBackendUserID(user), [user]);
 
@@ -309,6 +310,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         }
 
         if (response?.me) {
+          setResolvedUserId(response.me.id);
           setCurrencyCode(response.me.currencyType ?? 'USD');
           setReturnDisplayMode(response.me.returnType === 'REAL' ? 'real' : 'nominal');
           setInflationRate(
@@ -330,24 +332,25 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         const identityProviderId = user?.publicMetadata?.userId?.toString() ?? user?.id ?? '';
         const email = user?.emailAddresses[0]?.emailAddress ?? '';
         if (identityProviderId && email) {
-          await request<{ createUser: { id: string } }, { input: Record<string, unknown> }>(
-            CREATE_USER_MUTATION,
-            {
-              input: {
-                identityProviderId,
-                email,
-                returnType: returnDisplayMode === 'real' ? 'REAL' : 'NOMINAL',
-                safeWithdrawalRate: (safeWithdrawalRate / 100).toFixed(4),
-                currencyType: currencyCode,
-                inflationRate: (inflationRate / 100).toFixed(4),
-                deductionType,
-                deductionAmount,
-                maxTaxBracketId,
-                filingStatus,
-                payoffStrategy,
-              },
+          const createResp = await request<
+            { createUser: { id: string } },
+            { input: Record<string, unknown> }
+          >(CREATE_USER_MUTATION, {
+            input: {
+              identityProviderId,
+              email,
+              returnType: returnDisplayMode === 'real' ? 'REAL' : 'NOMINAL',
+              safeWithdrawalRate: (safeWithdrawalRate / 100).toFixed(4),
+              currencyType: currencyCode,
+              inflationRate: (inflationRate / 100).toFixed(4),
+              deductionType,
+              deductionAmount,
+              maxTaxBracketId,
+              filingStatus,
+              payoffStrategy,
             },
-          );
+          });
+          if (createResp?.createUser?.id) setResolvedUserId(createResp.createUser.id);
         }
       } catch {
         if (isCancelled) {
@@ -355,6 +358,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         }
 
         loadedPreferencesForUserRef.current = null;
+        setResolvedUserId(backendUserID);
         setCurrencyCode('USD');
         setReturnDisplayMode(PLANNER_DEFAULT_RETURN_DISPLAY_MODE);
         setInflationRate(PLANNER_DEFAULT_INFLATION_RATE);
@@ -393,7 +397,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
 
   const value: CurrentUserContextValue = {
     user,
-    userId: backendUserID,
+    userId: resolvedUserId,
     isLoaded,
     isSignedIn: Boolean(isSignedIn),
     currencyCode,

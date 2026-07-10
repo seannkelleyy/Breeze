@@ -38,15 +38,9 @@ export const FormInputField = <TFormValues extends FieldValues>({
             aria-invalid={fieldState.invalid}
             {...field}
             onChange={(e) => {
-              const value = e.target.value;
-              if (type === 'number') {
-                const numValue = value === '' ? 0 : parseFloat(value);
-                field.onChange(isNaN(numValue) ? 0 : numValue);
-              } else {
-                field.onChange(value);
-              }
+              field.onChange(e.target.value);
             }}
-            value={type === 'number' ? String(field.value || '') : field.value}
+            value={field.value ?? ''}
           />
           {fieldState.invalid && fieldState.error?.message && (
             <div role="alert" className="text-destructive text-sm">

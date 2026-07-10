@@ -4,4 +4,5 @@ export { default as usePlanner } from './usePlanner';
 export { default as usePlannerAccounts } from './usePlannerAccounts';
 export { default as usePlannerModel } from './usePlannerModel';
 export { default as usePlannerPeople } from './usePlannerPeople';
+export { default as usePersonMutations } from './usePersonMutations';
 export { default as usePlannerRetirementInputs } from './usePlannerRetirementInputs';

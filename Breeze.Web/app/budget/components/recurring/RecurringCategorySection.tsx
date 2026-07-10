@@ -6,6 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { RecurringCategoryTemplate } from '../../hooks/recurring/recurringTemplateServices';
 
+function toDateInputValue(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  return dateStr.slice(0, 10);
+}
+
 export function makeDefaultCategoryTemplate(today: string): RecurringCategoryTemplate {
   return {
     name: '',
@@ -135,7 +140,7 @@ export const RecurringCategorySection = ({
                   <label className="text-muted-foreground text-sm">Start</label>
                   <Input
                     type="date"
-                    value={template.startDate}
+                    value={toDateInputValue(template.startDate)}
                     onChange={(e) =>
                       onUpdate((curr) =>
                         curr.map((item, i) =>
@@ -149,7 +154,7 @@ export const RecurringCategorySection = ({
                   <label className="text-muted-foreground text-sm">Stop (optional)</label>
                   <Input
                     type="date"
-                    value={template.stopDate ?? ''}
+                    value={toDateInputValue(template.stopDate)}
                     onChange={(e) =>
                       onUpdate((curr) =>
                         curr.map((item, i) =>

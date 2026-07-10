@@ -1,4 +1,5 @@
 import { CREATE_GOAL, DELETE_GOAL, GET_GOALS, UPDATE_GOAL } from '@/lib/services/queries/budget';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import { useCallback } from 'react';
 import { Goal } from '../../types/goal';
@@ -8,22 +9,23 @@ import { Goal } from '../../types/goal';
  */
 const useGoals = () => {
   const { request } = useGraphql();
+  const { userId } = useCurrentUser();
 
   const getGoals = useCallback(
-    async (userId: string): Promise<Goal[]> => {
+    async (): Promise<Goal[]> => {
       const resp = await request<{ goals: Goal[] }>(GET_GOALS, { userId } as unknown as Record<
         string,
         unknown
       >);
       return resp?.goals ?? [];
     },
-    [request],
+    [request, userId],
   );
 
   const postGoal = useCallback(
     async (goal: Goal): Promise<string> => {
       const input = {
-        userId: goal.userId,
+        userId,
         description: goal.description,
         isCompleted: goal.isCompleted ?? false,
       };
@@ -32,7 +34,7 @@ const useGoals = () => {
       } as unknown as Record<string, unknown>);
       return resp.createGoal.id;
     },
-    [request],
+    [request, userId],
   );
 
   const patchGoal = useCallback(

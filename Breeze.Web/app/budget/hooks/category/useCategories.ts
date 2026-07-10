@@ -6,6 +6,7 @@ import {
   GET_CATEGORIES,
   UPDATE_EXPENSE_CATEGORY,
 } from '@/lib/services/queries/budget';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import { Category } from '../../types/category';
 
@@ -14,6 +15,7 @@ import { Category } from '../../types/category';
  */
 const useCategories = () => {
   const { request } = useGraphql();
+  const { userId } = useCurrentUser();
 
   const getCategories = useCallback(
     async (budgetId: string): Promise<Category[]> => {
@@ -28,7 +30,7 @@ const useCategories = () => {
   const postCategory = useCallback(
     async (
       budgetId: string,
-      userId: string,
+      _userId: string,
       category: Omit<
         Category,
         'id' | 'userId' | 'budgetId' | 'currentSpend' | 'createdAt' | 'updatedAt'
@@ -46,7 +48,7 @@ const useCategories = () => {
       });
       return resp.createExpenseCategory.id;
     },
-    [request],
+    [request, userId],
   );
 
   const patchCategory = useCallback(

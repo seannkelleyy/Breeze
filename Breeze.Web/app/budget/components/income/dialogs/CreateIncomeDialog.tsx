@@ -36,7 +36,7 @@ export const CreateIncomeDialog = () => {
     },
   });
 
-  const onSubmit = (values: IncomeFormData) => {
+  const onSubmit = async (values: IncomeFormData) => {
     if (!userId || !budget?.id) return;
     const income: Omit<Income, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'sourceType'> = {
       budgetId: budget.id,
@@ -44,7 +44,7 @@ export const CreateIncomeDialog = () => {
       amount: values.amount,
       date: values.date,
     };
-    postMutation.mutate({
+    await postMutation.mutateAsync({
       budgetId: budget.id,
       userId,
       income,
