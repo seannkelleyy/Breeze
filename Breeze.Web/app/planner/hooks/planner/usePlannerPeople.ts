@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import * as plannerConstants from '../../lib/constants';
 
@@ -8,21 +8,27 @@ import { PlannerPerson } from '../../types/person';
 
 const usePlannerPeople = () => {
   const { plannerPeople, setPlannerPeople, setPlannerAccounts } = useCurrentUser();
+  const hasHydrated = useRef(false);
 
   const people = plannerPeople;
 
-  // Initialize self person if people array is empty
+  // Mark that API data has been loaded (called by page.tsx hydration effect)
   useEffect(() => {
-    if (people.length === 0) {
+    if (people.length > 0) {
+      hasHydrated.current = true;
+    }
+  }, [people]);
+
+  // Initialize self person only if API never returned any data
+  useEffect(() => {
+    if (people.length === 0 && !hasHydrated.current) {
       const selfPerson: PlannerPerson = {
         id: crypto.randomUUID(),
         ...plannerConstants.PLANNER_DEFAULT_SELF_PERSON,
       };
       setPlannerPeople([selfPerson]);
     }
-    // Only run when people is empty on first load
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [people, setPlannerPeople]);
 
   const selfPerson = useMemo(
     () => people.find((person) => person.type === 'self') ?? people[0],

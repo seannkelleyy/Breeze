@@ -91,12 +91,16 @@ export interface CurrentUserContextValue {
   isSignedIn: boolean;
   currencyCode: string;
   setCurrencyCode: (nextCurrencyCode: string) => void;
+  updateCurrencyCode: (nextCurrencyCode: string) => void;
   returnDisplayMode: 'real' | 'nominal';
   setReturnDisplayMode: (nextReturnDisplayMode: 'real' | 'nominal') => void;
+  updateReturnDisplayMode: (nextReturnDisplayMode: 'real' | 'nominal') => void;
   inflationRate: number;
   setInflationRate: (nextInflationRate: number) => void;
+  updateInflationRate: (nextInflationRate: number) => void;
   safeWithdrawalRate: number;
   setSafeWithdrawalRate: (nextSafeWithdrawalRate: number) => void;
+  updateSafeWithdrawalRate: (nextSafeWithdrawalRate: number) => void;
   plannerDesiredInvestmentAmount: number;
   setPlannerDesiredInvestmentAmount: Dispatch<SetStateAction<number>>;
   plannerMonthlyExpenses: number;
@@ -174,7 +178,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
 
       try {
         const input = {
-          id: backendUserID,
+          id: resolvedUserId,
           identityProviderId: user?.publicMetadata?.userId?.toString() ?? user?.id ?? '',
           email: user?.emailAddresses[0]?.emailAddress ?? '',
           returnType: nextReturnDisplayMode === 'real' ? 'REAL' : 'NOMINAL',
@@ -201,7 +205,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     [
       isLoaded,
       isSignedIn,
-      backendUserID,
+      resolvedUserId,
       user,
       request,
       deductionType,
@@ -237,6 +241,15 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     },
     [persistPreferences, currencyCode, inflationRate, safeWithdrawalRate],
   );
+  const hydrateReturnDisplayMode = useCallback(
+    (nextReturnDisplayMode: 'real' | 'nominal') => {
+      setReturnDisplayMode(nextReturnDisplayMode);
+    },
+    [],
+  );
+  const hydrateCurrencyCode = useCallback((next: string) => setCurrencyCode(next), []);
+  const hydrateInflationRate = useCallback((next: number) => setInflationRate(next), []);
+  const hydrateSafeWithdrawalRate = useCallback((next: number) => setSafeWithdrawalRate(next), []);
 
   const updateInflationRate = useCallback(
     (nextInflationRate: number) => {
@@ -401,13 +414,17 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     isLoaded,
     isSignedIn: Boolean(isSignedIn),
     currencyCode,
-    setCurrencyCode: updateCurrencyCode,
+    setCurrencyCode: hydrateCurrencyCode,
+    updateCurrencyCode,
     returnDisplayMode,
-    setReturnDisplayMode: updateReturnDisplayMode,
+    setReturnDisplayMode: hydrateReturnDisplayMode,
+    updateReturnDisplayMode,
     inflationRate,
-    setInflationRate: updateInflationRate,
+    setInflationRate: hydrateInflationRate,
+    updateInflationRate,
     safeWithdrawalRate,
-    setSafeWithdrawalRate: updateSafeWithdrawalRate,
+    setSafeWithdrawalRate: hydrateSafeWithdrawalRate,
+    updateSafeWithdrawalRate,
     plannerDesiredInvestmentAmount,
     setPlannerDesiredInvestmentAmount,
     plannerMonthlyExpenses,

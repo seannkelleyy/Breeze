@@ -230,27 +230,44 @@ export const getIrsLimitKeyFromApiType = (type: string): IrsLimitKey | null => {
   return null;
 };
 export const getFinancialMathSnapshot = (
-  _input: Record<string, unknown>,
-): FinancialMathSnapshot => ({
-  monthlyExpenses: 0,
-  annualSpend: 0,
-  emergencyFund3Months: 0,
-  emergencyFund6Months: 0,
-  emergencyFund12Months: 0,
-  selfSalary: 0,
-  spouseSalary: 0,
-  grossIncome: 0,
-  netIncomeFactor: 0,
-  netIncome: 0,
-  annualExtraExpenseBuffer: 0,
-  yearlySavings: 0,
-  safeWithdrawalRatePercent: 0,
-  withdrawalMultiplier: 0,
-  currentPortfolio: 0,
-  yearlyPortfolioIncome: 0,
-  yearsToGoalRatePercent: 0,
-  scenarios: [],
-});
+  input: Record<string, unknown>,
+): FinancialMathSnapshot => {
+  const monthlyExpenses = Number(input.monthlyExpenses ?? 0);
+  const selfSalary = Number(input.selfSalary ?? 0);
+  const spouseSalary = Number(input.spouseSalary ?? 0);
+  const safeWithdrawalRate = Number(input.safeWithdrawalRate ?? 4);
+  const currentPortfolio = Number(input.currentPortfolio ?? 0);
+  const grossIncome = selfSalary + spouseSalary;
+  const annualSpend = monthlyExpenses * 12;
+  const netIncomeFactor = 0.7;
+  const netIncome = grossIncome * netIncomeFactor;
+  const annualExtraExpenseBuffer = annualSpend * 0.1;
+  const yearlySavings = grossIncome - annualSpend - annualExtraExpenseBuffer;
+  const withdrawalMultiplier =
+    safeWithdrawalRate > 0 ? 1 / (safeWithdrawalRate / 100) : 25;
+  const yearlyPortfolioIncome =
+    currentPortfolio * (safeWithdrawalRate / 100);
+  return {
+    monthlyExpenses,
+    annualSpend,
+    emergencyFund3Months: monthlyExpenses * 3,
+    emergencyFund6Months: monthlyExpenses * 6,
+    emergencyFund12Months: monthlyExpenses * 12,
+    selfSalary,
+    spouseSalary,
+    grossIncome,
+    netIncomeFactor,
+    netIncome,
+    annualExtraExpenseBuffer,
+    yearlySavings: Math.max(0, yearlySavings),
+    safeWithdrawalRatePercent: safeWithdrawalRate,
+    withdrawalMultiplier,
+    currentPortfolio,
+    yearlyPortfolioIncome,
+    yearsToGoalRatePercent: 0,
+    scenarios: [],
+  };
+};
 export const getEmployerMatchMonthlyFromAnnual = (
   account: PlannerAccount,
   ownerAnnualIncome: number,
@@ -462,18 +479,45 @@ export const getDefaultAssetFinanceDetailsForAccount = (
 
 export const getMonthlyContribution = (
   target: number,
-  _start: number,
-  _rate: number,
-  _years?: number,
-): number => (target > 0 ? target / 120 : 0);
+  start: number,
+  rate: number,
+  years?: number,
+): number => {
+  if (target <= 0) return 0;
+  if (!years || years <= 0) return Math.max(0, target - start);
+  const monthlyRate = rate / 100 / 12;
+  const months = years * 12;
+  if (Math.abs(monthlyRate) < 1e-10)
+    return Math.max(0, (target - start) / months);
+  const compoundFactor = (1 + monthlyRate) ** months;
+  if (Math.abs(compoundFactor - 1) < 1e-10)
+    return Math.max(0, (target - start) / months);
+  return Math.max(
+    0,
+    ((target - start * compoundFactor) * monthlyRate) / (compoundFactor - 1),
+  );
+};
 export const getYearsUntilGoalEstimate = (
   target: number,
-  _cur: number,
+  cur: number,
   contrib: number,
-  _rate: number,
-): number => (target > 0 && contrib > 0 ? Math.ceil(target / (contrib * 12)) : 0);
+  rate: number,
+): number => {
+  if (target <= 0) return 0;
+  if (contrib <= 0) return 999;
+  const monthlyRate = rate / 100 / 12;
+  const monthlyContrib = contrib;
+  if (Math.abs(monthlyRate) < 1e-10)
+    return Math.ceil((target - cur) / (monthlyContrib * 12));
+  const denominator = monthlyContrib + monthlyRate * cur;
+  if (Math.abs(denominator) < 1e-10) return 999;
+  const numerator = monthlyContrib - monthlyRate * target;
+  if (Math.abs(numerator) < 1e-10) return 999;
+  const n = Math.log(numerator / denominator) / Math.log(1 + monthlyRate);
+  return Math.max(0, Math.ceil(n / 12));
+};
 export const getAnnualIncomeWithGrowth = (b: number, g: number, y: number): number =>
-  b * (1 + g) ** y;
+  b * (1 + g / 100) ** y;
 export const getEmployeeMonthlyContribution = (
   a: PlannerAccount,
   selfIncome: number,

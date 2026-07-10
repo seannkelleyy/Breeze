@@ -1,10 +1,12 @@
 'use client';
 import { SummaryCards } from '../SummaryCards';
+import FinancialMathCard from '../FinancialMathCard';
 import ProjectionChartCard from '../ProjectionChartCard';
 import ProjectionTables from '../ProjectionTables';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { ChartConfig } from '@/components/ui/chart';
+import type { FinancialMathSnapshot } from '../../types/finance';
 
 type SectionCollapse = {
   requiredMonthly: boolean;
@@ -43,6 +45,7 @@ interface ProjectionsSectionProps {
   accounts: Array<{ id: string; name: string }>;
   accountLineColors: string[];
   accountBreakdownRows: AccountBreakdownRow[];
+  financialMathSnapshot: FinancialMathSnapshot;
   collapses: SectionCollapse;
 }
 
@@ -59,6 +62,7 @@ export function ProjectionsSection({
   accounts,
   accountLineColors,
   accountBreakdownRows,
+  financialMathSnapshot,
   collapses,
 }: ProjectionsSectionProps) {
   const {
@@ -89,6 +93,7 @@ export function ProjectionsSection({
           />
         }
       />
+      <FinancialMathCard snapshot={financialMathSnapshot} />
       <ProjectionChartCard
         collapsed={false}
         toggleControl={null}

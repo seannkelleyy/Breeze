@@ -22,13 +22,13 @@ import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 export const UserPreferencesModal = () => {
   const {
     currencyCode,
-    setCurrencyCode,
+    updateCurrencyCode,
     returnDisplayMode,
-    setReturnDisplayMode,
+    updateReturnDisplayMode,
     inflationRate,
-    setInflationRate,
+    updateInflationRate,
     safeWithdrawalRate,
-    setSafeWithdrawalRate,
+    updateSafeWithdrawalRate,
   } = useCurrentUser();
 
   return (
@@ -50,7 +50,7 @@ export const UserPreferencesModal = () => {
             <Label>Return Display Mode</Label>
             <Select
               value={returnDisplayMode}
-              onValueChange={(value) => setReturnDisplayMode(value as 'real' | 'nominal')}
+              onValueChange={(value) => updateReturnDisplayMode(value as 'real' | 'nominal')}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -66,7 +66,7 @@ export const UserPreferencesModal = () => {
           </div>
           <div className="space-y-1">
             <Label>Currency</Label>
-            <Select value={currencyCode} onValueChange={setCurrencyCode}>
+            <Select value={currencyCode} onValueChange={updateCurrencyCode}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -82,7 +82,7 @@ export const UserPreferencesModal = () => {
               <Label>Inflation Rate %</Label>
               <FormattedNumberInput
                 value={inflationRate}
-                onValueChange={setInflationRate}
+                onValueChange={updateInflationRate}
                 maxFractionDigits={2}
               />
             </div>
@@ -90,7 +90,7 @@ export const UserPreferencesModal = () => {
               <Label>Safe Withdrawal Rate %</Label>
               <FormattedNumberInput
                 value={safeWithdrawalRate}
-                onValueChange={setSafeWithdrawalRate}
+                onValueChange={updateSafeWithdrawalRate}
                 maxFractionDigits={2}
               />
             </div>

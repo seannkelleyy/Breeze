@@ -13,7 +13,6 @@ import {
   AccountsSection,
   ProjectionsSection,
 } from './components/sections';
-import FinancialMathCard from './components/FinancialMathCard';
 import { accountLineColors } from './lib/plannerMath';
 import { PLANNER_DEFAULT_INCOME_REPLACEMENT_RATE } from './lib/constants';
 
@@ -137,7 +136,6 @@ export default function PlannerPage() {
             incomeReplacementTarget={incomeReplacementTarget}
             financialMathSnapshot={financialMathSnapshot}
           />
-          <FinancialMathCard snapshot={financialMathSnapshot} />
           <PeopleSection
             isCollapsed={collapsedSections['people']}
             onToggle={() => toggleSection('people')}
@@ -161,6 +159,7 @@ export default function PlannerPage() {
             accounts={accounts}
             accountLineColors={accountLineColors}
             accountBreakdownRows={accountBreakdownRows}
+            financialMathSnapshot={financialMathSnapshot}
             collapses={{
               requiredMonthly: collapsedSections['requiredMonthly'],
               plannedMonthly: collapsedSections['plannedMonthly'],
