@@ -5,8 +5,10 @@ INSERT INTO expenses (
   amount,
   date,
   description,
-  recurring_source_id
-) VALUES ($1, $2, $3, $4, $5, $6)
+  source_type,
+  source_template_id,
+  generation_month
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING
   id,
   user_id,
@@ -14,7 +16,9 @@ RETURNING
   amount,
   date,
   description,
-  recurring_source_id,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at;
@@ -27,7 +31,9 @@ SELECT
   amount,
   date,
   description,
-  recurring_source_id,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
@@ -44,7 +50,9 @@ SELECT
   amount,
   date,
   description,
-  recurring_source_id,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
@@ -69,7 +77,9 @@ RETURNING
   amount,
   date,
   description,
-  recurring_source_id,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at;
@@ -79,6 +89,14 @@ UPDATE expenses
 SET deleted_at = now(),
     updated_at = now()
 WHERE id = $1
+  AND deleted_at IS NULL;
+
+-- name: SoftDeleteGeneratedExpensesByBudget :execrows
+UPDATE expenses
+SET deleted_at = now(),
+    updated_at = now()
+WHERE budget_id = $1
+  AND source_type = 'RECURRING_TEMPLATE'
   AND deleted_at IS NULL;
 
 -- name: CreateExpenseSplit :one

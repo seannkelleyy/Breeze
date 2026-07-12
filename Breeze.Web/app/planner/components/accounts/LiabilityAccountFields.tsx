@@ -49,18 +49,6 @@ const LiabilityAccountFields = ({ account, onUpdateAccount }: LiabilityAccountFi
           maxFractionDigits={2}
         />
       </div>
-      <div className="space-y-2">
-        <Label>Target Extra Payment</Label>
-        <FormattedNumberInput
-          value={0}
-          onValueChange={(value) =>
-            onUpdateAccount((current) => ({
-              ...current,
-            }))
-          }
-          maxFractionDigits={2}
-        />
-      </div>
     </>
   );
 };

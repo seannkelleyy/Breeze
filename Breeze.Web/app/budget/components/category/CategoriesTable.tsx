@@ -17,6 +17,7 @@ import { ArrowUpDown } from 'lucide-react';
 
 import { useBudgetContext } from '../../providers';
 import { Category } from '../../types/category';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -94,6 +95,17 @@ export const CategoriesTable = () => {
           return (
             <span className={overBudget ? 'text-destructive font-medium' : ''}>{formatted}</span>
           );
+        },
+      },
+      {
+        id: 'source',
+        header: 'Source',
+        cell: ({ row }) => {
+          const category = row.original as Category;
+          if (category.sourceType === 'RECURRING_TEMPLATE') {
+            return <Badge variant="secondary">Recurring</Badge>;
+          }
+          return <span className="text-muted-foreground text-sm">Manual</span>;
         },
       },
     ],

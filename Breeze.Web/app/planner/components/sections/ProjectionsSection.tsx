@@ -3,6 +3,7 @@ import { SummaryCards } from '../SummaryCards';
 import FinancialMathCard from '../FinancialMathCard';
 import ProjectionChartCard from '../ProjectionChartCard';
 import ProjectionTables from '../ProjectionTables';
+import HealthIndicators from '../HealthIndicators';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { ChartConfig } from '@/components/ui/chart';
@@ -47,6 +48,8 @@ interface ProjectionsSectionProps {
   accountBreakdownRows: AccountBreakdownRow[];
   financialMathSnapshot: FinancialMathSnapshot;
   collapses: SectionCollapse;
+  hasReachedCoastFire: boolean;
+  coastFireGap: number;
 }
 
 const ToggleBtn = ({ collapsed, onClick }: { collapsed: boolean; onClick: () => void }) => (
@@ -64,6 +67,8 @@ export function ProjectionsSection({
   accountBreakdownRows,
   financialMathSnapshot,
   collapses,
+  hasReachedCoastFire,
+  coastFireGap,
 }: ProjectionsSectionProps) {
   const {
     requiredMonthly,
@@ -76,6 +81,7 @@ export function ProjectionsSection({
 
   return (
     <div className="space-y-6">
+      <HealthIndicators hasReachedCoastFire={hasReachedCoastFire} coastFireGap={coastFireGap} />
       <SummaryCards
         requiredMonthlyCollapsed={requiredMonthly}
         requiredMonthlyToggleControl={
@@ -92,6 +98,7 @@ export function ProjectionsSection({
             onClick={() => onToggle('retirementEstimateCard')}
           />
         }
+        currentPortfolio={financialMathSnapshot.currentPortfolio}
       />
       <FinancialMathCard snapshot={financialMathSnapshot} />
       <ProjectionChartCard

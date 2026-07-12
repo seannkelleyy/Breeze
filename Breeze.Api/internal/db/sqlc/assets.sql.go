@@ -24,10 +24,9 @@ INSERT INTO assets (
   contribution_value,
   employer_match_rate,
   employer_match_max_percent_of_salary,
-  annual_rate,
-  return_profile
+  annual_rate
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING
   id,
   user_id,
@@ -40,7 +39,6 @@ RETURNING
   employer_match_rate,
   employer_match_max_percent_of_salary,
   annual_rate,
-  return_profile,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -58,7 +56,6 @@ type CreateAssetParams struct {
 	EmployerMatchRate               decimal.Decimal `json:"employer_match_rate"`
 	EmployerMatchMaxPercentOfSalary decimal.Decimal `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal `json:"annual_rate"`
-	ReturnProfile                   *string         `json:"return_profile"`
 }
 
 type CreateAssetRow struct {
@@ -73,7 +70,6 @@ type CreateAssetRow struct {
 	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
-	ReturnProfile                   *string            `json:"return_profile"`
 	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
 	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
@@ -92,7 +88,6 @@ func (q *Queries) CreateAsset(ctx context.Context, arg CreateAssetParams) (Creat
 		arg.EmployerMatchRate,
 		arg.EmployerMatchMaxPercentOfSalary,
 		arg.AnnualRate,
-		arg.ReturnProfile,
 	)
 	var i CreateAssetRow
 	err := row.Scan(
@@ -107,7 +102,6 @@ func (q *Queries) CreateAsset(ctx context.Context, arg CreateAssetParams) (Creat
 		&i.EmployerMatchRate,
 		&i.EmployerMatchMaxPercentOfSalary,
 		&i.AnnualRate,
-		&i.ReturnProfile,
 		&i.LastValueUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -129,7 +123,6 @@ SELECT
   employer_match_rate,
   employer_match_max_percent_of_salary,
   annual_rate,
-  return_profile,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -152,7 +145,6 @@ type GetAssetByIDRow struct {
 	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
-	ReturnProfile                   *string            `json:"return_profile"`
 	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
 	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
@@ -174,7 +166,6 @@ func (q *Queries) GetAssetByID(ctx context.Context, id uuid.UUID) (GetAssetByIDR
 		&i.EmployerMatchRate,
 		&i.EmployerMatchMaxPercentOfSalary,
 		&i.AnnualRate,
-		&i.ReturnProfile,
 		&i.LastValueUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -196,7 +187,6 @@ SELECT
   employer_match_rate,
   employer_match_max_percent_of_salary,
   annual_rate,
-  return_profile,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -219,7 +209,6 @@ type ListAssetsByUserIDRow struct {
 	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
-	ReturnProfile                   *string            `json:"return_profile"`
 	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
 	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
@@ -247,7 +236,6 @@ func (q *Queries) ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]L
 			&i.EmployerMatchRate,
 			&i.EmployerMatchMaxPercentOfSalary,
 			&i.AnnualRate,
-			&i.ReturnProfile,
 			&i.LastValueUpdatedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -291,7 +279,6 @@ SET
   employer_match_rate = $8,
   employer_match_max_percent_of_salary = $9,
   annual_rate = $10,
-  return_profile = $11,
   last_value_updated_at = CASE
     WHEN current_value IS DISTINCT FROM $4 THEN now()
     ELSE last_value_updated_at
@@ -311,7 +298,6 @@ RETURNING
   employer_match_rate,
   employer_match_max_percent_of_salary,
   annual_rate,
-  return_profile,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -329,7 +315,6 @@ type UpdateAssetParams struct {
 	EmployerMatchRate               decimal.Decimal `json:"employer_match_rate"`
 	EmployerMatchMaxPercentOfSalary decimal.Decimal `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal `json:"annual_rate"`
-	ReturnProfile                   *string         `json:"return_profile"`
 }
 
 type UpdateAssetRow struct {
@@ -344,7 +329,6 @@ type UpdateAssetRow struct {
 	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
-	ReturnProfile                   *string            `json:"return_profile"`
 	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
 	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
@@ -363,7 +347,6 @@ func (q *Queries) UpdateAsset(ctx context.Context, arg UpdateAssetParams) (Updat
 		arg.EmployerMatchRate,
 		arg.EmployerMatchMaxPercentOfSalary,
 		arg.AnnualRate,
-		arg.ReturnProfile,
 	)
 	var i UpdateAssetRow
 	err := row.Scan(
@@ -378,7 +361,6 @@ func (q *Queries) UpdateAsset(ctx context.Context, arg UpdateAssetParams) (Updat
 		&i.EmployerMatchRate,
 		&i.EmployerMatchMaxPercentOfSalary,
 		&i.AnnualRate,
-		&i.ReturnProfile,
 		&i.LastValueUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,

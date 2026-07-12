@@ -2,9 +2,9 @@
 
 This is a **personal finance planner** monorepo with a Go API and Next.js web app.
 
-**Docs index:** `.github/docs/README.md`
-**Full docs:** `.github/docs/api/`, `.github/docs/db/`, `.github/docs/ui/`, `.github/docs/product/`, `.github/docs/deployment/`
-**Scoped rules:** `.github/docs/api/*.instructions.md` | `.github/docs/ui/*.instructions.md`
+**Docs index:** `docs/README.md`
+**Full docs:** `docs/api/`, `docs/db/`, `docs/ui/`, `docs/product/`, `docs/deployment/`
+**Scoped rules:** `docs/api/*.instructions.md` | `docs/ui/*.instructions.md`
 
 ---
 

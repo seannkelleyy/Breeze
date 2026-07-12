@@ -37,8 +37,9 @@ export const CreateCategoryDialog = () => {
     > = {
       name: values.name,
       allocation: values.allocation,
+      sourceType: 'MANUAL',
     };
-    await postMutation.mutateAsync({ budgetId: budget.id, userId, category });
+    await postMutation.mutateAsync({ budgetId: budget!.id, userId, category });
   };
 
   const dialogTrigger = (

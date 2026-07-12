@@ -13,22 +13,28 @@ import (
 )
 
 type ExpenseCategory struct {
-	ID           uuid.UUID
-	UserID       uuid.UUID
-	BudgetID     uuid.UUID
-	Name         string
-	Allocation   decimal.Decimal
-	CurrentSpend decimal.Decimal
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID               uuid.UUID
+	UserID           uuid.UUID
+	BudgetID         uuid.UUID
+	Name             string
+	Allocation       decimal.Decimal
+	CurrentSpend     decimal.Decimal
+	SourceType       sqlc.ExpenseSourceType
+	SourceTemplateID *uuid.UUID
+	GenerationMonth  *time.Time
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 type CreateExpenseCategoryInput struct {
-	UserID       uuid.UUID
-	BudgetID     uuid.UUID
-	Name         string
-	Allocation   decimal.Decimal
-	CurrentSpend decimal.Decimal
+	UserID           uuid.UUID
+	BudgetID         uuid.UUID
+	Name             string
+	Allocation       decimal.Decimal
+	CurrentSpend     decimal.Decimal
+	SourceType       sqlc.ExpenseSourceType
+	SourceTemplateID *uuid.UUID
+	GenerationMonth  *time.Time
 }
 
 type UpdateExpenseCategoryInput struct {
@@ -39,11 +45,12 @@ type UpdateExpenseCategoryInput struct {
 }
 
 type expenseCategoryQuerier interface {
-	CreateExpenseCategory(ctx context.Context, arg sqlc.CreateExpenseCategoryParams) (sqlc.ExpenseCategory, error)
-	GetExpenseCategoryByID(ctx context.Context, id uuid.UUID) (sqlc.ExpenseCategory, error)
-	ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ExpenseCategory, error)
-	UpdateExpenseCategory(ctx context.Context, arg sqlc.UpdateExpenseCategoryParams) (sqlc.ExpenseCategory, error)
+	CreateExpenseCategory(ctx context.Context, arg sqlc.CreateExpenseCategoryParams) (sqlc.CreateExpenseCategoryRow, error)
+	GetExpenseCategoryByID(ctx context.Context, id uuid.UUID) (sqlc.GetExpenseCategoryByIDRow, error)
+	ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListExpenseCategoriesByBudgetIDRow, error)
+	UpdateExpenseCategory(ctx context.Context, arg sqlc.UpdateExpenseCategoryParams) (sqlc.UpdateExpenseCategoryRow, error)
 	SoftDeleteExpenseCategory(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteGeneratedCategoriesByBudget(ctx context.Context, budgetID uuid.UUID) (int64, error)
 }
 
 type ExpenseCategoryService struct {
@@ -56,17 +63,20 @@ func NewExpenseCategoryService(queries expenseCategoryQuerier) *ExpenseCategoryS
 
 func (s *ExpenseCategoryService) Create(ctx context.Context, input CreateExpenseCategoryInput) (*ExpenseCategory, error) {
 	row, err := s.queries.CreateExpenseCategory(ctx, sqlc.CreateExpenseCategoryParams{
-		UserID:       input.UserID,
-		BudgetID:     input.BudgetID,
-		Name:         input.Name,
-		Allocation:   input.Allocation,
-		CurrentSpend: input.CurrentSpend,
+		UserID:           input.UserID,
+		BudgetID:         input.BudgetID,
+		Name:             input.Name,
+		Allocation:       input.Allocation,
+		CurrentSpend:     input.CurrentSpend,
+		SourceType:       input.SourceType,
+		SourceTemplateID: uuidToPGUUID(input.SourceTemplateID),
+		GenerationMonth:  dateToPGDate(input.GenerationMonth),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create expense category: %w", err)
 	}
 
-	category := mapExpenseCategoryRecord(row)
+	category := mapCreateExpenseCategoryRow(row)
 	return &category, nil
 }
 
@@ -79,7 +89,7 @@ func (s *ExpenseCategoryService) GetByID(ctx context.Context, id uuid.UUID) (*Ex
 		return nil, fmt.Errorf("get expense category by id: %w", err)
 	}
 
-	category := mapExpenseCategoryRecord(row)
+	category := mapGetExpenseCategoryByIDRow(row)
 	return &category, nil
 }
 
@@ -91,7 +101,7 @@ func (s *ExpenseCategoryService) ListByBudgetID(ctx context.Context, budgetID uu
 
 	categories := make([]ExpenseCategory, 0, len(rows))
 	for _, row := range rows {
-		categories = append(categories, mapExpenseCategoryRecord(row))
+		categories = append(categories, mapListExpenseCategoriesByBudgetIDRow(row))
 	}
 
 	return categories, nil
@@ -111,7 +121,7 @@ func (s *ExpenseCategoryService) Update(ctx context.Context, input UpdateExpense
 		return nil, fmt.Errorf("update expense category: %w", err)
 	}
 
-	category := mapExpenseCategoryRecord(row)
+	category := mapUpdateExpenseCategoryRow(row)
 	return &category, nil
 }
 
@@ -128,13 +138,80 @@ func (s *ExpenseCategoryService) Delete(ctx context.Context, id uuid.UUID) error
 
 func mapExpenseCategoryRecord(row sqlc.ExpenseCategory) ExpenseCategory {
 	return ExpenseCategory{
-		ID:           row.ID,
-		UserID:       row.UserID,
-		BudgetID:     row.BudgetID,
-		Name:         row.Name,
-		Allocation:   row.Allocation,
-		CurrentSpend: row.CurrentSpend,
-		CreatedAt:    timestamptzToTime(row.CreatedAt),
-		UpdatedAt:    timestamptzToTime(row.UpdatedAt),
+		ID:               row.ID,
+		UserID:           row.UserID,
+		BudgetID:         row.BudgetID,
+		Name:             row.Name,
+		Allocation:       row.Allocation,
+		CurrentSpend:     row.CurrentSpend,
+		SourceType:       row.SourceType,
+		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
+		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
+		CreatedAt:        timestamptzToTime(row.CreatedAt),
+		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapCreateExpenseCategoryRow(row sqlc.CreateExpenseCategoryRow) ExpenseCategory {
+	return ExpenseCategory{
+		ID:               row.ID,
+		UserID:           row.UserID,
+		BudgetID:         row.BudgetID,
+		Name:             row.Name,
+		Allocation:       row.Allocation,
+		CurrentSpend:     row.CurrentSpend,
+		SourceType:       row.SourceType,
+		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
+		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
+		CreatedAt:        timestamptzToTime(row.CreatedAt),
+		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapGetExpenseCategoryByIDRow(row sqlc.GetExpenseCategoryByIDRow) ExpenseCategory {
+	return ExpenseCategory{
+		ID:               row.ID,
+		UserID:           row.UserID,
+		BudgetID:         row.BudgetID,
+		Name:             row.Name,
+		Allocation:       row.Allocation,
+		CurrentSpend:     row.CurrentSpend,
+		SourceType:       row.SourceType,
+		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
+		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
+		CreatedAt:        timestamptzToTime(row.CreatedAt),
+		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapListExpenseCategoriesByBudgetIDRow(row sqlc.ListExpenseCategoriesByBudgetIDRow) ExpenseCategory {
+	return ExpenseCategory{
+		ID:               row.ID,
+		UserID:           row.UserID,
+		BudgetID:         row.BudgetID,
+		Name:             row.Name,
+		Allocation:       row.Allocation,
+		CurrentSpend:     row.CurrentSpend,
+		SourceType:       row.SourceType,
+		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
+		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
+		CreatedAt:        timestamptzToTime(row.CreatedAt),
+		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapUpdateExpenseCategoryRow(row sqlc.UpdateExpenseCategoryRow) ExpenseCategory {
+	return ExpenseCategory{
+		ID:               row.ID,
+		UserID:           row.UserID,
+		BudgetID:         row.BudgetID,
+		Name:             row.Name,
+		Allocation:       row.Allocation,
+		CurrentSpend:     row.CurrentSpend,
+		SourceType:       row.SourceType,
+		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
+		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
+		CreatedAt:        timestamptzToTime(row.CreatedAt),
+		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
 	}
 }

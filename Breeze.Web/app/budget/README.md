@@ -47,6 +47,6 @@ npm run build
 
 ## Related Docs
 
-- `../../../.github/docs/ui/01-stack.md`
-- `../../../.github/docs/ui/ui-slice-api-checklist.md`
-- `../../../.github/docs/api/06-vertical-slice.md`
+- `../../../docs/ui/01-stack.md`
+- `../../../docs/ui/ui-slice-api-checklist.md`
+- `../../../docs/api/06-vertical-slice.md`

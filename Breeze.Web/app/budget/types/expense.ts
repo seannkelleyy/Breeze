@@ -15,6 +15,9 @@ export interface Expense {
   date: string;
   description: string;
   splits: ExpenseSplit[];
+  sourceType: 'MANUAL' | 'RECURRING_TEMPLATE';
+  sourceTemplateId?: string | null;
+  generationMonth?: string | null;
   createdAt: string;
   updatedAt: string;
 }

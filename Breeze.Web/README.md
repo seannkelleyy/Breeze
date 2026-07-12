@@ -44,8 +44,8 @@ npm run gen
 
 ## Related Docs
 
-- `../.github/docs/README.md`
-- `../.github/docs/ui/01-stack.md`
-- `../.github/docs/ui/ui-slice-api-checklist.md`
-- `../.github/docs/api/04-dev-workflow.md`
-- `../.github/docs/api/06-vertical-slice.md`
+- `../docs/README.md`
+- `../docs/ui/01-stack.md`
+- `../docs/ui/ui-slice-api-checklist.md`
+- `../docs/api/04-dev-workflow.md`
+- `../docs/api/06-vertical-slice.md`

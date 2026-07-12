@@ -1,5 +1,4 @@
 'use client';
-import { type ReactNode, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Loader2, Save, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +14,6 @@ import {
 } from '@/components/ui/select';
 import * as plannerConstants from '../../lib/constants';
 import {
-  clamp,
   formatCurrencyWithCode,
   getAssetFinanceSnapshot,
   getEmployeeMonthlyContribution,
@@ -26,7 +24,6 @@ import {
   AccountOwner,
   AccountType,
   ContributionMode,
-  LiabilityType,
   AccountRateProfile,
   PlannerAccount,
 } from '../../types/account';
@@ -69,7 +66,6 @@ interface AccountListItemProps {
   accountTypeOptions: ReadonlyArray<{ value: string; label: string }>;
   contributionModeOptions: ReadonlyArray<{ value: ContributionMode; label: string }>;
   liabilityContributionModeOptions: ReadonlyArray<{ value: ContributionMode; label: string }>;
-  liabilityTypeOptions: ReadonlyArray<{ value: LiabilityType; label: string }>;
   homeGrowthProfileOptions: ReadonlyArray<{ value: HomeGrowthProfile; label: string }>;
   vehicleDepreciationProfileOptions: ReadonlyArray<{ value: string; label: string }>;
   defaultHomeGrowthProfile: HomeGrowthProfile;
@@ -121,7 +117,6 @@ export function AccountListItem({
   accountTypeOptions,
   contributionModeOptions,
   liabilityContributionModeOptions,
-  liabilityTypeOptions,
   homeGrowthProfileOptions,
   vehicleDepreciationProfileOptions,
   defaultHomeGrowthProfile,
@@ -353,7 +348,6 @@ export function AccountListItem({
               onRateProfileChange={handleRateProfileChange}
               onSetContributionToIrsMax={onSetContributionToIrsMax}
               getDisplayedRateForAccount={getDisplayedRateForAccount}
-              getAnnualRateFromProfile={getAnnualRateFromProfile}
               getStoredAnnualRateForInput={getStoredAnnualRateForInput}
             />
           )

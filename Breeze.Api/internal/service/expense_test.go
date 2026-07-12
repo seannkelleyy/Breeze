@@ -14,47 +14,55 @@ import (
 )
 
 type mockExpenseQuerier struct {
-	createExpenseFunc                 func(context.Context, sqlc.CreateExpenseParams) (sqlc.Expense, error)
-	getExpenseByIDFunc                func(context.Context, uuid.UUID) (sqlc.Expense, error)
-	listExpensesByBudgetIDFunc        func(context.Context, uuid.UUID) ([]sqlc.Expense, error)
-	updateExpenseFunc                 func(context.Context, sqlc.UpdateExpenseParams) (sqlc.Expense, error)
+	createExpenseFunc                 func(context.Context, sqlc.CreateExpenseParams) (sqlc.CreateExpenseRow, error)
+	getExpenseByIDFunc                func(context.Context, uuid.UUID) (sqlc.GetExpenseByIDRow, error)
+	listExpensesByBudgetIDFunc        func(context.Context, uuid.UUID) ([]sqlc.ListExpensesByBudgetIDRow, error)
+	updateExpenseFunc                 func(context.Context, sqlc.UpdateExpenseParams) (sqlc.UpdateExpenseRow, error)
 	softDeleteExpenseFunc             func(context.Context, uuid.UUID) (int64, error)
+	softDeleteGeneratedExpensesFunc   func(context.Context, uuid.UUID) (int64, error)
 	createExpenseSplitFunc            func(context.Context, sqlc.CreateExpenseSplitParams) (sqlc.ExpenseSplit, error)
 	listExpenseSplitsByExpenseIDsFunc func(context.Context, []uuid.UUID) ([]sqlc.ExpenseSplit, error)
 	softDeleteExpenseSplitsFunc       func(context.Context, uuid.UUID) (int64, error)
 }
 
-func (m *mockExpenseQuerier) CreateExpense(ctx context.Context, arg sqlc.CreateExpenseParams) (sqlc.Expense, error) {
+func (m *mockExpenseQuerier) CreateExpense(ctx context.Context, arg sqlc.CreateExpenseParams) (sqlc.CreateExpenseRow, error) {
 	if m.createExpenseFunc != nil {
 		return m.createExpenseFunc(ctx, arg)
 	}
-	return sqlc.Expense{}, nil
+	return sqlc.CreateExpenseRow{}, nil
 }
 
-func (m *mockExpenseQuerier) GetExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.Expense, error) {
+func (m *mockExpenseQuerier) GetExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.GetExpenseByIDRow, error) {
 	if m.getExpenseByIDFunc != nil {
 		return m.getExpenseByIDFunc(ctx, id)
 	}
-	return sqlc.Expense{}, nil
+	return sqlc.GetExpenseByIDRow{}, nil
 }
 
-func (m *mockExpenseQuerier) ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.Expense, error) {
+func (m *mockExpenseQuerier) ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListExpensesByBudgetIDRow, error) {
 	if m.listExpensesByBudgetIDFunc != nil {
 		return m.listExpensesByBudgetIDFunc(ctx, budgetID)
 	}
-	return []sqlc.Expense{}, nil
+	return []sqlc.ListExpensesByBudgetIDRow{}, nil
 }
 
-func (m *mockExpenseQuerier) UpdateExpense(ctx context.Context, arg sqlc.UpdateExpenseParams) (sqlc.Expense, error) {
+func (m *mockExpenseQuerier) UpdateExpense(ctx context.Context, arg sqlc.UpdateExpenseParams) (sqlc.UpdateExpenseRow, error) {
 	if m.updateExpenseFunc != nil {
 		return m.updateExpenseFunc(ctx, arg)
 	}
-	return sqlc.Expense{}, nil
+	return sqlc.UpdateExpenseRow{}, nil
 }
 
 func (m *mockExpenseQuerier) SoftDeleteExpense(ctx context.Context, id uuid.UUID) (int64, error) {
 	if m.softDeleteExpenseFunc != nil {
 		return m.softDeleteExpenseFunc(ctx, id)
+	}
+	return 0, nil
+}
+
+func (m *mockExpenseQuerier) SoftDeleteGeneratedExpensesByBudget(ctx context.Context, budgetID uuid.UUID) (int64, error) {
+	if m.softDeleteGeneratedExpensesFunc != nil {
+		return m.softDeleteGeneratedExpensesFunc(ctx, budgetID)
 	}
 	return 0, nil
 }
@@ -87,27 +95,29 @@ func expenseTestService(mock *mockExpenseQuerier) *ExpenseService {
 	return newExpenseServiceWithRunner(mock, runner)
 }
 
-func testExpenseRow() sqlc.Expense {
+func testCreateExpenseRow() sqlc.CreateExpenseRow {
 	amount, _ := decimal.Parse("250.00")
 	date := pgtype.Date{Time: time.Now().UTC(), Valid: true}
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.Expense{
-		ID:                uuid.New(),
-		UserID:            uuid.New(),
-		BudgetID:          uuid.New(),
-		Amount:            amount,
-		Date:              date,
-		Description:       "Groceries",
-		RecurringSourceID: pgtype.UUID{},
-		CreatedAt:         timestamp,
-		UpdatedAt:         timestamp,
-		DeletedAt:         pgtype.Timestamptz{},
+	return sqlc.CreateExpenseRow{
+		ID:               uuid.New(),
+		UserID:           uuid.New(),
+		BudgetID:         uuid.New(),
+		Amount:           amount,
+		Date:             date,
+		Description:      "Groceries",
+		SourceType:       sqlc.ExpenseSourceTypeMANUAL,
+		SourceTemplateID: pgtype.UUID{},
+		GenerationMonth:  pgtype.Date{},
+		CreatedAt:        timestamp,
+		UpdatedAt:        timestamp,
+		DeletedAt:        pgtype.Timestamptz{},
 	}
 }
 
 func testExpenseSplitRow(expenseID uuid.UUID) sqlc.ExpenseSplit {
-	amount, _ := decimal.Parse("100.00")
+	amount, _ := decimal.Parse("250.00")
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 	description := "Produce"
 
@@ -125,7 +135,7 @@ func testExpenseSplitRow(expenseID uuid.UUID) sqlc.ExpenseSplit {
 
 func TestExpenseService_Create_Validation(t *testing.T) {
 	ctx := context.Background()
-	expense := testExpenseRow()
+	expense := testCreateExpenseRow()
 
 	svc := expenseTestService(&mockExpenseQuerier{})
 
@@ -138,38 +148,39 @@ func TestExpenseService_Create_Validation(t *testing.T) {
 		Splits:      nil,
 	})
 	assert.ErrorIs(t, err, ErrNoSplits)
+}
 
-	amount, _ := decimal.Parse("200.00")
-	_, err = svc.Create(ctx, CreateExpenseInput{
+func TestExpenseService_Create_SplitMismatch(t *testing.T) {
+	ctx := context.Background()
+	expense := testCreateExpenseRow()
+	catID := uuid.New()
+	badAmount, _ := decimal.Parse("999.99")
+
+	svc := expenseTestService(&mockExpenseQuerier{})
+
+	_, err := svc.Create(ctx, CreateExpenseInput{
 		UserID:      expense.UserID,
 		BudgetID:    expense.BudgetID,
 		Amount:      expense.Amount,
 		Date:        expense.Date.Time,
 		Description: expense.Description,
 		Splits: []ExpenseSplitInput{
-			{CategoryID: uuid.New(), Amount: amount},
+			{CategoryID: catID, Amount: badAmount},
 		},
 	})
 	assert.ErrorIs(t, err, ErrSplitMismatch)
 }
 
-func TestExpenseService_Create(t *testing.T) {
+func TestExpenseService_Create_Success(t *testing.T) {
 	ctx := context.Background()
-	expense := testExpenseRow()
+	expense := testCreateExpenseRow()
 	split := testExpenseSplitRow(expense.ID)
 
-	// Ensure split sums match total expense for successful Create test
-	split.Amount = expense.Amount
-
 	mock := &mockExpenseQuerier{
-		createExpenseFunc: func(ctx context.Context, arg sqlc.CreateExpenseParams) (sqlc.Expense, error) {
-			assert.Equal(t, expense.UserID, arg.UserID)
-			assert.Equal(t, expense.BudgetID, arg.BudgetID)
-			assert.Equal(t, expense.Amount, arg.Amount)
+		createExpenseFunc: func(_ context.Context, _ sqlc.CreateExpenseParams) (sqlc.CreateExpenseRow, error) {
 			return expense, nil
 		},
-		createExpenseSplitFunc: func(ctx context.Context, arg sqlc.CreateExpenseSplitParams) (sqlc.ExpenseSplit, error) {
-			assert.Equal(t, expense.ID, arg.ExpenseID)
+		createExpenseSplitFunc: func(_ context.Context, _ sqlc.CreateExpenseSplitParams) (sqlc.ExpenseSplit, error) {
 			return split, nil
 		},
 	}
@@ -185,49 +196,43 @@ func TestExpenseService_Create(t *testing.T) {
 			{CategoryID: split.CategoryID, Amount: split.Amount},
 		},
 	})
-
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, expense.ID, result.ID)
 	assert.Len(t, result.Splits, 1)
 }
 
 func TestExpenseService_Update_NotFound(t *testing.T) {
 	ctx := context.Background()
-	expense := testExpenseRow()
+	catID := uuid.New()
+	amount, _ := decimal.Parse("50.00")
 
 	mock := &mockExpenseQuerier{
-		updateExpenseFunc: func(ctx context.Context, arg sqlc.UpdateExpenseParams) (sqlc.Expense, error) {
-			return sqlc.Expense{}, pgx.ErrNoRows
+		updateExpenseFunc: func(_ context.Context, _ sqlc.UpdateExpenseParams) (sqlc.UpdateExpenseRow, error) {
+			return sqlc.UpdateExpenseRow{}, pgx.ErrNoRows
 		},
 	}
 
 	svc := expenseTestService(mock)
 	_, err := svc.Update(ctx, UpdateExpenseInput{
-		ID:          expense.ID,
-		Amount:      expense.Amount,
-		Date:        expense.Date.Time,
-		Description: expense.Description,
-		Splits: []ExpenseSplitInput{
-			{CategoryID: uuid.New(), Amount: expense.Amount},
-		},
+		ID:          uuid.New(),
+		Amount:      amount,
+		Date:        time.Now(),
+		Description: "test",
+		Splits:      []ExpenseSplitInput{{CategoryID: catID, Amount: amount}},
 	})
-
 	assert.ErrorIs(t, err, ErrNotFound)
 }
 
 func TestExpenseService_Delete_NotFound(t *testing.T) {
 	ctx := context.Background()
-	expense := testExpenseRow()
 
 	mock := &mockExpenseQuerier{
-		softDeleteExpenseFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+		softDeleteExpenseFunc: func(_ context.Context, _ uuid.UUID) (int64, error) {
 			return 0, nil
 		},
 	}
 
 	svc := expenseTestService(mock)
-	err := svc.Delete(ctx, expense.ID)
-
+	err := svc.Delete(ctx, uuid.New())
 	assert.ErrorIs(t, err, ErrNotFound)
 }

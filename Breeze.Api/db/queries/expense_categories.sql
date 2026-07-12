@@ -4,8 +4,11 @@ INSERT INTO expense_categories (
   budget_id,
   name,
   allocation,
-  current_spend
-) VALUES ($1, $2, $3, $4, $5)
+  current_spend,
+  source_type,
+  source_template_id,
+  generation_month
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING
   id,
   user_id,
@@ -13,6 +16,9 @@ RETURNING
   name,
   allocation,
   current_spend,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at;
@@ -25,6 +31,9 @@ SELECT
   name,
   allocation,
   current_spend,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
@@ -41,6 +50,9 @@ SELECT
   name,
   allocation,
   current_spend,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
@@ -65,6 +77,9 @@ RETURNING
   name,
   allocation,
   current_spend,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at;
@@ -74,4 +89,12 @@ UPDATE expense_categories
 SET deleted_at = now(),
     updated_at = now()
 WHERE id = $1
+  AND deleted_at IS NULL;
+
+-- name: SoftDeleteGeneratedCategoriesByBudget :execrows
+UPDATE expense_categories
+SET deleted_at = now(),
+    updated_at = now()
+WHERE budget_id = $1
+  AND source_type = 'RECURRING_TEMPLATE'
   AND deleted_at IS NULL;

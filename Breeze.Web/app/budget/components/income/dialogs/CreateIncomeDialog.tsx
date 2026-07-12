@@ -1,6 +1,4 @@
 'use client';
-import { useEffect } from 'react';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useBudgetContext } from '@/app/budget/providers/index';
@@ -39,13 +37,13 @@ export const CreateIncomeDialog = () => {
   const onSubmit = async (values: IncomeFormData) => {
     if (!userId || !budget?.id) return;
     const income: Omit<Income, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'sourceType'> = {
-      budgetId: budget.id,
+      budgetId: budget!.id,
       name: values.name,
       amount: values.amount,
       date: values.date,
     };
     await postMutation.mutateAsync({
-      budgetId: budget.id,
+      budgetId: budget!.id,
       userId,
       income,
     });

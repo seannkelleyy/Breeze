@@ -5,7 +5,6 @@ import dayjs, { Dayjs } from 'dayjs';
 
 import { BudgetContext } from './BudgetContext';
 import { useFetchBudget } from '../hooks/budget/index';
-import { Budget } from '../types/budget';
 import { useFetchIncomes } from '../hooks/income/index';
 import { useFetchCategories } from '../hooks/category/index';
 import { useFetchExpensesForBudget } from '../hooks/expense/index';
@@ -51,7 +50,7 @@ const BudgetDataProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   return (
     <BudgetContext.Provider
       value={{
-        budget,
+        budget: budget ?? null,
         totalSpent,
         incomes,
         categories,

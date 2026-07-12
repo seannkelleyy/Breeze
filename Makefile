@@ -1,18 +1,16 @@
-.PHONY: dev api web db db-stop clean
+.PHONY: dev db db-stop clean check
+
+dev:
+	./scripts/dev.sh
+
+check:
+	./scripts/check.sh
 
 db:
 	docker compose up -d postgres
 
 db-stop:
 	docker compose down
-
-api:
-	cd Breeze.Api && make dev
-
-web:
-	cd Breeze.Web && npm run dev
-
-dev: db api
 
 clean:
 	docker compose down -v

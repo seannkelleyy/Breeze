@@ -141,6 +141,16 @@ type CreateNetWorthSnapshotInput struct {
 	NetWorth         string `json:"netWorth"`
 }
 
+type CreateRecurringExpenseInput struct {
+	UserID             string             `json:"userId"`
+	Name               string             `json:"name"`
+	Amount             string             `json:"amount"`
+	RecurrenceInterval RecurrenceInterval `json:"recurrenceInterval"`
+	PaydayDayOfMonth   *int               `json:"paydayDayOfMonth,omitempty"`
+	StartDate          string             `json:"startDate"`
+	EndDate            *string            `json:"endDate,omitempty"`
+}
+
 type CreateRecurringIncomeInput struct {
 	UserID             string             `json:"userId"`
 	Name               string             `json:"name"`
@@ -195,26 +205,32 @@ type CreateUserInput struct {
 }
 
 type Expense struct {
-	ID          string          `json:"id"`
-	UserID      string          `json:"userId"`
-	BudgetID    string          `json:"budgetId"`
-	Amount      string          `json:"amount"`
-	Date        string          `json:"date"`
-	Description string          `json:"description"`
-	Splits      []*ExpenseSplit `json:"splits"`
-	CreatedAt   string          `json:"createdAt"`
-	UpdatedAt   string          `json:"updatedAt"`
+	ID               string            `json:"id"`
+	UserID           string            `json:"userId"`
+	BudgetID         string            `json:"budgetId"`
+	Amount           string            `json:"amount"`
+	Date             string            `json:"date"`
+	Description      string            `json:"description"`
+	Splits           []*ExpenseSplit   `json:"splits"`
+	SourceType       ExpenseSourceType `json:"sourceType"`
+	SourceTemplateID *string           `json:"sourceTemplateId,omitempty"`
+	GenerationMonth  *string           `json:"generationMonth,omitempty"`
+	CreatedAt        string            `json:"createdAt"`
+	UpdatedAt        string            `json:"updatedAt"`
 }
 
 type ExpenseCategory struct {
-	ID           string `json:"id"`
-	UserID       string `json:"userId"`
-	BudgetID     string `json:"budgetId"`
-	Name         string `json:"name"`
-	Allocation   string `json:"allocation"`
-	CurrentSpend string `json:"currentSpend"`
-	CreatedAt    string `json:"createdAt"`
-	UpdatedAt    string `json:"updatedAt"`
+	ID               string            `json:"id"`
+	UserID           string            `json:"userId"`
+	BudgetID         string            `json:"budgetId"`
+	Name             string            `json:"name"`
+	Allocation       string            `json:"allocation"`
+	CurrentSpend     string            `json:"currentSpend"`
+	SourceType       ExpenseSourceType `json:"sourceType"`
+	SourceTemplateID *string           `json:"sourceTemplateId,omitempty"`
+	GenerationMonth  *string           `json:"generationMonth,omitempty"`
+	CreatedAt        string            `json:"createdAt"`
+	UpdatedAt        string            `json:"updatedAt"`
 }
 
 type ExpenseSplit struct {
@@ -331,22 +347,20 @@ type PlaidConnection struct {
 	UpdatedAt       string  `json:"updatedAt"`
 }
 
-type PlannerPerson struct {
-	ID               string `json:"id"`
-	UserID           string `json:"userId"`
-	PersonType       string `json:"personType"`
-	Name             string `json:"name"`
-	Birthday         string `json:"birthday"`
-	RetirementAge    int    `json:"retirementAge"`
-	AnnualSalary     string `json:"annualSalary"`
-	BonusMode        string `json:"bonusMode"`
-	AnnualBonus      string `json:"annualBonus"`
-	IncomeGrowthRate string `json:"incomeGrowthRate"`
-	CreatedAt        string `json:"createdAt"`
-	UpdatedAt        string `json:"updatedAt"`
+type Query struct {
 }
 
-type Query struct {
+type RecurringExpense struct {
+	ID                 string             `json:"id"`
+	UserID             string             `json:"userId"`
+	Name               string             `json:"name"`
+	Amount             string             `json:"amount"`
+	RecurrenceInterval RecurrenceInterval `json:"recurrenceInterval"`
+	PaydayDayOfMonth   *int               `json:"paydayDayOfMonth,omitempty"`
+	StartDate          string             `json:"startDate"`
+	EndDate            *string            `json:"endDate,omitempty"`
+	CreatedAt          string             `json:"createdAt"`
+	UpdatedAt          string             `json:"updatedAt"`
 }
 
 type RecurringIncome struct {
@@ -510,6 +524,16 @@ type UpdateNetWorthSnapshotInput struct {
 	NetWorth         *string `json:"netWorth,omitempty"`
 }
 
+type UpdateRecurringExpenseInput struct {
+	ID                 string             `json:"id"`
+	Name               string             `json:"name"`
+	Amount             string             `json:"amount"`
+	RecurrenceInterval RecurrenceInterval `json:"recurrenceInterval"`
+	PaydayDayOfMonth   *int               `json:"paydayDayOfMonth,omitempty"`
+	StartDate          string             `json:"startDate"`
+	EndDate            *string            `json:"endDate,omitempty"`
+}
+
 type UpdateRecurringIncomeInput struct {
 	ID                 string             `json:"id"`
 	Name               string             `json:"name"`
@@ -563,19 +587,6 @@ type UpdateUserInput struct {
 	MaxTaxBracketID    *string        `json:"maxTaxBracketId,omitempty"`
 	FilingStatus       FilingStatus   `json:"filingStatus"`
 	PayoffStrategy     PayoffStrategy `json:"payoffStrategy"`
-}
-
-type UpsertPlannerPersonInput struct {
-	ID               string `json:"id"`
-	UserID           string `json:"userId"`
-	PersonType       string `json:"personType"`
-	Name             string `json:"name"`
-	Birthday         string `json:"birthday"`
-	RetirementAge    int    `json:"retirementAge"`
-	AnnualSalary     string `json:"annualSalary"`
-	BonusMode        string `json:"bonusMode"`
-	AnnualBonus      string `json:"annualBonus"`
-	IncomeGrowthRate string `json:"incomeGrowthRate"`
 }
 
 type User struct {
@@ -720,6 +731,61 @@ func (e *DeductionType) UnmarshalJSON(b []byte) error {
 }
 
 func (e DeductionType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ExpenseSourceType string
+
+const (
+	ExpenseSourceTypeManual            ExpenseSourceType = "MANUAL"
+	ExpenseSourceTypeRecurringTemplate ExpenseSourceType = "RECURRING_TEMPLATE"
+)
+
+var AllExpenseSourceType = []ExpenseSourceType{
+	ExpenseSourceTypeManual,
+	ExpenseSourceTypeRecurringTemplate,
+}
+
+func (e ExpenseSourceType) IsValid() bool {
+	switch e {
+	case ExpenseSourceTypeManual, ExpenseSourceTypeRecurringTemplate:
+		return true
+	}
+	return false
+}
+
+func (e ExpenseSourceType) String() string {
+	return string(e)
+}
+
+func (e *ExpenseSourceType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ExpenseSourceType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ExpenseSourceType", str)
+	}
+	return nil
+}
+
+func (e ExpenseSourceType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ExpenseSourceType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ExpenseSourceType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

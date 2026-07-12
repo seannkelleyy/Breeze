@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"breeze.api/graph/model"
+	"breeze.api/internal/db/sqlc"
 	"breeze.api/internal/service"
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
@@ -42,6 +43,7 @@ func createExpenseInputFromModel(input model.CreateExpenseInput) (service.Create
 		Amount:      amount,
 		Date:        expenseDate,
 		Description: input.Description,
+		SourceType:  sqlc.ExpenseSourceTypeMANUAL,
 		Splits:      splits,
 	}, nil
 }
@@ -119,15 +121,18 @@ func mapExpenseToModel(expense *service.Expense) *model.Expense {
 	}
 
 	return &model.Expense{
-		ID:          expense.ID.String(),
-		UserID:      expense.UserID.String(),
-		BudgetID:    expense.BudgetID.String(),
-		Amount:      expense.Amount.String(),
-		Date:        expense.Date.Format(time.RFC3339),
-		Description: expense.Description,
-		Splits:      splits,
-		CreatedAt:   expense.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:   expense.UpdatedAt.Format(time.RFC3339),
+		ID:               expense.ID.String(),
+		UserID:           expense.UserID.String(),
+		BudgetID:         expense.BudgetID.String(),
+		Amount:           expense.Amount.String(),
+		Date:             expense.Date.Format(time.RFC3339),
+		Description:      expense.Description,
+		Splits:           splits,
+		SourceType:       model.ExpenseSourceType(expense.SourceType),
+		SourceTemplateID: uuidPtrToString(expense.SourceTemplateID),
+		GenerationMonth:  formatOptionalDate(expense.GenerationMonth),
+		CreatedAt:        expense.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:        expense.UpdatedAt.Format(time.RFC3339),
 	}
 }
 

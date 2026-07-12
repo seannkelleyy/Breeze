@@ -101,6 +101,8 @@ export interface CurrentUserContextValue {
   safeWithdrawalRate: number;
   setSafeWithdrawalRate: (nextSafeWithdrawalRate: number) => void;
   updateSafeWithdrawalRate: (nextSafeWithdrawalRate: number) => void;
+  filingStatus: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH';
+  deductionType: 'STANDARD' | 'ITEMIZED';
   plannerDesiredInvestmentAmount: number;
   setPlannerDesiredInvestmentAmount: Dispatch<SetStateAction<number>>;
   plannerMonthlyExpenses: number;
@@ -131,6 +133,12 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const { user, isLoaded, isSignedIn } = useUser();
   const { request } = useGraphql();
   const loadedPreferencesForUserRef = useRef<string | null>(null);
+  const pendingPrefsRef = useRef<{
+    currencyCode?: string;
+    returnDisplayMode?: 'real' | 'nominal';
+    inflationRate?: number;
+    safeWithdrawalRate?: number;
+  }>({});
   const [currencyCode, setCurrencyCode] = useState('USD');
   const [returnDisplayMode, setReturnDisplayMode] = useState<'real' | 'nominal'>(
     PLANNER_DEFAULT_RETURN_DISPLAY_MODE,
@@ -172,7 +180,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       nextInflationRate: number,
       nextSafeWithdrawalRate: number,
     ) => {
-      if (!isLoaded || !isSignedIn) {
+      if (!isLoaded || !isSignedIn || !resolvedUserId) {
         return;
       }
 
@@ -219,6 +227,10 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const updateCurrencyCode = useCallback(
     (nextCurrencyCode: string) => {
       setCurrencyCode(nextCurrencyCode);
+      if (!resolvedUserId) {
+        pendingPrefsRef.current.currencyCode = nextCurrencyCode;
+        return;
+      }
       void persistPreferences(
         nextCurrencyCode,
         returnDisplayMode,
@@ -226,12 +238,16 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         safeWithdrawalRate,
       );
     },
-    [persistPreferences, returnDisplayMode, inflationRate, safeWithdrawalRate],
+    [persistPreferences, returnDisplayMode, inflationRate, safeWithdrawalRate, resolvedUserId],
   );
 
   const updateReturnDisplayMode = useCallback(
     (nextReturnDisplayMode: 'real' | 'nominal') => {
       setReturnDisplayMode(nextReturnDisplayMode);
+      if (!resolvedUserId) {
+        pendingPrefsRef.current.returnDisplayMode = nextReturnDisplayMode;
+        return;
+      }
       void persistPreferences(
         currencyCode,
         nextReturnDisplayMode,
@@ -239,14 +255,11 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         safeWithdrawalRate,
       );
     },
-    [persistPreferences, currencyCode, inflationRate, safeWithdrawalRate],
+    [persistPreferences, currencyCode, inflationRate, safeWithdrawalRate, resolvedUserId],
   );
-  const hydrateReturnDisplayMode = useCallback(
-    (nextReturnDisplayMode: 'real' | 'nominal') => {
-      setReturnDisplayMode(nextReturnDisplayMode);
-    },
-    [],
-  );
+  const hydrateReturnDisplayMode = useCallback((nextReturnDisplayMode: 'real' | 'nominal') => {
+    setReturnDisplayMode(nextReturnDisplayMode);
+  }, []);
   const hydrateCurrencyCode = useCallback((next: string) => setCurrencyCode(next), []);
   const hydrateInflationRate = useCallback((next: number) => setInflationRate(next), []);
   const hydrateSafeWithdrawalRate = useCallback((next: number) => setSafeWithdrawalRate(next), []);
@@ -254,6 +267,10 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const updateInflationRate = useCallback(
     (nextInflationRate: number) => {
       setInflationRate(nextInflationRate);
+      if (!resolvedUserId) {
+        pendingPrefsRef.current.inflationRate = nextInflationRate;
+        return;
+      }
       void persistPreferences(
         currencyCode,
         returnDisplayMode,
@@ -261,12 +278,16 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         safeWithdrawalRate,
       );
     },
-    [persistPreferences, currencyCode, returnDisplayMode, safeWithdrawalRate],
+    [persistPreferences, currencyCode, returnDisplayMode, safeWithdrawalRate, resolvedUserId],
   );
 
   const updateSafeWithdrawalRate = useCallback(
     (nextSafeWithdrawalRate: number) => {
       setSafeWithdrawalRate(nextSafeWithdrawalRate);
+      if (!resolvedUserId) {
+        pendingPrefsRef.current.safeWithdrawalRate = nextSafeWithdrawalRate;
+        return;
+      }
       void persistPreferences(
         currencyCode,
         returnDisplayMode,
@@ -274,8 +295,23 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         nextSafeWithdrawalRate,
       );
     },
-    [persistPreferences, currencyCode, returnDisplayMode, inflationRate],
+    [persistPreferences, currencyCode, returnDisplayMode, inflationRate, resolvedUserId],
   );
+
+  useEffect(() => {
+    if (!resolvedUserId) {
+      return;
+    }
+    const pending = pendingPrefsRef.current;
+    pendingPrefsRef.current = {};
+    void persistPreferences(
+      pending.currencyCode ?? currencyCode,
+      pending.returnDisplayMode ?? returnDisplayMode,
+      pending.inflationRate ?? inflationRate,
+      pending.safeWithdrawalRate ?? safeWithdrawalRate,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedUserId]);
 
   useEffect(() => {
     if (!isLoaded) {
@@ -425,6 +461,8 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     safeWithdrawalRate,
     setSafeWithdrawalRate: hydrateSafeWithdrawalRate,
     updateSafeWithdrawalRate,
+    filingStatus,
+    deductionType,
     plannerDesiredInvestmentAmount,
     setPlannerDesiredInvestmentAmount,
     plannerMonthlyExpenses,

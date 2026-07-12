@@ -148,6 +148,14 @@ function usePortfolioCalculation(
     [weightedAnnualRate, inflationRate, useInflationAdjustedValues],
   );
 
+  const emergencyFundBalance = useMemo(
+    () =>
+      accounts
+        .filter((a) => a.accountType === 'emergency-fund' || a.accountType === 'checking')
+        .reduce((sum, a) => sum + getNetWorthStartingBalance(a), 0),
+    [accounts],
+  );
+
   const currentSavingsRateEmployee =
     household.annualHouseholdIncome > 0
       ? (totalPlannedMonthlyEmployee * 12 * 100) / household.annualHouseholdIncome
@@ -166,6 +174,7 @@ function usePortfolioCalculation(
     effectiveWeightedAnnualRate,
     currentSavingsRateEmployee,
     currentSavingsRateTotal,
+    emergencyFundBalance,
   };
 }
 
@@ -309,6 +318,8 @@ function useFinancialMathSnapshot(
   household: ReturnType<typeof useHouseholdCalculation>,
   safeWithdrawalRate: number,
   portfolio: ReturnType<typeof usePortfolioCalculation>,
+  filingStatus: string,
+  deductionType: string,
 ) {
   return useMemo(
     () =>
@@ -318,6 +329,9 @@ function useFinancialMathSnapshot(
         spouseSalary: household.spouseAnnualIncome,
         safeWithdrawalRate,
         currentPortfolio: portfolio.totalStartingBalance,
+        emergencyFundBalance: portfolio.emergencyFundBalance,
+        filingStatus,
+        deductionType,
       }),
     [
       monthlyExpenses,
@@ -325,6 +339,9 @@ function useFinancialMathSnapshot(
       household.spouseAnnualIncome,
       safeWithdrawalRate,
       portfolio.totalStartingBalance,
+      portfolio.emergencyFundBalance,
+      filingStatus,
+      deductionType,
     ],
   );
 }
@@ -478,10 +495,11 @@ const usePlannerModel = () => {
     plannerDesiredInvestmentAmount,
     plannerMonthlyExpenses,
     plannerRetirementMethod,
-    plannerFireLifestyleIndex,
     plannerPeople,
     plannerAccounts,
     plannerAssetFinanceDetailsByAccountId,
+    filingStatus,
+    deductionType,
   } = useCurrentUser();
   const { irsLimits } = useIrsLimits();
 
@@ -510,6 +528,8 @@ const usePlannerModel = () => {
     household,
     safeWithdrawalRate,
     portfolio,
+    filingStatus,
+    deductionType,
   );
   const { projectionRows, finalBalances, projectedNetWorthAtTargetAge } = useProjections(
     plannerAccounts,

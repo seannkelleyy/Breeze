@@ -13,6 +13,7 @@ import { GET_BUDGET_BY_DATE } from '@/lib/services/queries/budget';
 import useGraphql from '@/lib/services/useGraphql';
 import { PlannerAccountDto } from '../../types/account';
 import { PlannerUpsertRequest } from '../../types/planner';
+import { accountTypeToApiAssetType } from '../../lib/typeMapping';
 
 const usePlanner = () => {
   const { request } = useGraphql();
@@ -82,27 +83,8 @@ const usePlanner = () => {
           acctType,
         );
 
-      const mapToAssetType = (acctType: string) => {
-        switch (acctType) {
-          case '401k':
-          case '403b':
-          case '457':
-          case 'roth-ira':
-          case 'traditional-ira':
-          case 'hsa':
-            return 'RETIREMENT';
-          case 'brokerage':
-          case 'checking':
-          case 'emergency-fund':
-            return 'CASH';
-          case 'home':
-            return 'REAL_ESTATE';
-          case 'vehicle':
-            return 'VEHICLE';
-          default:
-            return 'OTHER';
-        }
-      };
+      const mapToAssetType = (acctType: string): ReturnType<typeof accountTypeToApiAssetType> =>
+        accountTypeToApiAssetType(acctType as Parameters<typeof accountTypeToApiAssetType>[0]);
 
       const mapToLiabilityType = (acctType: string) => {
         switch (acctType) {
@@ -166,7 +148,9 @@ const usePlanner = () => {
             contributionMode: acct.contributionMode,
             contributionValue: String(acct.contributionValue ?? 0),
             employerMatchRate: String((acct.employerMatchRate ?? 0) / 100),
-            employerMatchMaxPercentOfSalary: String((acct.employerMatchMaxPercentOfSalary ?? 0) / 100),
+            employerMatchMaxPercentOfSalary: String(
+              (acct.employerMatchMaxPercentOfSalary ?? 0) / 100,
+            ),
             annualRate: String((acct.annualRate ?? 0) / 100),
             returnProfile: acct.returnProfile ?? null,
           };

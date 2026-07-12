@@ -37,6 +37,7 @@ export type FinancialMathScenario = {
 export type FinancialMathSnapshot = {
   monthlyExpenses: number;
   annualSpend: number;
+  emergencyFundBalance: number;
   emergencyFund3Months: number;
   emergencyFund6Months: number;
   emergencyFund12Months: number;

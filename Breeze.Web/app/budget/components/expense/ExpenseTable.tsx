@@ -29,6 +29,7 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { Expense } from '../../types/expense';
 
 /**
@@ -45,15 +46,6 @@ export const ExpensesTable = () => {
   const { categories, expenses } = useBudgetContext();
 
   const columns = React.useMemo<ColumnDef<Expense>[]>(() => {
-    const recurrenceLabelByInterval: Record<string, string> = {
-      none: 'One-time',
-      weekly: 'Weekly',
-      biweekly: 'Biweekly',
-      monthly: 'Monthly',
-      quarterly: 'Quarterly',
-      yearly: 'Yearly',
-    };
-
     return [
       {
         accessorKey: 'name',
@@ -139,11 +131,18 @@ export const ExpensesTable = () => {
       },
       {
         id: 'schedule',
-        header: 'Schedule',
-        cell: () => {
-          // Expenses are always one-time in the new schema
-          // Recurring expenses would be generated from templates
-          return 'One-time';
+        header: 'Status',
+        cell: ({ row }) => {
+          const expense = row.original as Expense;
+          if (expense.sourceType === 'RECURRING_TEMPLATE') {
+            const expenseDate = dayjs(expense.date);
+            const today = dayjs().startOf('day');
+            if (expenseDate.isAfter(today)) {
+              return <Badge variant="outline">Upcoming</Badge>;
+            }
+            return <Badge variant="secondary">Recurring</Badge>;
+          }
+          return <span className="text-muted-foreground text-sm">One-time</span>;
         },
       },
     ];

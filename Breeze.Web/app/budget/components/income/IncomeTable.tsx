@@ -44,15 +44,6 @@ export const IncomeTable = () => {
   const { incomes = [] } = useBudgetContext();
 
   const columns = React.useMemo<ColumnDef<Income>[]>(() => {
-    const recurrenceLabelByInterval: Record<string, string> = {
-      none: 'One-time',
-      weekly: 'Weekly',
-      biweekly: 'Biweekly',
-      monthly: 'Monthly',
-      quarterly: 'Quarterly',
-      yearly: 'Yearly',
-    };
-
     return [
       {
         accessorKey: 'name',

@@ -24,7 +24,6 @@ type Asset struct {
 	EmployerMatchRate               decimal.Decimal
 	EmployerMatchMaxPercentOfSalary decimal.Decimal
 	AnnualRate                      decimal.Decimal
-	ReturnProfile                   *string
 	LastValueUpdatedAt              time.Time
 	CreatedAt                       time.Time
 	UpdatedAt                       time.Time
@@ -41,7 +40,6 @@ type CreateAssetInput struct {
 	EmployerMatchRate               decimal.Decimal
 	EmployerMatchMaxPercentOfSalary decimal.Decimal
 	AnnualRate                      decimal.Decimal
-	ReturnProfile                   *string
 }
 
 type UpdateAssetInput struct {
@@ -55,7 +53,6 @@ type UpdateAssetInput struct {
 	EmployerMatchRate               decimal.Decimal
 	EmployerMatchMaxPercentOfSalary decimal.Decimal
 	AnnualRate                      decimal.Decimal
-	ReturnProfile                   *string
 }
 
 type assetQuerier interface {
@@ -86,7 +83,6 @@ func (s *AssetService) Create(ctx context.Context, input CreateAssetInput) (*Ass
 		EmployerMatchRate:               input.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: input.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      input.AnnualRate,
-		ReturnProfile:                   input.ReturnProfile,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create asset: %w", err)
@@ -135,7 +131,6 @@ func (s *AssetService) Update(ctx context.Context, input UpdateAssetInput) (*Ass
 		EmployerMatchRate:               input.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: input.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      input.AnnualRate,
-		ReturnProfile:                   input.ReturnProfile,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -172,7 +167,6 @@ func mapCreateAssetRow(row sqlc.CreateAssetRow) Asset {
 		EmployerMatchRate:               row.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      row.AnnualRate,
-		ReturnProfile:                   row.ReturnProfile,
 		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
 		CreatedAt:                       timestamptzToTime(row.CreatedAt),
 		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
@@ -192,7 +186,6 @@ func mapGetAssetByIDRow(row sqlc.GetAssetByIDRow) Asset {
 		EmployerMatchRate:               row.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      row.AnnualRate,
-		ReturnProfile:                   row.ReturnProfile,
 		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
 		CreatedAt:                       timestamptzToTime(row.CreatedAt),
 		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
@@ -212,7 +205,6 @@ func mapListAssetsByUserIDRow(row sqlc.ListAssetsByUserIDRow) Asset {
 		EmployerMatchRate:               row.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      row.AnnualRate,
-		ReturnProfile:                   row.ReturnProfile,
 		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
 		CreatedAt:                       timestamptzToTime(row.CreatedAt),
 		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
@@ -232,7 +224,6 @@ func mapUpdateAssetRow(row sqlc.UpdateAssetRow) Asset {
 		EmployerMatchRate:               row.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      row.AnnualRate,
-		ReturnProfile:                   row.ReturnProfile,
 		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
 		CreatedAt:                       timestamptzToTime(row.CreatedAt),
 		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),

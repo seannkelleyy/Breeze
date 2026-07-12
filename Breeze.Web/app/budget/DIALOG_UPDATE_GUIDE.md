@@ -5,8 +5,8 @@ This guide is the active implementation pattern for adding or changing budget fu
 Use it with:
 
 - `breeze.web/app/budget/README.md`
-- `.github/docs/ui/ui-slice-api-checklist.md`
-- `.github/docs/api/06-vertical-slice.md`
+- `docs/ui/ui-slice-api-checklist.md`
+- `docs/api/06-vertical-slice.md`
 
 ## Core Rules
 

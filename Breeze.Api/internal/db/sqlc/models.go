@@ -107,6 +107,48 @@ func (ns NullDeductionType) Value() (driver.Value, error) {
 	return string(ns.DeductionType), nil
 }
 
+type ExpenseSourceType string
+
+const (
+	ExpenseSourceTypeMANUAL            ExpenseSourceType = "MANUAL"
+	ExpenseSourceTypeRECURRINGTEMPLATE ExpenseSourceType = "RECURRING_TEMPLATE"
+)
+
+func (e *ExpenseSourceType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ExpenseSourceType(s)
+	case string:
+		*e = ExpenseSourceType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ExpenseSourceType: %T", src)
+	}
+	return nil
+}
+
+type NullExpenseSourceType struct {
+	ExpenseSourceType ExpenseSourceType `json:"expense_source_type"`
+	Valid             bool              `json:"valid"` // Valid is true if ExpenseSourceType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullExpenseSourceType) Scan(value interface{}) error {
+	if value == nil {
+		ns.ExpenseSourceType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ExpenseSourceType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullExpenseSourceType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ExpenseSourceType), nil
+}
+
 type FilingStatus string
 
 const (
@@ -519,7 +561,6 @@ type Asset struct {
 	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
-	ReturnProfile                   *string            `json:"return_profile"`
 }
 
 type Budget struct {
@@ -557,28 +598,33 @@ type ContributionLimit struct {
 }
 
 type Expense struct {
-	ID                uuid.UUID          `json:"id"`
-	UserID            uuid.UUID          `json:"user_id"`
-	BudgetID          uuid.UUID          `json:"budget_id"`
-	Amount            decimal.Decimal    `json:"amount"`
-	Date              pgtype.Date        `json:"date"`
-	Description       string             `json:"description"`
-	RecurringSourceID pgtype.UUID        `json:"recurring_source_id"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt         pgtype.Timestamptz `json:"deleted_at"`
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	BudgetID         uuid.UUID          `json:"budget_id"`
+	Amount           decimal.Decimal    `json:"amount"`
+	Date             pgtype.Date        `json:"date"`
+	Description      string             `json:"description"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+	SourceType       ExpenseSourceType  `json:"source_type"`
+	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
+	GenerationMonth  pgtype.Date        `json:"generation_month"`
 }
 
 type ExpenseCategory struct {
-	ID           uuid.UUID          `json:"id"`
-	UserID       uuid.UUID          `json:"user_id"`
-	BudgetID     uuid.UUID          `json:"budget_id"`
-	Name         string             `json:"name"`
-	Allocation   decimal.Decimal    `json:"allocation"`
-	CurrentSpend decimal.Decimal    `json:"current_spend"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	BudgetID         uuid.UUID          `json:"budget_id"`
+	Name             string             `json:"name"`
+	Allocation       decimal.Decimal    `json:"allocation"`
+	CurrentSpend     decimal.Decimal    `json:"current_spend"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+	SourceType       ExpenseSourceType  `json:"source_type"`
+	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
+	GenerationMonth  pgtype.Date        `json:"generation_month"`
 }
 
 type ExpenseSplit struct {
@@ -677,20 +723,18 @@ type PlaidConnection struct {
 	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
 }
 
-type PlannerPerson struct {
-	ID               uuid.UUID          `json:"id"`
-	UserID           uuid.UUID          `json:"user_id"`
-	PersonType       string             `json:"person_type"`
-	Name             string             `json:"name"`
-	Birthday         string             `json:"birthday"`
-	RetirementAge    int32              `json:"retirement_age"`
-	AnnualSalary     decimal.Decimal    `json:"annual_salary"`
-	BonusMode        string             `json:"bonus_mode"`
-	AnnualBonus      decimal.Decimal    `json:"annual_bonus"`
-	IncomeGrowthRate decimal.Decimal    `json:"income_growth_rate"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+type RecurringExpense struct {
+	ID                 uuid.UUID          `json:"id"`
+	UserID             uuid.UUID          `json:"user_id"`
+	Name               string             `json:"name"`
+	Amount             decimal.Decimal    `json:"amount"`
+	RecurrenceInterval RecurrenceInterval `json:"recurrence_interval"`
+	PaydayDayOfMonth   *int32             `json:"payday_day_of_month"`
+	StartDate          pgtype.Date        `json:"start_date"`
+	EndDate            pgtype.Date        `json:"end_date"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type RecurringIncome struct {

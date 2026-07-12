@@ -67,14 +67,14 @@ make check
 
 ## Project Docs
 
-Start with `.github/docs/README.md`.
+Start with `docs/README.md`.
 
 Key docs:
 
-- `.github/docs/api/06-vertical-slice.md` - full backend slice pattern
-- `.github/docs/ui/ui-slice-api-checklist.md` - full UI slice pattern
-- `.github/docs/api/04-dev-workflow.md` - day-to-day backend workflow
-- `.github/docs/db/01-schema-conventions.md` - schema conventions
+- `docs/api/06-vertical-slice.md` - full backend slice pattern
+- `docs/ui/ui-slice-api-checklist.md` - full UI slice pattern
+- `docs/api/04-dev-workflow.md` - day-to-day backend workflow
+- `docs/db/01-schema-conventions.md` - schema conventions
 
 ## Current Stack (Canonical)
 
@@ -82,4 +82,4 @@ Key docs:
 - Web: Next.js App Router + React Query + Clerk
 - Database: PostgreSQL
 
-The migration from legacy stacks is complete. Use docs under `.github/docs/` as source of truth for current implementation.
+The migration from legacy stacks is complete. Use docs under `docs/` as source of truth for current implementation.

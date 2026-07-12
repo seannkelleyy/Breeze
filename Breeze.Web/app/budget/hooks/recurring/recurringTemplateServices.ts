@@ -1,8 +1,8 @@
 import {
-  GET_CATEGORIES,
-  CREATE_EXPENSE_CATEGORY,
-  UPDATE_EXPENSE_CATEGORY,
-  DELETE_EXPENSE_CATEGORY,
+  GET_RECURRING_EXPENSES,
+  CREATE_RECURRING_EXPENSE,
+  UPDATE_RECURRING_EXPENSE,
+  DELETE_RECURRING_EXPENSE,
 } from '@/lib/services/queries/budget';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
@@ -23,14 +23,17 @@ export interface RecurringIncomeTemplate {
   updatedAt: string;
 }
 
-export interface RecurringCategoryTemplate {
-  id?: string;
-  userId?: string;
+export interface RecurringExpenseTemplate {
+  id: string;
+  userId: string;
   name: string;
-  allocation: number;
+  amount: string;
+  recurrenceInterval: ScheduleType;
+  paydayDayOfMonth?: number | null;
   startDate: string;
-  stopDate?: string | null;
-  isActive: boolean;
+  endDate?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const useRecurringTemplates = () => {
@@ -146,82 +149,75 @@ export const useRecurringTemplates = () => {
     [graphqlRequest],
   );
 
-  const getRecurringCategoryTemplates = useCallback(
-    async (budgetId: string, budgetMonth?: string): Promise<RecurringCategoryTemplate[]> => {
-      const response = await graphqlRequest<{
-        expenseCategories: Array<{
-          id: string;
-          name: string;
-          allocation: string;
-        }>;
-      }>(GET_CATEGORIES, { budgetId } as Record<string, unknown>);
-      const defaultStart = budgetMonth ?? `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
-      return (response?.expenseCategories ?? []).map((c) => ({
-        id: c.id,
-        name: c.name,
-        allocation: Number(c.allocation),
-        startDate: defaultStart,
-        stopDate: null,
-        isActive: true,
-      }));
-    },
-    [graphqlRequest],
-  );
+  const getRecurringExpenseTemplates = useCallback(async (): Promise<
+    RecurringExpenseTemplate[]
+  > => {
+    const response = await graphqlRequest<{ recurringExpenses: RecurringExpenseTemplate[] }>(
+      GET_RECURRING_EXPENSES,
+      { userId },
+    );
+    return response.recurringExpenses;
+  }, [graphqlRequest, userId]);
 
-  const postRecurringCategoryTemplate = useCallback(
+  const postRecurringExpenseTemplate = useCallback(
     async (
-      template: RecurringCategoryTemplate,
-      budgetId: string,
-    ): Promise<RecurringCategoryTemplate> => {
-      const response = await graphqlRequest<{
-        createExpenseCategory: { id: string; name: string; allocation: string };
-      }>(CREATE_EXPENSE_CATEGORY, {
-        input: {
-          userId,
-          budgetId,
-          name: template.name,
-          allocation: template.allocation.toString(),
-          currentSpend: '0',
+      template: Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+    ): Promise<RecurringExpenseTemplate> => {
+      const response = await graphqlRequest<{ createRecurringExpense: RecurringExpenseTemplate }>(
+        CREATE_RECURRING_EXPENSE,
+        {
+          input: {
+            userId,
+            name: template.name,
+            amount: template.amount,
+            recurrenceInterval: template.recurrenceInterval,
+            paydayDayOfMonth: template.paydayDayOfMonth,
+            startDate: template.startDate,
+            endDate: template.endDate,
+          },
         },
-      });
-      return {
-        ...template,
-        id: response.createExpenseCategory.id,
-      };
+      );
+      return response.createRecurringExpense;
     },
     [graphqlRequest, userId],
   );
 
-  const patchRecurringCategoryTemplate = useCallback(
-    async (
-      template: RecurringCategoryTemplate,
-    ): Promise<RecurringCategoryTemplate> => {
-      if (!template.id) throw new Error('Cannot update a category without an ID');
-      await graphqlRequest(UPDATE_EXPENSE_CATEGORY, {
-        input: {
-          id: template.id,
-          name: template.name,
-          allocation: template.allocation.toString(),
-          currentSpend: '0',
+  const patchRecurringExpenseTemplate = useCallback(
+    async (template: RecurringExpenseTemplate): Promise<RecurringExpenseTemplate> => {
+      const response = await graphqlRequest<{ updateRecurringExpense: RecurringExpenseTemplate }>(
+        UPDATE_RECURRING_EXPENSE,
+        {
+          input: {
+            id: template.id,
+            name: template.name,
+            amount: template.amount,
+            recurrenceInterval: template.recurrenceInterval,
+            paydayDayOfMonth: template.paydayDayOfMonth,
+            startDate: template.startDate,
+            endDate: template.endDate,
+          },
         },
-      });
-      return template;
+      );
+      return response.updateRecurringExpense;
     },
     [graphqlRequest],
   );
 
-  const deleteRecurringCategoryTemplate = useCallback(async (id: string): Promise<void> => {
-    await graphqlRequest(DELETE_EXPENSE_CATEGORY, { id });
-  }, [graphqlRequest]);
+  const deleteRecurringExpenseTemplate = useCallback(
+    async (id: string): Promise<void> => {
+      await graphqlRequest<{ deleteRecurringExpense: boolean }>(DELETE_RECURRING_EXPENSE, { id });
+    },
+    [graphqlRequest],
+  );
 
   return {
     getRecurringIncomeTemplates,
     postRecurringIncomeTemplate,
     patchRecurringIncomeTemplate,
     deleteRecurringIncomeTemplate,
-    getRecurringCategoryTemplates,
-    postRecurringCategoryTemplate,
-    patchRecurringCategoryTemplate,
-    deleteRecurringCategoryTemplate,
+    getRecurringExpenseTemplates,
+    postRecurringExpenseTemplate,
+    patchRecurringExpenseTemplate,
+    deleteRecurringExpenseTemplate,
   };
 };

@@ -46,6 +46,7 @@ interface AssetsResponse {
     employerMatchRate: string;
     employerMatchMaxPercentOfSalary: string;
     annualRate: string;
+    returnProfile: string | null;
   }>;
 }
 
@@ -107,7 +108,9 @@ const useFetchPlanner = () => {
         birthday: p.birthday,
         retirementAge: p.retirementAge,
         annualSalary: Number(p.annualSalary),
-        bonusMode: (p.bonusMode === 'salary-percent' ? 'salary-percent' : 'dollars') as 'dollars' | 'salary-percent',
+        bonusMode: (p.bonusMode === 'salary-percent' ? 'salary-percent' : 'dollars') as
+          | 'dollars'
+          | 'salary-percent',
         annualBonus: Number(p.annualBonus),
         incomeGrowthRate: Number(p.incomeGrowthRate),
       }));

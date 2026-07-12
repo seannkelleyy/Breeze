@@ -44,6 +44,11 @@ enum "income_source_type" {
   values = ["MANUAL", "RECURRING_TEMPLATE"]
 }
 
+enum "expense_source_type" {
+  schema = schema.public
+  values = ["MANUAL", "RECURRING_TEMPLATE"]
+}
+
 enum "retirement_account_owner" {
   schema = schema.public
   values = ["SELF", "SPOUSE"]
@@ -551,6 +556,22 @@ table "expense_categories" {
     default = sql("0")
   }
 
+  column "source_type" {
+    type    = enum.expense_source_type
+    null    = false
+    default = "MANUAL"
+  }
+
+  column "source_template_id" {
+    type = uuid
+    null = true
+  }
+
+  column "generation_month" {
+    type = date
+    null = true
+  }
+
   column "created_at" {
     type    = timestamptz
     null    = false
@@ -597,6 +618,10 @@ table "expense_categories" {
     where   = "deleted_at IS NULL"
   }
 
+  index "idx_expense_categories_source_template" {
+    columns = [column.source_template_id]
+  }
+
   check "expense_categories_amounts_nonnegative" {
     expr = "allocation >= 0 AND current_spend >= 0"
   }
@@ -636,8 +661,19 @@ table "expenses" {
     null = false
   }
 
-  column "recurring_source_id" {
+  column "source_type" {
+    type    = enum.expense_source_type
+    null    = false
+    default = "MANUAL"
+  }
+
+  column "source_template_id" {
     type = uuid
+    null = true
+  }
+
+  column "generation_month" {
+    type = date
     null = true
   }
 
@@ -682,8 +718,8 @@ table "expenses" {
     columns = [column.user_id, column.date]
   }
 
-  index "idx_expenses_recurring" {
-    columns = [column.recurring_source_id]
+  index "idx_expenses_source_template" {
+    columns = [column.source_template_id]
   }
 
   index "idx_expenses_budget_active" {
@@ -1734,5 +1770,93 @@ table "net_worth_snapshots" {
     columns = [column.user_id, column.snapshot_date]
     unique  = true
     where   = "deleted_at IS NULL"
+  }
+}
+
+table "recurring_expenses" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "name" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "recurrence_interval" {
+    type = enum.recurrence_interval
+    null = false
+  }
+
+  column "payday_day_of_month" {
+    type = int
+    null = true
+  }
+
+  column "start_date" {
+    type = date
+    null = false
+  }
+
+  column "end_date" {
+    type = date
+    null = true
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_recurring_expenses_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_recurring_expenses_user" {
+    columns = [column.user_id]
+  }
+
+  index "idx_recurring_expenses_user_dates" {
+    columns = [column.user_id, column.start_date, column.end_date]
+  }
+
+  check "recurring_expenses_amount_positive" {
+    expr = "amount > 0"
+  }
+
+  check "recurring_expenses_payday_valid" {
+    expr = "payday_day_of_month IS NULL OR (payday_day_of_month >= 1 AND payday_day_of_month <= 31)"
   }
 }

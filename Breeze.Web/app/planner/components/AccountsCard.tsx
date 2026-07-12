@@ -1,11 +1,11 @@
 'use client';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { encodeLoanReturnProfile, formatCurrencyWithCode } from '../lib/plannerMath';
 import { usePlannerAccounts } from '../hooks/planner/index';
 import { useAccountMutations } from '../hooks/planner/useAccountMutations';
 import { AccountListItem } from './accounts/AccountListItem';
@@ -20,7 +20,7 @@ export interface AccountsCardProps {
 type AccountFilter = 'all' | 'assets' | 'liabilities' | 'tax-advantaged';
 
 const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
-  const { currencyCode, userId, setPlannerAccounts } = useCurrentUser();
+  const { currencyCode, userId } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
 
   const [collapsedAccountIds, setCollapsedAccountIds] = useState<Record<string, boolean>>({});
@@ -28,6 +28,14 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const { data, options, typeGuards, helpers, actions } = usePlannerAccounts();
+
+  // Keep collapsed state in sync when accounts change
+  const syncedCollapsedIds = useMemo(() => {
+    const next: Record<string, boolean> = {};
+    for (const a of data.plannerAccounts) next[a.id] = collapsedAccountIds[a.id] ?? false;
+    return next;
+  }, [data.plannerAccounts, collapsedAccountIds]);
+
   const {
     plannerAccounts,
     assetFinanceDetailsByAccountId,
@@ -48,7 +56,6 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
     accountTypeOptions,
     contributionModeOptions,
     liabilityContributionModeOptions,
-    liabilityTypeOptions,
     homeGrowthProfileOptions,
     vehicleDepreciationProfileOptions,
     defaultHomeGrowthProfile,
@@ -63,17 +70,13 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
     isDepreciatingAssetType,
   } = typeGuards;
   const {
-    getEmployeeMonthlyContribution,
-    getEmployerMatchMonthly,
     getSuggestedAnnualLimitForAccount,
     getDisplayedRateForAccount,
     getStoredAnnualRateForInput,
     getRateProfileFromAnnualRate,
     getAnnualRateFromProfile,
-    getAssetFinanceSnapshot,
     getDefaultAssetFinanceDetailsForAccount,
     getHomeAnnualGrowthRate,
-    getAgeFromBirthday,
     toIsoDate,
   } = helpers;
   const {
@@ -90,15 +93,6 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
     updateAccount,
     removeAccount,
   });
-
-  // Track per-account collapse
-  useEffect(() => {
-    setCollapsedAccountIds((prev) => {
-      const next: Record<string, boolean> = {};
-      for (const a of plannerAccounts) next[a.id] = prev[a.id] ?? false;
-      return next;
-    });
-  }, [plannerAccounts]);
 
   const toggleCollapse = (id: string) => setCollapsedAccountIds((p) => ({ ...p, [id]: !p[id] }));
 
@@ -136,13 +130,23 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
       account.id,
     );
     const isLiability = isLiabilityAccountType(account.accountType);
+    let saveAccount = account;
+    if (!isLiability && isCombinedAssetType(account.accountType)) {
+      const details = assetFinanceDetailsByAccountId[account.id];
+      if (details?.hasLoan) {
+        saveAccount = {
+          ...account,
+          returnProfile: encodeLoanReturnProfile(details) as PlannerAccount['returnProfile'],
+        };
+      }
+    }
     try {
       if (isLiability) {
-        if (!isValidUuid) await mutations.createLiabilityMutation.mutateAsync(account);
-        else await mutations.updateLiabilityMutation.mutateAsync(account);
+        if (!isValidUuid) await mutations.createLiabilityMutation.mutateAsync(saveAccount);
+        else await mutations.updateLiabilityMutation.mutateAsync(saveAccount);
       } else {
-        if (!isValidUuid) await mutations.createAssetMutation.mutateAsync(account);
-        else await mutations.updateAssetMutation.mutateAsync(account);
+        if (!isValidUuid) await mutations.createAssetMutation.mutateAsync(saveAccount);
+        else await mutations.updateAssetMutation.mutateAsync(saveAccount);
       }
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Failed to save account');
@@ -229,7 +233,7 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
                 spouseAnnualIncome={spouseAnnualIncome}
                 hasSpouse={hasSpouse}
                 assetFinanceDetails={assetFinanceDetailsByAccountId[account.id]}
-                isAccountCollapsed={collapsedAccountIds[account.id] ?? false}
+                isAccountCollapsed={syncedCollapsedIds[account.id] ?? false}
                 isLastAccount={plannerAccounts.length === 1}
                 isLiabilityAccountType={isLiabilityAccountType}
                 isCombinedAssetType={isCombinedAssetType}
@@ -245,7 +249,6 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
                 accountTypeOptions={accountTypeOptions}
                 contributionModeOptions={contributionModeOptions}
                 liabilityContributionModeOptions={liabilityContributionModeOptions}
-                liabilityTypeOptions={liabilityTypeOptions}
                 homeGrowthProfileOptions={homeGrowthProfileOptions}
                 vehicleDepreciationProfileOptions={vehicleDepreciationProfileOptions}
                 defaultHomeGrowthProfile={defaultHomeGrowthProfile as HomeGrowthProfile}

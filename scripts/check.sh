@@ -11,8 +11,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-API_DIR="$ROOT_DIR/breeze.api"
-WEB_DIR="$ROOT_DIR/breeze.web"
+API_DIR="$ROOT_DIR/Breeze.Api"
+WEB_DIR="$ROOT_DIR/Breeze.Web"
 
 # ─── Colours ─────────────────────────────────────────────────────
 info() { printf "\033[36m━━━ %s ━━━\033[0m\n" "$*"; }
@@ -36,7 +36,11 @@ run_api() {
   go vet ./... || fail "[api] vet"
 
   info "[api] Lint"
-  make lint || fail "[api] lint"
+  if command -v golangci-lint &>/dev/null; then
+    make lint || fail "[api] lint"
+  else
+    info "[api] golangci-lint not installed — skipping (install: brew install golangci-lint)"
+  fi
 
   info "[api] Test"
   go test ./... -count=1 || fail "[api] test"
@@ -65,6 +69,9 @@ run_web() {
 
   info "[web] Build"
   npm run build || fail "[web] build"
+
+  info "[web] Test"
+  npm run test || fail "[web] test"
 
   ok "[web] clean"
 }

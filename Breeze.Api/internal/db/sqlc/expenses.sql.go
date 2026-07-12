@@ -20,8 +20,10 @@ INSERT INTO expenses (
   amount,
   date,
   description,
-  recurring_source_id
-) VALUES ($1, $2, $3, $4, $5, $6)
+  source_type,
+  source_template_id,
+  generation_month
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING
   id,
   user_id,
@@ -29,31 +31,52 @@ RETURNING
   amount,
   date,
   description,
-  recurring_source_id,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
 `
 
 type CreateExpenseParams struct {
-	UserID            uuid.UUID       `json:"user_id"`
-	BudgetID          uuid.UUID       `json:"budget_id"`
-	Amount            decimal.Decimal `json:"amount"`
-	Date              pgtype.Date     `json:"date"`
-	Description       string          `json:"description"`
-	RecurringSourceID pgtype.UUID     `json:"recurring_source_id"`
+	UserID           uuid.UUID         `json:"user_id"`
+	BudgetID         uuid.UUID         `json:"budget_id"`
+	Amount           decimal.Decimal   `json:"amount"`
+	Date             pgtype.Date       `json:"date"`
+	Description      string            `json:"description"`
+	SourceType       ExpenseSourceType `json:"source_type"`
+	SourceTemplateID pgtype.UUID       `json:"source_template_id"`
+	GenerationMonth  pgtype.Date       `json:"generation_month"`
 }
 
-func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (Expense, error) {
+type CreateExpenseRow struct {
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	BudgetID         uuid.UUID          `json:"budget_id"`
+	Amount           decimal.Decimal    `json:"amount"`
+	Date             pgtype.Date        `json:"date"`
+	Description      string             `json:"description"`
+	SourceType       ExpenseSourceType  `json:"source_type"`
+	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
+	GenerationMonth  pgtype.Date        `json:"generation_month"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (CreateExpenseRow, error) {
 	row := q.db.QueryRow(ctx, createExpense,
 		arg.UserID,
 		arg.BudgetID,
 		arg.Amount,
 		arg.Date,
 		arg.Description,
-		arg.RecurringSourceID,
+		arg.SourceType,
+		arg.SourceTemplateID,
+		arg.GenerationMonth,
 	)
-	var i Expense
+	var i CreateExpenseRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -61,7 +84,9 @@ func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (E
 		&i.Amount,
 		&i.Date,
 		&i.Description,
-		&i.RecurringSourceID,
+		&i.SourceType,
+		&i.SourceTemplateID,
+		&i.GenerationMonth,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -123,7 +148,9 @@ SELECT
   amount,
   date,
   description,
-  recurring_source_id,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
@@ -133,9 +160,24 @@ WHERE id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetExpenseByID(ctx context.Context, id uuid.UUID) (Expense, error) {
+type GetExpenseByIDRow struct {
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	BudgetID         uuid.UUID          `json:"budget_id"`
+	Amount           decimal.Decimal    `json:"amount"`
+	Date             pgtype.Date        `json:"date"`
+	Description      string             `json:"description"`
+	SourceType       ExpenseSourceType  `json:"source_type"`
+	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
+	GenerationMonth  pgtype.Date        `json:"generation_month"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) GetExpenseByID(ctx context.Context, id uuid.UUID) (GetExpenseByIDRow, error) {
 	row := q.db.QueryRow(ctx, getExpenseByID, id)
-	var i Expense
+	var i GetExpenseByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -143,7 +185,9 @@ func (q *Queries) GetExpenseByID(ctx context.Context, id uuid.UUID) (Expense, er
 		&i.Amount,
 		&i.Date,
 		&i.Description,
-		&i.RecurringSourceID,
+		&i.SourceType,
+		&i.SourceTemplateID,
+		&i.GenerationMonth,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -204,7 +248,9 @@ SELECT
   amount,
   date,
   description,
-  recurring_source_id,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
@@ -214,15 +260,30 @@ WHERE budget_id = $1
 ORDER BY date DESC, created_at DESC
 `
 
-func (q *Queries) ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]Expense, error) {
+type ListExpensesByBudgetIDRow struct {
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	BudgetID         uuid.UUID          `json:"budget_id"`
+	Amount           decimal.Decimal    `json:"amount"`
+	Date             pgtype.Date        `json:"date"`
+	Description      string             `json:"description"`
+	SourceType       ExpenseSourceType  `json:"source_type"`
+	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
+	GenerationMonth  pgtype.Date        `json:"generation_month"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]ListExpensesByBudgetIDRow, error) {
 	rows, err := q.db.Query(ctx, listExpensesByBudgetID, budgetID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Expense
+	var items []ListExpensesByBudgetIDRow
 	for rows.Next() {
-		var i Expense
+		var i ListExpensesByBudgetIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -230,7 +291,9 @@ func (q *Queries) ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID
 			&i.Amount,
 			&i.Date,
 			&i.Description,
-			&i.RecurringSourceID,
+			&i.SourceType,
+			&i.SourceTemplateID,
+			&i.GenerationMonth,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -277,6 +340,23 @@ func (q *Queries) SoftDeleteExpenseSplitsByExpenseID(ctx context.Context, expens
 	return result.RowsAffected(), nil
 }
 
+const softDeleteGeneratedExpensesByBudget = `-- name: SoftDeleteGeneratedExpensesByBudget :execrows
+UPDATE expenses
+SET deleted_at = now(),
+    updated_at = now()
+WHERE budget_id = $1
+  AND source_type = 'RECURRING_TEMPLATE'
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) SoftDeleteGeneratedExpensesByBudget(ctx context.Context, budgetID uuid.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteGeneratedExpensesByBudget, budgetID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const updateExpense = `-- name: UpdateExpense :one
 UPDATE expenses
 SET
@@ -293,7 +373,9 @@ RETURNING
   amount,
   date,
   description,
-  recurring_source_id,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
@@ -306,14 +388,29 @@ type UpdateExpenseParams struct {
 	Description string          `json:"description"`
 }
 
-func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (Expense, error) {
+type UpdateExpenseRow struct {
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	BudgetID         uuid.UUID          `json:"budget_id"`
+	Amount           decimal.Decimal    `json:"amount"`
+	Date             pgtype.Date        `json:"date"`
+	Description      string             `json:"description"`
+	SourceType       ExpenseSourceType  `json:"source_type"`
+	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
+	GenerationMonth  pgtype.Date        `json:"generation_month"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (UpdateExpenseRow, error) {
 	row := q.db.QueryRow(ctx, updateExpense,
 		arg.ID,
 		arg.Amount,
 		arg.Date,
 		arg.Description,
 	)
-	var i Expense
+	var i UpdateExpenseRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -321,7 +418,9 @@ func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (E
 		&i.Amount,
 		&i.Date,
 		&i.Description,
-		&i.RecurringSourceID,
+		&i.SourceType,
+		&i.SourceTemplateID,
+		&i.GenerationMonth,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,

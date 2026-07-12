@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TaxEstimate } from '@/lib/services/hooks/useTaxEstimate';
 
 interface TaxResultsProps {

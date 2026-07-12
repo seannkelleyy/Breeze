@@ -26,7 +26,6 @@ interface InvestmentAccountFieldsProps {
   onRateProfileChange: (profile: AccountRateProfile) => void;
   onSetContributionToIrsMax: () => void;
   getDisplayedRateForAccount: (account: PlannerAccount) => number;
-  getAnnualRateFromProfile: (profile: AccountRateProfile, currentAnnualRate: number) => number;
   getStoredAnnualRateForInput: (account: PlannerAccount, value: number) => number;
 }
 
@@ -44,7 +43,6 @@ const InvestmentAccountFields = ({
   onRateProfileChange,
   onSetContributionToIrsMax,
   getDisplayedRateForAccount,
-  getAnnualRateFromProfile,
   getStoredAnnualRateForInput,
 }: InvestmentAccountFieldsProps) => {
   return (

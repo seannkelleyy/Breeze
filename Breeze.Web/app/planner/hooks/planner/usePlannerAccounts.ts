@@ -156,7 +156,7 @@ const usePlannerAccounts = () => {
       ...prev,
       {
         id: `local-${crypto.randomUUID()}`,
-        name: `Liability ${plannerAccounts.length + 1}`,
+        name: `Liability ${prev.length + 1}`,
         owner: 'self' as const,
         accountType: 'student-loan' as const,
         contributionMode: 'monthly' as const,

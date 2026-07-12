@@ -76,7 +76,9 @@ export function useAccountMutations({
           contributionMode: account.contributionMode,
           contributionValue: account.contributionValue.toString(),
           employerMatchRate: (account.employerMatchRate / 100).toString(),
-          employerMatchMaxPercentOfSalary: (account.employerMatchMaxPercentOfSalary / 100).toString(),
+          employerMatchMaxPercentOfSalary: (
+            account.employerMatchMaxPercentOfSalary / 100
+          ).toString(),
           annualRate: (account.annualRate / 100).toString(),
           returnProfile: account.returnProfile ?? null,
         },
@@ -102,7 +104,9 @@ export function useAccountMutations({
           contributionMode: account.contributionMode,
           contributionValue: account.contributionValue.toString(),
           employerMatchRate: (account.employerMatchRate / 100).toString(),
-          employerMatchMaxPercentOfSalary: (account.employerMatchMaxPercentOfSalary / 100).toString(),
+          employerMatchMaxPercentOfSalary: (
+            account.employerMatchMaxPercentOfSalary / 100
+          ).toString(),
           annualRate: (account.annualRate / 100).toString(),
           returnProfile: account.returnProfile ?? null,
         },
@@ -137,7 +141,9 @@ export function useAccountMutations({
 
   const updateLiabilityMutation = useMutation({
     mutationFn: async (account: PlannerAccount) => {
-      const { userId: _uid, ...fields } = buildLiabilityInput(account, userId);
+      const input = buildLiabilityInput(account, userId);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { userId: _drop, ...fields } = input;
       await request(UPDATE_LIABILITY, { input: { id: account.id, ...fields } });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['liabilities', userId] }),

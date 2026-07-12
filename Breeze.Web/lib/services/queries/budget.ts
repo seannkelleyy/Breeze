@@ -10,7 +10,7 @@ export const UPDATE_BUDGET = `mutation UpdateBudget($input: UpdateBudgetInput!) 
 export const DELETE_BUDGET = `mutation DeleteBudget($id: ID!) { deleteBudget(id: $id) }`;
 
 export const GET_CATEGORIES = `query GetCategories($budgetId: ID!) {
-  expenseCategories(budgetId: $budgetId) { id userId budgetId name allocation currentSpend createdAt updatedAt }
+  expenseCategories(budgetId: $budgetId) { id userId budgetId name allocation currentSpend sourceType sourceTemplateId generationMonth createdAt updatedAt }
 }`;
 export const CREATE_EXPENSE_CATEGORY = `mutation CreateExpenseCategory($input: CreateExpenseCategoryInput!) {
   createExpenseCategory(input: $input) { id userId budgetId name allocation currentSpend }
@@ -21,7 +21,7 @@ export const UPDATE_EXPENSE_CATEGORY = `mutation UpdateExpenseCategory($input: U
 export const DELETE_EXPENSE_CATEGORY = `mutation DeleteExpenseCategory($id: ID!) { deleteExpenseCategory(id: $id) }`;
 
 export const GET_EXPENSES_BY_BUDGET = `query GetExpensesByBudget($budgetId: ID!) {
-  expenses(budgetId: $budgetId) { id userId budgetId amount date description splits { id categoryId amount description } createdAt updatedAt }
+  expenses(budgetId: $budgetId) { id userId budgetId amount date description splits { id categoryId amount description } sourceType sourceTemplateId generationMonth createdAt updatedAt }
 }`;
 export const CREATE_EXPENSE = `mutation CreateExpense($input: CreateExpenseInput!) {
   createExpense(input: $input) { id userId budgetId amount date description splits { id categoryId amount description } createdAt updatedAt }
@@ -52,3 +52,14 @@ export const UPDATE_GOAL = `mutation UpdateGoal($input: UpdateGoalInput!) {
   updateGoal(input: $input) { id description isCompleted }
 }`;
 export const DELETE_GOAL = `mutation DeleteGoal($id: ID!) { deleteGoal(id: $id) }`;
+
+export const GET_RECURRING_EXPENSES = `query GetRecurringExpenses($userId: ID!) {
+  recurringExpenses(userId: $userId) { id userId name amount recurrenceInterval paydayDayOfMonth startDate endDate createdAt updatedAt }
+}`;
+export const CREATE_RECURRING_EXPENSE = `mutation CreateRecurringExpense($input: CreateRecurringExpenseInput!) {
+  createRecurringExpense(input: $input) { id userId name amount recurrenceInterval paydayDayOfMonth startDate endDate createdAt updatedAt }
+}`;
+export const UPDATE_RECURRING_EXPENSE = `mutation UpdateRecurringExpense($input: UpdateRecurringExpenseInput!) {
+  updateRecurringExpense(input: $input) { id userId name amount recurrenceInterval paydayDayOfMonth startDate endDate createdAt updatedAt }
+}`;
+export const DELETE_RECURRING_EXPENSE = `mutation DeleteRecurringExpense($id: ID!) { deleteRecurringExpense(id: $id) }`;

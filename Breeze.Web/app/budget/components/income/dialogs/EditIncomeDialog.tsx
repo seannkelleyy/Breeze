@@ -51,7 +51,7 @@ export const EditIncomeDialog = ({ existingIncome, children }: EditIncomeDialogP
     },
   });
 
-  const onSubmit = (values: IncomeFormData) => {
+  const onSubmit = async (values: IncomeFormData) => {
     if (!userId || !budget?.id) return;
 
     const income: Income = {

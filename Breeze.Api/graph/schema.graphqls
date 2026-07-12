@@ -29,11 +29,12 @@ type Query {
   incomes(budgetId: ID!): [Income!]!
   recurringIncome(id: ID!): RecurringIncome
   recurringIncomes(userId: ID!): [RecurringIncome!]!
+  recurringExpense(id: ID!): RecurringExpense
+  recurringExpenses(userId: ID!): [RecurringExpense!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
   estimateTaxesForYear(year: Int!, filingStatus: FilingStatus!, income: String!, deduction: String): TaxEstimate
   calculateRetirementLadder(initialBalance: String!, annualExpenses: String!, currentAge: Int!, firstWithdrawalAge: Int!, isRoth: Boolean!, year: Int!, filingStatus: FilingStatus!, yearsToProject: Int): RetirementLadderProjection
-  plannerPeople(userId: ID!): [PlannerPerson!]!
   netWorthSnapshot(id: ID!): NetWorthSnapshot
   netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
   netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
@@ -74,6 +75,9 @@ type Mutation {
   createRecurringIncome(input: CreateRecurringIncomeInput!): RecurringIncome!
   updateRecurringIncome(input: UpdateRecurringIncomeInput!): RecurringIncome!
   deleteRecurringIncome(id: ID!): Boolean!
+  createRecurringExpense(input: CreateRecurringExpenseInput!): RecurringExpense!
+  updateRecurringExpense(input: UpdateRecurringExpenseInput!): RecurringExpense!
+  deleteRecurringExpense(id: ID!): Boolean!
   createTaxBracket(input: CreateTaxBracketInput!): TaxBracket!
   updateTaxBracket(input: UpdateTaxBracketInput!): TaxBracket!
   deleteTaxBracket(id: ID!): Boolean!
@@ -83,8 +87,6 @@ type Mutation {
   exchangePlaidPublicToken(userId: ID!, publicToken: String!): PlaidConnection!
   syncPlaidConnection(id: ID!): Boolean!
   deletePlaidConnection(id: ID!): Boolean!
-  upsertPlannerPerson(input: UpsertPlannerPersonInput!): PlannerPerson!
-  deletePlannerPerson(id: ID!): Boolean!
 }
 
 type Health {
@@ -124,6 +126,11 @@ enum RecurrenceInterval {
 }
 
 enum IncomeSourceType {
+  MANUAL
+  RECURRING_TEMPLATE
+}
+
+enum ExpenseSourceType {
   MANUAL
   RECURRING_TEMPLATE
 }
@@ -276,34 +283,6 @@ type Goal {
   updatedAt: String!
 }
 
-type PlannerPerson {
-  id: ID!
-  userId: ID!
-  personType: String!
-  name: String!
-  birthday: String!
-  retirementAge: Int!
-  annualSalary: String!
-  bonusMode: String!
-  annualBonus: String!
-  incomeGrowthRate: String!
-  createdAt: String!
-  updatedAt: String!
-}
-
-input UpsertPlannerPersonInput {
-  id: ID!
-  userId: ID!
-  personType: String!
-  name: String!
-  birthday: String!
-  retirementAge: Int!
-  annualSalary: String!
-  bonusMode: String!
-  annualBonus: String!
-  incomeGrowthRate: String!
-}
-
 type Scenario {
   id: ID!
   userId: ID!
@@ -401,6 +380,9 @@ type ExpenseCategory {
   name: String!
   allocation: String!
   currentSpend: String!
+  sourceType: ExpenseSourceType!
+  sourceTemplateId: ID
+  generationMonth: String
   createdAt: String!
   updatedAt: String!
 }
@@ -413,6 +395,9 @@ type Expense {
   date: String!
   description: String!
   splits: [ExpenseSplit!]!
+  sourceType: ExpenseSourceType!
+  sourceTemplateId: ID
+  generationMonth: String
   createdAt: String!
   updatedAt: String!
 }
@@ -443,6 +428,19 @@ type Income {
 }
 
 type RecurringIncome {
+  id: ID!
+  userId: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type RecurringExpense {
   id: ID!
   userId: ID!
   name: String!
@@ -629,6 +627,26 @@ input CreateRecurringIncomeInput {
 }
 
 input UpdateRecurringIncomeInput {
+  id: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+}
+
+input CreateRecurringExpenseInput {
+  userId: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+}
+
+input UpdateRecurringExpenseInput {
   id: ID!
   name: String!
   amount: String!

@@ -15,16 +15,18 @@ import (
 )
 
 type Expense struct {
-	ID                uuid.UUID
-	UserID            uuid.UUID
-	BudgetID          uuid.UUID
-	Amount            decimal.Decimal
-	Date              time.Time
-	Description       string
-	RecurringSourceID *uuid.UUID
-	Splits            []ExpenseSplit
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	ID               uuid.UUID
+	UserID           uuid.UUID
+	BudgetID         uuid.UUID
+	Amount           decimal.Decimal
+	Date             time.Time
+	Description      string
+	SourceType       sqlc.ExpenseSourceType
+	SourceTemplateID *uuid.UUID
+	GenerationMonth  *time.Time
+	Splits           []ExpenseSplit
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 type ExpenseSplit struct {
@@ -44,13 +46,15 @@ type ExpenseSplitInput struct {
 }
 
 type CreateExpenseInput struct {
-	UserID            uuid.UUID
-	BudgetID          uuid.UUID
-	Amount            decimal.Decimal
-	Date              time.Time
-	Description       string
-	RecurringSourceID *uuid.UUID
-	Splits            []ExpenseSplitInput
+	UserID           uuid.UUID
+	BudgetID         uuid.UUID
+	Amount           decimal.Decimal
+	Date             time.Time
+	Description      string
+	SourceType       sqlc.ExpenseSourceType
+	SourceTemplateID *uuid.UUID
+	GenerationMonth  *time.Time
+	Splits           []ExpenseSplitInput
 }
 
 type UpdateExpenseInput struct {
@@ -62,11 +66,12 @@ type UpdateExpenseInput struct {
 }
 
 type expenseQuerier interface {
-	CreateExpense(ctx context.Context, arg sqlc.CreateExpenseParams) (sqlc.Expense, error)
-	GetExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.Expense, error)
-	ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.Expense, error)
-	UpdateExpense(ctx context.Context, arg sqlc.UpdateExpenseParams) (sqlc.Expense, error)
+	CreateExpense(ctx context.Context, arg sqlc.CreateExpenseParams) (sqlc.CreateExpenseRow, error)
+	GetExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.GetExpenseByIDRow, error)
+	ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListExpensesByBudgetIDRow, error)
+	UpdateExpense(ctx context.Context, arg sqlc.UpdateExpenseParams) (sqlc.UpdateExpenseRow, error)
 	SoftDeleteExpense(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteGeneratedExpensesByBudget(ctx context.Context, budgetID uuid.UUID) (int64, error)
 	CreateExpenseSplit(ctx context.Context, arg sqlc.CreateExpenseSplitParams) (sqlc.ExpenseSplit, error)
 	ListExpenseSplitsByExpenseIDs(ctx context.Context, expenseIDs []uuid.UUID) ([]sqlc.ExpenseSplit, error)
 	SoftDeleteExpenseSplitsByExpenseID(ctx context.Context, expenseID uuid.UUID) (int64, error)
@@ -132,17 +137,19 @@ func (s *ExpenseService) Create(ctx context.Context, input CreateExpenseInput) (
 		return nil, err
 	}
 
-	var expenseRow sqlc.Expense
+	var expenseRow sqlc.CreateExpenseRow
 	splitRows := make([]sqlc.ExpenseSplit, 0, len(input.Splits))
 
 	err := s.txRunner.Run(ctx, func(q expenseQuerier) error {
 		row, err := q.CreateExpense(ctx, sqlc.CreateExpenseParams{
-			UserID:            input.UserID,
-			BudgetID:          input.BudgetID,
-			Amount:            input.Amount,
-			Date:              pgtype.Date{Time: input.Date, Valid: true},
-			Description:       input.Description,
-			RecurringSourceID: uuidToPGUUID(input.RecurringSourceID),
+			UserID:           input.UserID,
+			BudgetID:         input.BudgetID,
+			Amount:           input.Amount,
+			Date:             pgtype.Date{Time: input.Date, Valid: true},
+			Description:      input.Description,
+			SourceType:       input.SourceType,
+			SourceTemplateID: uuidToPGUUID(input.SourceTemplateID),
+			GenerationMonth:  dateToPGDate(input.GenerationMonth),
 		})
 		if err != nil {
 			return fmt.Errorf("create expense: %w", err)
@@ -168,7 +175,7 @@ func (s *ExpenseService) Create(ctx context.Context, input CreateExpenseInput) (
 		return nil, err
 	}
 
-	expense := mapExpenseRecord(expenseRow)
+	expense := mapCreateExpenseRow(expenseRow)
 	expense.Splits = mapExpenseSplitRecords(splitRows)
 	return &expense, nil
 }
@@ -187,7 +194,7 @@ func (s *ExpenseService) GetByID(ctx context.Context, id uuid.UUID) (*Expense, e
 		return nil, fmt.Errorf("list expense splits: %w", err)
 	}
 
-	expense := mapExpenseRecord(expenseRow)
+	expense := mapGetExpenseByIDRow(expenseRow)
 	expense.Splits = mapExpenseSplitRecords(splits)
 	return &expense, nil
 }
@@ -220,7 +227,7 @@ func (s *ExpenseService) ListByBudgetID(ctx context.Context, budgetID uuid.UUID)
 
 	expenses := make([]Expense, 0, len(expenseRows))
 	for _, row := range expenseRows {
-		expense := mapExpenseRecord(row)
+		expense := mapListExpensesByBudgetIDRow(row)
 		expense.Splits = splitsByExpense[row.ID]
 		expenses = append(expenses, expense)
 	}
@@ -233,7 +240,7 @@ func (s *ExpenseService) Update(ctx context.Context, input UpdateExpenseInput) (
 		return nil, err
 	}
 
-	var expenseRow sqlc.Expense
+	var expenseRow sqlc.UpdateExpenseRow
 	splitRows := make([]sqlc.ExpenseSplit, 0, len(input.Splits))
 
 	err := s.txRunner.Run(ctx, func(q expenseQuerier) error {
@@ -275,7 +282,7 @@ func (s *ExpenseService) Update(ctx context.Context, input UpdateExpenseInput) (
 		return nil, err
 	}
 
-	expense := mapExpenseRecord(expenseRow)
+	expense := mapUpdateExpenseRow(expenseRow)
 	expense.Splits = mapExpenseSplitRecords(splitRows)
 	return &expense, nil
 }
@@ -328,15 +335,81 @@ func validateExpenseSplits(amount decimal.Decimal, splits []ExpenseSplitInput) e
 
 func mapExpenseRecord(row sqlc.Expense) Expense {
 	return Expense{
-		ID:                row.ID,
-		UserID:            row.UserID,
-		BudgetID:          row.BudgetID,
-		Amount:            row.Amount,
-		Date:              row.Date.Time,
-		Description:       row.Description,
-		RecurringSourceID: uuidFromPGUUID(row.RecurringSourceID),
-		CreatedAt:         timestamptzToTime(row.CreatedAt),
-		UpdatedAt:         timestamptzToTime(row.UpdatedAt),
+		ID:               row.ID,
+		UserID:           row.UserID,
+		BudgetID:         row.BudgetID,
+		Amount:           row.Amount,
+		Date:             row.Date.Time,
+		Description:      row.Description,
+		SourceType:       row.SourceType,
+		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
+		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
+		CreatedAt:        timestamptzToTime(row.CreatedAt),
+		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapCreateExpenseRow(row sqlc.CreateExpenseRow) Expense {
+	return Expense{
+		ID:               row.ID,
+		UserID:           row.UserID,
+		BudgetID:         row.BudgetID,
+		Amount:           row.Amount,
+		Date:             row.Date.Time,
+		Description:      row.Description,
+		SourceType:       row.SourceType,
+		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
+		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
+		CreatedAt:        timestamptzToTime(row.CreatedAt),
+		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapGetExpenseByIDRow(row sqlc.GetExpenseByIDRow) Expense {
+	return Expense{
+		ID:               row.ID,
+		UserID:           row.UserID,
+		BudgetID:         row.BudgetID,
+		Amount:           row.Amount,
+		Date:             row.Date.Time,
+		Description:      row.Description,
+		SourceType:       row.SourceType,
+		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
+		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
+		CreatedAt:        timestamptzToTime(row.CreatedAt),
+		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapListExpensesByBudgetIDRow(row sqlc.ListExpensesByBudgetIDRow) Expense {
+	return Expense{
+		ID:               row.ID,
+		UserID:           row.UserID,
+		BudgetID:         row.BudgetID,
+		Amount:           row.Amount,
+		Date:             row.Date.Time,
+		Description:      row.Description,
+		SourceType:       row.SourceType,
+		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
+		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
+		CreatedAt:        timestamptzToTime(row.CreatedAt),
+		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapUpdateExpenseRow(row sqlc.UpdateExpenseRow) Expense {
+	return Expense{
+		ID:               row.ID,
+		UserID:           row.UserID,
+		BudgetID:         row.BudgetID,
+		Amount:           row.Amount,
+		Date:             row.Date.Time,
+		Description:      row.Description,
+		SourceType:       row.SourceType,
+		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
+		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
+		CreatedAt:        timestamptzToTime(row.CreatedAt),
+		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
 	}
 }
 

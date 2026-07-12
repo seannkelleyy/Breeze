@@ -1,10 +1,13 @@
 package graph
 
 import (
+	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"breeze.api/graph/model"
+	"breeze.api/internal/db/sqlc"
 	"breeze.api/internal/service"
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
@@ -64,6 +67,54 @@ func updateBudgetInputFromModel(input model.UpdateBudgetInput) (service.UpdateBu
 		MonthlyIncome:   monthlyIncome,
 		MonthlyExpenses: monthlyExpenses,
 	}, nil
+}
+
+// removeRecurringIncomesForBudget soft-deletes all incomes for a budget
+// that were generated from recurring templates.
+func removeRecurringIncomesForBudget(ctx context.Context, incomeSvc *service.IncomeService, budgetID uuid.UUID) error {
+	existingIncomes, err := incomeSvc.ListByBudgetID(ctx, budgetID)
+	if err != nil {
+		return err
+	}
+	for _, inc := range existingIncomes {
+		if inc.SourceType == sqlc.IncomeSourceTypeRECURRINGTEMPLATE {
+			_ = incomeSvc.Delete(ctx, inc.ID)
+		}
+	}
+	return nil
+}
+
+// recalculateBudgetIncome sums all income records for the budget and updates
+// the budget's MonthlyIncome so it reflects the actual total.
+func recalculateBudgetIncome(
+	ctx context.Context,
+	incomeSvc *service.IncomeService,
+	budgetSvc *service.BudgetService,
+	budget *service.Budget,
+) *service.Budget {
+	incomes, listErr := incomeSvc.ListByBudgetID(ctx, budget.ID)
+	if listErr != nil {
+		slog.Warn("recalculateBudgetIncome: failed to list incomes", "error", listErr)
+		return budget
+	}
+	slog.Info("recalculateBudgetIncome: found incomes", "count", len(incomes))
+	total := decimalZero()
+	for _, inc := range incomes {
+		total, _ = total.Add(inc.Amount)
+		slog.Info("recalculateBudgetIncome: income", "name", inc.Name, "amount", inc.Amount.String())
+	}
+	slog.Info("recalculateBudgetIncome: total", "total", total.String())
+	updated, updateErr := budgetSvc.Update(ctx, service.UpdateBudgetInput{
+		ID:              budget.ID,
+		MonthlyIncome:   total,
+		MonthlyExpenses: budget.MonthlyExpenses,
+	})
+	if updateErr != nil {
+		slog.Warn("recalculateBudgetIncome: failed to update budget", "error", updateErr)
+		return budget
+	}
+	slog.Info("recalculateBudgetIncome: updated budget", "monthlyIncome", updated.MonthlyIncome.String())
+	return updated
 }
 
 func mapBudgetToModel(budget *service.Budget) *model.Budget {

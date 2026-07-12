@@ -4,114 +4,171 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { RecurringCategoryTemplate } from '../../hooks/recurring/recurringTemplateServices';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  RecurringExpenseTemplate,
+  ScheduleType,
+} from '../../hooks/recurring/recurringTemplateServices';
 
 function toDateInputValue(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
   return dateStr.slice(0, 10);
 }
 
-export function makeDefaultCategoryTemplate(today: string): RecurringCategoryTemplate {
+const SCHEDULE_OPTIONS: { value: ScheduleType; label: string }[] = [
+  { value: 'WEEKLY', label: 'Weekly' },
+  { value: 'BIWEEKLY', label: 'Biweekly' },
+  { value: 'MONTHLY', label: 'Monthly' },
+  { value: 'QUARTERLY', label: 'Quarterly' },
+  { value: 'YEARLY', label: 'Yearly' },
+];
+
+export function makeDefaultRecurringExpenseTemplate(
+  today: string,
+): Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'> {
   return {
     name: '',
-    allocation: 0,
+    amount: '0',
+    recurrenceInterval: 'MONTHLY',
+    paydayDayOfMonth: 1,
     startDate: today,
-    stopDate: null,
-    isActive: true,
+    endDate: null,
   };
 }
 
-interface CategoryTemplateErrors {
+interface RecurringExpenseTemplateErrors {
   name?: string;
-  allocation?: string;
-  stopDate?: string;
+  amount?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
-export function validateCategoryTemplate(
-  template: RecurringCategoryTemplate,
-): CategoryTemplateErrors {
-  const errors: CategoryTemplateErrors = {};
+export function validateRecurringExpenseTemplate(
+  template: Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+): RecurringExpenseTemplateErrors {
+  const errors: RecurringExpenseTemplateErrors = {};
   if (!template.name.trim()) errors.name = 'Name is required.';
-  if (template.allocation < 0) errors.allocation = 'Allocation must be 0 or greater.';
-  if (template.stopDate && template.startDate && template.stopDate < template.startDate) {
-    errors.stopDate = 'Stop date must be on or after start date.';
+  if (Number(template.amount) <= 0) errors.amount = 'Amount must be greater than 0.';
+  if (template.endDate && template.startDate && template.endDate < template.startDate) {
+    errors.endDate = 'End date must be on or after start date.';
   }
   return errors;
 }
 
 interface RecurringCategorySectionProps {
-  templates: RecurringCategoryTemplate[];
+  templates: RecurringExpenseTemplate[];
+  newTemplates: Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>[];
   attemptedSave: boolean;
   saving: boolean;
-  today: string;
-  onUpdate: React.Dispatch<React.SetStateAction<RecurringCategoryTemplate[]>>;
-  onDelete: (template: RecurringCategoryTemplate, index: number) => void;
+  onAddNew: () => void;
+  onRemoveNew: (index: number) => void;
+  onUpdateNew: (
+    index: number,
+    updater: (
+      prev: Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+    ) => Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+  ) => void;
+  onDeleteExisting: (template: RecurringExpenseTemplate) => void;
 }
 
 export const RecurringCategorySection = ({
   templates,
+  newTemplates,
   attemptedSave,
   saving,
-  today,
-  onUpdate,
-  onDelete,
+  onAddNew,
+  onRemoveNew,
+  onUpdateNew,
+  onDeleteExisting,
 }: RecurringCategorySectionProps) => {
   return (
     <section className="bg-muted/10 grid gap-3 rounded-lg border p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold">Recurring Category Allocations</h3>
+          <h3 className="text-lg font-semibold">Recurring Expenses</h3>
           <p className="text-muted-foreground text-sm">
-            Use this for planned monthly category budgets.
+            Set up recurring bills like mortgage, phone, insurance. They auto-populate when you
+            regenerate a budget month.
           </p>
         </div>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => onUpdate((curr) => [...curr, makeDefaultCategoryTemplate(today)])}
-        >
-          Add Recurring Category
+        <Button type="button" variant="secondary" onClick={onAddNew} disabled={saving}>
+          Add Recurring Expense
         </Button>
       </div>
 
       <div className="grid gap-4">
-        {templates.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No recurring category templates yet.</p>
+        {templates.length === 0 && newTemplates.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No recurring expenses yet.</p>
         ) : null}
-        {templates.map((template, index) => {
-          const errors = validateCategoryTemplate(template);
+
+        {/* Existing templates (from DB) */}
+        {templates.map((template) => (
+          <div key={template.id} className="bg-background/80 rounded-lg border p-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <Badge variant="secondary">{template.recurrenceInterval}</Badge>
+              <Button
+                size="sm"
+                type="button"
+                variant="destructive"
+                disabled={saving}
+                onClick={() => onDeleteExisting(template)}
+              >
+                Delete
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+              <div className="md:col-span-2">
+                <label className="text-muted-foreground text-sm">Name</label>
+                <div className="text-sm font-medium">{template.name}</div>
+              </div>
+              <div>
+                <label className="text-muted-foreground text-sm">Amount</label>
+                <div className="text-sm font-medium">${template.amount}</div>
+              </div>
+              <div>
+                <label className="text-muted-foreground text-sm">Schedule</label>
+                <div className="text-sm font-medium">{template.recurrenceInterval}</div>
+              </div>
+              <div>
+                <label className="text-muted-foreground text-sm">Start</label>
+                <div className="text-sm font-medium">{toDateInputValue(template.startDate)}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* New templates (being created) */}
+        {newTemplates.map((template, index) => {
+          const errors = validateRecurringExpenseTemplate(template);
           return (
-            <div
-              key={template.id ?? `new-category-${index}`}
-              className="bg-background/80 rounded-lg border p-4"
-            >
+            <div key={`new-expense-${index}`} className="bg-background/80 rounded-lg border p-4">
               <div className="mb-3 flex items-center justify-between gap-2">
-                <Badge variant={template.isActive ? 'secondary' : 'outline'}>
-                  {template.isActive ? 'Active' : 'Paused'}
-                </Badge>
+                <Badge variant="outline">New</Badge>
                 <Button
                   size="sm"
                   type="button"
                   variant="destructive"
                   disabled={saving}
-                  onClick={() => onDelete(template, index)}
+                  onClick={() => onRemoveNew(index)}
                 >
-                  Delete
+                  Remove
                 </Button>
               </div>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-6">
                 <div className="md:col-span-2">
                   <label className="text-muted-foreground text-sm">Name</label>
                   <Input
                     value={template.name}
                     onChange={(e) =>
-                      onUpdate((curr) =>
-                        curr.map((item, i) =>
-                          i === index ? { ...item, name: e.target.value } : item,
-                        ),
-                      )
+                      onUpdateNew(index, (prev) => ({ ...prev, name: e.target.value }))
                     }
-                    placeholder="Rent"
+                    placeholder="Mortgage"
                     className={attemptedSave && errors.name ? 'border-destructive' : ''}
                   />
                   {attemptedSave && errors.name ? (
@@ -119,66 +176,94 @@ export const RecurringCategorySection = ({
                   ) : null}
                 </div>
                 <div>
-                  <label className="text-muted-foreground text-sm">Allocation</label>
+                  <label className="text-muted-foreground text-sm">Amount</label>
                   <Input
                     type="number"
-                    value={template.allocation}
+                    value={template.amount}
                     onChange={(e) =>
-                      onUpdate((curr) =>
-                        curr.map((item, i) =>
-                          i === index ? { ...item, allocation: Number(e.target.value || 0) } : item,
-                        ),
-                      )
+                      onUpdateNew(index, (prev) => ({ ...prev, amount: e.target.value }))
                     }
-                    className={attemptedSave && errors.allocation ? 'border-destructive' : ''}
+                    className={attemptedSave && errors.amount ? 'border-destructive' : ''}
                   />
-                  {attemptedSave && errors.allocation ? (
-                    <p className="text-destructive mt-1 text-xs">{errors.allocation}</p>
+                  {attemptedSave && errors.amount ? (
+                    <p className="text-destructive mt-1 text-xs">{errors.amount}</p>
                   ) : null}
                 </div>
+                <div>
+                  <label className="text-muted-foreground text-sm">Schedule</label>
+                  <Select
+                    value={template.recurrenceInterval}
+                    onValueChange={(value) =>
+                      onUpdateNew(index, (prev) => ({
+                        ...prev,
+                        recurrenceInterval: value as ScheduleType,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SCHEDULE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {template.recurrenceInterval === 'MONTHLY' ? (
+                  <div>
+                    <label className="text-muted-foreground text-sm">Day of Month</label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={31}
+                      value={template.paydayDayOfMonth ?? 1}
+                      onChange={(e) =>
+                        onUpdateNew(index, (prev) => ({
+                          ...prev,
+                          paydayDayOfMonth: Number(e.target.value),
+                        }))
+                      }
+                    />
+                  </div>
+                ) : null}
                 <div>
                   <label className="text-muted-foreground text-sm">Start</label>
                   <Input
                     type="date"
                     value={toDateInputValue(template.startDate)}
                     onChange={(e) =>
-                      onUpdate((curr) =>
-                        curr.map((item, i) =>
-                          i === index ? { ...item, startDate: e.target.value } : item,
-                        ),
-                      )
+                      onUpdateNew(index, (prev) => ({ ...prev, startDate: e.target.value }))
                     }
                   />
                 </div>
                 <div>
-                  <label className="text-muted-foreground text-sm">Stop (optional)</label>
+                  <label className="text-muted-foreground text-sm">End (optional)</label>
                   <Input
                     type="date"
-                    value={toDateInputValue(template.stopDate)}
+                    value={toDateInputValue(template.endDate)}
                     onChange={(e) =>
-                      onUpdate((curr) =>
-                        curr.map((item, i) =>
-                          i === index ? { ...item, stopDate: e.target.value || null } : item,
-                        ),
-                      )
+                      onUpdateNew(index, (prev) => ({
+                        ...prev,
+                        endDate: e.target.value || null,
+                      }))
                     }
-                    className={attemptedSave && errors.stopDate ? 'border-destructive' : ''}
+                    className={attemptedSave && errors.endDate ? 'border-destructive' : ''}
                   />
-                  {attemptedSave && errors.stopDate ? (
-                    <p className="text-destructive mt-1 text-xs">{errors.stopDate}</p>
+                  {attemptedSave && errors.endDate ? (
+                    <p className="text-destructive mt-1 text-xs">{errors.endDate}</p>
                   ) : null}
                 </div>
               </div>
             </div>
           );
         })}
+
         <div className="flex justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onUpdate((curr) => [...curr, makeDefaultCategoryTemplate(today)])}
-          >
-            Add Recurring Category
+          <Button type="button" variant="outline" onClick={onAddNew} disabled={saving}>
+            Add Recurring Expense
           </Button>
         </div>
       </div>

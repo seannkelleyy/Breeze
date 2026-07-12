@@ -76,11 +76,11 @@ func main() {
 	expenseService := service.NewExpenseService(queries, pool)
 	incomeService := service.NewIncomeService(queries)
 	recurringIncomeService := service.NewRecurringIncomeService(queries)
+	recurringExpenseService := service.NewRecurringExpenseService(queries)
 	taxBracketService := service.NewTaxBracketService(queries)
 	taxPlanningService := service.NewTaxPlanningService(queries)
 	retirementLadderService := service.NewRetirementLadderService(queries)
 	netWorthSnapshotService := service.NewNetWorthSnapshotService(queries)
-	plannerPersonService := service.NewPlannerPersonService(queries)
 	// Plaid client/service (dev-mode when local)
 	var plaidClient service.PlaidClient
 	if cfg.IsLocalEnv() {
@@ -109,11 +109,11 @@ func main() {
 		ExpenseService:          expenseService,
 		IncomeService:           incomeService,
 		RecurringIncomeService:  recurringIncomeService,
+		RecurringExpenseService: recurringExpenseService,
 		TaxBracketService:       taxBracketService,
 		TaxPlanningService:      taxPlanningService,
 		RetirementLadderService: retirementLadderService,
 		NetWorthSnapshotService: netWorthSnapshotService,
-		PlannerPersonService:    plannerPersonService,
 	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 

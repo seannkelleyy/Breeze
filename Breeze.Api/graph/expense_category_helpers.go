@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"breeze.api/graph/model"
+	"breeze.api/internal/db/sqlc"
 	"breeze.api/internal/service"
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
@@ -37,6 +38,7 @@ func createExpenseCategoryInputFromModel(input model.CreateExpenseCategoryInput)
 		Name:         input.Name,
 		Allocation:   allocation,
 		CurrentSpend: currentSpend,
+		SourceType:   sqlc.ExpenseSourceTypeMANUAL,
 	}, nil
 }
 
@@ -66,13 +68,16 @@ func updateExpenseCategoryInputFromModel(input model.UpdateExpenseCategoryInput)
 
 func mapExpenseCategoryToModel(category *service.ExpenseCategory) *model.ExpenseCategory {
 	return &model.ExpenseCategory{
-		ID:           category.ID.String(),
-		UserID:       category.UserID.String(),
-		BudgetID:     category.BudgetID.String(),
-		Name:         category.Name,
-		Allocation:   category.Allocation.String(),
-		CurrentSpend: category.CurrentSpend.String(),
-		CreatedAt:    category.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:    category.UpdatedAt.Format(time.RFC3339),
+		ID:               category.ID.String(),
+		UserID:           category.UserID.String(),
+		BudgetID:         category.BudgetID.String(),
+		Name:             category.Name,
+		Allocation:       category.Allocation.String(),
+		CurrentSpend:     category.CurrentSpend.String(),
+		SourceType:       model.ExpenseSourceType(category.SourceType),
+		SourceTemplateID: uuidPtrToString(category.SourceTemplateID),
+		GenerationMonth:  formatOptionalDate(category.GenerationMonth),
+		CreatedAt:        category.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:        category.UpdatedAt.Format(time.RFC3339),
 	}
 }

@@ -7,6 +7,9 @@ export interface Category {
   name: string;
   allocation: string;
   currentSpend: string;
+  sourceType: 'MANUAL' | 'RECURRING_TEMPLATE';
+  sourceTemplateId?: string | null;
+  generationMonth?: string | null;
   createdAt: string;
   updatedAt: string;
 }

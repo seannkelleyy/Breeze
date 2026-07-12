@@ -1,5 +1,5 @@
 'use client';
-import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrencyWithCode } from '../lib/plannerMath';
 import { FinancialMathSnapshot } from '../types/finance';
 import ExpensesEmergencyFundCard from './financialMathCards/ExpensesEmergencyFundCard';
@@ -18,11 +18,7 @@ const FinancialMathCard = ({ snapshot }: FinancialMathCardProps) => {
   return (
     <div className="space-y-4">
       <CardHeader>
-        <CardTitle>Emergency Fund + FI Math Snapshot</CardTitle>
-        <CardDescription>
-          This mirrors your Apple Notes formulas using your saved planner values, so it stays
-          updated in one place.
-        </CardDescription>
+        <CardTitle>Income & Expenses</CardTitle>
       </CardHeader>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <ExpensesEmergencyFundCard snapshot={snapshot} formatCurrency={formatCurrency} />

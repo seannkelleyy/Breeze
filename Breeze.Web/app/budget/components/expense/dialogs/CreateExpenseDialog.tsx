@@ -61,9 +61,10 @@ export const CreateExpenseDialog = () => {
       date: values.date,
       description: values.description,
       splits: [{ categoryId, amount: values.amount }],
+      sourceType: 'MANUAL',
     };
     await postMutation.mutateAsync({
-      budgetId: budget.id,
+      budgetId: budget!.id,
       userId,
       expense,
     });

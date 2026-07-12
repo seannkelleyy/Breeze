@@ -39,7 +39,7 @@ const PlaidConnections = () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       setSyncStatus('success');
       setTimeout(() => setSyncStatus('idle'), 3000);
-    } catch (error) {
+    } catch {
       setSyncStatus('error');
     }
   };

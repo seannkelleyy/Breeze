@@ -11,16 +11,13 @@ const useGoals = () => {
   const { request } = useGraphql();
   const { userId } = useCurrentUser();
 
-  const getGoals = useCallback(
-    async (): Promise<Goal[]> => {
-      const resp = await request<{ goals: Goal[] }>(GET_GOALS, { userId } as unknown as Record<
-        string,
-        unknown
-      >);
-      return resp?.goals ?? [];
-    },
-    [request, userId],
-  );
+  const getGoals = useCallback(async (): Promise<Goal[]> => {
+    const resp = await request<{ goals: Goal[] }>(GET_GOALS, { userId } as unknown as Record<
+      string,
+      unknown
+    >);
+    return resp?.goals ?? [];
+  }, [request, userId]);
 
   const postGoal = useCallback(
     async (goal: Goal): Promise<string> => {

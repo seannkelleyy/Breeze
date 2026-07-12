@@ -1,5 +1,4 @@
 import { type ReactNode } from 'react';
-
 import { formatCurrencyWithCode } from '../lib/plannerMath';
 import RequiredMonthlyContributionCard from './summaryCards/RequiredMonthlyContributionCard';
 import NetWorthSnapshotCard from './summaryCards/NetWorthSnapshotCard';
@@ -13,6 +12,7 @@ export type SummaryCardProps = {
   plannedMonthlyToggleControl: ReactNode;
   retirementNeedCollapsed: boolean;
   retirementNeedToggleControl: ReactNode;
+  currentPortfolio: number;
 };
 
 export const SummaryCards = ({
@@ -22,8 +22,9 @@ export const SummaryCards = ({
   plannedMonthlyToggleControl,
   retirementNeedCollapsed,
   retirementNeedToggleControl,
+  currentPortfolio,
 }: SummaryCardProps) => {
-  const { currencyCode, plannerSummary } = useCurrentUser();
+  const { plannerSummary, currencyCode } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
 
   if (!plannerSummary) {
@@ -88,8 +89,12 @@ export const SummaryCards = ({
         annualNeedAtRetirement={annualNeedAtRetirement}
         financialFreedomTarget={financialFreedomTarget}
         monthlyNeededForFreedomTarget={monthlyNeededForFreedomTarget}
+        currentPortfolio={currentPortfolio}
+        totalPlannedMonthlyInvestment={totalPlannedMonthlyInvestment}
         formatCurrency={formatCurrency}
       />
     </div>
   );
 };
+
+export default SummaryCards;

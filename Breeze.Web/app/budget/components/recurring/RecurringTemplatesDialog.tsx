@@ -4,17 +4,23 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useBudgetContext } from '../../providers';
 import { BreezeDialog } from '../../../../components/common/dialog/BreezeDialog';
 import {
-  RecurringCategoryTemplate,
+  RecurringExpenseTemplate,
   RecurringIncomeTemplate,
   useRecurringTemplates,
 } from '../../hooks/recurring/recurringTemplateServices';
 import { Button } from '@/components/ui/button';
 import { RecurringIncomeSection, validateIncomeTemplate } from './RecurringIncomeSection';
-import { RecurringCategorySection, validateCategoryTemplate } from './RecurringCategorySection';
+import {
+  RecurringCategorySection,
+  makeDefaultRecurringExpenseTemplate,
+  validateRecurringExpenseTemplate,
+} from './RecurringCategorySection';
 
 type IncomeDraft =
   | RecurringIncomeTemplate
   | Omit<RecurringIncomeTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
+
+type ExpenseDraft = Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
 
 export const RecurringTemplatesDialog = () => {
   const {
@@ -22,12 +28,11 @@ export const RecurringTemplatesDialog = () => {
     postRecurringIncomeTemplate,
     patchRecurringIncomeTemplate,
     deleteRecurringIncomeTemplate,
-    getRecurringCategoryTemplates,
-    postRecurringCategoryTemplate,
-    patchRecurringCategoryTemplate,
-    deleteRecurringCategoryTemplate,
+    getRecurringExpenseTemplates,
+    postRecurringExpenseTemplate,
+    deleteRecurringExpenseTemplate,
   } = useRecurringTemplates();
-  const { refetchBudget, refetchIncomes, refetchCategories, budget } = useBudgetContext();
+  const { refetchBudget, refetchIncomes, refetchCategories, refetchExpenses } = useBudgetContext();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,26 +42,26 @@ export const RecurringTemplatesDialog = () => {
   const [today] = useState(() => new Date().toISOString().split('T')[0]);
 
   const [incomeTemplates, setIncomeTemplates] = useState<IncomeDraft[]>([]);
-  const [categoryTemplates, setCategoryTemplates] = useState<RecurringCategoryTemplate[]>([]);
+  const [expenseTemplates, setExpenseTemplates] = useState<RecurringExpenseTemplate[]>([]);
+  const [newExpenseTemplates, setNewExpenseTemplates] = useState<ExpenseDraft[]>([]);
 
   const loadTemplates = useCallback(async () => {
-    if (!budget?.id) return;
     setLoading(true);
     setError('');
-    const budgetMonth = budget.date ? budget.date.slice(0, 7) + '-01' : undefined;
     try {
-      const [incomeData, categoryData] = await Promise.all([
+      const [incomeData, expenseData] = await Promise.all([
         getRecurringIncomeTemplates(),
-        getRecurringCategoryTemplates(budget.id, budgetMonth),
+        getRecurringExpenseTemplates(),
       ]);
       setIncomeTemplates(incomeData);
-      setCategoryTemplates(categoryData);
+      setExpenseTemplates(expenseData);
+      setNewExpenseTemplates([]);
     } catch {
       setError('Failed to load recurring templates. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [getRecurringCategoryTemplates, getRecurringIncomeTemplates, budget?.id]);
+  }, [getRecurringIncomeTemplates, getRecurringExpenseTemplates]);
 
   useEffect(() => {
     if (open) {
@@ -66,7 +71,7 @@ export const RecurringTemplatesDialog = () => {
   }, [open, loadTemplates]);
 
   const refreshBudgetViews = async () => {
-    await Promise.all([refetchBudget(), refetchIncomes(), refetchCategories()]);
+    await Promise.all([refetchBudget(), refetchIncomes(), refetchCategories(), refetchExpenses()]);
   };
 
   const handleDeleteIncome = async (template: IncomeDraft, index: number) => {
@@ -88,22 +93,32 @@ export const RecurringTemplatesDialog = () => {
     }
   };
 
-  const handleDeleteCategory = async (template: RecurringCategoryTemplate, index: number) => {
-    if (!template.id) {
-      setCategoryTemplates((current) => current.filter((_, i) => i !== index));
-      return;
-    }
+  const handleDeleteExpense = async (template: RecurringExpenseTemplate) => {
     setSaving(true);
     setError('');
     try {
-      await deleteRecurringCategoryTemplate(template.id);
-      setCategoryTemplates((current) => current.filter((_, i) => i !== index));
+      await deleteRecurringExpenseTemplate(template.id);
+      setExpenseTemplates((current) => current.filter((t) => t.id !== template.id));
       await refreshBudgetViews();
     } catch {
-      setError('Failed to delete recurring category template.');
+      setError('Failed to delete recurring expense template.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleRemoveNewExpense = (index: number) => {
+    setNewExpenseTemplates((current) => current.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateNewExpense = (index: number, updater: (prev: ExpenseDraft) => ExpenseDraft) => {
+    setNewExpenseTemplates((current) =>
+      current.map((item, i) => (i === index ? updater(item) : item)),
+    );
+  };
+
+  const handleAddNewExpense = () => {
+    setNewExpenseTemplates((current) => [...current, makeDefaultRecurringExpenseTemplate(today)]);
   };
 
   const handleSaveAll = async () => {
@@ -113,10 +128,10 @@ export const RecurringTemplatesDialog = () => {
     const hasIncomeErrors = incomeTemplates.some(
       (t) => Object.keys(validateIncomeTemplate(t)).length > 0,
     );
-    const hasCategoryErrors = categoryTemplates.some(
-      (t) => Object.keys(validateCategoryTemplate(t)).length > 0,
+    const hasExpenseErrors = newExpenseTemplates.some(
+      (t) => Object.keys(validateRecurringExpenseTemplate(t)).length > 0,
     );
-    if (hasIncomeErrors || hasCategoryErrors) {
+    if (hasIncomeErrors || hasExpenseErrors) {
       setError('Please fix validation issues before saving.');
       return;
     }
@@ -134,11 +149,7 @@ export const RecurringTemplatesDialog = () => {
                 >,
               ),
         ),
-        ...categoryTemplates.map((template) =>
-          template.id
-            ? patchRecurringCategoryTemplate(template)
-            : postRecurringCategoryTemplate(template, budget?.id ?? ''),
-        ),
+        ...newExpenseTemplates.map((template) => postRecurringExpenseTemplate(template)),
       ]);
       await loadTemplates();
       await refreshBudgetViews();
@@ -153,7 +164,7 @@ export const RecurringTemplatesDialog = () => {
     <BreezeDialog
       dialogTrigger={<Button variant="outline">Manage Recurring Templates</Button>}
       title="Recurring Templates"
-      description="Define repeating incomes and category allocations that auto-populate each month."
+      description="Define repeating incomes and expenses that auto-populate each month."
       open={open}
       onOpenChange={setOpen}
       dialogContentClassName="!w-[98vw] sm:!w-[96vw] lg:!w-[94vw] !max-w-[1260px]"
@@ -178,12 +189,14 @@ export const RecurringTemplatesDialog = () => {
         />
 
         <RecurringCategorySection
-          templates={categoryTemplates}
+          templates={expenseTemplates}
+          newTemplates={newExpenseTemplates}
           attemptedSave={attemptedSave}
           saving={saving}
-          today={today}
-          onUpdate={setCategoryTemplates}
-          onDelete={handleDeleteCategory}
+          onAddNew={handleAddNewExpense}
+          onRemoveNew={handleRemoveNewExpense}
+          onUpdateNew={handleUpdateNewExpense}
+          onDeleteExisting={handleDeleteExpense}
         />
 
         <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky bottom-0 z-20 flex justify-end rounded-md border p-3 backdrop-blur">

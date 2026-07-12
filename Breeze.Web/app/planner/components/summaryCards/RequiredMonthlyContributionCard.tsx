@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
-
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 
 interface RequiredMonthlyContributionCardProps {
   collapsed: boolean;
@@ -27,7 +28,6 @@ const RequiredMonthlyContributionCard = ({
   annualHouseholdIncome,
   weightedAnnualRate,
   yearsToGoal,
-  currentSavingsRateEmployeePercent,
   currentSavingsRateTotalPercent,
   requiredSavingsRatePercent,
   savingsRateGapPercent,
@@ -35,6 +35,13 @@ const RequiredMonthlyContributionCard = ({
   isMonthlyGapPositive,
   formatCurrency,
 }: RequiredMonthlyContributionCardProps) => {
+  const isOnTrack = savingsRateGapPercent >= 0;
+  const savingsProgress = Math.min(
+    100,
+    (currentSavingsRateTotalPercent / Math.max(requiredSavingsRatePercent, 0.01)) * 100,
+  );
+  const monthlyProgress = Math.min(100, monthlyGapToGoal > 0 ? 100 : 0);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
@@ -47,48 +54,100 @@ const RequiredMonthlyContributionCard = ({
         {toggleControl}
       </CardHeader>
       {!collapsed ? (
-        <CardContent>
-          <p className="text-success text-3xl font-bold">
-            {formatCurrency(monthlyNeededForDesiredTarget)}
-          </p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Based on: {requiredMonthlyTargetLabel}
-          </p>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Annual household income: {formatCurrency(annualHouseholdIncome)}
-          </p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Using weighted annual return of {weightedAnnualRate.toFixed(2)}% over{' '}
-            {Number.isFinite(yearsToGoal) ? yearsToGoal : 0} years.
-          </p>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Current employee savings rate: {currentSavingsRateEmployeePercent.toFixed(1)}%
-          </p>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Current total savings rate (employee + match):{' '}
-            {currentSavingsRateTotalPercent.toFixed(1)}%
-          </p>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Required savings rate: {requiredSavingsRatePercent.toFixed(1)}%
-          </p>
-          <p
-            className={
-              savingsRateGapPercent >= 0
-                ? 'text-success mt-1 text-sm'
-                : 'text-destructive mt-1 text-sm'
-            }
-          >
-            Savings rate gap: {savingsRateGapPercent >= 0 ? '+' : ''}
-            {savingsRateGapPercent.toFixed(1)}%
-          </p>
-          <p
-            className={
-              isMonthlyGapPositive ? 'text-success mt-1 text-sm' : 'text-destructive mt-1 text-sm'
-            }
-          >
-            Planned total is {formatCurrency(Math.abs(monthlyGapToGoal))}/month{' '}
-            {isMonthlyGapPositive ? 'above' : 'below'} required.
-          </p>
+        <CardContent className="space-y-4">
+          <div>
+            <p
+              className={cn(
+                'text-3xl font-bold',
+                isOnTrack ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
+              )}
+            >
+              {formatCurrency(monthlyNeededForDesiredTarget)}
+            </p>
+            <p className="text-muted-foreground mt-0.5 text-xs">
+              Based on: {requiredMonthlyTargetLabel}
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground text-xs">Savings Rate</span>
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  isOnTrack
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400',
+                )}
+              >
+                {currentSavingsRateTotalPercent.toFixed(1)}% /{' '}
+                {requiredSavingsRatePercent.toFixed(1)}%
+              </span>
+            </div>
+            <Progress
+              value={savingsProgress}
+              className={cn(
+                'h-2',
+                isOnTrack
+                  ? '[&>[data-slot=progress-indicator]]:bg-green-500'
+                  : '[&>[data-slot=progress-indicator]]:bg-red-500',
+              )}
+            />
+            <p
+              className={cn(
+                'text-xs',
+                isOnTrack ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
+              )}
+            >
+              {isOnTrack
+                ? `On track — ${savingsRateGapPercent.toFixed(1)}% above required`
+                : `${Math.abs(savingsRateGapPercent).toFixed(1)}% below required rate`}
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground text-xs">Monthly Plan vs Required</span>
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  isMonthlyGapPositive
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400',
+                )}
+              >
+                {isMonthlyGapPositive ? '+' : ''}
+                {formatCurrency(monthlyGapToGoal)}/mo
+              </span>
+            </div>
+            <Progress
+              value={monthlyProgress}
+              className={cn(
+                'h-2',
+                isMonthlyGapPositive
+                  ? '[&>[data-slot=progress-indicator]]:bg-green-500'
+                  : '[&>[data-slot=progress-indicator]]:bg-red-500',
+              )}
+            />
+            <p
+              className={cn(
+                'text-xs',
+                isMonthlyGapPositive
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-red-600 dark:text-red-400',
+              )}
+            >
+              {isMonthlyGapPositive
+                ? `Planned total is ${formatCurrency(monthlyGapToGoal)}/mo above required`
+                : `Planned total is ${formatCurrency(Math.abs(monthlyGapToGoal))}/mo below required`}
+            </p>
+          </div>
+
+          <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
+            <span>Return: {weightedAnnualRate.toFixed(2)}%</span>
+            <span>Years: {Number.isFinite(yearsToGoal) ? yearsToGoal : 0}</span>
+            <span>Income: {formatCurrency(annualHouseholdIncome)}</span>
+          </div>
         </CardContent>
       ) : null}
     </Card>

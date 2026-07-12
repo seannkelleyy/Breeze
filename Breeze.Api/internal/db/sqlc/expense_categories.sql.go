@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createExpenseCategory = `-- name: CreateExpenseCategory :one
@@ -18,8 +19,11 @@ INSERT INTO expense_categories (
   budget_id,
   name,
   allocation,
-  current_spend
-) VALUES ($1, $2, $3, $4, $5)
+  current_spend,
+  source_type,
+  source_template_id,
+  generation_month
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING
   id,
   user_id,
@@ -27,28 +31,52 @@ RETURNING
   name,
   allocation,
   current_spend,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
 `
 
 type CreateExpenseCategoryParams struct {
-	UserID       uuid.UUID       `json:"user_id"`
-	BudgetID     uuid.UUID       `json:"budget_id"`
-	Name         string          `json:"name"`
-	Allocation   decimal.Decimal `json:"allocation"`
-	CurrentSpend decimal.Decimal `json:"current_spend"`
+	UserID           uuid.UUID         `json:"user_id"`
+	BudgetID         uuid.UUID         `json:"budget_id"`
+	Name             string            `json:"name"`
+	Allocation       decimal.Decimal   `json:"allocation"`
+	CurrentSpend     decimal.Decimal   `json:"current_spend"`
+	SourceType       ExpenseSourceType `json:"source_type"`
+	SourceTemplateID pgtype.UUID       `json:"source_template_id"`
+	GenerationMonth  pgtype.Date       `json:"generation_month"`
 }
 
-func (q *Queries) CreateExpenseCategory(ctx context.Context, arg CreateExpenseCategoryParams) (ExpenseCategory, error) {
+type CreateExpenseCategoryRow struct {
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	BudgetID         uuid.UUID          `json:"budget_id"`
+	Name             string             `json:"name"`
+	Allocation       decimal.Decimal    `json:"allocation"`
+	CurrentSpend     decimal.Decimal    `json:"current_spend"`
+	SourceType       ExpenseSourceType  `json:"source_type"`
+	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
+	GenerationMonth  pgtype.Date        `json:"generation_month"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) CreateExpenseCategory(ctx context.Context, arg CreateExpenseCategoryParams) (CreateExpenseCategoryRow, error) {
 	row := q.db.QueryRow(ctx, createExpenseCategory,
 		arg.UserID,
 		arg.BudgetID,
 		arg.Name,
 		arg.Allocation,
 		arg.CurrentSpend,
+		arg.SourceType,
+		arg.SourceTemplateID,
+		arg.GenerationMonth,
 	)
-	var i ExpenseCategory
+	var i CreateExpenseCategoryRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -56,6 +84,9 @@ func (q *Queries) CreateExpenseCategory(ctx context.Context, arg CreateExpenseCa
 		&i.Name,
 		&i.Allocation,
 		&i.CurrentSpend,
+		&i.SourceType,
+		&i.SourceTemplateID,
+		&i.GenerationMonth,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -71,6 +102,9 @@ SELECT
   name,
   allocation,
   current_spend,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
@@ -80,9 +114,24 @@ WHERE id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetExpenseCategoryByID(ctx context.Context, id uuid.UUID) (ExpenseCategory, error) {
+type GetExpenseCategoryByIDRow struct {
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	BudgetID         uuid.UUID          `json:"budget_id"`
+	Name             string             `json:"name"`
+	Allocation       decimal.Decimal    `json:"allocation"`
+	CurrentSpend     decimal.Decimal    `json:"current_spend"`
+	SourceType       ExpenseSourceType  `json:"source_type"`
+	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
+	GenerationMonth  pgtype.Date        `json:"generation_month"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) GetExpenseCategoryByID(ctx context.Context, id uuid.UUID) (GetExpenseCategoryByIDRow, error) {
 	row := q.db.QueryRow(ctx, getExpenseCategoryByID, id)
-	var i ExpenseCategory
+	var i GetExpenseCategoryByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -90,6 +139,9 @@ func (q *Queries) GetExpenseCategoryByID(ctx context.Context, id uuid.UUID) (Exp
 		&i.Name,
 		&i.Allocation,
 		&i.CurrentSpend,
+		&i.SourceType,
+		&i.SourceTemplateID,
+		&i.GenerationMonth,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -105,6 +157,9 @@ SELECT
   name,
   allocation,
   current_spend,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
@@ -114,15 +169,30 @@ WHERE budget_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]ExpenseCategory, error) {
+type ListExpenseCategoriesByBudgetIDRow struct {
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	BudgetID         uuid.UUID          `json:"budget_id"`
+	Name             string             `json:"name"`
+	Allocation       decimal.Decimal    `json:"allocation"`
+	CurrentSpend     decimal.Decimal    `json:"current_spend"`
+	SourceType       ExpenseSourceType  `json:"source_type"`
+	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
+	GenerationMonth  pgtype.Date        `json:"generation_month"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]ListExpenseCategoriesByBudgetIDRow, error) {
 	rows, err := q.db.Query(ctx, listExpenseCategoriesByBudgetID, budgetID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ExpenseCategory
+	var items []ListExpenseCategoriesByBudgetIDRow
 	for rows.Next() {
-		var i ExpenseCategory
+		var i ListExpenseCategoriesByBudgetIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -130,6 +200,9 @@ func (q *Queries) ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID 
 			&i.Name,
 			&i.Allocation,
 			&i.CurrentSpend,
+			&i.SourceType,
+			&i.SourceTemplateID,
+			&i.GenerationMonth,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -160,6 +233,23 @@ func (q *Queries) SoftDeleteExpenseCategory(ctx context.Context, id uuid.UUID) (
 	return result.RowsAffected(), nil
 }
 
+const softDeleteGeneratedCategoriesByBudget = `-- name: SoftDeleteGeneratedCategoriesByBudget :execrows
+UPDATE expense_categories
+SET deleted_at = now(),
+    updated_at = now()
+WHERE budget_id = $1
+  AND source_type = 'RECURRING_TEMPLATE'
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) SoftDeleteGeneratedCategoriesByBudget(ctx context.Context, budgetID uuid.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteGeneratedCategoriesByBudget, budgetID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const updateExpenseCategory = `-- name: UpdateExpenseCategory :one
 UPDATE expense_categories
 SET
@@ -176,6 +266,9 @@ RETURNING
   name,
   allocation,
   current_spend,
+  source_type,
+  source_template_id,
+  generation_month,
   created_at,
   updated_at,
   deleted_at
@@ -188,14 +281,29 @@ type UpdateExpenseCategoryParams struct {
 	CurrentSpend decimal.Decimal `json:"current_spend"`
 }
 
-func (q *Queries) UpdateExpenseCategory(ctx context.Context, arg UpdateExpenseCategoryParams) (ExpenseCategory, error) {
+type UpdateExpenseCategoryRow struct {
+	ID               uuid.UUID          `json:"id"`
+	UserID           uuid.UUID          `json:"user_id"`
+	BudgetID         uuid.UUID          `json:"budget_id"`
+	Name             string             `json:"name"`
+	Allocation       decimal.Decimal    `json:"allocation"`
+	CurrentSpend     decimal.Decimal    `json:"current_spend"`
+	SourceType       ExpenseSourceType  `json:"source_type"`
+	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
+	GenerationMonth  pgtype.Date        `json:"generation_month"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) UpdateExpenseCategory(ctx context.Context, arg UpdateExpenseCategoryParams) (UpdateExpenseCategoryRow, error) {
 	row := q.db.QueryRow(ctx, updateExpenseCategory,
 		arg.ID,
 		arg.Name,
 		arg.Allocation,
 		arg.CurrentSpend,
 	)
-	var i ExpenseCategory
+	var i UpdateExpenseCategoryRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -203,6 +311,9 @@ func (q *Queries) UpdateExpenseCategory(ctx context.Context, arg UpdateExpenseCa
 		&i.Name,
 		&i.Allocation,
 		&i.CurrentSpend,
+		&i.SourceType,
+		&i.SourceTemplateID,
+		&i.GenerationMonth,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,

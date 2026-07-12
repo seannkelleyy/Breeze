@@ -31,7 +31,7 @@ export default function PlannerPage() {
   } = usePlannerState();
 
   // Load planner data from API on mount and hydrate state
-  const { data: plannerData, isLoading: isPlannerLoading } = useFetchPlanner();
+  const { data: plannerData } = useFetchPlanner();
 
   const {
     setPlannerAccounts,
@@ -160,6 +160,8 @@ export default function PlannerPage() {
             accountLineColors={accountLineColors}
             accountBreakdownRows={accountBreakdownRows}
             financialMathSnapshot={financialMathSnapshot}
+            hasReachedCoastFire={hasReachedCoastFire}
+            coastFireGap={coastFireGap}
             collapses={{
               requiredMonthly: collapsedSections['requiredMonthly'],
               plannedMonthly: collapsedSections['plannedMonthly'],
