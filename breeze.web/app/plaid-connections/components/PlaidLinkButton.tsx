@@ -20,8 +20,11 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
 
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
-  onSuccessRef.current = onSuccess;
-  onErrorRef.current = onError;
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [onSuccess, onError]);
 
   useEffect(() => {
     if (!userId) return;
@@ -57,11 +60,7 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
   const isLoading = isExchanging || isCreatingToken;
 
   return (
-    <Button
-      onClick={() => open()}
-      disabled={!ready || !linkToken || isLoading}
-      variant="default"
-    >
+    <Button onClick={() => open()} disabled={!ready || !linkToken || isLoading} variant="default">
       {isLoading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />

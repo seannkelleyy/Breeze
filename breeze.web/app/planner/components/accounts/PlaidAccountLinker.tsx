@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { usePlaidConnections, usePlaidAccounts, PlaidAccount } from '@/lib/services/hooks/usePlaid';
+import { usePlaidConnections, usePlaidAccounts } from '@/lib/services/hooks/usePlaid';
 import {
   useLinkAssetToPlaidAccount,
   useUnlinkAssetFromPlaidAccount,
@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/button';
 
 interface PlaidAccountLinkerProps {
   accountId: string;
-  accountName: string;
   isLiability: boolean;
   plaidAccountId: string | null;
 }
@@ -31,27 +30,34 @@ const NONE_VALUE = '__none__';
 
 export const PlaidAccountLinker = ({
   accountId,
-  accountName,
   isLiability,
   plaidAccountId,
 }: PlaidAccountLinkerProps) => {
   const { userId } = useCurrentUser();
   const { data: connections, isLoading: connectionsLoading } = usePlaidConnections(userId);
-  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
-  const { data: plaidAccounts, isLoading: accountsLoading } = usePlaidAccounts(selectedConnectionId);
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(() => {
+    return connections?.[0]?.id ?? null;
+  });
+
+  useEffect(() => {
+    if (connections && connections.length > 0 && selectedConnectionId === null) {
+      setSelectedConnectionId(connections[0].id); // eslint-disable-line react-hooks/set-state-in-effect
+    }
+  }, [connections, selectedConnectionId]);
+
+  const { data: plaidAccounts, isLoading: accountsLoading } =
+    usePlaidAccounts(selectedConnectionId);
 
   const linkAsset = useLinkAssetToPlaidAccount();
   const unlinkAsset = useUnlinkAssetFromPlaidAccount();
   const linkLiability = useLinkLiabilityToPlaidAccount();
   const unlinkLiability = useUnlinkLiabilityFromPlaidAccount();
 
-  const isLinking = linkAsset.isPending || unlinkAsset.isPending || linkLiability.isPending || unlinkLiability.isPending;
-
-  useEffect(() => {
-    if (connections && connections.length > 0 && !selectedConnectionId) {
-      setSelectedConnectionId(connections[0].id);
-    }
-  }, [connections, selectedConnectionId]);
+  const isLinking =
+    linkAsset.isPending ||
+    unlinkAsset.isPending ||
+    linkLiability.isPending ||
+    unlinkLiability.isPending;
 
   const handleLink = (plaidAccId: string) => {
     if (plaidAccId === NONE_VALUE) {
@@ -71,7 +77,7 @@ export const PlaidAccountLinker = ({
 
   if (connectionsLoading) {
     return (
-      <div className="flex items-center gap-2 text-muted-foreground text-sm">
+      <div className="text-muted-foreground flex items-center gap-2 text-sm">
         <Loader2 className="h-3 w-3 animate-spin" />
         Loading Plaid connections...
       </div>
@@ -132,7 +138,8 @@ export const PlaidAccountLinker = ({
           <SelectItem value={NONE_VALUE}>Not linked</SelectItem>
           {plaidAccounts?.map((acc) => (
             <SelectItem key={acc.id} value={acc.id}>
-              {acc.name}{acc.subtype ? ` (${acc.subtype})` : ''}
+              {acc.name}
+              {acc.subtype ? ` (${acc.subtype})` : ''}
             </SelectItem>
           ))}
         </SelectContent>
@@ -141,7 +148,8 @@ export const PlaidAccountLinker = ({
       {linkedAccount && (
         <p className="text-muted-foreground text-xs">
           Linked to: {linkedAccount.name}
-          {linkedAccount.currentBalance && ` — $${Number(linkedAccount.currentBalance).toLocaleString()}`}
+          {linkedAccount.currentBalance &&
+            ` — $${Number(linkedAccount.currentBalance).toLocaleString()}`}
         </p>
       )}
     </div>

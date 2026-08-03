@@ -185,7 +185,11 @@ const RetirementLadder = () => {
       {ladderData && (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card
-            className={isSustainable ? 'border-success/30 bg-success/10' : 'border-destructive/30 bg-destructive/10'}
+            className={
+              isSustainable
+                ? 'border-success/30 bg-success/10'
+                : 'border-destructive/30 bg-destructive/10'
+            }
           >
             <CardHeader className="pb-2">
               <CardTitle className="text-muted-foreground text-sm font-medium">
@@ -196,13 +200,13 @@ const RetirementLadder = () => {
               <div className="flex items-center gap-2">
                 {isSustainable ? (
                   <>
-                    <CheckCircle2 className="h-5 w-5 text-success" />
-                    <span className="font-bold text-success">Sustainable</span>
+                    <CheckCircle2 className="text-success h-5 w-5" />
+                    <span className="text-success font-bold">Sustainable</span>
                   </>
                 ) : (
                   <>
-                    <AlertCircle className="h-5 w-5 text-destructive" />
-                    <span className="font-bold text-destructive">
+                    <AlertCircle className="text-destructive h-5 w-5" />
+                    <span className="text-destructive font-bold">
                       Depleted at age {ladderData.projectedDepletionAge}
                     </span>
                   </>
@@ -228,8 +232,8 @@ const RetirementLadder = () => {
 
       {/* Error State */}
       {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
-          <div className="flex items-center gap-2 text-destructive">
+        <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-4">
+          <div className="text-destructive flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
             <span>
               Failed to calculate ladder.{' '}
@@ -283,10 +287,10 @@ const RetirementLadder = () => {
                       <td className="p-2 text-right font-mono">
                         {formatCurrency(step.taxableWithdrawal)}
                       </td>
-                      <td className="p-2 text-right font-mono text-destructive">
+                      <td className="text-destructive p-2 text-right font-mono">
                         {formatCurrency(step.estimatedIncomeTax)}
                       </td>
-                      <td className="p-2 text-right font-mono text-success">
+                      <td className="text-success p-2 text-right font-mono">
                         {formatCurrency(step.netWithdrawal)}
                       </td>
                       <td className="p-2 text-right font-mono">

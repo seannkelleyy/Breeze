@@ -66,7 +66,7 @@ export const BreezeFormDialog = <TFormValues extends FieldValues>({
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {inputFields}
         {submitError ? (
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+          <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-md border p-3 text-sm">
             {submitError}
           </div>
         ) : null}

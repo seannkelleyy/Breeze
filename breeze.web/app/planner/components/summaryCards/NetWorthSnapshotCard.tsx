@@ -49,12 +49,7 @@ const NetWorthSnapshotCard = ({
         <CardContent className="space-y-4">
           <div>
             <p
-              className={cn(
-                'text-3xl font-bold',
-                isPositive
-                  ? 'text-success'
-                  : 'text-destructive',
-              )}
+              className={cn('text-3xl font-bold', isPositive ? 'text-success' : 'text-destructive')}
             >
               {isPositive ? '' : '-'}
               {formatCurrency(Math.abs(totalStartingBalance))}
@@ -67,26 +62,26 @@ const NetWorthSnapshotCard = ({
           {hasLiabilities ? (
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-success">
+                <span className="text-success font-medium">
                   Assets {formatCurrency(totalAssets)}
                 </span>
-                <span className="font-medium text-destructive">
+                <span className="text-destructive font-medium">
                   Liabilities {formatCurrency(totalLiabilities)}
                 </span>
               </div>
-              <div className="flex h-3 w-full overflow-hidden rounded-full bg-destructive/20">
+              <div className="bg-destructive/20 flex h-3 w-full overflow-hidden rounded-full">
                 <div
-                  className="h-full rounded-l-full bg-success transition-all"
+                  className="bg-success h-full rounded-l-full transition-all"
                   style={{ width: `${assetPercent}%` }}
                 />
                 <div
-                  className="h-full rounded-r-full bg-destructive transition-all"
+                  className="bg-destructive h-full rounded-r-full transition-all"
                   style={{ width: `${liabilityPercent}%` }}
                 />
               </div>
             </div>
           ) : (
-            <p className="text-xs font-medium text-success">No liabilities</p>
+            <p className="text-success text-xs font-medium">No liabilities</p>
           )}
 
           <div className="space-y-1.5">
@@ -99,7 +94,7 @@ const NetWorthSnapshotCard = ({
             </div>
             <Progress
               value={targetProgress}
-              className="h-2 [&>[data-slot=progress-indicator]]:bg-info"
+              className="[&>[data-slot=progress-indicator]]:bg-info h-2"
             />
           </div>
 

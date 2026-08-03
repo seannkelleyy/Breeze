@@ -9,7 +9,13 @@ interface PageHeaderProps {
   children?: React.ReactNode;
 }
 
-export const PageHeader = ({ icon: Icon, title, subtitle, className, children }: PageHeaderProps) => {
+export const PageHeader = ({
+  icon: Icon,
+  title,
+  subtitle,
+  className,
+  children,
+}: PageHeaderProps) => {
   return (
     <div className={cn('flex items-start justify-between gap-4', className)}>
       <div className="flex items-center gap-3">

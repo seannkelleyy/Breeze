@@ -76,14 +76,27 @@ const MortgageTools = () => {
     queryKey: ['mortgage-pairs', userId],
     queryFn: async () => {
       const [assetsResp, liabilitiesResp] = await Promise.all([
-        request<{ assets: Array<{ id: string; name: string; assetType: string; currentValue: string; homeGrowthProfile: string | null; linkedLiabilityId: string | null }> }>(
-          GET_ASSETS_BY_USER,
-          { userId },
-        ),
-        request<{ liabilities: Array<{ id: string; name: string; liabilityType: string; currentBalance: string; originalLoanAmount: string | null; interestRate: string; minimumPayment: string }> }>(
-          GET_LIABILITIES_BY_USER,
-          { userId },
-        ),
+        request<{
+          assets: Array<{
+            id: string;
+            name: string;
+            assetType: string;
+            currentValue: string;
+            homeGrowthProfile: string | null;
+            linkedLiabilityId: string | null;
+          }>;
+        }>(GET_ASSETS_BY_USER, { userId }),
+        request<{
+          liabilities: Array<{
+            id: string;
+            name: string;
+            liabilityType: string;
+            currentBalance: string;
+            originalLoanAmount: string | null;
+            interestRate: string;
+            minimumPayment: string;
+          }>;
+        }>(GET_LIABILITIES_BY_USER, { userId }),
       ]);
 
       const assets = (assetsResp?.assets ?? []).filter((a) => a.assetType === 'HOME');
@@ -150,7 +163,10 @@ const MortgageTools = () => {
   );
 
   const homeLoan = {
-    accountName: selectedId === 'manual' ? 'Primary Home Loan' : (pairs?.find((p) => p.id === selectedId)?.label ?? 'Primary Home Loan'),
+    accountName:
+      selectedId === 'manual'
+        ? 'Primary Home Loan'
+        : (pairs?.find((p) => p.id === selectedId)?.label ?? 'Primary Home Loan'),
     currentBalance: clamp(mortgageBalance),
     originalLoanAmount: clamp(mortgageOriginalAmount),
     interestRate: clamp(mortgageRate),

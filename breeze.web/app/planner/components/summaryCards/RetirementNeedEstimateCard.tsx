@@ -57,7 +57,7 @@ const RetirementNeedEstimateCard = ({
             </div>
             <Progress
               value={progressPct}
-              className="h-2 [&>[data-slot=progress-indicator]]:bg-info"
+              className="[&>[data-slot=progress-indicator]]:bg-info h-2"
             />
             <p className="text-muted-foreground text-xs">
               {progressPct.toFixed(1)}% toward your freedom target
@@ -67,24 +67,12 @@ const RetirementNeedEstimateCard = ({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Monthly needed vs planned</span>
-              <span
-                className={cn(
-                  'font-medium',
-                  isOnTrack
-                    ? 'text-success'
-                    : 'text-destructive',
-                )}
-              >
+              <span className={cn('font-medium', isOnTrack ? 'text-success' : 'text-destructive')}>
                 {formatCurrency(totalPlannedMonthlyInvestment)} /{' '}
                 {formatCurrency(monthlyNeededForFreedomTarget)}
               </span>
             </div>
-            <p
-              className={cn(
-                'text-xs',
-                isOnTrack ? 'text-success' : 'text-destructive',
-              )}
-            >
+            <p className={cn('text-xs', isOnTrack ? 'text-success' : 'text-destructive')}>
               {isOnTrack
                 ? `Planned ${formatCurrency(totalPlannedMonthlyInvestment)}/mo meets the ${formatCurrency(monthlyNeededForFreedomTarget)}/mo needed`
                 : `Planned ${formatCurrency(totalPlannedMonthlyInvestment)}/mo is below the ${formatCurrency(monthlyNeededForFreedomTarget)}/mo needed`}

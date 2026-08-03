@@ -27,9 +27,24 @@ const formatCurrency = (value: number) =>
   }).format(value);
 
 const quickLinks = [
-  { label: 'Planner', href: '/planner', icon: TrendingUp, description: 'Accounts, projections, and retirement planning.' },
-  { label: 'Budget', href: '/budget', icon: Wallet, description: 'Monthly budgeting, categories, and expenses.' },
-  { label: 'Tools', href: '/tools', icon: Wrench, description: 'Mortgage calculator and financial utilities.' },
+  {
+    label: 'Planner',
+    href: '/planner',
+    icon: TrendingUp,
+    description: 'Accounts, projections, and retirement planning.',
+  },
+  {
+    label: 'Budget',
+    href: '/budget',
+    icon: Wallet,
+    description: 'Monthly budgeting, categories, and expenses.',
+  },
+  {
+    label: 'Tools',
+    href: '/tools',
+    icon: Wrench,
+    description: 'Mortgage calculator and financial utilities.',
+  },
 ];
 
 const DashboardPage = () => {
@@ -40,21 +55,27 @@ const DashboardPage = () => {
     queryKey: ['dashboard-summary', userId],
     queryFn: async () => {
       const [assetsResp, liabilitiesResp] = await Promise.all([
-        request<{ assets: Array<{ id: string; name: string; assetType: string; currentValue: string }> }>(
-          GET_ASSETS_BY_USER,
-          { userId },
-        ),
-        request<{ liabilities: Array<{ id: string; name: string; liabilityType: string; currentBalance: string }> }>(
-          GET_LIABILITIES_BY_USER,
-          { userId },
-        ),
+        request<{
+          assets: Array<{ id: string; name: string; assetType: string; currentValue: string }>;
+        }>(GET_ASSETS_BY_USER, { userId }),
+        request<{
+          liabilities: Array<{
+            id: string;
+            name: string;
+            liabilityType: string;
+            currentBalance: string;
+          }>;
+        }>(GET_LIABILITIES_BY_USER, { userId }),
       ]);
 
       const assets = assetsResp?.assets ?? [];
       const liabilities = liabilitiesResp?.liabilities ?? [];
 
       const totalAssets = assets.reduce((sum, a) => sum + (Number(a.currentValue) || 0), 0);
-      const totalLiabilities = liabilities.reduce((sum, l) => sum + (Number(l.currentBalance) || 0), 0);
+      const totalLiabilities = liabilities.reduce(
+        (sum, l) => sum + (Number(l.currentBalance) || 0),
+        0,
+      );
       const netWorth = totalAssets - totalLiabilities;
 
       const assetsByType = new Map<string, number>();
@@ -66,7 +87,10 @@ const DashboardPage = () => {
       const liabilitiesByType = new Map<string, number>();
       for (const liability of liabilities) {
         const type = liability.liabilityType;
-        liabilitiesByType.set(type, (liabilitiesByType.get(type) ?? 0) + (Number(liability.currentBalance) || 0));
+        liabilitiesByType.set(
+          type,
+          (liabilitiesByType.get(type) ?? 0) + (Number(liability.currentBalance) || 0),
+        );
       }
 
       return {
@@ -106,20 +130,20 @@ const DashboardPage = () => {
       <PageHeader
         icon={LayoutDashboard}
         title={`Welcome, ${user?.firstName ?? 'there'}`}
-        subtitle="Here&apos;s your financial overview."
+        subtitle="Here's your financial overview."
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Net Worth</CardDescription>
-            <CardTitle className="text-3xl">
-              {data ? formatCurrency(data.netWorth) : '—'}
-            </CardTitle>
+            <CardTitle className="text-3xl">{data ? formatCurrency(data.netWorth) : '—'}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-sm">
-              {data ? `${data.assetCount} assets, ${data.liabilityCount} liabilities` : 'Loading...'}
+              {data
+                ? `${data.assetCount} assets, ${data.liabilityCount} liabilities`
+                : 'Loading...'}
             </p>
           </CardContent>
         </Card>
@@ -127,7 +151,7 @@ const DashboardPage = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
-              <ArrowUpRight className="size-4 text-success" />
+              <ArrowUpRight className="text-success size-4" />
               Total Assets
             </CardDescription>
             <CardTitle className="text-3xl">
@@ -144,7 +168,7 @@ const DashboardPage = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
-              <ArrowDownRight className="size-4 text-destructive" />
+              <ArrowDownRight className="text-destructive size-4" />
               Total Liabilities
             </CardDescription>
             <CardTitle className="text-3xl">
@@ -162,7 +186,7 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {quickLinks.map((link) => (
           <Link key={link.href} href={link.href}>
-            <Card className="h-full transition-colors hover:bg-accent">
+            <Card className="hover:bg-accent h-full transition-colors">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">

@@ -57,10 +57,7 @@ const RequiredMonthlyContributionCard = ({
         <CardContent className="space-y-4">
           <div>
             <p
-              className={cn(
-                'text-3xl font-bold',
-                isOnTrack ? 'text-success' : 'text-destructive',
-              )}
+              className={cn('text-3xl font-bold', isOnTrack ? 'text-success' : 'text-destructive')}
             >
               {formatCurrency(monthlyNeededForDesiredTarget)}
             </p>
@@ -75,9 +72,7 @@ const RequiredMonthlyContributionCard = ({
               <span
                 className={cn(
                   'text-xs font-medium',
-                  isOnTrack
-                    ? 'text-success'
-                    : 'text-destructive',
+                  isOnTrack ? 'text-success' : 'text-destructive',
                 )}
               >
                 {currentSavingsRateTotalPercent.toFixed(1)}% /{' '}
@@ -93,12 +88,7 @@ const RequiredMonthlyContributionCard = ({
                   : '[&>[data-slot=progress-indicator]]:bg-destructive',
               )}
             />
-            <p
-              className={cn(
-                'text-xs',
-                isOnTrack ? 'text-success' : 'text-destructive',
-              )}
-            >
+            <p className={cn('text-xs', isOnTrack ? 'text-success' : 'text-destructive')}>
               {isOnTrack
                 ? `On track — ${savingsRateGapPercent.toFixed(1)}% above required`
                 : `${Math.abs(savingsRateGapPercent).toFixed(1)}% below required rate`}
@@ -111,9 +101,7 @@ const RequiredMonthlyContributionCard = ({
               <span
                 className={cn(
                   'text-xs font-medium',
-                  isMonthlyGapPositive
-                    ? 'text-success'
-                    : 'text-destructive',
+                  isMonthlyGapPositive ? 'text-success' : 'text-destructive',
                 )}
               >
                 {isMonthlyGapPositive ? '+' : ''}
@@ -130,12 +118,7 @@ const RequiredMonthlyContributionCard = ({
               )}
             />
             <p
-              className={cn(
-                'text-xs',
-                isMonthlyGapPositive
-                  ? 'text-success'
-                  : 'text-destructive',
-              )}
+              className={cn('text-xs', isMonthlyGapPositive ? 'text-success' : 'text-destructive')}
             >
               {isMonthlyGapPositive
                 ? `Planned total is ${formatCurrency(monthlyGapToGoal)}/mo above required`

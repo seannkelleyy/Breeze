@@ -41,10 +41,9 @@ const LinkedPlannerAccounts = ({ plaidAccountId }: { plaidAccountId: string }) =
           GET_ASSETS_BY_USER,
           { userId },
         ),
-        request<{ liabilities: Array<{ id: string; name: string; plaidAccountId: string | null }> }>(
-          GET_LIABILITIES_BY_USER,
-          { userId },
-        ),
+        request<{
+          liabilities: Array<{ id: string; name: string; plaidAccountId: string | null }>;
+        }>(GET_LIABILITIES_BY_USER, { userId }),
       ]);
       return {
         assets: assetsResp?.assets ?? [],
@@ -85,7 +84,7 @@ const ConnectionAccounts = ({ connectionId }: { connectionId: string }) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-2 py-2 text-sm">
         <Loader2 className="h-3 w-3 animate-spin" />
         Loading accounts...
       </div>
@@ -154,8 +153,8 @@ const PlaidConnections = () => {
       />
 
       {syncStatus === 'success' && (
-        <div className="rounded-lg border border-success/30 bg-success/10 p-4">
-          <div className="flex items-center gap-2 text-success">
+        <div className="border-success/30 bg-success/10 rounded-lg border p-4">
+          <div className="text-success flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4" />
             <span>Successfully synced your accounts</span>
           </div>
@@ -163,8 +162,8 @@ const PlaidConnections = () => {
       )}
 
       {syncStatus === 'error' && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
-          <div className="flex items-center gap-2 text-destructive">
+        <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-4">
+          <div className="text-destructive flex items-center gap-2">
             <span>Failed to sync accounts. Please try again.</span>
           </div>
         </div>

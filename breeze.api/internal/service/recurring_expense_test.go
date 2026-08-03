@@ -15,11 +15,11 @@ import (
 )
 
 type mockRecurringExpenseQuerier struct {
-	createRecurringExpenseFunc       func(context.Context, sqlc.CreateRecurringExpenseParams) (sqlc.CreateRecurringExpenseRow, error)
-	getRecurringExpenseByIDFunc      func(context.Context, uuid.UUID) (sqlc.GetRecurringExpenseByIDRow, error)
+	createRecurringExpenseFunc        func(context.Context, sqlc.CreateRecurringExpenseParams) (sqlc.CreateRecurringExpenseRow, error)
+	getRecurringExpenseByIDFunc       func(context.Context, uuid.UUID) (sqlc.GetRecurringExpenseByIDRow, error)
 	listRecurringExpensesByUserIDFunc func(context.Context, uuid.UUID) ([]sqlc.ListRecurringExpensesByUserIDRow, error)
-	updateRecurringExpenseFunc       func(context.Context, sqlc.UpdateRecurringExpenseParams) (sqlc.UpdateRecurringExpenseRow, error)
-	softDeleteRecurringExpenseFunc   func(context.Context, uuid.UUID) (int64, error)
+	updateRecurringExpenseFunc        func(context.Context, sqlc.UpdateRecurringExpenseParams) (sqlc.UpdateRecurringExpenseRow, error)
+	softDeleteRecurringExpenseFunc    func(context.Context, uuid.UUID) (int64, error)
 }
 
 func (m *mockRecurringExpenseQuerier) CreateRecurringExpense(ctx context.Context, arg sqlc.CreateRecurringExpenseParams) (sqlc.CreateRecurringExpenseRow, error) {

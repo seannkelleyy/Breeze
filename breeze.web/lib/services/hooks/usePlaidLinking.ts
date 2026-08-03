@@ -13,7 +13,13 @@ export const useLinkAssetToPlaidAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ assetId, plaidAccountId }: { assetId: string; plaidAccountId: string }) => {
+    mutationFn: async ({
+      assetId,
+      plaidAccountId,
+    }: {
+      assetId: string;
+      plaidAccountId: string;
+    }) => {
       return request<boolean>(LINK_ASSET_TO_PLAID_ACCOUNT, {
         assetId,
         plaidAccountId,
@@ -46,7 +52,13 @@ export const useLinkLiabilityToPlaidAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ liabilityId, plaidAccountId }: { liabilityId: string; plaidAccountId: string }) => {
+    mutationFn: async ({
+      liabilityId,
+      plaidAccountId,
+    }: {
+      liabilityId: string;
+      plaidAccountId: string;
+    }) => {
       return request<boolean>(LINK_LIABILITY_TO_PLAID_ACCOUNT, {
         liabilityId,
         plaidAccountId,

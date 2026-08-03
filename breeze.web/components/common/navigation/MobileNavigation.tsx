@@ -28,7 +28,7 @@ export const MobileNavigation = () => {
       </div>
 
       {/* Bottom tab bar */}
-      <nav className="fixed bottom-0 z-10 flex w-full items-center justify-around border-t bg-background/80 backdrop-blur-lg sm:hidden">
+      <nav className="bg-background/80 fixed bottom-0 z-10 flex w-full items-center justify-around border-t backdrop-blur-lg sm:hidden">
         {tabs.map((tab) => {
           const active = isActive(tab.to);
           return (
@@ -40,10 +40,12 @@ export const MobileNavigation = () => {
                 active ? 'text-primary-foreground' : 'text-muted-foreground',
               )}
             >
-              <div className={cn(
-                'flex size-8 items-center justify-center rounded-full transition-colors',
-                active && 'bg-primary',
-              )}>
+              <div
+                className={cn(
+                  'flex size-8 items-center justify-center rounded-full transition-colors',
+                  active && 'bg-primary',
+                )}
+              >
                 <tab.icon className="h-5 w-5" />
               </div>
               {tab.label}

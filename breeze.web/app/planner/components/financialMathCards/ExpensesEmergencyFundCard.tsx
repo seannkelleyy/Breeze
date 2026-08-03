@@ -46,12 +46,7 @@ const ExpensesEmergencyFundCard = ({
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">{tier.label}</span>
                   <span
-                    className={cn(
-                      'font-medium',
-                      isCovered
-                        ? 'text-success'
-                        : 'text-destructive',
-                    )}
+                    className={cn('font-medium', isCovered ? 'text-success' : 'text-destructive')}
                   >
                     {formatCurrency(efBalance)} / {formatCurrency(target)}
                   </span>
@@ -67,14 +62,7 @@ const ExpensesEmergencyFundCard = ({
                         : '[&>[data-slot=progress-indicator]]:bg-destructive',
                   )}
                 />
-                <p
-                  className={cn(
-                    'text-xs',
-                    isCovered
-                      ? 'text-success'
-                      : 'text-destructive',
-                  )}
-                >
+                <p className={cn('text-xs', isCovered ? 'text-success' : 'text-destructive')}>
                   {isCovered
                     ? `${formatCurrency(efBalance - target)} above ${tier.label}`
                     : `${formatCurrency(target - efBalance)} short of ${tier.label}`}

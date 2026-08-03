@@ -14,10 +14,10 @@ import (
 )
 
 type mockPlannerPersonQuerier struct {
-	upsertPlannerPersonFunc              func(context.Context, sqlc.UpsertPlannerPersonParams) (sqlc.PlannerPerson, error)
-	listPlannerPeopleByUserIDFunc        func(context.Context, uuid.UUID) ([]sqlc.PlannerPerson, error)
-	softDeletePlannerPersonFunc          func(context.Context, uuid.UUID) (int64, error)
-	softDeletePlannerPeopleByUserIDFunc  func(context.Context, uuid.UUID) (int64, error)
+	upsertPlannerPersonFunc             func(context.Context, sqlc.UpsertPlannerPersonParams) (sqlc.PlannerPerson, error)
+	listPlannerPeopleByUserIDFunc       func(context.Context, uuid.UUID) ([]sqlc.PlannerPerson, error)
+	softDeletePlannerPersonFunc         func(context.Context, uuid.UUID) (int64, error)
+	softDeletePlannerPeopleByUserIDFunc func(context.Context, uuid.UUID) (int64, error)
 }
 
 func (m *mockPlannerPersonQuerier) UpsertPlannerPerson(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.PlannerPerson, error) {

@@ -1,10 +1,5 @@
 'use client';
-import {
-  Menubar,
-  MenubarContent,
-  MenubarMenu,
-  MenubarTrigger,
-} from '@/components/ui/menubar';
+import { Menubar, MenubarContent, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
 import ThemeToggle from '../theme/ThemeToggle';
 import { UserPreferencesModal } from '../userPreference/UserPreferencesModal';
 import { NavRouteItem } from './NavItems';
@@ -32,13 +27,19 @@ export const DesktopNavigation = () => {
       {/* CENTER: route links + tools dropdown */}
       <div className="z-10 flex items-center gap-1">
         {routeNavItems.map((item) => (
-          <NavRouteItem key={item.label} label={item.label} to={item.to} title={item.title} icon={item.icon} />
+          <NavRouteItem
+            key={item.label}
+            label={item.label}
+            to={item.to}
+            title={item.title}
+            icon={item.icon}
+          />
         ))}
 
         <MenubarMenu>
           <MenubarTrigger
             className={cn(
-              'flex items-center gap-1.5 cursor-pointer',
+              'flex cursor-pointer items-center gap-1.5',
               isToolsActive && 'bg-primary text-primary-foreground',
             )}
           >
@@ -47,7 +48,13 @@ export const DesktopNavigation = () => {
           </MenubarTrigger>
           <MenubarContent className="flex flex-col">
             {toolNavItems.map((item) => (
-              <NavRouteItem key={item.label} label={item.label} to={item.to} title={item.title} icon={item.icon} />
+              <NavRouteItem
+                key={item.label}
+                label={item.label}
+                to={item.to}
+                title={item.title}
+                icon={item.icon}
+              />
             ))}
           </MenubarContent>
         </MenubarMenu>

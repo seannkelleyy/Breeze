@@ -118,8 +118,8 @@ const Dashboard = () => {
         <RecurringTemplatesDialog />
       </div>
       {confirmRegenerate ? (
-        <div className="flex w-full flex-col items-center gap-3 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm sm:flex-row">
-          <span className="flex-1 text-warning">
+        <div className="border-warning/30 bg-warning/10 flex w-full flex-col items-center gap-3 rounded-lg border px-4 py-3 text-sm sm:flex-row">
+          <span className="text-warning flex-1">
             This will delete and re-generate all template-sourced rows for{' '}
             <strong>{dayjs(new Date(currentYear, currentMonth)).format('MMMM YYYY')}</strong>.
             Continue?

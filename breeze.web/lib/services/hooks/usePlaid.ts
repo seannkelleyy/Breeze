@@ -85,7 +85,10 @@ export const useDeletePlaidConnection = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      return request<boolean>(DELETE_PLAID_CONNECTION, { id } as unknown as Record<string, unknown>);
+      return request<boolean>(DELETE_PLAID_CONNECTION, { id } as unknown as Record<
+        string,
+        unknown
+      >);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plaidConnections'] });
@@ -100,10 +103,9 @@ export const usePlaidConnections = (userId: string | null, enabled: boolean = tr
     queryKey: ['plaidConnections', userId],
     queryFn: async () => {
       if (!userId) return null;
-      const resp = await request<{ plaidConnections: PlaidConnection[] }>(
-        PLAID_CONNECTIONS,
-        { userId } as unknown as Record<string, unknown>,
-      );
+      const resp = await request<{ plaidConnections: PlaidConnection[] }>(PLAID_CONNECTIONS, {
+        userId,
+      } as unknown as Record<string, unknown>);
       return resp.plaidConnections;
     },
     enabled: enabled && !!userId,
@@ -117,10 +119,9 @@ export const usePlaidAccounts = (connectionId: string | null, enabled: boolean =
     queryKey: ['plaidAccounts', connectionId],
     queryFn: async () => {
       if (!connectionId) return null;
-      const resp = await request<{ plaidAccounts: PlaidAccount[] }>(
-        PLAID_ACCOUNTS,
-        { connectionId } as unknown as Record<string, unknown>,
-      );
+      const resp = await request<{ plaidAccounts: PlaidAccount[] }>(PLAID_ACCOUNTS, {
+        connectionId,
+      } as unknown as Record<string, unknown>);
       return resp.plaidAccounts;
     },
     enabled: enabled && !!connectionId,
