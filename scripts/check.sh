@@ -11,8 +11,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-API_DIR="$ROOT_DIR/Breeze.Api"
-WEB_DIR="$ROOT_DIR/Breeze.Web"
+API_DIR="$ROOT_DIR/breeze.api"
+WEB_DIR="$ROOT_DIR/breeze.web"
 
 # ─── Colours ─────────────────────────────────────────────────────
 info() { printf "\033[36m━━━ %s ━━━\033[0m\n" "$*"; }

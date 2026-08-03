@@ -1,0 +1,31 @@
+when:
+  - event: [push, pull_request]
+
+pipeline:
+  api:
+    image: golang:1.23
+    commands:
+      - cd breeze.api
+      - go mod download
+      - make gen
+      - test -z "$(gofmt -l .)"
+      - go test ./... -count=1
+      - go build -o bin/api ./cmd/api/...
+      - go build -o bin/river ./cmd/river/...
+    when:
+      path:
+        - "breeze.api/**"
+
+  web:
+    image: node:22
+    commands:
+      - cd breeze.web
+      - npm ci
+      - npm run gen
+      - npm run typecheck
+      - npm run lint
+      - npm run build
+    when:
+      path:
+        - "breeze.web/**"
+        - "breeze.api/graph/schema.graphqls"

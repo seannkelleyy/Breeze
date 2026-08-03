@@ -7,7 +7,7 @@ If you are a person or an AI agent, start here first.
 ## Source of Truth
 
 - Product and engineering docs live in `docs/`
-- Agent execution rules live in `AGENTS.md` and `.github/copilot-instructions.md`
+- Agent execution rules live in `AGENTS.md` and `docs/agent-instructions.md`
 - Root quick start lives in `README.md`
 
 ## Documentation Map

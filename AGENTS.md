@@ -20,9 +20,8 @@ breeze/
 │   ├── lib/             # Shared utilities, providers, services
 │   └── package.json     # npm scripts
 ├── compose.yaml         # Local PostgreSQL (shared across monorepo)
-└── .github/
-    ├── copilot-instructions.md    # Agent-facing quick ref
-    └── workflows/                 # CI pipelines
+└── docs/
+    └── agent-instructions.md  # Agent-facing quick ref
 ```
 
 ---
