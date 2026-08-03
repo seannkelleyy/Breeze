@@ -1,0 +1,37 @@
+services:
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server:v3
+    container_name: breeze-woodpecker-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - breeze-woodpecker-data:/var/lib/woodpecker
+    environment:
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=http://localhost:8000
+      - WOODPECKER_AGENT_SECRET=changeme-use-openssl-rand-hex-32
+      # GitHub (uncomment and fill in to use)
+      # - WOODPECKER_GITHUB=true
+      # - WOODPECKER_GITHUB_CLIENT=your-github-client-id
+      # - WOODPECKER_GITHUB_SECRET=your-github-client-secret
+      # Forgejo (uncomment and fill in to use)
+      # - WOODPECKER_FORGEJO=true
+      # - WOODPECKER_FORGEJO_URL=http://your-forgejo-instance
+      # - WOODPECKER_FORGEJO_CLIENT=your-forgejo-client-id
+      # - WOODPECKER_FORGEJO_SECRET=your-forgejo-client-secret
+
+  woodpecker-agent:
+    image: woodpeckerci/woodpecker-agent:v3
+    container_name: breeze-woodpecker-agent
+    restart: unless-stopped
+    depends_on:
+      - woodpecker-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_AGENT_SECRET=changeme-use-openssl-rand-hex-32
+
+volumes:
+  breeze-woodpecker-data:
