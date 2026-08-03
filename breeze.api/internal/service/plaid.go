@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -47,6 +48,12 @@ type plaidQuerier interface {
 	ListPlaidConnectionsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.PlaidConnection, error)
 	GetPlaidAccountsByConnectionID(ctx context.Context, connectionID uuid.UUID) ([]sqlc.PlaidAccount, error)
 	SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error)
+	LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) error
+	UnlinkAssetFromPlaidAccount(ctx context.Context, id uuid.UUID) error
+	LinkLiabilityToPlaidAccount(ctx context.Context, arg sqlc.LinkLiabilityToPlaidAccountParams) error
+	UnlinkLiabilityFromPlaidAccount(ctx context.Context, id uuid.UUID) error
+	GetAssetsByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetAssetsByPlaidAccountIDRow, error)
+	GetLiabilitiesByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetLiabilitiesByPlaidAccountIDRow, error)
 }
 
 type plaidTxQuerier interface {
@@ -90,6 +97,32 @@ func (s *PlaidService) CreateLinkToken(ctx context.Context, userID string) (stri
 		return "", fmt.Errorf("create link token: %w", err)
 	}
 	return token, nil
+}
+
+// LinkAssetToPlaidAccount links an asset to a Plaid account.
+func (s *PlaidService) LinkAssetToPlaidAccount(ctx context.Context, assetID, plaidAccountID uuid.UUID) error {
+	return s.queries.LinkAssetToPlaidAccount(ctx, sqlc.LinkAssetToPlaidAccountParams{
+		ID:             assetID,
+		PlaidAccountID: pgtypeUUIDFromPtr(&plaidAccountID),
+	})
+}
+
+// UnlinkAssetFromPlaidAccount removes the Plaid account link from an asset.
+func (s *PlaidService) UnlinkAssetFromPlaidAccount(ctx context.Context, assetID uuid.UUID) error {
+	return s.queries.UnlinkAssetFromPlaidAccount(ctx, assetID)
+}
+
+// LinkLiabilityToPlaidAccount links a liability to a Plaid account.
+func (s *PlaidService) LinkLiabilityToPlaidAccount(ctx context.Context, liabilityID, plaidAccountID uuid.UUID) error {
+	return s.queries.LinkLiabilityToPlaidAccount(ctx, sqlc.LinkLiabilityToPlaidAccountParams{
+		ID:             liabilityID,
+		PlaidAccountID: pgtypeUUIDFromPtr(&plaidAccountID),
+	})
+}
+
+// UnlinkLiabilityFromPlaidAccount removes the Plaid account link from a liability.
+func (s *PlaidService) UnlinkLiabilityFromPlaidAccount(ctx context.Context, liabilityID uuid.UUID) error {
+	return s.queries.UnlinkLiabilityFromPlaidAccount(ctx, liabilityID)
 }
 
 // ExchangePublicToken exchanges the public token via the Plaid client and stores the resulting connection.

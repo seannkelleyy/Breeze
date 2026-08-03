@@ -29,6 +29,7 @@ type Asset struct {
 	HomeGrowthProfile               *string
 	VehicleDepreciationProfile      *string
 	LinkedLiabilityID               *uuid.UUID
+	PlaidAccountID                  *uuid.UUID
 	LastValueUpdatedAt              time.Time
 	CreatedAt                       time.Time
 	UpdatedAt                       time.Time
@@ -206,6 +207,7 @@ func mapCreateAssetRow(row sqlc.CreateAssetRow) Asset {
 		HomeGrowthProfile:               row.HomeGrowthProfile,
 		VehicleDepreciationProfile:      row.VehicleDepreciationProfile,
 		LinkedLiabilityID:               pgtypeUUIDToPtr(row.LinkedLiabilityID),
+		PlaidAccountID:                  pgtypeUUIDToPtr(row.PlaidAccountID),
 		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
 		CreatedAt:                       timestamptzToTime(row.CreatedAt),
 		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
@@ -231,6 +233,7 @@ func mapGetAssetByIDRow(row sqlc.GetAssetByIDRow) Asset {
 		HomeGrowthProfile:               row.HomeGrowthProfile,
 		VehicleDepreciationProfile:      row.VehicleDepreciationProfile,
 		LinkedLiabilityID:               pgtypeUUIDToPtr(row.LinkedLiabilityID),
+		PlaidAccountID:                  pgtypeUUIDToPtr(row.PlaidAccountID),
 		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
 		CreatedAt:                       timestamptzToTime(row.CreatedAt),
 		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
@@ -256,6 +259,7 @@ func mapListAssetsByUserIDRow(row sqlc.ListAssetsByUserIDRow) Asset {
 		HomeGrowthProfile:               row.HomeGrowthProfile,
 		VehicleDepreciationProfile:      row.VehicleDepreciationProfile,
 		LinkedLiabilityID:               pgtypeUUIDToPtr(row.LinkedLiabilityID),
+		PlaidAccountID:                  pgtypeUUIDToPtr(row.PlaidAccountID),
 		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
 		CreatedAt:                       timestamptzToTime(row.CreatedAt),
 		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),
@@ -281,6 +285,7 @@ func mapUpdateAssetRow(row sqlc.UpdateAssetRow) Asset {
 		HomeGrowthProfile:               row.HomeGrowthProfile,
 		VehicleDepreciationProfile:      row.VehicleDepreciationProfile,
 		LinkedLiabilityID:               pgtypeUUIDToPtr(row.LinkedLiabilityID),
+		PlaidAccountID:                  pgtypeUUIDToPtr(row.PlaidAccountID),
 		LastValueUpdatedAt:              timestamptzToTime(row.LastValueUpdatedAt),
 		CreatedAt:                       timestamptzToTime(row.CreatedAt),
 		UpdatedAt:                       timestamptzToTime(row.UpdatedAt),

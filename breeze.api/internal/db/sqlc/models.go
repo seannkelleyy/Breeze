@@ -566,6 +566,7 @@ type Asset struct {
 	HomeGrowthProfile               *string            `json:"home_growth_profile"`
 	VehicleDepreciationProfile      *string            `json:"vehicle_depreciation_profile"`
 	LinkedLiabilityID               pgtype.UUID        `json:"linked_liability_id"`
+	PlaidAccountID                  pgtype.UUID        `json:"plaid_account_id"`
 }
 
 type Budget struct {
@@ -689,6 +690,7 @@ type Liability struct {
 	ContributionValue    decimal.Decimal    `json:"contribution_value"`
 	PersonIds            []uuid.UUID        `json:"person_ids"`
 	OriginalLoanAmount   pgtype.Numeric     `json:"original_loan_amount"`
+	PlaidAccountID       pgtype.UUID        `json:"plaid_account_id"`
 }
 
 type NetWorthSnapshot struct {

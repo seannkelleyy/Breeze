@@ -320,6 +320,11 @@ table "assets" {
     null = true
   }
 
+  column "plaid_account_id" {
+    type = uuid
+    null = true
+  }
+
   column "last_value_updated_at" {
     type    = timestamptz
     null    = false
@@ -356,6 +361,12 @@ table "assets" {
   foreign_key "fk_assets_linked_liability" {
     columns     = [column.linked_liability_id]
     ref_columns = [table.liabilities.column.id]
+    on_delete   = SET_NULL
+  }
+
+  foreign_key "fk_assets_plaid_account" {
+    columns     = [column.plaid_account_id]
+    ref_columns = [table.plaid_accounts.column.id]
     on_delete   = SET_NULL
   }
 
@@ -441,6 +452,11 @@ table "liabilities" {
     null = false
   }
 
+  column "plaid_account_id" {
+    type = uuid
+    null = true
+  }
+
   column "last_balance_updated_at" {
     type    = timestamptz
     null    = false
@@ -472,6 +488,12 @@ table "liabilities" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
     on_delete   = CASCADE
+  }
+
+  foreign_key "fk_liabilities_plaid_account" {
+    columns     = [column.plaid_account_id]
+    ref_columns = [table.plaid_accounts.column.id]
+    on_delete   = SET_NULL
   }
 
   index "idx_liabilities_user_id" {

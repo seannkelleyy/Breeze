@@ -852,6 +852,62 @@ func (r *mutationResolver) DeletePlaidConnection(ctx context.Context, id string)
 	return true, nil
 }
 
+// LinkAssetToPlaidAccount is the resolver for the linkAssetToPlaidAccount field.
+func (r *mutationResolver) LinkAssetToPlaidAccount(ctx context.Context, assetID string, plaidAccountID string) (bool, error) {
+	parsedAssetID, err := uuid.Parse(assetID)
+	if err != nil {
+		return false, fmt.Errorf("invalid asset id: %w", err)
+	}
+	parsedPlaidAccountID, err := uuid.Parse(plaidAccountID)
+	if err != nil {
+		return false, fmt.Errorf("invalid plaid account id: %w", err)
+	}
+	if err := r.PlaidService.LinkAssetToPlaidAccount(ctx, parsedAssetID, parsedPlaidAccountID); err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+	return true, nil
+}
+
+// UnlinkAssetFromPlaidAccount is the resolver for the unlinkAssetFromPlaidAccount field.
+func (r *mutationResolver) UnlinkAssetFromPlaidAccount(ctx context.Context, assetID string) (bool, error) {
+	parsedAssetID, err := uuid.Parse(assetID)
+	if err != nil {
+		return false, fmt.Errorf("invalid asset id: %w", err)
+	}
+	if err := r.PlaidService.UnlinkAssetFromPlaidAccount(ctx, parsedAssetID); err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+	return true, nil
+}
+
+// LinkLiabilityToPlaidAccount is the resolver for the linkLiabilityToPlaidAccount field.
+func (r *mutationResolver) LinkLiabilityToPlaidAccount(ctx context.Context, liabilityID string, plaidAccountID string) (bool, error) {
+	parsedLiabilityID, err := uuid.Parse(liabilityID)
+	if err != nil {
+		return false, fmt.Errorf("invalid liability id: %w", err)
+	}
+	parsedPlaidAccountID, err := uuid.Parse(plaidAccountID)
+	if err != nil {
+		return false, fmt.Errorf("invalid plaid account id: %w", err)
+	}
+	if err := r.PlaidService.LinkLiabilityToPlaidAccount(ctx, parsedLiabilityID, parsedPlaidAccountID); err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+	return true, nil
+}
+
+// UnlinkLiabilityFromPlaidAccount is the resolver for the unlinkLiabilityFromPlaidAccount field.
+func (r *mutationResolver) UnlinkLiabilityFromPlaidAccount(ctx context.Context, liabilityID string) (bool, error) {
+	parsedLiabilityID, err := uuid.Parse(liabilityID)
+	if err != nil {
+		return false, fmt.Errorf("invalid liability id: %w", err)
+	}
+	if err := r.PlaidService.UnlinkLiabilityFromPlaidAccount(ctx, parsedLiabilityID); err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+	return true, nil
+}
+
 // Health is the resolver for the health field.
 func (r *queryResolver) Health(ctx context.Context) (*model.Health, error) {
 	health, err := r.HealthService.Get(ctx)

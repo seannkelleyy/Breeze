@@ -118,6 +118,7 @@ const usePlannerAccounts = () => {
             homeGrowthProfile: null,
             vehicleDepreciationProfile: null,
             linkedLiabilityId: null,
+            plaidAccountId: null,
           });
       const nextDetails = updater(prev[accountId] ?? fallback);
       updateAccount(accountId, (c) => ({
@@ -176,6 +177,7 @@ const usePlannerAccounts = () => {
         homeGrowthProfile: null,
         vehicleDepreciationProfile: null,
         linkedLiabilityId: null,
+        plaidAccountId: null,
       },
     ]);
   };

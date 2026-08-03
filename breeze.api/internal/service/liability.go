@@ -26,6 +26,7 @@ type Liability struct {
 	ContributionMode     string
 	ContributionValue    decimal.Decimal
 	PersonIDs            []uuid.UUID
+	PlaidAccountID       *uuid.UUID
 	LastBalanceUpdatedAt time.Time
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
@@ -180,6 +181,7 @@ func mapCreateLiabilityRow(row sqlc.CreateLiabilityRow) Liability {
 		ContributionMode:     row.ContributionMode,
 		ContributionValue:    row.ContributionValue,
 		PersonIDs:            row.PersonIds,
+		PlaidAccountID:       pgtypeUUIDToPtr(row.PlaidAccountID),
 		LastBalanceUpdatedAt: timestamptzToTime(row.LastBalanceUpdatedAt),
 		CreatedAt:            timestamptzToTime(row.CreatedAt),
 		UpdatedAt:            timestamptzToTime(row.UpdatedAt),
@@ -202,6 +204,7 @@ func mapGetLiabilityByIDRow(row sqlc.GetLiabilityByIDRow) Liability {
 		ContributionMode:     row.ContributionMode,
 		ContributionValue:    row.ContributionValue,
 		PersonIDs:            row.PersonIds,
+		PlaidAccountID:       pgtypeUUIDToPtr(row.PlaidAccountID),
 		LastBalanceUpdatedAt: timestamptzToTime(row.LastBalanceUpdatedAt),
 		CreatedAt:            timestamptzToTime(row.CreatedAt),
 		UpdatedAt:            timestamptzToTime(row.UpdatedAt),
@@ -224,6 +227,7 @@ func mapListLiabilitiesByUserIDRow(row sqlc.ListLiabilitiesByUserIDRow) Liabilit
 		ContributionMode:     row.ContributionMode,
 		ContributionValue:    row.ContributionValue,
 		PersonIDs:            row.PersonIds,
+		PlaidAccountID:       pgtypeUUIDToPtr(row.PlaidAccountID),
 		LastBalanceUpdatedAt: timestamptzToTime(row.LastBalanceUpdatedAt),
 		CreatedAt:            timestamptzToTime(row.CreatedAt),
 		UpdatedAt:            timestamptzToTime(row.UpdatedAt),
@@ -246,6 +250,7 @@ func mapUpdateLiabilityRow(row sqlc.UpdateLiabilityRow) Liability {
 		ContributionMode:     row.ContributionMode,
 		ContributionValue:    row.ContributionValue,
 		PersonIDs:            row.PersonIds,
+		PlaidAccountID:       pgtypeUUIDToPtr(row.PlaidAccountID),
 		LastBalanceUpdatedAt: timestamptzToTime(row.LastBalanceUpdatedAt),
 		CreatedAt:            timestamptzToTime(row.CreatedAt),
 		UpdatedAt:            timestamptzToTime(row.UpdatedAt),

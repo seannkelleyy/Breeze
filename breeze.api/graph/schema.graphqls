@@ -91,6 +91,10 @@ type Mutation {
   exchangePlaidPublicToken(userId: ID!, publicToken: String!): PlaidConnection!
   syncPlaidConnection(id: ID!): Boolean!
   deletePlaidConnection(id: ID!): Boolean!
+  linkAssetToPlaidAccount(assetId: ID!, plaidAccountId: ID!): Boolean!
+  unlinkAssetFromPlaidAccount(assetId: ID!): Boolean!
+  linkLiabilityToPlaidAccount(liabilityId: ID!, plaidAccountId: ID!): Boolean!
+  unlinkLiabilityFromPlaidAccount(liabilityId: ID!): Boolean!
 }
 
 type Health {
@@ -250,6 +254,7 @@ type Asset {
   homeGrowthProfile: String
   vehicleDepreciationProfile: String
   linkedLiabilityId: ID
+  plaidAccountId: ID
   lastValueUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
@@ -269,6 +274,7 @@ type Liability {
   contributionMode: String!
   contributionValue: String!
   personIds: [ID!]!
+  plaidAccountId: ID
   lastBalanceUpdatedAt: String!
   createdAt: String!
   updatedAt: String!

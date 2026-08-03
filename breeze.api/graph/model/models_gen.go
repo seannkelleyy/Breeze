@@ -33,6 +33,7 @@ type Asset struct {
 	HomeGrowthProfile               *string   `json:"homeGrowthProfile,omitempty"`
 	VehicleDepreciationProfile      *string   `json:"vehicleDepreciationProfile,omitempty"`
 	LinkedLiabilityID               *string   `json:"linkedLiabilityId,omitempty"`
+	PlaidAccountID                  *string   `json:"plaidAccountId,omitempty"`
 	LastValueUpdatedAt              string    `json:"lastValueUpdatedAt"`
 	CreatedAt                       string    `json:"createdAt"`
 	UpdatedAt                       string    `json:"updatedAt"`
@@ -322,6 +323,7 @@ type Liability struct {
 	ContributionMode     string        `json:"contributionMode"`
 	ContributionValue    string        `json:"contributionValue"`
 	PersonIds            []string      `json:"personIds"`
+	PlaidAccountID       *string       `json:"plaidAccountId,omitempty"`
 	LastBalanceUpdatedAt string        `json:"lastBalanceUpdatedAt"`
 	CreatedAt            string        `json:"createdAt"`
 	UpdatedAt            string        `json:"updatedAt"`

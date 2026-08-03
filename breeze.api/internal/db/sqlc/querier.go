@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
@@ -31,6 +32,7 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteNetWorthSnapshot(ctx context.Context, id uuid.UUID) error
 	GetAssetByID(ctx context.Context, id uuid.UUID) (GetAssetByIDRow, error)
+	GetAssetsByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]GetAssetsByPlaidAccountIDRow, error)
 	GetBudgetByDate(ctx context.Context, arg GetBudgetByDateParams) (Budget, error)
 	GetBudgetByID(ctx context.Context, id uuid.UUID) (Budget, error)
 	GetContributionLimitByAccountTypeAndTaxYear(ctx context.Context, arg GetContributionLimitByAccountTypeAndTaxYearParams) (ContributionLimit, error)
@@ -39,6 +41,7 @@ type Querier interface {
 	GetExpenseCategoryByID(ctx context.Context, id uuid.UUID) (GetExpenseCategoryByIDRow, error)
 	GetGoalByID(ctx context.Context, id uuid.UUID) (Goal, error)
 	GetIncomeByID(ctx context.Context, id uuid.UUID) (GetIncomeByIDRow, error)
+	GetLiabilitiesByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]GetLiabilitiesByPlaidAccountIDRow, error)
 	GetLiabilityByID(ctx context.Context, id uuid.UUID) (GetLiabilityByIDRow, error)
 	GetNetWorthSnapshot(ctx context.Context, id uuid.UUID) (NetWorthSnapshot, error)
 	GetNetWorthSnapshotByDate(ctx context.Context, arg GetNetWorthSnapshotByDateParams) (NetWorthSnapshot, error)
@@ -53,6 +56,8 @@ type Querier interface {
 	GetTaxBracketByID(ctx context.Context, id uuid.UUID) (TaxBracket, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error)
 	GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (GetUserByIdentityProviderIDRow, error)
+	LinkAssetToPlaidAccount(ctx context.Context, arg LinkAssetToPlaidAccountParams) error
+	LinkLiabilityToPlaidAccount(ctx context.Context, arg LinkLiabilityToPlaidAccountParams) error
 	ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]ListAssetsByUserIDRow, error)
 	ListBudgetsByUserID(ctx context.Context, userID uuid.UUID) ([]Budget, error)
 	ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]ListExpenseCategoriesByBudgetIDRow, error)
@@ -62,6 +67,7 @@ type Querier interface {
 	ListIncomeByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]ListIncomeByBudgetIDRow, error)
 	ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID) ([]ListLiabilitiesByUserIDRow, error)
 	ListNetWorthSnapshots(ctx context.Context, userID uuid.UUID) ([]NetWorthSnapshot, error)
+	ListPlaidAccountsByConnectionID(ctx context.Context, plaidConnectionID uuid.UUID) ([]ListPlaidAccountsByConnectionIDRow, error)
 	ListPlaidConnectionsByUserID(ctx context.Context, userID uuid.UUID) ([]PlaidConnection, error)
 	ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]PlannerPerson, error)
 	ListRecurringExpensesByUserID(ctx context.Context, userID uuid.UUID) ([]ListRecurringExpensesByUserIDRow, error)
@@ -91,6 +97,8 @@ type Querier interface {
 	SoftDeleteScenarioProfile(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteTaxBracket(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteUser(ctx context.Context, id uuid.UUID) (int64, error)
+	UnlinkAssetFromPlaidAccount(ctx context.Context, id uuid.UUID) error
+	UnlinkLiabilityFromPlaidAccount(ctx context.Context, id uuid.UUID) error
 	UpdateAsset(ctx context.Context, arg UpdateAssetParams) (UpdateAssetRow, error)
 	UpdateBudget(ctx context.Context, arg UpdateBudgetParams) (Budget, error)
 	UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (UpdateExpenseRow, error)

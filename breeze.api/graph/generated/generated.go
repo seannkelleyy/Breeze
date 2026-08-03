@@ -50,6 +50,7 @@ type ComplexityRoot struct {
 		LinkedLiabilityID               func(childComplexity int) int
 		Name                            func(childComplexity int) int
 		PersonIds                       func(childComplexity int) int
+		PlaidAccountID                  func(childComplexity int) int
 		PurchaseDate                    func(childComplexity int) int
 		PurchasePrice                   func(childComplexity int) int
 		ReturnProfile                   func(childComplexity int) int
@@ -184,60 +185,65 @@ type ComplexityRoot struct {
 		OriginalLoanAmount   func(childComplexity int) int
 		PayoffPriority       func(childComplexity int) int
 		PersonIds            func(childComplexity int) int
+		PlaidAccountID       func(childComplexity int) int
 		TargetExtraPayment   func(childComplexity int) int
 		UpdatedAt            func(childComplexity int) int
 		UserID               func(childComplexity int) int
 	}
 
 	Mutation struct {
-		AddContribution          func(childComplexity int, input model.AddContributionInput) int
-		CreateAsset              func(childComplexity int, input model.CreateAssetInput) int
-		CreateBudget             func(childComplexity int, input model.CreateBudgetInput) int
-		CreateExpense            func(childComplexity int, input model.CreateExpenseInput) int
-		CreateExpenseCategory    func(childComplexity int, input model.CreateExpenseCategoryInput) int
-		CreateGoal               func(childComplexity int, input model.CreateGoalInput) int
-		CreateIncome             func(childComplexity int, input model.CreateIncomeInput) int
-		CreateLiability          func(childComplexity int, input model.CreateLiabilityInput) int
-		CreateNetWorthSnapshot   func(childComplexity int, input model.CreateNetWorthSnapshotInput) int
-		CreateRecurringExpense   func(childComplexity int, input model.CreateRecurringExpenseInput) int
-		CreateRecurringIncome    func(childComplexity int, input model.CreateRecurringIncomeInput) int
-		CreateRetirementAccount  func(childComplexity int, input model.CreateRetirementAccountInput) int
-		CreateScenario           func(childComplexity int, input model.CreateScenarioInput) int
-		CreateTaxBracket         func(childComplexity int, input model.CreateTaxBracketInput) int
-		CreateUser               func(childComplexity int, input model.CreateUserInput) int
-		DeleteAsset              func(childComplexity int, id string) int
-		DeleteBudget             func(childComplexity int, id string) int
-		DeleteExpense            func(childComplexity int, id string) int
-		DeleteExpenseCategory    func(childComplexity int, id string) int
-		DeleteGoal               func(childComplexity int, id string) int
-		DeleteIncome             func(childComplexity int, id string) int
-		DeleteLiability          func(childComplexity int, id string) int
-		DeleteNetWorthSnapshot   func(childComplexity int, id string) int
-		DeletePlaidConnection    func(childComplexity int, id string) int
-		DeletePlannerPerson      func(childComplexity int, id string) int
-		DeleteRecurringExpense   func(childComplexity int, id string) int
-		DeleteRecurringIncome    func(childComplexity int, id string) int
-		DeleteRetirementAccount  func(childComplexity int, id string) int
-		DeleteScenario           func(childComplexity int, id string) int
-		DeleteTaxBracket         func(childComplexity int, id string) int
-		DeleteUser               func(childComplexity int, id string) int
-		ExchangePlaidPublicToken func(childComplexity int, userID string, publicToken string) int
-		SyncPlaidConnection      func(childComplexity int, id string) int
-		UpdateAsset              func(childComplexity int, input model.UpdateAssetInput) int
-		UpdateBudget             func(childComplexity int, input model.UpdateBudgetInput) int
-		UpdateExpense            func(childComplexity int, input model.UpdateExpenseInput) int
-		UpdateExpenseCategory    func(childComplexity int, input model.UpdateExpenseCategoryInput) int
-		UpdateGoal               func(childComplexity int, input model.UpdateGoalInput) int
-		UpdateIncome             func(childComplexity int, input model.UpdateIncomeInput) int
-		UpdateLiability          func(childComplexity int, input model.UpdateLiabilityInput) int
-		UpdateNetWorthSnapshot   func(childComplexity int, input model.UpdateNetWorthSnapshotInput) int
-		UpdateRecurringExpense   func(childComplexity int, input model.UpdateRecurringExpenseInput) int
-		UpdateRecurringIncome    func(childComplexity int, input model.UpdateRecurringIncomeInput) int
-		UpdateRetirementAccount  func(childComplexity int, input model.UpdateRetirementAccountInput) int
-		UpdateScenario           func(childComplexity int, input model.UpdateScenarioInput) int
-		UpdateTaxBracket         func(childComplexity int, input model.UpdateTaxBracketInput) int
-		UpdateUser               func(childComplexity int, input model.UpdateUserInput) int
-		UpsertPlannerPerson      func(childComplexity int, input model.UpsertPlannerPersonInput) int
+		AddContribution                 func(childComplexity int, input model.AddContributionInput) int
+		CreateAsset                     func(childComplexity int, input model.CreateAssetInput) int
+		CreateBudget                    func(childComplexity int, input model.CreateBudgetInput) int
+		CreateExpense                   func(childComplexity int, input model.CreateExpenseInput) int
+		CreateExpenseCategory           func(childComplexity int, input model.CreateExpenseCategoryInput) int
+		CreateGoal                      func(childComplexity int, input model.CreateGoalInput) int
+		CreateIncome                    func(childComplexity int, input model.CreateIncomeInput) int
+		CreateLiability                 func(childComplexity int, input model.CreateLiabilityInput) int
+		CreateNetWorthSnapshot          func(childComplexity int, input model.CreateNetWorthSnapshotInput) int
+		CreateRecurringExpense          func(childComplexity int, input model.CreateRecurringExpenseInput) int
+		CreateRecurringIncome           func(childComplexity int, input model.CreateRecurringIncomeInput) int
+		CreateRetirementAccount         func(childComplexity int, input model.CreateRetirementAccountInput) int
+		CreateScenario                  func(childComplexity int, input model.CreateScenarioInput) int
+		CreateTaxBracket                func(childComplexity int, input model.CreateTaxBracketInput) int
+		CreateUser                      func(childComplexity int, input model.CreateUserInput) int
+		DeleteAsset                     func(childComplexity int, id string) int
+		DeleteBudget                    func(childComplexity int, id string) int
+		DeleteExpense                   func(childComplexity int, id string) int
+		DeleteExpenseCategory           func(childComplexity int, id string) int
+		DeleteGoal                      func(childComplexity int, id string) int
+		DeleteIncome                    func(childComplexity int, id string) int
+		DeleteLiability                 func(childComplexity int, id string) int
+		DeleteNetWorthSnapshot          func(childComplexity int, id string) int
+		DeletePlaidConnection           func(childComplexity int, id string) int
+		DeletePlannerPerson             func(childComplexity int, id string) int
+		DeleteRecurringExpense          func(childComplexity int, id string) int
+		DeleteRecurringIncome           func(childComplexity int, id string) int
+		DeleteRetirementAccount         func(childComplexity int, id string) int
+		DeleteScenario                  func(childComplexity int, id string) int
+		DeleteTaxBracket                func(childComplexity int, id string) int
+		DeleteUser                      func(childComplexity int, id string) int
+		ExchangePlaidPublicToken        func(childComplexity int, userID string, publicToken string) int
+		LinkAssetToPlaidAccount         func(childComplexity int, assetID string, plaidAccountID string) int
+		LinkLiabilityToPlaidAccount     func(childComplexity int, liabilityID string, plaidAccountID string) int
+		SyncPlaidConnection             func(childComplexity int, id string) int
+		UnlinkAssetFromPlaidAccount     func(childComplexity int, assetID string) int
+		UnlinkLiabilityFromPlaidAccount func(childComplexity int, liabilityID string) int
+		UpdateAsset                     func(childComplexity int, input model.UpdateAssetInput) int
+		UpdateBudget                    func(childComplexity int, input model.UpdateBudgetInput) int
+		UpdateExpense                   func(childComplexity int, input model.UpdateExpenseInput) int
+		UpdateExpenseCategory           func(childComplexity int, input model.UpdateExpenseCategoryInput) int
+		UpdateGoal                      func(childComplexity int, input model.UpdateGoalInput) int
+		UpdateIncome                    func(childComplexity int, input model.UpdateIncomeInput) int
+		UpdateLiability                 func(childComplexity int, input model.UpdateLiabilityInput) int
+		UpdateNetWorthSnapshot          func(childComplexity int, input model.UpdateNetWorthSnapshotInput) int
+		UpdateRecurringExpense          func(childComplexity int, input model.UpdateRecurringExpenseInput) int
+		UpdateRecurringIncome           func(childComplexity int, input model.UpdateRecurringIncomeInput) int
+		UpdateRetirementAccount         func(childComplexity int, input model.UpdateRetirementAccountInput) int
+		UpdateScenario                  func(childComplexity int, input model.UpdateScenarioInput) int
+		UpdateTaxBracket                func(childComplexity int, input model.UpdateTaxBracketInput) int
+		UpdateUser                      func(childComplexity int, input model.UpdateUserInput) int
+		UpsertPlannerPerson             func(childComplexity int, input model.UpsertPlannerPersonInput) int
 	}
 
 	NetWorthSnapshot struct {
@@ -504,6 +510,10 @@ type MutationResolver interface {
 	ExchangePlaidPublicToken(ctx context.Context, userID string, publicToken string) (*model.PlaidConnection, error)
 	SyncPlaidConnection(ctx context.Context, id string) (bool, error)
 	DeletePlaidConnection(ctx context.Context, id string) (bool, error)
+	LinkAssetToPlaidAccount(ctx context.Context, assetID string, plaidAccountID string) (bool, error)
+	UnlinkAssetFromPlaidAccount(ctx context.Context, assetID string) (bool, error)
+	LinkLiabilityToPlaidAccount(ctx context.Context, liabilityID string, plaidAccountID string) (bool, error)
+	UnlinkLiabilityFromPlaidAccount(ctx context.Context, liabilityID string) (bool, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (*model.Health, error)
@@ -647,6 +657,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Asset.PersonIds(childComplexity), true
+	case "Asset.plaidAccountId":
+		if e.ComplexityRoot.Asset.PlaidAccountID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Asset.PlaidAccountID(childComplexity), true
 	case "Asset.purchaseDate":
 		if e.ComplexityRoot.Asset.PurchaseDate == nil {
 			break
@@ -1264,6 +1280,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Liability.PersonIds(childComplexity), true
+	case "Liability.plaidAccountId":
+		if e.ComplexityRoot.Liability.PlaidAccountID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Liability.PlaidAccountID(childComplexity), true
 	case "Liability.targetExtraPayment":
 		if e.ComplexityRoot.Liability.TargetExtraPayment == nil {
 			break
@@ -1635,6 +1657,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.ExchangePlaidPublicToken(childComplexity, args["userId"].(string), args["publicToken"].(string)), true
+	case "Mutation.linkAssetToPlaidAccount":
+		if e.ComplexityRoot.Mutation.LinkAssetToPlaidAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_linkAssetToPlaidAccount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.LinkAssetToPlaidAccount(childComplexity, args["assetId"].(string), args["plaidAccountId"].(string)), true
+	case "Mutation.linkLiabilityToPlaidAccount":
+		if e.ComplexityRoot.Mutation.LinkLiabilityToPlaidAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_linkLiabilityToPlaidAccount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.LinkLiabilityToPlaidAccount(childComplexity, args["liabilityId"].(string), args["plaidAccountId"].(string)), true
 	case "Mutation.syncPlaidConnection":
 		if e.ComplexityRoot.Mutation.SyncPlaidConnection == nil {
 			break
@@ -1646,6 +1690,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.SyncPlaidConnection(childComplexity, args["id"].(string)), true
+	case "Mutation.unlinkAssetFromPlaidAccount":
+		if e.ComplexityRoot.Mutation.UnlinkAssetFromPlaidAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_unlinkAssetFromPlaidAccount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UnlinkAssetFromPlaidAccount(childComplexity, args["assetId"].(string)), true
+	case "Mutation.unlinkLiabilityFromPlaidAccount":
+		if e.ComplexityRoot.Mutation.UnlinkLiabilityFromPlaidAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_unlinkLiabilityFromPlaidAccount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UnlinkLiabilityFromPlaidAccount(childComplexity, args["liabilityId"].(string)), true
 	case "Mutation.updateAsset":
 		if e.ComplexityRoot.Mutation.UpdateAsset == nil {
 			break
@@ -3256,6 +3322,10 @@ type Mutation {
   exchangePlaidPublicToken(userId: ID!, publicToken: String!): PlaidConnection!
   syncPlaidConnection(id: ID!): Boolean!
   deletePlaidConnection(id: ID!): Boolean!
+  linkAssetToPlaidAccount(assetId: ID!, plaidAccountId: ID!): Boolean!
+  unlinkAssetFromPlaidAccount(assetId: ID!): Boolean!
+  linkLiabilityToPlaidAccount(liabilityId: ID!, plaidAccountId: ID!): Boolean!
+  unlinkLiabilityFromPlaidAccount(liabilityId: ID!): Boolean!
 }
 
 type Health {
@@ -3415,6 +3485,7 @@ type Asset {
   homeGrowthProfile: String
   vehicleDepreciationProfile: String
   linkedLiabilityId: ID
+  plaidAccountId: ID
   lastValueUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
@@ -3434,6 +3505,7 @@ type Liability {
   contributionMode: String!
   contributionValue: String!
   personIds: [ID!]!
+  plaidAccountId: ID
   lastBalanceUpdatedAt: String!
   createdAt: String!
   updatedAt: String!
@@ -4360,6 +4432,38 @@ func (ec *executionContext) field_Mutation_exchangePlaidPublicToken_args(ctx con
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_linkAssetToPlaidAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "assetId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["assetId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "plaidAccountId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["plaidAccountId"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_linkLiabilityToPlaidAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "liabilityId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["liabilityId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "plaidAccountId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["plaidAccountId"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_syncPlaidConnection_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -4368,6 +4472,28 @@ func (ec *executionContext) field_Mutation_syncPlaidConnection_args(ctx context.
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_unlinkAssetFromPlaidAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "assetId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["assetId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_unlinkLiabilityFromPlaidAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "liabilityId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["liabilityId"] = arg0
 	return args, nil
 }
 
@@ -5568,6 +5694,35 @@ func (ec *executionContext) _Asset_linkedLiabilityId(ctx context.Context, field 
 }
 
 func (ec *executionContext) fieldContext_Asset_linkedLiabilityId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Asset",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Asset_plaidAccountId(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Asset_plaidAccountId,
+		func(ctx context.Context) (any, error) {
+			return obj.PlaidAccountID, nil
+		},
+		nil,
+		ec.marshalOID2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Asset_plaidAccountId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Asset",
 		Field:      field,
@@ -8438,6 +8593,35 @@ func (ec *executionContext) fieldContext_Liability_personIds(_ context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Liability_plaidAccountId(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Liability_plaidAccountId,
+		func(ctx context.Context) (any, error) {
+			return obj.PlaidAccountID, nil
+		},
+		nil,
+		ec.marshalOID2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Liability_plaidAccountId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Liability",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Liability_lastBalanceUpdatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Liability) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -8767,6 +8951,8 @@ func (ec *executionContext) fieldContext_Mutation_createAsset(ctx context.Contex
 				return ec.fieldContext_Asset_vehicleDepreciationProfile(ctx, field)
 			case "linkedLiabilityId":
 				return ec.fieldContext_Asset_linkedLiabilityId(ctx, field)
+			case "plaidAccountId":
+				return ec.fieldContext_Asset_plaidAccountId(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -8850,6 +9036,8 @@ func (ec *executionContext) fieldContext_Mutation_updateAsset(ctx context.Contex
 				return ec.fieldContext_Asset_vehicleDepreciationProfile(ctx, field)
 			case "linkedLiabilityId":
 				return ec.fieldContext_Asset_linkedLiabilityId(ctx, field)
+			case "plaidAccountId":
+				return ec.fieldContext_Asset_plaidAccountId(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -8966,6 +9154,8 @@ func (ec *executionContext) fieldContext_Mutation_createLiability(ctx context.Co
 				return ec.fieldContext_Liability_contributionValue(ctx, field)
 			case "personIds":
 				return ec.fieldContext_Liability_personIds(ctx, field)
+			case "plaidAccountId":
+				return ec.fieldContext_Liability_plaidAccountId(ctx, field)
 			case "lastBalanceUpdatedAt":
 				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
 			case "createdAt":
@@ -9041,6 +9231,8 @@ func (ec *executionContext) fieldContext_Mutation_updateLiability(ctx context.Co
 				return ec.fieldContext_Liability_contributionValue(ctx, field)
 			case "personIds":
 				return ec.fieldContext_Liability_personIds(ctx, field)
+			case "plaidAccountId":
+				return ec.fieldContext_Liability_plaidAccountId(ctx, field)
 			case "lastBalanceUpdatedAt":
 				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
 			case "createdAt":
@@ -11247,6 +11439,170 @@ func (ec *executionContext) fieldContext_Mutation_deletePlaidConnection(ctx cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_linkAssetToPlaidAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_linkAssetToPlaidAccount,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().LinkAssetToPlaidAccount(ctx, fc.Args["assetId"].(string), fc.Args["plaidAccountId"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_linkAssetToPlaidAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_linkAssetToPlaidAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_unlinkAssetFromPlaidAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_unlinkAssetFromPlaidAccount,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().UnlinkAssetFromPlaidAccount(ctx, fc.Args["assetId"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_unlinkAssetFromPlaidAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_unlinkAssetFromPlaidAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_linkLiabilityToPlaidAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_linkLiabilityToPlaidAccount,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().LinkLiabilityToPlaidAccount(ctx, fc.Args["liabilityId"].(string), fc.Args["plaidAccountId"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_linkLiabilityToPlaidAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_linkLiabilityToPlaidAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_unlinkLiabilityFromPlaidAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_unlinkLiabilityFromPlaidAccount,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().UnlinkLiabilityFromPlaidAccount(ctx, fc.Args["liabilityId"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_unlinkLiabilityFromPlaidAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_unlinkLiabilityFromPlaidAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _NetWorthSnapshot_id(ctx context.Context, field graphql.CollectedField, obj *model.NetWorthSnapshot) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -12632,6 +12988,8 @@ func (ec *executionContext) fieldContext_Query_asset(ctx context.Context, field 
 				return ec.fieldContext_Asset_vehicleDepreciationProfile(ctx, field)
 			case "linkedLiabilityId":
 				return ec.fieldContext_Asset_linkedLiabilityId(ctx, field)
+			case "plaidAccountId":
+				return ec.fieldContext_Asset_plaidAccountId(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -12715,6 +13073,8 @@ func (ec *executionContext) fieldContext_Query_assets(ctx context.Context, field
 				return ec.fieldContext_Asset_vehicleDepreciationProfile(ctx, field)
 			case "linkedLiabilityId":
 				return ec.fieldContext_Asset_linkedLiabilityId(ctx, field)
+			case "plaidAccountId":
+				return ec.fieldContext_Asset_plaidAccountId(ctx, field)
 			case "lastValueUpdatedAt":
 				return ec.fieldContext_Asset_lastValueUpdatedAt(ctx, field)
 			case "createdAt":
@@ -12790,6 +13150,8 @@ func (ec *executionContext) fieldContext_Query_liability(ctx context.Context, fi
 				return ec.fieldContext_Liability_contributionValue(ctx, field)
 			case "personIds":
 				return ec.fieldContext_Liability_personIds(ctx, field)
+			case "plaidAccountId":
+				return ec.fieldContext_Liability_plaidAccountId(ctx, field)
 			case "lastBalanceUpdatedAt":
 				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
 			case "createdAt":
@@ -12865,6 +13227,8 @@ func (ec *executionContext) fieldContext_Query_liabilities(ctx context.Context, 
 				return ec.fieldContext_Liability_contributionValue(ctx, field)
 			case "personIds":
 				return ec.fieldContext_Liability_personIds(ctx, field)
+			case "plaidAccountId":
+				return ec.fieldContext_Liability_plaidAccountId(ctx, field)
 			case "lastBalanceUpdatedAt":
 				return ec.fieldContext_Liability_lastBalanceUpdatedAt(ctx, field)
 			case "createdAt":
@@ -21614,6 +21978,8 @@ func (ec *executionContext) _Asset(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Asset_vehicleDepreciationProfile(ctx, field, obj)
 		case "linkedLiabilityId":
 			out.Values[i] = ec._Asset_linkedLiabilityId(ctx, field, obj)
+		case "plaidAccountId":
+			out.Values[i] = ec._Asset_plaidAccountId(ctx, field, obj)
 		case "lastValueUpdatedAt":
 			out.Values[i] = ec._Asset_lastValueUpdatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -22445,6 +22811,8 @@ func (ec *executionContext) _Liability(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "plaidAccountId":
+			out.Values[i] = ec._Liability_plaidAccountId(ctx, field, obj)
 		case "lastBalanceUpdatedAt":
 			out.Values[i] = ec._Liability_lastBalanceUpdatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -22834,6 +23202,34 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deletePlaidConnection":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deletePlaidConnection(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "linkAssetToPlaidAccount":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_linkAssetToPlaidAccount(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "unlinkAssetFromPlaidAccount":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_unlinkAssetFromPlaidAccount(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "linkLiabilityToPlaidAccount":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_linkLiabilityToPlaidAccount(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "unlinkLiabilityFromPlaidAccount":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_unlinkLiabilityFromPlaidAccount(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

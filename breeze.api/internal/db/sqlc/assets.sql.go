@@ -49,6 +49,7 @@ RETURNING
   home_growth_profile,
   vehicle_depreciation_profile,
   linked_liability_id,
+  plaid_account_id,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -90,6 +91,7 @@ type CreateAssetRow struct {
 	HomeGrowthProfile               *string            `json:"home_growth_profile"`
 	VehicleDepreciationProfile      *string            `json:"vehicle_depreciation_profile"`
 	LinkedLiabilityID               pgtype.UUID        `json:"linked_liability_id"`
+	PlaidAccountID                  pgtype.UUID        `json:"plaid_account_id"`
 	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
 	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
@@ -132,6 +134,7 @@ func (q *Queries) CreateAsset(ctx context.Context, arg CreateAssetParams) (Creat
 		&i.HomeGrowthProfile,
 		&i.VehicleDepreciationProfile,
 		&i.LinkedLiabilityID,
+		&i.PlaidAccountID,
 		&i.LastValueUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -158,6 +161,7 @@ SELECT
   home_growth_profile,
   vehicle_depreciation_profile,
   linked_liability_id,
+  plaid_account_id,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -185,6 +189,7 @@ type GetAssetByIDRow struct {
 	HomeGrowthProfile               *string            `json:"home_growth_profile"`
 	VehicleDepreciationProfile      *string            `json:"vehicle_depreciation_profile"`
 	LinkedLiabilityID               pgtype.UUID        `json:"linked_liability_id"`
+	PlaidAccountID                  pgtype.UUID        `json:"plaid_account_id"`
 	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
 	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
@@ -211,6 +216,7 @@ func (q *Queries) GetAssetByID(ctx context.Context, id uuid.UUID) (GetAssetByIDR
 		&i.HomeGrowthProfile,
 		&i.VehicleDepreciationProfile,
 		&i.LinkedLiabilityID,
+		&i.PlaidAccountID,
 		&i.LastValueUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -237,6 +243,7 @@ SELECT
   home_growth_profile,
   vehicle_depreciation_profile,
   linked_liability_id,
+  plaid_account_id,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -264,6 +271,7 @@ type ListAssetsByUserIDRow struct {
 	HomeGrowthProfile               *string            `json:"home_growth_profile"`
 	VehicleDepreciationProfile      *string            `json:"vehicle_depreciation_profile"`
 	LinkedLiabilityID               pgtype.UUID        `json:"linked_liability_id"`
+	PlaidAccountID                  pgtype.UUID        `json:"plaid_account_id"`
 	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
 	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
@@ -296,6 +304,7 @@ func (q *Queries) ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]L
 			&i.HomeGrowthProfile,
 			&i.VehicleDepreciationProfile,
 			&i.LinkedLiabilityID,
+			&i.PlaidAccountID,
 			&i.LastValueUpdatedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -368,6 +377,7 @@ RETURNING
   home_growth_profile,
   vehicle_depreciation_profile,
   linked_liability_id,
+  plaid_account_id,
   last_value_updated_at,
   created_at,
   updated_at,
@@ -409,6 +419,7 @@ type UpdateAssetRow struct {
 	HomeGrowthProfile               *string            `json:"home_growth_profile"`
 	VehicleDepreciationProfile      *string            `json:"vehicle_depreciation_profile"`
 	LinkedLiabilityID               pgtype.UUID        `json:"linked_liability_id"`
+	PlaidAccountID                  pgtype.UUID        `json:"plaid_account_id"`
 	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
 	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
@@ -451,6 +462,7 @@ func (q *Queries) UpdateAsset(ctx context.Context, arg UpdateAssetParams) (Updat
 		&i.HomeGrowthProfile,
 		&i.VehicleDepreciationProfile,
 		&i.LinkedLiabilityID,
+		&i.PlaidAccountID,
 		&i.LastValueUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,

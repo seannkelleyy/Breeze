@@ -51,6 +51,7 @@ interface AssetsResponse {
     homeGrowthProfile: string | null;
     vehicleDepreciationProfile: string | null;
     linkedLiabilityId: string | null;
+    plaidAccountId: string | null;
   }>;
 }
 
@@ -66,6 +67,7 @@ interface LiabilitiesResponse {
     contributionMode: string;
     contributionValue: string;
     personIds: string[];
+    plaidAccountId: string | null;
   }>;
 }
 
@@ -137,6 +139,7 @@ const useFetchPlanner = () => {
         homeGrowthProfile: a.homeGrowthProfile ?? null,
         vehicleDepreciationProfile: a.vehicleDepreciationProfile ?? null,
         linkedLiabilityId: a.linkedLiabilityId ?? null,
+        plaidAccountId: a.plaidAccountId ?? null,
       }));
 
       const mappedLiabilities: PlannerAccount[] = liabilities.map((l) => ({
@@ -156,6 +159,7 @@ const useFetchPlanner = () => {
         homeGrowthProfile: null,
         vehicleDepreciationProfile: null,
         linkedLiabilityId: null,
+        plaidAccountId: l.plaidAccountId ?? null,
         originalLoanAmount: l.originalLoanAmount ? Number(l.originalLoanAmount) : null,
       }));
 

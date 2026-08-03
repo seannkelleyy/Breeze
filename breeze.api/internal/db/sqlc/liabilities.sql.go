@@ -43,6 +43,7 @@ RETURNING
   contribution_mode,
   contribution_value,
   person_ids,
+  plaid_account_id,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -78,6 +79,7 @@ type CreateLiabilityRow struct {
 	ContributionMode     string             `json:"contribution_mode"`
 	ContributionValue    decimal.Decimal    `json:"contribution_value"`
 	PersonIds            []uuid.UUID        `json:"person_ids"`
+	PlaidAccountID       pgtype.UUID        `json:"plaid_account_id"`
 	LastBalanceUpdatedAt pgtype.Timestamptz `json:"last_balance_updated_at"`
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
@@ -114,6 +116,7 @@ func (q *Queries) CreateLiability(ctx context.Context, arg CreateLiabilityParams
 		&i.ContributionMode,
 		&i.ContributionValue,
 		&i.PersonIds,
+		&i.PlaidAccountID,
 		&i.LastBalanceUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -137,6 +140,7 @@ SELECT
   contribution_mode,
   contribution_value,
   person_ids,
+  plaid_account_id,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -161,6 +165,7 @@ type GetLiabilityByIDRow struct {
 	ContributionMode     string             `json:"contribution_mode"`
 	ContributionValue    decimal.Decimal    `json:"contribution_value"`
 	PersonIds            []uuid.UUID        `json:"person_ids"`
+	PlaidAccountID       pgtype.UUID        `json:"plaid_account_id"`
 	LastBalanceUpdatedAt pgtype.Timestamptz `json:"last_balance_updated_at"`
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
@@ -184,6 +189,7 @@ func (q *Queries) GetLiabilityByID(ctx context.Context, id uuid.UUID) (GetLiabil
 		&i.ContributionMode,
 		&i.ContributionValue,
 		&i.PersonIds,
+		&i.PlaidAccountID,
 		&i.LastBalanceUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -207,6 +213,7 @@ SELECT
   contribution_mode,
   contribution_value,
   person_ids,
+  plaid_account_id,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -231,6 +238,7 @@ type ListLiabilitiesByUserIDRow struct {
 	ContributionMode     string             `json:"contribution_mode"`
 	ContributionValue    decimal.Decimal    `json:"contribution_value"`
 	PersonIds            []uuid.UUID        `json:"person_ids"`
+	PlaidAccountID       pgtype.UUID        `json:"plaid_account_id"`
 	LastBalanceUpdatedAt pgtype.Timestamptz `json:"last_balance_updated_at"`
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
@@ -260,6 +268,7 @@ func (q *Queries) ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID)
 			&i.ContributionMode,
 			&i.ContributionValue,
 			&i.PersonIds,
+			&i.PlaidAccountID,
 			&i.LastBalanceUpdatedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -326,6 +335,7 @@ RETURNING
   contribution_mode,
   contribution_value,
   person_ids,
+  plaid_account_id,
   last_balance_updated_at,
   created_at,
   updated_at,
@@ -361,6 +371,7 @@ type UpdateLiabilityRow struct {
 	ContributionMode     string             `json:"contribution_mode"`
 	ContributionValue    decimal.Decimal    `json:"contribution_value"`
 	PersonIds            []uuid.UUID        `json:"person_ids"`
+	PlaidAccountID       pgtype.UUID        `json:"plaid_account_id"`
 	LastBalanceUpdatedAt pgtype.Timestamptz `json:"last_balance_updated_at"`
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
@@ -397,6 +408,7 @@ func (q *Queries) UpdateLiability(ctx context.Context, arg UpdateLiabilityParams
 		&i.ContributionMode,
 		&i.ContributionValue,
 		&i.PersonIds,
+		&i.PlaidAccountID,
 		&i.LastBalanceUpdatedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,

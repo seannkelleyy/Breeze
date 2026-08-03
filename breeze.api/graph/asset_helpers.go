@@ -168,6 +168,11 @@ func mapAssetToModel(asset *service.Asset) *model.Asset {
 		s := asset.LinkedLiabilityID.String()
 		linkedID = &s
 	}
+	var plaidAccountID *string
+	if asset.PlaidAccountID != nil {
+		s := asset.PlaidAccountID.String()
+		plaidAccountID = &s
+	}
 	return &model.Asset{
 		ID:                              asset.ID.String(),
 		UserID:                          asset.UserID.String(),
@@ -185,6 +190,7 @@ func mapAssetToModel(asset *service.Asset) *model.Asset {
 		HomeGrowthProfile:               asset.HomeGrowthProfile,
 		VehicleDepreciationProfile:      asset.VehicleDepreciationProfile,
 		LinkedLiabilityID:               linkedID,
+		PlaidAccountID:                  plaidAccountID,
 		LastValueUpdatedAt:              asset.LastValueUpdatedAt.Format(time.RFC3339),
 		CreatedAt:                       asset.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:                       asset.UpdatedAt.Format(time.RFC3339),

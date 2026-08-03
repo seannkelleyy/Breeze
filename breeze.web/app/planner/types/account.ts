@@ -50,6 +50,7 @@ export type PlannerAccount = {
   homeGrowthProfile: string | null;
   vehicleDepreciationProfile: string | null;
   linkedLiabilityId: string | null;
+  plaidAccountId: string | null;
   originalLoanAmount?: number | null;
 };
 

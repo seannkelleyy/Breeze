@@ -139,6 +139,11 @@ func mapLiabilityToModel(liability *service.Liability) *model.Liability {
 		s := liability.OriginalLoanAmount.String()
 		originalLoanAmount = &s
 	}
+	var plaidAccountID *string
+	if liability.PlaidAccountID != nil {
+		s := liability.PlaidAccountID.String()
+		plaidAccountID = &s
+	}
 	return &model.Liability{
 		ID:                 liability.ID.String(),
 		UserID:             liability.UserID.String(),
@@ -154,6 +159,7 @@ func mapLiabilityToModel(liability *service.Liability) *model.Liability {
 		ContributionMode:     liability.ContributionMode,
 		ContributionValue:    liability.ContributionValue.String(),
 		PersonIds:            uuidSliceToStringSlice(liability.PersonIDs),
+		PlaidAccountID:       plaidAccountID,
 		LastBalanceUpdatedAt: liability.LastBalanceUpdatedAt.Format(time.RFC3339),
 		CreatedAt:            liability.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:            liability.UpdatedAt.Format(time.RFC3339),

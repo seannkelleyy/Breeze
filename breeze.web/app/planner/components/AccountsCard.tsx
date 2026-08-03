@@ -185,6 +185,7 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
         homeGrowthProfile: null,
         vehicleDepreciationProfile: null,
         linkedLiabilityId: null,
+        plaidAccountId: null,
         originalLoanAmount: details.originalLoanAmount,
       };
       mutations.updateLiabilityMutation.mutate(linkedLiability);
