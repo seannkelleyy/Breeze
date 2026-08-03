@@ -3,13 +3,12 @@ import {
   Menubar,
   MenubarContent,
   MenubarMenu,
-  MenubarSeparator,
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import ThemeToggle from '../theme/ThemeToggle';
 import { UserPreferencesModal } from '../userPreference/UserPreferencesModal';
 import { NavRouteItem } from './NavItems';
-import { navLabels, routeNavItems, toolNavItems } from './navConfig';
+import { routeNavItems, toolNavItems } from './navConfig';
 import BreezeAuthButton from '../auth/BreezeAuthButton';
 import Image from 'next/image';
 import { Wrench } from 'lucide-react';
@@ -25,12 +24,13 @@ export const DesktopNavigation = () => {
       title="navigation"
       className="fixed relative top-0 z-10 hidden w-full items-center justify-between px-4 backdrop-blur-lg sm:flex"
     >
-      {/* LEFT cluster: logo + route links + tools dropdown */}
-      <div className="z-10 flex items-center justify-start gap-1">
+      {/* LEFT: logo */}
+      <div className="z-10 flex items-center">
         <Image className="dark:invert" src="/b.svg" alt="Breeze" width={40} height={40} />
+      </div>
 
-        <MenubarSeparator className="mx-1" />
-
+      {/* CENTER: route links + tools dropdown */}
+      <div className="z-10 flex items-center gap-1">
         {routeNavItems.map((item) => (
           <NavRouteItem key={item.label} label={item.label} to={item.to} title={item.title} icon={item.icon} />
         ))}
@@ -53,13 +53,8 @@ export const DesktopNavigation = () => {
         </MenubarMenu>
       </div>
 
-      {/* CENTER: brand name */}
-      <h1 className="absolute left-1/2 -translate-x-1/2 text-3xl font-thin">
-        <u>{navLabels.brandName}</u>
-      </h1>
-
-      {/* RIGHT cluster: preferences, theme, auth */}
-      <div className="z-10 flex items-center justify-end gap-2">
+      {/* RIGHT: preferences, theme, auth */}
+      <div className="z-10 flex items-center gap-2">
         <UserPreferencesModal />
         <ThemeToggle />
         <BreezeAuthButton />
