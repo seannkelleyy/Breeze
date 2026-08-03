@@ -34,6 +34,7 @@ import HomeAccountFields from './HomeAccountFields';
 import InvestmentAccountFields from './InvestmentAccountFields';
 import LiabilityAccountFields from './LiabilityAccountFields';
 import VehicleAccountFields from './VehicleAccountFields';
+import { PlaidAccountLinker } from './PlaidAccountLinker';
 
 interface AccountListItemProps {
   account: PlannerAccount;
@@ -358,6 +359,13 @@ export function AccountListItem({
             </SelectContent>
           </Select>
         </div>
+
+        <PlaidAccountLinker
+          accountId={account.id}
+          accountName={account.name}
+          isLiability={isLiability}
+          plaidAccountId={account.plaidAccountId}
+        />
 
         {!isCombinedAsset ? (
           isLiability ? (

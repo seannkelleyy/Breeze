@@ -62,6 +62,30 @@ func (m *mockPlaidQuerier) SoftDeletePlaidConnection(ctx context.Context, id uui
 	return 1, nil
 }
 
+func (m *mockPlaidQuerier) LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) error {
+	return nil
+}
+
+func (m *mockPlaidQuerier) UnlinkAssetFromPlaidAccount(ctx context.Context, id uuid.UUID) error {
+	return nil
+}
+
+func (m *mockPlaidQuerier) LinkLiabilityToPlaidAccount(ctx context.Context, arg sqlc.LinkLiabilityToPlaidAccountParams) error {
+	return nil
+}
+
+func (m *mockPlaidQuerier) UnlinkLiabilityFromPlaidAccount(ctx context.Context, id uuid.UUID) error {
+	return nil
+}
+
+func (m *mockPlaidQuerier) GetAssetsByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetAssetsByPlaidAccountIDRow, error) {
+	return []sqlc.GetAssetsByPlaidAccountIDRow{}, nil
+}
+
+func (m *mockPlaidQuerier) GetLiabilitiesByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetLiabilitiesByPlaidAccountIDRow, error) {
+	return []sqlc.GetLiabilitiesByPlaidAccountIDRow{}, nil
+}
+
 // timeNow helper to avoid importing time repeatedly in the test top-level
 func timeNow() (t time.Time) { return time.Now().UTC() }
 

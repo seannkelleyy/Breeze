@@ -67,6 +67,30 @@ func (m *graphPlaidQuerierMock) SoftDeletePlaidConnection(ctx context.Context, i
 	return 1, nil
 }
 
+func (m *graphPlaidQuerierMock) LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) error {
+	return nil
+}
+
+func (m *graphPlaidQuerierMock) UnlinkAssetFromPlaidAccount(ctx context.Context, id uuid.UUID) error {
+	return nil
+}
+
+func (m *graphPlaidQuerierMock) LinkLiabilityToPlaidAccount(ctx context.Context, arg sqlc.LinkLiabilityToPlaidAccountParams) error {
+	return nil
+}
+
+func (m *graphPlaidQuerierMock) UnlinkLiabilityFromPlaidAccount(ctx context.Context, id uuid.UUID) error {
+	return nil
+}
+
+func (m *graphPlaidQuerierMock) GetAssetsByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetAssetsByPlaidAccountIDRow, error) {
+	return []sqlc.GetAssetsByPlaidAccountIDRow{}, nil
+}
+
+func (m *graphPlaidQuerierMock) GetLiabilitiesByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetLiabilitiesByPlaidAccountIDRow, error) {
+	return []sqlc.GetLiabilitiesByPlaidAccountIDRow{}, nil
+}
+
 func graphTime() time.Time { return time.Date(2026, 5, 5, 12, 0, 0, 0, time.UTC) }
 
 func graphPtrString(value string) *string { return &value }

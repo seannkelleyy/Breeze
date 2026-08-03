@@ -1,11 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, LinkIcon, RotateCw, Trash2, Loader2 } from 'lucide-react';
 import { PlaidLinkButton } from './components/PlaidLinkButton';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import useGraphql from '@/lib/services/useGraphql';
+import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/lib/services/queries/assets';
 import {
   usePlaidConnections,
   usePlaidAccounts,
@@ -25,6 +29,57 @@ const formatBalance = (balance: string | null, currency: string | null) => {
   }).format(num);
 };
 
+const LinkedPlannerAccounts = ({ plaidAccountId }: { plaidAccountId: string }) => {
+  const { userId } = useCurrentUser();
+  const { request } = useGraphql();
+
+  const { data } = useQuery({
+    queryKey: ['planner-accounts-for-plaid', userId],
+    queryFn: async () => {
+      const [assetsResp, liabilitiesResp] = await Promise.all([
+        request<{ assets: Array<{ id: string; name: string; plaidAccountId: string | null }> }>(
+          GET_ASSETS_BY_USER,
+          { userId },
+        ),
+        request<{ liabilities: Array<{ id: string; name: string; plaidAccountId: string | null }> }>(
+          GET_LIABILITIES_BY_USER,
+          { userId },
+        ),
+      ]);
+      return {
+        assets: assetsResp?.assets ?? [],
+        liabilities: liabilitiesResp?.liabilities ?? [],
+      };
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (!data) return null;
+
+  const linkedAssets = data.assets.filter((a) => a.plaidAccountId === plaidAccountId);
+  const linkedLiabilities = data.liabilities.filter((l) => l.plaidAccountId === plaidAccountId);
+
+  if (linkedAssets.length === 0 && linkedLiabilities.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {linkedAssets.map((a) => (
+        <Badge key={a.id} variant="secondary" className="text-xs">
+          {a.name}
+        </Badge>
+      ))}
+      {linkedLiabilities.map((l) => (
+        <Badge key={l.id} variant="destructive" className="text-xs">
+          {l.name}
+        </Badge>
+      ))}
+    </div>
+  );
+};
+
 const ConnectionAccounts = ({ connectionId }: { connectionId: string }) => {
   const { data: accounts, isLoading } = usePlaidAccounts(connectionId);
 
@@ -42,18 +97,21 @@ const ConnectionAccounts = ({ connectionId }: { connectionId: string }) => {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <h4 className="text-sm font-medium">Accounts</h4>
-      <ul className="space-y-1">
+      <ul className="space-y-2">
         {accounts.map((account) => (
-          <li key={account.id} className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              {account.name}
-              {account.subtype && ` (${account.subtype})`}
-            </span>
-            <span className="font-mono">
-              {formatBalance(account.currentBalance, account.isoCurrencyCode)}
-            </span>
+          <li key={account.id} className="rounded-md border p-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                {account.name}
+                {account.subtype && ` (${account.subtype})`}
+              </span>
+              <span className="font-mono">
+                {formatBalance(account.currentBalance, account.isoCurrencyCode)}
+              </span>
+            </div>
+            <LinkedPlannerAccounts plaidAccountId={account.id} />
           </li>
         ))}
       </ul>

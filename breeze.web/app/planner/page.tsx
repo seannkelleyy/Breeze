@@ -1,11 +1,12 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 import { usePlannerModel, useFetchPlanner } from './hooks/planner/index';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from './hooks/usePlannerState';
+import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
 
 import {
   RetirementInputsSection,
@@ -21,6 +22,18 @@ type PlannerTab = 'inputs' | 'accounts' | 'projections';
 export default function PlannerPage() {
   const { isLoaded: clerkLoaded } = useUser();
   const { userId, isLoaded } = useCurrentUser();
+  const { data: connections } = usePlaidConnections(userId);
+  const { mutate: syncConnection } = useSyncPlaidConnection();
+  const hasSyncedRef = useRef(false);
+
+  // Auto-sync Plaid connections on page load (once per session)
+  useEffect(() => {
+    if (!connections || connections.length === 0 || hasSyncedRef.current) return;
+    hasSyncedRef.current = true;
+    for (const conn of connections) {
+      syncConnection(conn.id);
+    }
+  }, [connections, syncConnection]);
 
   // Manage local UI state
   const {
