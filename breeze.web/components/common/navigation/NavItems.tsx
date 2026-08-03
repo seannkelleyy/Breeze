@@ -38,7 +38,7 @@ export const NavRouteItem = ({ label, to, title, icon: Icon }: RouteItemProps) =
     <Button
       asChild
       variant="ghost"
-      className={cn(isActive && 'bg-accent text-accent-foreground')}
+      className={cn(isActive && 'bg-primary text-primary-foreground')}
     >
       <Link href={to} title={title} className="flex items-center gap-1.5">
         <Icon className="h-4 w-4" />

@@ -51,7 +51,7 @@ export const DesktopNavigation = () => {
           <MenubarTrigger
             className={cn(
               'flex items-center gap-1.5 cursor-pointer',
-              isToolsActive && 'bg-accent text-accent-foreground',
+              isToolsActive && 'bg-primary text-primary-foreground',
             )}
           >
             <Wrench className="h-4 w-4" />

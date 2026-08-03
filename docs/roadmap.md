@@ -16,6 +16,10 @@
 - [ ] Update `docs/deployment/01-hosting.md` CI/CD section to reference Woodpecker instead of GitHub Actions
 - [ ] Remove Pulumi/IaC section from hosting doc (not using it)
 
+## Dashboard
+
+- [ ] Add net worth history chart (past to present) — line chart showing net worth over time
+
 ## Product (from vision)
 
 1. Balance sheet — assets, liabilities, net worth over time

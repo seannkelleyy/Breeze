@@ -26,21 +26,21 @@ const ThemeToggle = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-background border-border rounded-md border">
         <DropdownMenuItem
-          className="hover:bg-border my-1 rounded-md p-1 hover:cursor-pointer"
+          className="hover:bg-muted my-1 rounded-md p-1 hover:cursor-pointer"
           onClick={() => setTheme('light')}
         >
           Light
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-border my-.5 h-[1px]" />
         <DropdownMenuItem
-          className="hover:bg-border my-1 rounded-md p-1 hover:cursor-pointer"
+          className="hover:bg-muted my-1 rounded-md p-1 hover:cursor-pointer"
           onClick={() => setTheme('dark')}
         >
           Dark
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-border my-.5 h-[1px]" />
         <DropdownMenuItem
-          className="hover:bg-border my-1 rounded-md p-1 hover:cursor-pointer"
+          className="hover:bg-muted my-1 rounded-md p-1 hover:cursor-pointer"
           onClick={() => setTheme('system')}
         >
           System
