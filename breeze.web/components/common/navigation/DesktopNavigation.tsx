@@ -12,7 +12,6 @@ import { NavRouteItem } from './NavItems';
 import { navLabels, routeNavItems, toolNavItems } from './navConfig';
 import BreezeAuthButton from '../auth/BreezeAuthButton';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Wrench } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -28,9 +27,7 @@ export const DesktopNavigation = () => {
     >
       {/* LEFT cluster: logo + route links + tools dropdown */}
       <div className="z-10 flex items-center justify-start gap-1">
-        <Link href="/" className="flex items-center">
-          <Image className="dark:invert" src="/b.svg" alt="Breeze" width={40} height={40} />
-        </Link>
+        <Image className="dark:invert" src="/b.svg" alt="Breeze" width={40} height={40} />
 
         <MenubarSeparator className="mx-1" />
 
