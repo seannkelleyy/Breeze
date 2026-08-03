@@ -2,7 +2,7 @@
 import { CurrentUserProvider } from '@/lib/providers/CurrentUserProvider';
 import { ThemeProvider } from '@/lib/providers/ThemeProvider';
 import { queryClient } from '@/lib/queryClient';
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkProvider } from '@clerk/clerk-react';
 import { QueryClientProvider } from '@tanstack/react-query';
 
 interface ProvidersProps {
@@ -11,7 +11,7 @@ interface ProvidersProps {
 
 const Providers = ({ children }: ProvidersProps) => {
   return (
-    <ClerkProvider>
+    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ''}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="system">
           <CurrentUserProvider>{children}</CurrentUserProvider>

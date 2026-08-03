@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useExchangePlaidToken } from '@/lib/services/hooks/usePlaid';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 
 declare global {

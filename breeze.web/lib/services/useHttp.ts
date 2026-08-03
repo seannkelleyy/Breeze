@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 
 /** Throws an error, preserving Axios errors as-is and wrapping others. */

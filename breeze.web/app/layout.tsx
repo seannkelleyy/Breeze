@@ -28,7 +28,6 @@ if (!PUBLISHABLE_KEY) {
   throw new Error('Missing Publishable Key');
 }
 
-export const dynamic = 'force-dynamic';
 export default function RootLayout({
   children,
 }: Readonly<{

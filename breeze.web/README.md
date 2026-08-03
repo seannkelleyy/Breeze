@@ -31,7 +31,7 @@ npm run gen
 
 ## Auth and API Notes
 
-- Clerk is used for frontend auth (`@clerk/nextjs`).
+- Clerk is used for frontend auth (`@clerk/clerk-react`).
 - GraphQL requests are sent through `lib/services/useGraphql.ts`.
 - User bootstrap and profile state live in `lib/providers/CurrentUserProvider.tsx`.
 

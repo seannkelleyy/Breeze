@@ -2,7 +2,7 @@
 import BreezeAuthButton from '@/components/common/auth/BreezeAuthButton';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { SignUpButton } from '@clerk/nextjs';
+import { SignUpButton } from '@clerk/clerk-react';
 import Link from 'next/link';
 
 const LandingPage = () => {

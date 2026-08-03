@@ -1,6 +1,6 @@
 'use client';
 import { useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@clerk/clerk-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 import { usePlannerModel, useFetchPlanner } from './hooks/planner/index';

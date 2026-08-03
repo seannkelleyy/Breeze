@@ -8,7 +8,7 @@
 | UI components | shadcn/ui + Radix + Tailwind v4 | Owned in repo, not node_modules |
 | Data fetching | TanStack React Query v5 | Stable cache keys, mutations, invalidation |
 | HTTP client | Axios | Direct HTTP calls to GraphQL endpoint |
-| Auth | Clerk (`@clerk/nextjs`) | Clerk middleware, proxy.ts, CurrentUserProvider |
+| Auth | Clerk (`@clerk/clerk-react`) | Client-side SPA auth, CurrentUserProvider |
 | Forms | React Hook Form + Zod | Pairs with shadcn form components |
 | Charts | Recharts | Works with Tailwind, included in shadcn chart |
 | Package manager | npm | |
@@ -17,15 +17,9 @@
 
 ## Architecture Patterns
 
-### Auth Flow (Clerk + Middleware)
+### Auth Flow (Clerk, client-side)
 
-Auth is handled via Clerk's Next.js SDK. The middleware in `proxy.ts` protects API routes:
-
-```typescript
-// proxy.ts — Clerk middleware
-import { clerkMiddleware } from '@clerk/nextjs/server';
-export default clerkMiddleware();
-```
+Auth is handled via Clerk's client-side React SDK (`@clerk/clerk-react`). The app is a pure static SPA: there is no Next.js middleware (`proxy.ts`) and no `force-dynamic` — auth state lives entirely in the browser.
 
 The authenticated user is available via the `CurrentUserProvider` context wrapper:
 
@@ -96,7 +90,6 @@ breeze.web/
 ├── lib/
 │   ├── providers/          # Context providers (CurrentUserProvider)
 │   └── services/           # Shared transport (useGraphql.ts, useHttp.ts)
-├── proxy.ts                # Clerk middleware
 └── package.json
 ```
 
@@ -158,9 +151,8 @@ Type mapping between frontend `AccountType` and API `ApiAssetType` lives in:
 
 ## Deployment
 
-Next.js builds to `.next/` via `npm run build`. Deployed as part of the monorepo.
+Next.js is configured with `output: 'export'` and builds to `out/` via `npm run build`. The result is a fully static site that can be hosted on any static file server (nginx, Vercel, Cloudflare Pages, S3, etc.).
 
 ```bash
-npm run build    # production build
-npm run start    # production server (Node required)
+npm run build    # produces out/ (static export)
 ```

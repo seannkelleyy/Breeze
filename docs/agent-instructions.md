@@ -29,7 +29,7 @@ This is a **personal finance planner** monorepo with a Go API and Next.js web ap
 | UI components | shadcn/ui + Radix + Tailwind v4 |
 | Data fetching | TanStack React Query |
 | HTTP client | Axios |
-| Auth | Clerk (`@clerk/nextjs`) |
+| Auth | Clerk (`@clerk/clerk-react`) |
 | Forms | React Hook Form + Zod |
 | Charts | Recharts |
 | Package manager | npm |

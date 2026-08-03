@@ -27,7 +27,7 @@ import { PlannerPerson } from '@/app/planner/types/person';
 import { PlannerAccount } from '@/app/planner/types/account';
 import { AssetFinanceDetails } from '@/app/planner/types/finance';
 import { PlannerSummary } from '@/app/planner/types/planner';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@clerk/clerk-react';
 
 const DEV_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
 const UUID_V4_PATTERN =
