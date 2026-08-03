@@ -1,11 +1,9 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-/* eslint-disable react-hooks/preserve-manual-memoization */
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useExchangePlaidToken } from '@/lib/services/hooks/usePlaid';
-import { useUser } from '@clerk/clerk-react';
+import { useExchangePlaidToken, useCreateLinkToken } from '@/lib/services/hooks/usePlaid';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { Loader2 } from 'lucide-react';
 
 declare global {
@@ -21,15 +19,15 @@ interface PlaidLinkButtonProps {
 }
 
 export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) => {
-  const { user } = useUser();
-  const { mutate: exchangeToken, isPending } = useExchangePlaidToken();
+  const { userId } = useCurrentUser();
+  const { mutate: exchangeToken, isPending: isExchanging } = useExchangePlaidToken();
+  const { mutate: createLinkToken, isPending: isCreatingToken } = useCreateLinkToken();
   const [isLinkReady, setIsLinkReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load Plaid SDK from CDN
     if (document.getElementById('plaid-script')) {
-      setIsLinkReady(true);
+      setIsLinkReady(true); // eslint-disable-line react-hooks/set-state-in-effect
       return;
     }
 
@@ -37,60 +35,58 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
     script.id = 'plaid-script';
     script.src = 'https://cdn.plaid.com/link/v3/stable/link-initialize.js';
     script.async = true;
-    script.onload = () => {
-      setIsLinkReady(true);
-    };
+    script.onload = () => setIsLinkReady(true); // eslint-disable-line react-hooks/set-state-in-effect
     script.onerror = () => {
       setError('Failed to load Plaid SDK');
       onError?.('Failed to load Plaid SDK');
     };
     document.head.appendChild(script);
-
-    return () => {
-      // Clean up script if component unmounts
-    };
   }, [onError]);
 
   const handleLinkOpen = useCallback(() => {
-    if (!window.Plaid || !user?.id) {
+    if (!window.Plaid || !userId) {
       setError('Plaid SDK not ready or user not authenticated');
       onError?.('Plaid SDK not ready or user not authenticated');
       return;
     }
 
-    // Get link token from API (you'll need to create this endpoint)
-    // For now, this is a placeholder - the actual implementation would call your backend
-    // to get a link_token from Plaid API
-    window.Plaid.create({
-      token: '', // This should come from your backend
-      onSuccess: (publicToken: string) => {
-        exchangeToken(
-          { userId: user.id, publicToken },
-          {
-            onSuccess: () => {
-              onSuccess?.();
-            },
-            onError: () => {
-              setError('Failed to connect account');
-              onError?.('Failed to connect account');
-            },
+    createLinkToken(userId, {
+      onSuccess: (data) => {
+        const handler = window.Plaid.create({
+          token: data.createPlaidLinkToken,
+          onSuccess: (publicToken: string) => {
+            exchangeToken(
+              { userId, publicToken },
+              {
+                onSuccess: () => onSuccess?.(),
+                onError: () => {
+                  setError('Failed to connect account');
+                  onError?.('Failed to connect account');
+                },
+              },
+            );
           },
-        );
+          onExit: () => {},
+        });
+        handler.open();
       },
-      onExit: () => {
-        // User closed the Link flow
+      onError: () => {
+        setError('Failed to create link token');
+        onError?.('Failed to create link token');
       },
-    }).open();
-  }, [user?.id, exchangeToken, onSuccess, onError]);
+    });
+  }, [userId, createLinkToken, exchangeToken, onSuccess, onError]);
+
+  const isLoading = isExchanging || isCreatingToken;
 
   return (
     <>
       <Button
         onClick={handleLinkOpen}
-        disabled={!isLinkReady || !user || isPending}
+        disabled={!isLinkReady || !userId || isLoading}
         variant="default"
       >
-        {isPending ? (
+        {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Connecting...

@@ -18,6 +18,7 @@ type Query {
   plaidConnection(id: ID!): PlaidConnection
   plaidConnections(userId: ID!): [PlaidConnection!]!
   plaidAccounts(connectionId: ID!): [PlaidAccount!]!
+  createPlaidLinkToken(userId: ID!): String!
   retirementAccount(id: ID!): RetirementAccount
   retirementAccounts(userId: ID!): [RetirementAccount!]!
   contributionProgress(retirementAccountId: ID!, taxYear: Int!): ContributionProgress!

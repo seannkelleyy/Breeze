@@ -5,30 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 
-interface ExternalItemProps {
-  label: string;
-  href: string;
-  title: string;
-  icon?: LucideIcon;
-}
-
 interface RouteItemProps {
   label: string;
   to: string;
   title: string;
   icon: LucideIcon;
 }
-
-export const NavExternalItem = ({ label, href, title, icon: Icon }: ExternalItemProps) => {
-  return (
-    <Button asChild variant="ghost">
-      <a href={href} target="_blank" rel="noopener noreferrer" title={title} className="flex items-center gap-1.5">
-        {Icon ? <Icon className="h-4 w-4" /> : null}
-        {label}
-      </a>
-    </Button>
-  );
-};
 
 export const NavRouteItem = ({ label, to, title, icon: Icon }: RouteItemProps) => {
   const pathname = usePathname();

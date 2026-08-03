@@ -5,6 +5,8 @@ import {
   PLAID_ACCOUNTS,
   PLAID_CONNECTIONS,
   SYNC_PLAID_CONNECTION,
+  DELETE_PLAID_CONNECTION,
+  CREATE_PLAID_LINK_TOKEN,
 } from '../queries/plaid';
 import useGraphql from '../useGraphql';
 
@@ -33,11 +35,17 @@ export interface PlaidAccount {
   updatedAt: string;
 }
 
-export interface PlaidSyncResponse {
-  connectionId: string;
-  syncedAt: string;
-  accounts: PlaidAccount[];
-}
+export const useCreateLinkToken = () => {
+  const { request } = useGraphql();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      return request<{ createPlaidLinkToken: string }>(CREATE_PLAID_LINK_TOKEN, {
+        userId,
+      } as unknown as Record<string, unknown>);
+    },
+  });
+};
 
 export const useExchangePlaidToken = () => {
   const { request } = useGraphql();
@@ -66,6 +74,20 @@ export const useSyncPlaidConnection = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plaidAccounts'] });
+    },
+  });
+};
+
+export const useDeletePlaidConnection = () => {
+  const { request } = useGraphql();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      return request<boolean>(DELETE_PLAID_CONNECTION, { id } as unknown as Record<string, unknown>);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plaidConnections'] });
     },
   });
 };

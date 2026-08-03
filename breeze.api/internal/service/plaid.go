@@ -29,6 +29,8 @@ type PlaidClient interface {
 	FetchAccounts(ctx context.Context, accessToken string) ([]PlaidAccount, error)
 	// ExchangePublicToken exchanges a Link public_token for an access_token and item_id and institution info.
 	ExchangePublicToken(ctx context.Context, publicToken string) (accessToken, itemID, institutionID, institutionName, environment string, err error)
+	// CreateLinkToken creates a Link token for initializing Plaid Link.
+	CreateLinkToken(ctx context.Context, userID string) (string, error)
 }
 
 type PlaidService struct {
@@ -79,6 +81,15 @@ func (s *PlaidService) CreateConnection(ctx context.Context, userID uuid.UUID, e
 		return nil, fmt.Errorf("create plaid connection: %w", err)
 	}
 	return &row, nil
+}
+
+// CreateLinkToken creates a Link token for initializing Plaid Link.
+func (s *PlaidService) CreateLinkToken(ctx context.Context, userID string) (string, error) {
+	token, err := s.client.CreateLinkToken(ctx, userID)
+	if err != nil {
+		return "", fmt.Errorf("create link token: %w", err)
+	}
+	return token, nil
 }
 
 // ExchangePublicToken exchanges the public token via the Plaid client and stores the resulting connection.

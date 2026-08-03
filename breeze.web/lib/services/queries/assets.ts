@@ -6,5 +6,3 @@ export const CREATE_LIABILITY = `mutation CreateLiability($input: CreateLiabilit
 export const UPDATE_LIABILITY = `mutation UpdateLiability($input: UpdateLiabilityInput!) { updateLiability(input: $input) { id userId name liabilityType currentBalance originalLoanAmount interestRate minimumPayment targetExtraPayment payoffPriority contributionMode contributionValue personIds lastBalanceUpdatedAt createdAt updatedAt } }`;
 export const DELETE_ASSET = `mutation DeleteAsset($id: ID!) { deleteAsset(id: $id) }`;
 export const DELETE_LIABILITY = `mutation DeleteLiability($id: ID!) { deleteLiability(id: $id) }`;
-export const GET_ASSETS = GET_ASSETS_BY_USER;
-export const GET_LIABILITIES = GET_LIABILITIES_BY_USER;

@@ -1227,6 +1227,15 @@ func (r *queryResolver) PlaidAccounts(ctx context.Context, connectionID string) 
 	return out, nil
 }
 
+// CreatePlaidLinkToken is the resolver for the createPlaidLinkToken field.
+func (r *queryResolver) CreatePlaidLinkToken(ctx context.Context, userID string) (string, error) {
+	token, err := r.PlaidService.CreateLinkToken(ctx, userID)
+	if err != nil {
+		return "", r.mapErr(ctx, err)
+	}
+	return token, nil
+}
+
 // RetirementAccount is the resolver for the retirementAccount field.
 func (r *queryResolver) RetirementAccount(ctx context.Context, id string) (*model.RetirementAccount, error) {
 	parsedID, err := uuid.Parse(id)

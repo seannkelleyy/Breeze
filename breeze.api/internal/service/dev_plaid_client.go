@@ -14,6 +14,10 @@ func NewDevPlaidClient() PlaidClient {
 
 type devPlaidClient struct{}
 
+func (d *devPlaidClient) CreateLinkToken(ctx context.Context, userID string) (string, error) {
+	return fmt.Sprintf("dev-link-token-%s", userID), nil
+}
+
 func (d *devPlaidClient) ExchangePublicToken(ctx context.Context, publicToken string) (string, string, string, string, string, error) {
 	// Return deterministic values derived from publicToken for testing.
 	id := uuid.New().String()

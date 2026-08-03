@@ -60,6 +60,62 @@ type exchangeResp struct {
 	RequestID string `json:"request_id"`
 }
 
+type linkTokenReq struct {
+	ClientID string `json:"client_id"`
+	Secret   string `json:"secret"`
+	User     struct {
+		ClientUserID string `json:"client_user_id"`
+	} `json:"user"`
+	ClientName   string   `json:"client_name"`
+	Products     []string `json:"products"`
+	CountryCodes []string `json:"country_codes"`
+	Language     string   `json:"language"`
+}
+
+type linkTokenResp struct {
+	LinkToken string `json:"link_token"`
+	RequestID string `json:"request_id"`
+}
+
+// CreateLinkToken implements PlaidClient.CreateLinkToken
+func (p *PlaidHTTPClient) CreateLinkToken(ctx context.Context, userID string) (string, error) {
+	reqBody := linkTokenReq{
+		ClientID:     p.clientID,
+		Secret:       p.secret,
+		ClientName:   "Breeze",
+		Products:     []string{"auth", "transactions"},
+		CountryCodes: []string{"US"},
+		Language:     "en",
+	}
+	reqBody.User.ClientUserID = userID
+
+	b, _ := json.Marshal(reqBody)
+	req, err := http.NewRequestWithContext(ctx, "POST", p.baseURL+"/link/token/create", bytes.NewReader(b))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("plaid link token create returned %d", resp.StatusCode)
+	}
+
+	var out linkTokenResp
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return "", err
+	}
+
+	return out.LinkToken, nil
+}
+
 // ExchangePublicToken implements PlaidClient.ExchangePublicToken
 func (p *PlaidHTTPClient) ExchangePublicToken(ctx context.Context, publicToken string) (string, string, string, string, string, error) {
 	reqBody := exchangeReq{ClientID: p.clientID, Secret: p.secret, PublicToken: publicToken}
