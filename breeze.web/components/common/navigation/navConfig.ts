@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, TrendingUp, Wallet, Home } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Wallet, Home, LinkIcon } from 'lucide-react';
 
 export type RouteNavItem = {
   label: string;
@@ -42,5 +42,11 @@ export const toolNavItems: ReadonlyArray<ToolNavItem> = [
     to: '/tools/mortgage',
     title: 'Mortgage Calculator',
     icon: Home,
+  },
+  {
+    label: 'Plaid',
+    to: '/plaid-connections',
+    title: 'Plaid Connections',
+    icon: LinkIcon,
   },
 ];

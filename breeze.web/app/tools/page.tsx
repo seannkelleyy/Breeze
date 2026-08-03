@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/common/PageHeader';
-import { Wrench, Home } from 'lucide-react';
+import { Wrench, Home, LinkIcon } from 'lucide-react';
 
 const tools = [
   {
@@ -11,6 +11,12 @@ const tools = [
     description: 'Analyze amortization, refinance choices, and extra payment strategies.',
     href: '/tools/mortgage',
     icon: Home,
+  },
+  {
+    title: 'Plaid Connections',
+    description: 'Connect bank accounts and sync balances automatically.',
+    href: '/plaid-connections',
+    icon: LinkIcon,
   },
 ];
 

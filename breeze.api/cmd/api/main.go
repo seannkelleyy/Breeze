@@ -82,9 +82,9 @@ func main() {
 	taxPlanningService := service.NewTaxPlanningService(queries)
 	retirementLadderService := service.NewRetirementLadderService(queries)
 	netWorthSnapshotService := service.NewNetWorthSnapshotService(queries)
-	// Plaid client/service (dev-mode when local)
+	// Plaid client/service (dev-mode when local and no credentials)
 	var plaidClient service.PlaidClient
-	if cfg.IsLocalEnv() {
+	if cfg.IsLocalEnv() && (cfg.PlaidClientID == "" || cfg.PlaidSecret == "") {
 		plaidClient = service.NewDevPlaidClient()
 	} else {
 		plaidHTTP, err := service.NewPlaidHTTPClient(cfg)
