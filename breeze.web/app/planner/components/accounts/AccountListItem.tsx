@@ -362,7 +362,6 @@ export function AccountListItem({
 
         <PlaidAccountLinker
           accountId={account.id}
-          accountName={account.name}
           isLiability={isLiability}
           plaidAccountId={account.plaidAccountId}
         />

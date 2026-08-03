@@ -27,6 +27,7 @@ const makeAccount = (overrides: Partial<PlannerAccount> = {}): PlannerAccount =>
   homeGrowthProfile: null,
   vehicleDepreciationProfile: null,
   linkedLiabilityId: null,
+  plaidAccountId: null,
   ...overrides,
 });
 
