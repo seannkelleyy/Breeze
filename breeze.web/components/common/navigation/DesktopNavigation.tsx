@@ -9,21 +9,24 @@ import {
 import ThemeToggle from '../theme/ThemeToggle';
 import { UserPreferencesModal } from '../userPreference/UserPreferencesModal';
 import { NavExternalItem, NavRouteItem } from './NavItems';
-import { externalNavItems, navLabels, routeNavItems } from './navConfig';
+import { externalNavItems, navLabels, routeNavItems, toolNavItems } from './navConfig';
 import BreezeAuthButton from '../auth/BreezeAuthButton';
 import Image from 'next/image';
+import { Wrench } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
-/**
- * DesktopNavigation component for rendering the navigation bar on desktop screens.
- * @returns {JSX.Element} The DesktopNavigation component.
- */
 export const DesktopNavigation = () => {
+  const pathname = usePathname();
+  const isToolsActive = pathname.startsWith('/tools');
+
   return (
     <Menubar
       title="navigation"
       className="fixed relative top-0 z-10 hidden w-full items-center justify-between px-4 backdrop-blur-lg sm:flex"
     >
-      <div className="z-10 flex items-center justify-start gap-2">
+      {/* LEFT cluster: logo dropdown + route links + tools dropdown */}
+      <div className="z-10 flex items-center justify-start gap-1">
         <MenubarMenu>
           <MenubarTrigger>
             <Image className="dark:invert" src="/SK.png" alt="SK Logo" width={40} height={40} />
@@ -31,27 +34,43 @@ export const DesktopNavigation = () => {
           <MenubarContent className="flex flex-col">
             {externalNavItems.map((item, index) => (
               <div key={item.label}>
-                <NavExternalItem
-                  label={item.label}
-                  href={item.href}
-                  title={item.title}
-                  icon={item.icon}
-                />
+                <NavExternalItem label={item.label} href={item.href} title={item.title} icon={item.icon} />
                 {index < externalNavItems.length - 1 ? <MenubarSeparator /> : null}
               </div>
             ))}
           </MenubarContent>
         </MenubarMenu>
-        {routeNavItems.map((item, index) => (
-          <div key={item.label} className="flex items-center">
-            <NavRouteItem label={item.label} to={item.to} title={item.title} />
-            {index < routeNavItems.length - 1 ? <MenubarSeparator /> : null}
-          </div>
+
+        <MenubarSeparator className="mx-1" />
+
+        {routeNavItems.map((item) => (
+          <NavRouteItem key={item.label} label={item.label} to={item.to} title={item.title} icon={item.icon} />
         ))}
+
+        <MenubarMenu>
+          <MenubarTrigger
+            className={cn(
+              'flex items-center gap-1.5 cursor-pointer',
+              isToolsActive && 'bg-accent text-accent-foreground',
+            )}
+          >
+            <Wrench className="h-4 w-4" />
+            Tools
+          </MenubarTrigger>
+          <MenubarContent className="flex flex-col">
+            {toolNavItems.map((item) => (
+              <NavRouteItem key={item.label} label={item.label} to={item.to} title={item.title} icon={item.icon} />
+            ))}
+          </MenubarContent>
+        </MenubarMenu>
       </div>
+
+      {/* CENTER: brand name */}
       <h1 className="absolute left-1/2 -translate-x-1/2 text-3xl font-thin">
         <u>{navLabels.brandName}</u>
       </h1>
+
+      {/* RIGHT cluster: preferences, theme, auth */}
       <div className="z-10 flex items-center justify-end gap-2">
         <UserPreferencesModal />
         <ThemeToggle />

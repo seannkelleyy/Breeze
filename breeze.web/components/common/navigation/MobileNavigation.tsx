@@ -1,57 +1,51 @@
 'use client';
-import {
-  Menubar,
-  MenubarContent,
-  MenubarMenu,
-  MenubarSeparator,
-  MenubarTrigger,
-} from '@/components/ui/menubar';
-import { NavExternalItem, NavRouteItem } from './NavItems';
-import { externalNavItems, navLabels, routeNavItems } from './navConfig';
-import { UserPreferencesModal } from '../userPreference/UserPreferencesModal';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import { LayoutDashboard, TrendingUp, Wallet, Wrench } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import BreezeAuthButton from '../auth/BreezeAuthButton';
-import ThemeToggle from '../theme/ThemeToggle';
 import Image from 'next/image';
 
-/**
- * MobileNavigation component to render the navigation bar on mobile screens.
- * @returns {JSX.Element} The MobileNavigation component.
- */
+const tabs: Array<{ label: string; to: string; icon: LucideIcon }> = [
+  { label: 'Dashboard', to: '/', icon: LayoutDashboard },
+  { label: 'Planner', to: '/planner', icon: TrendingUp },
+  { label: 'Budget', to: '/budget', icon: Wallet },
+  { label: 'Tools', to: '/tools', icon: Wrench },
+];
+
 export const MobileNavigation = () => {
+  const pathname = usePathname();
+
+  const isActive = (to: string) => (to === '/' ? pathname === '/' : pathname.startsWith(to));
+
   return (
-    <Menubar className="fixed top-0 z-10 flex w-full justify-between border-none bg-white/2 px-4 backdrop-blur-lg sm:hidden">
-      <MenubarMenu>
-        <MenubarTrigger>
-          <Image className="dark:invert" src="/SK.png" alt="SK Logo" width={40} height={40} />
-        </MenubarTrigger>
-        <MenubarContent className="flex flex-col">
-          {externalNavItems.map((item, index) => (
-            <div key={item.label}>
-              <NavExternalItem
-                label={item.label}
-                href={item.href}
-                title={item.title}
-                icon={item.icon}
-              />
-              {index < externalNavItems.length - 1 ? <MenubarSeparator /> : null}
-            </div>
-          ))}
-        </MenubarContent>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>{navLabels.routeMenuTitle}</MenubarTrigger>
-        <MenubarContent className="flex flex-col">
-          {routeNavItems.map((item, index) => (
-            <div key={item.label}>
-              <NavRouteItem label={item.label} to={item.to} title={item.title} />
-              {index < routeNavItems.length - 1 ? <MenubarSeparator /> : null}
-            </div>
-          ))}
-        </MenubarContent>
-      </MenubarMenu>
-      <UserPreferencesModal />
-      <ThemeToggle />
-      <BreezeAuthButton />
-    </Menubar>
+    <>
+      {/* Top bar — logo + auth only */}
+      <div className="fixed top-0 z-10 flex w-full items-center justify-between border-none bg-white/2 px-4 backdrop-blur-lg sm:hidden">
+        <Image className="dark:invert" src="/SK.png" alt="SK Logo" width={36} height={36} />
+        <BreezeAuthButton />
+      </div>
+
+      {/* Bottom tab bar */}
+      <nav className="fixed bottom-0 z-10 flex w-full items-center justify-around border-t bg-background/80 backdrop-blur-lg sm:hidden">
+        {tabs.map((tab) => {
+          const active = isActive(tab.to);
+          return (
+            <Link
+              key={tab.label}
+              href={tab.to}
+              className={cn(
+                'flex flex-1 flex-col items-center gap-0.5 py-2 text-xs transition-colors',
+                active ? 'text-primary' : 'text-muted-foreground',
+              )}
+            >
+              <tab.icon className="h-5 w-5" />
+              {tab.label}
+            </Link>
+          );
+        })}
+      </nav>
+    </>
   );
 };
