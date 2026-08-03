@@ -1,0 +1,4 @@
+export const GET_RETIREMENT_ACCOUNTS = `query GetRetirementAccounts($userId: ID!) { retirementAccounts(userId: $userId) { id userId name accountType owner taxTreatment currentBalance annualContributionLimit createdAt updatedAt } }`;
+export const CREATE_RETIREMENT_ACCOUNT = `mutation CreateRetirementAccount($input: CreateRetirementAccountInput!) { createRetirementAccount(input: $input) { id userId name accountType owner taxTreatment currentBalance annualContributionLimit createdAt updatedAt } }`;
+export const UPDATE_RETIREMENT_ACCOUNT = `mutation UpdateRetirementAccount($input: UpdateRetirementAccountInput!) { updateRetirementAccount(input: $input) { id userId name accountType owner taxTreatment currentBalance annualContributionLimit createdAt updatedAt } }`;
+export const DELETE_RETIREMENT_ACCOUNT = `mutation DeleteRetirementAccount($id: ID!) { deleteRetirementAccount(id: $id) }`;

@@ -1,26 +1,67 @@
 # Breeze
-Author: Sean Kelley
 
-### Breeze is currently being refactored and receiving updates. Documentation will be updated once these changes are done. Currently, the documentation may be out of date.
+Personal finance planner — track assets, liabilities, budgets, retirement projections, and tax planning in one place.
 
-Breeze is a Budgeting App that allows users to create new budgets by adding expenses and categories. I built it to showcase my full stack development skills as well as practice. 
+## Stack
 
-Tech Stack:
-React with TypeScript, Axios, ReactQuery, C# and Entity Framework, SQL Databse, Auth0 for security. I have also hosted this application in Azure and got experience with creating, deploying and troubleshooting the process of hosting applications in the cloud. 
+- **API:** Go + GraphQL (gqlgen) + sqlc + Atlas + PostgreSQL
+- **Web:** Next.js 16 App Router + React 19 + TanStack Query + Clerk
+- **DB:** PostgreSQL 16
 
-Getting Started:
-  1. Clone the repo to Visual Studio to set up the backend.
-  2. Run the backend
-  3. Clone the Repo to Visual Studio Code, or any other editor that you prefer.
-  4. In the terminal at the root of /Breeze.Web, run the command "npm install"
-  5. After the install, you can run the command "npm run dev"
-  6. After all of this, the backend should be running and your frontend should be as well, next you need to setup a connection string for your database.
-  7. After setting up a database, get the connection string and add it to the file named "appsettings.development.json" in the /Breeze.API folder in the backend.
-  8. Your application should be good to go at this point.
+## Quick Start
 
-HOSTED APP LINK: https://breezebudgeting.azurewebsites.net/
-This app is hosted in Azure using App Servies for the front end and backend as well as an AzureSQL database. 
+```bash
+# 1. Start PostgreSQL
+docker compose up -d postgres
 
-![Screenshot 2024-06-25 100452](https://github.com/seannkelleyy/Breeze/assets/94130791/948da453-1994-4077-8465-e2a1d1e877f2)
+# 2. API (in breeze.api/)
+make dev    # migrate → gen → run
 
-![Screenshot 2024-06-25 100459](https://github.com/seannkelleyy/Breeze/assets/94130791/1df22075-7534-4603-9085-800fe1d79706)
+# 3. Web (in breeze.web/)
+npm run dev
+```
+
+## Monorepo Structure
+
+```
+breeze.api/    Go API (gqlgen + sqlc + Atlas)
+breeze.web/    Next.js frontend
+compose.yaml   Local PostgreSQL
+docs/          All project documentation
+```
+
+## Key Commands
+
+### API (`breeze.api/`)
+
+| Command | What it does |
+|---|---|
+| `make dev` | Start db → migrate → gen → run |
+| `make gen` | sqlc + gqlgen code generation |
+| `make migrate` | Apply pending migrations |
+| `make seed` | Seed tax brackets |
+| `make test` | Run tests |
+| `make lint` | golangci-lint |
+| `make check` | Full CI pipeline (fmt → tidy → gen → vet → lint → test → build) |
+
+### Web (`breeze.web/`)
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript check |
+| `npm run test` | Vitest |
+
+## API Endpoints
+
+- `GET /health` — health check
+- `GET /graphql` — GraphQL playground
+- `POST /query` — GraphQL endpoint
+
+## Documentation
+
+Start with **[`docs/README.md`](docs/README.md)** — it maps every doc and has common workflows.
+
+Agent instructions live in **[`AGENTS.md`](AGENTS.md)**.
