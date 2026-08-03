@@ -15,6 +15,39 @@
 
 ---
 
+## Quick Start
+
+**Prerequisites:** Node.js 20+, npm 10+, API running at `http://localhost:8080`
+
+```bash
+cd breeze.web
+npm install
+npm run dev
+```
+
+App runs at `http://localhost:3000`.
+
+### Common Commands
+
+```bash
+npm run dev        # start dev server
+npm run build      # static export to out/
+npm run lint       # ESLint check
+npm run typecheck  # TypeScript check
+npm run check      # typecheck + lint + build
+npm run gen        # GraphQL codegen
+npm run test       # Vitest
+```
+
+### Module Entry Points
+
+- `app/planner/` — planning experience (accounts, projections, retirement math)
+- `app/budget/` — budgeting workflow and dialogs
+- `app/plaid-connections/` — Plaid connect/sync UI
+- `components/ui/` — shared shadcn components
+
+---
+
 ## Architecture Patterns
 
 ### Auth Flow (Clerk, client-side)

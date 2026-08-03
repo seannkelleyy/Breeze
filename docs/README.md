@@ -40,6 +40,10 @@ If you are a person or an AI agent, start here first.
 
 - `deployment/01-hosting.md`
 
+### Roadmap
+
+- `roadmap.md`
+
 ### Patterns
 
 - `patterns/01-full-stack-feature.md`
