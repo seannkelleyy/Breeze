@@ -23,7 +23,9 @@ export const MobileNavigation = () => {
     <>
       {/* Top bar — logo + auth only */}
       <div className="fixed top-0 z-10 flex w-full items-center justify-between border-none bg-white/2 px-4 backdrop-blur-lg sm:hidden">
-        <Image className="dark:invert" src="/b.svg" alt="Breeze" width={36} height={36} />
+        <Link href="/">
+          <Image className="dark:invert" src="/b.svg" alt="Breeze" width={36} height={36} />
+        </Link>
         <BreezeAuthButton />
       </div>
 

@@ -8,10 +8,11 @@ import {
 } from '@/components/ui/menubar';
 import ThemeToggle from '../theme/ThemeToggle';
 import { UserPreferencesModal } from '../userPreference/UserPreferencesModal';
-import { NavExternalItem, NavRouteItem } from './NavItems';
-import { externalNavItems, navLabels, routeNavItems, toolNavItems } from './navConfig';
+import { NavRouteItem } from './NavItems';
+import { navLabels, routeNavItems, toolNavItems } from './navConfig';
 import BreezeAuthButton from '../auth/BreezeAuthButton';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Wrench } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -25,21 +26,11 @@ export const DesktopNavigation = () => {
       title="navigation"
       className="fixed relative top-0 z-10 hidden w-full items-center justify-between px-4 backdrop-blur-lg sm:flex"
     >
-      {/* LEFT cluster: logo dropdown + route links + tools dropdown */}
+      {/* LEFT cluster: logo + route links + tools dropdown */}
       <div className="z-10 flex items-center justify-start gap-1">
-        <MenubarMenu>
-          <MenubarTrigger>
-            <Image className="dark:invert" src="/b.svg" alt="Breeze" width={40} height={40} />
-          </MenubarTrigger>
-          <MenubarContent className="flex flex-col">
-            {externalNavItems.map((item, index) => (
-              <div key={item.label}>
-                <NavExternalItem label={item.label} href={item.href} title={item.title} icon={item.icon} />
-                {index < externalNavItems.length - 1 ? <MenubarSeparator /> : null}
-              </div>
-            ))}
-          </MenubarContent>
-        </MenubarMenu>
+        <Link href="/" className="flex items-center">
+          <Image className="dark:invert" src="/b.svg" alt="Breeze" width={40} height={40} />
+        </Link>
 
         <MenubarSeparator className="mx-1" />
 
