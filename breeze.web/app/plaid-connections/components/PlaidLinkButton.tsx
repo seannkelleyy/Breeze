@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
 import { Button } from '@/components/ui/button';
 import { useExchangePlaidToken, useCreateLinkToken } from '@/lib/services/hooks/usePlaid';
@@ -18,16 +18,21 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
   const { mutate: createLinkToken, isPending: isCreatingToken } = useCreateLinkToken();
   const [linkToken, setLinkToken] = useState<string | null>(null);
 
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  onSuccessRef.current = onSuccess;
+  onErrorRef.current = onError;
+
   useEffect(() => {
     if (!userId) return;
 
     createLinkToken(userId, {
       onSuccess: (data) => setLinkToken(data.createPlaidLinkToken),
       onError: () => {
-        onError?.('Failed to create link token');
+        onErrorRef.current?.('Failed to create link token');
       },
     });
-  }, [userId, createLinkToken, onError]);
+  }, [userId, createLinkToken]);
 
   const onPlaidSuccess = useCallback(
     (publicToken: string | null) => {
@@ -36,12 +41,12 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
       exchangeToken(
         { userId, publicToken },
         {
-          onSuccess: () => onSuccess?.(),
-          onError: () => onError?.('Failed to connect account'),
+          onSuccess: () => onSuccessRef.current?.(),
+          onError: () => onErrorRef.current?.('Failed to connect account'),
         },
       );
     },
-    [userId, exchangeToken, onSuccess, onError],
+    [userId, exchangeToken],
   );
 
   const { open, ready } = usePlaidLink({
