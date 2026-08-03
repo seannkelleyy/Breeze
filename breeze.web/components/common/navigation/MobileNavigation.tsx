@@ -37,10 +37,15 @@ export const MobileNavigation = () => {
               href={tab.to}
               className={cn(
                 'flex flex-1 flex-col items-center gap-0.5 py-2 text-xs transition-colors',
-                active ? 'text-primary' : 'text-muted-foreground',
+                active ? 'text-primary-foreground' : 'text-muted-foreground',
               )}
             >
-              <tab.icon className="h-5 w-5" />
+              <div className={cn(
+                'flex size-8 items-center justify-center rounded-full transition-colors',
+                active && 'bg-primary',
+              )}>
+                <tab.icon className="h-5 w-5" />
+              </div>
               {tab.label}
             </Link>
           );
