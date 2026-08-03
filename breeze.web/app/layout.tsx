@@ -20,6 +20,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Breeze',
   description: 'Breeze, the personal finance planner.',
+  icons: {
+    icon: '/b.svg',
+  },
 };
 
 const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? '';

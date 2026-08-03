@@ -29,7 +29,7 @@ export const DesktopNavigation = () => {
       <div className="z-10 flex items-center justify-start gap-1">
         <MenubarMenu>
           <MenubarTrigger>
-            <Image className="dark:invert" src="/SK.png" alt="SK Logo" width={40} height={40} />
+            <Image className="dark:invert" src="/b.svg" alt="Breeze" width={40} height={40} />
           </MenubarTrigger>
           <MenubarContent className="flex flex-col">
             {externalNavItems.map((item, index) => (
