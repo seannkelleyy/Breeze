@@ -98,14 +98,11 @@ check "splits_amount_positive" { expr = "amount > 0" }
 
 Add check constraints for any column with a logical range restriction.
 
-## Immutable Tables — No updated_at or deleted_at
+## Seed Data Tables
 
-These tables are append-only — never updated or soft-deleted after creation:
+These tables require seed data before the app is usable. Seed via a dedicated SQL file in `db/seed/`:
 
-- `net_worth_snapshots`
-- `tax_estimates`
-- `retirement_scenarios`
-- `plaid_webhooks`
+- `tax_brackets` — IRS brackets for current + prior years, all filing statuses, with rates
 
 ## sqlc Query Conventions
 
@@ -168,13 +165,3 @@ overrides:
 ```
 
 Both `numeric` and `pg_catalog.numeric` overrides are required — sqlc uses both type names depending on how the column is defined.
-
-## Seed Data Tables
-
-These tables require seed data before the app is usable. Seed via a dedicated Atlas migration using `INSERT` statements:
-
-- `tax_brackets` — IRS brackets for current + prior years, all filing statuses, with rates
-- `irs_accounts` — 401k, Roth IRA, Traditional IRA, HSA limits per year
-- `tax_form_guide` — document type to required form mappings
-- `return_profiles` — High/Medium/Low Depreciation Vehicle, Standard Investment, Real Estate
-- `return_profile_schedules` — year-by-year depreciation rates for vehicle profiles

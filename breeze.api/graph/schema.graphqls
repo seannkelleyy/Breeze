@@ -1,0 +1,831 @@
+type Query {
+  health: Health!
+  user(id: ID!): User
+  me: User
+  users: [User!]!
+  asset(id: ID!): Asset
+  assets(userId: ID!): [Asset!]!
+  liability(id: ID!): Liability
+  liabilities(userId: ID!): [Liability!]!
+  budget(id: ID!): Budget
+  budgetByDate(userId: ID!, date: String!): Budget
+  budgets(userId: ID!): [Budget!]!
+  goal(id: ID!): Goal
+  goals(userId: ID!): [Goal!]!
+  scenario(id: ID!): Scenario
+  scenarios(userId: ID!): [Scenario!]!
+  compareScenarios(userId: ID!): [ScenarioResult!]!
+  plaidConnection(id: ID!): PlaidConnection
+  plaidConnections(userId: ID!): [PlaidConnection!]!
+  plaidAccounts(connectionId: ID!): [PlaidAccount!]!
+  retirementAccount(id: ID!): RetirementAccount
+  retirementAccounts(userId: ID!): [RetirementAccount!]!
+  contributionProgress(retirementAccountId: ID!, taxYear: Int!): ContributionProgress!
+  expenseCategory(id: ID!): ExpenseCategory
+  expenseCategories(budgetId: ID!): [ExpenseCategory!]!
+  expense(id: ID!): Expense
+  expenses(budgetId: ID!): [Expense!]!
+  income(id: ID!): Income
+  incomes(budgetId: ID!): [Income!]!
+  recurringIncome(id: ID!): RecurringIncome
+  recurringIncomes(userId: ID!): [RecurringIncome!]!
+  recurringExpense(id: ID!): RecurringExpense
+  recurringExpenses(userId: ID!): [RecurringExpense!]!
+  plannerPeople(userId: ID!): [PlannerPerson!]!
+  taxBracket(id: ID!): TaxBracket
+  taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
+  estimateTaxesForYear(year: Int!, filingStatus: FilingStatus!, income: String!, deduction: String): TaxEstimate
+  calculateRetirementLadder(initialBalance: String!, annualExpenses: String!, currentAge: Int!, firstWithdrawalAge: Int!, isRoth: Boolean!, year: Int!, filingStatus: FilingStatus!, yearsToProject: Int): RetirementLadderProjection
+  netWorthSnapshot(id: ID!): NetWorthSnapshot
+  netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
+  netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  deleteUser(id: ID!): Boolean!
+  createAsset(input: CreateAssetInput!): Asset!
+  updateAsset(input: UpdateAssetInput!): Asset!
+  deleteAsset(id: ID!): Boolean!
+  createLiability(input: CreateLiabilityInput!): Liability!
+  updateLiability(input: UpdateLiabilityInput!): Liability!
+  deleteLiability(id: ID!): Boolean!
+  createBudget(input: CreateBudgetInput!): Budget!
+  updateBudget(input: UpdateBudgetInput!): Budget!
+  deleteBudget(id: ID!): Boolean!
+  createGoal(input: CreateGoalInput!): Goal!
+  updateGoal(input: UpdateGoalInput!): Goal!
+  deleteGoal(id: ID!): Boolean!
+  createScenario(input: CreateScenarioInput!): Scenario!
+  updateScenario(input: UpdateScenarioInput!): Scenario!
+  deleteScenario(id: ID!): Boolean!
+  createRetirementAccount(input: CreateRetirementAccountInput!): RetirementAccount!
+  updateRetirementAccount(input: UpdateRetirementAccountInput!): RetirementAccount!
+  deleteRetirementAccount(id: ID!): Boolean!
+  addContribution(input: AddContributionInput!): ContributionEntry!
+  createExpenseCategory(input: CreateExpenseCategoryInput!): ExpenseCategory!
+  updateExpenseCategory(input: UpdateExpenseCategoryInput!): ExpenseCategory!
+  deleteExpenseCategory(id: ID!): Boolean!
+  createExpense(input: CreateExpenseInput!): Expense!
+  updateExpense(input: UpdateExpenseInput!): Expense!
+  deleteExpense(id: ID!): Boolean!
+  createIncome(input: CreateIncomeInput!): Income!
+  updateIncome(input: UpdateIncomeInput!): Income!
+  deleteIncome(id: ID!): Boolean!
+  createRecurringIncome(input: CreateRecurringIncomeInput!): RecurringIncome!
+  updateRecurringIncome(input: UpdateRecurringIncomeInput!): RecurringIncome!
+  deleteRecurringIncome(id: ID!): Boolean!
+  createRecurringExpense(input: CreateRecurringExpenseInput!): RecurringExpense!
+  updateRecurringExpense(input: UpdateRecurringExpenseInput!): RecurringExpense!
+  deleteRecurringExpense(id: ID!): Boolean!
+  upsertPlannerPerson(input: UpsertPlannerPersonInput!): PlannerPerson!
+  deletePlannerPerson(id: ID!): Boolean!
+  createTaxBracket(input: CreateTaxBracketInput!): TaxBracket!
+  updateTaxBracket(input: UpdateTaxBracketInput!): TaxBracket!
+  deleteTaxBracket(id: ID!): Boolean!
+  createNetWorthSnapshot(input: CreateNetWorthSnapshotInput!): NetWorthSnapshot!
+  updateNetWorthSnapshot(input: UpdateNetWorthSnapshotInput!): NetWorthSnapshot!
+  deleteNetWorthSnapshot(id: ID!): Boolean!
+  exchangePlaidPublicToken(userId: ID!, publicToken: String!): PlaidConnection!
+  syncPlaidConnection(id: ID!): Boolean!
+  deletePlaidConnection(id: ID!): Boolean!
+}
+
+type Health {
+  status: String!
+  timestamp: String!
+}
+
+enum ReturnType {
+  REAL
+  NOMINAL
+}
+
+enum DeductionType {
+  STANDARD
+  ITEMIZED
+}
+
+enum FilingStatus {
+  SINGLE
+  MFJ
+  MFS
+  HOH
+}
+
+enum PayoffStrategy {
+  AVALANCHE
+  SNOWBALL
+}
+
+enum RecurrenceInterval {
+  NONE
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum IncomeSourceType {
+  MANUAL
+  RECURRING_TEMPLATE
+}
+
+enum ExpenseSourceType {
+  MANUAL
+  RECURRING_TEMPLATE
+}
+
+enum AssetType {
+  CHECKING
+  EMERGENCY_FUND
+  BROKERAGE
+  _401K
+  _403B
+  _457
+  ROTH_IRA
+  TRADITIONAL_IRA
+  HSA
+  HOME
+  VEHICLE
+  OTHER
+}
+
+enum RetirementAccountOwner {
+  SELF
+  SPOUSE
+}
+
+enum RetirementAccountType {
+  ACCOUNT_401K
+  ACCOUNT_403B
+  ACCOUNT_457
+  ROTH_IRA
+  TRADITIONAL_IRA
+  HSA
+  OTHER
+}
+
+enum RetirementTaxTreatment {
+  PRE_TAX
+  ROTH
+  TAX_DEFERRED
+  TAXABLE
+  OTHER
+}
+
+enum LiabilityType {
+  MORTGAGE
+  CREDIT_CARD
+  STUDENT_LOAN
+  AUTO_LOAN
+  PERSONAL_LOAN
+  OTHER
+}
+
+type User {
+  id: ID!
+  identityProviderId: String!
+  email: String!
+  returnType: ReturnType!
+  safeWithdrawalRate: String!
+  currencyType: String!
+  inflationRate: String!
+  deductionType: DeductionType!
+  deductionAmount: String
+  maxTaxBracketId: ID
+  filingStatus: FilingStatus!
+  payoffStrategy: PayoffStrategy!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateUserInput {
+  identityProviderId: String!
+  email: String!
+  returnType: ReturnType!
+  safeWithdrawalRate: String!
+  currencyType: String!
+  inflationRate: String!
+  deductionType: DeductionType!
+  deductionAmount: String
+  maxTaxBracketId: ID
+  filingStatus: FilingStatus!
+  payoffStrategy: PayoffStrategy!
+}
+
+input UpdateUserInput {
+  id: ID!
+  identityProviderId: String!
+  email: String!
+  returnType: ReturnType!
+  safeWithdrawalRate: String!
+  currencyType: String!
+  inflationRate: String!
+  deductionType: DeductionType!
+  deductionAmount: String
+  maxTaxBracketId: ID
+  filingStatus: FilingStatus!
+  payoffStrategy: PayoffStrategy!
+}
+
+type Asset {
+  id: ID!
+  userId: ID!
+  name: String!
+  assetType: AssetType!
+  currentValue: String!
+  contributionMode: String!
+  contributionValue: String!
+  employerMatchRate: String!
+  employerMatchMaxPercentOfSalary: String!
+  annualRate: String!
+  returnProfile: String
+  personIds: [ID!]!
+  purchaseDate: String
+  purchasePrice: String
+  homeGrowthProfile: String
+  vehicleDepreciationProfile: String
+  linkedLiabilityId: ID
+  lastValueUpdatedAt: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Liability {
+  id: ID!
+  userId: ID!
+  name: String!
+  liabilityType: LiabilityType!
+  currentBalance: String!
+  originalLoanAmount: String
+  interestRate: String!
+  minimumPayment: String!
+  targetExtraPayment: String!
+  payoffPriority: Int!
+  contributionMode: String!
+  contributionValue: String!
+  personIds: [ID!]!
+  lastBalanceUpdatedAt: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Budget {
+  id: ID!
+  userId: ID!
+  date: String!
+  monthlyIncome: String!
+  monthlyExpenses: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Goal {
+  id: ID!
+  userId: ID!
+  description: String!
+  isCompleted: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Scenario {
+  id: ID!
+  userId: ID!
+  name: String!
+  currentAge: Int!
+  retirementAge: Int!
+  annualSpend: String!
+  safeWithdrawalRate: String!
+  inflationRate: String!
+  returnRate: String!
+  currentPortfolio: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ScenarioResult {
+  scenarioProfileId: ID!
+  name: String!
+  currentAge: Int!
+  retirementAge: Int!
+  annualSpend: String!
+  safeWithdrawalRate: String!
+  inflationRate: String!
+  returnRate: String!
+  currentPortfolio: String!
+  portfolioAtRetirement: String!
+  requiredPortfolio: String!
+  projectedDepletionAge: Int
+  isSustainable: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type RetirementAccount {
+  id: ID!
+  userId: ID!
+  name: String!
+  accountType: RetirementAccountType!
+  owner: RetirementAccountOwner!
+  taxTreatment: RetirementTaxTreatment!
+  currentBalance: String!
+  annualContributionLimit: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ContributionEntry {
+  id: ID!
+  retirementAccountId: ID!
+  taxYear: Int!
+  contributionDate: String!
+  amount: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ContributionProgress {
+  retirementAccountId: ID!
+  taxYear: Int!
+  annualLimit: String!
+  contributedYtd: String!
+  remainingAmount: String!
+  percentUsed: String!
+  isMaxed: Boolean!
+}
+
+input CreateRetirementAccountInput {
+  userId: ID!
+  name: String!
+  accountType: RetirementAccountType!
+  owner: RetirementAccountOwner!
+  taxTreatment: RetirementTaxTreatment!
+  currentBalance: String!
+}
+
+input UpdateRetirementAccountInput {
+  id: ID!
+  name: String!
+  accountType: RetirementAccountType!
+  owner: RetirementAccountOwner!
+  taxTreatment: RetirementTaxTreatment!
+  currentBalance: String!
+}
+
+input AddContributionInput {
+  retirementAccountId: ID!
+  contributionDate: String!
+  amount: String!
+}
+
+type ExpenseCategory {
+  id: ID!
+  userId: ID!
+  budgetId: ID!
+  name: String!
+  allocation: String!
+  currentSpend: String!
+  sourceType: ExpenseSourceType!
+  sourceTemplateId: ID
+  generationMonth: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Expense {
+  id: ID!
+  userId: ID!
+  budgetId: ID!
+  amount: String!
+  date: String!
+  description: String!
+  splits: [ExpenseSplit!]!
+  sourceType: ExpenseSourceType!
+  sourceTemplateId: ID
+  generationMonth: String
+  personId: ID
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ExpenseSplit {
+  id: ID!
+  expenseId: ID!
+  categoryId: ID!
+  amount: String!
+  description: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Income {
+  id: ID!
+  userId: ID!
+  budgetId: ID!
+  name: String!
+  amount: String!
+  date: String!
+  sourceType: IncomeSourceType!
+  sourceTemplateId: ID
+  sourceOccurrenceDate: String
+  generationMonth: String
+  personId: ID
+  createdAt: String!
+  updatedAt: String!
+}
+
+type RecurringIncome {
+  id: ID!
+  userId: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+  personId: ID
+  createdAt: String!
+  updatedAt: String!
+}
+
+type RecurringExpense {
+  id: ID!
+  userId: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+  personId: ID
+  createdAt: String!
+  updatedAt: String!
+}
+
+type PlannerPerson {
+  id: ID!
+  userId: ID!
+  name: String!
+  birthday: String!
+  retirementAge: Int!
+  annualSalary: String!
+  bonusMode: String!
+  annualBonus: String!
+  incomeGrowthRate: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type PlaidConnection {
+  id: ID!
+  userId: ID!
+  environment: String!
+  institutionId: String
+  institutionName: String
+  itemId: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type PlaidAccount {
+  id: ID!
+  plaidConnectionId: ID!
+  externalId: String!
+  name: String!
+  officialName: String
+  type: String
+  subtype: String
+  currentBalance: String
+  isoCurrencyCode: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateLiabilityInput {
+  userId: ID!
+  name: String!
+  liabilityType: LiabilityType!
+  currentBalance: String!
+  originalLoanAmount: String
+  interestRate: String!
+  minimumPayment: String!
+  targetExtraPayment: String!
+  payoffPriority: Int!
+  contributionMode: String!
+  contributionValue: String!
+  personIds: [ID!]!
+}
+
+input UpdateLiabilityInput {
+  id: ID!
+  name: String!
+  liabilityType: LiabilityType!
+  currentBalance: String!
+  originalLoanAmount: String
+  interestRate: String!
+  minimumPayment: String!
+  targetExtraPayment: String!
+  payoffPriority: Int!
+  contributionMode: String!
+  contributionValue: String!
+  personIds: [ID!]!
+}
+
+input CreateBudgetInput {
+  userId: ID!
+  date: String!
+  monthlyIncome: String!
+  monthlyExpenses: String!
+}
+
+input UpdateBudgetInput {
+  id: ID!
+  monthlyIncome: String!
+  monthlyExpenses: String!
+}
+
+input CreateGoalInput {
+  userId: ID!
+  description: String!
+  isCompleted: Boolean!
+}
+
+input CreateScenarioInput {
+  userId: ID!
+  name: String!
+  currentAge: Int!
+  retirementAge: Int!
+  annualSpend: String!
+  safeWithdrawalRate: String!
+  inflationRate: String!
+  returnRate: String!
+  currentPortfolio: String!
+}
+
+input UpdateGoalInput {
+  id: ID!
+  description: String!
+  isCompleted: Boolean!
+}
+
+input UpdateScenarioInput {
+  id: ID!
+  name: String!
+  currentAge: Int!
+  retirementAge: Int!
+  annualSpend: String!
+  safeWithdrawalRate: String!
+  inflationRate: String!
+  returnRate: String!
+  currentPortfolio: String!
+}
+
+input CreateExpenseCategoryInput {
+  userId: ID!
+  budgetId: ID!
+  name: String!
+  allocation: String!
+  currentSpend: String!
+}
+
+input UpdateExpenseCategoryInput {
+  id: ID!
+  name: String!
+  allocation: String!
+  currentSpend: String!
+}
+
+input CreateExpenseInput {
+  userId: ID!
+  budgetId: ID!
+  amount: String!
+  date: String!
+  description: String!
+  splits: [ExpenseSplitInput!]!
+  personId: ID
+}
+
+input UpdateExpenseInput {
+  id: ID!
+  amount: String!
+  date: String!
+  description: String!
+  splits: [ExpenseSplitInput!]!
+  personId: ID
+}
+
+input ExpenseSplitInput {
+  categoryId: ID!
+  amount: String!
+  description: String
+}
+
+input CreateIncomeInput {
+  userId: ID!
+  budgetId: ID!
+  name: String!
+  amount: String!
+  date: String!
+  sourceType: IncomeSourceType!
+  sourceTemplateId: ID
+  sourceOccurrenceDate: String
+  generationMonth: String
+  personId: ID
+}
+
+input UpdateIncomeInput {
+  id: ID!
+  name: String!
+  amount: String!
+  date: String!
+  sourceType: IncomeSourceType!
+  sourceTemplateId: ID
+  sourceOccurrenceDate: String
+  generationMonth: String
+  personId: ID
+}
+
+input CreateRecurringIncomeInput {
+  userId: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+  personId: ID
+}
+
+input UpdateRecurringIncomeInput {
+  id: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+  personId: ID
+}
+
+input CreateRecurringExpenseInput {
+  userId: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+  personId: ID
+}
+
+input UpdateRecurringExpenseInput {
+  id: ID!
+  name: String!
+  amount: String!
+  recurrenceInterval: RecurrenceInterval!
+  paydayDayOfMonth: Int
+  startDate: String!
+  endDate: String
+  personId: ID
+}
+
+input UpsertPlannerPersonInput {
+  id: ID!
+  userId: ID!
+  name: String!
+  birthday: String!
+  retirementAge: Int!
+  annualSalary: String!
+  bonusMode: String!
+  annualBonus: String!
+  incomeGrowthRate: String!
+}
+
+type TaxBracket {
+  id: ID!
+  year: Int!
+  filingStatus: FilingStatus!
+  minimumAmount: String!
+  maximumAmount: String
+  rate: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type TaxEstimate {
+  taxOwed: String!
+  taxableIncome: String!
+  effectiveRate: String!
+  marginalRate: String!
+}
+
+input CreateTaxBracketInput {
+  year: Int!
+  filingStatus: FilingStatus!
+  minimumAmount: String!
+  maximumAmount: String
+  rate: String!
+}
+
+input UpdateTaxBracketInput {
+  id: ID!
+  year: Int!
+  filingStatus: FilingStatus!
+  minimumAmount: String!
+  maximumAmount: String
+  rate: String!
+}
+
+input CreateAssetInput {
+  userId: ID!
+  name: String!
+  assetType: AssetType!
+  currentValue: String!
+  contributionMode: String!
+  contributionValue: String!
+  employerMatchRate: String!
+  employerMatchMaxPercentOfSalary: String!
+  annualRate: String!
+  returnProfile: String
+  purchaseDate: String
+  purchasePrice: String
+  homeGrowthProfile: String
+  vehicleDepreciationProfile: String
+  annualChangeRate: String
+  linkedLiabilityId: ID
+  personIds: [ID!]!
+}
+
+input UpdateAssetInput {
+  id: ID!
+  name: String!
+  assetType: AssetType!
+  currentValue: String!
+  contributionMode: String!
+  contributionValue: String!
+  employerMatchRate: String!
+  employerMatchMaxPercentOfSalary: String!
+  annualRate: String!
+  returnProfile: String
+  purchaseDate: String
+  purchasePrice: String
+  homeGrowthProfile: String
+  vehicleDepreciationProfile: String
+  annualChangeRate: String
+  linkedLiabilityId: ID
+  personIds: [ID!]!
+}
+
+
+type NetWorthSnapshot {
+  id: ID!
+  userId: ID!
+  snapshotDate: String!
+  totalAssets: String!
+  totalLiabilities: String!
+  netWorth: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateNetWorthSnapshotInput {
+  userId: ID!
+  snapshotDate: String!
+  totalAssets: String!
+  totalLiabilities: String!
+  netWorth: String!
+}
+
+input UpdateNetWorthSnapshotInput {
+  id: ID!
+  totalAssets: String
+  totalLiabilities: String
+  netWorth: String
+}
+
+type LadderStep {
+  year: Int!
+  age: Int!
+  withdrawalAmount: String!
+  taxableWithdrawal: String!
+  estimatedIncomeTax: String!
+  earlyWithdrawalPenalty: String!
+  netWithdrawal: String!
+  remainingBalance: String!
+  isAccessible: Boolean!
+}
+
+type RetirementLadderProjection {
+  initialBalance: String!
+  annualExpenses: String!
+  currentAge: Int!
+  firstWithdrawalAge: Int!
+  isRoth: Boolean!
+  projectedSteps: [LadderStep!]!
+  isSustainable: Boolean!
+  projectedDepletionAge: Int
+}

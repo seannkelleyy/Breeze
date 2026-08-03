@@ -64,6 +64,10 @@ migrate-clean:
 migrate-lint:
 	export $(shell cat .env | xargs) && atlas migrate lint --env local --latest 1
 
+# Apply seed data (tax brackets, etc.)
+seed:
+	export $(shell cat .env | xargs) && psql $$DATABASE_URL -f db/seed/seed.sql
+
 # Start PostgreSQL
 db-up:
 	docker compose -f ../compose.yaml up -d postgres

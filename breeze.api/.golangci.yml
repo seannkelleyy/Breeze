@@ -1,0 +1,41 @@
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+    - gosimple
+    - gocritic
+    - errorlint
+    - gofmt
+  disable:
+    - deadcode
+    - structcheck
+    - varcheck
+
+linters-settings:
+  govet:
+    enable:
+      - shadow
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+  errorlint:
+    errorf: true
+    asserts: true
+    comparison: true
+
+issues:
+  exclude-dirs:
+    - internal/db/sqlc
+    - graph/generated
+    - graph/model
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck

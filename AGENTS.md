@@ -22,11 +22,7 @@ breeze/
 ├── compose.yaml         # Local PostgreSQL (shared across monorepo)
 └── .github/
     ├── copilot-instructions.md    # Agent-facing quick ref
-    ├── instructions.md            # This file — master agent guide
-    └── docs/
-        ├── api/                  # Numbered API reference docs
-        ├── api/*.instructions.md  # Scoped API rules (applyTo)
-        └── ui/*.instructions.md   # Web app checklists + spec docs
+    └── workflows/                 # CI pipelines
 ```
 
 ---
@@ -62,7 +58,7 @@ breeze/
 - **Every read query filters `WHERE deleted_at IS NULL`** — no exceptions.
 - Soft delete: sets `deleted_at = now()` and `updated_at = now()`.
 - Primary keys: `UUID` with `DEFAULT gen_random_uuid()` — never generate UUIDs in Go.
-- Immutable tables (no updated_at/deleted_at): `net_worth_snapshots`, `tax_estimates`, `retirement_scenarios`.
+- Immutable tables (no updated_at/deleted_at) should be documented in `docs/db/01-schema-conventions.md` when created.
 
 ### Enum Changes (PostgreSQL + Atlas)
 - Cannot use `ALTER TYPE ... ADD VALUE` in Atlas migrations (Atlas can't reorder values).
@@ -116,6 +112,7 @@ npm run dev
 | `make migrate-diff MIGRATION_NAME=x` | Generate migration from schema.hcl |
 | `make migrate-hash` | Re-hash atlas.sum after manual migration edits |
 | `make migrate-clean` | Wipe the database schema |
+| `make seed` | Apply seed data (tax brackets, etc.) |
 | `make test` | `go test ./...` |
 | `make lint` | `golangci-lint run ./...` |
 
@@ -179,6 +176,18 @@ Primary index: [`docs/README.md`](docs/README.md)
 ---
 
 ## 🎯 Common Change Patterns
+
+| Change | What to touch |
+|---|---|
+| **Add a field to an existing table** | `schema.hcl` → `make migrate-diff` → `db/queries/*.sql` → `make gen` → service struct → GraphQL schema → resolver helper → frontend types → frontend component |
+| **Add a new enum value** | `schema.hcl` → migration (RENAME + CREATE NEW + MIGRATE + DROP OLD) → `make migrate` → `make gen` → frontend `typeMapping.ts` → frontend component |
+| **Add a new GraphQL query** | `graph/schema.graphqls` → `make gen` → implement resolver stub in `graph/schema.resolvers.go` → helper in `graph/*_helpers.go` → frontend query definition → TanStack Query hook |
+| **Add a new GraphQL mutation** | `graph/schema.graphqls` → `make gen` → implement resolver stub → service method → sqlc query (if needed) → frontend mutation hook → UI save flow |
+| **Add a new table (full slice)** | Follow the [vertical slice playbook](docs/api/06-vertical-slice.md) |
+| **Fix an Atlas checksum error** | `cd breeze.api && export $(cat .env \| xargs) && atlas migrate hash --env local` |
+| **Add columns that already exist in the DB** | Migration must use `ADD COLUMN IF NOT EXISTS` with reasonable defaults — see `20260627133813_add_asset_liability_fields.sql` for an example |
+| **Rename a migration value** | Change the migration SQL directly, then re-hash. Do not write adapter code |
+
 ---
 
 ## 🧹 Keeping Docs in Sync
@@ -199,19 +208,6 @@ Docs are read by every agent on every task. Stale docs cause bad code. When you 
 | **Anything else** | If it's a pattern another agent would benefit from, add a sentence or example to the most relevant doc. A one-line addition is better than a stale doc. |
 
 **Rule of thumb:** if you had to read a doc to write your code, update that doc with what you learned.
-
-
-
-| Change | What to touch |
-|---|---|
-| **Add a field to an existing table** | `schema.hcl` → `make migrate-diff` → `db/queries/*.sql` → `make gen` → service struct → GraphQL schema → resolver helper → frontend types → frontend component |
-| **Add a new enum value** | `schema.hcl` → migration (RENAME + CREATE NEW + MIGRATE + DROP OLD) → `make migrate` → `make gen` → frontend `typeMapping.ts` → frontend component |
-| **Add a new GraphQL query** | `graph/schema.graphqls` → `make gen` → implement resolver stub in `graph/schema.resolvers.go` → helper in `graph/*_helpers.go` → frontend query definition → TanStack Query hook |
-| **Add a new GraphQL mutation** | `graph/schema.graphqls` → `make gen` → implement resolver stub → service method → sqlc query (if needed) → frontend mutation hook → UI save flow |
-| **Add a new table (full slice)** | Follow the [vertical slice playbook](docs/api/06-vertical-slice.md) |
-| **Fix an Atlas checksum error** | `cd breeze.api && export $(cat .env \| xargs) && atlas migrate hash --env local` |
-| **Add columns that already exist in the DB** | Migration must use `ADD COLUMN IF NOT EXISTS` with reasonable defaults — see `20260627133813_add_asset_liability_fields.sql` for an example |
-| **Rename a migration value** | Change the migration SQL directly, then re-hash. Do not write adapter code |
 
 ---
 

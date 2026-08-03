@@ -1,3 +1,0 @@
-export const UPSERT_PLANNER_PERSON = `mutation UpsertPlannerPerson($input: UpsertPlannerPersonInput!) { upsertPlannerPerson(input: $input) { id userId personType name birthday retirementAge annualSalary bonusMode annualBonus incomeGrowthRate createdAt updatedAt } }`;
-export const DELETE_PLANNER_PERSON = `mutation DeletePlannerPerson($id: ID!) { deletePlannerPerson(id: $id) }`;
-export const GET_PLANNER_PEOPLE = `query PlannerPeople($userId: ID!) { plannerPeople(userId: $userId) { id userId personType name birthday retirementAge annualSalary bonusMode annualBonus incomeGrowthRate createdAt updatedAt } }`;
