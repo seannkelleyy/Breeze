@@ -40,9 +40,10 @@ export const useCreateLinkToken = () => {
 
   return useMutation({
     mutationFn: async (userId: string) => {
-      return request<{ createPlaidLinkToken: string }>(CREATE_PLAID_LINK_TOKEN, {
+      const resp = await request<{ createPlaidLinkToken: string }>(CREATE_PLAID_LINK_TOKEN, {
         userId,
       } as unknown as Record<string, unknown>);
+      return resp.createPlaidLinkToken;
     },
   });
 };
@@ -99,10 +100,11 @@ export const usePlaidConnections = (userId: string | null, enabled: boolean = tr
     queryKey: ['plaidConnections', userId],
     queryFn: async () => {
       if (!userId) return null;
-      return request<PlaidConnection[]>(PLAID_CONNECTIONS, { userId } as unknown as Record<
-        string,
-        unknown
-      >);
+      const resp = await request<{ plaidConnections: PlaidConnection[] }>(
+        PLAID_CONNECTIONS,
+        { userId } as unknown as Record<string, unknown>,
+      );
+      return resp.plaidConnections;
     },
     enabled: enabled && !!userId,
   });
@@ -115,10 +117,11 @@ export const usePlaidAccounts = (connectionId: string | null, enabled: boolean =
     queryKey: ['plaidAccounts', connectionId],
     queryFn: async () => {
       if (!connectionId) return null;
-      return request<PlaidAccount[]>(PLAID_ACCOUNTS, { connectionId } as unknown as Record<
-        string,
-        unknown
-      >);
+      const resp = await request<{ plaidAccounts: PlaidAccount[] }>(
+        PLAID_ACCOUNTS,
+        { connectionId } as unknown as Record<string, unknown>,
+      );
+      return resp.plaidAccounts;
     },
     enabled: enabled && !!connectionId,
   });

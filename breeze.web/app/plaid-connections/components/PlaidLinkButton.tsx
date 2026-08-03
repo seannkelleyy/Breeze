@@ -27,7 +27,7 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
     if (!userId) return;
 
     createLinkToken(userId, {
-      onSuccess: (data) => setLinkToken(data.createPlaidLinkToken),
+      onSuccess: (token) => setLinkToken(token),
       onError: () => {
         onErrorRef.current?.('Failed to create link token');
       },
