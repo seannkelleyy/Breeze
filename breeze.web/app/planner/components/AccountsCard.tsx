@@ -9,7 +9,7 @@ import { formatCurrencyWithCode } from '../lib/plannerMath';
 import { usePlannerAccounts } from '../hooks/planner/index';
 import { useAccountMutations } from '../hooks/planner/useAccountMutations';
 import { AccountListItem } from './accounts/AccountListItem';
-import { PlannerAccount } from '../types/account';
+import { PlannerAccount, AccountType } from '../types/account';
 import { HomeGrowthProfile } from '../types/finance';
 
 export interface AccountsCardProps {
@@ -18,6 +18,26 @@ export interface AccountsCardProps {
 }
 
 type AccountFilter = 'all' | 'assets' | 'liabilities' | 'tax-advantaged';
+
+const ACCOUNT_TYPE_ORDER: Record<AccountType, number> = {
+  'checking': 0,
+  'emergency-fund': 1,
+  'brokerage': 2,
+  '401k': 3,
+  '403b': 4,
+  '457': 5,
+  'roth-ira': 6,
+  'traditional-ira': 7,
+  'hsa': 8,
+  'home': 9,
+  'vehicle': 10,
+  'other': 11,
+  'student-loan': 12,
+  'credit-card': 13,
+  'personal-loan': 14,
+  'auto-loan': 15,
+  'mortgage': 16,
+};
 
 const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
   const { currencyCode, userId } = useCurrentUser();
@@ -91,23 +111,34 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
   const toggleCollapse = (id: string) => setCollapsedAccountIds((p) => ({ ...p, [id]: !p[id] }));
 
   const filteredAccounts = useMemo(() => {
+    let accounts: PlannerAccount[];
     switch (accountFilter) {
       case 'assets':
-        return plannerAccounts.filter((a) => !isLiabilityAccountType(a.accountType));
+        accounts = plannerAccounts.filter((a) => !isLiabilityAccountType(a.accountType));
+        break;
       case 'liabilities':
-        return plannerAccounts.filter((a) => {
+        accounts = plannerAccounts.filter((a) => {
           if (isLiabilityAccountType(a.accountType)) return true;
           if (isCombinedAssetType(a.accountType))
             return assetFinanceDetailsByAccountId[a.id]?.hasLoan ?? false;
           return false;
         });
+        break;
       case 'tax-advantaged':
-        return plannerAccounts.filter(
+        accounts = plannerAccounts.filter(
           (a) => getSuggestedAnnualLimitForAccount(a.accountType, 40) > 0,
         );
+        break;
       default:
-        return plannerAccounts;
+        accounts = plannerAccounts;
     }
+
+    return accounts.sort((a, b) => {
+      const typeA = ACCOUNT_TYPE_ORDER[a.accountType] ?? 99;
+      const typeB = ACCOUNT_TYPE_ORDER[b.accountType] ?? 99;
+      if (typeA !== typeB) return typeA - typeB;
+      return a.name.localeCompare(b.name);
+    });
   }, [
     accountFilter,
     plannerAccounts,
