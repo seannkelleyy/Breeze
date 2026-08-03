@@ -57,7 +57,7 @@ const RetirementNeedEstimateCard = ({
             </div>
             <Progress
               value={progressPct}
-              className="h-2 [&>[data-slot=progress-indicator]]:bg-blue-500"
+              className="h-2 [&>[data-slot=progress-indicator]]:bg-info"
             />
             <p className="text-muted-foreground text-xs">
               {progressPct.toFixed(1)}% toward your freedom target
@@ -71,8 +71,8 @@ const RetirementNeedEstimateCard = ({
                 className={cn(
                   'font-medium',
                   isOnTrack
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-red-600 dark:text-red-400',
+                    ? 'text-success'
+                    : 'text-destructive',
                 )}
               >
                 {formatCurrency(totalPlannedMonthlyInvestment)} /{' '}
@@ -82,7 +82,7 @@ const RetirementNeedEstimateCard = ({
             <p
               className={cn(
                 'text-xs',
-                isOnTrack ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
+                isOnTrack ? 'text-success' : 'text-destructive',
               )}
             >
               {isOnTrack

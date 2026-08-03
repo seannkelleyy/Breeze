@@ -118,8 +118,8 @@ const Dashboard = () => {
         <RecurringTemplatesDialog />
       </div>
       {confirmRegenerate ? (
-        <div className="flex w-full flex-col items-center gap-3 rounded-lg border border-orange-300 bg-orange-50 px-4 py-3 text-sm sm:flex-row dark:border-orange-700 dark:bg-orange-950/30">
-          <span className="flex-1 text-orange-800 dark:text-orange-300">
+        <div className="flex w-full flex-col items-center gap-3 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm sm:flex-row">
+          <span className="flex-1 text-warning">
             This will delete and re-generate all template-sourced rows for{' '}
             <strong>{dayjs(new Date(currentYear, currentMonth)).format('MMMM YYYY')}</strong>.
             Continue?
@@ -156,7 +156,7 @@ const Dashboard = () => {
       )}
       {regenerateMessage ? (
         <div
-          className={`w-full rounded-md border px-3 py-2 text-sm ${regenerateMessage.startsWith('Failed') ? 'border-destructive/30 bg-destructive/10 text-destructive' : 'border-green-300 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-950/30 dark:text-green-300'}`}
+          className={`w-full rounded-md border px-3 py-2 text-sm ${regenerateMessage.startsWith('Failed') ? 'border-destructive/30 bg-destructive/10 text-destructive' : 'border-success/30 bg-success/10 text-success'}`}
         >
           {regenerateMessage}
         </div>

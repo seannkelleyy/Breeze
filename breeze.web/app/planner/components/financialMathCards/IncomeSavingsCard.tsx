@@ -50,8 +50,8 @@ const IncomeSavingsCard = ({ snapshot, formatCurrency }: IncomeSavingsCardProps)
             <span>{formatCurrency(snapshot.annualExtraExpenseBuffer)}</span>
           </div>
           <div className="flex items-center justify-between text-sm font-medium">
-            <span className="text-green-600 dark:text-green-400">Yearly saving</span>
-            <span className="text-green-600 dark:text-green-400">
+            <span className="text-success">Yearly saving</span>
+            <span className="text-success">
               {formatCurrency(snapshot.yearlySavings)}
             </span>
           </div>
@@ -60,13 +60,13 @@ const IncomeSavingsCard = ({ snapshot, formatCurrency }: IncomeSavingsCardProps)
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Savings rate</span>
-            <span className="font-medium text-green-600 dark:text-green-400">
+            <span className="font-medium text-success">
               {savingsRate.toFixed(1)}%
             </span>
           </div>
           <Progress
             value={savingsRate}
-            className="h-2 [&>[data-slot=progress-indicator]]:bg-green-500"
+            className="h-2 [&>[data-slot=progress-indicator]]:bg-success"
           />
         </div>
       </CardContent>

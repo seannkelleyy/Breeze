@@ -49,8 +49,8 @@ const ExpensesEmergencyFundCard = ({
                     className={cn(
                       'font-medium',
                       isCovered
-                        ? 'text-green-600 dark:text-green-400'
-                        : 'text-red-600 dark:text-red-400',
+                        ? 'text-success'
+                        : 'text-destructive',
                     )}
                   >
                     {formatCurrency(efBalance)} / {formatCurrency(target)}
@@ -61,18 +61,18 @@ const ExpensesEmergencyFundCard = ({
                   className={cn(
                     'h-2.5',
                     isCovered
-                      ? '[&>[data-slot=progress-indicator]]:bg-green-500'
+                      ? '[&>[data-slot=progress-indicator]]:bg-success'
                       : pct >= 50
-                        ? '[&>[data-slot=progress-indicator]]:bg-amber-500'
-                        : '[&>[data-slot=progress-indicator]]:bg-red-500',
+                        ? '[&>[data-slot=progress-indicator]]:bg-warning'
+                        : '[&>[data-slot=progress-indicator]]:bg-destructive',
                   )}
                 />
                 <p
                   className={cn(
                     'text-xs',
                     isCovered
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-red-600 dark:text-red-400',
+                      ? 'text-success'
+                      : 'text-destructive',
                   )}
                 >
                   {isCovered

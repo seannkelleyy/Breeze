@@ -59,7 +59,7 @@ const RequiredMonthlyContributionCard = ({
             <p
               className={cn(
                 'text-3xl font-bold',
-                isOnTrack ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
+                isOnTrack ? 'text-success' : 'text-destructive',
               )}
             >
               {formatCurrency(monthlyNeededForDesiredTarget)}
@@ -76,8 +76,8 @@ const RequiredMonthlyContributionCard = ({
                 className={cn(
                   'text-xs font-medium',
                   isOnTrack
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-red-600 dark:text-red-400',
+                    ? 'text-success'
+                    : 'text-destructive',
                 )}
               >
                 {currentSavingsRateTotalPercent.toFixed(1)}% /{' '}
@@ -89,14 +89,14 @@ const RequiredMonthlyContributionCard = ({
               className={cn(
                 'h-2',
                 isOnTrack
-                  ? '[&>[data-slot=progress-indicator]]:bg-green-500'
-                  : '[&>[data-slot=progress-indicator]]:bg-red-500',
+                  ? '[&>[data-slot=progress-indicator]]:bg-success'
+                  : '[&>[data-slot=progress-indicator]]:bg-destructive',
               )}
             />
             <p
               className={cn(
                 'text-xs',
-                isOnTrack ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
+                isOnTrack ? 'text-success' : 'text-destructive',
               )}
             >
               {isOnTrack
@@ -112,8 +112,8 @@ const RequiredMonthlyContributionCard = ({
                 className={cn(
                   'text-xs font-medium',
                   isMonthlyGapPositive
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-red-600 dark:text-red-400',
+                    ? 'text-success'
+                    : 'text-destructive',
                 )}
               >
                 {isMonthlyGapPositive ? '+' : ''}
@@ -125,16 +125,16 @@ const RequiredMonthlyContributionCard = ({
               className={cn(
                 'h-2',
                 isMonthlyGapPositive
-                  ? '[&>[data-slot=progress-indicator]]:bg-green-500'
-                  : '[&>[data-slot=progress-indicator]]:bg-red-500',
+                  ? '[&>[data-slot=progress-indicator]]:bg-success'
+                  : '[&>[data-slot=progress-indicator]]:bg-destructive',
               )}
             />
             <p
               className={cn(
                 'text-xs',
                 isMonthlyGapPositive
-                  ? 'text-green-600 dark:text-green-400'
-                  : 'text-red-600 dark:text-red-400',
+                  ? 'text-success'
+                  : 'text-destructive',
               )}
             >
               {isMonthlyGapPositive

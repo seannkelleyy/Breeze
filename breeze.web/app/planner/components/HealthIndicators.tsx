@@ -13,21 +13,21 @@ type HealthStatus = 'good' | 'warning' | 'bad';
 
 const statusConfig = {
   good: {
-    border: 'border-l-green-500',
-    text: 'text-green-600 dark:text-green-400',
-    dot: 'bg-green-500',
+    border: 'border-l-success',
+    text: 'text-success',
+    dot: 'bg-success',
     label: 'On Track',
   },
   warning: {
-    border: 'border-l-amber-500',
-    text: 'text-amber-600 dark:text-amber-400',
-    dot: 'bg-amber-500',
+    border: 'border-l-warning',
+    text: 'text-warning',
+    dot: 'bg-warning',
     label: 'Needs Attention',
   },
   bad: {
-    border: 'border-l-red-500',
-    text: 'text-red-600 dark:text-red-400',
-    dot: 'bg-red-500',
+    border: 'border-l-destructive',
+    text: 'text-destructive',
+    dot: 'bg-destructive',
     label: 'Behind',
   },
 };

@@ -109,7 +109,7 @@ export default function PlannerPage() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="space-y-2 text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-info" />
           <p className="text-muted-foreground">Loading your planner...</p>
         </div>
       </div>

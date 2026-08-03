@@ -59,8 +59,8 @@ const PlaidConnections = () => {
 
       {/* Status Messages */}
       {syncStatus === 'success' && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-          <div className="flex items-center gap-2 text-green-800">
+        <div className="rounded-lg border border-success/30 bg-success/10 p-4">
+          <div className="flex items-center gap-2 text-success">
             <CheckCircle2 className="h-4 w-4" />
             <span>Successfully synced your accounts</span>
           </div>
@@ -68,8 +68,8 @@ const PlaidConnections = () => {
       )}
 
       {syncStatus === 'error' && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <div className="flex items-center gap-2 text-red-800">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <div className="flex items-center gap-2 text-destructive">
             <span>Failed to sync accounts. Please try again.</span>
           </div>
         </div>

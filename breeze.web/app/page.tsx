@@ -127,7 +127,7 @@ const DashboardPage = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
-              <ArrowUpRight className="size-4 text-green-500" />
+              <ArrowUpRight className="size-4 text-success" />
               Total Assets
             </CardDescription>
             <CardTitle className="text-3xl">
@@ -144,7 +144,7 @@ const DashboardPage = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
-              <ArrowDownRight className="size-4 text-red-500" />
+              <ArrowDownRight className="size-4 text-destructive" />
               Total Liabilities
             </CardDescription>
             <CardTitle className="text-3xl">
