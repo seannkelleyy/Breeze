@@ -449,13 +449,6 @@ export const getProjection = (
   ];
   let contributedTotal = 0;
   for (let year = 1; year <= years; year++) {
-    const yearPersonIncomes = people.reduce(
-      (map, p) => {
-        map[p.id] = getAnnualIncomeWithGrowth(p.annualSalary, p.incomeGrowthRate, year - 1);
-        return map;
-      },
-      {} as Record<string, number>,
-    );
     const projectedContributionPlanByAccount = accounts.map((account) => {
       const ownerPersons = people.filter((p) => account.personIds.includes(p.id));
       const ownerPerson = ownerPersons[0] ?? people[0];
