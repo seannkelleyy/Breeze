@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 import dayjs from 'dayjs';
-import { MoveLeft, MoveRight, RefreshCw } from 'lucide-react';
+import { MoveLeft, MoveRight, RefreshCw, Loader2 } from 'lucide-react';
 
 import { useBudgetContext } from './providers/index';
 import { useRegenerateBudget } from './hooks/budget/index';
@@ -19,12 +19,25 @@ import {
 } from './components/index';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { isMoneyGreaterThanOrEqualWithTolerance } from '../planner/lib/constants';
+import { useTabParam } from '@/lib/hooks/useTabParam';
 
-/**
- * Main page of the application displaying a budget and goals.
- * @returns {JSX.Element} The Dashboard component displaying budget overview and management options.
- */
-const Dashboard = () => {
+const BUDGET_TABS = ['categories', 'expenses', 'income'] as const;
+
+export default function BudgetPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="text-muted-foreground mx-auto h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
+      <BudgetContent />
+    </Suspense>
+  );
+}
+
+const BudgetContent = () => {
   const { budget, getBudgetForDate, refetchBudget, refetchIncomes, refetchCategories } =
     useBudgetContext();
   const { regenerateBudgetMonth } = useRegenerateBudget();
@@ -33,6 +46,7 @@ const Dashboard = () => {
   const [confirmRegenerate, setConfirmRegenerate] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [regenerateMessage, setRegenerateMessage] = useState('');
+  const [activeTab, setActiveTab] = useTabParam('expenses', BUDGET_TABS);
 
   useEffect(() => {
     getBudgetForDate(currentYear, currentMonth);
@@ -162,7 +176,7 @@ const Dashboard = () => {
         </div>
       ) : null}
       <Goals />
-      <Tabs defaultValue="expenses" className="m-4 flex flex-col items-center justify-center">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="m-4 flex flex-col items-center justify-center">
         <TabsList>
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
@@ -181,5 +195,3 @@ const Dashboard = () => {
     </div>
   );
 };
-
-export default Dashboard;

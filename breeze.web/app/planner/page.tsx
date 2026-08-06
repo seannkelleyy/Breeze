@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
@@ -17,9 +17,21 @@ import {
 import { accountLineColors, getDefaultAssetFinanceDetailsForAccount } from './lib/plannerMath';
 import { PLANNER_DEFAULT_INCOME_REPLACEMENT_RATE } from './lib/constants';
 
-type PlannerTab = 'inputs' | 'accounts' | 'projections';
-
 export default function PlannerPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="text-muted-foreground mx-auto h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
+      <PlannerContent />
+    </Suspense>
+  );
+}
+
+function PlannerContent() {
   const { isLoaded: clerkLoaded } = useUser();
   const { userId, isLoaded } = useCurrentUser();
   const { data: connections } = usePlaidConnections(userId);
@@ -38,7 +50,7 @@ export default function PlannerPage() {
   // Manage local UI state
   const {
     collapsedSections,
-    activeTab: uiActiveTab,
+    activeTab,
     toggleSection,
     setActiveTab,
   } = usePlannerState();
@@ -141,8 +153,8 @@ export default function PlannerPage() {
 
       {/* Main Content */}
       <Tabs
-        value={uiActiveTab}
-        onValueChange={(v) => setActiveTab(v as PlannerTab)}
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as 'inputs' | 'accounts' | 'projections')}
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-3">

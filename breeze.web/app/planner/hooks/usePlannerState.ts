@@ -1,14 +1,18 @@
 'use client';
 import { useState } from 'react';
+import { useTabParam } from '@/lib/hooks/useTabParam';
+
+const PLANNER_TABS = ['inputs', 'accounts', 'projections'] as const;
+type PlannerTab = (typeof PLANNER_TABS)[number];
 
 export interface PlannerUIState {
   collapsedSections: Record<string, boolean>;
-  activeTab: string;
+  activeTab: PlannerTab;
   editingFieldId: string | null;
   validationErrors: Record<string, string>;
 }
 
-const DEFAULT_UI_STATE: PlannerUIState = {
+const DEFAULT_UI_STATE: Omit<PlannerUIState, 'activeTab'> = {
   collapsedSections: {
     retirementInputs: false,
     people: false,
@@ -17,13 +21,13 @@ const DEFAULT_UI_STATE: PlannerUIState = {
     taxPlanning: false,
     retirementLadder: false,
   },
-  activeTab: 'inputs',
   editingFieldId: null,
   validationErrors: {},
 };
 
 export function usePlannerState() {
-  const [uiState, setUiState] = useState<PlannerUIState>(DEFAULT_UI_STATE);
+  const [activeTab, setActiveTab] = useTabParam<PlannerTab>('inputs', PLANNER_TABS);
+  const [uiState, setUiState] = useState(DEFAULT_UI_STATE);
 
   const toggleSection = (sectionId: string) => {
     setUiState((prev) => ({
@@ -33,10 +37,6 @@ export function usePlannerState() {
         [sectionId]: !prev.collapsedSections[sectionId],
       },
     }));
-  };
-
-  const setActiveTab = (tab: string) => {
-    setUiState((prev) => ({ ...prev, activeTab: tab }));
   };
 
   const setEditingField = (fieldId: string | null) => {
@@ -64,8 +64,9 @@ export function usePlannerState() {
 
   return {
     ...uiState,
-    toggleSection,
+    activeTab,
     setActiveTab,
+    toggleSection,
     setEditingField,
     setValidationError,
     clearValidationErrors,

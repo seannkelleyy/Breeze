@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChartConfig } from '@/components/ui/chart';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { type ReactNode, useMemo, useState } from 'react';
+import { useTabParam } from '@/lib/hooks/useTabParam';
 import AmortizationTab from './tabs/AmortizationTab';
 import LoanCompareTab from './tabs/LoanCompareTab';
 import RefinanceTab from './tabs/RefinanceTab';
@@ -88,7 +89,7 @@ export const PlannerToolsCard = ({
   formatCurrency,
   homeLoan,
 }: PlannerToolsCardProps) => {
-  const [selectedTool, setSelectedTool] = useState('loan-compare');
+  const [selectedTool, setSelectedTool] = useTabParam('loan-compare', ['loan-compare', 'amortization', 'refinance'] as const);
   const [refiRate, setRefiRate] = useState(0);
   const [refiTermYears, setRefiTermYears] = useState(0);
   const [refiClosingCosts, setRefiClosingCosts] = useState(4500);
@@ -421,7 +422,7 @@ export const PlannerToolsCard = ({
       </CardHeader>
       {!collapsed ? (
         <CardContent className="space-y-4">
-          <Tabs value={selectedTool} onValueChange={setSelectedTool}>
+          <Tabs value={selectedTool} onValueChange={(v) => setSelectedTool(v as 'loan-compare' | 'amortization' | 'refinance')}>
             <div className="overflow-x-auto pb-1">
               <TabsList className="inline-flex h-9 w-max min-w-full justify-start gap-1">
                 <TabsTrigger value="loan-compare">Loan Compare</TabsTrigger>

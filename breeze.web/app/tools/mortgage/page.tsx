@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { Suspense, useCallback, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 
 import { FormattedNumberInput } from '../../../components/common/form/FormattedNumberInput';
 import { Label } from '@/components/ui/label';
@@ -292,4 +293,17 @@ const MortgageTools = () => {
   );
 };
 
-export default MortgageTools;
+export default function MortgagePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="text-muted-foreground mx-auto h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
+      <MortgageTools />
+    </Suspense>
+  );
+}
+
