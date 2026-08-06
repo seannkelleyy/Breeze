@@ -1,5 +1,5 @@
 'use client';
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { usePlannerPeople, usePersonMutations } from '../hooks/planner/index';
 import { BonusMode } from '../types/person';
+import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 
 export interface PeopleCardProps {
@@ -60,20 +61,15 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
     setActivePersonIndex((previous) => (previous + 1) % people.length);
   };
 
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  useEffect(() => {
-    if (people.length === 0) return;
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
+  useAutoSave(
+    () => {
+      if (people.length === 0) return;
       for (const person of people) {
         upsertPersonMutation.mutate(person);
       }
-    }, 600);
-    return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-    };
-  }, [people]);
+    },
+    [people],
+  );
 
   return (
     <Card>

@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import * as plannerConstants from '../../lib/constants';
+import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import {
   formatCurrencyWithCode,
   getAssetFinanceSnapshot,
@@ -20,7 +21,6 @@ import {
   getEmployerMatchMonthly,
   getAgeFromBirthday,
 } from '../../lib/plannerMath';
-import { useEffect, useRef } from 'react';
 import {
   AccountType,
   ContributionMode,
@@ -119,15 +119,7 @@ export function AccountListItem({
   toIsoDate,
   getHomeAnnualGrowthRate,
 }: AccountListItemProps) {
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  useEffect(() => {
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => onSave(account), 600);
-    return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-    };
-  }, [
+  useAutoSave(() => onSave(account), [
     account.name,
     account.personIds,
     account.accountType,
@@ -152,23 +144,24 @@ export function AccountListItem({
   const usesDepreciationInput = isDepreciatingAssetType(account.accountType);
 
   // Auto-save linked liability when finance details change
-  const financeDetailsSaveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => {
-    if (!isCombinedAsset || !assetFinanceDetails) return;
-    if (financeDetailsSaveTimer.current) clearTimeout(financeDetailsSaveTimer.current);
-    financeDetailsSaveTimer.current = setTimeout(() => onSave(account), 600);
-    return () => {
-      if (financeDetailsSaveTimer.current) clearTimeout(financeDetailsSaveTimer.current);
-    };
-  }, [
-    assetFinanceDetails?.hasLoan,
-    assetFinanceDetails?.loanInterestRate,
-    assetFinanceDetails?.originalLoanAmount,
-    assetFinanceDetails?.loanMonthlyPayment,
-    assetFinanceDetails?.loanTermYears,
-    assetFinanceDetails?.loanStartDate,
-    assetFinanceDetails?.currentLoanBalance,
-  ]);
+  useAutoSave(
+    () => {
+      if (isCombinedAsset && assetFinanceDetails) {
+        onSave(account);
+      }
+    },
+    [
+      assetFinanceDetails?.hasLoan,
+      assetFinanceDetails?.loanInterestRate,
+      assetFinanceDetails?.originalLoanAmount,
+      assetFinanceDetails?.loanMonthlyPayment,
+      assetFinanceDetails?.loanTermYears,
+      assetFinanceDetails?.loanStartDate,
+      assetFinanceDetails?.currentLoanBalance,
+      isCombinedAsset,
+      assetFinanceDetails,
+    ],
+  );
 
   const assetFinanceSnapshot =
     isCombinedAsset && assetFinanceDetails
