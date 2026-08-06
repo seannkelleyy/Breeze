@@ -9,11 +9,7 @@ import { useEffect, useRef, DependencyList } from 'react';
  * @param deps - Dependencies that trigger the save
  * @param delay - Debounce delay in milliseconds (default: 600)
  */
-export function useAutoSave(
-  callback: () => void,
-  deps: DependencyList,
-  delay: number = 600,
-): void {
+export function useAutoSave(callback: () => void, deps: DependencyList, delay: number = 600): void {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {

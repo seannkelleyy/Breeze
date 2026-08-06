@@ -176,7 +176,11 @@ const BudgetContent = () => {
         </div>
       ) : null}
       <Goals />
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="m-4 flex flex-col items-center justify-center">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as typeof activeTab)}
+        className="m-4 flex flex-col items-center justify-center"
+      >
         <TabsList>
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>

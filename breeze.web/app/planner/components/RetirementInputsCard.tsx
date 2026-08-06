@@ -148,12 +148,7 @@ export const RetirementInputsCard = ({
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <div>
-          <CardTitle>Retirement Need Estimate</CardTitle>
-          <CardDescription>
-            Estimate yearly retirement spending and financial freedom target from expenses.
-          </CardDescription>
-        </div>
+        <CardTitle>Retirement Inputs</CardTitle>
         {toggleControl}
       </CardHeader>
       {!collapsed ? (
@@ -238,86 +233,54 @@ export const RetirementInputsCard = ({
             </div>
           </div>
           <div className="text-muted-foreground space-y-1 rounded-md border p-3 text-xs sm:col-span-2">
-            <p className="text-foreground font-medium">Coast FIRE Check (Informational)</p>
+            <p className="text-foreground font-medium">Coast FIRE</p>
             <p>Current portfolio: {formatCurrency(financialMathSnapshot.currentPortfolio)}</p>
-            <p>Coast FIRE target needed today: {formatCurrency(coastFireTargetToday)}</p>
+            <p>Target needed today: {formatCurrency(coastFireTargetToday)}</p>
             <p
               className={
                 hasReachedCoastFire ? 'text-accent font-semibold' : 'text-muted-foreground'
               }
             >
               {hasReachedCoastFire
-                ? `You are coast FIRE by ${formatCurrency(Math.abs(coastFireGap))}.`
-                : `You need ${formatCurrency(Math.abs(coastFireGap))} more to reach coast FIRE.`}
+                ? `Coast FIRE by ${formatCurrency(Math.abs(coastFireGap))}.`
+                : `Need ${formatCurrency(Math.abs(coastFireGap))} more.`}
             </p>
           </div>
           <div className="rounded-md border p-3 sm:col-span-2">
-            <p className="text-muted-foreground mb-2 text-xs">
-              FIRE target numbers at current assumptions:
-            </p>
+            <p className="text-muted-foreground mb-2 text-xs">FIRE targets:</p>
             <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
               {fireTargets.map((target, index) => (
                 <div
                   key={target.label}
                   className={index === safeFireIndex ? 'text-accent font-semibold' : ''}
                 >
-                  {target.label}: {formatCurrency(target.target)} (
-                  {formatCurrency(target.monthlySpendSupported)}/mo spend)
+                  {target.label}: {formatCurrency(target.target)}
                 </div>
               ))}
             </div>
             <div className="text-muted-foreground mt-3 space-y-1 rounded-md border p-3 text-xs">
+              <p>Safe withdrawal rate: {suggestedSafeWithdrawalRate.toFixed(2)}%</p>
               <p>
-                Suggested safe withdrawal for ~{retirementHorizonYears} retirement years:{' '}
-                {suggestedSafeWithdrawalRate.toFixed(2)}%
-              </p>
-              <p>
-                Financial freedom age (selected FIRE target):{' '}
+                Freedom age:{' '}
                 {financialFreedomAge !== null ? financialFreedomAge : 'Not reached by target age'}
               </p>
               <p>
-                Current portfolio yearly income:{' '}
-                {formatCurrency(financialMathSnapshot.yearlyPortfolioIncome)}
+                Portfolio yearly income: {formatCurrency(financialMathSnapshot.yearlyPortfolioIncome)}
               </p>
-              {selectedFireScenario ? (
+              {selectedFireScenario && (
                 <>
                   <p>
-                    {selectedFireScenario.label} percent to goal:{' '}
+                    {selectedFireScenario.label} progress:{' '}
                     {selectedFireScenario.percentToGoal.toFixed(2)}%
                   </p>
                   <p>
-                    Years to {selectedFireScenario.label} @{' '}
-                    {financialMathSnapshot.yearsToGoalRatePercent}%:{' '}
+                    Years to goal:{' '}
                     {selectedFireScenario.yearsUntilGoal === null
-                      ? 'Needs positive yearly savings to estimate'
-                      : selectedFireScenario.yearsUntilGoal.toFixed(2)}
+                      ? 'Needs positive savings'
+                      : selectedFireScenario.yearsUntilGoal.toFixed(1)}
                   </p>
                 </>
-              ) : null}
-            </div>
-            <div className="text-muted-foreground mt-3 space-y-1 border-t pt-3 text-xs">
-              <p className="text-foreground font-medium">How FIRE math is calculated</p>
-              <p>Inflation rate comes from your Preferences modal: {inflationRate.toFixed(2)}%.</p>
-              <p>
-                1){' '}
-                {useInflationAdjustedValues
-                  ? 'Real-dollar annual spend'
-                  : 'Inflation-adjusted annual spend'}{' '}
-                = ({formatCurrency(monthlyExpenses)} x 12)
-                {!useInflationAdjustedValues
-                  ? ` x (1 + ${inflationRate.toFixed(2)}%)^${yearsToGoal}`
-                  : ''}{' '}
-                = {formatCurrency(annualNeedAtRetirement)}
-              </p>
-              <p>
-                2) Base FIRE target = {formatCurrency(annualNeedAtRetirement)} / (
-                {safeWithdrawalRate.toFixed(2)}% / 100) ={' '}
-                {formatCurrency(baseFinancialFreedomTarget)}
-              </p>
-              <p>
-                3) {selectedFireLabel} target = {formatCurrency(baseFinancialFreedomTarget)} x{' '}
-                {selectedFireMultiplier.toFixed(2)} = {formatCurrency(selectedFireTarget)}
-              </p>
+              )}
             </div>
           </div>
         </CardContent>

@@ -61,25 +61,17 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
     setActivePersonIndex((previous) => (previous + 1) % people.length);
   };
 
-  useAutoSave(
-    () => {
-      if (people.length === 0) return;
-      for (const person of people) {
-        upsertPersonMutation.mutate(person);
-      }
-    },
-    [people],
-  );
+  useAutoSave(() => {
+    if (people.length === 0) return;
+    for (const person of people) {
+      upsertPersonMutation.mutate(person);
+    }
+  }, [people]);
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <div>
-          <CardTitle>People</CardTitle>
-          <CardDescription>
-            Add household members and planning details (name, salary, birthday, retirement age).
-          </CardDescription>
-        </div>
+        <CardTitle>Household</CardTitle>
         {toggleControl}
       </CardHeader>
       {!collapsed ? (
@@ -242,11 +234,6 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
               Add Person
             </Button>
           </div>
-
-          <p className="text-muted-foreground text-xs sm:col-span-2">
-            Projection timeline currently uses age {currentAge} to {targetAge} (max retirement age
-            across people).
-          </p>
         </CardContent>
       ) : null}
     </Card>

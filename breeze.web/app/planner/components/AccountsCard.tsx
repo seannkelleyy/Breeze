@@ -20,23 +20,23 @@ export interface AccountsCardProps {
 type AccountFilter = 'all' | 'assets' | 'liabilities' | 'tax-advantaged';
 
 const ACCOUNT_TYPE_ORDER: Record<AccountType, number> = {
-  'checking': 0,
+  checking: 0,
   'emergency-fund': 1,
-  'brokerage': 2,
+  brokerage: 2,
   '401k': 3,
   '403b': 4,
   '457': 5,
   'roth-ira': 6,
   'traditional-ira': 7,
-  'hsa': 8,
-  'home': 9,
-  'vehicle': 10,
-  'other': 11,
+  hsa: 8,
+  home: 9,
+  vehicle: 10,
+  other: 11,
   'student-loan': 12,
   'credit-card': 13,
   'personal-loan': 14,
   'auto-loan': 15,
-  'mortgage': 16,
+  mortgage: 16,
 };
 
 const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
@@ -262,28 +262,17 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <div>
-          <CardTitle>Accounts</CardTitle>
-          <CardDescription>
-            Add investment and non-investment assets (home, vehicle, emergency fund, checking),
-            contributions, and growth assumptions.
-          </CardDescription>
-        </div>
+        <CardTitle>Accounts</CardTitle>
         {toggleControl}
       </CardHeader>
       {!collapsed && (
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-muted-foreground text-xs">
-              IRS limits apply only to tax-advantaged account types.
-            </p>
             {isIrsAccountsLoading && (
-              <p className="text-muted-foreground text-xs">Loading latest IRS limits...</p>
+              <p className="text-muted-foreground text-xs">Loading IRS limits...</p>
             )}
             {isIrsAccountsError && (
-              <p className="text-destructive text-xs">
-                Unable to load IRS limits. Using fallback defaults.
-              </p>
+              <p className="text-destructive text-xs">Unable to load IRS limits.</p>
             )}
           </div>
 
@@ -368,14 +357,6 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
               </Button>
             </div>
           </div>
-
-          <p className="text-muted-foreground text-xs">
-            Annual limits are read from your IRS account configuration in the API.
-          </p>
-          <p className="text-muted-foreground text-xs">
-            401(k) formula: Employer match = min(employee annual contribution, salary x match cap %)
-            x match rate %.
-          </p>
         </CardContent>
       )}
     </Card>

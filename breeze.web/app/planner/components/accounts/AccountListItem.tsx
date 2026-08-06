@@ -119,23 +119,26 @@ export function AccountListItem({
   toIsoDate,
   getHomeAnnualGrowthRate,
 }: AccountListItemProps) {
-  useAutoSave(() => onSave(account), [
-    account.name,
-    account.personIds,
-    account.accountType,
-    account.contributionMode,
-    account.contributionValue,
-    account.employerMatchRate,
-    account.employerMatchMaxPercentOfSalary,
-    account.startingBalance,
-    account.annualRate,
-    account.returnProfile,
-    account.linkedLiabilityId,
-    account.purchaseDate,
-    account.purchasePrice,
-    account.homeGrowthProfile,
-    account.vehicleDepreciationProfile,
-  ]);
+  useAutoSave(
+    () => onSave(account),
+    [
+      account.name,
+      account.personIds,
+      account.accountType,
+      account.contributionMode,
+      account.contributionValue,
+      account.employerMatchRate,
+      account.employerMatchMaxPercentOfSalary,
+      account.startingBalance,
+      account.annualRate,
+      account.returnProfile,
+      account.linkedLiabilityId,
+      account.purchaseDate,
+      account.purchasePrice,
+      account.homeGrowthProfile,
+      account.vehicleDepreciationProfile,
+    ],
+  );
 
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
   const isLiability = isLiabilityAccountType(account.accountType);
@@ -144,24 +147,21 @@ export function AccountListItem({
   const usesDepreciationInput = isDepreciatingAssetType(account.accountType);
 
   // Auto-save linked liability when finance details change
-  useAutoSave(
-    () => {
-      if (isCombinedAsset && assetFinanceDetails) {
-        onSave(account);
-      }
-    },
-    [
-      assetFinanceDetails?.hasLoan,
-      assetFinanceDetails?.loanInterestRate,
-      assetFinanceDetails?.originalLoanAmount,
-      assetFinanceDetails?.loanMonthlyPayment,
-      assetFinanceDetails?.loanTermYears,
-      assetFinanceDetails?.loanStartDate,
-      assetFinanceDetails?.currentLoanBalance,
-      isCombinedAsset,
-      assetFinanceDetails,
-    ],
-  );
+  useAutoSave(() => {
+    if (isCombinedAsset && assetFinanceDetails) {
+      onSave(account);
+    }
+  }, [
+    assetFinanceDetails?.hasLoan,
+    assetFinanceDetails?.loanInterestRate,
+    assetFinanceDetails?.originalLoanAmount,
+    assetFinanceDetails?.loanMonthlyPayment,
+    assetFinanceDetails?.loanTermYears,
+    assetFinanceDetails?.loanStartDate,
+    assetFinanceDetails?.currentLoanBalance,
+    isCombinedAsset,
+    assetFinanceDetails,
+  ]);
 
   const assetFinanceSnapshot =
     isCombinedAsset && assetFinanceDetails
@@ -424,59 +424,16 @@ export function AccountListItem({
               : `, Balance: ${formatCurrency(account.startingBalance)}`}
           </p>
         ) : null}
-        {hidesContributionInputs ? (
+        {!hidesContributionInputs && suggestedLimit > 0 && (
           <p>
-            {isCombinedAsset
-              ? 'This account combines asset value and optional loan in one place.'
-              : 'This account type tracks value/depreciation only. Contribution inputs are hidden.'}
-          </p>
-        ) : isLiability ? (
-          <p>Liability payments are not IRS-limited.</p>
-        ) : (
-          <>
-            <p>
-              IRS annual limit for age {ownerAge}: {formatCurrency(suggestedLimit)}
-            </p>
-            {suggestedLimit > 0 ? (
-              <span
-                className={
-                  plannerConstants.isMoneyGreaterThanWithTolerance(employeeAnnual, suggestedLimit)
-                    ? 'text-destructive font-medium'
-                    : ''
-                }
-              >
-                Annual contribution {formatCurrency(employeeAnnual)} / limit{' '}
-                {formatCurrency(suggestedLimit)}
+            IRS limit (age {ownerAge}): {formatCurrency(suggestedLimit)}
+            {plannerConstants.isMoneyGreaterThanWithTolerance(employeeAnnual, suggestedLimit) && (
+              <span className="text-destructive ml-2 font-medium">
+                Over by {formatCurrency(employeeAnnual - suggestedLimit)}
               </span>
-            ) : (
-              <span>No annual limit set for this account.</span>
             )}
-          </>
+          </p>
         )}
-        {!hidesContributionInputs ? (
-          <span className="ml-2">
-            {isLiability ? 'Monthly payment' : 'Employee monthly equivalent'}:{' '}
-            {formatCurrency(employeeMonthly)}
-          </span>
-        ) : null}
-        {assetFinanceSnapshot ? (
-          <span className="ml-2">
-            Estimated equity now: {formatCurrency(assetFinanceSnapshot.equity)} (
-            {formatCurrency(assetFinanceSnapshot.assetValue)} - Loan{' '}
-            {formatCurrency(assetFinanceSnapshot.loanBalance)})
-          </span>
-        ) : null}
-        {usesDepreciationInput ? (
-          <span className="ml-2">
-            Vehicle depreciation uses a tapered curve by age (faster early years, slower later
-            years), unless Custom is selected.
-          </span>
-        ) : null}
-        {account.accountType === '401k' ? (
-          <span className="ml-2">
-            Employer match applied monthly: {formatCurrency(employerMatchMonthly)}
-          </span>
-        ) : null}
       </div>
     </div>
   );

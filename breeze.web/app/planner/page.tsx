@@ -48,12 +48,7 @@ function PlannerContent() {
   }, [connections, syncConnection]);
 
   // Manage local UI state
-  const {
-    collapsedSections,
-    activeTab,
-    toggleSection,
-    setActiveTab,
-  } = usePlannerState();
+  const { collapsedSections, activeTab, toggleSection, setActiveTab } = usePlannerState();
 
   // Load planner data from API on mount and hydrate state
   const { data: plannerData } = useFetchPlanner();
