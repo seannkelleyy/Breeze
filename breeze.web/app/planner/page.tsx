@@ -2,11 +2,13 @@
 import { Suspense, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, TrendingUp, Target, Calendar, DollarSign } from 'lucide-react';
 import { usePlannerModel, useFetchPlanner } from './hooks/planner/index';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from './hooks/usePlannerState';
 import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
+import { formatCurrencyWithCode } from './lib/plannerMath';
 
 import {
   RetirementInputsSection,
@@ -33,7 +35,7 @@ export default function PlannerPage() {
 
 function PlannerContent() {
   const { isLoaded: clerkLoaded } = useUser();
-  const { userId, isLoaded } = useCurrentUser();
+  const { userId, isLoaded, currencyCode } = useCurrentUser();
   const { data: connections } = usePlaidConnections(userId);
   const { mutate: syncConnection } = useSyncPlaidConnection();
   const hasSyncedRef = useRef(false);
@@ -124,6 +126,8 @@ function PlannerContent() {
     incomeReplacementTarget,
   } = usePlannerModel();
 
+  const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
+
   // Show loading state while user data loads
   if (!clerkLoaded || !isLoaded || !userId) {
     return (
@@ -136,30 +140,101 @@ function PlannerContent() {
     );
   }
 
+  // Calculate key metrics for summary cards
+  const totalAssets = financialMathSnapshot.currentPortfolio;
+  const totalLiabilities = 0; // TODO: Calculate from accounts
+  const netWorth = totalAssets - totalLiabilities;
+  const fireProgress = baseFinancialFreedomTarget > 0
+    ? (totalAssets / baseFinancialFreedomTarget) * 100
+    : 0;
+
   return (
-    <div className="container mx-auto space-y-6 py-8">
+    <div className="container mx-auto space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Financial Planner</h1>
-          <p className="text-muted-foreground mt-1">Plan your path to financial independence</p>
-        </div>
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight">Financial Planner</h1>
+        <p className="text-muted-foreground">Track your path to financial independence</p>
       </div>
 
-      {/* Main Content */}
+      {/* Summary Metrics */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
+            <DollarSign className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(netWorth)}</div>
+            <p className="text-muted-foreground text-xs">
+              {formatCurrency(totalAssets)} in assets
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">FIRE Progress</CardTitle>
+            <Target className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{fireProgress.toFixed(1)}%</div>
+            <p className="text-muted-foreground text-xs">
+              of {formatCurrency(baseFinancialFreedomTarget)} goal
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Current Age</CardTitle>
+            <Calendar className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{currentAge}</div>
+            <p className="text-muted-foreground text-xs">
+              {financialFreedomAge ? `Target: ${financialFreedomAge}` : 'Target: TBD'}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Coast FIRE</CardTitle>
+            <TrendingUp className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${hasReachedCoastFire ? 'text-green-600' : ''}`}>
+              {hasReachedCoastFire ? 'Reached' : 'In Progress'}
+            </div>
+            <p className="text-muted-foreground text-xs">
+              {hasReachedCoastFire
+                ? `By ${formatCurrency(Math.abs(coastFireGap))}`
+                : `Need ${formatCurrency(Math.abs(coastFireGap))}`}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content Tabs */}
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as 'inputs' | 'accounts' | 'projections')}
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="inputs">Inputs</TabsTrigger>
-          <TabsTrigger value="accounts">Accounts</TabsTrigger>
-          <TabsTrigger value="projections">Projections</TabsTrigger>
+          <TabsTrigger value="inputs" className="gap-2">
+            Inputs
+          </TabsTrigger>
+          <TabsTrigger value="accounts" className="gap-2">
+            Accounts
+          </TabsTrigger>
+          <TabsTrigger value="projections" className="gap-2">
+            Projections
+          </TabsTrigger>
         </TabsList>
 
         {/* Inputs Tab */}
-        <TabsContent value="inputs" className="space-y-6">
+        <TabsContent value="inputs" className="mt-6 space-y-6">
           <RetirementInputsSection
             isCollapsed={collapsedSections['retirementInputs']}
             onToggle={() => toggleSection('retirementInputs')}
@@ -184,7 +259,7 @@ function PlannerContent() {
         </TabsContent>
 
         {/* Accounts Tab */}
-        <TabsContent value="accounts" className="space-y-6">
+        <TabsContent value="accounts" className="mt-6 space-y-6">
           <AccountsSection
             isCollapsed={collapsedSections['accounts']}
             onToggle={() => toggleSection('accounts')}
@@ -192,7 +267,7 @@ function PlannerContent() {
         </TabsContent>
 
         {/* Projections Tab */}
-        <TabsContent value="projections" className="space-y-6">
+        <TabsContent value="projections" className="mt-6 space-y-6">
           <ProjectionsSection
             currentAge={currentAge}
             chartConfig={dynamicChartConfig}
