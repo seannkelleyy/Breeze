@@ -11,8 +11,6 @@ import { formatCurrencyWithCode } from './lib/plannerMath';
 
 import {
   RetirementInputsSection,
-  PeopleSection,
-  AccountsSection,
   ProjectionsSection,
 } from './components/sections';
 import { accountLineColors, getDefaultAssetFinanceDetailsForAccount } from './lib/plannerMath';
@@ -235,14 +233,6 @@ function PlannerContent() {
             incomeReplacementAnnualNeed={incomeReplacementAnnualNeed}
             incomeReplacementTarget={incomeReplacementTarget}
             financialMathSnapshot={financialMathSnapshot}
-          />
-          <PeopleSection
-            isCollapsed={collapsedSections['people']}
-            onToggle={() => toggleSection('people')}
-          />
-          <AccountsSection
-            isCollapsed={collapsedSections['accounts']}
-            onToggle={() => toggleSection('accounts')}
           />
         </div>
 

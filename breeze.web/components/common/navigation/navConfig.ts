@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, TrendingUp, Wallet, Home, LinkIcon } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Wallet, Home, LinkIcon, Users } from 'lucide-react';
 
 export type RouteNavItem = {
   label: string;
@@ -21,6 +21,12 @@ export const routeNavItems: ReadonlyArray<RouteNavItem> = [
     to: '/',
     title: 'Dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    label: 'Accounts',
+    to: '/accounts',
+    title: 'Accounts & People',
+    icon: Users,
   },
   {
     label: 'Planner',

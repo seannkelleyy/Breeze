@@ -2,13 +2,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, TrendingUp, Wallet, Wrench } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Wallet, Wrench, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import BreezeAuthButton from '../auth/BreezeAuthButton';
 import Image from 'next/image';
 
 const tabs: Array<{ label: string; to: string; icon: LucideIcon }> = [
   { label: 'Dashboard', to: '/', icon: LayoutDashboard },
+  { label: 'Accounts', to: '/accounts', icon: Users },
   { label: 'Planner', to: '/planner', icon: TrendingUp },
   { label: 'Budget', to: '/budget', icon: Wallet },
   { label: 'Tools', to: '/tools', icon: Wrench },
