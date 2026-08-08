@@ -3,7 +3,7 @@ import { type ReactNode, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { formatCurrencyWithCode } from '../lib/plannerMath';
 import { usePlannerAccounts } from '../hooks/planner/index';

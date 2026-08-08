@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as plannerConstants from '../lib/constants';
 import { FormattedNumberInput } from '../../../components/common/form/FormattedNumberInput';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -27,12 +27,11 @@ export interface PeopleCardProps {
 }
 
 const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
-  const { plannerSummary, userId } = useCurrentUser();
-  const { people, currentAge, updatePerson, addPerson, removePerson } = usePlannerPeople();
+  const { userId } = useCurrentUser();
+  const { people, updatePerson, addPerson, removePerson } = usePlannerPeople();
   const { upsertPersonMutation } = usePersonMutations(userId);
 
   const bonusModeOptions = plannerConstants.PLANNER_BONUS_MODE_OPTIONS;
-  const targetAge = plannerSummary?.targetAge ?? currentAge;
   const [activePersonIndex, setActivePersonIndex] = useState(0);
   const safeActivePersonIndex =
     people.length === 0 ? 0 : Math.min(activePersonIndex, people.length - 1);

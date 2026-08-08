@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useMemo } from 'react';
 import { formatCurrencyWithCode } from '../lib/plannerMath';
 import { FormattedNumberInput } from '../../../components/common/form/FormattedNumberInput';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { FinancialMathSnapshot } from '../types/finance';
 import { PLANNER_FIRE_LIFESTYLE_OPTIONS } from '../lib/constants';
@@ -37,8 +37,6 @@ export const RetirementInputsCard = ({
   collapsed,
   toggleControl,
   fireTargets,
-  baseFinancialFreedomTarget,
-  retirementHorizonYears,
   suggestedSafeWithdrawalRate,
   financialFreedomAge,
   coastFireTargetToday,
@@ -53,10 +51,7 @@ export const RetirementInputsCard = ({
   const {
     isSignedIn,
     currencyCode,
-    returnDisplayMode,
-    inflationRate,
     safeWithdrawalRate,
-    plannerSummary,
   } = useCurrentUser();
   const {
     desiredInvestmentAmount,
@@ -69,9 +64,6 @@ export const RetirementInputsCard = ({
     refreshMonthlyExpenses,
   } = usePlannerRetirementInputs();
   const fireLifestyleOptions = PLANNER_FIRE_LIFESTYLE_OPTIONS;
-  const yearsToGoal = plannerSummary?.yearsToGoal ?? 0;
-  const annualNeedAtRetirement = plannerSummary?.annualNeedAtRetirement ?? 0;
-  const useInflationAdjustedValues = returnDisplayMode === 'real';
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
   const safeFireIndex = useMemo(() => {
     if (fireTargets.length === 0) {
@@ -91,9 +83,6 @@ export const RetirementInputsCard = ({
 
     return Math.max(0, Math.min(closestIndex, fireLifestyleOptions.length - 1));
   }, [fireTargets, desiredInvestmentAmount, fireLifestyleOptions.length]);
-  const selectedFireLabel = fireLifestyleOptions[safeFireIndex]?.label ?? 'Standard FIRE';
-  const selectedFireMultiplier = fireLifestyleOptions[safeFireIndex]?.multiplier ?? 1;
-  const selectedFireTarget = fireTargets[safeFireIndex]?.target ?? baseFinancialFreedomTarget;
   const selectedFireScenario = financialMathSnapshot.scenarios[safeFireIndex];
 
   const targetGuideItems = useMemo(
