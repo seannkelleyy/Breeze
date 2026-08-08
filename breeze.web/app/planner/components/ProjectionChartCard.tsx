@@ -55,6 +55,24 @@ const ProjectionChartCard = ({
     // For totalBalance or other keys
     return formatCurrency(Number(value));
   };
+
+  // Custom label formatter to show total contributions
+  const tooltipLabelFormatter = (
+    label: string | number,
+    payload: ReadonlyArray<{ payload?: Record<string, unknown> }>,
+  ) => {
+    const data = payload[0]?.payload as ProjectionRow | undefined;
+    return (
+      <div>
+        <div className="font-medium">Age {label}</div>
+        {data && (
+          <div className="text-muted-foreground text-xs">
+            Total contributions: {formatCurrency(data.totalContributions)}
+          </div>
+        )}
+      </div>
+    );
+  };
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
@@ -90,7 +108,7 @@ const ProjectionChartCard = ({
               },
             }}
             tooltipFormatter={tooltipFormatter}
-            tooltipLabelFormatter={(label: string | number) => `Age ${label}`}
+            tooltipLabelFormatter={tooltipLabelFormatter}
           >
             <Line
               type="monotone"

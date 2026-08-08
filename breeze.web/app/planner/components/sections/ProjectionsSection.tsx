@@ -13,7 +13,6 @@ type SectionCollapse = {
   requiredMonthly: boolean;
   plannedMonthly: boolean;
   retirementEstimateCard: boolean;
-  yearlyProjection: boolean;
   accountBreakdown: boolean;
   onToggle: (section: string) => void;
 };
@@ -74,7 +73,6 @@ export function ProjectionsSection({
     requiredMonthly,
     plannedMonthly,
     retirementEstimateCard,
-    yearlyProjection,
     accountBreakdown,
     onToggle,
   } = collapses;
@@ -112,16 +110,12 @@ export function ProjectionsSection({
       />
       <ProjectionTables
         sections={{
-          yearlyCollapsed: yearlyProjection,
-          yearlyToggleControl: (
-            <ToggleBtn collapsed={yearlyProjection} onClick={() => onToggle('yearlyProjection')} />
-          ),
           accountBreakdownCollapsed: accountBreakdown,
           accountBreakdownToggleControl: (
             <ToggleBtn collapsed={accountBreakdown} onClick={() => onToggle('accountBreakdown')} />
           ),
         }}
-        data={{ projectionRows, accountBreakdownRows }}
+        data={{ accountBreakdownRows }}
       />
     </div>
   );

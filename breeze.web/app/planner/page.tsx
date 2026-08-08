@@ -262,7 +262,6 @@ function PlannerContent() {
               requiredMonthly: collapsedSections['requiredMonthly'],
               plannedMonthly: collapsedSections['plannedMonthly'],
               retirementEstimateCard: collapsedSections['retirementEstimateCard'],
-              yearlyProjection: collapsedSections['yearlyProjection'],
               accountBreakdown: collapsedSections['accountBreakdown'],
               onToggle: toggleSection,
             }}
