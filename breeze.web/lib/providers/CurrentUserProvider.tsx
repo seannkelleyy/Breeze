@@ -22,11 +22,11 @@ import {
   PLANNER_DEFAULT_MONTHLY_EXPENSES,
   PLANNER_DEFAULT_RETIREMENT_METHOD,
   PLANNER_DEFAULT_FIRE_LIFESTYLE_INDEX,
-} from '@/app/planner/lib/constants';
-import { PlannerPerson } from '@/app/planner/types/person';
-import { PlannerAccount } from '@/app/planner/types/account';
-import { AssetFinanceDetails } from '@/app/planner/types/finance';
-import { PlannerSummary } from '@/app/planner/types/planner';
+} from '@/app/future/lib/constants';
+import { PlannerPerson } from '@/app/future/types/person';
+import { PlannerAccount } from '@/app/future/types/account';
+import { AssetFinanceDetails } from '@/app/future/types/finance';
+import { PlannerSummary } from '@/app/future/types/planner';
 import { useUser } from '@clerk/clerk-react';
 
 const DEV_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
@@ -48,6 +48,24 @@ const CURRENT_USER_QUERY = `
       maxTaxBracketId
       filingStatus
       payoffStrategy
+      budgetEnabled
+      monthlyExpenses
+      setupCompleted
+      disclaimerAccepted
+      disclaimerAcceptedAt
+    }
+  }
+`;
+
+const UPDATE_USER_SETUP_MUTATION = `
+  mutation UpdateUserSetup($input: UpdateUserSetupInput!) {
+    updateUserSetup(input: $input) {
+      id
+      budgetEnabled
+      monthlyExpenses
+      setupCompleted
+      disclaimerAccepted
+      disclaimerAcceptedAt
     }
   }
 `;
@@ -103,6 +121,20 @@ export interface CurrentUserContextValue {
   updateSafeWithdrawalRate: (nextSafeWithdrawalRate: number) => void;
   filingStatus: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH';
   deductionType: 'STANDARD' | 'ITEMIZED';
+  budgetEnabled: boolean;
+  setBudgetEnabled: Dispatch<SetStateAction<boolean>>;
+  monthlyExpenses: number | null;
+  setMonthlyExpenses: Dispatch<SetStateAction<number | null>>;
+  setupCompleted: boolean;
+  setSetupCompleted: Dispatch<SetStateAction<boolean>>;
+  disclaimerAccepted: boolean;
+  setDisclaimerAccepted: Dispatch<SetStateAction<boolean>>;
+  updateUserSetup: (input: {
+    budgetEnabled?: boolean;
+    monthlyExpenses?: string;
+    setupCompleted?: boolean;
+    disclaimerAccepted?: boolean;
+  }) => Promise<void>;
   plannerDesiredInvestmentAmount: number;
   setPlannerDesiredInvestmentAmount: Dispatch<SetStateAction<number>>;
   plannerMonthlyExpenses: number;
@@ -165,6 +197,10 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const [maxTaxBracketId, setMaxTaxBracketId] = useState<string | null>(null);
   const [filingStatus, setFilingStatus] = useState<'SINGLE' | 'MFJ' | 'MFS' | 'HOH'>('SINGLE');
   const [payoffStrategy, setPayoffStrategy] = useState<'AVALANCHE' | 'SNOWBALL'>('AVALANCHE');
+  const [budgetEnabled, setBudgetEnabled] = useState(false);
+  const [monthlyExpenses, setMonthlyExpenses] = useState<number | null>(null);
+  const [setupCompleted, setSetupCompleted] = useState(false);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [plannerPeople, setPlannerPeople] = useState<PlannerPerson[]>([]);
   const [plannerAccounts, setPlannerAccounts] = useState<PlannerAccount[]>([]);
   const [plannerAssetFinanceDetailsByAccountId, setPlannerAssetFinanceDetailsByAccountId] =
@@ -298,6 +334,28 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     [persistPreferences, currencyCode, returnDisplayMode, inflationRate, resolvedUserId],
   );
 
+  const updateUserSetup = useCallback(
+    async (input: {
+      budgetEnabled?: boolean;
+      monthlyExpenses?: string;
+      setupCompleted?: boolean;
+      disclaimerAccepted?: boolean;
+    }) => {
+      if (!isLoaded || !isSignedIn || !resolvedUserId) {
+        return;
+      }
+      try {
+        await request<{ updateUserSetup: { id: string } }, { input: Record<string, unknown> }>(
+          UPDATE_USER_SETUP_MUTATION,
+          { input: { id: resolvedUserId, ...input } },
+        );
+      } catch {
+        // Keep optimistic UI state and allow future writes.
+      }
+    },
+    [isLoaded, isSignedIn, resolvedUserId, request],
+  );
+
   useEffect(() => {
     if (!resolvedUserId) {
       return;
@@ -351,6 +409,11 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
             maxTaxBracketId: string | null;
             filingStatus: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH';
             payoffStrategy: 'AVALANCHE' | 'SNOWBALL';
+            budgetEnabled: boolean;
+            monthlyExpenses: string | null;
+            setupCompleted: boolean;
+            disclaimerAccepted: boolean;
+            disclaimerAcceptedAt: string | null;
           } | null;
         }>(CURRENT_USER_QUERY);
 
@@ -374,6 +437,14 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
           setMaxTaxBracketId(response.me.maxTaxBracketId ?? null);
           setFilingStatus(response.me.filingStatus ?? 'SINGLE');
           setPayoffStrategy(response.me.payoffStrategy ?? 'AVALANCHE');
+          setBudgetEnabled(response.me.budgetEnabled);
+          setMonthlyExpenses(
+            response.me.monthlyExpenses != null
+              ? Number.parseFloat(response.me.monthlyExpenses)
+              : null,
+          );
+          setSetupCompleted(response.me.setupCompleted);
+          setDisclaimerAccepted(response.me.disclaimerAccepted);
           loadedPreferencesForUserRef.current = backendUserID;
           return;
         }
@@ -463,6 +534,15 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     updateSafeWithdrawalRate,
     filingStatus,
     deductionType,
+    budgetEnabled,
+    setBudgetEnabled,
+    monthlyExpenses,
+    setMonthlyExpenses,
+    setupCompleted,
+    setSetupCompleted,
+    disclaimerAccepted,
+    setDisclaimerAccepted,
+    updateUserSetup,
     plannerDesiredInvestmentAmount,
     setPlannerDesiredInvestmentAmount,
     plannerMonthlyExpenses,

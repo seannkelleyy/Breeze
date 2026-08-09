@@ -148,7 +148,7 @@ function PlannerContent() {
     <div className="mx-auto max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       {/* Page Header */}
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Financial Planner</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Future</h1>
         <p className="text-muted-foreground text-sm">Track your path to financial independence</p>
       </div>
 

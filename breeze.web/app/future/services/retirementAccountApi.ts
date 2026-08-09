@@ -1,5 +1,5 @@
 import { PlannerApi } from './plannerApi';
-import type { CreateApiAssetInput, UpdateApiAssetInput } from '@/app/planner/types/apiAsset';
+import type { CreateApiAssetInput, UpdateApiAssetInput } from '@/app/future/types/apiAsset';
 
 export const createRetirementAccountApi = (api: PlannerApi) => ({
   list: (userId: string) => api.getAssets(userId),

@@ -2,21 +2,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, TrendingUp, Wallet, Wrench, Users } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { routeNavItems } from './navConfig';
 import BreezeAuthButton from '../auth/BreezeAuthButton';
 import Image from 'next/image';
 
-const tabs: Array<{ label: string; to: string; icon: LucideIcon }> = [
-  { label: 'Dashboard', to: '/', icon: LayoutDashboard },
-  { label: 'Accounts', to: '/accounts', icon: Users },
-  { label: 'Planner', to: '/planner', icon: TrendingUp },
-  { label: 'Budget', to: '/budget', icon: Wallet },
-  { label: 'Tools', to: '/tools', icon: Wrench },
-];
-
 export const MobileNavigation = () => {
   const pathname = usePathname();
+
+  // Bottom tab bar shows the core categories (excluding optional Budget).
+  const tabs = routeNavItems.filter((item) => item.showWhen !== 'budget-enabled');
 
   const isActive = (to: string) => (to === '/' ? pathname === '/' : pathname.startsWith(to));
 

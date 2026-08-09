@@ -17,6 +17,8 @@ import {
   Wrench,
   ArrowUpRight,
   ArrowDownRight,
+  Users,
+  Target,
 } from 'lucide-react';
 
 const formatCurrency = (value: number) =>
@@ -28,10 +30,22 @@ const formatCurrency = (value: number) =>
 
 const quickLinks = [
   {
-    label: 'Planner',
-    href: '/planner',
+    label: 'Future',
+    href: '/future',
     icon: TrendingUp,
-    description: 'Accounts, projections, and retirement planning.',
+    description: 'Track your path to financial independence.',
+  },
+  {
+    label: 'Accounts',
+    href: '/accounts',
+    icon: Users,
+    description: 'Configure your household members and financial accounts.',
+  },
+  {
+    label: 'Goals',
+    href: '/goals',
+    icon: Target,
+    description: 'Plan, prioritize, and track your financial goals.',
   },
   {
     label: 'Budget',

@@ -20,7 +20,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/lib/services/queries/assets';
-import { PLANNER_HOME_GROWTH_PROFILE_RATES } from '@/app/planner/lib/constants';
+import { PLANNER_HOME_GROWTH_PROFILE_RATES } from '@/app/future/lib/constants';
 import { Home } from 'lucide-react';
 
 const clamp = (value: number, min = 0) => (Number.isFinite(value) ? Math.max(min, value) : min);

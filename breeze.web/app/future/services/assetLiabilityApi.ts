@@ -1,4 +1,4 @@
-import type { CreateApiAssetInput, UpdateApiAssetInput } from '@/app/planner/types/apiAsset';
+import type { CreateApiAssetInput, UpdateApiAssetInput } from '@/app/future/types/apiAsset';
 import { PlannerApi } from './plannerApi';
 
 export const createAssetLiabilityApi = (api: PlannerApi) => ({

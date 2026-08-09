@@ -1,11 +1,21 @@
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, TrendingUp, Wallet, Home, LinkIcon, Users } from 'lucide-react';
+import {
+  LayoutDashboard,
+  TrendingUp,
+  Wallet,
+  Home,
+  LinkIcon,
+  Users,
+  Target,
+  UserRound,
+} from 'lucide-react';
 
 export type RouteNavItem = {
   label: string;
   to: string;
   title: string;
   icon: LucideIcon;
+  showWhen?: 'budget-enabled';
 };
 
 export type ToolNavItem = {
@@ -23,22 +33,35 @@ export const routeNavItems: ReadonlyArray<RouteNavItem> = [
     icon: LayoutDashboard,
   },
   {
-    label: 'Accounts',
-    to: '/accounts',
-    title: 'Accounts & People',
-    icon: Users,
+    label: 'People',
+    to: '/people',
+    title: 'People',
+    icon: UserRound,
   },
   {
-    label: 'Planner',
-    to: '/planner',
-    title: 'Planner',
-    icon: TrendingUp,
+    label: 'Accounts',
+    to: '/accounts',
+    title: 'Accounts',
+    icon: Users,
   },
   {
     label: 'Budget',
     to: '/budget',
     title: 'Budget',
     icon: Wallet,
+    showWhen: 'budget-enabled',
+  },
+  {
+    label: 'Future',
+    to: '/future',
+    title: 'Future',
+    icon: TrendingUp,
+  },
+  {
+    label: 'Goals',
+    to: '/goals',
+    title: 'Goals',
+    icon: Target,
   },
 ];
 

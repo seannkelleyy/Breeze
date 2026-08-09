@@ -18,7 +18,7 @@ import {
   RecurringTemplatesDialog,
 } from './components/index';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { isMoneyGreaterThanOrEqualWithTolerance } from '../planner/lib/constants';
+import { isMoneyGreaterThanOrEqualWithTolerance } from '../future/lib/constants';
 import { useTabParam } from '@/lib/hooks/useTabParam';
 
 const BUDGET_TABS = ['categories', 'expenses', 'income'] as const;

@@ -4,6 +4,7 @@ import ThemeToggle from '../theme/ThemeToggle';
 import { UserPreferencesModal } from '../userPreference/UserPreferencesModal';
 import { NavRouteItem } from './NavItems';
 import { routeNavItems, toolNavItems } from './navConfig';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import BreezeAuthButton from '../auth/BreezeAuthButton';
 import Image from 'next/image';
 import { Wrench } from 'lucide-react';
@@ -13,6 +14,11 @@ import { cn } from '@/lib/utils';
 export const DesktopNavigation = () => {
   const pathname = usePathname();
   const isToolsActive = pathname.startsWith('/tools');
+  const { budgetEnabled } = useCurrentUser();
+
+  const visibleRouteItems = routeNavItems.filter(
+    (item) => item.showWhen !== 'budget-enabled' || budgetEnabled,
+  );
 
   return (
     <Menubar
@@ -26,7 +32,7 @@ export const DesktopNavigation = () => {
 
       {/* CENTER: route links + tools dropdown */}
       <div className="z-10 flex items-center gap-1">
-        {routeNavItems.map((item) => (
+        {visibleRouteItems.map((item) => (
           <NavRouteItem
             key={item.label}
             label={item.label}
