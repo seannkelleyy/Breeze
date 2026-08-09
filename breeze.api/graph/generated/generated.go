@@ -130,12 +130,21 @@ type ComplexityRoot struct {
 	}
 
 	Goal struct {
-		CreatedAt   func(childComplexity int) int
-		Description func(childComplexity int) int
-		ID          func(childComplexity int) int
-		IsCompleted func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
-		UserID      func(childComplexity int) int
+		Category             func(childComplexity int) int
+		ConnectedAccountIds  func(childComplexity int) int
+		CreatedAt            func(childComplexity int) int
+		CustomCategory       func(childComplexity int) int
+		Description          func(childComplexity int) int
+		FinancialOrderStep   func(childComplexity int) int
+		ID                   func(childComplexity int) int
+		IsCompleted          func(childComplexity int) int
+		IsFinancialOrderStep func(childComplexity int) int
+		Notes                func(childComplexity int) int
+		Priority             func(childComplexity int) int
+		TargetAmount         func(childComplexity int) int
+		TargetDate           func(childComplexity int) int
+		UpdatedAt            func(childComplexity int) int
+		UserID               func(childComplexity int) int
 	}
 
 	Health struct {
@@ -197,6 +206,7 @@ type ComplexityRoot struct {
 		CreateBudget                    func(childComplexity int, input model.CreateBudgetInput) int
 		CreateExpense                   func(childComplexity int, input model.CreateExpenseInput) int
 		CreateExpenseCategory           func(childComplexity int, input model.CreateExpenseCategoryInput) int
+		CreateFinancialOrderSteps       func(childComplexity int) int
 		CreateGoal                      func(childComplexity int, input model.CreateGoalInput) int
 		CreateIncome                    func(childComplexity int, input model.CreateIncomeInput) int
 		CreateLiability                 func(childComplexity int, input model.CreateLiabilityInput) int
@@ -243,6 +253,7 @@ type ComplexityRoot struct {
 		UpdateScenario                  func(childComplexity int, input model.UpdateScenarioInput) int
 		UpdateTaxBracket                func(childComplexity int, input model.UpdateTaxBracketInput) int
 		UpdateUser                      func(childComplexity int, input model.UpdateUserInput) int
+		UpdateUserSetup                 func(childComplexity int, input model.UpdateUserSetupInput) int
 		UpsertPlannerPerson             func(childComplexity int, input model.UpsertPlannerPersonInput) int
 	}
 
@@ -444,20 +455,25 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		CreatedAt          func(childComplexity int) int
-		CurrencyType       func(childComplexity int) int
-		DeductionAmount    func(childComplexity int) int
-		DeductionType      func(childComplexity int) int
-		Email              func(childComplexity int) int
-		FilingStatus       func(childComplexity int) int
-		ID                 func(childComplexity int) int
-		IdentityProviderID func(childComplexity int) int
-		InflationRate      func(childComplexity int) int
-		MaxTaxBracketID    func(childComplexity int) int
-		PayoffStrategy     func(childComplexity int) int
-		ReturnType         func(childComplexity int) int
-		SafeWithdrawalRate func(childComplexity int) int
-		UpdatedAt          func(childComplexity int) int
+		BudgetEnabled        func(childComplexity int) int
+		CreatedAt            func(childComplexity int) int
+		CurrencyType         func(childComplexity int) int
+		DeductionAmount      func(childComplexity int) int
+		DeductionType        func(childComplexity int) int
+		DisclaimerAccepted   func(childComplexity int) int
+		DisclaimerAcceptedAt func(childComplexity int) int
+		Email                func(childComplexity int) int
+		FilingStatus         func(childComplexity int) int
+		ID                   func(childComplexity int) int
+		IdentityProviderID   func(childComplexity int) int
+		InflationRate        func(childComplexity int) int
+		MaxTaxBracketID      func(childComplexity int) int
+		MonthlyExpenses      func(childComplexity int) int
+		PayoffStrategy       func(childComplexity int) int
+		ReturnType           func(childComplexity int) int
+		SafeWithdrawalRate   func(childComplexity int) int
+		SetupCompleted       func(childComplexity int) int
+		UpdatedAt            func(childComplexity int) int
 	}
 }
 
@@ -514,6 +530,8 @@ type MutationResolver interface {
 	UnlinkAssetFromPlaidAccount(ctx context.Context, assetID string) (bool, error)
 	LinkLiabilityToPlaidAccount(ctx context.Context, liabilityID string, plaidAccountID string) (bool, error)
 	UnlinkLiabilityFromPlaidAccount(ctx context.Context, liabilityID string) (bool, error)
+	UpdateUserSetup(ctx context.Context, input model.UpdateUserSetupInput) (*model.User, error)
+	CreateFinancialOrderSteps(ctx context.Context) ([]*model.Goal, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (*model.Health, error)
@@ -1018,18 +1036,42 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.ExpenseSplit.UpdatedAt(childComplexity), true
 
+	case "Goal.category":
+		if e.ComplexityRoot.Goal.Category == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Goal.Category(childComplexity), true
+	case "Goal.connectedAccountIds":
+		if e.ComplexityRoot.Goal.ConnectedAccountIds == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Goal.ConnectedAccountIds(childComplexity), true
 	case "Goal.createdAt":
 		if e.ComplexityRoot.Goal.CreatedAt == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Goal.CreatedAt(childComplexity), true
+	case "Goal.customCategory":
+		if e.ComplexityRoot.Goal.CustomCategory == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Goal.CustomCategory(childComplexity), true
 	case "Goal.description":
 		if e.ComplexityRoot.Goal.Description == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Goal.Description(childComplexity), true
+	case "Goal.financialOrderStep":
+		if e.ComplexityRoot.Goal.FinancialOrderStep == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Goal.FinancialOrderStep(childComplexity), true
 	case "Goal.id":
 		if e.ComplexityRoot.Goal.ID == nil {
 			break
@@ -1042,6 +1084,36 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Goal.IsCompleted(childComplexity), true
+	case "Goal.isFinancialOrderStep":
+		if e.ComplexityRoot.Goal.IsFinancialOrderStep == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Goal.IsFinancialOrderStep(childComplexity), true
+	case "Goal.notes":
+		if e.ComplexityRoot.Goal.Notes == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Goal.Notes(childComplexity), true
+	case "Goal.priority":
+		if e.ComplexityRoot.Goal.Priority == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Goal.Priority(childComplexity), true
+	case "Goal.targetAmount":
+		if e.ComplexityRoot.Goal.TargetAmount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Goal.TargetAmount(childComplexity), true
+	case "Goal.targetDate":
+		if e.ComplexityRoot.Goal.TargetDate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Goal.TargetDate(childComplexity), true
 	case "Goal.updatedAt":
 		if e.ComplexityRoot.Goal.UpdatedAt == nil {
 			break
@@ -1360,6 +1432,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CreateExpenseCategory(childComplexity, args["input"].(model.CreateExpenseCategoryInput)), true
+	case "Mutation.createFinancialOrderSteps":
+		if e.ComplexityRoot.Mutation.CreateFinancialOrderSteps == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Mutation.CreateFinancialOrderSteps(childComplexity), true
 	case "Mutation.createGoal":
 		if e.ComplexityRoot.Mutation.CreateGoal == nil {
 			break
@@ -1866,6 +1944,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.UpdateUser(childComplexity, args["input"].(model.UpdateUserInput)), true
+	case "Mutation.updateUserSetup":
+		if e.ComplexityRoot.Mutation.UpdateUserSetup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUserSetup_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpdateUserSetup(childComplexity, args["input"].(model.UpdateUserSetupInput)), true
 	case "Mutation.upsertPlannerPerson":
 		if e.ComplexityRoot.Mutation.UpsertPlannerPerson == nil {
 			break
@@ -3030,6 +3119,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.TaxEstimate.TaxableIncome(childComplexity), true
 
+	case "User.budgetEnabled":
+		if e.ComplexityRoot.User.BudgetEnabled == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.BudgetEnabled(childComplexity), true
 	case "User.createdAt":
 		if e.ComplexityRoot.User.CreatedAt == nil {
 			break
@@ -3054,6 +3149,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.DeductionType(childComplexity), true
+	case "User.disclaimerAccepted":
+		if e.ComplexityRoot.User.DisclaimerAccepted == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.DisclaimerAccepted(childComplexity), true
+	case "User.disclaimerAcceptedAt":
+		if e.ComplexityRoot.User.DisclaimerAcceptedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.DisclaimerAcceptedAt(childComplexity), true
 	case "User.email":
 		if e.ComplexityRoot.User.Email == nil {
 			break
@@ -3090,6 +3197,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.MaxTaxBracketID(childComplexity), true
+	case "User.monthlyExpenses":
+		if e.ComplexityRoot.User.MonthlyExpenses == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.MonthlyExpenses(childComplexity), true
 	case "User.payoffStrategy":
 		if e.ComplexityRoot.User.PayoffStrategy == nil {
 			break
@@ -3108,6 +3221,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.SafeWithdrawalRate(childComplexity), true
+	case "User.setupCompleted":
+		if e.ComplexityRoot.User.SetupCompleted == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.SetupCompleted(childComplexity), true
 	case "User.updatedAt":
 		if e.ComplexityRoot.User.UpdatedAt == nil {
 			break
@@ -3153,6 +3272,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUpdateScenarioInput,
 		ec.unmarshalInputUpdateTaxBracketInput,
 		ec.unmarshalInputUpdateUserInput,
+		ec.unmarshalInputUpdateUserSetupInput,
 		ec.unmarshalInputUpsertPlannerPersonInput,
 	)
 	first := true
@@ -3326,6 +3446,8 @@ type Mutation {
   unlinkAssetFromPlaidAccount(assetId: ID!): Boolean!
   linkLiabilityToPlaidAccount(liabilityId: ID!, plaidAccountId: ID!): Boolean!
   unlinkLiabilityFromPlaidAccount(liabilityId: ID!): Boolean!
+  updateUserSetup(input: UpdateUserSetupInput!): User!
+  createFinancialOrderSteps: [Goal!]!
 }
 
 type Health {
@@ -3434,6 +3556,11 @@ type User {
   maxTaxBracketId: ID
   filingStatus: FilingStatus!
   payoffStrategy: PayoffStrategy!
+  budgetEnabled: Boolean!
+  monthlyExpenses: String
+  setupCompleted: Boolean!
+  disclaimerAccepted: Boolean!
+  disclaimerAcceptedAt: String
   createdAt: String!
   updatedAt: String!
 }
@@ -3465,6 +3592,15 @@ input UpdateUserInput {
   maxTaxBracketId: ID
   filingStatus: FilingStatus!
   payoffStrategy: PayoffStrategy!
+}
+
+input UpdateUserSetupInput {
+  id: ID!
+  budgetEnabled: Boolean
+  monthlyExpenses: String
+  setupCompleted: Boolean
+  disclaimerAccepted: Boolean
+  disclaimerAcceptedAt: String
 }
 
 type Asset {
@@ -3526,6 +3662,15 @@ type Goal {
   userId: ID!
   description: String!
   isCompleted: Boolean!
+  targetAmount: String
+  targetDate: String
+  category: String
+  customCategory: String
+  priority: Int!
+  notes: String
+  connectedAccountIds: [ID!]!
+  isFinancialOrderStep: Boolean!
+  financialOrderStep: Int
   createdAt: String!
   updatedAt: String!
 }
@@ -3790,6 +3935,15 @@ input CreateGoalInput {
   userId: ID!
   description: String!
   isCompleted: Boolean!
+  targetAmount: String
+  targetDate: String
+  category: String
+  customCategory: String
+  priority: Int!
+  notes: String
+  connectedAccountIds: [ID!]!
+  isFinancialOrderStep: Boolean!
+  financialOrderStep: Int
 }
 
 input CreateScenarioInput {
@@ -3808,6 +3962,15 @@ input UpdateGoalInput {
   id: ID!
   description: String!
   isCompleted: Boolean!
+  targetAmount: String
+  targetDate: String
+  category: String
+  customCategory: String
+  priority: Int!
+  notes: String
+  connectedAccountIds: [ID!]!
+  isFinancialOrderStep: Boolean!
+  financialOrderStep: Int
 }
 
 input UpdateScenarioInput {
@@ -4633,6 +4796,17 @@ func (ec *executionContext) field_Mutation_updateTaxBracket_args(ctx context.Con
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateTaxBracketInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateTaxBracketInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateUserSetup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateUserSetupInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateUserSetupInput)
 	if err != nil {
 		return nil, err
 	}
@@ -7462,6 +7636,267 @@ func (ec *executionContext) fieldContext_Goal_isCompleted(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Goal_targetAmount(ctx context.Context, field graphql.CollectedField, obj *model.Goal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Goal_targetAmount,
+		func(ctx context.Context) (any, error) {
+			return obj.TargetAmount, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Goal_targetAmount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Goal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Goal_targetDate(ctx context.Context, field graphql.CollectedField, obj *model.Goal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Goal_targetDate,
+		func(ctx context.Context) (any, error) {
+			return obj.TargetDate, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Goal_targetDate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Goal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Goal_category(ctx context.Context, field graphql.CollectedField, obj *model.Goal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Goal_category,
+		func(ctx context.Context) (any, error) {
+			return obj.Category, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Goal_category(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Goal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Goal_customCategory(ctx context.Context, field graphql.CollectedField, obj *model.Goal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Goal_customCategory,
+		func(ctx context.Context) (any, error) {
+			return obj.CustomCategory, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Goal_customCategory(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Goal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Goal_priority(ctx context.Context, field graphql.CollectedField, obj *model.Goal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Goal_priority,
+		func(ctx context.Context) (any, error) {
+			return obj.Priority, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Goal_priority(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Goal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Goal_notes(ctx context.Context, field graphql.CollectedField, obj *model.Goal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Goal_notes,
+		func(ctx context.Context) (any, error) {
+			return obj.Notes, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Goal_notes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Goal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Goal_connectedAccountIds(ctx context.Context, field graphql.CollectedField, obj *model.Goal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Goal_connectedAccountIds,
+		func(ctx context.Context) (any, error) {
+			return obj.ConnectedAccountIds, nil
+		},
+		nil,
+		ec.marshalNID2ᚕstringᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Goal_connectedAccountIds(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Goal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Goal_isFinancialOrderStep(ctx context.Context, field graphql.CollectedField, obj *model.Goal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Goal_isFinancialOrderStep,
+		func(ctx context.Context) (any, error) {
+			return obj.IsFinancialOrderStep, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Goal_isFinancialOrderStep(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Goal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Goal_financialOrderStep(ctx context.Context, field graphql.CollectedField, obj *model.Goal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Goal_financialOrderStep,
+		func(ctx context.Context) (any, error) {
+			return obj.FinancialOrderStep, nil
+		},
+		nil,
+		ec.marshalOInt2ᚖint,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Goal_financialOrderStep(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Goal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Goal_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Goal) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -8758,6 +9193,16 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 				return ec.fieldContext_User_filingStatus(ctx, field)
 			case "payoffStrategy":
 				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "budgetEnabled":
+				return ec.fieldContext_User_budgetEnabled(ctx, field)
+			case "monthlyExpenses":
+				return ec.fieldContext_User_monthlyExpenses(ctx, field)
+			case "setupCompleted":
+				return ec.fieldContext_User_setupCompleted(ctx, field)
+			case "disclaimerAccepted":
+				return ec.fieldContext_User_disclaimerAccepted(ctx, field)
+			case "disclaimerAcceptedAt":
+				return ec.fieldContext_User_disclaimerAcceptedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -8829,6 +9274,16 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_filingStatus(ctx, field)
 			case "payoffStrategy":
 				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "budgetEnabled":
+				return ec.fieldContext_User_budgetEnabled(ctx, field)
+			case "monthlyExpenses":
+				return ec.fieldContext_User_monthlyExpenses(ctx, field)
+			case "setupCompleted":
+				return ec.fieldContext_User_setupCompleted(ctx, field)
+			case "disclaimerAccepted":
+				return ec.fieldContext_User_disclaimerAccepted(ctx, field)
+			case "disclaimerAcceptedAt":
+				return ec.fieldContext_User_disclaimerAcceptedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -9486,6 +9941,24 @@ func (ec *executionContext) fieldContext_Mutation_createGoal(ctx context.Context
 				return ec.fieldContext_Goal_description(ctx, field)
 			case "isCompleted":
 				return ec.fieldContext_Goal_isCompleted(ctx, field)
+			case "targetAmount":
+				return ec.fieldContext_Goal_targetAmount(ctx, field)
+			case "targetDate":
+				return ec.fieldContext_Goal_targetDate(ctx, field)
+			case "category":
+				return ec.fieldContext_Goal_category(ctx, field)
+			case "customCategory":
+				return ec.fieldContext_Goal_customCategory(ctx, field)
+			case "priority":
+				return ec.fieldContext_Goal_priority(ctx, field)
+			case "notes":
+				return ec.fieldContext_Goal_notes(ctx, field)
+			case "connectedAccountIds":
+				return ec.fieldContext_Goal_connectedAccountIds(ctx, field)
+			case "isFinancialOrderStep":
+				return ec.fieldContext_Goal_isFinancialOrderStep(ctx, field)
+			case "financialOrderStep":
+				return ec.fieldContext_Goal_financialOrderStep(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Goal_createdAt(ctx, field)
 			case "updatedAt":
@@ -9541,6 +10014,24 @@ func (ec *executionContext) fieldContext_Mutation_updateGoal(ctx context.Context
 				return ec.fieldContext_Goal_description(ctx, field)
 			case "isCompleted":
 				return ec.fieldContext_Goal_isCompleted(ctx, field)
+			case "targetAmount":
+				return ec.fieldContext_Goal_targetAmount(ctx, field)
+			case "targetDate":
+				return ec.fieldContext_Goal_targetDate(ctx, field)
+			case "category":
+				return ec.fieldContext_Goal_category(ctx, field)
+			case "customCategory":
+				return ec.fieldContext_Goal_customCategory(ctx, field)
+			case "priority":
+				return ec.fieldContext_Goal_priority(ctx, field)
+			case "notes":
+				return ec.fieldContext_Goal_notes(ctx, field)
+			case "connectedAccountIds":
+				return ec.fieldContext_Goal_connectedAccountIds(ctx, field)
+			case "isFinancialOrderStep":
+				return ec.fieldContext_Goal_isFinancialOrderStep(ctx, field)
+			case "financialOrderStep":
+				return ec.fieldContext_Goal_financialOrderStep(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Goal_createdAt(ctx, field)
 			case "updatedAt":
@@ -11603,6 +12094,148 @@ func (ec *executionContext) fieldContext_Mutation_unlinkLiabilityFromPlaidAccoun
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_updateUserSetup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateUserSetup,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().UpdateUserSetup(ctx, fc.Args["input"].(model.UpdateUserSetupInput))
+		},
+		nil,
+		ec.marshalNUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateUserSetup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "identityProviderId":
+				return ec.fieldContext_User_identityProviderId(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "returnType":
+				return ec.fieldContext_User_returnType(ctx, field)
+			case "safeWithdrawalRate":
+				return ec.fieldContext_User_safeWithdrawalRate(ctx, field)
+			case "currencyType":
+				return ec.fieldContext_User_currencyType(ctx, field)
+			case "inflationRate":
+				return ec.fieldContext_User_inflationRate(ctx, field)
+			case "deductionType":
+				return ec.fieldContext_User_deductionType(ctx, field)
+			case "deductionAmount":
+				return ec.fieldContext_User_deductionAmount(ctx, field)
+			case "maxTaxBracketId":
+				return ec.fieldContext_User_maxTaxBracketId(ctx, field)
+			case "filingStatus":
+				return ec.fieldContext_User_filingStatus(ctx, field)
+			case "payoffStrategy":
+				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "budgetEnabled":
+				return ec.fieldContext_User_budgetEnabled(ctx, field)
+			case "monthlyExpenses":
+				return ec.fieldContext_User_monthlyExpenses(ctx, field)
+			case "setupCompleted":
+				return ec.fieldContext_User_setupCompleted(ctx, field)
+			case "disclaimerAccepted":
+				return ec.fieldContext_User_disclaimerAccepted(ctx, field)
+			case "disclaimerAcceptedAt":
+				return ec.fieldContext_User_disclaimerAcceptedAt(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateUserSetup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createFinancialOrderSteps(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_createFinancialOrderSteps,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Mutation().CreateFinancialOrderSteps(ctx)
+		},
+		nil,
+		ec.marshalNGoal2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐGoalᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createFinancialOrderSteps(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Goal_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Goal_userId(ctx, field)
+			case "description":
+				return ec.fieldContext_Goal_description(ctx, field)
+			case "isCompleted":
+				return ec.fieldContext_Goal_isCompleted(ctx, field)
+			case "targetAmount":
+				return ec.fieldContext_Goal_targetAmount(ctx, field)
+			case "targetDate":
+				return ec.fieldContext_Goal_targetDate(ctx, field)
+			case "category":
+				return ec.fieldContext_Goal_category(ctx, field)
+			case "customCategory":
+				return ec.fieldContext_Goal_customCategory(ctx, field)
+			case "priority":
+				return ec.fieldContext_Goal_priority(ctx, field)
+			case "notes":
+				return ec.fieldContext_Goal_notes(ctx, field)
+			case "connectedAccountIds":
+				return ec.fieldContext_Goal_connectedAccountIds(ctx, field)
+			case "isFinancialOrderStep":
+				return ec.fieldContext_Goal_isFinancialOrderStep(ctx, field)
+			case "financialOrderStep":
+				return ec.fieldContext_Goal_financialOrderStep(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Goal_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Goal_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Goal", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _NetWorthSnapshot_id(ctx context.Context, field graphql.CollectedField, obj *model.NetWorthSnapshot) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -12789,6 +13422,16 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_filingStatus(ctx, field)
 			case "payoffStrategy":
 				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "budgetEnabled":
+				return ec.fieldContext_User_budgetEnabled(ctx, field)
+			case "monthlyExpenses":
+				return ec.fieldContext_User_monthlyExpenses(ctx, field)
+			case "setupCompleted":
+				return ec.fieldContext_User_setupCompleted(ctx, field)
+			case "disclaimerAccepted":
+				return ec.fieldContext_User_disclaimerAccepted(ctx, field)
+			case "disclaimerAcceptedAt":
+				return ec.fieldContext_User_disclaimerAcceptedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -12859,6 +13502,16 @@ func (ec *executionContext) fieldContext_Query_me(_ context.Context, field graph
 				return ec.fieldContext_User_filingStatus(ctx, field)
 			case "payoffStrategy":
 				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "budgetEnabled":
+				return ec.fieldContext_User_budgetEnabled(ctx, field)
+			case "monthlyExpenses":
+				return ec.fieldContext_User_monthlyExpenses(ctx, field)
+			case "setupCompleted":
+				return ec.fieldContext_User_setupCompleted(ctx, field)
+			case "disclaimerAccepted":
+				return ec.fieldContext_User_disclaimerAccepted(ctx, field)
+			case "disclaimerAcceptedAt":
+				return ec.fieldContext_User_disclaimerAcceptedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -12918,6 +13571,16 @@ func (ec *executionContext) fieldContext_Query_users(_ context.Context, field gr
 				return ec.fieldContext_User_filingStatus(ctx, field)
 			case "payoffStrategy":
 				return ec.fieldContext_User_payoffStrategy(ctx, field)
+			case "budgetEnabled":
+				return ec.fieldContext_User_budgetEnabled(ctx, field)
+			case "monthlyExpenses":
+				return ec.fieldContext_User_monthlyExpenses(ctx, field)
+			case "setupCompleted":
+				return ec.fieldContext_User_setupCompleted(ctx, field)
+			case "disclaimerAccepted":
+				return ec.fieldContext_User_disclaimerAccepted(ctx, field)
+			case "disclaimerAcceptedAt":
+				return ec.fieldContext_User_disclaimerAcceptedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -13457,6 +14120,24 @@ func (ec *executionContext) fieldContext_Query_goal(ctx context.Context, field g
 				return ec.fieldContext_Goal_description(ctx, field)
 			case "isCompleted":
 				return ec.fieldContext_Goal_isCompleted(ctx, field)
+			case "targetAmount":
+				return ec.fieldContext_Goal_targetAmount(ctx, field)
+			case "targetDate":
+				return ec.fieldContext_Goal_targetDate(ctx, field)
+			case "category":
+				return ec.fieldContext_Goal_category(ctx, field)
+			case "customCategory":
+				return ec.fieldContext_Goal_customCategory(ctx, field)
+			case "priority":
+				return ec.fieldContext_Goal_priority(ctx, field)
+			case "notes":
+				return ec.fieldContext_Goal_notes(ctx, field)
+			case "connectedAccountIds":
+				return ec.fieldContext_Goal_connectedAccountIds(ctx, field)
+			case "isFinancialOrderStep":
+				return ec.fieldContext_Goal_isFinancialOrderStep(ctx, field)
+			case "financialOrderStep":
+				return ec.fieldContext_Goal_financialOrderStep(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Goal_createdAt(ctx, field)
 			case "updatedAt":
@@ -13512,6 +14193,24 @@ func (ec *executionContext) fieldContext_Query_goals(ctx context.Context, field 
 				return ec.fieldContext_Goal_description(ctx, field)
 			case "isCompleted":
 				return ec.fieldContext_Goal_isCompleted(ctx, field)
+			case "targetAmount":
+				return ec.fieldContext_Goal_targetAmount(ctx, field)
+			case "targetDate":
+				return ec.fieldContext_Goal_targetDate(ctx, field)
+			case "category":
+				return ec.fieldContext_Goal_category(ctx, field)
+			case "customCategory":
+				return ec.fieldContext_Goal_customCategory(ctx, field)
+			case "priority":
+				return ec.fieldContext_Goal_priority(ctx, field)
+			case "notes":
+				return ec.fieldContext_Goal_notes(ctx, field)
+			case "connectedAccountIds":
+				return ec.fieldContext_Goal_connectedAccountIds(ctx, field)
+			case "isFinancialOrderStep":
+				return ec.fieldContext_Goal_isFinancialOrderStep(ctx, field)
+			case "financialOrderStep":
+				return ec.fieldContext_Goal_financialOrderStep(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Goal_createdAt(ctx, field)
 			case "updatedAt":
@@ -18051,6 +18750,151 @@ func (ec *executionContext) fieldContext_User_payoffStrategy(_ context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _User_budgetEnabled(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_budgetEnabled,
+		func(ctx context.Context) (any, error) {
+			return obj.BudgetEnabled, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_budgetEnabled(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_monthlyExpenses(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_monthlyExpenses,
+		func(ctx context.Context) (any, error) {
+			return obj.MonthlyExpenses, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_monthlyExpenses(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_setupCompleted(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_setupCompleted,
+		func(ctx context.Context) (any, error) {
+			return obj.SetupCompleted, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_setupCompleted(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_disclaimerAccepted(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_disclaimerAccepted,
+		func(ctx context.Context) (any, error) {
+			return obj.DisclaimerAccepted, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_disclaimerAccepted(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_disclaimerAcceptedAt(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_disclaimerAcceptedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.DisclaimerAcceptedAt, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_disclaimerAcceptedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -19933,7 +20777,7 @@ func (ec *executionContext) unmarshalInputCreateGoalInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "description", "isCompleted"}
+	fieldsInOrder := [...]string{"userId", "description", "isCompleted", "targetAmount", "targetDate", "category", "customCategory", "priority", "notes", "connectedAccountIds", "isFinancialOrderStep", "financialOrderStep"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -19961,6 +20805,69 @@ func (ec *executionContext) unmarshalInputCreateGoalInput(ctx context.Context, o
 				return it, err
 			}
 			it.IsCompleted = data
+		case "targetAmount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetAmount"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TargetAmount = data
+		case "targetDate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetDate"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TargetDate = data
+		case "category":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Category = data
+		case "customCategory":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("customCategory"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CustomCategory = data
+		case "priority":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("priority"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Priority = data
+		case "notes":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("notes"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Notes = data
+		case "connectedAccountIds":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("connectedAccountIds"))
+			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ConnectedAccountIds = data
+		case "isFinancialOrderStep":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isFinancialOrderStep"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsFinancialOrderStep = data
+		case "financialOrderStep":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("financialOrderStep"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FinancialOrderStep = data
 		}
 	}
 	return it, nil
@@ -21048,7 +21955,7 @@ func (ec *executionContext) unmarshalInputUpdateGoalInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "description", "isCompleted"}
+	fieldsInOrder := [...]string{"id", "description", "isCompleted", "targetAmount", "targetDate", "category", "customCategory", "priority", "notes", "connectedAccountIds", "isFinancialOrderStep", "financialOrderStep"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -21076,6 +21983,69 @@ func (ec *executionContext) unmarshalInputUpdateGoalInput(ctx context.Context, o
 				return it, err
 			}
 			it.IsCompleted = data
+		case "targetAmount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetAmount"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TargetAmount = data
+		case "targetDate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetDate"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TargetDate = data
+		case "category":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Category = data
+		case "customCategory":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("customCategory"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CustomCategory = data
+		case "priority":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("priority"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Priority = data
+		case "notes":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("notes"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Notes = data
+		case "connectedAccountIds":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("connectedAccountIds"))
+			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ConnectedAccountIds = data
+		case "isFinancialOrderStep":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isFinancialOrderStep"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsFinancialOrderStep = data
+		case "financialOrderStep":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("financialOrderStep"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FinancialOrderStep = data
 		}
 	}
 	return it, nil
@@ -21806,6 +22776,71 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateUserSetupInput(ctx context.Context, obj any) (model.UpdateUserSetupInput, error) {
+	var it model.UpdateUserSetupInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "budgetEnabled", "monthlyExpenses", "setupCompleted", "disclaimerAccepted", "disclaimerAcceptedAt"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "budgetEnabled":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("budgetEnabled"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.BudgetEnabled = data
+		case "monthlyExpenses":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("monthlyExpenses"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MonthlyExpenses = data
+		case "setupCompleted":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("setupCompleted"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SetupCompleted = data
+		case "disclaimerAccepted":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("disclaimerAccepted"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DisclaimerAccepted = data
+		case "disclaimerAcceptedAt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("disclaimerAcceptedAt"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DisclaimerAcceptedAt = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpsertPlannerPersonInput(ctx context.Context, obj any) (model.UpsertPlannerPersonInput, error) {
 	var it model.UpsertPlannerPersonInput
 	if obj == nil {
@@ -22495,6 +23530,33 @@ func (ec *executionContext) _Goal(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "targetAmount":
+			out.Values[i] = ec._Goal_targetAmount(ctx, field, obj)
+		case "targetDate":
+			out.Values[i] = ec._Goal_targetDate(ctx, field, obj)
+		case "category":
+			out.Values[i] = ec._Goal_category(ctx, field, obj)
+		case "customCategory":
+			out.Values[i] = ec._Goal_customCategory(ctx, field, obj)
+		case "priority":
+			out.Values[i] = ec._Goal_priority(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "notes":
+			out.Values[i] = ec._Goal_notes(ctx, field, obj)
+		case "connectedAccountIds":
+			out.Values[i] = ec._Goal_connectedAccountIds(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "isFinancialOrderStep":
+			out.Values[i] = ec._Goal_isFinancialOrderStep(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "financialOrderStep":
+			out.Values[i] = ec._Goal_financialOrderStep(ctx, field, obj)
 		case "createdAt":
 			out.Values[i] = ec._Goal_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -23230,6 +24292,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "unlinkLiabilityFromPlaidAccount":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_unlinkLiabilityFromPlaidAccount(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateUserSetup":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateUserSetup(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createFinancialOrderSteps":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createFinancialOrderSteps(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -25159,6 +26235,25 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "budgetEnabled":
+			out.Values[i] = ec._User_budgetEnabled(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "monthlyExpenses":
+			out.Values[i] = ec._User_monthlyExpenses(ctx, field, obj)
+		case "setupCompleted":
+			out.Values[i] = ec._User_setupCompleted(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "disclaimerAccepted":
+			out.Values[i] = ec._User_disclaimerAccepted(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "disclaimerAcceptedAt":
+			out.Values[i] = ec._User_disclaimerAcceptedAt(ctx, field, obj)
 		case "createdAt":
 			out.Values[i] = ec._User_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -26499,6 +27594,11 @@ func (ec *executionContext) unmarshalNUpdateTaxBracketInput2breezeᚗapiᚋgraph
 
 func (ec *executionContext) unmarshalNUpdateUserInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v any) (model.UpdateUserInput, error) {
 	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateUserSetupInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateUserSetupInput(ctx context.Context, v any) (model.UpdateUserSetupInput, error) {
+	res, err := ec.unmarshalInputUpdateUserSetupInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

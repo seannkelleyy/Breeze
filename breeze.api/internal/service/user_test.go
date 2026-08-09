@@ -22,6 +22,7 @@ type mockQuerier struct {
 	getOrCreateUserByEmailFunc      func(context.Context, sqlc.GetOrCreateUserByEmailParams) (sqlc.GetOrCreateUserByEmailRow, error)
 	listUsersFunc                   func(context.Context) ([]sqlc.ListUsersRow, error)
 	updateUserFunc                  func(context.Context, sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error)
+	updateUserSetupFunc             func(context.Context, sqlc.UpdateUserSetupParams) (sqlc.UpdateUserSetupRow, error)
 	softDeleteUserFunc              func(context.Context, uuid.UUID) (int64, error)
 }
 
@@ -72,6 +73,13 @@ func (m *mockQuerier) SoftDeleteUser(ctx context.Context, id uuid.UUID) (int64, 
 		return m.softDeleteUserFunc(ctx, id)
 	}
 	return 0, nil
+}
+
+func (m *mockQuerier) UpdateUserSetup(ctx context.Context, params sqlc.UpdateUserSetupParams) (sqlc.UpdateUserSetupRow, error) {
+	if m.updateUserSetupFunc != nil {
+		return m.updateUserSetupFunc(ctx, params)
+	}
+	return sqlc.UpdateUserSetupRow{}, nil
 }
 
 // Helper to create a test user row

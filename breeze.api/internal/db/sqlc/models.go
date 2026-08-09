@@ -646,13 +646,22 @@ type ExpenseSplit struct {
 }
 
 type Goal struct {
-	ID          uuid.UUID          `json:"id"`
-	UserID      uuid.UUID          `json:"user_id"`
-	Description string             `json:"description"`
-	IsCompleted bool               `json:"is_completed"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
+	ID                   uuid.UUID          `json:"id"`
+	UserID               uuid.UUID          `json:"user_id"`
+	Description          string             `json:"description"`
+	IsCompleted          bool               `json:"is_completed"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+	TargetAmount         pgtype.Numeric     `json:"target_amount"`
+	TargetDate           pgtype.Date        `json:"target_date"`
+	Category             *string            `json:"category"`
+	CustomCategory       *string            `json:"custom_category"`
+	Priority             int32              `json:"priority"`
+	Notes                *string            `json:"notes"`
+	ConnectedAccountIds  []uuid.UUID        `json:"connected_account_ids"`
+	IsFinancialOrderStep bool               `json:"is_financial_order_step"`
+	FinancialOrderStep   *int32             `json:"financial_order_step"`
 }
 
 type Income struct {
@@ -843,19 +852,24 @@ type TaxBracket struct {
 }
 
 type User struct {
-	ID                 uuid.UUID          `json:"id"`
-	Email              string             `json:"email"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
-	IdentityProviderID string             `json:"identity_provider_id"`
-	ReturnType         ReturnType         `json:"return_type"`
-	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType       string             `json:"currency_type"`
-	InflationRate      decimal.Decimal    `json:"inflation_rate"`
-	DeductionType      DeductionType      `json:"deduction_type"`
-	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus       FilingStatus       `json:"filing_status"`
-	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
+	ID                   uuid.UUID          `json:"id"`
+	Email                string             `json:"email"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+	IdentityProviderID   string             `json:"identity_provider_id"`
+	ReturnType           ReturnType         `json:"return_type"`
+	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType         string             `json:"currency_type"`
+	InflationRate        decimal.Decimal    `json:"inflation_rate"`
+	DeductionType        DeductionType      `json:"deduction_type"`
+	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus         FilingStatus       `json:"filing_status"`
+	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
+	BudgetEnabled        bool               `json:"budget_enabled"`
+	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
+	SetupCompleted       bool               `json:"setup_completed"`
+	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
+	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
 }

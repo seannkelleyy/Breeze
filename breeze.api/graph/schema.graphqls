@@ -95,6 +95,8 @@ type Mutation {
   unlinkAssetFromPlaidAccount(assetId: ID!): Boolean!
   linkLiabilityToPlaidAccount(liabilityId: ID!, plaidAccountId: ID!): Boolean!
   unlinkLiabilityFromPlaidAccount(liabilityId: ID!): Boolean!
+  updateUserSetup(input: UpdateUserSetupInput!): User!
+  createFinancialOrderSteps: [Goal!]!
 }
 
 type Health {
@@ -203,6 +205,11 @@ type User {
   maxTaxBracketId: ID
   filingStatus: FilingStatus!
   payoffStrategy: PayoffStrategy!
+  budgetEnabled: Boolean!
+  monthlyExpenses: String
+  setupCompleted: Boolean!
+  disclaimerAccepted: Boolean!
+  disclaimerAcceptedAt: String
   createdAt: String!
   updatedAt: String!
 }
@@ -234,6 +241,15 @@ input UpdateUserInput {
   maxTaxBracketId: ID
   filingStatus: FilingStatus!
   payoffStrategy: PayoffStrategy!
+}
+
+input UpdateUserSetupInput {
+  id: ID!
+  budgetEnabled: Boolean
+  monthlyExpenses: String
+  setupCompleted: Boolean
+  disclaimerAccepted: Boolean
+  disclaimerAcceptedAt: String
 }
 
 type Asset {
@@ -295,6 +311,15 @@ type Goal {
   userId: ID!
   description: String!
   isCompleted: Boolean!
+  targetAmount: String
+  targetDate: String
+  category: String
+  customCategory: String
+  priority: Int!
+  notes: String
+  connectedAccountIds: [ID!]!
+  isFinancialOrderStep: Boolean!
+  financialOrderStep: Int
   createdAt: String!
   updatedAt: String!
 }
@@ -559,6 +584,15 @@ input CreateGoalInput {
   userId: ID!
   description: String!
   isCompleted: Boolean!
+  targetAmount: String
+  targetDate: String
+  category: String
+  customCategory: String
+  priority: Int!
+  notes: String
+  connectedAccountIds: [ID!]!
+  isFinancialOrderStep: Boolean!
+  financialOrderStep: Int
 }
 
 input CreateScenarioInput {
@@ -577,6 +611,15 @@ input UpdateGoalInput {
   id: ID!
   description: String!
   isCompleted: Boolean!
+  targetAmount: String
+  targetDate: String
+  category: String
+  customCategory: String
+  priority: Int!
+  notes: String
+  connectedAccountIds: [ID!]!
+  isFinancialOrderStep: Boolean!
+  financialOrderStep: Int
 }
 
 input UpdateScenarioInput {

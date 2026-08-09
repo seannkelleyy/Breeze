@@ -17,6 +17,7 @@ import (
 	"breeze.api/internal/db/sqlc"
 	"breeze.api/internal/middleware"
 	"breeze.api/internal/service"
+	"github.com/govalues/decimal"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -906,6 +907,83 @@ func (r *mutationResolver) UnlinkLiabilityFromPlaidAccount(ctx context.Context, 
 		return false, r.mapErr(ctx, err)
 	}
 	return true, nil
+}
+
+// UpdateUserSetup is the resolver for the updateUserSetup field.
+func (r *mutationResolver) UpdateUserSetup(ctx context.Context, input model.UpdateUserSetupInput) (*model.User, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	parsedID, err := uuid.Parse(input.ID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	// Ensure user can only update their own setup
+	if userID != parsedID {
+		return nil, fmt.Errorf("unauthorized: cannot update another user's setup")
+	}
+
+	setupInput := service.UpdateSetupInput{
+		ID: parsedID,
+	}
+
+	if input.BudgetEnabled != nil {
+		setupInput.BudgetEnabled = input.BudgetEnabled
+	}
+
+	if input.MonthlyExpenses != nil {
+		monthlyExpenses, err := decimal.Parse(*input.MonthlyExpenses)
+		if err != nil {
+			return nil, fmt.Errorf("invalid monthly expenses: %w", err)
+		}
+		setupInput.MonthlyExpenses = &monthlyExpenses
+	}
+
+	if input.SetupCompleted != nil {
+		setupInput.SetupCompleted = input.SetupCompleted
+	}
+
+	if input.DisclaimerAccepted != nil {
+		setupInput.DisclaimerAccepted = input.DisclaimerAccepted
+	}
+
+	if input.DisclaimerAcceptedAt != nil {
+		t, err := time.Parse(time.RFC3339, *input.DisclaimerAcceptedAt)
+		if err != nil {
+			return nil, fmt.Errorf("invalid disclaimer accepted at: %w", err)
+		}
+		setupInput.DisclaimerAcceptedAt = &t
+	}
+
+	user, err := r.UserService.UpdateSetup(ctx, setupInput)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	return mapUserToModel(user), nil
+}
+
+// CreateFinancialOrderSteps is the resolver for the createFinancialOrderSteps field.
+func (r *mutationResolver) CreateFinancialOrderSteps(ctx context.Context) ([]*model.Goal, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	goals, err := r.GoalService.CreateFinancialOrderSteps(ctx, userID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	result := make([]*model.Goal, len(goals))
+	for i, goal := range goals {
+		result[i] = mapGoalToModel(&goal)
+	}
+
+	return result, nil
 }
 
 // Health is the resolver for the health field.

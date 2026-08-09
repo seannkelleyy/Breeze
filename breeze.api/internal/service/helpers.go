@@ -87,6 +87,15 @@ func timestamptzToTime(value pgtype.Timestamptz) time.Time {
 	return value.Time.UTC()
 }
 
+// timestamptzToTimePtr converts a pgtype.Timestamptz to *time.Time (UTC).
+func timestamptzToTimePtr(value pgtype.Timestamptz) *time.Time {
+	if !value.Valid {
+		return nil
+	}
+	t := value.Time.UTC()
+	return &t
+}
+
 // pgtypeUUIDFromPtr converts a *uuid.UUID to pgtype.UUID.
 func pgtypeUUIDFromPtr(id *uuid.UUID) pgtype.UUID {
 	if id == nil {

@@ -1,4 +1,4 @@
-h1:VfQTVSMmqxnPWYeLDmrRC4jakGb8E+KMRAxRh8ZeSS4=
+h1:176bg8qdxPkemyUbKHx5zO3yU8ifH03+AuXzlxpq7zQ=
 20260401213128_initial_schema.sql h1:/GVoKJxw6oD5DTPSxCdkRcOHQLi/iT4Qe7Zz9XXGrc0=
 20260401214314_users_full_stack.sql h1:ZqbaWes3gnXoHUCh3t9e34eVE+n5ac85yzmIBzH8h7Y=
 20260415010436_assets_full_stack.sql h1:2O4xE9IkLsMLQR+aqZzQEm8ptOXh95J6w0GPjnHqzs4=
@@ -27,3 +27,4 @@ h1:VfQTVSMmqxnPWYeLDmrRC4jakGb8E+KMRAxRh8ZeSS4=
 20260731120000_add_original_loan_amount.sql h1:6fCk9ti2pnNsDY1NQuDtsDc7Mav4CtBeaxfS5Tz0s2c=
 20260802000000_widen_income_growth_rate.sql h1:RujfEO+FFL+O5ArSGKG/j2i9SW85Hhk4mLd5mPcDgsQ=
 20260803160000_add_plaid_account_linking.sql h1:zPEZphALh9h9SMrx80DgsKHp345KYBQXhz5+p9g+i8w=
+20260803200000_extend_users_and_goals_for_setup.sql h1:cfg7fDv3Qj/ZYHieiYLeyCLroofraryOnGg0BYp/3Fk=

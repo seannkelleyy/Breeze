@@ -41,6 +41,11 @@ RETURNING
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at
@@ -61,21 +66,26 @@ type CreateUserParams struct {
 }
 
 type CreateUserRow struct {
-	ID                 uuid.UUID          `json:"id"`
-	Email              string             `json:"email"`
-	IdentityProviderID string             `json:"identity_provider_id"`
-	ReturnType         ReturnType         `json:"return_type"`
-	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType       string             `json:"currency_type"`
-	InflationRate      decimal.Decimal    `json:"inflation_rate"`
-	DeductionType      DeductionType      `json:"deduction_type"`
-	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus       FilingStatus       `json:"filing_status"`
-	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	ID                   uuid.UUID          `json:"id"`
+	Email                string             `json:"email"`
+	IdentityProviderID   string             `json:"identity_provider_id"`
+	ReturnType           ReturnType         `json:"return_type"`
+	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType         string             `json:"currency_type"`
+	InflationRate        decimal.Decimal    `json:"inflation_rate"`
+	DeductionType        DeductionType      `json:"deduction_type"`
+	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus         FilingStatus       `json:"filing_status"`
+	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
+	BudgetEnabled        bool               `json:"budget_enabled"`
+	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
+	SetupCompleted       bool               `json:"setup_completed"`
+	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
+	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
@@ -106,6 +116,11 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		&i.MaxTaxBracketID,
 		&i.FilingStatus,
 		&i.PayoffStrategy,
+		&i.BudgetEnabled,
+		&i.MonthlyExpenses,
+		&i.SetupCompleted,
+		&i.DisclaimerAccepted,
+		&i.DisclaimerAcceptedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -146,6 +161,11 @@ RETURNING
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at
@@ -166,21 +186,26 @@ type GetOrCreateUserByEmailParams struct {
 }
 
 type GetOrCreateUserByEmailRow struct {
-	ID                 uuid.UUID          `json:"id"`
-	Email              string             `json:"email"`
-	IdentityProviderID string             `json:"identity_provider_id"`
-	ReturnType         ReturnType         `json:"return_type"`
-	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType       string             `json:"currency_type"`
-	InflationRate      decimal.Decimal    `json:"inflation_rate"`
-	DeductionType      DeductionType      `json:"deduction_type"`
-	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus       FilingStatus       `json:"filing_status"`
-	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	ID                   uuid.UUID          `json:"id"`
+	Email                string             `json:"email"`
+	IdentityProviderID   string             `json:"identity_provider_id"`
+	ReturnType           ReturnType         `json:"return_type"`
+	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType         string             `json:"currency_type"`
+	InflationRate        decimal.Decimal    `json:"inflation_rate"`
+	DeductionType        DeductionType      `json:"deduction_type"`
+	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus         FilingStatus       `json:"filing_status"`
+	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
+	BudgetEnabled        bool               `json:"budget_enabled"`
+	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
+	SetupCompleted       bool               `json:"setup_completed"`
+	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
+	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }
 
 func (q *Queries) GetOrCreateUserByEmail(ctx context.Context, arg GetOrCreateUserByEmailParams) (GetOrCreateUserByEmailRow, error) {
@@ -211,6 +236,11 @@ func (q *Queries) GetOrCreateUserByEmail(ctx context.Context, arg GetOrCreateUse
 		&i.MaxTaxBracketID,
 		&i.FilingStatus,
 		&i.PayoffStrategy,
+		&i.BudgetEnabled,
+		&i.MonthlyExpenses,
+		&i.SetupCompleted,
+		&i.DisclaimerAccepted,
+		&i.DisclaimerAcceptedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -232,6 +262,11 @@ SELECT
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at
@@ -242,21 +277,26 @@ LIMIT 1
 `
 
 type GetUserByIDRow struct {
-	ID                 uuid.UUID          `json:"id"`
-	Email              string             `json:"email"`
-	IdentityProviderID string             `json:"identity_provider_id"`
-	ReturnType         ReturnType         `json:"return_type"`
-	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType       string             `json:"currency_type"`
-	InflationRate      decimal.Decimal    `json:"inflation_rate"`
-	DeductionType      DeductionType      `json:"deduction_type"`
-	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus       FilingStatus       `json:"filing_status"`
-	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	ID                   uuid.UUID          `json:"id"`
+	Email                string             `json:"email"`
+	IdentityProviderID   string             `json:"identity_provider_id"`
+	ReturnType           ReturnType         `json:"return_type"`
+	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType         string             `json:"currency_type"`
+	InflationRate        decimal.Decimal    `json:"inflation_rate"`
+	DeductionType        DeductionType      `json:"deduction_type"`
+	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus         FilingStatus       `json:"filing_status"`
+	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
+	BudgetEnabled        bool               `json:"budget_enabled"`
+	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
+	SetupCompleted       bool               `json:"setup_completed"`
+	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
+	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error) {
@@ -275,6 +315,11 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow
 		&i.MaxTaxBracketID,
 		&i.FilingStatus,
 		&i.PayoffStrategy,
+		&i.BudgetEnabled,
+		&i.MonthlyExpenses,
+		&i.SetupCompleted,
+		&i.DisclaimerAccepted,
+		&i.DisclaimerAcceptedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -296,6 +341,11 @@ SELECT
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at
@@ -306,21 +356,26 @@ LIMIT 1
 `
 
 type GetUserByIdentityProviderIDRow struct {
-	ID                 uuid.UUID          `json:"id"`
-	Email              string             `json:"email"`
-	IdentityProviderID string             `json:"identity_provider_id"`
-	ReturnType         ReturnType         `json:"return_type"`
-	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType       string             `json:"currency_type"`
-	InflationRate      decimal.Decimal    `json:"inflation_rate"`
-	DeductionType      DeductionType      `json:"deduction_type"`
-	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus       FilingStatus       `json:"filing_status"`
-	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	ID                   uuid.UUID          `json:"id"`
+	Email                string             `json:"email"`
+	IdentityProviderID   string             `json:"identity_provider_id"`
+	ReturnType           ReturnType         `json:"return_type"`
+	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType         string             `json:"currency_type"`
+	InflationRate        decimal.Decimal    `json:"inflation_rate"`
+	DeductionType        DeductionType      `json:"deduction_type"`
+	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus         FilingStatus       `json:"filing_status"`
+	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
+	BudgetEnabled        bool               `json:"budget_enabled"`
+	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
+	SetupCompleted       bool               `json:"setup_completed"`
+	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
+	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }
 
 func (q *Queries) GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (GetUserByIdentityProviderIDRow, error) {
@@ -339,6 +394,11 @@ func (q *Queries) GetUserByIdentityProviderID(ctx context.Context, identityProvi
 		&i.MaxTaxBracketID,
 		&i.FilingStatus,
 		&i.PayoffStrategy,
+		&i.BudgetEnabled,
+		&i.MonthlyExpenses,
+		&i.SetupCompleted,
+		&i.DisclaimerAccepted,
+		&i.DisclaimerAcceptedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -360,6 +420,11 @@ SELECT
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at
@@ -369,21 +434,26 @@ ORDER BY created_at DESC
 `
 
 type ListUsersRow struct {
-	ID                 uuid.UUID          `json:"id"`
-	Email              string             `json:"email"`
-	IdentityProviderID string             `json:"identity_provider_id"`
-	ReturnType         ReturnType         `json:"return_type"`
-	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType       string             `json:"currency_type"`
-	InflationRate      decimal.Decimal    `json:"inflation_rate"`
-	DeductionType      DeductionType      `json:"deduction_type"`
-	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus       FilingStatus       `json:"filing_status"`
-	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	ID                   uuid.UUID          `json:"id"`
+	Email                string             `json:"email"`
+	IdentityProviderID   string             `json:"identity_provider_id"`
+	ReturnType           ReturnType         `json:"return_type"`
+	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType         string             `json:"currency_type"`
+	InflationRate        decimal.Decimal    `json:"inflation_rate"`
+	DeductionType        DeductionType      `json:"deduction_type"`
+	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus         FilingStatus       `json:"filing_status"`
+	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
+	BudgetEnabled        bool               `json:"budget_enabled"`
+	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
+	SetupCompleted       bool               `json:"setup_completed"`
+	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
+	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }
 
 func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
@@ -408,6 +478,11 @@ func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 			&i.MaxTaxBracketID,
 			&i.FilingStatus,
 			&i.PayoffStrategy,
+			&i.BudgetEnabled,
+			&i.MonthlyExpenses,
+			&i.SetupCompleted,
+			&i.DisclaimerAccepted,
+			&i.DisclaimerAcceptedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -468,6 +543,11 @@ RETURNING
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at
@@ -489,21 +569,26 @@ type UpdateUserParams struct {
 }
 
 type UpdateUserRow struct {
-	ID                 uuid.UUID          `json:"id"`
-	Email              string             `json:"email"`
-	IdentityProviderID string             `json:"identity_provider_id"`
-	ReturnType         ReturnType         `json:"return_type"`
-	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType       string             `json:"currency_type"`
-	InflationRate      decimal.Decimal    `json:"inflation_rate"`
-	DeductionType      DeductionType      `json:"deduction_type"`
-	DeductionAmount    pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID    pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus       FilingStatus       `json:"filing_status"`
-	PayoffStrategy     PayoffStrategy     `json:"payoff_strategy"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	ID                   uuid.UUID          `json:"id"`
+	Email                string             `json:"email"`
+	IdentityProviderID   string             `json:"identity_provider_id"`
+	ReturnType           ReturnType         `json:"return_type"`
+	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType         string             `json:"currency_type"`
+	InflationRate        decimal.Decimal    `json:"inflation_rate"`
+	DeductionType        DeductionType      `json:"deduction_type"`
+	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus         FilingStatus       `json:"filing_status"`
+	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
+	BudgetEnabled        bool               `json:"budget_enabled"`
+	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
+	SetupCompleted       bool               `json:"setup_completed"`
+	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
+	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
@@ -535,6 +620,112 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateU
 		&i.MaxTaxBracketID,
 		&i.FilingStatus,
 		&i.PayoffStrategy,
+		&i.BudgetEnabled,
+		&i.MonthlyExpenses,
+		&i.SetupCompleted,
+		&i.DisclaimerAccepted,
+		&i.DisclaimerAcceptedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const updateUserSetup = `-- name: UpdateUserSetup :one
+UPDATE users
+SET
+  budget_enabled = COALESCE($2, budget_enabled),
+  monthly_expenses = COALESCE($3, monthly_expenses),
+  setup_completed = COALESCE($4, setup_completed),
+  disclaimer_accepted = COALESCE($5, disclaimer_accepted),
+  disclaimer_accepted_at = COALESCE($6, disclaimer_accepted_at),
+  updated_at = now()
+WHERE id = $1
+  AND deleted_at IS NULL
+RETURNING
+  id,
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
+  created_at,
+  updated_at,
+  deleted_at
+`
+
+type UpdateUserSetupParams struct {
+	ID                   uuid.UUID          `json:"id"`
+	BudgetEnabled        bool               `json:"budget_enabled"`
+	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
+	SetupCompleted       bool               `json:"setup_completed"`
+	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
+	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
+}
+
+type UpdateUserSetupRow struct {
+	ID                   uuid.UUID          `json:"id"`
+	Email                string             `json:"email"`
+	IdentityProviderID   string             `json:"identity_provider_id"`
+	ReturnType           ReturnType         `json:"return_type"`
+	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
+	CurrencyType         string             `json:"currency_type"`
+	InflationRate        decimal.Decimal    `json:"inflation_rate"`
+	DeductionType        DeductionType      `json:"deduction_type"`
+	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
+	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
+	FilingStatus         FilingStatus       `json:"filing_status"`
+	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
+	BudgetEnabled        bool               `json:"budget_enabled"`
+	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
+	SetupCompleted       bool               `json:"setup_completed"`
+	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
+	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) UpdateUserSetup(ctx context.Context, arg UpdateUserSetupParams) (UpdateUserSetupRow, error) {
+	row := q.db.QueryRow(ctx, updateUserSetup,
+		arg.ID,
+		arg.BudgetEnabled,
+		arg.MonthlyExpenses,
+		arg.SetupCompleted,
+		arg.DisclaimerAccepted,
+		arg.DisclaimerAcceptedAt,
+	)
+	var i UpdateUserSetupRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.IdentityProviderID,
+		&i.ReturnType,
+		&i.SafeWithdrawalRate,
+		&i.CurrencyType,
+		&i.InflationRate,
+		&i.DeductionType,
+		&i.DeductionAmount,
+		&i.MaxTaxBracketID,
+		&i.FilingStatus,
+		&i.PayoffStrategy,
+		&i.BudgetEnabled,
+		&i.MonthlyExpenses,
+		&i.SetupCompleted,
+		&i.DisclaimerAccepted,
+		&i.DisclaimerAcceptedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,

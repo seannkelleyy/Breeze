@@ -107,20 +107,37 @@ func mapUserToModel(user *service.User) *model.User {
 		maxTaxBracketID = &value
 	}
 
+	var monthlyExpenses *string
+	if user.MonthlyExpenses != nil {
+		value := user.MonthlyExpenses.String()
+		monthlyExpenses = &value
+	}
+
+	var disclaimerAcceptedAt *string
+	if user.DisclaimerAcceptedAt != nil {
+		value := user.DisclaimerAcceptedAt.Format(time.RFC3339)
+		disclaimerAcceptedAt = &value
+	}
+
 	return &model.User{
-		ID:                 user.ID.String(),
-		IdentityProviderID: user.IdentityProviderID,
-		Email:              user.Email,
-		ReturnType:         model.ReturnType(user.ReturnType),
-		SafeWithdrawalRate: user.SafeWithdrawalRate.String(),
-		CurrencyType:       user.CurrencyType,
-		InflationRate:      user.InflationRate.String(),
-		DeductionType:      model.DeductionType(user.DeductionType),
-		DeductionAmount:    deductionAmount,
-		MaxTaxBracketID:    maxTaxBracketID,
-		FilingStatus:       model.FilingStatus(user.FilingStatus),
-		PayoffStrategy:     model.PayoffStrategy(user.PayoffStrategy),
-		CreatedAt:          user.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:          user.UpdatedAt.Format(time.RFC3339),
+		ID:                   user.ID.String(),
+		IdentityProviderID:   user.IdentityProviderID,
+		Email:                user.Email,
+		ReturnType:           model.ReturnType(user.ReturnType),
+		SafeWithdrawalRate:   user.SafeWithdrawalRate.String(),
+		CurrencyType:         user.CurrencyType,
+		InflationRate:        user.InflationRate.String(),
+		DeductionType:        model.DeductionType(user.DeductionType),
+		DeductionAmount:      deductionAmount,
+		MaxTaxBracketID:      maxTaxBracketID,
+		FilingStatus:         model.FilingStatus(user.FilingStatus),
+		PayoffStrategy:       model.PayoffStrategy(user.PayoffStrategy),
+		BudgetEnabled:        user.BudgetEnabled,
+		MonthlyExpenses:      monthlyExpenses,
+		SetupCompleted:       user.SetupCompleted,
+		DisclaimerAccepted:   user.DisclaimerAccepted,
+		DisclaimerAcceptedAt: disclaimerAcceptedAt,
+		CreatedAt:            user.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:            user.UpdatedAt.Format(time.RFC3339),
 	}
 }

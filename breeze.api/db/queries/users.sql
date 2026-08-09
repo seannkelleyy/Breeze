@@ -26,6 +26,11 @@ RETURNING
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at;
@@ -44,6 +49,11 @@ SELECT
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at
@@ -66,6 +76,11 @@ SELECT
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at
@@ -88,6 +103,11 @@ SELECT
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at
@@ -125,6 +145,11 @@ RETURNING
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at;
@@ -169,6 +194,44 @@ RETURNING
   max_tax_bracket_id,
   filing_status,
   payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
+  created_at,
+  updated_at,
+  deleted_at;
+
+-- name: UpdateUserSetup :one
+UPDATE users
+SET
+  budget_enabled = COALESCE($2, budget_enabled),
+  monthly_expenses = COALESCE($3, monthly_expenses),
+  setup_completed = COALESCE($4, setup_completed),
+  disclaimer_accepted = COALESCE($5, disclaimer_accepted),
+  disclaimer_accepted_at = COALESCE($6, disclaimer_accepted_at),
+  updated_at = now()
+WHERE id = $1
+  AND deleted_at IS NULL
+RETURNING
+  id,
+  email,
+  identity_provider_id,
+  return_type,
+  safe_withdrawal_rate,
+  currency_type,
+  inflation_rate,
+  deduction_type,
+  deduction_amount,
+  max_tax_bracket_id,
+  filing_status,
+  payoff_strategy,
+  budget_enabled,
+  monthly_expenses,
+  setup_completed,
+  disclaimer_accepted,
+  disclaimer_accepted_at,
   created_at,
   updated_at,
   deleted_at;

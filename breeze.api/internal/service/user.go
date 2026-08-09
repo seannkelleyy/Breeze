@@ -14,20 +14,25 @@ import (
 )
 
 type User struct {
-	ID                 uuid.UUID
-	IdentityProviderID string
-	Email              string
-	ReturnType         sqlc.ReturnType
-	SafeWithdrawalRate decimal.Decimal
-	CurrencyType       string
-	InflationRate      decimal.Decimal
-	DeductionType      sqlc.DeductionType
-	DeductionAmount    *decimal.Decimal
-	MaxTaxBracketID    *uuid.UUID
-	FilingStatus       sqlc.FilingStatus
-	PayoffStrategy     sqlc.PayoffStrategy
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
+	ID                   uuid.UUID
+	IdentityProviderID   string
+	Email                string
+	ReturnType           sqlc.ReturnType
+	SafeWithdrawalRate   decimal.Decimal
+	CurrencyType         string
+	InflationRate        decimal.Decimal
+	DeductionType        sqlc.DeductionType
+	DeductionAmount      *decimal.Decimal
+	MaxTaxBracketID      *uuid.UUID
+	FilingStatus         sqlc.FilingStatus
+	PayoffStrategy       sqlc.PayoffStrategy
+	BudgetEnabled        bool
+	MonthlyExpenses      *decimal.Decimal
+	SetupCompleted       bool
+	DisclaimerAccepted   bool
+	DisclaimerAcceptedAt *time.Time
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
 
 type CreateUserInput struct {
@@ -66,6 +71,7 @@ type userQuerier interface {
 	GetOrCreateUserByEmail(ctx context.Context, arg sqlc.GetOrCreateUserByEmailParams) (sqlc.GetOrCreateUserByEmailRow, error)
 	ListUsers(ctx context.Context) ([]sqlc.ListUsersRow, error)
 	UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error)
+	UpdateUserSetup(ctx context.Context, arg sqlc.UpdateUserSetupParams) (sqlc.UpdateUserSetupRow, error)
 	SoftDeleteUser(ctx context.Context, id uuid.UUID) (int64, error)
 }
 
@@ -113,6 +119,11 @@ func (s *UserService) Create(ctx context.Context, input CreateUserInput) (*User,
 		row.MaxTaxBracketID,
 		row.FilingStatus,
 		row.PayoffStrategy,
+		row.BudgetEnabled,
+		row.MonthlyExpenses,
+		row.SetupCompleted,
+		row.DisclaimerAccepted,
+		row.DisclaimerAcceptedAt,
 		row.CreatedAt,
 		row.UpdatedAt,
 	)
@@ -173,6 +184,11 @@ func (s *UserService) GetOrCreate(ctx context.Context, input CreateUserInput) (*
 		row.MaxTaxBracketID,
 		row.FilingStatus,
 		row.PayoffStrategy,
+		row.BudgetEnabled,
+		row.MonthlyExpenses,
+		row.SetupCompleted,
+		row.DisclaimerAccepted,
+		row.DisclaimerAcceptedAt,
 		row.CreatedAt,
 		row.UpdatedAt,
 	)
@@ -205,6 +221,11 @@ func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (*User, error) 
 		row.MaxTaxBracketID,
 		row.FilingStatus,
 		row.PayoffStrategy,
+		row.BudgetEnabled,
+		row.MonthlyExpenses,
+		row.SetupCompleted,
+		row.DisclaimerAccepted,
+		row.DisclaimerAcceptedAt,
 		row.CreatedAt,
 		row.UpdatedAt,
 	)
@@ -237,6 +258,11 @@ func (s *UserService) GetByIdentityProviderID(ctx context.Context, identityProvi
 		row.MaxTaxBracketID,
 		row.FilingStatus,
 		row.PayoffStrategy,
+		row.BudgetEnabled,
+		row.MonthlyExpenses,
+		row.SetupCompleted,
+		row.DisclaimerAccepted,
+		row.DisclaimerAcceptedAt,
 		row.CreatedAt,
 		row.UpdatedAt,
 	)
@@ -268,6 +294,11 @@ func (s *UserService) List(ctx context.Context) ([]User, error) {
 			row.MaxTaxBracketID,
 			row.FilingStatus,
 			row.PayoffStrategy,
+			row.BudgetEnabled,
+			row.MonthlyExpenses,
+			row.SetupCompleted,
+			row.DisclaimerAccepted,
+			row.DisclaimerAcceptedAt,
 			row.CreatedAt,
 			row.UpdatedAt,
 		)
@@ -320,6 +351,11 @@ func (s *UserService) Update(ctx context.Context, input UpdateUserInput) (*User,
 		row.MaxTaxBracketID,
 		row.FilingStatus,
 		row.PayoffStrategy,
+		row.BudgetEnabled,
+		row.MonthlyExpenses,
+		row.SetupCompleted,
+		row.DisclaimerAccepted,
+		row.DisclaimerAcceptedAt,
 		row.CreatedAt,
 		row.UpdatedAt,
 	)
@@ -341,6 +377,98 @@ func (s *UserService) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
+type UpdateSetupInput struct {
+	ID                   uuid.UUID
+	BudgetEnabled        *bool
+	MonthlyExpenses      *decimal.Decimal
+	SetupCompleted       *bool
+	DisclaimerAccepted   *bool
+	DisclaimerAcceptedAt *time.Time
+}
+
+func (s *UserService) UpdateSetup(ctx context.Context, input UpdateSetupInput) (*User, error) {
+	// Get current user to fill in non-updated fields
+	current, err := s.GetByID(ctx, input.ID)
+	if err != nil {
+		return nil, fmt.Errorf("get current user: %w", err)
+	}
+
+	var monthlyExpenses pgtype.Numeric
+	if input.MonthlyExpenses != nil {
+		var err error
+		monthlyExpenses, err = decimalToPGNumeric(input.MonthlyExpenses)
+		if err != nil {
+			return nil, fmt.Errorf("encode monthly expenses: %w", err)
+		}
+	} else {
+		monthlyExpenses, _ = decimalToPGNumeric(current.MonthlyExpenses)
+	}
+
+	var disclaimerAcceptedAt pgtype.Timestamptz
+	if input.DisclaimerAcceptedAt != nil {
+		disclaimerAcceptedAt = pgtype.Timestamptz{Time: *input.DisclaimerAcceptedAt, Valid: true}
+	} else if current.DisclaimerAcceptedAt != nil {
+		disclaimerAcceptedAt = pgtype.Timestamptz{Time: *current.DisclaimerAcceptedAt, Valid: true}
+	}
+
+	budgetEnabled := current.BudgetEnabled
+	if input.BudgetEnabled != nil {
+		budgetEnabled = *input.BudgetEnabled
+	}
+
+	setupCompleted := current.SetupCompleted
+	if input.SetupCompleted != nil {
+		setupCompleted = *input.SetupCompleted
+	}
+
+	disclaimerAccepted := current.DisclaimerAccepted
+	if input.DisclaimerAccepted != nil {
+		disclaimerAccepted = *input.DisclaimerAccepted
+	}
+
+	row, err := s.queries.UpdateUserSetup(ctx, sqlc.UpdateUserSetupParams{
+		ID:                   input.ID,
+		BudgetEnabled:        budgetEnabled,
+		MonthlyExpenses:      monthlyExpenses,
+		SetupCompleted:       setupCompleted,
+		DisclaimerAccepted:   disclaimerAccepted,
+		DisclaimerAcceptedAt: disclaimerAcceptedAt,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("update user setup: %w", err)
+	}
+
+	user, err := mapUserRecord(
+		row.ID,
+		row.IdentityProviderID,
+		row.Email,
+		row.ReturnType,
+		row.SafeWithdrawalRate,
+		row.CurrencyType,
+		row.InflationRate,
+		row.DeductionType,
+		row.DeductionAmount,
+		row.MaxTaxBracketID,
+		row.FilingStatus,
+		row.PayoffStrategy,
+		row.BudgetEnabled,
+		row.MonthlyExpenses,
+		row.SetupCompleted,
+		row.DisclaimerAccepted,
+		row.DisclaimerAcceptedAt,
+		row.CreatedAt,
+		row.UpdatedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("map updated user: %w", err)
+	}
+
+	return user, nil
+}
+
 func mapUserRecord(
 	id uuid.UUID,
 	identityProviderID string,
@@ -354,6 +482,11 @@ func mapUserRecord(
 	maxTaxBracketID pgtype.UUID,
 	filingStatus sqlc.FilingStatus,
 	payoffStrategy sqlc.PayoffStrategy,
+	budgetEnabled bool,
+	monthlyExpenses pgtype.Numeric,
+	setupCompleted bool,
+	disclaimerAccepted bool,
+	disclaimerAcceptedAt pgtype.Timestamptz,
 	createdAt pgtype.Timestamptz,
 	updatedAt pgtype.Timestamptz,
 ) (*User, error) {
@@ -362,20 +495,30 @@ func mapUserRecord(
 		return nil, err
 	}
 
+	monthlyExpensesValue, err := decimalFromPGNumeric(monthlyExpenses)
+	if err != nil {
+		return nil, err
+	}
+
 	return &User{
-		ID:                 id,
-		IdentityProviderID: identityProviderID,
-		Email:              email,
-		ReturnType:         returnType,
-		SafeWithdrawalRate: safeWithdrawalRate,
-		CurrencyType:       currencyType,
-		InflationRate:      inflationRate,
-		DeductionType:      deductionType,
-		DeductionAmount:    deductionAmountValue,
-		MaxTaxBracketID:    uuidFromPG(maxTaxBracketID),
-		FilingStatus:       filingStatus,
-		PayoffStrategy:     payoffStrategy,
-		CreatedAt:          timestamptzToTime(createdAt),
-		UpdatedAt:          timestamptzToTime(updatedAt),
+		ID:                   id,
+		IdentityProviderID:   identityProviderID,
+		Email:                email,
+		ReturnType:           returnType,
+		SafeWithdrawalRate:   safeWithdrawalRate,
+		CurrencyType:         currencyType,
+		InflationRate:        inflationRate,
+		DeductionType:        deductionType,
+		DeductionAmount:      deductionAmountValue,
+		MaxTaxBracketID:      uuidFromPG(maxTaxBracketID),
+		FilingStatus:         filingStatus,
+		PayoffStrategy:       payoffStrategy,
+		BudgetEnabled:        budgetEnabled,
+		MonthlyExpenses:      monthlyExpensesValue,
+		SetupCompleted:       setupCompleted,
+		DisclaimerAccepted:   disclaimerAccepted,
+		DisclaimerAcceptedAt: timestamptzToTimePtr(disclaimerAcceptedAt),
+		CreatedAt:            timestamptzToTime(createdAt),
+		UpdatedAt:            timestamptzToTime(updatedAt),
 	}, nil
 }

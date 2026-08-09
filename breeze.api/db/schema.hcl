@@ -192,6 +192,34 @@ table "users" {
     null = false
   }
 
+  column "budget_enabled" {
+    type    = boolean
+    null    = false
+    default = sql("false")
+  }
+
+  column "monthly_expenses" {
+    type = numeric(12,2)
+    null = true
+  }
+
+  column "setup_completed" {
+    type    = boolean
+    null    = false
+    default = sql("false")
+  }
+
+  column "disclaimer_accepted" {
+    type    = boolean
+    null    = false
+    default = sql("false")
+  }
+
+  column "disclaimer_accepted_at" {
+    type = timestamptz
+    null = true
+  }
+
   column "created_at" {
     type    = timestamptz
     null    = false
@@ -828,6 +856,54 @@ table "goals" {
     default = sql("false")
   }
 
+  column "target_amount" {
+    type = numeric(14,2)
+    null = true
+  }
+
+  column "target_date" {
+    type = date
+    null = true
+  }
+
+  column "category" {
+    type = varchar(50)
+    null = true
+  }
+
+  column "custom_category" {
+    type = varchar(100)
+    null = true
+  }
+
+  column "priority" {
+    type    = int
+    null    = false
+    default = sql("0")
+  }
+
+  column "notes" {
+    type = text
+    null = true
+  }
+
+  column "connected_account_ids" {
+    type    = list(uuid)
+    null    = false
+    default = sql("ARRAY[]::uuid[]")
+  }
+
+  column "is_financial_order_step" {
+    type    = boolean
+    null    = false
+    default = sql("false")
+  }
+
+  column "financial_order_step" {
+    type = int
+    null = true
+  }
+
   column "created_at" {
     type    = timestamptz
     null    = false
@@ -862,6 +938,11 @@ table "goals" {
   index "idx_goals_user_active" {
     columns = [column.user_id, column.created_at]
     where   = "deleted_at IS NULL"
+  }
+
+  index "idx_goals_financial_order" {
+    columns = [column.user_id, column.financial_order_step]
+    where   = "is_financial_order_step = true AND deleted_at IS NULL"
   }
 }
 

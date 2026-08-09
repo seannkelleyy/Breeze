@@ -115,9 +115,18 @@ type CreateExpenseInput struct {
 }
 
 type CreateGoalInput struct {
-	UserID      string `json:"userId"`
-	Description string `json:"description"`
-	IsCompleted bool   `json:"isCompleted"`
+	UserID               string   `json:"userId"`
+	Description          string   `json:"description"`
+	IsCompleted          bool     `json:"isCompleted"`
+	TargetAmount         *string  `json:"targetAmount,omitempty"`
+	TargetDate           *string  `json:"targetDate,omitempty"`
+	Category             *string  `json:"category,omitempty"`
+	CustomCategory       *string  `json:"customCategory,omitempty"`
+	Priority             int      `json:"priority"`
+	Notes                *string  `json:"notes,omitempty"`
+	ConnectedAccountIds  []string `json:"connectedAccountIds"`
+	IsFinancialOrderStep bool     `json:"isFinancialOrderStep"`
+	FinancialOrderStep   *int     `json:"financialOrderStep,omitempty"`
 }
 
 type CreateIncomeInput struct {
@@ -268,12 +277,21 @@ type ExpenseSplitInput struct {
 }
 
 type Goal struct {
-	ID          string `json:"id"`
-	UserID      string `json:"userId"`
-	Description string `json:"description"`
-	IsCompleted bool   `json:"isCompleted"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	ID                   string   `json:"id"`
+	UserID               string   `json:"userId"`
+	Description          string   `json:"description"`
+	IsCompleted          bool     `json:"isCompleted"`
+	TargetAmount         *string  `json:"targetAmount,omitempty"`
+	TargetDate           *string  `json:"targetDate,omitempty"`
+	Category             *string  `json:"category,omitempty"`
+	CustomCategory       *string  `json:"customCategory,omitempty"`
+	Priority             int      `json:"priority"`
+	Notes                *string  `json:"notes,omitempty"`
+	ConnectedAccountIds  []string `json:"connectedAccountIds"`
+	IsFinancialOrderStep bool     `json:"isFinancialOrderStep"`
+	FinancialOrderStep   *int     `json:"financialOrderStep,omitempty"`
+	CreatedAt            string   `json:"createdAt"`
+	UpdatedAt            string   `json:"updatedAt"`
 }
 
 type Health struct {
@@ -531,9 +549,18 @@ type UpdateExpenseInput struct {
 }
 
 type UpdateGoalInput struct {
-	ID          string `json:"id"`
-	Description string `json:"description"`
-	IsCompleted bool   `json:"isCompleted"`
+	ID                   string   `json:"id"`
+	Description          string   `json:"description"`
+	IsCompleted          bool     `json:"isCompleted"`
+	TargetAmount         *string  `json:"targetAmount,omitempty"`
+	TargetDate           *string  `json:"targetDate,omitempty"`
+	Category             *string  `json:"category,omitempty"`
+	CustomCategory       *string  `json:"customCategory,omitempty"`
+	Priority             int      `json:"priority"`
+	Notes                *string  `json:"notes,omitempty"`
+	ConnectedAccountIds  []string `json:"connectedAccountIds"`
+	IsFinancialOrderStep bool     `json:"isFinancialOrderStep"`
+	FinancialOrderStep   *int     `json:"financialOrderStep,omitempty"`
 }
 
 type UpdateIncomeInput struct {
@@ -637,6 +664,15 @@ type UpdateUserInput struct {
 	PayoffStrategy     PayoffStrategy `json:"payoffStrategy"`
 }
 
+type UpdateUserSetupInput struct {
+	ID                   string  `json:"id"`
+	BudgetEnabled        *bool   `json:"budgetEnabled,omitempty"`
+	MonthlyExpenses      *string `json:"monthlyExpenses,omitempty"`
+	SetupCompleted       *bool   `json:"setupCompleted,omitempty"`
+	DisclaimerAccepted   *bool   `json:"disclaimerAccepted,omitempty"`
+	DisclaimerAcceptedAt *string `json:"disclaimerAcceptedAt,omitempty"`
+}
+
 type UpsertPlannerPersonInput struct {
 	ID               string `json:"id"`
 	UserID           string `json:"userId"`
@@ -650,20 +686,25 @@ type UpsertPlannerPersonInput struct {
 }
 
 type User struct {
-	ID                 string         `json:"id"`
-	IdentityProviderID string         `json:"identityProviderId"`
-	Email              string         `json:"email"`
-	ReturnType         ReturnType     `json:"returnType"`
-	SafeWithdrawalRate string         `json:"safeWithdrawalRate"`
-	CurrencyType       string         `json:"currencyType"`
-	InflationRate      string         `json:"inflationRate"`
-	DeductionType      DeductionType  `json:"deductionType"`
-	DeductionAmount    *string        `json:"deductionAmount,omitempty"`
-	MaxTaxBracketID    *string        `json:"maxTaxBracketId,omitempty"`
-	FilingStatus       FilingStatus   `json:"filingStatus"`
-	PayoffStrategy     PayoffStrategy `json:"payoffStrategy"`
-	CreatedAt          string         `json:"createdAt"`
-	UpdatedAt          string         `json:"updatedAt"`
+	ID                   string         `json:"id"`
+	IdentityProviderID   string         `json:"identityProviderId"`
+	Email                string         `json:"email"`
+	ReturnType           ReturnType     `json:"returnType"`
+	SafeWithdrawalRate   string         `json:"safeWithdrawalRate"`
+	CurrencyType         string         `json:"currencyType"`
+	InflationRate        string         `json:"inflationRate"`
+	DeductionType        DeductionType  `json:"deductionType"`
+	DeductionAmount      *string        `json:"deductionAmount,omitempty"`
+	MaxTaxBracketID      *string        `json:"maxTaxBracketId,omitempty"`
+	FilingStatus         FilingStatus   `json:"filingStatus"`
+	PayoffStrategy       PayoffStrategy `json:"payoffStrategy"`
+	BudgetEnabled        bool           `json:"budgetEnabled"`
+	MonthlyExpenses      *string        `json:"monthlyExpenses,omitempty"`
+	SetupCompleted       bool           `json:"setupCompleted"`
+	DisclaimerAccepted   bool           `json:"disclaimerAccepted"`
+	DisclaimerAcceptedAt *string        `json:"disclaimerAcceptedAt,omitempty"`
+	CreatedAt            string         `json:"createdAt"`
+	UpdatedAt            string         `json:"updatedAt"`
 }
 
 type AssetType string
