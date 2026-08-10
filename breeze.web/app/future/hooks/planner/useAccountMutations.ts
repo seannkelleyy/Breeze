@@ -65,8 +65,7 @@ export function useAccountMutations({
   const { request } = useGraphql();
   const queryClient = useQueryClient();
 
-  const invalidatePlanner = () =>
-    queryClient.invalidateQueries({ queryKey: ['planner', userId] });
+  const invalidatePlanner = () => queryClient.invalidateQueries({ queryKey: ['planner', userId] });
 
   const createAssetMutation = useMutation({
     mutationFn: async (account: PlannerAccount) => {
