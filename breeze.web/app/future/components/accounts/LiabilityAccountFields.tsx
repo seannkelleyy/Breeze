@@ -9,47 +9,38 @@ interface LiabilityAccountFieldsProps {
 
 const LiabilityAccountFields = ({ account, onUpdateAccount }: LiabilityAccountFieldsProps) => {
   return (
-    <>
-      <div className="space-y-2">
-        <Label>Current Balance Owed</Label>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="space-y-1.5">
+        <Label className="text-xs">Balance Owed</Label>
         <FormattedNumberInput
           value={account.startingBalance}
           onValueChange={(value) =>
-            onUpdateAccount((current) => ({
-              ...current,
-              startingBalance: value,
-            }))
+            onUpdateAccount((current) => ({ ...current, startingBalance: value }))
           }
           maxFractionDigits={0}
         />
       </div>
-      <div className="space-y-2">
-        <Label>Interest Rate (%)</Label>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Interest Rate %</Label>
         <FormattedNumberInput
           value={account.annualRate}
           onValueChange={(value) =>
-            onUpdateAccount((current) => ({
-              ...current,
-              annualRate: value,
-            }))
+            onUpdateAccount((current) => ({ ...current, annualRate: value }))
           }
           maxFractionDigits={2}
         />
       </div>
-      <div className="space-y-2">
-        <Label>Minimum Payment</Label>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Min Payment</Label>
         <FormattedNumberInput
           value={account.contributionValue}
           onValueChange={(value) =>
-            onUpdateAccount((current) => ({
-              ...current,
-              contributionValue: value,
-            }))
+            onUpdateAccount((current) => ({ ...current, contributionValue: value }))
           }
           maxFractionDigits={2}
         />
       </div>
-    </>
+    </div>
   );
 };
 
