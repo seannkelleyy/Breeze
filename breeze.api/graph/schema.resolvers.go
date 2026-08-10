@@ -17,8 +17,8 @@ import (
 	"breeze.api/internal/db/sqlc"
 	"breeze.api/internal/middleware"
 	"breeze.api/internal/service"
-	"github.com/govalues/decimal"
 	"github.com/google/uuid"
+	"github.com/govalues/decimal"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -1503,6 +1503,29 @@ func (r *queryResolver) Expenses(ctx context.Context, budgetID string) ([]*model
 	}
 
 	return out, nil
+}
+
+// WeightedMonthlyExpenses is the resolver for the weightedMonthlyExpenses field.
+func (r *queryResolver) WeightedMonthlyExpenses(ctx context.Context, userID string) (string, error) {
+	parsedID, err := uuid.Parse(userID)
+	if err != nil {
+		return "", fmt.Errorf("invalid user id: %w", err)
+	}
+
+	authUserID, authErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if authErr != nil {
+		return "", authErr
+	}
+	if parsedID != authUserID {
+		return "", fmt.Errorf("unauthorized: cannot view another user's expenses")
+	}
+
+	result, err := r.ExpenseService.GetWeightedMonthlyExpenses(ctx, parsedID)
+	if err != nil {
+		return "", r.mapErr(ctx, err)
+	}
+
+	return result.String(), nil
 }
 
 // Income is the resolver for the income field.

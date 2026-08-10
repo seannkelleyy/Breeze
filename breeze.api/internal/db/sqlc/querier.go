@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/govalues/decimal"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -57,6 +58,7 @@ type Querier interface {
 	GetTaxBracketByID(ctx context.Context, id uuid.UUID) (TaxBracket, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error)
 	GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (GetUserByIdentityProviderIDRow, error)
+	GetWeightedMonthlyExpenses(ctx context.Context, userID uuid.UUID) (decimal.Decimal, error)
 	LinkAssetToPlaidAccount(ctx context.Context, arg LinkAssetToPlaidAccountParams) error
 	LinkLiabilityToPlaidAccount(ctx context.Context, arg LinkLiabilityToPlaidAccountParams) error
 	ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]ListAssetsByUserIDRow, error)

@@ -88,6 +88,10 @@ func (m *mockExpenseQuerier) SoftDeleteExpenseSplitsByExpenseID(ctx context.Cont
 	return 0, nil
 }
 
+func (m *mockExpenseQuerier) GetWeightedMonthlyExpenses(ctx context.Context, userID uuid.UUID) (decimal.Decimal, error) {
+	return decimal.Zero, nil
+}
+
 func expenseTestService(mock *mockExpenseQuerier) *ExpenseService {
 	runner := expenseTxRunnerFunc(func(ctx context.Context, fn func(q expenseQuerier) error) error {
 		return fn(mock)

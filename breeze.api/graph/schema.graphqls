@@ -26,6 +26,7 @@ type Query {
   expenseCategories(budgetId: ID!): [ExpenseCategory!]!
   expense(id: ID!): Expense
   expenses(budgetId: ID!): [Expense!]!
+  weightedMonthlyExpenses(userId: ID!): String!
   income(id: ID!): Income
   incomes(budgetId: ID!): [Income!]!
   recurringIncome(id: ID!): RecurringIncome

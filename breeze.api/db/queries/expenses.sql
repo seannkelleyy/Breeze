@@ -143,3 +143,25 @@ SET deleted_at = now(),
     updated_at = now()
 WHERE expense_id = $1
   AND deleted_at IS NULL;
+
+-- name: GetWeightedMonthlyExpenses :one
+WITH monthly_totals AS (
+  SELECT
+    date_trunc('month', e.date) AS month,
+    SUM(e.amount) AS total
+  FROM expenses e
+  WHERE e.user_id = $1
+    AND e.deleted_at IS NULL
+    AND e.date >= (CURRENT_DATE - INTERVAL '12 months')
+  GROUP BY date_trunc('month', e.date)
+),
+weighted AS (
+  SELECT
+    month,
+    total,
+    ROW_NUMBER() OVER (ORDER BY month DESC) AS weight
+  FROM monthly_totals
+)
+SELECT
+  COALESCE(SUM(total * weight)::numeric / NULLIF(SUM(weight), 0), 0)::numeric AS weighted_monthly_expenses
+FROM weighted;
