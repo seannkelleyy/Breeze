@@ -92,19 +92,31 @@ breeze.api/
 
 breeze.web/                          # Next.js 16 web app
 ├── app/
-│   ├── planner/                     # Planner module
+│   ├── future/                      # Future module (renamed from planner)
 │   │   ├── components/              # UI components
 │   │   ├── hooks/                   # Domain hooks (TanStack Query)
 │   │   ├── lib/                     # Math, config, type mapping
 │   │   ├── services/                # API calls
 │   │   └── types/                   # TypeScript types
+│   ├── accounts/                    # Accounts page (financial accounts)
+│   ├── people/                      # People page (household members)
+│   ├── goals/                       # Goals page (FOO checklist + goal CRUD)
+│   ├── preferences/                 # Preferences page (user settings)
+│   ├── budget/                      # Budget module
+│   ├── tools/                       # Tools (mortgage calculator, etc.)
+│   ├── plaid-connections/           # Plaid connect/sync UI
 │   ├── layout.tsx
-│   └── page.tsx
-├── components/ui/                   # shadcn components
+│   └── page.tsx                     # Dashboard
+├── components/
+│   ├── ui/                          # shadcn components
+│   └── common/
+│       ├── navigation/              # Desktop + mobile nav
+│       ├── setup/                   # Setup wizard
+│       └── ...
 ├── lib/
-│   ├── providers/                   # Context providers
-│   └── services/                    # Shared transport
-├── proxy.ts                         # Clerk middleware
+│   ├── providers/                   # Context providers (CurrentUserProvider)
+│   ├── hooks/                       # Shared hooks (useAutoSave, useTabParam)
+│   └── services/                    # Shared transport + GraphQL queries
 └── package.json
 ```
 

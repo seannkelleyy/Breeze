@@ -129,6 +129,11 @@ table "users" {
   column "max_tax_bracket_id"   { type = uuid           null = true }
   column "filing_status"        { type = enum.filing_status }
   column "payoff_strategy"      { type = enum.payoff_strategy }
+  column "budget_enabled"       { type = boolean       default = false }
+  column "monthly_expenses"     { type = numeric(12,2)  null = true }
+  column "setup_completed"      { type = boolean       default = false }
+  column "disclaimer_accepted"  { type = boolean       default = false }
+  column "disclaimer_accepted_at" { type = timestamptz  null = true }
   column "created_at"           { type = timestamptz    default = sql("now()") }
   column "updated_at"           { type = timestamptz    default = sql("now()") }
   column "deleted_at"           { type = timestamptz    null = true }
@@ -522,13 +527,22 @@ table "recurring_income" {
 
 ```hcl
 table "goals" {
-  column "id"           { type = uuid          default = sql("gen_random_uuid()") }
-  column "user_id"      { type = uuid }
-  column "description"  { type = text }
-  column "is_completed" { type = boolean       default = sql("false") }
-  column "created_at"   { type = timestamptz   default = sql("now()") }
-  column "updated_at"   { type = timestamptz   default = sql("now()") }
-  column "deleted_at"   { type = timestamptz   null = true }
+  column "id"                     { type = uuid          default = sql("gen_random_uuid()") }
+  column "user_id"                { type = uuid }
+  column "description"            { type = text }
+  column "is_completed"           { type = boolean       default = sql("false") }
+  column "target_amount"          { type = numeric(12,2)  null = true }
+  column "target_date"            { type = date           null = true }
+  column "category"               { type = text           null = true }
+  column "custom_category"        { type = text           null = true }
+  column "priority"               { type = integer        default = 0 }
+  column "notes"                  { type = text           null = true }
+  column "connected_account_ids"  { type = "uuid[]"       default = sql("ARRAY[]::uuid[]") }
+  column "is_financial_order_step" { type = boolean       default = false }
+  column "financial_order_step"   { type = integer        null = true }
+  column "created_at"             { type = timestamptz   default = sql("now()") }
+  column "updated_at"             { type = timestamptz   default = sql("now()") }
+  column "deleted_at"             { type = timestamptz   null = true }
 
   primary_key { columns = [column.id] }
   foreign_key "fk_goals_user" {
@@ -536,8 +550,9 @@ table "goals" {
     ref_columns = [table.users.column.id]
     on_delete   = CASCADE
   }
-  index "idx_goals_user_id"     { columns = [column.user_id] }
-  index "idx_goals_user_active" { columns = [column.user_id, column.created_at]  where = "deleted_at IS NULL" }
+  index "idx_goals_user_id"             { columns = [column.user_id] }
+  index "idx_goals_user_active"         { columns = [column.user_id, column.created_at]  where = "deleted_at IS NULL" }
+  index "idx_goals_financial_order"     { columns = [column.user_id, column.financial_order_step]  where = "deleted_at IS NULL AND is_financial_order_step = true" }
 }
 ```
 

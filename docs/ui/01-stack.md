@@ -41,10 +41,15 @@ npm run test       # Vitest
 
 ### Module Entry Points
 
-- `app/planner/` — planning experience (accounts, projections, retirement math)
+- `app/future/` — financial projections, retirement math, Coast FIRE (renamed from planner)
+- `app/accounts/` — financial accounts management
+- `app/people/` — household members
+- `app/goals/` — financial goals and Financial Order of Operations checklist
+- `app/preferences/` — user settings and defaults
 - `app/budget/` — budgeting workflow and dialogs
 - `app/plaid-connections/` — Plaid connect/sync UI
 - `components/ui/` — shared shadcn components
+- `components/common/setup/` — setup wizard (auto-shows on first login)
 
 ---
 
