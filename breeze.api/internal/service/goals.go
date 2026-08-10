@@ -90,6 +90,11 @@ func (s *GoalService) Create(ctx context.Context, input CreateGoalInput) (*Goal,
 		targetDate = pgtype.Date{Time: *input.TargetDate, Valid: true}
 	}
 
+	connectedAccountIDs := input.ConnectedAccountIDs
+	if connectedAccountIDs == nil {
+		connectedAccountIDs = []uuid.UUID{}
+	}
+
 	row, err := s.queries.CreateGoal(ctx, sqlc.CreateGoalParams{
 		UserID:               input.UserID,
 		Description:          input.Description,
@@ -100,7 +105,7 @@ func (s *GoalService) Create(ctx context.Context, input CreateGoalInput) (*Goal,
 		CustomCategory:       input.CustomCategory,
 		Priority:             input.Priority,
 		Notes:                input.Notes,
-		ConnectedAccountIds:  input.ConnectedAccountIDs,
+		ConnectedAccountIds:  connectedAccountIDs,
 		IsFinancialOrderStep: input.IsFinancialOrderStep,
 		FinancialOrderStep:   input.FinancialOrderStep,
 	})
@@ -199,6 +204,11 @@ func (s *GoalService) Update(ctx context.Context, input UpdateGoalInput) (*Goal,
 		targetDate = pgtype.Date{Time: *input.TargetDate, Valid: true}
 	}
 
+	connectedAccountIDs := input.ConnectedAccountIDs
+	if connectedAccountIDs == nil {
+		connectedAccountIDs = []uuid.UUID{}
+	}
+
 	row, err := s.queries.UpdateGoal(ctx, sqlc.UpdateGoalParams{
 		ID:                   input.ID,
 		Description:          input.Description,
@@ -209,7 +219,7 @@ func (s *GoalService) Update(ctx context.Context, input UpdateGoalInput) (*Goal,
 		CustomCategory:       input.CustomCategory,
 		Priority:             input.Priority,
 		Notes:                input.Notes,
-		ConnectedAccountIds:  input.ConnectedAccountIDs,
+		ConnectedAccountIds:  connectedAccountIDs,
 		IsFinancialOrderStep: input.IsFinancialOrderStep,
 		FinancialOrderStep:   input.FinancialOrderStep,
 	})
