@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFetchPlanner } from '../hooks/planner/index';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { getDefaultAssetFinanceDetailsForAccount } from '../lib/plannerMath';
@@ -15,8 +15,23 @@ export const usePlannerHydration = () => {
     setCurrencyCode,
   } = useCurrentUser();
 
+  const lastHydratedRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (!plannerData) return;
+
+    // Create a fingerprint of the data to avoid re-hydrating the same data
+    const fingerprint = JSON.stringify({
+      accountCount: plannerData.accounts.length,
+      peopleCount: plannerData.people.length,
+      inflationRate: plannerData.inflationRate,
+      safeWithdrawalRate: plannerData.safeWithdrawalRate,
+      currencyCode: plannerData.currencyCode,
+    });
+
+    if (lastHydratedRef.current === fingerprint) return;
+    lastHydratedRef.current = fingerprint;
+
     setPlannerAccounts(plannerData.accounts);
     if (plannerData.people.length > 0) {
       setPlannerPeople(plannerData.people);
