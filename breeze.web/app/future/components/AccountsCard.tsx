@@ -154,99 +154,105 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
     );
     const isLiability = isLiabilityAccountType(account.accountType);
 
-    if (isLiability) {
-      if (!isValidUuid) mutations.createLiabilityMutation.mutate(account);
-      else mutations.updateLiabilityMutation.mutate(account);
-      return;
-    }
+    try {
+      if (isLiability) {
+        if (!isValidUuid) await mutations.createLiabilityMutation.mutateAsync(account);
+        else await mutations.updateLiabilityMutation.mutateAsync(account);
+        return;
+      }
 
-    // Combined asset with loan: ensure linked liability exists
-    if (
-      isCombinedAssetType(account.accountType) &&
-      assetFinanceDetailsByAccountId[account.id]?.hasLoan
-    ) {
-      const details = assetFinanceDetailsByAccountId[account.id];
-      if (!account.linkedLiabilityId) {
-        // Create a liability for the loan
-        const loanAccount: PlannerAccount = {
-          ...account,
-          id: `local-${crypto.randomUUID()}`,
-          name: `${account.name} Loan`,
-          accountType: account.accountType === 'home' ? 'mortgage' : 'auto-loan',
-          startingBalance: details.currentLoanBalance,
-          annualRate: details.loanInterestRate,
-          contributionMode: 'monthly',
-          contributionValue: details.loanMonthlyPayment,
-          originalLoanAmount: details.originalLoanAmount,
-        };
-        try {
+      // Combined asset with loan: ensure linked liability exists
+      if (
+        isCombinedAssetType(account.accountType) &&
+        assetFinanceDetailsByAccountId[account.id]?.hasLoan
+      ) {
+        const details = assetFinanceDetailsByAccountId[account.id];
+        if (!account.linkedLiabilityId) {
+          // Create a liability for the loan
+          const loanAccount: PlannerAccount = {
+            ...account,
+            id: `local-${crypto.randomUUID()}`,
+            name: `${account.name} Loan`,
+            accountType: account.accountType === 'home' ? 'mortgage' : 'auto-loan',
+            startingBalance: details.currentLoanBalance,
+            annualRate: details.loanInterestRate,
+            contributionMode: 'monthly',
+            contributionValue: details.loanMonthlyPayment,
+            originalLoanAmount: details.originalLoanAmount,
+          };
           const resp = await mutations.createLiabilityMutation.mutateAsync(loanAccount);
           const newLiabilityId = (resp as { createLiability: { id: string } }).createLiability.id;
           // Save asset with linked liability
           const assetWithLink = { ...account, linkedLiabilityId: newLiabilityId };
-          if (!isValidUuid) mutations.createAssetMutation.mutate(assetWithLink);
-          else mutations.updateAssetMutation.mutate(assetWithLink);
-        } catch {
-          // Liability creation failed, save asset without link
-          if (!isValidUuid) mutations.createAssetMutation.mutate(account);
-          else mutations.updateAssetMutation.mutate(account);
+          if (!isValidUuid) await mutations.createAssetMutation.mutateAsync(assetWithLink);
+          else await mutations.updateAssetMutation.mutateAsync(assetWithLink);
+          return;
         }
+
+        // Linked liability exists: save asset + update liability
+        const saveAssetPromise = !isValidUuid
+          ? mutations.createAssetMutation.mutateAsync(account)
+          : mutations.updateAssetMutation.mutateAsync(account);
+
+        // Update the linked liability with loan details
+        const linkedLiability: PlannerAccount = {
+          id: account.linkedLiabilityId,
+          name: `${account.name} Loan`,
+          personIds: account.personIds,
+          accountType: account.accountType === 'home' ? 'mortgage' : 'auto-loan',
+          contributionMode: 'monthly',
+          contributionValue: details.loanMonthlyPayment,
+          employerMatchRate: 0,
+          employerMatchMaxPercentOfSalary: 0,
+          startingBalance: details.currentLoanBalance,
+          annualRate: details.loanInterestRate,
+          returnProfile: null,
+          purchaseDate: null,
+          purchasePrice: null,
+          homeGrowthProfile: null,
+          vehicleDepreciationProfile: null,
+          linkedLiabilityId: null,
+          plaidAccountId: null,
+          originalLoanAmount: details.originalLoanAmount,
+        };
+        await Promise.all([
+          saveAssetPromise,
+          mutations.updateLiabilityMutation.mutateAsync(linkedLiability),
+        ]);
         return;
       }
 
-      // Linked liability exists: save asset + update liability
-      if (!isValidUuid) mutations.createAssetMutation.mutate(account);
-      else mutations.updateAssetMutation.mutate(account);
+      // Combined asset without loan: unlink if needed
+      if (
+        isCombinedAssetType(account.accountType) &&
+        account.linkedLiabilityId &&
+        !assetFinanceDetailsByAccountId[account.id]?.hasLoan
+      ) {
+        const unlinked = { ...account, linkedLiabilityId: null };
+        if (!isValidUuid) await mutations.createAssetMutation.mutateAsync(unlinked);
+        else await mutations.updateAssetMutation.mutateAsync(unlinked);
+        return;
+      }
 
-      // Update the linked liability with loan details
-      const linkedLiability: PlannerAccount = {
-        id: account.linkedLiabilityId,
-        name: `${account.name} Loan`,
-        personIds: account.personIds,
-        accountType: account.accountType === 'home' ? 'mortgage' : 'auto-loan',
-        contributionMode: 'monthly',
-        contributionValue: details.loanMonthlyPayment,
-        employerMatchRate: 0,
-        employerMatchMaxPercentOfSalary: 0,
-        startingBalance: details.currentLoanBalance,
-        annualRate: details.loanInterestRate,
-        returnProfile: null,
-        purchaseDate: null,
-        purchasePrice: null,
-        homeGrowthProfile: null,
-        vehicleDepreciationProfile: null,
-        linkedLiabilityId: null,
-        plaidAccountId: null,
-        originalLoanAmount: details.originalLoanAmount,
-      };
-      mutations.updateLiabilityMutation.mutate(linkedLiability);
-      return;
+      if (!isValidUuid) await mutations.createAssetMutation.mutateAsync(account);
+      else await mutations.updateAssetMutation.mutateAsync(account);
+    } finally {
+      mutations.invalidatePlanner();
     }
-
-    // Combined asset without loan: unlink if needed
-    if (
-      isCombinedAssetType(account.accountType) &&
-      account.linkedLiabilityId &&
-      !assetFinanceDetailsByAccountId[account.id]?.hasLoan
-    ) {
-      const unlinked = { ...account, linkedLiabilityId: null };
-      if (!isValidUuid) mutations.createAssetMutation.mutate(unlinked);
-      else mutations.updateAssetMutation.mutate(unlinked);
-      return;
-    }
-
-    if (!isValidUuid) mutations.createAssetMutation.mutate(account);
-    else mutations.updateAssetMutation.mutate(account);
   };
 
-  const handleDelete = (account: PlannerAccount) => {
+  const handleDelete = async (account: PlannerAccount) => {
     const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       account.id,
     );
     const isLiability = isLiabilityAccountType(account.accountType);
     if (isValidUuid) {
-      if (isLiability) mutations.deleteLiabilityMutation.mutate(account.id);
-      else mutations.deleteAssetMutation.mutate(account.id);
+      try {
+        if (isLiability) await mutations.deleteLiabilityMutation.mutateAsync(account.id);
+        else await mutations.deleteAssetMutation.mutateAsync(account.id);
+      } finally {
+        mutations.invalidatePlanner();
+      }
     } else {
       removeAccount(account.id);
     }

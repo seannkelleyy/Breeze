@@ -223,7 +223,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       try {
         const input = {
           id: resolvedUserId,
-          identityProviderId: user?.publicMetadata?.userId?.toString() ?? user?.id ?? '',
+          identityProviderId: backendUserID,
           email: user?.emailAddresses[0]?.emailAddress ?? '',
           returnType: nextReturnDisplayMode === 'real' ? 'REAL' : 'NOMINAL',
           safeWithdrawalRate: (nextSafeWithdrawalRate / 100).toFixed(4),
@@ -250,6 +250,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       isLoaded,
       isSignedIn,
       resolvedUserId,
+      backendUserID,
       user,
       request,
       deductionType,
@@ -449,7 +450,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
           return;
         }
 
-        const identityProviderId = user?.publicMetadata?.userId?.toString() ?? user?.id ?? '';
+        const identityProviderId = backendUserID;
         const email = user?.emailAddresses[0]?.emailAddress ?? '';
         if (identityProviderId && email) {
           const createResp = await request<

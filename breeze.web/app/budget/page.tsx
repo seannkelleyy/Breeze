@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useState } from 'react';
 
 import dayjs from 'dayjs';
-import { MoveLeft, MoveRight, RefreshCw, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { MoveLeft, MoveRight, RefreshCw, Loader2, Target } from 'lucide-react';
 
 import { useBudgetContext } from './providers/index';
 import { useRegenerateBudget } from './hooks/budget/index';
@@ -13,10 +14,10 @@ import {
   CreateExpenseDialog,
   CreateIncomeDialog,
   ExpensesTable,
-  Goals,
   IncomeTable,
   RecurringTemplatesDialog,
 } from './components/index';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { isMoneyGreaterThanOrEqualWithTolerance } from '../future/lib/constants';
 import { useTabParam } from '@/lib/hooks/useTabParam';
@@ -175,7 +176,19 @@ const BudgetContent = () => {
           {regenerateMessage}
         </div>
       ) : null}
-      <Goals />
+      <Link href="/goals">
+        <Card className="hover:bg-accent transition-colors">
+          <CardHeader className="flex flex-row items-center gap-3 pb-2">
+            <Target className="text-muted-foreground h-5 w-5" />
+            <CardTitle className="text-lg">Goals</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-sm">
+              Track your financial goals and Financial Order of Operations on the Goals page.
+            </p>
+          </CardContent>
+        </Card>
+      </Link>
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as typeof activeTab)}

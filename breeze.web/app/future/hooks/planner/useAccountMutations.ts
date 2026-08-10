@@ -65,6 +65,9 @@ export function useAccountMutations({
   const { request } = useGraphql();
   const queryClient = useQueryClient();
 
+  const invalidatePlanner = () =>
+    queryClient.invalidateQueries({ queryKey: ['planner', userId] });
+
   const createAssetMutation = useMutation({
     mutationFn: async (account: PlannerAccount) => {
       const response = await request(CREATE_ASSET, {
@@ -80,7 +83,7 @@ export function useAccountMutations({
             account.employerMatchMaxPercentOfSalary / 100
           ).toString(),
           annualRate: (account.annualRate / 100).toString(),
-          returnProfile: null,
+          returnProfile: account.returnProfile ?? null,
           personIds: account.personIds,
           purchaseDate: account.purchaseDate ?? null,
           purchasePrice: account.purchasePrice?.toString() ?? null,
@@ -95,7 +98,6 @@ export function useAccountMutations({
       }));
       return response;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['assets', userId] }),
   });
 
   const updateAssetMutation = useMutation({
@@ -113,7 +115,7 @@ export function useAccountMutations({
             account.employerMatchMaxPercentOfSalary / 100
           ).toString(),
           annualRate: (account.annualRate / 100).toString(),
-          returnProfile: null,
+          returnProfile: account.returnProfile ?? null,
           personIds: account.personIds,
           purchaseDate: account.purchaseDate ?? null,
           purchasePrice: account.purchasePrice?.toString() ?? null,
@@ -123,7 +125,6 @@ export function useAccountMutations({
         },
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['assets', userId] }),
   });
 
   const deleteAssetMutation = useMutation({
@@ -131,7 +132,6 @@ export function useAccountMutations({
       await request(DELETE_ASSET, { id: accountId });
     },
     onSuccess: (_, accountId) => {
-      queryClient.invalidateQueries({ queryKey: ['assets', userId] });
       removeAccount(accountId);
     },
   });
@@ -147,7 +147,6 @@ export function useAccountMutations({
       }));
       return response;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['liabilities', userId] }),
   });
 
   const updateLiabilityMutation = useMutation({
@@ -157,7 +156,6 @@ export function useAccountMutations({
       const { userId: _drop, ...fields } = input;
       await request(UPDATE_LIABILITY, { input: { id: account.id, ...fields } });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['liabilities', userId] }),
   });
 
   const deleteLiabilityMutation = useMutation({
@@ -165,7 +163,6 @@ export function useAccountMutations({
       await request(DELETE_LIABILITY, { id: accountId });
     },
     onSuccess: (_, accountId) => {
-      queryClient.invalidateQueries({ queryKey: ['liabilities', userId] });
       removeAccount(accountId);
     },
   });
@@ -177,6 +174,7 @@ export function useAccountMutations({
     createLiabilityMutation,
     updateLiabilityMutation,
     deleteLiabilityMutation,
+    invalidatePlanner,
   };
 }
 
