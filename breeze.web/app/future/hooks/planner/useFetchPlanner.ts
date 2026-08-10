@@ -174,7 +174,7 @@ const useFetchPlanner = () => {
           | 'nominal',
       };
     },
-    enabled: !!userId,
+    enabled: typeof window !== 'undefined' && !!userId,
     staleTime: 5 * 60 * 1000,
   });
 };
