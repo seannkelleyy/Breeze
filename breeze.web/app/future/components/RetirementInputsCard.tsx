@@ -48,11 +48,7 @@ export const RetirementInputsCard = ({
   incomeReplacementTarget,
   financialMathSnapshot,
 }: RetirementInputsCardProps) => {
-  const {
-    isSignedIn,
-    currencyCode,
-    safeWithdrawalRate,
-  } = useCurrentUser();
+  const { isSignedIn, currencyCode, safeWithdrawalRate } = useCurrentUser();
   const {
     desiredInvestmentAmount,
     setDesiredInvestmentAmount,
@@ -254,7 +250,8 @@ export const RetirementInputsCard = ({
                 {financialFreedomAge !== null ? financialFreedomAge : 'Not reached by target age'}
               </p>
               <p>
-                Portfolio yearly income: {formatCurrency(financialMathSnapshot.yearlyPortfolioIncome)}
+                Portfolio yearly income:{' '}
+                {formatCurrency(financialMathSnapshot.yearlyPortfolioIncome)}
               </p>
               {selectedFireScenario && (
                 <>

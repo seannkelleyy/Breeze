@@ -28,7 +28,11 @@ function GoalsContent() {
   const queryClient = useQueryClient();
   const api = useGoalsApi();
 
-  const { data: goals, isLoading, isError } = useQuery({
+  const {
+    data: goals,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: GOALS_QUERY_KEY,
     queryFn: () => api.getGoals(),
     enabled: isLoaded && !!userId,
@@ -52,10 +56,7 @@ function GoalsContent() {
     [goals],
   );
 
-  const regularGoals = useMemo(
-    () => (goals ?? []).filter((g) => !g.isFinancialOrderStep),
-    [goals],
-  );
+  const regularGoals = useMemo(() => (goals ?? []).filter((g) => !g.isFinancialOrderStep), [goals]);
 
   // Create FOO steps on first visit if none exist.
   useEffect(() => {
@@ -129,9 +130,7 @@ function FinancialOrderSection({ steps }: { steps: Goal[] }) {
             )}
             <span
               className={
-                step.isCompleted
-                  ? 'text-muted-foreground text-sm line-through'
-                  : 'text-sm'
+                step.isCompleted ? 'text-muted-foreground text-sm line-through' : 'text-sm'
               }
             >
               {step.description}
@@ -212,9 +211,7 @@ function GoalsList({ goals }: { goals: Goal[] }) {
             <div className="flex-1">
               <p
                 className={
-                  goal.isCompleted
-                    ? 'text-muted-foreground text-sm line-through'
-                    : 'text-sm'
+                  goal.isCompleted ? 'text-muted-foreground text-sm line-through' : 'text-sm'
                 }
               >
                 {goal.description}
@@ -274,11 +271,7 @@ function GoalForm({ onCancel }: { onCancel: () => void }) {
         <Button variant="ghost" size="sm" onClick={onCancel}>
           Cancel
         </Button>
-        <Button
-          size="sm"
-          disabled={!description.trim() || isPending}
-          onClick={() => createGoal()}
-        >
+        <Button size="sm" disabled={!description.trim() || isPending} onClick={() => createGoal()}>
           Save Goal
         </Button>
       </div>

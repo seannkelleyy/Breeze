@@ -47,7 +47,9 @@ const useGoalsApi = () => {
   );
 
   const updateGoal = useCallback(
-    async (input: Partial<Goal> & { id: string; description: string; priority: number }): Promise<Goal> => {
+    async (
+      input: Partial<Goal> & { id: string; description: string; priority: number },
+    ): Promise<Goal> => {
       const resp = await request<{ updateGoal: Goal }, { input: Record<string, unknown> }>(
         UPDATE_GOAL,
         {

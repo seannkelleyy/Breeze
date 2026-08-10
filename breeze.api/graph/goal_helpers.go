@@ -6,8 +6,8 @@ import (
 
 	"breeze.api/graph/model"
 	"breeze.api/internal/service"
-	"github.com/govalues/decimal"
 	"github.com/google/uuid"
+	"github.com/govalues/decimal"
 )
 
 func createGoalInputFromModel(input model.CreateGoalInput) (service.CreateGoalInput, error) {

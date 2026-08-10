@@ -111,9 +111,7 @@ export default function PreferencesPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Financial Setup</CardTitle>
-          <CardDescription>
-            Your monthly expenses and budgeting preferences.
-          </CardDescription>
+          <CardDescription>Your monthly expenses and budgeting preferences.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1">

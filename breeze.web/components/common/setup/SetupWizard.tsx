@@ -19,14 +19,7 @@ import { usePlannerState } from '@/app/future/hooks/usePlannerState';
 import { usePlannerHydration } from '@/app/future/hooks/usePlannerHydration';
 import { PeopleSection, AccountsSection } from '@/app/future/components/sections';
 
-const STEPS = [
-  'Welcome',
-  'People',
-  'Accounts',
-  'Expenses',
-  'Goals',
-  'Disclaimer',
-] as const;
+const STEPS = ['Welcome', 'People', 'Accounts', 'Expenses', 'Goals', 'Disclaimer'] as const;
 
 export const SetupWizard = () => {
   const {
@@ -80,10 +73,7 @@ export const SetupWizard = () => {
 
   return (
     <Dialog open={open}>
-      <DialogContent
-        showCloseButton={false}
-        className="max-h-[90vh] overflow-y-auto sm:max-w-xl"
-      >
+      <DialogContent showCloseButton={false} className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <div className="space-y-2 pb-2">
           <Progress value={progress} />
           <p className="text-muted-foreground text-xs">
@@ -192,10 +182,7 @@ export const SetupWizard = () => {
               <Button variant="ghost" onClick={back}>
                 <ArrowLeft className="h-4 w-4" /> Back
               </Button>
-              <Button
-                onClick={next}
-                disabled={(monthlyExpenses ?? 0) <= 0}
-              >
+              <Button onClick={next} disabled={(monthlyExpenses ?? 0) <= 0}>
                 Continue <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -219,10 +206,12 @@ export const SetupWizard = () => {
                 <Button variant="outline" onClick={next}>
                   Skip
                 </Button>
-                <Button onClick={() => {
-                  setManualClose(true);
-                  router.push('/goals');
-                }}>
+                <Button
+                  onClick={() => {
+                    setManualClose(true);
+                    router.push('/goals');
+                  }}
+                >
                   Go to Goals <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>

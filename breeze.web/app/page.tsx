@@ -261,7 +261,9 @@ function DashboardContent() {
               <CardDescription>Complete your setup to unlock full planning.</CardDescription>
             </div>
             <Link href="/future">
-              <Button variant="outline" size="sm">Continue Setup</Button>
+              <Button variant="outline" size="sm">
+                Continue Setup
+              </Button>
             </Link>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -274,7 +276,9 @@ function DashboardContent() {
                   ) : (
                     <Circle className="text-muted-foreground h-4 w-4 shrink-0" />
                   )}
-                  <span className={step.done ? 'text-muted-foreground text-xs line-through' : 'text-xs'}>
+                  <span
+                    className={step.done ? 'text-muted-foreground text-xs line-through' : 'text-xs'}
+                  >
                     {step.label}
                   </span>
                 </div>
@@ -292,14 +296,18 @@ function DashboardContent() {
               <div className="flex items-center gap-2">
                 <ListChecks className="text-muted-foreground h-4 w-4" />
                 <div>
-                  <CardTitle className="text-sm font-medium">Financial Order of Operations</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Financial Order of Operations
+                  </CardTitle>
                   <CardDescription className="text-xs">
                     {data.completedSteps} of {data.totalSteps} steps complete
                   </CardDescription>
                 </div>
               </div>
               <Link href="/goals">
-                <Button variant="ghost" size="sm">View All</Button>
+                <Button variant="ghost" size="sm">
+                  View All
+                </Button>
               </Link>
             </CardHeader>
             <CardContent>
@@ -316,9 +324,7 @@ function DashboardContent() {
                   )}
                   <span
                     className={
-                      step.isCompleted
-                        ? 'text-muted-foreground text-xs line-through'
-                        : 'text-xs'
+                      step.isCompleted ? 'text-muted-foreground text-xs line-through' : 'text-xs'
                     }
                   >
                     {step.description}
@@ -342,7 +348,9 @@ function DashboardContent() {
                 </CardDescription>
               </div>
               <Link href="/goals">
-                <Button variant="ghost" size="sm">View All</Button>
+                <Button variant="ghost" size="sm">
+                  View All
+                </Button>
               </Link>
             </CardHeader>
             <CardContent>
@@ -351,7 +359,9 @@ function DashboardContent() {
                   <Target className="text-muted-foreground size-6" />
                   <p className="text-muted-foreground text-xs">No goals yet</p>
                   <Link href="/goals">
-                    <Button variant="outline" size="sm">Add Goal</Button>
+                    <Button variant="outline" size="sm">
+                      Add Goal
+                    </Button>
                   </Link>
                 </div>
               ) : (

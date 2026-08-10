@@ -69,13 +69,8 @@ export function ProjectionsSection({
   hasReachedCoastFire,
   coastFireGap,
 }: ProjectionsSectionProps) {
-  const {
-    requiredMonthly,
-    plannedMonthly,
-    retirementEstimateCard,
-    accountBreakdown,
-    onToggle,
-  } = collapses;
+  const { requiredMonthly, plannedMonthly, retirementEstimateCard, accountBreakdown, onToggle } =
+    collapses;
 
   return (
     <div className="space-y-6">

@@ -49,9 +49,7 @@ function PeopleContent() {
       {/* Page Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">People</h1>
-        <p className="text-muted-foreground text-sm">
-          Configure your household members
-        </p>
+        <p className="text-muted-foreground text-sm">Configure your household members</p>
       </div>
 
       {/* Configuration Sections */}

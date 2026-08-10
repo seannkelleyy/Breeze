@@ -9,10 +9,7 @@ import { usePlannerState } from './hooks/usePlannerState';
 import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
 import { formatCurrencyWithCode } from './lib/plannerMath';
 
-import {
-  RetirementInputsSection,
-  ProjectionsSection,
-} from './components/sections';
+import { RetirementInputsSection, ProjectionsSection } from './components/sections';
 import { accountLineColors, getDefaultAssetFinanceDetailsForAccount } from './lib/plannerMath';
 import { PLANNER_DEFAULT_INCOME_REPLACEMENT_RATE } from './lib/constants';
 
@@ -140,9 +137,7 @@ function PlannerContent() {
   const totalAssets = financialMathSnapshot.currentPortfolio;
   const netWorth = totalAssets;
   const fireProgress =
-    baseFinancialFreedomTarget > 0
-      ? (totalAssets / baseFinancialFreedomTarget) * 100
-      : 0;
+    baseFinancialFreedomTarget > 0 ? (totalAssets / baseFinancialFreedomTarget) * 100 : 0;
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -161,9 +156,7 @@ function PlannerContent() {
           </CardHeader>
           <CardContent>
             <div className="text-xl font-bold sm:text-2xl">{formatCurrency(netWorth)}</div>
-            <p className="text-muted-foreground text-xs">
-              {formatCurrency(totalAssets)} in assets
-            </p>
+            <p className="text-muted-foreground text-xs">{formatCurrency(totalAssets)} in assets</p>
           </CardContent>
         </Card>
 

@@ -7,28 +7,28 @@ import (
 	"time"
 
 	"breeze.api/internal/db/sqlc"
-	"github.com/govalues/decimal"
 	"github.com/google/uuid"
+	"github.com/govalues/decimal"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Goal struct {
-	ID                    uuid.UUID
-	UserID                uuid.UUID
-	Description           string
-	IsCompleted           bool
-	TargetAmount          *decimal.Decimal
-	TargetDate            *time.Time
-	Category              *string
-	CustomCategory        *string
-	Priority              int32
-	Notes                 *string
-	ConnectedAccountIDs   []uuid.UUID
-	IsFinancialOrderStep  bool
-	FinancialOrderStep    *int32
-	CreatedAt             time.Time
-	UpdatedAt             time.Time
+	ID                   uuid.UUID
+	UserID               uuid.UUID
+	Description          string
+	IsCompleted          bool
+	TargetAmount         *decimal.Decimal
+	TargetDate           *time.Time
+	Category             *string
+	CustomCategory       *string
+	Priority             int32
+	Notes                *string
+	ConnectedAccountIDs  []uuid.UUID
+	IsFinancialOrderStep bool
+	FinancialOrderStep   *int32
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
 
 type CreateGoalInput struct {
