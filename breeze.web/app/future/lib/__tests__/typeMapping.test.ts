@@ -104,8 +104,18 @@ describe('apiAssetTypeToAccountType', () => {
 
 describe('round-trip mapping', () => {
   const assetTypes = [
-    'checking', 'emergency-fund', 'brokerage', '401k', '403b', '457',
-    'roth-ira', 'traditional-ira', 'hsa', 'home', 'vehicle', 'other',
+    'checking',
+    'emergency-fund',
+    'brokerage',
+    '401k',
+    '403b',
+    '457',
+    'roth-ira',
+    'traditional-ira',
+    'hsa',
+    'home',
+    'vehicle',
+    'other',
   ];
 
   assetTypes.forEach((type) => {

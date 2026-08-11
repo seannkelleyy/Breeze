@@ -3,7 +3,6 @@ import { AccountType, PlannerAccount } from '../../types/account';
 import { getDefaultAssetFinanceDetailsForAccount } from '../plannerMath';
 
 describe('getDefaultAssetFinanceDetailsForAccount', () => {
-
   it('returns default details for home account', () => {
     const account: PlannerAccount = {
       id: 'account-1',
@@ -93,9 +92,23 @@ describe('getDefaultAssetFinanceDetailsForAccount', () => {
 describe('PlannerAccount type', () => {
   it('allows all account types', () => {
     const types = [
-      'checking', 'emergency-fund', 'brokerage', '401k', '403b', '457',
-      'roth-ira', 'traditional-ira', 'hsa', 'home', 'vehicle', 'other',
-      'student-loan', 'credit-card', 'personal-loan', 'auto-loan', 'mortgage',
+      'checking',
+      'emergency-fund',
+      'brokerage',
+      '401k',
+      '403b',
+      '457',
+      'roth-ira',
+      'traditional-ira',
+      'hsa',
+      'home',
+      'vehicle',
+      'other',
+      'student-loan',
+      'credit-card',
+      'personal-loan',
+      'auto-loan',
+      'mortgage',
     ];
 
     types.forEach((type) => {

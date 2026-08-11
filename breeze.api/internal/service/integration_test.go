@@ -8,8 +8,8 @@ import (
 
 	"breeze.api/internal/db"
 	dbsqlc "breeze.api/internal/db/sqlc"
-	"github.com/govalues/decimal"
 	"github.com/google/uuid"
+	"github.com/govalues/decimal"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -388,16 +388,16 @@ func TestIntegration_UserCRUD(t *testing.T) {
 		newSWR := mustDecimal("0.0350")
 		newIR := mustDecimal("0.0200")
 		updated, err := svc.Update(ctx, UpdateUserInput{
-			ID:                  created.ID,
-			IdentityProviderID:  ipid,
-			Email:               created.Email,
-			ReturnType:          dbsqlc.ReturnTypeNOMINAL,
-			SafeWithdrawalRate:  newSWR,
-			CurrencyType:        "GBP",
-			InflationRate:       newIR,
-			DeductionType:       dbsqlc.DeductionTypeSTANDARD,
-			FilingStatus:        dbsqlc.FilingStatusSINGLE,
-			PayoffStrategy:      dbsqlc.PayoffStrategyAVALANCHE,
+			ID:                 created.ID,
+			IdentityProviderID: ipid,
+			Email:              created.Email,
+			ReturnType:         dbsqlc.ReturnTypeNOMINAL,
+			SafeWithdrawalRate: newSWR,
+			CurrencyType:       "GBP",
+			InflationRate:      newIR,
+			DeductionType:      dbsqlc.DeductionTypeSTANDARD,
+			FilingStatus:       dbsqlc.FilingStatusSINGLE,
+			PayoffStrategy:     dbsqlc.PayoffStrategyAVALANCHE,
 		})
 		require.NoError(t, err)
 		assert.Equal(t, "GBP", updated.CurrencyType)
@@ -839,16 +839,16 @@ func TestIntegration_LiabilityCRUD(t *testing.T) {
 	t.Run("list returns all liability types", func(t *testing.T) {
 		// Add a credit card
 		_, err := svc.Create(ctx, CreateLiabilityInput{
-			UserID:            userRow.ID,
-			Name:              "Visa",
-			LiabilityType:     dbsqlc.LiabilityTypeCREDITCARD,
-			CurrentBalance:    mustDecimal("5000.00"),
-			InterestRate:      mustDecimal("0.1999"),
-			MinimumPayment:    mustDecimal("150.00"),
+			UserID:             userRow.ID,
+			Name:               "Visa",
+			LiabilityType:      dbsqlc.LiabilityTypeCREDITCARD,
+			CurrentBalance:     mustDecimal("5000.00"),
+			InterestRate:       mustDecimal("0.1999"),
+			MinimumPayment:     mustDecimal("150.00"),
 			TargetExtraPayment: mustDecimal("0.00"),
-			ContributionMode:  "monthly",
-			ContributionValue: mustDecimal("150.00"),
-			PersonIDs:         []uuid.UUID{},
+			ContributionMode:   "monthly",
+			ContributionValue:  mustDecimal("150.00"),
+			PersonIDs:          []uuid.UUID{},
 		})
 		require.NoError(t, err)
 

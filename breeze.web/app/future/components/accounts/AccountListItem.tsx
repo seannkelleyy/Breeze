@@ -1,5 +1,17 @@
 'use client';
-import { ChevronDown, ChevronUp, Trash2, PiggyBank, CreditCard, Home, Car, Briefcase, Wallet, Shield, TrendingUp } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+  PiggyBank,
+  CreditCard,
+  Home,
+  Car,
+  Briefcase,
+  Wallet,
+  Shield,
+  TrendingUp,
+} from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -206,10 +218,16 @@ export function AccountListItem({
   const modeOptions = isLiability ? liabilityContributionModeOptions : contributionModeOptions;
   const contributionInputLabel =
     account.contributionMode === 'monthly'
-      ? isLiability ? 'Monthly Payment' : 'Monthly Contribution'
+      ? isLiability
+        ? 'Monthly Payment'
+        : 'Monthly Contribution'
       : account.contributionMode === 'yearly'
-        ? isLiability ? 'Yearly Payment' : 'Yearly Contribution'
-        : isLiability ? 'Payment % of Salary' : 'Contribution % of Salary';
+        ? isLiability
+          ? 'Yearly Payment'
+          : 'Yearly Contribution'
+        : isLiability
+          ? 'Payment % of Salary'
+          : 'Contribution % of Salary';
 
   const onSetContributionToIrsMax = () => {
     onUpdateAccount((current) => ({
@@ -267,20 +285,27 @@ export function AccountListItem({
     : null;
 
   return (
-    <div className="group rounded-lg border transition-colors hover:border-primary/30">
+    <div className="group hover:border-primary/30 rounded-lg border transition-colors">
       {/* Header — always visible */}
       <button
         type="button"
         className="flex w-full items-center gap-3 px-4 py-3 text-left"
         onClick={() => onToggleCollapse(account.id)}
       >
-        <div className={`flex size-9 shrink-0 items-center justify-center rounded-md ${isLiability ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
+        <div
+          className={`flex size-9 shrink-0 items-center justify-center rounded-md ${isLiability ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}
+        >
           <Icon className="size-4" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-medium">{account.name || 'Unnamed Account'}</span>
-            <Badge variant={isLiability ? 'destructive' : 'secondary'} className="shrink-0 text-[10px]">
+            <span className="truncate text-sm font-medium">
+              {account.name || 'Unnamed Account'}
+            </span>
+            <Badge
+              variant={isLiability ? 'destructive' : 'secondary'}
+              className="shrink-0 text-[10px]"
+            >
               {isLiability ? 'Liability' : 'Asset'}
             </Badge>
           </div>
@@ -311,7 +336,7 @@ export function AccountListItem({
 
       {/* Expanded form */}
       {!isAccountCollapsed && (
-        <div className="space-y-4 border-t px-4 pb-4 pt-3">
+        <div className="space-y-4 border-t px-4 pt-3 pb-4">
           {/* Basic info row */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="space-y-1.5">
@@ -439,7 +464,9 @@ export function AccountListItem({
 
           {/* IRS limit hint */}
           {!hidesContributionInputs && suggestedLimit > 0 && (
-            <div className={`rounded-md px-3 py-2 text-xs ${isUsingIrsMaxContribution ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+            <div
+              className={`rounded-md px-3 py-2 text-xs ${isUsingIrsMaxContribution ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}
+            >
               IRS limit (age {ownerAge}): {formatCurrency(suggestedLimit)}
               {plannerConstants.isMoneyGreaterThanWithTolerance(employeeAnnual, suggestedLimit) && (
                 <span className="text-destructive ml-2 font-medium">
