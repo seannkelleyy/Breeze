@@ -404,13 +404,6 @@ func (s *UserService) UpdateSetup(ctx context.Context, input UpdateSetupInput) (
 		monthlyExpenses, _ = decimalToPGNumeric(current.MonthlyExpenses)
 	}
 
-	var disclaimerAcceptedAt pgtype.Timestamptz
-	if input.DisclaimerAcceptedAt != nil {
-		disclaimerAcceptedAt = pgtype.Timestamptz{Time: *input.DisclaimerAcceptedAt, Valid: true}
-	} else if current.DisclaimerAcceptedAt != nil {
-		disclaimerAcceptedAt = pgtype.Timestamptz{Time: *current.DisclaimerAcceptedAt, Valid: true}
-	}
-
 	budgetEnabled := current.BudgetEnabled
 	if input.BudgetEnabled != nil {
 		budgetEnabled = *input.BudgetEnabled
@@ -424,6 +417,16 @@ func (s *UserService) UpdateSetup(ctx context.Context, input UpdateSetupInput) (
 	disclaimerAccepted := current.DisclaimerAccepted
 	if input.DisclaimerAccepted != nil {
 		disclaimerAccepted = *input.DisclaimerAccepted
+	}
+
+	// Auto-set disclaimer accepted timestamp when disclaimer is first accepted
+	var disclaimerAcceptedAt pgtype.Timestamptz
+	if input.DisclaimerAcceptedAt != nil {
+		disclaimerAcceptedAt = pgtype.Timestamptz{Time: *input.DisclaimerAcceptedAt, Valid: true}
+	} else if disclaimerAccepted && !current.DisclaimerAccepted {
+		disclaimerAcceptedAt = pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
+	} else if current.DisclaimerAcceptedAt != nil {
+		disclaimerAcceptedAt = pgtype.Timestamptz{Time: *current.DisclaimerAcceptedAt, Valid: true}
 	}
 
 	row, err := s.queries.UpdateUserSetup(ctx, sqlc.UpdateUserSetupParams{
