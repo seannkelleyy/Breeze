@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { accountTypeToApiAssetType, apiAssetTypeToAccountType } from '../typeMapping';
+import { AccountType } from '../../types/account';
 
 describe('accountTypeToApiAssetType', () => {
   it('maps checking to CHECKING', () => {
@@ -109,7 +110,7 @@ describe('round-trip mapping', () => {
 
   assetTypes.forEach((type) => {
     it(`round-trips ${type}`, () => {
-      const apiType = accountTypeToApiAssetType(type as any);
+      const apiType = accountTypeToApiAssetType(type as AccountType);
       expect(apiType).not.toBeNull();
       const backType = apiAssetTypeToAccountType(apiType!);
       expect(backType).toBe(type);

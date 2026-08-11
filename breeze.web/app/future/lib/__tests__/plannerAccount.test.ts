@@ -1,19 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { PlannerPerson } from '../../types/person';
-import { PlannerAccount } from '../../types/account';
+import { AccountType, PlannerAccount } from '../../types/account';
 import { getDefaultAssetFinanceDetailsForAccount } from '../plannerMath';
 
 describe('getDefaultAssetFinanceDetailsForAccount', () => {
-  const basePerson: PlannerPerson = {
-    id: 'person-1',
-    name: 'Alice',
-    birthday: '1990-01-01',
-    retirementAge: 65,
-    annualSalary: 100000,
-    bonusMode: 'dollars',
-    annualBonus: 0,
-    incomeGrowthRate: 0,
-  };
 
   it('returns default details for home account', () => {
     const account: PlannerAccount = {
@@ -113,7 +102,7 @@ describe('PlannerAccount type', () => {
       const account: PlannerAccount = {
         id: 'test',
         name: 'Test',
-        accountType: type as any,
+        accountType: type as AccountType,
         personIds: [],
         contributionMode: 'monthly',
         contributionValue: 0,
