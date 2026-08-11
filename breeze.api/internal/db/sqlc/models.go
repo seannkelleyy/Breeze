@@ -567,6 +567,7 @@ type Asset struct {
 	VehicleDepreciationProfile      *string            `json:"vehicle_depreciation_profile"`
 	LinkedLiabilityID               pgtype.UUID        `json:"linked_liability_id"`
 	PlaidAccountID                  pgtype.UUID        `json:"plaid_account_id"`
+	ReturnProfile                   *string            `json:"return_profile"`
 }
 
 type Budget struct {

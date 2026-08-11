@@ -323,6 +323,11 @@ table "assets" {
     null = false
   }
 
+  column "return_profile" {
+    type = varchar(32)
+    null = true
+  }
+
   column "purchase_date" {
     type = date
     null = true

@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"breeze.api/internal/db"
 	dbsqlc "breeze.api/internal/db/sqlc"
@@ -326,6 +327,553 @@ func TestIntegration_WeightedMonthlyExpenses(t *testing.T) {
 		result, err := expenseSvc.GetWeightedMonthlyExpenses(ctx, userRow.ID)
 		require.NoError(t, err)
 		assert.True(t, result.IsZero(), "should return zero when no expenses exist")
+	})
+}
+
+func TestIntegration_UserCRUD(t *testing.T) {
+	pool := getTestPool(t)
+	q := dbsqlc.New(pool)
+	ctx := context.Background()
+
+	svc := NewUserService(q)
+
+	t.Run("create and retrieve user with all fields", func(t *testing.T) {
+		swr := mustDecimal("0.0350")
+		ir := mustDecimal("0.0250")
+		deductionAmt := mustDecimal("12000.00")
+
+		created, err := svc.Create(ctx, CreateUserInput{
+			IdentityProviderID: "test-crud-" + uuid.New().String(),
+			Email:              "crud-" + uuid.New().String() + "@example.com",
+			ReturnType:         dbsqlc.ReturnTypeNOMINAL,
+			SafeWithdrawalRate: swr,
+			CurrencyType:       "EUR",
+			InflationRate:      ir,
+			DeductionType:      dbsqlc.DeductionTypeITEMIZED,
+			DeductionAmount:    &deductionAmt,
+			FilingStatus:       dbsqlc.FilingStatusMFJ,
+			PayoffStrategy:     dbsqlc.PayoffStrategySNOWBALL,
+		})
+		require.NoError(t, err)
+		defer cleanupUser(t, q, created.ID)
+
+		// Verify all fields persisted
+		fetched, err := svc.GetByID(ctx, created.ID)
+		require.NoError(t, err)
+		assert.Equal(t, "EUR", fetched.CurrencyType)
+		assert.Equal(t, dbsqlc.ReturnTypeNOMINAL, fetched.ReturnType)
+		assert.Equal(t, dbsqlc.DeductionTypeITEMIZED, fetched.DeductionType)
+		assert.Equal(t, dbsqlc.FilingStatusMFJ, fetched.FilingStatus)
+		assert.Equal(t, dbsqlc.PayoffStrategySNOWBALL, fetched.PayoffStrategy)
+		assert.NotNil(t, fetched.DeductionAmount)
+		assert.Equal(t, "12000.00", fetched.DeductionAmount.String())
+	})
+
+	t.Run("update user preferences", func(t *testing.T) {
+		ipid := "test-update-" + uuid.New().String()
+		created, err := svc.Create(ctx, CreateUserInput{
+			IdentityProviderID: ipid,
+			Email:              "update-" + uuid.New().String() + "@example.com",
+			ReturnType:         dbsqlc.ReturnTypeREAL,
+			SafeWithdrawalRate: mustDecimal("0.0400"),
+			CurrencyType:       "USD",
+			InflationRate:      mustDecimal("0.0300"),
+			DeductionType:      dbsqlc.DeductionTypeSTANDARD,
+			FilingStatus:       dbsqlc.FilingStatusSINGLE,
+			PayoffStrategy:     dbsqlc.PayoffStrategyAVALANCHE,
+		})
+		require.NoError(t, err)
+		defer cleanupUser(t, q, created.ID)
+
+		newSWR := mustDecimal("0.0350")
+		newIR := mustDecimal("0.0200")
+		updated, err := svc.Update(ctx, UpdateUserInput{
+			ID:                  created.ID,
+			IdentityProviderID:  ipid,
+			Email:               created.Email,
+			ReturnType:          dbsqlc.ReturnTypeNOMINAL,
+			SafeWithdrawalRate:  newSWR,
+			CurrencyType:        "GBP",
+			InflationRate:       newIR,
+			DeductionType:       dbsqlc.DeductionTypeSTANDARD,
+			FilingStatus:        dbsqlc.FilingStatusSINGLE,
+			PayoffStrategy:      dbsqlc.PayoffStrategyAVALANCHE,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "GBP", updated.CurrencyType)
+		assert.Equal(t, dbsqlc.ReturnTypeNOMINAL, updated.ReturnType)
+	})
+
+	t.Run("get by identity provider ID", func(t *testing.T) {
+		ipid := "test-ipid-" + uuid.New().String()
+		created, err := svc.Create(ctx, CreateUserInput{
+			IdentityProviderID: ipid,
+			Email:              "ipid-" + uuid.New().String() + "@example.com",
+			ReturnType:         dbsqlc.ReturnTypeREAL,
+			SafeWithdrawalRate: mustDecimal("0.0400"),
+			CurrencyType:       "USD",
+			InflationRate:      mustDecimal("0.0300"),
+			DeductionType:      dbsqlc.DeductionTypeSTANDARD,
+			FilingStatus:       dbsqlc.FilingStatusSINGLE,
+			PayoffStrategy:     dbsqlc.PayoffStrategyAVALANCHE,
+		})
+		require.NoError(t, err)
+		defer cleanupUser(t, q, created.ID)
+
+		fetched, err := svc.GetByIdentityProviderID(ctx, ipid)
+		require.NoError(t, err)
+		assert.Equal(t, created.ID, fetched.ID)
+		assert.Equal(t, created.Email, fetched.Email)
+	})
+
+	t.Run("soft delete prevents retrieval", func(t *testing.T) {
+		created, err := svc.Create(ctx, CreateUserInput{
+			IdentityProviderID: "test-delete-" + uuid.New().String(),
+			Email:              "delete-" + uuid.New().String() + "@example.com",
+			ReturnType:         dbsqlc.ReturnTypeREAL,
+			SafeWithdrawalRate: mustDecimal("0.0400"),
+			CurrencyType:       "USD",
+			InflationRate:      mustDecimal("0.0300"),
+			DeductionType:      dbsqlc.DeductionTypeSTANDARD,
+			FilingStatus:       dbsqlc.FilingStatusSINGLE,
+			PayoffStrategy:     dbsqlc.PayoffStrategyAVALANCHE,
+		})
+		require.NoError(t, err)
+
+		err = svc.Delete(ctx, created.ID)
+		require.NoError(t, err)
+
+		_, err = svc.GetByID(ctx, created.ID)
+		assert.ErrorIs(t, err, ErrNotFound)
+	})
+}
+
+func TestIntegration_PlannerPersonLifecycle(t *testing.T) {
+	pool := getTestPool(t)
+	q := dbsqlc.New(pool)
+	ctx := context.Background()
+
+	userRow := createTestUser(t, q)
+	defer cleanupUser(t, q, userRow.ID)
+
+	svc := NewPlannerPersonService(q)
+
+	t.Run("upsert and list persons", func(t *testing.T) {
+		person1 := UpsertPlannerPersonInput{
+			ID:               uuid.New(),
+			UserID:           userRow.ID,
+			Name:             "Alice",
+			Birthday:         "1990-05-15",
+			RetirementAge:    65,
+			AnnualSalary:     mustDecimal("120000.00"),
+			BonusMode:        "dollars",
+			AnnualBonus:      mustDecimal("10000.00"),
+			IncomeGrowthRate: mustDecimal("3.00"),
+		}
+		person2 := UpsertPlannerPersonInput{
+			ID:               uuid.New(),
+			UserID:           userRow.ID,
+			Name:             "Bob",
+			Birthday:         "1988-03-20",
+			RetirementAge:    60,
+			AnnualSalary:     mustDecimal("95000.00"),
+			BonusMode:        "salary-percent",
+			AnnualBonus:      mustDecimal("15.00"),
+			IncomeGrowthRate: mustDecimal("2.50"),
+		}
+
+		_, err := svc.Upsert(ctx, person1)
+		require.NoError(t, err)
+		_, err = svc.Upsert(ctx, person2)
+		require.NoError(t, err)
+
+		persons, err := svc.ListByUserID(ctx, userRow.ID)
+		require.NoError(t, err)
+		assert.Len(t, persons, 2)
+
+		names := make(map[string]bool)
+		for _, p := range persons {
+			names[p.Name] = true
+		}
+		assert.True(t, names["Alice"])
+		assert.True(t, names["Bob"])
+	})
+
+	t.Run("upsert updates existing person by ID", func(t *testing.T) {
+		persons, err := svc.ListByUserID(ctx, userRow.ID)
+		require.NoError(t, err)
+
+		var alice *PlannerPerson
+		for i := range persons {
+			if persons[i].Name == "Alice" {
+				alice = &persons[i]
+				break
+			}
+		}
+		require.NotNil(t, alice)
+
+		// Upsert Alice again with updated salary
+		updatedAlice := UpsertPlannerPersonInput{
+			ID:               alice.ID,
+			UserID:           userRow.ID,
+			Name:             "Alice",
+			Birthday:         "1990-05-15",
+			RetirementAge:    65,
+			AnnualSalary:     mustDecimal("130000.00"),
+			BonusMode:        "dollars",
+			AnnualBonus:      mustDecimal("12000.00"),
+			IncomeGrowthRate: mustDecimal("3.50"),
+		}
+		_, err = svc.Upsert(ctx, updatedAlice)
+		require.NoError(t, err)
+
+		persons, err = svc.ListByUserID(ctx, userRow.ID)
+		require.NoError(t, err)
+
+		alice = nil
+		for i := range persons {
+			if persons[i].Name == "Alice" {
+				alice = &persons[i]
+				break
+			}
+		}
+		require.NotNil(t, alice)
+		assert.Equal(t, "130000.00", alice.AnnualSalary.String())
+	})
+
+	t.Run("delete person", func(t *testing.T) {
+		persons, err := svc.ListByUserID(ctx, userRow.ID)
+		require.NoError(t, err)
+		require.Len(t, persons, 2)
+
+		err = svc.Delete(ctx, persons[0].ID)
+		require.NoError(t, err)
+
+		remaining, err := svc.ListByUserID(ctx, userRow.ID)
+		require.NoError(t, err)
+		assert.Len(t, remaining, 1)
+	})
+}
+
+func TestIntegration_BudgetExpenseLifecycle(t *testing.T) {
+	pool := getTestPool(t)
+	q := dbsqlc.New(pool)
+	ctx := context.Background()
+
+	userRow := createTestUser(t, q)
+	defer cleanupUser(t, q, userRow.ID)
+
+	budgetSvc := NewBudgetService(q)
+	expenseSvc := NewExpenseService(dbsqlc.New(pool), pool)
+	categorySvc := NewExpenseCategoryService(q)
+
+	t.Run("create budget with expenses and categories", func(t *testing.T) {
+		// Create budget
+		budgetDate := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+		budget, err := budgetSvc.Create(ctx, CreateBudgetInput{
+			UserID:          userRow.ID,
+			Date:            budgetDate,
+			MonthlyIncome:   mustDecimal("10000.00"),
+			MonthlyExpenses: mustDecimal("7000.00"),
+		})
+		require.NoError(t, err)
+
+		// Create category
+		category, err := categorySvc.Create(ctx, CreateExpenseCategoryInput{
+			UserID:       userRow.ID,
+			BudgetID:     budget.ID,
+			Name:         "Groceries",
+			Allocation:   mustDecimal("800.00"),
+			CurrentSpend: mustDecimal("0.00"),
+			SourceType:   dbsqlc.ExpenseSourceTypeMANUAL,
+		})
+		require.NoError(t, err)
+
+		// Create expense
+		expenseDate := time.Date(2026, 1, 15, 0, 0, 0, 0, time.UTC)
+		expense, err := expenseSvc.Create(ctx, CreateExpenseInput{
+			UserID:      userRow.ID,
+			BudgetID:    budget.ID,
+			Amount:      mustDecimal("150.00"),
+			Date:        expenseDate,
+			Description: "Weekly groceries",
+			SourceType:  dbsqlc.ExpenseSourceTypeMANUAL,
+			Splits: []ExpenseSplitInput{
+				{CategoryID: category.ID, Amount: mustDecimal("150.00")},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "150.00", expense.Amount.String())
+
+		// Verify expense list
+		expenses, err := expenseSvc.ListByBudgetID(ctx, budget.ID)
+		require.NoError(t, err)
+		assert.Len(t, expenses, 1)
+		assert.Equal(t, "Weekly groceries", expenses[0].Description)
+	})
+
+	t.Run("budget totals are correct", func(t *testing.T) {
+		budgets, err := budgetSvc.ListByUserID(ctx, userRow.ID)
+		require.NoError(t, err)
+		require.Len(t, budgets, 1)
+
+		budget := budgets[0]
+		assert.Equal(t, "10000.00", budget.MonthlyIncome.String())
+		assert.Equal(t, "7000.00", budget.MonthlyExpenses.String())
+	})
+}
+
+func TestIntegration_GoalWithConnectedAccounts(t *testing.T) {
+	pool := getTestPool(t)
+	q := dbsqlc.New(pool)
+	ctx := context.Background()
+
+	userRow := createTestUser(t, q)
+	defer cleanupUser(t, q, userRow.ID)
+
+	goalSvc := NewGoalService(q)
+	assetSvc := NewAssetService(q)
+
+	t.Run("goal with connected account IDs persists", func(t *testing.T) {
+		// Create an asset
+		asset, err := assetSvc.Create(ctx, CreateAssetInput{
+			UserID:                          userRow.ID,
+			Name:                            "Emergency Fund",
+			AssetType:                       dbsqlc.AssetTypeEMERGENCYFUND,
+			CurrentValue:                    mustDecimal("5000.00"),
+			ContributionMode:                "monthly",
+			ContributionValue:               mustDecimal("500.00"),
+			EmployerMatchRate:               mustDecimal("0.00"),
+			EmployerMatchMaxPercentOfSalary: mustDecimal("0.00"),
+			AnnualRate:                      mustDecimal("0.0400"),
+			PersonIDs:                       []uuid.UUID{},
+		})
+		require.NoError(t, err)
+
+		// Create goal connected to the asset
+		goal, err := goalSvc.Create(ctx, CreateGoalInput{
+			UserID:              userRow.ID,
+			Description:         "Build 6-month emergency fund",
+			IsCompleted:         false,
+			Priority:            1,
+			Category:            ptrString("emergency_fund"),
+			ConnectedAccountIDs: []uuid.UUID{asset.ID},
+		})
+		require.NoError(t, err)
+
+		// Verify connected accounts persist
+		fetched, err := goalSvc.GetByID(ctx, goal.ID)
+		require.NoError(t, err)
+		assert.Len(t, fetched.ConnectedAccountIDs, 1)
+		assert.Equal(t, asset.ID, fetched.ConnectedAccountIDs[0])
+	})
+
+	t.Run("goal with multiple connected accounts", func(t *testing.T) {
+		// Create another asset
+		asset2, err := assetSvc.Create(ctx, CreateAssetInput{
+			UserID:                          userRow.ID,
+			Name:                            "House Down Payment",
+			AssetType:                       dbsqlc.AssetTypeBROKERAGE,
+			CurrentValue:                    mustDecimal("15000.00"),
+			ContributionMode:                "monthly",
+			ContributionValue:               mustDecimal("1000.00"),
+			EmployerMatchRate:               mustDecimal("0.00"),
+			EmployerMatchMaxPercentOfSalary: mustDecimal("0.00"),
+			AnnualRate:                      mustDecimal("0.0700"),
+			PersonIDs:                       []uuid.UUID{},
+		})
+		require.NoError(t, err)
+
+		goal, err := goalSvc.Create(ctx, CreateGoalInput{
+			UserID:              userRow.ID,
+			Description:         "Save for house down payment",
+			IsCompleted:         false,
+			Priority:            2,
+			TargetAmount:        ptrDecimal(mustDecimal("50000.00")),
+			ConnectedAccountIDs: []uuid.UUID{asset2.ID},
+		})
+		require.NoError(t, err)
+
+		fetched, err := goalSvc.GetByID(ctx, goal.ID)
+		require.NoError(t, err)
+		assert.NotNil(t, fetched.TargetAmount)
+		assert.Equal(t, "50000.00", fetched.TargetAmount.String())
+		assert.Len(t, fetched.ConnectedAccountIDs, 1)
+	})
+}
+
+func TestIntegration_AssetReturnProfile(t *testing.T) {
+	pool := getTestPool(t)
+	q := dbsqlc.New(pool)
+	ctx := context.Background()
+
+	userRow := createTestUser(t, q)
+	defer cleanupUser(t, q, userRow.ID)
+
+	svc := NewAssetService(q)
+
+	t.Run("return profile persists through create and update", func(t *testing.T) {
+		asset, err := svc.Create(ctx, CreateAssetInput{
+			UserID:                          userRow.ID,
+			Name:                            "401k",
+			AssetType:                       dbsqlc.AssetType401K,
+			CurrentValue:                    mustDecimal("50000.00"),
+			ContributionMode:                "monthly",
+			ContributionValue:               mustDecimal("1625.00"),
+			EmployerMatchRate:               mustDecimal("0.06"),
+			EmployerMatchMaxPercentOfSalary: mustDecimal("0.50"),
+			AnnualRate:                      mustDecimal("0.1000"),
+			PersonIDs:                       []uuid.UUID{},
+			ReturnProfile:                   ptrString("stocks"),
+		})
+		require.NoError(t, err)
+
+		// Verify return profile persisted
+		fetched, err := svc.GetByID(ctx, asset.ID)
+		require.NoError(t, err)
+		assert.NotNil(t, fetched.ReturnProfile)
+		assert.Equal(t, "stocks", *fetched.ReturnProfile)
+
+		// Update return profile
+		updated, err := svc.Update(ctx, UpdateAssetInput{
+			ID:                              fetched.ID,
+			Name:                            fetched.Name,
+			AssetType:                       fetched.AssetType,
+			CurrentValue:                    fetched.CurrentValue,
+			ContributionMode:                fetched.ContributionMode,
+			ContributionValue:               fetched.ContributionValue,
+			EmployerMatchRate:               mustDecimal("0.06"),
+			EmployerMatchMaxPercentOfSalary: mustDecimal("0.50"),
+			AnnualRate:                      mustDecimal("0.0700"),
+			PersonIDs:                       fetched.PersonIDs,
+			ReturnProfile:                   ptrString("bonds"),
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "bonds", *updated.ReturnProfile)
+	})
+
+	t.Run("null return profile persists", func(t *testing.T) {
+		asset, err := svc.Create(ctx, CreateAssetInput{
+			UserID:                          userRow.ID,
+			Name:                            "Checking",
+			AssetType:                       dbsqlc.AssetTypeCHECKING,
+			CurrentValue:                    mustDecimal("10000.00"),
+			ContributionMode:                "monthly",
+			ContributionValue:               mustDecimal("0.00"),
+			EmployerMatchRate:               mustDecimal("0.00"),
+			EmployerMatchMaxPercentOfSalary: mustDecimal("0.00"),
+			AnnualRate:                      mustDecimal("0.0100"),
+			PersonIDs:                       []uuid.UUID{},
+		})
+		require.NoError(t, err)
+
+		fetched, err := svc.GetByID(ctx, asset.ID)
+		require.NoError(t, err)
+		assert.Nil(t, fetched.ReturnProfile)
+	})
+}
+
+func TestIntegration_LiabilityCRUD(t *testing.T) {
+	pool := getTestPool(t)
+	q := dbsqlc.New(pool)
+	ctx := context.Background()
+
+	userRow := createTestUser(t, q)
+	defer cleanupUser(t, q, userRow.ID)
+
+	svc := NewLiabilityService(q)
+
+	t.Run("create and retrieve liability with all fields", func(t *testing.T) {
+		origLoan := mustDecimal("250000.00")
+		liability, err := svc.Create(ctx, CreateLiabilityInput{
+			UserID:             userRow.ID,
+			Name:               "Home Mortgage",
+			LiabilityType:      dbsqlc.LiabilityTypeMORTGAGE,
+			CurrentBalance:     mustDecimal("200000.00"),
+			OriginalLoanAmount: &origLoan,
+			InterestRate:       mustDecimal("0.0650"),
+			MinimumPayment:     mustDecimal("1500.00"),
+			TargetExtraPayment: mustDecimal("200.00"),
+			PayoffPriority:     1,
+			ContributionMode:   "monthly",
+			ContributionValue:  mustDecimal("1700.00"),
+			PersonIDs:          []uuid.UUID{},
+		})
+		require.NoError(t, err)
+
+		fetched, err := svc.GetByID(ctx, liability.ID)
+		require.NoError(t, err)
+		assert.Equal(t, "Home Mortgage", fetched.Name)
+		assert.Equal(t, dbsqlc.LiabilityTypeMORTGAGE, fetched.LiabilityType)
+		assert.Equal(t, "200000.00", fetched.CurrentBalance.String())
+		assert.NotNil(t, fetched.OriginalLoanAmount)
+		assert.Equal(t, "250000.00", fetched.OriginalLoanAmount.String())
+		assert.Equal(t, "0.0650", fetched.InterestRate.String())
+		assert.Equal(t, "1500.00", fetched.MinimumPayment.String())
+	})
+
+	t.Run("update liability balance", func(t *testing.T) {
+		liabilities, err := svc.ListByUserID(ctx, userRow.ID)
+		require.NoError(t, err)
+		require.Len(t, liabilities, 1)
+
+		liability := liabilities[0]
+		updated, err := svc.Update(ctx, UpdateLiabilityInput{
+			ID:                 liability.ID,
+			Name:               liability.Name,
+			LiabilityType:      liability.LiabilityType,
+			CurrentBalance:     mustDecimal("195000.00"),
+			OriginalLoanAmount: liability.OriginalLoanAmount,
+			InterestRate:       liability.InterestRate,
+			MinimumPayment:     liability.MinimumPayment,
+			TargetExtraPayment: mustDecimal("0.00"),
+			PayoffPriority:     1,
+			ContributionMode:   liability.ContributionMode,
+			ContributionValue:  liability.ContributionValue,
+			PersonIDs:          liability.PersonIDs,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "195000.00", updated.CurrentBalance.String())
+	})
+
+	t.Run("list returns all liability types", func(t *testing.T) {
+		// Add a credit card
+		_, err := svc.Create(ctx, CreateLiabilityInput{
+			UserID:            userRow.ID,
+			Name:              "Visa",
+			LiabilityType:     dbsqlc.LiabilityTypeCREDITCARD,
+			CurrentBalance:    mustDecimal("5000.00"),
+			InterestRate:      mustDecimal("0.1999"),
+			MinimumPayment:    mustDecimal("150.00"),
+			TargetExtraPayment: mustDecimal("0.00"),
+			ContributionMode:  "monthly",
+			ContributionValue: mustDecimal("150.00"),
+			PersonIDs:         []uuid.UUID{},
+		})
+		require.NoError(t, err)
+
+		liabilities, err := svc.ListByUserID(ctx, userRow.ID)
+		require.NoError(t, err)
+		assert.Len(t, liabilities, 2)
+
+		types := make(map[dbsqlc.LiabilityType]bool)
+		for _, l := range liabilities {
+			types[l.LiabilityType] = true
+		}
+		assert.True(t, types[dbsqlc.LiabilityTypeMORTGAGE])
+		assert.True(t, types[dbsqlc.LiabilityTypeCREDITCARD])
+	})
+
+	t.Run("soft delete removes from list", func(t *testing.T) {
+		liabilities, err := svc.ListByUserID(ctx, userRow.ID)
+		require.NoError(t, err)
+
+		err = svc.Delete(ctx, liabilities[0].ID)
+		require.NoError(t, err)
+
+		remaining, err := svc.ListByUserID(ctx, userRow.ID)
+		require.NoError(t, err)
+		assert.Len(t, remaining, 1)
 	})
 }
 

@@ -23,6 +23,7 @@ type Asset struct {
 	EmployerMatchRate               decimal.Decimal
 	EmployerMatchMaxPercentOfSalary decimal.Decimal
 	AnnualRate                      decimal.Decimal
+	ReturnProfile                   *string
 	PersonIDs                       []uuid.UUID
 	PurchaseDate                    *string
 	PurchasePrice                   *decimal.Decimal
@@ -45,6 +46,7 @@ type CreateAssetInput struct {
 	EmployerMatchRate               decimal.Decimal
 	EmployerMatchMaxPercentOfSalary decimal.Decimal
 	AnnualRate                      decimal.Decimal
+	ReturnProfile                   *string
 	PersonIDs                       []uuid.UUID
 	PurchaseDate                    *string
 	PurchasePrice                   *decimal.Decimal
@@ -63,6 +65,7 @@ type UpdateAssetInput struct {
 	EmployerMatchRate               decimal.Decimal
 	EmployerMatchMaxPercentOfSalary decimal.Decimal
 	AnnualRate                      decimal.Decimal
+	ReturnProfile                   *string
 	PersonIDs                       []uuid.UUID
 	PurchaseDate                    *string
 	PurchasePrice                   *decimal.Decimal
@@ -102,6 +105,7 @@ func (s *AssetService) Create(ctx context.Context, input CreateAssetInput) (*Ass
 		EmployerMatchRate:               input.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: input.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      input.AnnualRate,
+		ReturnProfile:                   input.ReturnProfile,
 		PersonIds:                       input.PersonIDs,
 		PurchaseDate:                    purchaseDate,
 		PurchasePrice:                   purchasePrice,
@@ -159,6 +163,7 @@ func (s *AssetService) Update(ctx context.Context, input UpdateAssetInput) (*Ass
 		EmployerMatchRate:               input.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: input.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      input.AnnualRate,
+		ReturnProfile:                   input.ReturnProfile,
 		PersonIds:                       input.PersonIDs,
 		PurchaseDate:                    purchaseDate,
 		PurchasePrice:                   purchasePrice,
@@ -201,6 +206,7 @@ func mapCreateAssetRow(row sqlc.CreateAssetRow) Asset {
 		EmployerMatchRate:               row.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      row.AnnualRate,
+		ReturnProfile:                   row.ReturnProfile,
 		PersonIDs:                       row.PersonIds,
 		PurchaseDate:                    pgtypeDateToString(row.PurchaseDate),
 		PurchasePrice:                   pgtypeNumericToDecimal(row.PurchasePrice),
@@ -227,6 +233,7 @@ func mapGetAssetByIDRow(row sqlc.GetAssetByIDRow) Asset {
 		EmployerMatchRate:               row.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      row.AnnualRate,
+		ReturnProfile:                   row.ReturnProfile,
 		PersonIDs:                       row.PersonIds,
 		PurchaseDate:                    pgtypeDateToString(row.PurchaseDate),
 		PurchasePrice:                   pgtypeNumericToDecimal(row.PurchasePrice),
@@ -253,6 +260,7 @@ func mapListAssetsByUserIDRow(row sqlc.ListAssetsByUserIDRow) Asset {
 		EmployerMatchRate:               row.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      row.AnnualRate,
+		ReturnProfile:                   row.ReturnProfile,
 		PersonIDs:                       row.PersonIds,
 		PurchaseDate:                    pgtypeDateToString(row.PurchaseDate),
 		PurchasePrice:                   pgtypeNumericToDecimal(row.PurchasePrice),
@@ -279,6 +287,7 @@ func mapUpdateAssetRow(row sqlc.UpdateAssetRow) Asset {
 		EmployerMatchRate:               row.EmployerMatchRate,
 		EmployerMatchMaxPercentOfSalary: row.EmployerMatchMaxPercentOfSalary,
 		AnnualRate:                      row.AnnualRate,
+		ReturnProfile:                   row.ReturnProfile,
 		PersonIDs:                       row.PersonIds,
 		PurchaseDate:                    pgtypeDateToString(row.PurchaseDate),
 		PurchasePrice:                   pgtypeNumericToDecimal(row.PurchasePrice),
