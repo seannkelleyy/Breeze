@@ -49,7 +49,7 @@ test-coverage:
 # Code generation
 gen:
 	go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate
-	go run github.com/99designs/gqlgen@v0.17.89 generate
+	go run github.com/99designs/gqlgen@v0.17.95 generate
 
 # Migrations
 migrate:

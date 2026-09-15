@@ -51,6 +51,7 @@ export type PlannerAccount = {
   vehicleDepreciationProfile: string | null;
   linkedLiabilityId: string | null;
   plaidAccountId: string | null;
+  lastValueUpdatedAt: string | null;
   originalLoanAmount?: number | null;
 };
 

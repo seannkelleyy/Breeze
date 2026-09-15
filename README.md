@@ -45,7 +45,7 @@ Personal finance planner — track assets, liabilities, budgets, retirement proj
 |---|---|
 | Database | PostgreSQL 16 |
 | Containers | Docker Compose |
-| CI/CD | Woodpecker CI |
+| Hosting | Render |
 
 ## Quick Start
 
@@ -60,29 +60,12 @@ make dev    # migrate → gen → run
 npm run dev
 ```
 
-## CI (Woodpecker)
-
-Woodpecker CI runs locally for development. Start it alongside your database:
-
-```bash
-# Start everything (postgres + woodpecker)
-./scripts/ci-local.sh
-
-# Or just start woodpecker (postgres already running)
-docker compose -f compose.yaml -f compose.woodpecker.yaml up -d woodpecker-server woodpecker-agent
-```
-
-Woodpecker UI: http://localhost:8000
-
-To use with GitHub or Forgejo, set `WOODPECKER_GITHUB_*` or `WOODPECKER_FORGEJO_*` env vars in `compose.woodpecker.yaml`.
-
 ## Monorepo Structure
 
 ```
 breeze.api/    Go API (gqlgen + sqlc + Atlas)
 breeze.web/    Next.js frontend
 compose.yaml   Local PostgreSQL
-compose.woodpecker.yaml  Woodpecker CI (local dev)
 docs/          All project documentation
 ```
 

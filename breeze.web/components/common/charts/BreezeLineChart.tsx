@@ -60,6 +60,7 @@ const BreezeLineChart = <TData extends Record<string, unknown>>({
         <CartesianGrid vertical={false} />
         <XAxis
           dataKey={xAxisDataKey}
+          type="category"
           tickLine={false}
           axisLine={false}
           tickMargin={8}

@@ -765,7 +765,7 @@ func (e *AssetType) UnmarshalGQL(v any) error {
 }
 
 func (e AssetType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *AssetType) UnmarshalJSON(b []byte) error {
@@ -820,7 +820,7 @@ func (e *DeductionType) UnmarshalGQL(v any) error {
 }
 
 func (e DeductionType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *DeductionType) UnmarshalJSON(b []byte) error {
@@ -875,7 +875,7 @@ func (e *ExpenseSourceType) UnmarshalGQL(v any) error {
 }
 
 func (e ExpenseSourceType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *ExpenseSourceType) UnmarshalJSON(b []byte) error {
@@ -934,7 +934,7 @@ func (e *FilingStatus) UnmarshalGQL(v any) error {
 }
 
 func (e FilingStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *FilingStatus) UnmarshalJSON(b []byte) error {
@@ -989,7 +989,7 @@ func (e *IncomeSourceType) UnmarshalGQL(v any) error {
 }
 
 func (e IncomeSourceType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *IncomeSourceType) UnmarshalJSON(b []byte) error {
@@ -1052,7 +1052,7 @@ func (e *LiabilityType) UnmarshalGQL(v any) error {
 }
 
 func (e LiabilityType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *LiabilityType) UnmarshalJSON(b []byte) error {
@@ -1107,7 +1107,7 @@ func (e *PayoffStrategy) UnmarshalGQL(v any) error {
 }
 
 func (e PayoffStrategy) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *PayoffStrategy) UnmarshalJSON(b []byte) error {
@@ -1170,7 +1170,7 @@ func (e *RecurrenceInterval) UnmarshalGQL(v any) error {
 }
 
 func (e RecurrenceInterval) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *RecurrenceInterval) UnmarshalJSON(b []byte) error {
@@ -1225,7 +1225,7 @@ func (e *RetirementAccountOwner) UnmarshalGQL(v any) error {
 }
 
 func (e RetirementAccountOwner) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *RetirementAccountOwner) UnmarshalJSON(b []byte) error {
@@ -1290,7 +1290,7 @@ func (e *RetirementAccountType) UnmarshalGQL(v any) error {
 }
 
 func (e RetirementAccountType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *RetirementAccountType) UnmarshalJSON(b []byte) error {
@@ -1351,7 +1351,7 @@ func (e *RetirementTaxTreatment) UnmarshalGQL(v any) error {
 }
 
 func (e RetirementTaxTreatment) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *RetirementTaxTreatment) UnmarshalJSON(b []byte) error {
@@ -1406,7 +1406,7 @@ func (e *ReturnType) UnmarshalGQL(v any) error {
 }
 
 func (e ReturnType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *ReturnType) UnmarshalJSON(b []byte) error {

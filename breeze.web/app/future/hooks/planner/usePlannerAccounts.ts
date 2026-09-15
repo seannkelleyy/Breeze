@@ -48,6 +48,7 @@ const usePlannerAccounts = () => {
     () =>
       plannerConfig.accountRateProfileOptions.map((option) => {
         if (option.value === 'custom') return option;
+        if (option.value === 'none') return option;
         const nominalRate = plannerConstants.PLANNER_ACCOUNT_RATE_PROFILE_RATES[option.value];
         const displayRate = useInflationAdjustedValues
           ? getRealAnnualRatePercent(nominalRate, inflationRate)
@@ -119,6 +120,7 @@ const usePlannerAccounts = () => {
             vehicleDepreciationProfile: null,
             linkedLiabilityId: null,
             plaidAccountId: null,
+            lastValueUpdatedAt: null,
           });
       const nextDetails = updater(prev[accountId] ?? fallback);
       updateAccount(accountId, (c) => ({
@@ -178,6 +180,7 @@ const usePlannerAccounts = () => {
         vehicleDepreciationProfile: null,
         linkedLiabilityId: null,
         plaidAccountId: null,
+        lastValueUpdatedAt: null,
       },
     ]);
   };

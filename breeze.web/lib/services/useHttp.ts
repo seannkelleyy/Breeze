@@ -15,10 +15,7 @@ const useHttp = () => {
 
   return useMemo(() => {
     const axiosInstance = axios.create({
-      baseURL:
-        process.env.NODE_ENV === 'production'
-          ? process.env.NEXT_PUBLIC_HOSTED_API
-          : process.env.NEXT_PUBLIC_LOCAL_API,
+      baseURL: process.env.NEXT_PUBLIC_API_URL,
     });
 
     axiosInstance.interceptors.request.use(

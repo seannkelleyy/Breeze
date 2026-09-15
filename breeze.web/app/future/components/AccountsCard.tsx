@@ -136,8 +136,7 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
     return accounts.sort((a, b) => {
       const typeA = ACCOUNT_TYPE_ORDER[a.accountType] ?? 99;
       const typeB = ACCOUNT_TYPE_ORDER[b.accountType] ?? 99;
-      if (typeA !== typeB) return typeA - typeB;
-      return a.name.localeCompare(b.name);
+      return typeA - typeB;
     });
   }, [
     accountFilter,
@@ -213,6 +212,7 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
           vehicleDepreciationProfile: null,
           linkedLiabilityId: null,
           plaidAccountId: null,
+          lastValueUpdatedAt: null,
           originalLoanAmount: details.originalLoanAmount,
         };
         await Promise.all([

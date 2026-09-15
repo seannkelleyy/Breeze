@@ -1,20 +1,16 @@
 # Roadmap
 
-## Deployment (Hetzner CAX11)
+## Deployment
 
-- [ ] Regenerate GitHub OAuth secret (old one exposed in chat)
-- [ ] Set `WOODPECKER_AGENT_SECRET` to a real value in `.env.woodpecker`
-- [ ] Update `WOODPECKER_HOST` in `compose.woodpecker.yaml` to VPS public URL
-- [ ] Add deploy step to `.woodpecker.yml` (SSH to VPS, pull, restart)
-- [ ] Write production `docker-compose.yml` (postgres + breeze-api + woodpecker + nginx)
-- [ ] Set up nginx config for static frontend (`out/`) + API reverse proxy
-- [ ] TLS with certbot
-- [ ] Update `docs/deployment/01-hosting.md` (stale — references GitHub Actions, old project names)
+- [ ] Deploy API to Render
+- [ ] Deploy frontend to Vercel/Render
+- [ ] Set up production PostgreSQL on Render
+- [ ] Configure Clerk production environment
+- [ ] Configure Plaid production environment
 
 ## CI Cleanup
 
-- [ ] Update `docs/deployment/01-hosting.md` CI/CD section to reference Woodpecker instead of GitHub Actions
-- [ ] Remove Pulumi/IaC section from hosting doc (not using it)
+- [ ] Update `docs/deployment/01-hosting.md` to reflect Render deployment
 
 ## Dashboard
 
@@ -29,3 +25,8 @@
 5. Plaid integration — auto-sync transactions
 6. Tax planning — form checklist, estimate
 7. Roth ladder + HSA ladder — advanced FIRE features
+
+
+## Sean's notices
+1. ~~On iphone, the area around the search bar and top bar is white instead of black.~~ (fixed — added `apple-mobile-web-app-status-bar-style` metadata)
+2. ~~I created some accounts while signed in with clerk via github. then my wife created an account via clerk and apple and she saw my accounts. This is in hosted env.~~ (fixed — all resolvers now enforce authenticated userId via `resolveUserIDFromCtx`)

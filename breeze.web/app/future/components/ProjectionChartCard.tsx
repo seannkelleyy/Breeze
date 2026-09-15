@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useMemo } from 'react';
 
 import { Line } from 'recharts';
 
@@ -36,13 +37,41 @@ const ProjectionChartCard = ({
   const { currencyCode, plannerSummary } = useCurrentUser();
   const targetAge = plannerSummary?.targetAge ?? currentAge;
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
+
+  // Sort accounts by their final balance value (highest first) and remap data keys
+  const { sortedAccounts, remappedRows } = useMemo(() => {
+    if (projectionRows.length === 0 || accounts.length === 0) {
+      return { sortedAccounts: accounts, remappedRows: projectionRows };
+    }
+    const lastRow = projectionRows[projectionRows.length - 1];
+    const sorted = [...accounts].sort((a, b) => {
+      const aIdx = accounts.indexOf(a);
+      const bIdx = accounts.indexOf(b);
+      const aVal = (lastRow[`account-${aIdx}`] as number) ?? 0;
+      const bVal = (lastRow[`account-${bIdx}`] as number) ?? 0;
+      return bVal - aVal;
+    });
+    // Remap projection rows so account-0, account-1, etc. match sorted order
+    const remapped = projectionRows.map((row) => {
+      const newRow: ProjectionRow = { age: row.age, totalBalance: row.totalBalance, totalContributions: row.totalContributions };
+      sorted.forEach((account, newIdx) => {
+        const origIdx = accounts.indexOf(account);
+        newRow[`account-${newIdx}` as keyof ProjectionRow] = row[`account-${origIdx}` as keyof ProjectionRow] as number;
+      });
+      return newRow;
+    });
+    return { sortedAccounts: sorted, remappedRows: remapped };
+  }, [accounts, projectionRows]);
+
   // Map account dataKey to account name
-  const accountNameMap = Object.fromEntries(accounts.map((a, i) => [`account-${i}`, a.name]));
+  const accountNameMap = Object.fromEntries(
+    sortedAccounts.map((a, i) => [`account-${i}`, a.name]),
+  );
+
   // Custom tooltip formatter: show account name next to number, colored
   const tooltipFormatter = (value: number, name: string) => {
     const accountName = accountNameMap[name];
     if (accountName) {
-      // Find index for color
       const index = Object.keys(accountNameMap).findIndex((k) => k === name);
       const colorVar = `--chart-${(index + 1) % 5}`;
       return (
@@ -52,7 +81,6 @@ const ProjectionChartCard = ({
         </span>
       );
     }
-    // For totalBalance or other keys
     return formatCurrency(Number(value));
   };
 
@@ -73,6 +101,7 @@ const ProjectionChartCard = ({
       </div>
     );
   };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
@@ -90,7 +119,7 @@ const ProjectionChartCard = ({
           <BreezeLineChart
             config={chartConfig}
             className="h-[320px] w-full"
-            data={projectionRows}
+            data={remappedRows}
             xAxisDataKey="age"
             xAxisMinTickGap={0}
             margin={{ top: 8, right: 16, bottom: 8, left: 0 }}
@@ -119,7 +148,7 @@ const ProjectionChartCard = ({
               strokeDasharray="6 4"
               yAxisId="left"
             />
-            {accounts.map((account, index) => (
+            {sortedAccounts.map((account, index) => (
               <Line
                 key={account.id}
                 type="monotone"
@@ -139,7 +168,7 @@ const ProjectionChartCard = ({
               />
               <span>Total Portfolio</span>
             </div>
-            {accounts.map((account, index) => (
+            {sortedAccounts.map((account, index) => (
               <div key={account.id} className="inline-flex items-center gap-2">
                 <span
                   className="inline-block h-2 w-6 rounded-sm"

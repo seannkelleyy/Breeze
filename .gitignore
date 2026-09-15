@@ -1,6 +1,7 @@
 # Shared
 .env
 .env.*
+!.env.example
 dist/
 coverage/
 .DS_Store
@@ -20,12 +21,14 @@ next-env.d.ts
 *.coverprofile
 /breeze.api/.env
 /breeze.api/.env.*
+!/breeze.api/.env.example
 
 # React | Typescript | Next.js
 /breeze.web/.next/
 /breeze.web/node_modules/
 /breeze.web/.env
 /breeze.web/.env.*
+!/breeze.web/.env.example
 /breeze.web/.eslintcache
 /breeze.web/.turbo/
 npm-debug.log*

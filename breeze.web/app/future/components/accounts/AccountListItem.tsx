@@ -46,6 +46,21 @@ import LiabilityAccountFields from './LiabilityAccountFields';
 import VehicleAccountFields from './VehicleAccountFields';
 import { PlaidAccountLinker } from './PlaidAccountLinker';
 
+function formatTimeAgo(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diffMs = now - then;
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 30) return `${diffDays}d ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  return `${diffMonths}mo ago`;
+}
+
 const ACCOUNT_ICONS: Record<string, typeof PiggyBank> = {
   checking: Wallet,
   'emergency-fund': Shield,
@@ -284,13 +299,24 @@ export function AccountListItem({
       : `Balance: ${formatCurrency(account.startingBalance)}`
     : null;
 
+  const lastUpdatedAgo = account.lastValueUpdatedAt
+    ? formatTimeAgo(account.lastValueUpdatedAt)
+    : null;
+
   return (
     <div className="group hover:border-primary/30 rounded-lg border transition-colors">
       {/* Header — always visible */}
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         className="flex w-full items-center gap-3 px-4 py-3 text-left"
         onClick={() => onToggleCollapse(account.id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggleCollapse(account.id);
+          }
+        }}
       >
         <div
           className={`flex size-9 shrink-0 items-center justify-center rounded-md ${isLiability ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}
@@ -312,6 +338,9 @@ export function AccountListItem({
           {collapsedSummary && (
             <p className="text-muted-foreground mt-0.5 text-xs">{collapsedSummary}</p>
           )}
+          {!isAccountCollapsed && lastUpdatedAgo && (
+            <p className="text-muted-foreground mt-0.5 text-[10px]">Updated {lastUpdatedAgo}</p>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <Button
@@ -332,13 +361,13 @@ export function AccountListItem({
             <ChevronUp className="text-muted-foreground size-4" />
           )}
         </div>
-      </button>
+      </div>
 
       {/* Expanded form */}
       {!isAccountCollapsed && (
         <div className="space-y-4 border-t px-4 pt-3 pb-4">
-          {/* Basic info row */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {/* Identity row */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label className="text-xs">Account Name</Label>
               <Input
@@ -364,51 +393,7 @@ export function AccountListItem({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Owners</Label>
-              <div className="flex flex-wrap gap-1">
-                {people.map((p) => (
-                  <label
-                    key={p.id}
-                    className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
-                      account.personIds?.includes(p.id)
-                        ? 'bg-primary/10 border-primary/30 text-primary'
-                        : 'text-muted-foreground hover:bg-accent'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      className="sr-only"
-                      checked={account.personIds?.includes(p.id) ?? false}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          onUpdateAccount((c) => ({
-                            ...c,
-                            personIds: [...(c.personIds ?? []), p.id],
-                          }));
-                        } else {
-                          onUpdateAccount((c) => ({
-                            ...c,
-                            personIds: (c.personIds ?? []).filter((id) => id !== p.id),
-                          }));
-                        }
-                      }}
-                    />
-                    {p.name || 'Unnamed'}
-                  </label>
-                ))}
-                {people.length === 0 && (
-                  <span className="text-muted-foreground text-xs">No people configured</span>
-                )}
-              </div>
-            </div>
           </div>
-
-          <PlaidAccountLinker
-            accountId={account.id}
-            isLiability={isLiability}
-            plaidAccountId={account.plaidAccountId}
-          />
 
           {/* Type-specific fields */}
           {!isCombinedAsset ? (
@@ -475,6 +460,53 @@ export function AccountListItem({
               )}
             </div>
           )}
+
+          {/* Owners */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Owners</Label>
+            <div className="flex flex-wrap gap-1">
+              {people.map((p) => (
+                <label
+                  key={p.id}
+                  className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
+                    account.personIds?.includes(p.id)
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'text-muted-foreground hover:bg-accent'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={account.personIds?.includes(p.id) ?? false}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        onUpdateAccount((c) => ({
+                          ...c,
+                          personIds: [...(c.personIds ?? []), p.id],
+                        }));
+                      } else {
+                        onUpdateAccount((c) => ({
+                          ...c,
+                          personIds: (c.personIds ?? []).filter((id) => id !== p.id),
+                        }));
+                      }
+                    }}
+                  />
+                  {p.name || 'Unnamed'}
+                </label>
+              ))}
+              {people.length === 0 && (
+                <span className="text-muted-foreground text-xs">No people configured</span>
+              )}
+            </div>
+          </div>
+
+          {/* Plaid Link */}
+          <PlaidAccountLinker
+            accountId={account.id}
+            isLiability={isLiability}
+            plaidAccountId={account.plaidAccountId}
+          />
         </div>
       )}
     </div>

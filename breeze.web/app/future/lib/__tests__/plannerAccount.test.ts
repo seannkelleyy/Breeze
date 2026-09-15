@@ -22,6 +22,7 @@ describe('getDefaultAssetFinanceDetailsForAccount', () => {
       vehicleDepreciationProfile: null,
       linkedLiabilityId: null,
       plaidAccountId: null,
+      lastValueUpdatedAt: null,
       originalLoanAmount: null,
     };
 
@@ -52,6 +53,7 @@ describe('getDefaultAssetFinanceDetailsForAccount', () => {
       vehicleDepreciationProfile: 'standard',
       linkedLiabilityId: null,
       plaidAccountId: null,
+      lastValueUpdatedAt: null,
       originalLoanAmount: null,
     };
 
@@ -80,6 +82,7 @@ describe('getDefaultAssetFinanceDetailsForAccount', () => {
       vehicleDepreciationProfile: null,
       linkedLiabilityId: null,
       plaidAccountId: null,
+      lastValueUpdatedAt: null,
       originalLoanAmount: null,
     };
 
@@ -130,6 +133,7 @@ describe('PlannerAccount type', () => {
         vehicleDepreciationProfile: null,
         linkedLiabilityId: null,
         plaidAccountId: null,
+        lastValueUpdatedAt: null,
         originalLoanAmount: null,
       };
       expect(account.accountType).toBe(type);

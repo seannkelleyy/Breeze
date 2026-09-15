@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   icons: {
     icon: '/b.svg',
   },
+  other: {
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+  },
 };
 
 const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? '';
