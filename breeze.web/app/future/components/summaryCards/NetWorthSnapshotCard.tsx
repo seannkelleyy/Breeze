@@ -1,7 +1,16 @@
+'use client';
 import { type ReactNode } from 'react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+
+interface AccountSummary {
+  id: string;
+  name: string;
+  balance: number;
+  type: 'asset' | 'liability';
+}
 
 interface NetWorthSnapshotCardProps {
   collapsed: boolean;
@@ -9,6 +18,8 @@ interface NetWorthSnapshotCardProps {
   totalStartingBalance: number;
   totalAssets: number;
   totalLiabilities: number;
+  assetAccounts: AccountSummary[];
+  liabilityAccounts: AccountSummary[];
   targetAge: number;
   projectedNetWorthAtTargetAge: number;
   totalPlannedMonthlyInvestment: number;
@@ -21,6 +32,8 @@ const NetWorthSnapshotCard = ({
   totalStartingBalance,
   totalAssets,
   totalLiabilities,
+  assetAccounts,
+  liabilityAccounts,
   targetAge,
   projectedNetWorthAtTargetAge,
   totalPlannedMonthlyInvestment,
@@ -82,6 +95,41 @@ const NetWorthSnapshotCard = ({
             </div>
           ) : (
             <p className="text-success text-xs font-medium">No liabilities</p>
+          )}
+
+          {/* Account links */}
+          {assetAccounts.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-muted-foreground text-xs font-medium">Assets</p>
+              <div className="flex flex-wrap gap-1.5">
+                {assetAccounts.map((a) => (
+                  <Link
+                    key={a.id}
+                    href="/accounts"
+                    className="bg-success/10 text-success hover:bg-success/20 rounded-md px-2 py-0.5 text-xs transition-colors"
+                  >
+                    {a.name} ({formatCurrency(a.balance)})
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {liabilityAccounts.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-muted-foreground text-xs font-medium">Liabilities</p>
+              <div className="flex flex-wrap gap-1.5">
+                {liabilityAccounts.map((a) => (
+                  <Link
+                    key={a.id}
+                    href="/accounts"
+                    className="bg-destructive/10 text-destructive hover:bg-destructive/20 rounded-md px-2 py-0.5 text-xs transition-colors"
+                  >
+                    {a.name} ({formatCurrency(a.balance)})
+                  </Link>
+                ))}
+              </div>
+            </div>
           )}
 
           <div className="space-y-1.5">

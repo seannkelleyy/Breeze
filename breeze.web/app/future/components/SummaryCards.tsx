@@ -1,5 +1,7 @@
+'use client';
 import { type ReactNode } from 'react';
 import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { isLiabilityAccountType } from '../lib/config';
 import RequiredMonthlyContributionCard from './summaryCards/RequiredMonthlyContributionCard';
 import NetWorthSnapshotCard from './summaryCards/NetWorthSnapshotCard';
 import RetirementNeedEstimateCard from './summaryCards/RetirementNeedEstimateCard';
@@ -28,7 +30,7 @@ export const SummaryCards = ({
   currentAge,
   financialFreedomAge,
 }: SummaryCardProps) => {
-  const { plannerSummary, currencyCode } = useCurrentUser();
+  const { plannerSummary, currencyCode, plannerAccounts } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
 
   if (!plannerSummary) {
@@ -58,6 +60,14 @@ export const SummaryCards = ({
     monthlyNeededForFreedomTarget,
   } = plannerSummary;
 
+  const assetAccounts = plannerAccounts
+    .filter((a) => !isLiabilityAccountType(a.accountType))
+    .map((a) => ({ id: a.id, name: a.name, balance: a.startingBalance, type: 'asset' as const }));
+
+  const liabilityAccounts = plannerAccounts
+    .filter((a) => isLiabilityAccountType(a.accountType))
+    .map((a) => ({ id: a.id, name: a.name, balance: a.startingBalance, type: 'liability' as const }));
+
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <RequiredMonthlyContributionCard
@@ -84,6 +94,8 @@ export const SummaryCards = ({
         totalStartingBalance={totalStartingBalance}
         totalAssets={totalAssets}
         totalLiabilities={totalLiabilities}
+        assetAccounts={assetAccounts}
+        liabilityAccounts={liabilityAccounts}
         targetAge={targetAge}
         projectedNetWorthAtTargetAge={projectedNetWorthAtTargetAge}
         totalPlannedMonthlyInvestment={totalPlannedMonthlyInvestment}
