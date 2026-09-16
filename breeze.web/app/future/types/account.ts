@@ -24,7 +24,7 @@ export type LiabilityType =
   | 'auto-loan'
   | 'mortgage';
 
-export type ContributionMode = 'monthly' | 'yearly' | 'salary-percent';
+export type ContributionMode = 'monthly' | 'yearly' | 'salary-percent' | 'biweekly' | 'weekly';
 export type AccountRateProfile =
   | 'none'
   | 'money-market'
@@ -53,6 +53,8 @@ export type PlannerAccount = {
   plaidAccountId: string | null;
   lastValueUpdatedAt: string | null;
   originalLoanAmount?: number | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export interface PlannerAccountDto {

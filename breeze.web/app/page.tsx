@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
@@ -201,6 +201,12 @@ function DashboardContent() {
   ];
   const completedSetupSteps = setupSteps.filter((s) => s.done).length;
 
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+
+  const toggleCard = (card: string) => {
+    setExpandedCard((prev) => (prev === card ? null : card));
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pt-24 pb-12">
       <PageHeader
@@ -224,7 +230,10 @@ function DashboardContent() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card
+          className="cursor-pointer transition-colors hover:bg-accent/50"
+          onClick={() => toggleCard('assets')}
+        >
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
               <ArrowUpRight className="text-success size-4" />
@@ -235,13 +244,27 @@ function DashboardContent() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-sm">
-              {data ? `Across ${Object.keys(data.assetsByType).length} types` : 'Loading...'}
-            </p>
+            {expandedCard === 'assets' && data ? (
+              <div className="space-y-1">
+                {Object.entries(data.assetsByType).map(([type, amount]) => (
+                  <div key={type} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground capitalize">{type.replace(/-/g, ' ')}</span>
+                    <span>{formatCurrency(amount as number)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                {data ? `Across ${Object.keys(data.assetsByType).length} types` : 'Loading...'}
+              </p>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card
+          className="cursor-pointer transition-colors hover:bg-accent/50"
+          onClick={() => toggleCard('liabilities')}
+        >
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1">
               <ArrowDownRight className="text-destructive size-4" />
@@ -252,9 +275,20 @@ function DashboardContent() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-sm">
-              {data ? `Across ${Object.keys(data.liabilitiesByType).length} types` : 'Loading...'}
-            </p>
+            {expandedCard === 'liabilities' && data ? (
+              <div className="space-y-1">
+                {Object.entries(data.liabilitiesByType).map(([type, amount]) => (
+                  <div key={type} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground capitalize">{type.replace(/-/g, ' ')}</span>
+                    <span>{formatCurrency(amount as number)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                {data ? `Across ${Object.keys(data.liabilitiesByType).length} types` : 'Loading...'}
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -28,6 +28,21 @@ import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import * as plannerConstants from '../lib/constants';
 
+function formatTimeAgo(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diffMs = now - then;
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 30) return `${diffDays}d ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  return `${diffMonths}mo ago`;
+}
+
 export interface PeopleCardProps {
   collapsed: boolean;
 }
@@ -144,14 +159,14 @@ function PersonSummaryCard({
 
   return (
     <Card className="relative">
-      <CardContent className="pt-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-muted flex size-10 items-center justify-center rounded-full">
-              <UserRound className="text-muted-foreground size-5" />
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-full sm:size-10">
+              <UserRound className="text-muted-foreground size-4 sm:size-5" />
             </div>
-            <div>
-              <p className="font-medium">{person.name || 'Unnamed'}</p>
+            <div className="min-w-0">
+              <p className="truncate font-medium">{person.name || 'Unnamed'}</p>
               <p className="text-muted-foreground text-xs">
                 Retire at {person.retirementAge}
               </p>
@@ -183,6 +198,9 @@ function PersonSummaryCard({
             </p>
           )}
           <p>Growth: {person.incomeGrowthRate}%</p>
+          {person.updatedAt && (
+            <p className="text-[10px] opacity-60">Updated {formatTimeAgo(person.updatedAt)}</p>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -279,11 +297,21 @@ function PersonFormModal({
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label>Income Growth %</Label>
-            <FormattedNumberInput
-              value={person.incomeGrowthRate}
-              onValueChange={(v) => onUpdate((c) => ({ ...c, incomeGrowthRate: v }))}
-              maxFractionDigits={2}
-            />
+            <Select
+              value={String(person.incomeGrowthRate)}
+              onValueChange={(v) => onUpdate((c) => ({ ...c, incomeGrowthRate: Number(v) }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select growth rate" />
+              </SelectTrigger>
+              <SelectContent>
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((rate) => (
+                  <SelectItem key={rate} value={String(rate)}>
+                    {rate}%
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <DialogFooter>

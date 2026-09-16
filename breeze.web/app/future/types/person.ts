@@ -9,6 +9,8 @@ export type PlannerPerson = {
   bonusMode: BonusMode;
   annualBonus: number;
   incomeGrowthRate: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export interface PlannerPersonDto {

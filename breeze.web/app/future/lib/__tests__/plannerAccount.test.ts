@@ -24,6 +24,8 @@ describe('getDefaultAssetFinanceDetailsForAccount', () => {
       plaidAccountId: null,
       lastValueUpdatedAt: null,
       originalLoanAmount: null,
+      createdAt: '',
+      updatedAt: '',
     };
 
     const details = getDefaultAssetFinanceDetailsForAccount(account);
@@ -55,6 +57,8 @@ describe('getDefaultAssetFinanceDetailsForAccount', () => {
       plaidAccountId: null,
       lastValueUpdatedAt: null,
       originalLoanAmount: null,
+      createdAt: '',
+      updatedAt: '',
     };
 
     const details = getDefaultAssetFinanceDetailsForAccount(account);
@@ -84,6 +88,8 @@ describe('getDefaultAssetFinanceDetailsForAccount', () => {
       plaidAccountId: null,
       lastValueUpdatedAt: null,
       originalLoanAmount: null,
+      createdAt: '',
+      updatedAt: '',
     };
 
     const details = getDefaultAssetFinanceDetailsForAccount(account);
@@ -135,6 +141,8 @@ describe('PlannerAccount type', () => {
         plaidAccountId: null,
         lastValueUpdatedAt: null,
         originalLoanAmount: null,
+        createdAt: '',
+        updatedAt: '',
       };
       expect(account.accountType).toBe(type);
     });

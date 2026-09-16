@@ -213,6 +213,8 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
           plaidAccountId: null,
           lastValueUpdatedAt: null,
           originalLoanAmount: details.originalLoanAmount,
+          createdAt: account.createdAt,
+          updatedAt: account.updatedAt,
         };
         await Promise.all([
           saveAssetPromise,
@@ -338,7 +340,7 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
             )}
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="bg-background sticky bottom-0 flex items-center justify-between gap-4 border-t pt-3">
             <div className="text-muted-foreground text-sm">
               <p>
                 Planned employee contribution / payment:{' '}

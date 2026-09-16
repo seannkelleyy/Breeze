@@ -121,6 +121,8 @@ const usePlannerAccounts = () => {
             linkedLiabilityId: null,
             plaidAccountId: null,
             lastValueUpdatedAt: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           });
       const nextDetails = updater(prev[accountId] ?? fallback);
       updateAccount(accountId, (c) => ({
@@ -181,6 +183,8 @@ const usePlannerAccounts = () => {
         linkedLiabilityId: null,
         plaidAccountId: null,
         lastValueUpdatedAt: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     ]);
   };

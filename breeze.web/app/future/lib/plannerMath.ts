@@ -616,6 +616,8 @@ export const getEmployeeMonthlyContribution = (
   if (a.contributionMode === 'salary-percent')
     return clamp((inc * (a.contributionValue / 100)) / 12);
   if (a.contributionMode === 'yearly') return clamp(a.contributionValue / 12);
+  if (a.contributionMode === 'biweekly') return clamp((a.contributionValue * 26) / 12);
+  if (a.contributionMode === 'weekly') return clamp((a.contributionValue * 52) / 12);
   return clamp(a.contributionValue);
 };
 export const getEmployerMatchMonthly = (a: PlannerAccount, people: PlannerPerson[]): number => {

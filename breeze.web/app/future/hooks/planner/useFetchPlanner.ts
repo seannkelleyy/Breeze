@@ -53,6 +53,8 @@ interface AssetsResponse {
     linkedLiabilityId: string | null;
     plaidAccountId: string | null;
     lastValueUpdatedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
   }>;
 }
 
@@ -70,6 +72,8 @@ interface LiabilitiesResponse {
     personIds: string[];
     plaidAccountId: string | null;
     lastBalanceUpdatedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
   }>;
 }
 
@@ -121,6 +125,8 @@ const useFetchPlanner = () => {
           | 'salary-percent',
         annualBonus: Number(p.annualBonus),
         incomeGrowthRate: Number(p.incomeGrowthRate),
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
       }));
 
       // Map API assets and liabilities into the planner's local account format
@@ -143,6 +149,8 @@ const useFetchPlanner = () => {
         linkedLiabilityId: a.linkedLiabilityId ?? null,
         plaidAccountId: a.plaidAccountId ?? null,
         lastValueUpdatedAt: a.lastValueUpdatedAt ?? null,
+        createdAt: a.createdAt,
+        updatedAt: a.updatedAt,
       }));
 
       const mappedLiabilities: PlannerAccount[] = liabilities.map((l) => ({
@@ -165,6 +173,8 @@ const useFetchPlanner = () => {
         plaidAccountId: l.plaidAccountId ?? null,
         lastValueUpdatedAt: l.lastBalanceUpdatedAt ?? null,
         originalLoanAmount: l.originalLoanAmount ? Number(l.originalLoanAmount) : null,
+        createdAt: l.createdAt,
+        updatedAt: l.updatedAt,
       }));
 
       return {

@@ -240,13 +240,21 @@ export function AccountListItem({
       ? isLiability
         ? 'Monthly Payment'
         : 'Monthly Contribution'
-      : account.contributionMode === 'yearly'
+      : account.contributionMode === 'biweekly'
         ? isLiability
-          ? 'Yearly Payment'
-          : 'Yearly Contribution'
-        : isLiability
-          ? 'Payment % of Salary'
-          : 'Contribution % of Salary';
+          ? 'Biweekly Payment'
+          : 'Biweekly Contribution'
+        : account.contributionMode === 'weekly'
+          ? isLiability
+            ? 'Weekly Payment'
+            : 'Weekly Contribution'
+          : account.contributionMode === 'yearly'
+            ? isLiability
+              ? 'Yearly Payment'
+              : 'Yearly Contribution'
+            : isLiability
+              ? 'Payment % of Salary'
+              : 'Contribution % of Salary';
 
   const onSetContributionToIrsMax = () => {
     onUpdateAccount((current) => ({

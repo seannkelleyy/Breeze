@@ -29,6 +29,8 @@ const usePlannerPeople = () => {
       const defaultPerson: PlannerPerson = {
         id: crypto.randomUUID(),
         ...PLANNER_DEFAULT_PERSON,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
       setPlannerPeople([defaultPerson]);
     }
@@ -47,6 +49,8 @@ const usePlannerPeople = () => {
         id: crypto.randomUUID(),
         ...PLANNER_DEFAULT_PERSON,
         annualSalary: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     ]);
   };

@@ -29,6 +29,8 @@ const makeAccount = (overrides: Partial<PlannerAccount> = {}): PlannerAccount =>
   linkedLiabilityId: null,
   plaidAccountId: null,
   lastValueUpdatedAt: null,
+  createdAt: '',
+  updatedAt: '',
   ...overrides,
 });
 
@@ -41,6 +43,8 @@ const makePerson = (overrides: Partial<PlannerPerson> = {}): PlannerPerson => ({
   bonusMode: 'dollars',
   annualBonus: 5000,
   incomeGrowthRate: 3,
+  createdAt: '',
+  updatedAt: '',
   ...overrides,
 });
 

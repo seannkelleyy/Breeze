@@ -107,6 +107,8 @@ export const PLANNER_DEFAULT_NEW_ACCOUNT: {
   vehicleDepreciationProfile: null;
   linkedLiabilityId: null;
   lastValueUpdatedAt: null;
+  createdAt: string;
+  updatedAt: string;
 } = {
   personIds: [],
   accountType: 'other',
@@ -122,6 +124,8 @@ export const PLANNER_DEFAULT_NEW_ACCOUNT: {
   vehicleDepreciationProfile: null,
   linkedLiabilityId: null,
   lastValueUpdatedAt: null,
+  createdAt: '',
+  updatedAt: '',
 };
 
 export const PLANNER_DEFAULT_COLLAPSED_SECTIONS = {

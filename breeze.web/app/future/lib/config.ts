@@ -34,6 +34,8 @@ export const contributionModeOptions: ReadonlyArray<{
   label: string;
 }> = [
   { value: 'monthly', label: 'Monthly Amount' },
+  { value: 'biweekly', label: 'Biweekly Amount' },
+  { value: 'weekly', label: 'Weekly Amount' },
   { value: 'yearly', label: 'Yearly Amount' },
   { value: 'salary-percent', label: '% of Salary' },
 ];
@@ -43,6 +45,8 @@ export const liabilityContributionModeOptions: ReadonlyArray<{
   label: string;
 }> = [
   { value: 'monthly', label: 'Monthly Payment' },
+  { value: 'biweekly', label: 'Biweekly Payment' },
+  { value: 'weekly', label: 'Weekly Payment' },
   { value: 'yearly', label: 'Yearly Payment' },
   { value: 'salary-percent', label: 'Payment % of Salary' },
 ];
