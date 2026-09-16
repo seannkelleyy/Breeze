@@ -193,7 +193,7 @@ export const getPlannerContributionTotals = (
 };
 export const getPlannerHouseholdSnapshot = (people: PlannerPerson[]) => {
   const bd = people[0]?.birthday ?? '';
-  const hi = people.reduce((sum, p) => sum + p.annualSalary, 0);
+  const hi = people.reduce((sum, p) => sum + getTotalAnnualIncome(p), 0);
   const ca = getAgeFromBirthday(bd);
   return {
     people,

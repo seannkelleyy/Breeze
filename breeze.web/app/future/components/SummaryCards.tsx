@@ -13,6 +13,8 @@ export type SummaryCardProps = {
   retirementNeedCollapsed: boolean;
   retirementNeedToggleControl: ReactNode;
   currentPortfolio: number;
+  currentAge: number;
+  financialFreedomAge: number | null;
 };
 
 export const SummaryCards = ({
@@ -23,6 +25,8 @@ export const SummaryCards = ({
   retirementNeedCollapsed,
   retirementNeedToggleControl,
   currentPortfolio,
+  currentAge,
+  financialFreedomAge,
 }: SummaryCardProps) => {
   const { plannerSummary, currencyCode } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
@@ -64,6 +68,8 @@ export const SummaryCards = ({
         annualHouseholdIncome={annualHouseholdIncome}
         weightedAnnualRate={weightedAnnualRate}
         yearsToGoal={yearsToGoal}
+        currentAge={currentAge}
+        financialFreedomAge={financialFreedomAge}
         currentSavingsRateEmployeePercent={currentSavingsRateEmployeePercent}
         currentSavingsRateTotalPercent={currentSavingsRateTotalPercent}
         requiredSavingsRatePercent={requiredSavingsRatePercent}

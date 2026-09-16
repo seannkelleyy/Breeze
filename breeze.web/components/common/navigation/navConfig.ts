@@ -8,6 +8,7 @@ import {
   Users,
   Target,
   UserRound,
+  Receipt,
 } from 'lucide-react';
 
 export type RouteNavItem = {
@@ -66,6 +67,12 @@ export const routeNavItems: ReadonlyArray<RouteNavItem> = [
 ];
 
 export const toolNavItems: ReadonlyArray<ToolNavItem> = [
+  {
+    label: 'Budget',
+    to: '/budget',
+    title: 'Budget',
+    icon: Receipt,
+  },
   {
     label: 'Mortgage',
     to: '/tools/mortgage',

@@ -1,13 +1,11 @@
 'use client';
 import { Suspense, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/clerk-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, TrendingUp, Target, Calendar, DollarSign } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { usePlannerModel, useFetchPlanner } from './hooks/planner/index';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from './hooks/usePlannerState';
 import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
-import { formatCurrencyWithCode } from './lib/plannerMath';
 
 import { RetirementInputsSection, ProjectionsSection } from './components/sections';
 import { accountLineColors, getDefaultAssetFinanceDetailsForAccount } from './lib/plannerMath';
@@ -29,7 +27,7 @@ export default function PlannerPage() {
 
 function PlannerContent() {
   const { isLoaded: clerkLoaded } = useUser();
-  const { userId, isLoaded, currencyCode } = useCurrentUser();
+  const { userId, isLoaded } = useCurrentUser();
   const { data: connections } = usePlaidConnections(userId);
   const { mutate: syncConnection } = useSyncPlaidConnection();
   const hasSyncedRef = useRef(false);
@@ -119,8 +117,6 @@ function PlannerContent() {
     incomeReplacementTarget,
   } = usePlannerModel();
 
-  const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
-
   // Show loading state while user data loads
   if (!clerkLoaded || !isLoaded || !userId) {
     return (
@@ -133,77 +129,12 @@ function PlannerContent() {
     );
   }
 
-  // Calculate key metrics for summary cards
-  const totalAssets = financialMathSnapshot.currentPortfolio;
-  const netWorth = totalAssets;
-  const fireProgress =
-    baseFinancialFreedomTarget > 0 ? (totalAssets / baseFinancialFreedomTarget) * 100 : 0;
-
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       {/* Page Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Future</h1>
         <p className="text-muted-foreground text-sm">Track your path to financial independence</p>
-      </div>
-
-      {/* Summary Metrics */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
-            <DollarSign className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold sm:text-2xl">{formatCurrency(netWorth)}</div>
-            <p className="text-muted-foreground text-xs">{formatCurrency(totalAssets)} in assets</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">FIRE Progress</CardTitle>
-            <Target className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold sm:text-2xl">{fireProgress.toFixed(1)}%</div>
-            <p className="text-muted-foreground text-xs">
-              of {formatCurrency(baseFinancialFreedomTarget)} goal
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Age</CardTitle>
-            <Calendar className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold sm:text-2xl">{currentAge}</div>
-            <p className="text-muted-foreground text-xs">
-              {financialFreedomAge ? `Target: ${financialFreedomAge}` : 'Target: TBD'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Coast FIRE</CardTitle>
-            <TrendingUp className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div
-              className={`text-xl font-bold sm:text-2xl ${hasReachedCoastFire ? 'text-green-600' : ''}`}
-            >
-              {hasReachedCoastFire ? 'Reached' : 'In Progress'}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              {hasReachedCoastFire
-                ? `By ${formatCurrency(Math.abs(coastFireGap))}`
-                : `Need ${formatCurrency(Math.abs(coastFireGap))}`}
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Split View: Inputs (left) + Results (right) on desktop, stacked on mobile */}
@@ -233,6 +164,7 @@ function PlannerContent() {
         <div className="space-y-6">
           <ProjectionsSection
             currentAge={currentAge}
+            financialFreedomAge={financialFreedomAge}
             chartConfig={dynamicChartConfig}
             projectionRows={projectionRows}
             accounts={accounts}

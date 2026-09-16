@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Circle, ListChecks, Loader2, Plus, Target } from 'lucide-react';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGoalsApi from './hooks/useGoalsApi';
 import { Goal, GOAL_CATEGORIES } from './types/goal';
+import { computeFooStepCompletion } from './lib/fooCompletion';
 
 const GOALS_QUERY_KEY = ['goals'];
 
@@ -24,7 +25,7 @@ export default function GoalsPage() {
 
 function GoalsContent() {
   const { isLoaded: clerkLoaded } = useUser();
-  const { userId, isLoaded } = useCurrentUser();
+  const { userId, isLoaded, plannerAccounts, plannerSummary } = useCurrentUser();
   const queryClient = useQueryClient();
   const api = useGoalsApi();
 
@@ -65,6 +66,44 @@ function GoalsContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, userId, isLoading, goals]);
+
+  // Auto-check FOO steps based on planner data
+  const completionStatus = useMemo(
+    () => computeFooStepCompletion(plannerAccounts, plannerSummary),
+    [plannerAccounts, plannerSummary],
+  );
+
+  const { mutate: autoCheckFooSteps } = useMutation({
+    mutationFn: async (stepsToCheck: Goal[]) => {
+      for (const step of stepsToCheck) {
+        await api.updateGoal({
+          id: step.id,
+          description: step.description,
+          priority: step.priority,
+          isCompleted: true,
+          connectedAccountIds: step.connectedAccountIds ?? [],
+          isFinancialOrderStep: true,
+        });
+      }
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: GOALS_QUERY_KEY }),
+  });
+
+  useEffect(() => {
+    if (isLoading || footSteps.length === 0) return;
+
+    const stepsToCheck = footSteps.filter((step) => {
+      const stepNum = step.financialOrderStep;
+      if (stepNum == null) return false;
+      const shouldBeComplete = completionStatus.get(stepNum) ?? false;
+      return shouldBeComplete && !step.isCompleted;
+    });
+
+    if (stepsToCheck.length > 0) {
+      autoCheckFooSteps(stepsToCheck);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completionStatus, footSteps]);
 
   if (!clerkLoaded || !isLoaded || !userId) {
     return (
@@ -146,22 +185,43 @@ function GoalsList({ goals }: { goals: Goal[] }) {
   const queryClient = useQueryClient();
   const api = useGoalsApi();
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const toggleCompletion = useCallback(
-    (goal: Goal) => (checked: boolean) => {
+  const invalidateGoals = () =>
+    void queryClient.invalidateQueries({ queryKey: GOALS_QUERY_KEY });
+
+  const { mutate: toggleCompletion } = useMutation({
+    mutationFn: (goal: Goal & { isCompleted: boolean }) =>
       api.updateGoal({
         id: goal.id,
         description: goal.description,
         priority: goal.priority,
-        isCompleted: checked,
-      });
+        isCompleted: goal.isCompleted,
+        connectedAccountIds: goal.connectedAccountIds ?? [],
+        isFinancialOrderStep: goal.isFinancialOrderStep,
+      }),
+    onSuccess: invalidateGoals,
+  });
+
+  const { mutate: updateGoal } = useMutation({
+    mutationFn: (goal: Goal) =>
+      api.updateGoal({
+        id: goal.id,
+        description: goal.description,
+        priority: goal.priority,
+        isCompleted: goal.isCompleted,
+        connectedAccountIds: goal.connectedAccountIds ?? [],
+        isFinancialOrderStep: goal.isFinancialOrderStep,
+      }),
+    onSuccess: () => {
+      setEditingId(null);
+      invalidateGoals();
     },
-    [api],
-  );
+  });
 
   const { mutate: deleteGoal } = useMutation({
     mutationFn: (id: string) => api.deleteGoal(id),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: GOALS_QUERY_KEY }),
+    onSuccess: invalidateGoals,
   });
 
   if (goals.length === 0) {
@@ -198,38 +258,78 @@ function GoalsList({ goals }: { goals: Goal[] }) {
       </CardHeader>
       <CardContent className="space-y-2">
         {showForm && <GoalForm onCancel={() => setShowForm(false)} />}
-        {goals.map((goal) => (
-          <div
-            key={goal.id}
-            className="hover:bg-accent flex items-center gap-3 rounded-md px-2 py-1.5"
-          >
-            <Checkbox
-              checked={goal.isCompleted}
-              onCheckedChange={toggleCompletion(goal)}
-              aria-label={`Mark ${goal.description} complete`}
-            />
-            <div className="flex-1">
-              <p
-                className={
-                  goal.isCompleted ? 'text-muted-foreground text-sm line-through' : 'text-sm'
-                }
+        {goals.map((goal) =>
+          editingId === goal.id ? (
+            <div key={goal.id} className="flex items-center gap-3 rounded-md px-2 py-1.5">
+              <Checkbox
+                checked={goal.isCompleted}
+                disabled
+                aria-label={`Mark ${goal.description} complete`}
+              />
+              <div className="flex-1">
+                <GoalInlineEdit
+                  goal={goal}
+                  onSave={(updated: Goal) => updateGoal(updated)}
+                  onCancel={() => setEditingId(null)}
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => deleteGoal(goal.id)}
               >
-                {goal.description}
-              </p>
-              {goal.category && (
-                <p className="text-muted-foreground text-xs">{levelLabel(goal.category)}</p>
-              )}
+                Remove
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => deleteGoal(goal.id)}
+          ) : (
+            <div
+              key={goal.id}
+              className="hover:bg-accent flex items-center gap-3 rounded-md px-2 py-1.5"
             >
-              Remove
-            </Button>
-          </div>
-        ))}
+              <Checkbox
+                checked={goal.isCompleted}
+                onCheckedChange={(checked) =>
+                  toggleCompletion({ ...goal, isCompleted: !!checked })
+                }
+                aria-label={`Mark ${goal.description} complete`}
+              />
+              <div className="flex-1">
+                {editingId === goal.id ? (
+                  <GoalInlineEdit
+                    goal={goal}
+                    onSave={(updated) => updateGoal(updated)}
+                    onCancel={() => setEditingId(null)}
+                  />
+                ) : (
+                  <>
+                    <p
+                      className={
+                        goal.isCompleted
+                          ? 'text-muted-foreground cursor-pointer text-sm line-through'
+                          : 'cursor-pointer text-sm'
+                      }
+                      onDoubleClick={() => setEditingId(goal.id)}
+                    >
+                      {goal.description}
+                    </p>
+                    {goal.category && (
+                      <p className="text-muted-foreground text-xs">{levelLabel(goal.category)}</p>
+                    )}
+                  </>
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => deleteGoal(goal.id)}
+              >
+                Remove
+              </Button>
+            </div>
+          ),
+        )}
       </CardContent>
     </Card>
   );
@@ -237,6 +337,41 @@ function GoalsList({ goals }: { goals: Goal[] }) {
 
 function levelLabel(category: string): string {
   return GOAL_CATEGORIES.find((c) => c.value === category)?.label ?? category;
+}
+
+function GoalInlineEdit({
+  goal,
+  onSave,
+  onCancel,
+}: {
+  goal: Goal;
+  onSave: (goal: Goal) => void;
+  onCancel: () => void;
+}) {
+  const [description, setDescription] = useState(goal.description);
+
+  return (
+    <Input
+      autoFocus
+      value={description}
+      onChange={(e) => setDescription(e.target.value)}
+      onBlur={() => {
+        const trimmed = description.trim();
+        if (trimmed && trimmed !== goal.description) {
+          onSave({ ...goal, description: trimmed });
+        }
+        onCancel();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          (e.target as HTMLInputElement).blur();
+        }
+        if (e.key === 'Escape') {
+          onCancel();
+        }
+      }}
+    />
+  );
 }
 
 function GoalForm({ onCancel }: { onCancel: () => void }) {

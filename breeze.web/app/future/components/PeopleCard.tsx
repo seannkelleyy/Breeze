@@ -27,7 +27,7 @@ export interface PeopleCardProps {
 const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
   const { userId } = useCurrentUser();
   const { people, updatePerson, addPerson, removePerson } = usePlannerPeople();
-  const { upsertPersonMutation } = usePersonMutations(userId);
+  const { upsertPersonMutation, deletePersonMutation } = usePersonMutations(userId);
 
   const bonusModeOptions = plannerConstants.PLANNER_BONUS_MODE_OPTIONS;
 
@@ -52,7 +52,10 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
                 key={person.id}
                 person={person}
                 updatePerson={updatePerson}
-                removePerson={removePerson}
+                removePerson={(id) => {
+                  deletePersonMutation.mutate(id);
+                  removePerson(id);
+                }}
                 canRemove={people.length > 1}
                 bonusModeOptions={bonusModeOptions}
               />

@@ -34,7 +34,7 @@ export const UserPreferencesModal = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" title="User Preferences">
+        <Button className="cursor-pointer" variant="ghost" title="User Preferences">
           Preferences
         </Button>
       </DialogTrigger>

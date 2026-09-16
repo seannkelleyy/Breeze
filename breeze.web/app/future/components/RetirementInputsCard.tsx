@@ -246,10 +246,6 @@ export const RetirementInputsCard = ({
             <div className="text-muted-foreground mt-3 space-y-1 rounded-md border p-3 text-xs">
               <p>Safe withdrawal rate: {suggestedSafeWithdrawalRate.toFixed(2)}%</p>
               <p>
-                Freedom age:{' '}
-                {financialFreedomAge !== null ? financialFreedomAge : 'Not reached by target age'}
-              </p>
-              <p>
                 Portfolio yearly income:{' '}
                 {formatCurrency(financialMathSnapshot.yearlyPortfolioIncome)}
               </p>

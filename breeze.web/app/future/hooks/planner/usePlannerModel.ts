@@ -73,6 +73,18 @@ function usePortfolioCalculation(
     [accounts, assetFinanceDetailsByAccountId],
   );
 
+  // Investment assets only (excludes home/vehicle equity and liabilities) — used for FIRE targets
+  const investmentStartingBalance = useMemo(
+    () =>
+      accounts
+        .filter(
+          (a) =>
+            !isCombinedAssetType(a.accountType) && !isLiabilityAccountType(a.accountType),
+        )
+        .reduce((sum, a) => sum + clamp(a.startingBalance), 0),
+    [accounts],
+  );
+
   const totalAssets = useMemo(
     () =>
       accounts
@@ -150,6 +162,7 @@ function usePortfolioCalculation(
 
   return {
     totalStartingBalance,
+    investmentStartingBalance,
     totalAssets,
     totalLiabilities,
     totalPlannedMonthlyEmployee,
@@ -257,13 +270,13 @@ function useRetirementTargets(
 
   const monthlyNeededForDesiredTarget = getMonthlyContribution(
     realSelectedRetirementTarget,
-    portfolio.totalStartingBalance,
+    portfolio.investmentStartingBalance,
     portfolio.realWeightedAnnualRate,
     household.yearsToGoal,
   );
   const monthlyNeededForFreedomTarget = getMonthlyContribution(
     realFinancialFreedomTarget,
-    portfolio.totalStartingBalance,
+    portfolio.investmentStartingBalance,
     portfolio.realWeightedAnnualRate,
     household.yearsToGoal,
   );
@@ -283,7 +296,7 @@ function useRetirementTargets(
     realAnnualReturnFactor > 0
       ? realFinancialFreedomTarget / realAnnualReturnFactor ** household.yearsToGoal
       : realFinancialFreedomTarget;
-  const coastFireGap = portfolio.totalStartingBalance - coastFireTargetToday;
+  const coastFireGap = portfolio.investmentStartingBalance - coastFireTargetToday;
   const hasReachedCoastFire = plannerConstants.isMoneyGreaterThanOrEqualWithTolerance(
     coastFireGap,
     0,

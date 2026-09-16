@@ -11,6 +11,8 @@ interface RequiredMonthlyContributionCardProps {
   annualHouseholdIncome: number;
   weightedAnnualRate: number;
   yearsToGoal: number;
+  currentAge: number;
+  financialFreedomAge: number | null;
   currentSavingsRateEmployeePercent: number;
   currentSavingsRateTotalPercent: number;
   requiredSavingsRatePercent: number;
@@ -28,6 +30,8 @@ const RequiredMonthlyContributionCard = ({
   annualHouseholdIncome,
   weightedAnnualRate,
   yearsToGoal,
+  currentAge,
+  financialFreedomAge,
   currentSavingsRateTotalPercent,
   requiredSavingsRatePercent,
   savingsRateGapPercent,
@@ -65,6 +69,20 @@ const RequiredMonthlyContributionCard = ({
               Based on: {requiredMonthlyTargetLabel}
             </p>
           </div>
+
+          {financialFreedomAge !== null && (
+            <div className="rounded-md border p-3">
+              <p className="text-muted-foreground text-xs">Projected FIRE date</p>
+              <p className="mt-0.5 text-lg font-semibold">
+                Age {financialFreedomAge}
+                <span className="text-muted-foreground ml-2 text-xs font-normal">
+                  ({financialFreedomAge - currentAge > 0
+                    ? `in ${financialFreedomAge - currentAge} years`
+                    : 'now'})
+                </span>
+              </p>
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-sm">

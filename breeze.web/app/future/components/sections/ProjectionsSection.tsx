@@ -40,6 +40,7 @@ type AccountBreakdownRow = {
 
 interface ProjectionsSectionProps {
   currentAge: number;
+  financialFreedomAge: number | null;
   chartConfig: ChartConfig;
   projectionRows: ProjectionRow[];
   accounts: Array<{ id: string; name: string }>;
@@ -59,6 +60,7 @@ const ToggleBtn = ({ collapsed, onClick }: { collapsed: boolean; onClick: () => 
 
 export function ProjectionsSection({
   currentAge,
+  financialFreedomAge,
   chartConfig,
   projectionRows,
   accounts,
@@ -74,7 +76,7 @@ export function ProjectionsSection({
 
   return (
     <div className="space-y-6">
-      <HealthIndicators hasReachedCoastFire={hasReachedCoastFire} coastFireGap={coastFireGap} />
+      <HealthIndicators />
       <SummaryCards
         requiredMonthlyCollapsed={requiredMonthly}
         requiredMonthlyToggleControl={
@@ -92,6 +94,8 @@ export function ProjectionsSection({
           />
         }
         currentPortfolio={financialMathSnapshot.currentPortfolio}
+        currentAge={currentAge}
+        financialFreedomAge={financialFreedomAge}
       />
       <FinancialMathCard snapshot={financialMathSnapshot} />
       <ProjectionChartCard

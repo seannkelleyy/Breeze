@@ -23,16 +23,15 @@ INSERT INTO goals (
   is_financial_order_step,
   financial_order_step
 ) VALUES
-  ($1, 'Build emergency fund (3-6 months expenses)', false, 'emergency-fund', 100, 'Save 3-6 months of essential expenses in a high-yield savings account', true, 1),
-  ($1, 'Get employer 401k match', false, 'retirement', 99, 'Contribute enough to get full employer match', true, 2),
-  ($1, 'Pay off high-interest debt', false, 'debt-payoff', 98, 'Pay off credit cards and loans with interest rates above 7%', true, 3),
-  ($1, 'Max out HSA', false, 'retirement', 97, 'Max out Health Savings Account if eligible', true, 4),
-  ($1, 'Max out Roth IRA', false, 'retirement', 96, 'Contribute maximum to Roth IRA ($7,000/year in 2024)', true, 5),
-  ($1, 'Pay off medium-interest debt', false, 'debt-payoff', 95, 'Pay off student loans and car loans (5-7% interest)', true, 6),
-  ($1, 'Max out 401k', false, 'retirement', 94, 'Max out 401k contributions ($23,000/year in 2024)', true, 7),
-  ($1, 'Mega backdoor Roth', false, 'retirement', 93, 'If available through employer plan', true, 8),
-  ($1, 'Invest in taxable brokerage', false, 'investment', 92, 'Invest in taxable accounts after tax-advantaged accounts are maxed', true, 9),
-  ($1, 'Other financial goals', false, 'other', 91, 'Real estate, business, or other goals', true, 10)
+  ($1, 'Cover your highest insurance deductible', false, 'emergency-fund', 100, 'Save enough cash to cover your largest insurance deductible in a high-yield savings account', true, 1),
+  ($1, 'Get employer match', false, 'retirement', 99, 'Contribute enough to your 401(k)/403(b) to receive the full employer match — free money', true, 2),
+  ($1, 'Pay off high-interest debt', false, 'debt-payoff', 98, 'Pay off credit cards, car loans, and student loans with interest rates above 7%', true, 3),
+  ($1, 'Build emergency fund (3-6 months)', false, 'emergency-fund', 97, 'Save 3-6 months of essential expenses in a high-yield savings account', true, 4),
+  ($1, 'Max out Roth IRA and HSA', false, 'retirement', 96, 'Contribute maximum to Roth IRA ($7,000/year) and HSA ($4,150/year) if eligible', true, 5),
+  ($1, 'Max out employer retirement plans', false, 'retirement', 95, 'Max out 401(k), 403(b), or 457 contributions ($23,000/year in 2024)', true, 6),
+  ($1, 'Hyperaccumulation — invest 25%+ of income', false, 'investment', 94, 'Invest at least 25% of gross income across all accounts for retirement', true, 7),
+  ($1, 'Prepay future expenses', false, 'other', 93, 'Save for kids college (529), vacation home, travel, or other long-term goals', true, 8),
+  ($1, 'Pay off low-interest debt', false, 'debt-payoff', 92, 'Pay off remaining low-interest debt like mortgages if desired', true, 9)
 RETURNING
   id,
   user_id,

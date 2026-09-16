@@ -23,11 +23,11 @@ export const DesktopNavigation = () => {
   return (
     <Menubar
       title="navigation"
-      className="fixed relative top-0 z-10 hidden w-full items-center justify-between px-4 backdrop-blur-lg sm:flex"
+      className="fixed relative top-0 z-10 hidden w-full items-center justify-between rounded-none p-4 backdrop-blur-lg sm:flex"
     >
       {/* LEFT: logo */}
       <div className="z-10 flex items-center">
-        <Image className="dark:invert" src="/b.svg" alt="Breeze" width={40} height={40} />
+        <Image className="dark:invert" src="/b.svg" alt="Breeze" width={30} height={30} />
       </div>
 
       {/* CENTER: route links + tools dropdown */}

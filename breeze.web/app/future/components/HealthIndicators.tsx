@@ -4,11 +4,6 @@ import { formatCurrencyWithCode } from '../lib/plannerMath';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-interface HealthIndicatorsProps {
-  hasReachedCoastFire: boolean;
-  coastFireGap: number;
-}
-
 type HealthStatus = 'good' | 'warning' | 'bad';
 
 const statusConfig = {
@@ -60,7 +55,7 @@ function IndicatorCard({
   );
 }
 
-export function HealthIndicators({ hasReachedCoastFire, coastFireGap }: HealthIndicatorsProps) {
+export function HealthIndicators() {
   const { plannerSummary, currencyCode } = useCurrentUser();
   if (!plannerSummary) return null;
 
@@ -79,15 +74,6 @@ export function HealthIndicators({ hasReachedCoastFire, coastFireGap }: HealthIn
       : plannerSummary.monthlyGapToGoal === 0
         ? 'warning'
         : 'bad';
-
-  const netWorthStatus: HealthStatus =
-    plannerSummary.totalStartingBalance > 0
-      ? 'good'
-      : plannerSummary.totalStartingBalance === 0
-        ? 'warning'
-        : 'bad';
-
-  const coastStatus: HealthStatus = hasReachedCoastFire ? 'good' : 'bad';
 
   const indicators = [
     {
@@ -109,27 +95,10 @@ export function HealthIndicators({ hasReachedCoastFire, coastFireGap }: HealthIn
         ? 'Planned exceeds required'
         : 'Below required monthly',
     },
-    {
-      label: 'Net Worth',
-      value: fc(plannerSummary.totalStartingBalance),
-      status: netWorthStatus,
-      detail:
-        plannerSummary.totalLiabilities > 0
-          ? `${fc(plannerSummary.totalAssets)} assets / ${fc(plannerSummary.totalLiabilities)} liabilities`
-          : 'No liabilities',
-    },
-    {
-      label: 'Coast FIRE',
-      value: hasReachedCoastFire ? 'Reached' : `${fc(Math.abs(coastFireGap))}`,
-      status: coastStatus,
-      detail: hasReachedCoastFire
-        ? `${fc(Math.abs(coastFireGap))} above target`
-        : 'Needed to reach coast FIRE',
-    },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3">
       {indicators.map((ind) => (
         <IndicatorCard key={ind.label} {...ind} />
       ))}
