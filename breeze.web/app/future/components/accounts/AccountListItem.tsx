@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import {
   ChevronDown,
   ChevronUp,
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import * as plannerConstants from '../../lib/constants';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import {
@@ -160,6 +162,8 @@ export function AccountListItem({
   toIsoDate,
   getHomeAnnualGrowthRate,
 }: AccountListItemProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   useAutoSave(
     () => onSave(account),
     [
@@ -344,14 +348,12 @@ export function AccountListItem({
         </div>
         <div className="flex items-center gap-1">
           <Button
-            variant="ghost"
+            variant="destructive"
             size="icon"
-            className="size-8 cursor-pointer text-muted-foreground hover:text-destructive"
+            className="size-8 cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              if (window.confirm(`Delete "${account.name || 'Unnamed Account'}"?`)) {
-                onDelete(account);
-              }
+              setShowDeleteConfirm(true);
             }}
             disabled={isLastAccount}
           >
@@ -511,6 +513,14 @@ export function AccountListItem({
           />
         </div>
       )}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete Account"
+        description={`Are you sure you want to delete "${account.name || 'Unnamed Account'}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={() => onDelete(account)}
+      />
     </div>
   );
 }
