@@ -1,10 +1,8 @@
 'use client';
-import { type ReactNode } from 'react';
 
 import * as plannerConstants from '../lib/constants';
 import { FormattedNumberInput } from '../../../components/common/form/FormattedNumberInput';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -21,10 +19,9 @@ import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 
 export interface PeopleCardProps {
   collapsed: boolean;
-  toggleControl: ReactNode;
 }
 
-const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
+const PeopleCard = ({ collapsed }: PeopleCardProps) => {
   const { userId } = useCurrentUser();
   const { people, updatePerson, addPerson, removePerson } = usePlannerPeople();
   const { upsertPersonMutation, deletePersonMutation } = usePersonMutations(userId);
@@ -39,13 +36,9 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
   }, [people]);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <CardTitle>Household</CardTitle>
-        {toggleControl}
-      </CardHeader>
+    <>
       {!collapsed ? (
-        <CardContent className="space-y-4">
+        <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {people.map((person) => (
               <PersonCard
@@ -66,9 +59,9 @@ const PeopleCard = ({ collapsed, toggleControl }: PeopleCardProps) => {
               Add Person
             </Button>
           </div>
-        </CardContent>
+        </div>
       ) : null}
-    </Card>
+    </>
   );
 };
 

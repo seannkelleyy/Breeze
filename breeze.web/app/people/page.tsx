@@ -56,7 +56,6 @@ function PeopleContent() {
       <div className="space-y-6">
         <PeopleSection
           isCollapsed={collapsedSections['people']}
-          onToggle={() => toggleSection('people')}
         />
       </div>
     </div>

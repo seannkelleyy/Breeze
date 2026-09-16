@@ -3,12 +3,9 @@ import {
   LayoutDashboard,
   TrendingUp,
   Wallet,
-  Home,
-  LinkIcon,
   Users,
   Target,
   UserRound,
-  Receipt,
 } from 'lucide-react';
 
 export type RouteNavItem = {
@@ -17,13 +14,6 @@ export type RouteNavItem = {
   title: string;
   icon: LucideIcon;
   showWhen?: 'budget-enabled';
-};
-
-export type ToolNavItem = {
-  label: string;
-  to: string;
-  title: string;
-  icon: LucideIcon;
 };
 
 export const routeNavItems: ReadonlyArray<RouteNavItem> = [
@@ -63,26 +53,5 @@ export const routeNavItems: ReadonlyArray<RouteNavItem> = [
     to: '/goals',
     title: 'Goals',
     icon: Target,
-  },
-];
-
-export const toolNavItems: ReadonlyArray<ToolNavItem> = [
-  {
-    label: 'Budget',
-    to: '/budget',
-    title: 'Budget',
-    icon: Receipt,
-  },
-  {
-    label: 'Mortgage',
-    to: '/tools/mortgage',
-    title: 'Mortgage Calculator',
-    icon: Home,
-  },
-  {
-    label: 'Plaid',
-    to: '/plaid-connections',
-    title: 'Plaid Connections',
-    icon: LinkIcon,
   },
 ];

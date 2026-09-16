@@ -176,7 +176,9 @@ const ProjectionChartCard = ({
                     backgroundColor: 'hsl(var(--chart-' + ((index + 1) % 5) + '))',
                   }}
                 />
-                <span>{account.name}</span>
+                <span style={{ color: 'hsl(var(--chart-' + ((index + 1) % 5) + '))' }}>
+                  {account.name}
+                </span>
               </div>
             ))}
           </div>

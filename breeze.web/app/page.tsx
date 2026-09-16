@@ -17,7 +17,6 @@ import {
   LayoutDashboard,
   TrendingUp,
   Wallet,
-  Wrench,
   ArrowUpRight,
   ArrowDownRight,
   Users,
@@ -26,6 +25,8 @@ import {
   Circle,
   ListChecks,
   Loader2,
+  Home,
+  LinkIcon,
 } from 'lucide-react';
 import type { Goal } from '@/app/goals/types/goal';
 
@@ -62,10 +63,16 @@ const quickLinks = [
     description: 'Monthly budgeting, categories, and expenses.',
   },
   {
-    label: 'Tools',
-    href: '/tools',
-    icon: Wrench,
-    description: 'Mortgage calculator and financial utilities.',
+    label: 'Mortgage Calculator',
+    href: '/tools/mortgage',
+    icon: Home,
+    description: 'Analyze amortization, refinance choices, and extra payment strategies.',
+  },
+  {
+    label: 'Plaid Connections',
+    href: '/plaid-connections',
+    icon: LinkIcon,
+    description: 'Connect bank accounts and sync balances automatically.',
   },
 ];
 
@@ -195,7 +202,7 @@ function DashboardContent() {
   const completedSetupSteps = setupSteps.filter((s) => s.done).length;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 pt-24 pb-12">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pt-24 pb-12">
       <PageHeader
         icon={LayoutDashboard}
         title={`Welcome, ${user?.firstName ?? 'there'}`}

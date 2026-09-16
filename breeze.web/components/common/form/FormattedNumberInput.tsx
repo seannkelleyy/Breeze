@@ -46,12 +46,12 @@ export const FormattedNumberInput = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isFocused) {
+    if (!isFocused && !error) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraftValue(String(value));
       setError(null);
     }
-  }, [value, isFocused]);
+  }, [value, isFocused, error]);
 
   const commitValue = (rawValue: string) => {
     const cleaned = rawValue.replace(/,/g, '').trim();

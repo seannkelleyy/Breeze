@@ -1,9 +1,9 @@
 'use client';
-import { type ReactNode, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { formatCurrencyWithCode } from '../lib/plannerMath';
 import { usePlannerAccounts } from '../hooks/planner/index';
@@ -14,7 +14,6 @@ import { HomeGrowthProfile } from '../types/finance';
 
 export interface AccountsCardProps {
   collapsed: boolean;
-  toggleControl: ReactNode;
 }
 
 type AccountFilter = 'all' | 'assets' | 'liabilities' | 'tax-advantaged';
@@ -39,7 +38,7 @@ const ACCOUNT_TYPE_ORDER: Record<AccountType, number> = {
   mortgage: 16,
 };
 
-const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
+const AccountsCard = ({ collapsed }: AccountsCardProps) => {
   const { currencyCode, userId } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
 
@@ -266,13 +265,9 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
   ];
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <CardTitle>Accounts</CardTitle>
-        {toggleControl}
-      </CardHeader>
+    <>
       {!collapsed && (
-        <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             {isIrsAccountsLoading && (
               <p className="text-muted-foreground text-xs">Loading IRS limits...</p>
@@ -363,9 +358,9 @@ const AccountsCard = ({ collapsed, toggleControl }: AccountsCardProps) => {
               </Button>
             </div>
           </div>
-        </CardContent>
+        </div>
       )}
-    </Card>
+    </>
   );
 };
 

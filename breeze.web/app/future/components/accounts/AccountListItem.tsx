@@ -309,7 +309,7 @@ export function AccountListItem({
       <div
         role="button"
         tabIndex={0}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left"
+        className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left"
         onClick={() => onToggleCollapse(account.id)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -346,10 +346,12 @@ export function AccountListItem({
           <Button
             variant="ghost"
             size="icon"
-            className="size-8"
+            className="size-8 cursor-pointer text-muted-foreground hover:text-destructive"
             onClick={(e) => {
               e.stopPropagation();
-              onDelete(account);
+              if (window.confirm(`Delete "${account.name || 'Unnamed Account'}"?`)) {
+                onDelete(account);
+              }
             }}
             disabled={isLastAccount}
           >

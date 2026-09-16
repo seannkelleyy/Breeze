@@ -111,7 +111,6 @@ export const SetupWizard = () => {
             </DialogHeader>
             <PeopleSection
               isCollapsed={collapsedSections['people']}
-              onToggle={() => toggleSection('people')}
             />
             <div className="flex justify-between pt-2">
               <Button variant="ghost" onClick={back}>
@@ -134,7 +133,6 @@ export const SetupWizard = () => {
             </DialogHeader>
             <AccountsSection
               isCollapsed={collapsedSections['accounts']}
-              onToggle={() => toggleSection('accounts')}
             />
             <div className="flex justify-between pt-2">
               <Button variant="ghost" onClick={back}>

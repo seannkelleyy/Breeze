@@ -69,7 +69,6 @@ function AccountsContent() {
       <div className="space-y-6">
         <AccountsSection
           isCollapsed={collapsedSections['accounts']}
-          onToggle={() => toggleSection('accounts')}
         />
       </div>
     </div>
