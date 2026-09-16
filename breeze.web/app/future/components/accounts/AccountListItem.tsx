@@ -300,7 +300,7 @@ export function AccountListItem({
   const collapsedSummary = isAccountCollapsed
     ? isLiability
       ? `Payment: ${formatCurrency(employeeMonthly)}/mo`
-      : `Balance: ${formatCurrency(account.startingBalance)}`
+      : `Balance: ${formatCurrency(account.startingBalance)} · ${formatCurrency(employeeMonthly)}/mo`
     : null;
 
   const lastUpdatedAgo = account.lastValueUpdatedAt
@@ -308,7 +308,13 @@ export function AccountListItem({
     : null;
 
   return (
-    <div className="group hover:border-primary/30 rounded-lg border transition-colors">
+    <div
+      className={`group rounded-lg border transition-colors ${
+        isAccountCollapsed
+          ? 'bg-muted/30 hover:bg-muted/50'
+          : 'hover:border-primary/30'
+      }`}
+    >
       {/* Header — always visible */}
       <div
         role="button"
@@ -456,12 +462,27 @@ export function AccountListItem({
             <div
               className={`rounded-md px-3 py-2 text-xs ${isUsingIrsMaxContribution ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}
             >
-              IRS limit (age {ownerAge}): {formatCurrency(suggestedLimit)}
+              <span className="font-medium">
+                {formatCurrency(employeeAnnual)} / {formatCurrency(suggestedLimit)}
+              </span>
+              <span className="ml-1">
+                IRS limit (age {ownerAge})
+              </span>
               {plannerConstants.isMoneyGreaterThanWithTolerance(employeeAnnual, suggestedLimit) && (
                 <span className="text-destructive ml-2 font-medium">
                   Over by {formatCurrency(employeeAnnual - suggestedLimit)}
                 </span>
               )}
+            </div>
+          )}
+
+          {/* Contribution summary */}
+          {!hidesContributionInputs && (
+            <div className="bg-muted/50 rounded-md px-3 py-2 text-xs">
+              <span className="font-medium">{formatCurrency(employeeMonthly)}/mo</span>
+              <span className="text-muted-foreground ml-1">
+                ({formatCurrency(employeeAnnual)}/yr)
+              </span>
             </div>
           )}
 
