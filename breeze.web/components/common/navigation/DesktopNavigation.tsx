@@ -1,11 +1,9 @@
 'use client';
 import { Menubar } from '@/components/ui/menubar';
-import ThemeToggle from '../theme/ThemeToggle';
-import { UserPreferencesModal } from '../userPreference/UserPreferencesModal';
 import { NavRouteItem } from './NavItems';
 import { routeNavItems } from './navConfig';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import BreezeAuthButton from '../auth/BreezeAuthButton';
+import { UserMenu } from '../auth/UserMenu';
 import Image from 'next/image';
 
 export const DesktopNavigation = () => {
@@ -38,11 +36,9 @@ export const DesktopNavigation = () => {
         ))}
       </div>
 
-      {/* RIGHT: preferences, theme, auth */}
+      {/* RIGHT: user menu */}
       <div className="z-10 flex items-center gap-2">
-        <UserPreferencesModal />
-        <ThemeToggle />
-        <BreezeAuthButton />
+        <UserMenu />
       </div>
     </Menubar>
   );

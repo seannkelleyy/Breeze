@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { routeNavItems } from './navConfig';
-import BreezeAuthButton from '../auth/BreezeAuthButton';
+import { UserMenu } from '../auth/UserMenu';
 import Image from 'next/image';
 
 export const MobileNavigation = () => {
@@ -19,7 +19,7 @@ export const MobileNavigation = () => {
       {/* Top bar — logo + auth only */}
       <div className="fixed top-0 z-10 flex w-full items-center justify-between border-none bg-white/2 px-4 backdrop-blur-lg sm:hidden">
         <Image className="dark:invert" src="/b.svg" alt="Breeze" width={36} height={36} />
-        <BreezeAuthButton />
+        <UserMenu />
       </div>
 
       {/* Bottom tab bar */}
