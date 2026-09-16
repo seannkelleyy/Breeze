@@ -56,10 +56,34 @@ function IndicatorCard({
 }
 
 export function HealthIndicators() {
-  const { plannerSummary, currencyCode } = useCurrentUser();
+  const { plannerSummary, currencyCode, monthlyExpenses, plannerPeople, plannerAccounts } = useCurrentUser();
   if (!plannerSummary) return null;
 
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
+
+  // Calculate total gross income (salary + dollar bonuses)
+  const totalAnnualIncome = plannerSummary.annualHouseholdIncome;
+  const totalAnnualBonus = plannerPeople.reduce((sum, p) => {
+    return sum + (p.bonusMode === 'dollars' ? p.annualBonus : 0);
+  }, 0);
+  const annualSpend = (monthlyExpenses ?? 0) * 12;
+  const annualInvestments = plannerSummary.totalPlannedMonthlyInvestment * 12;
+  const annualSavings = Math.max(0, totalAnnualIncome - annualSpend - annualInvestments);
+  const savingsRate = totalAnnualIncome > 0
+    ? ((annualInvestments + annualSavings) / totalAnnualIncome) * 100
+    : 0;
+
+  // Emergency fund months — from emergency-fund and checking accounts
+  const emergencyFundBalance = plannerAccounts
+    .filter((a) => a.accountType === 'emergency-fund' || a.accountType === 'checking')
+    .reduce((sum, a) => sum + a.startingBalance, 0);
+  const monthlyExpensesVal = monthlyExpenses ?? 0;
+  const emergencyMonths = monthlyExpensesVal > 0
+    ? emergencyFundBalance / monthlyExpensesVal
+    : 0;
+
+  const emergencyStatus: HealthStatus =
+    emergencyMonths >= 6 ? 'good' : emergencyMonths >= 3 ? 'warning' : 'bad';
 
   const savingsStatus: HealthStatus =
     plannerSummary.savingsRateGapPercent >= 0
@@ -77,8 +101,16 @@ export function HealthIndicators() {
 
   const indicators = [
     {
+      label: 'Gross Income',
+      value: totalAnnualBonus > 0
+        ? `${fc(totalAnnualIncome)} (${fc(totalAnnualBonus)} bonus)`
+        : fc(totalAnnualIncome),
+      status: 'good' as HealthStatus,
+      detail: `Annual household income${totalAnnualBonus > 0 ? ' + bonus' : ''}`,
+    },
+    {
       label: 'Savings Rate',
-      value: `${plannerSummary.savingsRateGapPercent >= 0 ? '+' : ''}${plannerSummary.savingsRateGapPercent.toFixed(1)}%`,
+      value: `${savingsRate.toFixed(1)}%`,
       status: savingsStatus,
       detail:
         plannerSummary.savingsRateGapPercent >= 0
@@ -94,6 +126,16 @@ export function HealthIndicators() {
       detail: plannerSummary.isMonthlyGapPositive
         ? 'Planned exceeds required'
         : 'Below required monthly',
+    },
+    {
+      label: 'Emergency Fund',
+      value: `${emergencyMonths.toFixed(1)} months`,
+      status: emergencyStatus,
+      detail: emergencyMonths >= 6
+        ? 'Fully funded'
+        : emergencyMonths >= 3
+          ? '3+ months covered'
+          : 'Needs attention',
     },
   ];
 
