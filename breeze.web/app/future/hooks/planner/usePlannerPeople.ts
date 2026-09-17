@@ -12,6 +12,11 @@ const PLANNER_DEFAULT_PERSON = {
   annualBonus: 0,
   incomeGrowthRate: 0,
   isPrimary: true,
+  payType: 'salary' as const,
+  payDay: 1,
+  payCadence: 'biweekly' as const,
+  hourlyRate: 0,
+  expectedHoursPerWeek: 0,
 };
 
 const usePlannerPeople = () => {

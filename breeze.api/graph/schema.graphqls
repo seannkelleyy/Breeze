@@ -509,6 +509,11 @@ type PlannerPerson {
   bonusMode: String!
   annualBonus: String!
   incomeGrowthRate: String!
+  payType: String!
+  payDay: Int!
+  payCadence: String!
+  hourlyRate: String!
+  expectedHoursPerWeek: String!
   createdAt: String!
   updatedAt: String!
 }
@@ -754,6 +759,11 @@ input UpsertPlannerPersonInput {
   bonusMode: String!
   annualBonus: String!
   incomeGrowthRate: String!
+  payType: String!
+  payDay: Int!
+  payCadence: String!
+  hourlyRate: String!
+  expectedHoursPerWeek: String!
 }
 
 type TaxBracket {

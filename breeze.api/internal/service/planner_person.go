@@ -11,29 +11,39 @@ import (
 )
 
 type PlannerPerson struct {
-	ID               uuid.UUID
-	UserID           uuid.UUID
-	Name             string
-	Birthday         string
-	RetirementAge    int32
-	AnnualSalary     decimal.Decimal
-	BonusMode        string
-	AnnualBonus      decimal.Decimal
-	IncomeGrowthRate decimal.Decimal
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
+	ID                   uuid.UUID
+	UserID               uuid.UUID
+	Name                 string
+	Birthday             string
+	RetirementAge        int32
+	AnnualSalary         decimal.Decimal
+	BonusMode            string
+	AnnualBonus          decimal.Decimal
+	IncomeGrowthRate     decimal.Decimal
+	PayType              string
+	PayDay               int32
+	PayCadence           string
+	HourlyRate           decimal.Decimal
+	ExpectedHoursPerWeek decimal.Decimal
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
 
 type UpsertPlannerPersonInput struct {
-	ID               uuid.UUID
-	UserID           uuid.UUID
-	Name             string
-	Birthday         string
-	RetirementAge    int32
-	AnnualSalary     decimal.Decimal
-	BonusMode        string
-	AnnualBonus      decimal.Decimal
-	IncomeGrowthRate decimal.Decimal
+	ID                   uuid.UUID
+	UserID               uuid.UUID
+	Name                 string
+	Birthday             string
+	RetirementAge        int32
+	AnnualSalary         decimal.Decimal
+	BonusMode            string
+	AnnualBonus          decimal.Decimal
+	IncomeGrowthRate     decimal.Decimal
+	PayType              string
+	PayDay               int32
+	PayCadence           string
+	HourlyRate           decimal.Decimal
+	ExpectedHoursPerWeek decimal.Decimal
 }
 
 type plannerPersonQuerier interface {
@@ -53,15 +63,20 @@ func NewPlannerPersonService(queries plannerPersonQuerier) *PlannerPersonService
 
 func (s *PlannerPersonService) Upsert(ctx context.Context, input UpsertPlannerPersonInput) (*PlannerPerson, error) {
 	row, err := s.queries.UpsertPlannerPerson(ctx, sqlc.UpsertPlannerPersonParams{
-		ID:               input.ID,
-		UserID:           input.UserID,
-		Name:             input.Name,
-		Birthday:         input.Birthday,
-		RetirementAge:    input.RetirementAge,
-		AnnualSalary:     input.AnnualSalary,
-		BonusMode:        input.BonusMode,
-		AnnualBonus:      input.AnnualBonus,
-		IncomeGrowthRate: input.IncomeGrowthRate,
+		ID:                   input.ID,
+		UserID:               input.UserID,
+		Name:                 input.Name,
+		Birthday:             input.Birthday,
+		RetirementAge:        input.RetirementAge,
+		AnnualSalary:         input.AnnualSalary,
+		BonusMode:            input.BonusMode,
+		AnnualBonus:          input.AnnualBonus,
+		IncomeGrowthRate:     input.IncomeGrowthRate,
+		PayType:              input.PayType,
+		PayDay:               input.PayDay,
+		PayCadence:           input.PayCadence,
+		HourlyRate:           input.HourlyRate,
+		ExpectedHoursPerWeek: input.ExpectedHoursPerWeek,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("upsert planner person: %w", err)
@@ -98,16 +113,21 @@ func (s *PlannerPersonService) Delete(ctx context.Context, id uuid.UUID) error {
 
 func mapPlannerPersonRecord(row sqlc.PlannerPerson) PlannerPerson {
 	return PlannerPerson{
-		ID:               row.ID,
-		UserID:           row.UserID,
-		Name:             row.Name,
-		Birthday:         row.Birthday,
-		RetirementAge:    row.RetirementAge,
-		AnnualSalary:     row.AnnualSalary,
-		BonusMode:        row.BonusMode,
-		AnnualBonus:      row.AnnualBonus,
-		IncomeGrowthRate: row.IncomeGrowthRate,
-		CreatedAt:        timestamptzToTime(row.CreatedAt),
-		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
+		ID:                   row.ID,
+		UserID:               row.UserID,
+		Name:                 row.Name,
+		Birthday:             row.Birthday,
+		RetirementAge:        row.RetirementAge,
+		AnnualSalary:         row.AnnualSalary,
+		BonusMode:            row.BonusMode,
+		AnnualBonus:          row.AnnualBonus,
+		IncomeGrowthRate:     row.IncomeGrowthRate,
+		PayType:              row.PayType,
+		PayDay:               row.PayDay,
+		PayCadence:           row.PayCadence,
+		HourlyRate:           row.HourlyRate,
+		ExpectedHoursPerWeek: row.ExpectedHoursPerWeek,
+		CreatedAt:            timestamptzToTime(row.CreatedAt),
+		UpdatedAt:            timestamptzToTime(row.UpdatedAt),
 	}
 }

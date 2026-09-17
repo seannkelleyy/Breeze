@@ -2008,6 +2008,36 @@ table "planner_people" {
     default = 0
   }
 
+  column "pay_type" {
+    type    = text
+    null    = false
+    default = "salary"
+  }
+
+  column "pay_day" {
+    type    = integer
+    null    = false
+    default = 1
+  }
+
+  column "pay_cadence" {
+    type    = text
+    null    = false
+    default = "biweekly"
+  }
+
+  column "hourly_rate" {
+    type    = numeric(8,2)
+    null    = false
+    default = 0
+  }
+
+  column "expected_hours_per_week" {
+    type    = numeric(5,2)
+    null    = false
+    default = 0
+  }
+
   column "created_at" {
     type    = timestamptz
     null    = false

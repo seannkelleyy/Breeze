@@ -24,7 +24,7 @@ import {
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { usePlannerPeople, usePersonMutations } from '../hooks/planner/index';
-import { BonusMode, PlannerPerson } from '../types/person';
+import { BonusMode, PayType, PayCadence, PlannerPerson } from '../types/person';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import * as plannerConstants from '../lib/constants';
@@ -211,7 +211,11 @@ function PersonSummaryCard({
           </div>
         </div>
         <div className="text-muted-foreground mt-3 space-y-1 text-xs">
-          <p>Salary: {fc(person.annualSalary)}</p>
+          <p>
+            {person.payType === 'hourly'
+              ? `$${person.hourlyRate}/hr × ${person.expectedHoursPerWeek}hrs/wk`
+              : `Salary: ${fc(person.annualSalary)}`}
+          </p>
           {person.annualBonus > 0 && (
             <p>
               Bonus:{' '}
@@ -221,6 +225,9 @@ function PersonSummaryCard({
             </p>
           )}
           <p>Growth: {person.incomeGrowthRate}%</p>
+          <p className="capitalize">
+            {person.payCadence} · Pay day {person.payDay}
+          </p>
           {person.updatedAt && (
             <p className="text-[10px] opacity-60">Updated {formatTimeAgo(person.updatedAt)}</p>
           )}
@@ -340,6 +347,66 @@ function PersonFormModal({
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-2">
+            <Label>Pay Type</Label>
+            <Select
+              value={person.payType}
+              onValueChange={(v) => onUpdate((c) => ({ ...c, payType: v as PayType }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select pay type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="salary">Salary</SelectItem>
+                <SelectItem value="hourly">Hourly</SelectItem>
+                <SelectItem value="commission">Commission</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Pay Cadence</Label>
+            <Select
+              value={person.payCadence}
+              onValueChange={(v) => onUpdate((c) => ({ ...c, payCadence: v as PayCadence }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select cadence" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="biweekly">Biweekly</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Pay Day (1-28)</Label>
+            <FormattedNumberInput
+              value={person.payDay}
+              onValueChange={(v) => onUpdate((c) => ({ ...c, payDay: Math.min(28, Math.max(1, v)) }))}
+              maxFractionDigits={0}
+            />
+          </div>
+          {person.payType === 'hourly' && (
+            <>
+              <div className="space-y-2">
+                <Label>Hourly Rate ($)</Label>
+                <FormattedNumberInput
+                  value={person.hourlyRate}
+                  onValueChange={(v) => onUpdate((c) => ({ ...c, hourlyRate: v }))}
+                  maxFractionDigits={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Expected Hours/Week</Label>
+                <FormattedNumberInput
+                  value={person.expectedHoursPerWeek}
+                  onValueChange={(v) => onUpdate((c) => ({ ...c, expectedHoursPerWeek: v }))}
+                  maxFractionDigits={0}
+                />
+              </div>
+            </>
+          )}
           <div className="flex items-center gap-2 sm:col-span-2">
             <input
               type="checkbox"

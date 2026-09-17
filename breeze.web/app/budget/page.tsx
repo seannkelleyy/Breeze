@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 
 import dayjs from 'dayjs';
 import Link from 'next/link';
-import { MoveLeft, MoveRight, RefreshCw, Loader2, Target } from 'lucide-react';
+import { MoveLeft, MoveRight, RefreshCw, Loader2, Target, Receipt } from 'lucide-react';
 
 import { useBudgetContext } from './providers/index';
 import { useRegenerateBudget } from './hooks/budget/index';
@@ -15,7 +15,6 @@ import {
   CreateIncomeDialog,
   ExpensesTable,
   IncomeTable,
-  RecurringTemplatesDialog,
 } from './components/index';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -130,7 +129,12 @@ const BudgetContent = () => {
       <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
         <CreateIncomeDialog />
         <CreateExpenseDialog />
-        <RecurringTemplatesDialog />
+        <Link href="/expenses">
+          <Button variant="outline" className="gap-2">
+            <Receipt className="h-4 w-4" />
+            Recurring Expenses
+          </Button>
+        </Link>
       </div>
       {confirmRegenerate ? (
         <div className="border-warning/30 bg-warning/10 flex w-full flex-col items-center gap-3 rounded-lg border px-4 py-3 text-sm sm:flex-row">

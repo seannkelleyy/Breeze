@@ -126,6 +126,11 @@ const useFetchPlanner = () => {
         annualBonus: Number(p.annualBonus),
         incomeGrowthRate: Number(p.incomeGrowthRate),
         isPrimary: index === 0,
+        payType: ((p as Record<string, unknown>).payType as string || 'salary') as 'salary' | 'hourly' | 'commission',
+        payDay: ((p as Record<string, unknown>).payDay as number) ?? 1,
+        payCadence: ((p as Record<string, unknown>).payCadence as string || 'biweekly') as 'weekly' | 'biweekly' | 'monthly',
+        hourlyRate: Number((p as Record<string, unknown>).hourlyRate) || 0,
+        expectedHoursPerWeek: Number((p as Record<string, unknown>).expectedHoursPerWeek) || 0,
         createdAt: p.createdAt,
         updatedAt: p.updatedAt,
       }));
