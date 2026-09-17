@@ -223,9 +223,18 @@ function DashboardContent() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-sm">
-              {data
-                ? `${data.assetCount} assets, ${data.liabilityCount} liabilities`
-                : 'Loading...'}
+              {data ? (
+                <>
+                  {data.assetCount}{' '}
+                  <Link href="/accounts" className="text-foreground underline underline-offset-2 hover:no-underline">
+                    assets
+                  </Link>
+                  , {data.liabilityCount}{' '}
+                  <Link href="/accounts" className="text-foreground underline underline-offset-2 hover:no-underline">
+                    liabilities
+                  </Link>
+                </>
+              ) : 'Loading...'}
             </p>
           </CardContent>
         </Card>
@@ -248,7 +257,7 @@ function DashboardContent() {
               <div className="space-y-1">
                 {Object.entries(data.assetsByType).map(([type, amount]) => (
                   <div key={type} className="flex justify-between text-sm">
-                    <span className="text-muted-foreground capitalize">{type.replace(/-/g, ' ')}</span>
+                    <span className="text-muted-foreground">{type.replace(/-/g, ' ')}</span>
                     <span>{formatCurrency(amount as number)}</span>
                   </div>
                 ))}
@@ -279,7 +288,7 @@ function DashboardContent() {
               <div className="space-y-1">
                 {Object.entries(data.liabilitiesByType).map(([type, amount]) => (
                   <div key={type} className="flex justify-between text-sm">
-                    <span className="text-muted-foreground capitalize">{type.replace(/-/g, ' ')}</span>
+                    <span className="text-muted-foreground">{type.replace(/-/g, ' ')}</span>
                     <span>{formatCurrency(amount as number)}</span>
                   </div>
                 ))}

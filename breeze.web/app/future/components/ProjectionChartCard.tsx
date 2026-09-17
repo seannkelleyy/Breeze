@@ -164,7 +164,7 @@ const ProjectionChartCard = ({
             <div className="inline-flex items-center gap-2">
               <span
                 className="inline-block h-2 w-6 rounded-sm"
-                style={{ backgroundColor: 'hsl(var(--color-balance))' }}
+                style={{ backgroundColor: 'var(--chart-header)' }}
               />
               <span>Total Portfolio</span>
             </div>
@@ -173,10 +173,10 @@ const ProjectionChartCard = ({
                 <span
                   className="inline-block h-2 w-6 rounded-sm"
                   style={{
-                    backgroundColor: 'hsl(var(--chart-' + ((index + 1) % 5) + '))',
+                    backgroundColor: 'var(--chart-' + ((index + 1) % 5) + ')',
                   }}
                 />
-                <span style={{ color: 'hsl(var(--chart-' + ((index + 1) % 5) + '))' }}>
+                <span style={{ color: 'var(--chart-' + ((index + 1) % 5) + ')' }}>
                   {account.name}
                 </span>
               </div>

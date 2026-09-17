@@ -82,7 +82,7 @@
 | 31 | Future | Create Expenses tab — monthly expenses, tie into budgets | High | New feature area |
 | 32 | Future | Mark people as "primary" in household — spouses planning together | High | Affects retirement calc |
 | 33 | Future | Retirement card rework — combine inputs + cards, show FIRE versions with scores | High | Traditional, Coast FIRE, etc. with portfolio at age, year, ages |
-| 34 | Future | Gross/Net income breakdown — Gross Income + Bonus in parens, Net Income, Tax Rate, Annual Spend, Annual Investments, Annual Savings, Savings Rate (investments+savings vs income), Emergency Fund months (color-coded R/Y/G) | Medium | Consolidate multiple indicators |
+| 34 | Future | ~~Gross/Net income breakdown~~ — DONE: shows gross income, savings rate, monthly plan gap, emergency fund months (R/Y/G) | Medium | Consolidate multiple indicators |
 | 35 | Middleware | Create reusable confirmation/delete pattern (Solution #3) | Medium | Shared across People, Accounts, Goals |
 
 ---

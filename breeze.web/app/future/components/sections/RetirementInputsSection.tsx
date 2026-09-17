@@ -4,10 +4,7 @@ import { RetirementInputsCard, type RetirementInputsCardProps } from '../Retirem
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-interface RetirementInputsSectionProps extends Omit<
-  RetirementInputsCardProps,
-  'collapsed' | 'toggleControl'
-> {
+interface RetirementInputsSectionProps extends RetirementInputsCardProps {
   isCollapsed: boolean;
   onToggle: () => void;
 }
@@ -27,7 +24,7 @@ export function RetirementInputsSection({
       </CardHeader>
       {!isCollapsed && (
         <CardContent>
-          <RetirementInputsCard collapsed={false} toggleControl={null} {...cardProps} />
+          <RetirementInputsCard {...cardProps} />
         </CardContent>
       )}
     </Card>

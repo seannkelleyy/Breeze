@@ -257,11 +257,24 @@ export function AccountListItem({
               : 'Contribution % of Salary';
 
   const onSetContributionToIrsMax = () => {
+    const mode = account.contributionMode;
+    let value: number;
+    if (mode === 'yearly') {
+      value = suggestedLimit;
+    } else if (mode === 'biweekly') {
+      value = suggestedLimit / 26;
+    } else if (mode === 'weekly') {
+      value = suggestedLimit / 52;
+    } else if (mode === 'salary-percent') {
+      // Keep current value for salary percent mode
+      value = account.contributionValue;
+    } else {
+      // monthly
+      value = suggestedLimit / 12;
+    }
     onUpdateAccount((current) => ({
       ...current,
-      contributionMode: 'monthly',
-      contributionValue:
-        suggestedLimit > 0 ? Number((suggestedLimit / 12).toFixed(2)) : current.contributionValue,
+      contributionValue: suggestedLimit > 0 ? Number(value.toFixed(2)) : current.contributionValue,
     }));
   };
 
@@ -307,8 +320,8 @@ export function AccountListItem({
   const Icon = ACCOUNT_ICONS[account.accountType] || PiggyBank;
   const collapsedSummary = isAccountCollapsed
     ? isLiability
-      ? `Payment: ${formatCurrency(employeeMonthly)}/mo`
-      : `Balance: ${formatCurrency(account.startingBalance)} · ${formatCurrency(employeeMonthly)}/mo`
+      ? { primary: formatCurrency(account.startingBalance), secondary: `Payment: ${formatCurrency(employeeMonthly)}/mo` }
+      : { primary: formatCurrency(account.startingBalance), secondary: `${formatCurrency(employeeMonthly)}/mo contribution` }
     : null;
 
   const lastUpdatedAgo = account.lastValueUpdatedAt
@@ -353,8 +366,11 @@ export function AccountListItem({
               {isLiability ? 'Liability' : 'Asset'}
             </Badge>
           </div>
-          {collapsedSummary && (
-            <p className="text-muted-foreground mt-0.5 text-xs">{collapsedSummary}</p>
+          {isAccountCollapsed && collapsedSummary && (
+            <div className="mt-0.5 flex items-baseline gap-2 text-xs">
+              <span className="text-foreground font-semibold">{collapsedSummary.primary}</span>
+              <span className="text-muted-foreground">{collapsedSummary.secondary}</span>
+            </div>
           )}
           {!isAccountCollapsed && lastUpdatedAgo && (
             <p className="text-muted-foreground mt-0.5 text-[10px]">Updated {lastUpdatedAgo}</p>

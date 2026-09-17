@@ -1,10 +1,9 @@
 'use client';
-import { type ReactNode, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { formatCurrencyWithCode } from '../lib/plannerMath';
 import { FormattedNumberInput } from '../../../components/common/form/FormattedNumberInput';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { FinancialMathSnapshot } from '../types/finance';
 import { PLANNER_FIRE_LIFESTYLE_OPTIONS } from '../lib/constants';
@@ -12,8 +11,6 @@ import { usePlannerRetirementInputs } from '../hooks/planner/index';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 
 export type RetirementInputsCardProps = {
-  collapsed: boolean;
-  toggleControl: ReactNode;
   fireTargets: ReadonlyArray<{
     label: string;
     target: number;
@@ -34,8 +31,6 @@ export type RetirementInputsCardProps = {
 };
 
 export const RetirementInputsCard = ({
-  collapsed,
-  toggleControl,
   fireTargets,
   suggestedSafeWithdrawalRate,
   financialFreedomAge,
@@ -131,14 +126,8 @@ export const RetirementInputsCard = ({
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <CardTitle>Retirement Inputs</CardTitle>
-        {toggleControl}
-      </CardHeader>
-      {!collapsed ? (
-        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-4 sm:col-span-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="space-y-4 sm:col-span-2">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
@@ -265,8 +254,6 @@ export const RetirementInputsCard = ({
               )}
             </div>
           </div>
-        </CardContent>
-      ) : null}
-    </Card>
+    </div>
   );
 };
