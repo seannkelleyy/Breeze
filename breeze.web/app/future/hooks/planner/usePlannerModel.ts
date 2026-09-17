@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { ChartConfig } from '@/components/ui/chart';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
@@ -367,6 +367,8 @@ function useProjections(
   irsLimits: IrsLimitConfig,
   inflationRate: number,
   useInflationAdjustedValues: boolean,
+  projectionEndAge?: number,
+  annualWithdrawal?: number,
 ) {
   const { projectionRows, finalBalances } = useMemo(
     () =>
@@ -380,6 +382,8 @@ function useProjections(
         plannerConstants.PLANNER_DEFAULT_IRS_LIMIT_GROWTH_RATE,
         inflationRate,
         useInflationAdjustedValues,
+        projectionEndAge,
+        annualWithdrawal,
       ),
     [
       accounts,
@@ -492,6 +496,7 @@ function useChartConfig(accounts: ReturnType<typeof useCurrentUser>['plannerAcco
 
 // ─── Main Hook ────────────────────────────────────────────
 const usePlannerModel = () => {
+  const [projectionEndAge, setProjectionEndAge] = useState<number | undefined>(undefined);
   const {
     returnDisplayMode,
     inflationRate,
@@ -548,6 +553,7 @@ const usePlannerModel = () => {
     filingStatus,
     deductionType,
   );
+  const annualWithdrawal = plannerMonthlyExpenses * 12;
   const { projectionRows, finalBalances, projectedNetWorthAtTargetAge } = useProjections(
     filteredAccounts,
     household,
@@ -555,6 +561,8 @@ const usePlannerModel = () => {
     irsLimits,
     inflationRate,
     useInflationAdjustedValues,
+    projectionEndAge,
+    annualWithdrawal,
   );
   const financialFreedomAge = useFinancialFreedomAge(
     projectionRows,
@@ -625,6 +633,7 @@ const usePlannerModel = () => {
   return {
     accounts: plannerAccounts,
     currentAge: household.currentAge,
+    targetAge: household.targetAge,
     financialMathSnapshot,
     projectionRows,
     accountBreakdownRows,
@@ -651,6 +660,8 @@ const usePlannerModel = () => {
     totalAssets: portfolio.totalAssets,
     totalLiabilities: portfolio.totalLiabilities,
     currentSavingsRate: portfolio.currentSavingsRateTotal,
+    projectionEndAge: projectionEndAge ?? household.targetAge,
+    setProjectionEndAge,
   };
 };
 

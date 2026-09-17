@@ -20,22 +20,28 @@ export type ProjectionChartCardProps = {
   collapsed: boolean;
   toggleControl: ReactNode;
   currentAge: number;
+  targetAge: number;
   chartConfig: ChartConfig;
   projectionRows: ProjectionRow[];
   accounts: Array<{ id: string; name: string }>;
   accountLineColors: string[];
+  projectionEndAge: number;
+  setProjectionEndAge: (age: number) => void;
 };
 
 const ProjectionChartCard = ({
   collapsed,
   toggleControl,
   currentAge,
+  targetAge,
   chartConfig,
   projectionRows,
   accounts,
+  accountLineColors,
+  projectionEndAge,
+  setProjectionEndAge,
 }: ProjectionChartCardProps) => {
-  const { currencyCode, plannerSummary } = useCurrentUser();
-  const targetAge = plannerSummary?.targetAge ?? currentAge;
+  const { currencyCode } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
 
   // Sort accounts by their final balance value (highest first) and remap data keys
@@ -112,14 +118,27 @@ const ProjectionChartCard = ({
         <div>
           <CardTitle>Projection Chart</CardTitle>
           <CardDescription>
-            Total portfolio plus each account from age {currentAge} to {targetAge} using per-account
-            monthly inputs.
+            Total portfolio plus each account from age {currentAge} to {projectionEndAge}
+            {projectionEndAge > targetAge ? ' (including post-retirement drawdown)' : ''}.
           </CardDescription>
         </div>
         {toggleControl}
       </CardHeader>
       {!collapsed ? (
         <CardContent>
+          <div className="mb-4 flex items-center gap-3">
+            <span className="text-muted-foreground text-xs">Projection range:</span>
+            <input
+              type="range"
+              min={targetAge}
+              max={95}
+              step={1}
+              value={projectionEndAge}
+              onChange={(e) => setProjectionEndAge(Number(e.target.value))}
+              className="accent-primary h-1.5 flex-1 cursor-pointer"
+            />
+            <span className="w-16 text-right text-xs font-medium">Age {projectionEndAge}</span>
+          </div>
           <BreezeLineChart
             config={chartConfig}
             className="h-[320px] w-full"

@@ -403,8 +403,11 @@ export const getProjection = (
   annualIrsLimitGrowthRate: number,
   inflationRatePercent: number,
   useInflationAdjustedValues: boolean,
+  projectionEndAge?: number,
+  annualWithdrawal?: number,
 ): { projectionRows: ProjectionRow[]; finalBalances: number[] } => {
-  const years = Math.max(0, targetAge - currentAge);
+  const endAge = projectionEndAge ?? targetAge;
+  const years = Math.max(0, endAge - currentAge);
   const now = new Date();
   const balances = accounts.map((account) => {
     if (isCombinedAssetType(account.accountType)) {
@@ -449,7 +452,14 @@ export const getProjection = (
   ];
   let contributedTotal = 0;
   for (let year = 1; year <= years; year++) {
-    const projectedContributionPlanByAccount = accounts.map((account) => {
+    const isPostRetirement = currentAge + year > targetAge;
+    const monthlyWithdrawal = isPostRetirement && annualWithdrawal
+      ? (annualWithdrawal / 12) * ((1 + inflationRatePercent / 100) ** (year - 1))
+      : 0;
+
+    const projectedContributionPlanByAccount = isPostRetirement
+      ? accounts.map(() => ({ monthlyEmployeeContribution: 0, monthlyEmployerMatch: 0 }))
+      : accounts.map((account) => {
       const ownerPersons = people.filter((p) => account.personIds.includes(p.id));
       const ownerPerson = ownerPersons[0] ?? people[0];
       const ownerAnnualIncome = ownerPerson
@@ -533,6 +543,16 @@ export const getProjection = (
         const plan = projectedContributionPlanByAccount[index];
         const contrib = plan.monthlyEmployeeContribution + plan.monthlyEmployerMatch;
         balances[index] = balances[index] * (1 + monthlyRate) + contrib;
+
+        if (isPostRetirement && monthlyWithdrawal > 0) {
+          const totalBalance = balances.reduce((sum, b) => sum + b, 0);
+          if (totalBalance > 0) {
+            const accountShare = balances[index] / totalBalance;
+            const withdrawal = monthlyWithdrawal * accountShare;
+            balances[index] = Math.max(0, balances[index] - withdrawal);
+          }
+        }
+
         contributedTotal += contrib;
       }
     }

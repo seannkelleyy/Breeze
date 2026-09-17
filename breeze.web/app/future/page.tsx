@@ -96,6 +96,7 @@ function PlannerContent() {
   const {
     accounts,
     currentAge,
+    targetAge,
     financialMathSnapshot,
     projectionRows,
     accountBreakdownRows,
@@ -107,6 +108,8 @@ function PlannerContent() {
     totalAssets,
     totalLiabilities,
     currentSavingsRate,
+    projectionEndAge,
+    setProjectionEndAge,
   } = usePlannerModel();
 
   if (!clerkLoaded || !isLoaded || !userId) {
@@ -141,6 +144,7 @@ function PlannerContent() {
 
       <ProjectionsSection
         currentAge={currentAge}
+        targetAge={targetAge}
         financialFreedomAge={null}
         chartConfig={dynamicChartConfig}
         projectionRows={projectionRows}
@@ -148,6 +152,8 @@ function PlannerContent() {
         accountLineColors={accountLineColors}
         accountBreakdownRows={accountBreakdownRows}
         financialMathSnapshot={financialMathSnapshot}
+        projectionEndAge={projectionEndAge}
+        setProjectionEndAge={setProjectionEndAge}
         collapses={{
           requiredMonthly: collapsedSections['requiredMonthly'],
           plannedMonthly: collapsedSections['plannedMonthly'],

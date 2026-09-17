@@ -40,6 +40,7 @@ type AccountBreakdownRow = {
 
 interface ProjectionsSectionProps {
   currentAge: number;
+  targetAge: number;
   financialFreedomAge: number | null;
   chartConfig: ChartConfig;
   projectionRows: ProjectionRow[];
@@ -48,6 +49,8 @@ interface ProjectionsSectionProps {
   accountBreakdownRows: AccountBreakdownRow[];
   financialMathSnapshot: FinancialMathSnapshot;
   collapses: SectionCollapse;
+  projectionEndAge: number;
+  setProjectionEndAge: (age: number) => void;
 }
 
 const ToggleBtn = ({ collapsed, onClick }: { collapsed: boolean; onClick: () => void }) => (
@@ -58,6 +61,7 @@ const ToggleBtn = ({ collapsed, onClick }: { collapsed: boolean; onClick: () => 
 
 export function ProjectionsSection({
   currentAge,
+  targetAge,
   financialFreedomAge,
   chartConfig,
   projectionRows,
@@ -66,6 +70,8 @@ export function ProjectionsSection({
   accountBreakdownRows,
   financialMathSnapshot,
   collapses,
+  projectionEndAge,
+  setProjectionEndAge,
 }: ProjectionsSectionProps) {
   const { requiredMonthly, plannedMonthly, retirementEstimateCard, accountBreakdown, onToggle } =
     collapses;
@@ -98,10 +104,13 @@ export function ProjectionsSection({
         collapsed={false}
         toggleControl={null}
         currentAge={currentAge}
+        targetAge={targetAge}
         chartConfig={chartConfig}
         projectionRows={projectionRows}
         accounts={accounts}
         accountLineColors={accountLineColors}
+        projectionEndAge={projectionEndAge}
+        setProjectionEndAge={setProjectionEndAge}
       />
       <ProjectionTables
         sections={{
