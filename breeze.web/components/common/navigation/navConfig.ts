@@ -1,5 +1,13 @@
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, TrendingUp, Wallet, Users, Target, UserRound } from 'lucide-react';
+import {
+  LayoutDashboard,
+  TrendingUp,
+  Wallet,
+  Users,
+  Target,
+  UserRound,
+  Receipt,
+} from 'lucide-react';
 
 export type RouteNavItem = {
   label: string;
@@ -27,6 +35,12 @@ export const routeNavItems: ReadonlyArray<RouteNavItem> = [
     to: '/accounts',
     title: 'Accounts',
     icon: Users,
+  },
+  {
+    label: 'Expenses',
+    to: '/expenses',
+    title: 'Expenses',
+    icon: Receipt,
   },
   {
     label: 'Budget',

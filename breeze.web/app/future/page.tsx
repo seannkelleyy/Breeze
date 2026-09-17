@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 import { usePlannerModel, useFetchPlanner } from './hooks/planner/index';
@@ -7,7 +7,8 @@ import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from './hooks/usePlannerState';
 import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
 
-import { RetirementInputsSection, ProjectionsSection } from './components/sections';
+import { ProjectionsSection } from './components/sections';
+import { FIRETargetsSection } from './components/FIRETargetsSection';
 import { accountLineColors, getDefaultAssetFinanceDetailsForAccount } from './lib/plannerMath';
 import { PLANNER_DEFAULT_INCOME_REPLACEMENT_RATE } from './lib/constants';
 
@@ -115,6 +116,10 @@ function PlannerContent() {
     projectedHouseholdIncomeAtRetirement,
     incomeReplacementAnnualNeed,
     incomeReplacementTarget,
+    investmentStartingBalance,
+    realWeightedAnnualRate,
+    monthlyGapToGoal,
+    isMonthlyGapPositive,
   } = usePlannerModel();
 
   // Show loading state while user data loads
@@ -130,59 +135,46 @@ function PlannerContent() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-[1200px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       {/* Page Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Future</h1>
         <p className="text-muted-foreground text-sm">Track your path to financial independence</p>
       </div>
 
-      {/* Split View: Inputs (left) + Results (right) on desktop, stacked on mobile */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Left Column: Configuration */}
-        <div className="space-y-6">
-          <RetirementInputsSection
-            isCollapsed={collapsedSections['retirementInputs']}
-            onToggle={() => toggleSection('retirementInputs')}
-            fireTargets={fireTargets}
-            baseFinancialFreedomTarget={baseFinancialFreedomTarget}
-            retirementHorizonYears={retirementHorizonYears}
-            suggestedSafeWithdrawalRate={suggestedSafeWithdrawalRate}
-            financialFreedomAge={financialFreedomAge}
-            coastFireTargetToday={coastFireTargetToday}
-            coastFireGap={coastFireGap}
-            hasReachedCoastFire={hasReachedCoastFire}
-            incomeReplacementRate={PLANNER_DEFAULT_INCOME_REPLACEMENT_RATE}
-            projectedHouseholdIncomeAtRetirement={projectedHouseholdIncomeAtRetirement}
-            incomeReplacementAnnualNeed={incomeReplacementAnnualNeed}
-            incomeReplacementTarget={incomeReplacementTarget}
-            financialMathSnapshot={financialMathSnapshot}
-          />
-        </div>
+      {/* FIRE Targets — inputs + variant cards */}
+      <FIRETargetsSection
+        fireTargets={fireTargets}
+        investmentStartingBalance={investmentStartingBalance}
+        realWeightedAnnualRate={realWeightedAnnualRate}
+        yearsToGoal={retirementHorizonYears}
+        financialFreedomAge={financialFreedomAge}
+        coastFireTargetToday={coastFireTargetToday}
+        coastFireGap={coastFireGap}
+        hasReachedCoastFire={hasReachedCoastFire}
+        incomeReplacementTarget={incomeReplacementTarget}
+        monthlyGapToGoal={monthlyGapToGoal}
+        isMonthlyGapPositive={isMonthlyGapPositive}
+      />
 
-        {/* Right Column: Results */}
-        <div className="space-y-6">
-          <ProjectionsSection
-            currentAge={currentAge}
-            financialFreedomAge={financialFreedomAge}
-            chartConfig={dynamicChartConfig}
-            projectionRows={projectionRows}
-            accounts={accounts}
-            accountLineColors={accountLineColors}
-            accountBreakdownRows={accountBreakdownRows}
-            financialMathSnapshot={financialMathSnapshot}
-            hasReachedCoastFire={hasReachedCoastFire}
-            coastFireGap={coastFireGap}
-            collapses={{
-              requiredMonthly: collapsedSections['requiredMonthly'],
-              plannedMonthly: collapsedSections['plannedMonthly'],
-              retirementEstimateCard: collapsedSections['retirementEstimateCard'],
-              accountBreakdown: collapsedSections['accountBreakdown'],
-              onToggle: toggleSection,
-            }}
-          />
-        </div>
-      </div>
+      {/* Projections — chart, breakdown, summary */}
+      <ProjectionsSection
+        currentAge={currentAge}
+        financialFreedomAge={financialFreedomAge}
+        chartConfig={dynamicChartConfig}
+        projectionRows={projectionRows}
+        accounts={accounts}
+        accountLineColors={accountLineColors}
+        accountBreakdownRows={accountBreakdownRows}
+        financialMathSnapshot={financialMathSnapshot}
+        collapses={{
+          requiredMonthly: collapsedSections['requiredMonthly'],
+          plannedMonthly: collapsedSections['plannedMonthly'],
+          retirementEstimateCard: collapsedSections['retirementEstimateCard'],
+          accountBreakdown: collapsedSections['accountBreakdown'],
+          onToggle: toggleSection,
+        }}
+      />
     </div>
   );
 }

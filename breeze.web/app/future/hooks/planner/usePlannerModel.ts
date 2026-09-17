@@ -614,6 +614,10 @@ const usePlannerModel = () => {
     projectedHouseholdIncomeAtRetirement: targets.projectedHouseholdIncomeAtRetirement,
     incomeReplacementAnnualNeed: targets.incomeReplacementAnnualNeed,
     incomeReplacementTarget: targets.incomeReplacementTarget,
+    investmentStartingBalance: portfolio.investmentStartingBalance,
+    realWeightedAnnualRate: portfolio.realWeightedAnnualRate,
+    monthlyGapToGoal: targets.monthlyGap,
+    isMonthlyGapPositive: targets.isMonthlyGapPositive,
   };
 };
 

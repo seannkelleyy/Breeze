@@ -48,8 +48,6 @@ interface ProjectionsSectionProps {
   accountBreakdownRows: AccountBreakdownRow[];
   financialMathSnapshot: FinancialMathSnapshot;
   collapses: SectionCollapse;
-  hasReachedCoastFire: boolean;
-  coastFireGap: number;
 }
 
 const ToggleBtn = ({ collapsed, onClick }: { collapsed: boolean; onClick: () => void }) => (
