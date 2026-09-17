@@ -15,7 +15,7 @@ const usePlannerRetirementInputs = () => {
     plannerFireLifestyleIndex,
     setPlannerFireLifestyleIndex,
   } = useCurrentUser();
-  const { getLatestBudgetMonthlyExpenses } = usePlanner();
+  const { getRecurringExpensesMonthlyTotal } = usePlanner();
   const [isRefreshingExpenses, setIsRefreshingExpenses] = useState(false);
 
   const refreshMonthlyExpenses = async () => {
@@ -25,7 +25,7 @@ const usePlannerRetirementInputs = () => {
 
     try {
       setIsRefreshingExpenses(true);
-      const latestExpenses = await getLatestBudgetMonthlyExpenses();
+      const latestExpenses = await getRecurringExpensesMonthlyTotal();
       setPlannerMonthlyExpenses(clamp(latestExpenses));
     } finally {
       setIsRefreshingExpenses(false);

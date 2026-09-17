@@ -9,7 +9,7 @@ import {
   UPDATE_ASSET,
   UPDATE_LIABILITY,
 } from '@/lib/services/queries/assets';
-import { GET_BUDGET_BY_DATE } from '@/lib/services/queries/budget';
+import { GET_BUDGET_BY_DATE, GET_RECURRING_EXPENSES } from '@/lib/services/queries/budget';
 import useGraphql from '@/lib/services/useGraphql';
 import { PlannerAccountDto } from '../../types/account';
 import { PlannerUpsertRequest } from '../../types/planner';
@@ -28,6 +28,38 @@ const usePlanner = () => {
     );
 
     return response.budgetByDate ? Number.parseFloat(response.budgetByDate.monthlyExpenses) : 0;
+  }, [request, userId]);
+
+  const getRecurringExpensesMonthlyTotal = useCallback(async (): Promise<number> => {
+    const response = await request<
+      {
+        recurringExpenses: Array<{
+          amount: string;
+          recurrenceInterval: string;
+        }>;
+      },
+      { userId: string }
+    >(GET_RECURRING_EXPENSES, { userId });
+
+    const toMonthly = (amount: number, interval: string): number => {
+      switch (interval) {
+        case 'WEEKLY':
+          return (amount * 52) / 12;
+        case 'BIWEEKLY':
+          return (amount * 26) / 12;
+        case 'QUARTERLY':
+          return amount / 3;
+        case 'YEARLY':
+          return amount / 12;
+        default:
+          return amount;
+      }
+    };
+
+    return (response.recurringExpenses ?? []).reduce(
+      (sum, e) => sum + toMonthly(Number.parseFloat(e.amount) || 0, e.recurrenceInterval),
+      0,
+    );
   }, [request, userId]);
 
   const upsertPlanner = async (payload: PlannerUpsertRequest): Promise<number> => {
@@ -160,7 +192,7 @@ const usePlanner = () => {
     }
   };
 
-  return { getLatestBudgetMonthlyExpenses, upsertPlanner };
+  return { getLatestBudgetMonthlyExpenses, getRecurringExpensesMonthlyTotal, upsertPlanner };
 };
 
 export default usePlanner;
