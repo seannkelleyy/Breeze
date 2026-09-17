@@ -322,11 +322,11 @@ export function AccountListItem({
     ? isLiability
       ? {
           primary: formatCurrency(account.startingBalance),
-          secondary: `Payment: ${formatCurrency(employeeMonthly)}/mo`,
+          secondary: `Payment: ${formatCurrency(employeeMonthly)}/mo (${formatCurrency(employeeMonthly * 12)}/yr)`,
         }
       : {
           primary: formatCurrency(account.startingBalance),
-          secondary: `${formatCurrency(employeeMonthly)}/mo contribution`,
+          secondary: `${formatCurrency(employeeMonthly)}/mo (${formatCurrency(employeeMonthly * 12)}/yr) contribution`,
         }
     : null;
 

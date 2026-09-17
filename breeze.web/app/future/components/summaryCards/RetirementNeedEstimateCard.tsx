@@ -74,8 +74,8 @@ const RetirementNeedEstimateCard = ({
             </div>
             <p className={cn('text-xs', isOnTrack ? 'text-success' : 'text-destructive')}>
               {isOnTrack
-                ? `Planned ${formatCurrency(totalPlannedMonthlyInvestment)}/mo meets the ${formatCurrency(monthlyNeededForFreedomTarget)}/mo needed`
-                : `Planned ${formatCurrency(totalPlannedMonthlyInvestment)}/mo is below the ${formatCurrency(monthlyNeededForFreedomTarget)}/mo needed`}
+                ? `Planned ${formatCurrency(totalPlannedMonthlyInvestment)}/mo (${formatCurrency(totalPlannedMonthlyInvestment * 12)}/yr) meets the ${formatCurrency(monthlyNeededForFreedomTarget)}/mo (${formatCurrency(monthlyNeededForFreedomTarget * 12)}/yr) needed`
+                : `Planned ${formatCurrency(totalPlannedMonthlyInvestment)}/mo (${formatCurrency(totalPlannedMonthlyInvestment * 12)}/yr) is below the ${formatCurrency(monthlyNeededForFreedomTarget)}/mo (${formatCurrency(monthlyNeededForFreedomTarget * 12)}/yr) needed`}
             </p>
           </div>
         </CardContent>

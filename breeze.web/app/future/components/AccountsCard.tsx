@@ -348,11 +348,11 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
 
           <div className="bg-background sticky bottom-0 flex items-center justify-between gap-4 border-t pt-3">
             <div className="text-muted-foreground text-sm">
-              <p>Personal contributions: {formatCurrency(totalPlannedMonthlyEmployee)}/month</p>
-              <p>Employer match: {formatCurrency(totalPlannedMonthlyMatch)}/month</p>
-              <p>Debt payments: {formatCurrency(totalPlannedMonthlyDebtPayments)}/month</p>
+              <p>Personal contributions: {formatCurrency(totalPlannedMonthlyEmployee)}/mo ({formatCurrency(totalPlannedMonthlyEmployee * 12)}/yr)</p>
+              <p>Employer match: {formatCurrency(totalPlannedMonthlyMatch)}/mo ({formatCurrency(totalPlannedMonthlyMatch * 12)}/yr)</p>
+              <p>Debt payments: {formatCurrency(totalPlannedMonthlyDebtPayments)}/mo ({formatCurrency(totalPlannedMonthlyDebtPayments * 12)}/yr)</p>
               <p className="text-foreground font-medium">
-                Total: {formatCurrency(totalPlannedMonthlyInvestment)}/month
+                Total: {formatCurrency(totalPlannedMonthlyInvestment)}/mo ({formatCurrency(totalPlannedMonthlyInvestment * 12)}/yr)
               </p>
             </div>
             <div className="flex gap-2">

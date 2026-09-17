@@ -125,7 +125,7 @@ const RequiredMonthlyContributionCard = ({
                 )}
               >
                 {isMonthlyGapPositive ? '+' : ''}
-                {formatCurrency(monthlyGapToGoal)}/mo
+                {formatCurrency(monthlyGapToGoal)}/mo ({formatCurrency(monthlyGapToGoal * 12)}/yr)
               </span>
             </div>
             <Progress
@@ -141,8 +141,8 @@ const RequiredMonthlyContributionCard = ({
               className={cn('text-xs', isMonthlyGapPositive ? 'text-success' : 'text-destructive')}
             >
               {isMonthlyGapPositive
-                ? `Planned total is ${formatCurrency(monthlyGapToGoal)}/mo above required`
-                : `Planned total is ${formatCurrency(Math.abs(monthlyGapToGoal))}/mo below required`}
+                ? `Planned total is ${formatCurrency(monthlyGapToGoal)}/mo (${formatCurrency(monthlyGapToGoal * 12)}/yr) above required`
+                : `Planned total is ${formatCurrency(Math.abs(monthlyGapToGoal))}/mo (${formatCurrency(Math.abs(monthlyGapToGoal) * 12)}/yr) below required`}
             </p>
           </div>
 

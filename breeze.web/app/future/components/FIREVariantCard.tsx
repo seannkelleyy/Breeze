@@ -64,7 +64,9 @@ export function FIREVariantCard({
         <Progress value={score} className={cn('mt-3 h-1.5', progressColor)} />
 
         <div className="mt-3 flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">{fc(monthlyNeeded)}/mo needed</span>
+          <span className="text-muted-foreground">
+            {fc(monthlyNeeded)}/mo <span className="text-[10px]">({fc(monthlyNeeded * 12)}/yr)</span>
+          </span>
           <span className="text-muted-foreground">
             {achieved ? 'Achieved!' : yearsToGoal !== null ? `${yearsToGoal.toFixed(1)} yrs` : '—'}
           </span>
