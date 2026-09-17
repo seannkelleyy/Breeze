@@ -9,8 +9,8 @@ import Image from 'next/image';
 export const MobileNavigation = () => {
   const pathname = usePathname();
 
-  // Bottom tab bar shows the core categories (excluding optional Budget).
-  const tabs = routeNavItems.filter((item) => item.showWhen !== 'budget-enabled');
+  // Bottom tab bar shows the core categories.
+  const tabs = routeNavItems;
 
   const isActive = (to: string) => (to === '/' ? pathname === '/' : pathname.startsWith(to));
 

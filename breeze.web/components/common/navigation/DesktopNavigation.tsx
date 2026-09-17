@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { Menubar } from '@/components/ui/menubar';
 import { NavRouteItem } from './NavItems';
 import { routeNavItems } from './navConfig';
-import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { UserMenu } from '../auth/UserMenu';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -13,20 +12,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Wrench } from 'lucide-react';
+import { Wrench, Calculator, Link2, Wallet } from 'lucide-react';
 
 const toolItems = [
-  { label: 'Mortgage Calculator', to: '/tools/mortgage' },
-  { label: 'Plaid Connections', to: '/plaid-connections' },
+  { label: 'Mortgage Calculator', to: '/tools/mortgage', icon: Calculator },
+  { label: 'Budget', to: '/budget', icon: Wallet },
+  { label: 'Plaid Connections', to: '/plaid-connections', icon: Link2 },
 ];
 
 export const DesktopNavigation = () => {
-  const { budgetEnabled } = useCurrentUser();
-
-  const visibleRouteItems = routeNavItems.filter(
-    (item) => item.showWhen !== 'budget-enabled' || budgetEnabled,
-  );
-
   return (
     <Menubar
       title="navigation"
@@ -39,7 +33,7 @@ export const DesktopNavigation = () => {
 
       {/* CENTER: route links + tools dropdown */}
       <div className="z-10 flex items-center gap-1">
-        {visibleRouteItems.map((item) => (
+        {routeNavItems.map((item) => (
           <NavRouteItem
             key={item.label}
             label={item.label}
@@ -58,7 +52,10 @@ export const DesktopNavigation = () => {
           <DropdownMenuContent align="end">
             {toolItems.map((item) => (
               <DropdownMenuItem key={item.to} asChild>
-                <Link href={item.to}>{item.label}</Link>
+                <Link href={item.to} className="flex items-center gap-2">
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

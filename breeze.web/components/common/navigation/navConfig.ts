@@ -2,7 +2,6 @@ import type { LucideIcon } from 'lucide-react';
 import {
   LayoutDashboard,
   TrendingUp,
-  Wallet,
   Users,
   Target,
   UserRound,
@@ -14,7 +13,6 @@ export type RouteNavItem = {
   to: string;
   title: string;
   icon: LucideIcon;
-  showWhen?: 'budget-enabled';
 };
 
 export const routeNavItems: ReadonlyArray<RouteNavItem> = [
@@ -41,13 +39,6 @@ export const routeNavItems: ReadonlyArray<RouteNavItem> = [
     to: '/expenses',
     title: 'Expenses',
     icon: Receipt,
-  },
-  {
-    label: 'Budget',
-    to: '/budget',
-    title: 'Budget',
-    icon: Wallet,
-    showWhen: 'budget-enabled',
   },
   {
     label: 'Future',
