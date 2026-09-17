@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Pencil, Trash2, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -112,7 +113,19 @@ const PeopleCard = ({ collapsed }: PeopleCardProps) => {
         <PersonFormModal
           person={editingPerson}
           bonusModeOptions={bonusModeOptions}
-          onUpdate={(updater) => updatePerson(editingPerson.id, updater)}
+          onUpdate={(updater) => {
+            updatePerson(editingPerson.id, (current) => {
+              const updated = updater(current);
+              if (updated.isPrimary && !current.isPrimary) {
+                for (const other of people) {
+                  if (other.id !== editingPerson.id && other.isPrimary) {
+                    updatePerson(other.id, (p) => ({ ...p, isPrimary: false }));
+                  }
+                }
+              }
+              return updated;
+            });
+          }}
           onClose={() => setEditingPerson(null)}
           mode="edit"
         />
@@ -170,7 +183,14 @@ function PersonSummaryCard({
               <UserRound className="text-muted-foreground size-4 sm:size-5" />
             </div>
             <div className="min-w-0">
-              <p className="truncate font-medium">{person.name || 'Unnamed'}</p>
+              <div className="flex items-center gap-2">
+                <p className="truncate font-medium">{person.name || 'Unnamed'}</p>
+                {person.isPrimary && (
+                  <Badge variant="secondary" className="shrink-0 text-[10px]">
+                    Primary
+                  </Badge>
+                )}
+              </div>
               <p className="text-muted-foreground text-xs">Retire at {person.retirementAge}</p>
             </div>
           </div>
@@ -319,6 +339,18 @@ function PersonFormModal({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex items-center gap-2 sm:col-span-2">
+            <input
+              type="checkbox"
+              id="isPrimary"
+              className="accent-primary"
+              checked={person.isPrimary}
+              onChange={(e) => onUpdate((c) => ({ ...c, isPrimary: e.target.checked }))}
+            />
+            <Label htmlFor="isPrimary" className="cursor-pointer text-sm">
+              Primary household member
+            </Label>
           </div>
         </div>
         <DialogFooter>

@@ -78,12 +78,12 @@
 
 | # | Page | Task | Priority | Notes |
 |---|------|------|----------|-------|
-| 30 | Future | Redesign left-side inputs — currently only inputs, needs new design | Medium | Layout rethink |
-| 31 | Future | Create Expenses tab — monthly expenses, tie into budgets | High | New feature area |
+| 30 | Future | ~~Redesign left-side inputs~~ — DONE: merged into #33, single-column layout | Medium | Layout rethink |
+| 31 | Future | ~~Create Expenses tab~~ — DONE: /expenses page with recurring expense CRUD, summary card, nav link | High | New feature area |
 | 32 | Future | Mark people as "primary" in household — spouses planning together | High | Affects retirement calc |
-| 33 | Future | Retirement card rework — combine inputs + cards, show FIRE versions with scores | High | Traditional, Coast FIRE, etc. with portfolio at age, year, ages |
+| 33 | Future | ~~Retirement card rework~~ — DONE: single-column, FIRE variant cards with progress scores, compact inputs | High | Traditional, Coast FIRE, etc. with portfolio at age, year, ages |
 | 34 | Future | ~~Gross/Net income breakdown~~ — DONE: shows gross income, savings rate, monthly plan gap, emergency fund months (R/Y/G) | Medium | Consolidate multiple indicators |
-| 35 | Middleware | Create reusable confirmation/delete pattern (Solution #3) | Medium | Shared across People, Accounts, Goals |
+| 35 | Middleware | ~~Create reusable confirmation/delete pattern~~ — DONE: ConfirmDialog component shared across People, Accounts, Goals | Medium | Shared across People, Accounts, Goals |
 
 ---
 

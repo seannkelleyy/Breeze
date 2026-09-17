@@ -9,6 +9,7 @@ export type PlannerPerson = {
   bonusMode: BonusMode;
   annualBonus: number;
   incomeGrowthRate: number;
+  isPrimary: boolean;
   createdAt: string;
   updatedAt: string;
 };

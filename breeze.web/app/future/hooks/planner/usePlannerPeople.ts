@@ -11,6 +11,7 @@ const PLANNER_DEFAULT_PERSON = {
   bonusMode: 'dollars' as const,
   annualBonus: 0,
   incomeGrowthRate: 0,
+  isPrimary: true,
 };
 
 const usePlannerPeople = () => {
@@ -49,6 +50,7 @@ const usePlannerPeople = () => {
         id: crypto.randomUUID(),
         ...PLANNER_DEFAULT_PERSON,
         annualSalary: 0,
+        isPrimary: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },

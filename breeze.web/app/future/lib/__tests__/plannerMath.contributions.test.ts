@@ -43,6 +43,7 @@ const makePerson = (overrides: Partial<PlannerPerson> = {}): PlannerPerson => ({
   bonusMode: 'dollars',
   annualBonus: 5000,
   incomeGrowthRate: 3,
+  isPrimary: true,
   createdAt: '',
   updatedAt: '',
   ...overrides,

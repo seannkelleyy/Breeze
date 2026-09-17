@@ -114,7 +114,7 @@ const useFetchPlanner = () => {
       const assets = assetsResp?.assets ?? [];
       const liabilities = liabilitiesResp?.liabilities ?? [];
 
-      const mappedPeople: PlannerPerson[] = plannerPeople.map((p) => ({
+      const mappedPeople: PlannerPerson[] = plannerPeople.map((p, index) => ({
         id: p.id,
         name: p.name,
         birthday: p.birthday,
@@ -125,6 +125,7 @@ const useFetchPlanner = () => {
           | 'salary-percent',
         annualBonus: Number(p.annualBonus),
         incomeGrowthRate: Number(p.incomeGrowthRate),
+        isPrimary: index === 0,
         createdAt: p.createdAt,
         updatedAt: p.updatedAt,
       }));
