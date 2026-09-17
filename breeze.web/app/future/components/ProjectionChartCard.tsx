@@ -53,10 +53,16 @@ const ProjectionChartCard = ({
     });
     // Remap projection rows so account-0, account-1, etc. match sorted order
     const remapped = projectionRows.map((row) => {
-      const newRow: ProjectionRow = { age: row.age, totalBalance: row.totalBalance, totalContributions: row.totalContributions };
+      const newRow: ProjectionRow = {
+        age: row.age,
+        totalBalance: row.totalBalance,
+        totalContributions: row.totalContributions,
+      };
       sorted.forEach((account, newIdx) => {
         const origIdx = accounts.indexOf(account);
-        newRow[`account-${newIdx}` as keyof ProjectionRow] = row[`account-${origIdx}` as keyof ProjectionRow] as number;
+        newRow[`account-${newIdx}` as keyof ProjectionRow] = row[
+          `account-${origIdx}` as keyof ProjectionRow
+        ] as number;
       });
       return newRow;
     });
@@ -64,9 +70,7 @@ const ProjectionChartCard = ({
   }, [accounts, projectionRows]);
 
   // Map account dataKey to account name
-  const accountNameMap = Object.fromEntries(
-    sortedAccounts.map((a, i) => [`account-${i}`, a.name]),
-  );
+  const accountNameMap = Object.fromEntries(sortedAccounts.map((a, i) => [`account-${i}`, a.name]));
 
   // Custom tooltip formatter: show account name next to number, colored
   const tooltipFormatter = (value: number, name: string) => {

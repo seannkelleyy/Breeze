@@ -187,8 +187,7 @@ function GoalsList({ goals }: { goals: Goal[] }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const invalidateGoals = () =>
-    void queryClient.invalidateQueries({ queryKey: GOALS_QUERY_KEY });
+  const invalidateGoals = () => void queryClient.invalidateQueries({ queryKey: GOALS_QUERY_KEY });
 
   const { mutate: toggleCompletion } = useMutation({
     mutationFn: (goal: Goal & { isCompleted: boolean }) =>
@@ -289,9 +288,7 @@ function GoalsList({ goals }: { goals: Goal[] }) {
             >
               <Checkbox
                 checked={goal.isCompleted}
-                onCheckedChange={(checked) =>
-                  toggleCompletion({ ...goal, isCompleted: !!checked })
-                }
+                onCheckedChange={(checked) => toggleCompletion({ ...goal, isCompleted: !!checked })}
                 aria-label={`Mark ${goal.description} complete`}
               />
               <div className="flex-1">

@@ -60,7 +60,7 @@ function SortableHead({
   const active = currentSortKey === sortKey;
   return (
     <TableHead
-      className="cursor-pointer select-none hover:text-foreground"
+      className="hover:text-foreground cursor-pointer select-none"
       onClick={() => onSort(sortKey)}
     >
       <span className="inline-flex items-center gap-1">
@@ -125,14 +125,62 @@ const ProjectionTables = ({ sections, data }: ProjectionTablesProps) => {
           <Table>
             <TableHeader>
               <TableRow>
-                <SortableHead label="Account" sortKey="name" currentSortKey={sortKey} currentSortDir={sortDir} onSort={handleSort} />
-                <SortableHead label="Owner" sortKey="ownerLabel" currentSortKey={sortKey} currentSortDir={sortDir} onSort={handleSort} />
-                <SortableHead label="Type" sortKey="accountTypeLabel" currentSortKey={sortKey} currentSortDir={sortDir} onSort={handleSort} />
-                <SortableHead label="Employee / Month" sortKey="employeeMonthly" currentSortKey={sortKey} currentSortDir={sortDir} onSort={handleSort} />
-                <SortableHead label="Match / Month" sortKey="matchMonthly" currentSortKey={sortKey} currentSortDir={sortDir} onSort={handleSort} />
-                <SortableHead label="Total / Month" sortKey="totalMonthly" currentSortKey={sortKey} currentSortDir={sortDir} onSort={handleSort} />
-                <SortableHead label="Annual vs Limit" sortKey="annualEmployee" currentSortKey={sortKey} currentSortDir={sortDir} onSort={handleSort} />
-                <SortableHead label={`Projected at ${targetAge}`} sortKey="projectedValue" currentSortKey={sortKey} currentSortDir={sortDir} onSort={handleSort} />
+                <SortableHead
+                  label="Account"
+                  sortKey="name"
+                  currentSortKey={sortKey}
+                  currentSortDir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortableHead
+                  label="Owner"
+                  sortKey="ownerLabel"
+                  currentSortKey={sortKey}
+                  currentSortDir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortableHead
+                  label="Type"
+                  sortKey="accountTypeLabel"
+                  currentSortKey={sortKey}
+                  currentSortDir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortableHead
+                  label="Employee / Month"
+                  sortKey="employeeMonthly"
+                  currentSortKey={sortKey}
+                  currentSortDir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortableHead
+                  label="Match / Month"
+                  sortKey="matchMonthly"
+                  currentSortKey={sortKey}
+                  currentSortDir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortableHead
+                  label="Total / Month"
+                  sortKey="totalMonthly"
+                  currentSortKey={sortKey}
+                  currentSortDir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortableHead
+                  label="Annual vs Limit"
+                  sortKey="annualEmployee"
+                  currentSortKey={sortKey}
+                  currentSortDir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortableHead
+                  label={`Projected at ${targetAge}`}
+                  sortKey="projectedValue"
+                  currentSortKey={sortKey}
+                  currentSortDir={sortDir}
+                  onSort={handleSort}
+                />
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -34,7 +34,7 @@ export const SetupWizard = () => {
   const [acknowledged, setAcknowledged] = useState(false);
   const [manualClose, setManualClose] = useState(false);
   const router = useRouter();
-  const { collapsedSections, toggleSection } = usePlannerState();
+  const { collapsedSections } = usePlannerState();
   usePlannerHydration();
 
   const open = isLoaded && isSignedIn && !setupCompleted && !manualClose;
@@ -109,9 +109,7 @@ export const SetupWizard = () => {
                 Add the people in your financial plan (spouse, partner, or yourself).
               </DialogDescription>
             </DialogHeader>
-            <PeopleSection
-              isCollapsed={collapsedSections['people']}
-            />
+            <PeopleSection isCollapsed={collapsedSections['people']} />
             <div className="flex justify-between pt-2">
               <Button variant="ghost" onClick={back}>
                 <ArrowLeft className="h-4 w-4" /> Back
@@ -131,9 +129,7 @@ export const SetupWizard = () => {
                 Add your financial accounts or link them with Plaid.
               </DialogDescription>
             </DialogHeader>
-            <AccountsSection
-              isCollapsed={collapsedSections['accounts']}
-            />
+            <AccountsSection isCollapsed={collapsedSections['accounts']} />
             <div className="flex justify-between pt-2">
               <Button variant="ghost" onClick={back}>
                 <ArrowLeft className="h-4 w-4" /> Back

@@ -21,8 +21,7 @@ export function computeFooStepCompletion(
 
   const hasLowInterestDebt = accounts.some(
     (a) =>
-      (a.accountType === 'mortgage' || a.accountType === 'student-loan') &&
-      a.startingBalance > 0,
+      (a.accountType === 'mortgage' || a.accountType === 'student-loan') && a.startingBalance > 0,
   );
 
   const hasEmployerMatch = accounts.some(
@@ -35,9 +34,7 @@ export function computeFooStepCompletion(
     (a) => a.accountType === 'emergency-fund' && a.startingBalance > 0,
   );
 
-  const hasRothIra = accounts.some(
-    (a) => a.accountType === 'roth-ira' && a.startingBalance > 0,
-  );
+  const hasRothIra = accounts.some((a) => a.accountType === 'roth-ira' && a.startingBalance > 0);
 
   const hasHsa = accounts.some((a) => a.accountType === 'hsa' && a.startingBalance > 0);
 

@@ -155,7 +155,11 @@ function PersonSummaryCard({
   canRemove: boolean;
 }) {
   const fc = (v: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(v);
 
   return (
     <Card className="relative">
@@ -167,9 +171,7 @@ function PersonSummaryCard({
             </div>
             <div className="min-w-0">
               <p className="truncate font-medium">{person.name || 'Unnamed'}</p>
-              <p className="text-muted-foreground text-xs">
-                Retire at {person.retirementAge}
-              </p>
+              <p className="text-muted-foreground text-xs">Retire at {person.retirementAge}</p>
             </div>
           </div>
           <div className="flex gap-1">
@@ -192,7 +194,8 @@ function PersonSummaryCard({
           <p>Salary: {fc(person.annualSalary)}</p>
           {person.annualBonus > 0 && (
             <p>
-              Bonus: {person.bonusMode === 'salary-percent'
+              Bonus:{' '}
+              {person.bonusMode === 'salary-percent'
                 ? `${person.annualBonus}% of salary`
                 : fc(person.annualBonus)}
             </p>
@@ -226,9 +229,13 @@ function PersonFormModal({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{mode === 'edit' ? `Edit ${person.name || 'Person'}` : 'Add Person'}</DialogTitle>
+          <DialogTitle>
+            {mode === 'edit' ? `Edit ${person.name || 'Person'}` : 'Add Person'}
+          </DialogTitle>
           <DialogDescription>
-            {mode === 'edit' ? 'Update the person\'s details below.' : 'Fill in the details for the new household member.'}
+            {mode === 'edit'
+              ? "Update the person's details below."
+              : 'Fill in the details for the new household member.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -323,9 +330,7 @@ function PersonFormModal({
               Save & Add Another
             </Button>
           )}
-          {mode === 'add' && (
-            <Button onClick={onClose}>Save</Button>
-          )}
+          {mode === 'add' && <Button onClick={onClose}>Save</Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

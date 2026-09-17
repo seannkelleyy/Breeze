@@ -40,7 +40,7 @@ function AccountsContent() {
   }, [connections, syncConnection]);
 
   // Manage local UI state
-  const { collapsedSections, toggleSection } = usePlannerState();
+  const { collapsedSections } = usePlannerState();
 
   // Load planner data from API on mount and hydrate state
   usePlannerHydration();
@@ -67,9 +67,7 @@ function AccountsContent() {
 
       {/* Configuration Sections */}
       <div className="space-y-6">
-        <AccountsSection
-          isCollapsed={collapsedSections['accounts']}
-        />
+        <AccountsSection isCollapsed={collapsedSections['accounts']} />
       </div>
     </div>
   );

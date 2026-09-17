@@ -66,7 +66,12 @@ export const SummaryCards = ({
 
   const liabilityAccounts = plannerAccounts
     .filter((a) => isLiabilityAccountType(a.accountType))
-    .map((a) => ({ id: a.id, name: a.name, balance: a.startingBalance, type: 'liability' as const }));
+    .map((a) => ({
+      id: a.id,
+      name: a.name,
+      balance: a.startingBalance,
+      type: 'liability' as const,
+    }));
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

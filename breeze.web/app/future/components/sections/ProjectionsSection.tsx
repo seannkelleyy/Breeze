@@ -68,8 +68,6 @@ export function ProjectionsSection({
   accountBreakdownRows,
   financialMathSnapshot,
   collapses,
-  hasReachedCoastFire,
-  coastFireGap,
 }: ProjectionsSectionProps) {
   const { requiredMonthly, plannedMonthly, retirementEstimateCard, accountBreakdown, onToggle } =
     collapses;

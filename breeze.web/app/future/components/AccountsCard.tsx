@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { CardContent } from '@/components/ui/card';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { formatCurrencyWithCode, getEmployeeMonthlyContribution } from '../lib/plannerMath';
 import { usePlannerAccounts } from '../hooks/planner/index';
@@ -64,13 +63,6 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
     totalPlannedMonthlyMatch,
     totalPlannedMonthlyInvestment,
   } = data;
-
-  // Calculate debt payments from liability accounts
-  const totalPlannedMonthlyDebtPayments = useMemo(() => {
-    return plannerAccounts
-      .filter((a) => isLiabilityAccountType(a.accountType))
-      .reduce((sum, a) => sum + getEmployeeMonthlyContribution(a, people), 0);
-  }, [plannerAccounts, people]);
   const {
     accountRateProfileOptions,
     accountTypeOptions,
@@ -89,6 +81,13 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
     isNonContributingAccountType,
     isDepreciatingAssetType,
   } = typeGuards;
+
+  // Calculate debt payments from liability accounts
+  const totalPlannedMonthlyDebtPayments = useMemo(() => {
+    return plannerAccounts
+      .filter((a) => isLiabilityAccountType(a.accountType))
+      .reduce((sum, a) => sum + getEmployeeMonthlyContribution(a, people), 0);
+  }, [plannerAccounts, people, isLiabilityAccountType]);
   const {
     getSuggestedAnnualLimitForAccount,
     getDisplayedRateForAccount,
@@ -349,15 +348,10 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
 
           <div className="bg-background sticky bottom-0 flex items-center justify-between gap-4 border-t pt-3">
             <div className="text-muted-foreground text-sm">
-              <p>
-                Personal contributions:{' '}
-                {formatCurrency(totalPlannedMonthlyEmployee)}/month
-              </p>
+              <p>Personal contributions: {formatCurrency(totalPlannedMonthlyEmployee)}/month</p>
               <p>Employer match: {formatCurrency(totalPlannedMonthlyMatch)}/month</p>
-              <p>
-                Debt payments: {formatCurrency(totalPlannedMonthlyDebtPayments)}/month
-              </p>
-              <p className="font-medium text-foreground">
+              <p>Debt payments: {formatCurrency(totalPlannedMonthlyDebtPayments)}/month</p>
+              <p className="text-foreground font-medium">
                 Total: {formatCurrency(totalPlannedMonthlyInvestment)}/month
               </p>
             </div>

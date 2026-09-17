@@ -42,7 +42,7 @@ export function UserMenu() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <button className="focus-visible:ring-ring cursor-pointer rounded-full outline-none focus-visible:ring-2">
             {user?.imageUrl ? (
               <Image
                 src={user.imageUrl}

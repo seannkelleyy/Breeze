@@ -320,8 +320,14 @@ export function AccountListItem({
   const Icon = ACCOUNT_ICONS[account.accountType] || PiggyBank;
   const collapsedSummary = isAccountCollapsed
     ? isLiability
-      ? { primary: formatCurrency(account.startingBalance), secondary: `Payment: ${formatCurrency(employeeMonthly)}/mo` }
-      : { primary: formatCurrency(account.startingBalance), secondary: `${formatCurrency(employeeMonthly)}/mo contribution` }
+      ? {
+          primary: formatCurrency(account.startingBalance),
+          secondary: `Payment: ${formatCurrency(employeeMonthly)}/mo`,
+        }
+      : {
+          primary: formatCurrency(account.startingBalance),
+          secondary: `${formatCurrency(employeeMonthly)}/mo contribution`,
+        }
     : null;
 
   const lastUpdatedAgo = account.lastValueUpdatedAt
@@ -331,9 +337,7 @@ export function AccountListItem({
   return (
     <div
       className={`group rounded-lg border transition-colors ${
-        isAccountCollapsed
-          ? 'bg-muted/30 hover:bg-muted/50'
-          : 'hover:border-primary/30'
+        isAccountCollapsed ? 'bg-muted/30 hover:bg-muted/50' : 'hover:border-primary/30'
       }`}
     >
       {/* Header — always visible */}
@@ -489,9 +493,7 @@ export function AccountListItem({
               <span className="font-medium">
                 {formatCurrency(employeeAnnual)} / {formatCurrency(suggestedLimit)}
               </span>
-              <span className="ml-1">
-                IRS limit (age {ownerAge})
-              </span>
+              <span className="ml-1">IRS limit (age {ownerAge})</span>
               {plannerConstants.isMoneyGreaterThanWithTolerance(employeeAnnual, suggestedLimit) && (
                 <span className="text-destructive ml-2 font-medium">
                   Over by {formatCurrency(employeeAnnual - suggestedLimit)}

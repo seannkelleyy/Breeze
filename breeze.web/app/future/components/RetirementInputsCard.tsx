@@ -33,7 +33,6 @@ export type RetirementInputsCardProps = {
 export const RetirementInputsCard = ({
   fireTargets,
   suggestedSafeWithdrawalRate,
-  financialFreedomAge,
   coastFireTargetToday,
   coastFireGap,
   hasReachedCoastFire,
@@ -128,132 +127,127 @@ export const RetirementInputsCard = ({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div className="space-y-4 sm:col-span-2">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <Label htmlFor="monthly-expenses">Current Monthly Expenses</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={refreshMonthlyExpenses}
-                    disabled={!isSignedIn || isRefreshingExpenses}
-                  >
-                    {isRefreshingExpenses ? 'Refreshing...' : 'Refresh'}
-                  </Button>
-                </div>
-                <FormattedNumberInput
-                  id="monthly-expenses"
-                  value={monthlyExpenses}
-                  onValueChange={setMonthlyExpenses}
-                  maxFractionDigits={0}
-                />
-              </div>
-              <div className="text-muted-foreground space-y-1 rounded-md border p-3 text-sm">
-                <p className="text-foreground font-medium">Safe Withdrawal Rate</p>
-                <p>{safeWithdrawalRate.toFixed(2)}%</p>
-                <p>Set this in Preferences.</p>
-              </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="monthly-expenses">Current Monthly Expenses</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={refreshMonthlyExpenses}
+                disabled={!isSignedIn || isRefreshingExpenses}
+              >
+                {isRefreshingExpenses ? 'Refreshing...' : 'Refresh'}
+              </Button>
             </div>
+            <FormattedNumberInput
+              id="monthly-expenses"
+              value={monthlyExpenses}
+              onValueChange={setMonthlyExpenses}
+              maxFractionDigits={0}
+            />
+          </div>
+          <div className="text-muted-foreground space-y-1 rounded-md border p-3 text-sm">
+            <p className="text-foreground font-medium">Safe Withdrawal Rate</p>
+            <p>{safeWithdrawalRate.toFixed(2)}%</p>
+            <p>Set this in Preferences.</p>
+          </div>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="target-selection-slider">Retirement Target Selection</Label>
-              <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 md:grid-cols-6">
-                {targetGuideItems.map((item, index) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => handleTargetAmountChange(item.target)}
-                    className={`rounded border px-2 py-1 text-left transition-colors ${
-                      closestGuideIndex === index
-                        ? 'border-accent text-accent bg-accent/5 font-semibold'
-                        : 'border-border text-muted-foreground'
-                    }`}
-                  >
-                    <div>{item.label}</div>
-                    <div>{formatCurrency(item.target)}</div>
-                  </button>
-                ))}
-              </div>
-              <input
-                id="target-selection-slider"
-                type="range"
-                min={sliderMin}
-                max={sliderMax}
-                step={1000}
-                value={sliderAmount}
-                onChange={(event) => handleTargetAmountChange(Number(event.target.value))}
-                className="w-full"
-              />
-              <div className="text-muted-foreground flex justify-between text-xs">
-                <span>{formatCurrency(sliderMin)}</span>
-                <span>{formatCurrency(sliderMax)}</span>
-              </div>
-              <p className="text-muted-foreground text-sm">
-                Selected target amount: {formatCurrency(sliderAmount)}
-              </p>
-            </div>
-            <div className="text-muted-foreground space-y-1 rounded-md border p-3 text-sm">
-              <p>
-                Current household income: {formatCurrency(financialMathSnapshot.grossIncome)} / year
-              </p>
-              <p>Income replacement rate: {incomeReplacementRate.toFixed(0)}%</p>
-              <p>Annual income to replace: {formatCurrency(incomeReplacementAnnualNeed)} / year</p>
-              <p>Income-replacement target: {formatCurrency(incomeReplacementTarget)}</p>
-              <p className="text-xs opacity-70">
-                Projected income at retirement:{' '}
-                {formatCurrency(projectedHouseholdIncomeAtRetirement)} / year
-              </p>
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="target-selection-slider">Retirement Target Selection</Label>
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 md:grid-cols-6">
+            {targetGuideItems.map((item, index) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => handleTargetAmountChange(item.target)}
+                className={`rounded border px-2 py-1 text-left transition-colors ${
+                  closestGuideIndex === index
+                    ? 'border-accent text-accent bg-accent/5 font-semibold'
+                    : 'border-border text-muted-foreground'
+                }`}
+              >
+                <div>{item.label}</div>
+                <div>{formatCurrency(item.target)}</div>
+              </button>
+            ))}
           </div>
-          <div className="text-muted-foreground space-y-1 rounded-md border p-3 text-xs sm:col-span-2">
-            <p className="text-foreground font-medium">Coast FIRE</p>
-            <p>Current portfolio: {formatCurrency(financialMathSnapshot.currentPortfolio)}</p>
-            <p>Target needed today: {formatCurrency(coastFireTargetToday)}</p>
-            <p
-              className={
-                hasReachedCoastFire ? 'text-accent font-semibold' : 'text-muted-foreground'
-              }
+          <input
+            id="target-selection-slider"
+            type="range"
+            min={sliderMin}
+            max={sliderMax}
+            step={1000}
+            value={sliderAmount}
+            onChange={(event) => handleTargetAmountChange(Number(event.target.value))}
+            className="w-full"
+          />
+          <div className="text-muted-foreground flex justify-between text-xs">
+            <span>{formatCurrency(sliderMin)}</span>
+            <span>{formatCurrency(sliderMax)}</span>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            Selected target amount: {formatCurrency(sliderAmount)}
+          </p>
+        </div>
+        <div className="text-muted-foreground space-y-1 rounded-md border p-3 text-sm">
+          <p>
+            Current household income: {formatCurrency(financialMathSnapshot.grossIncome)} / year
+          </p>
+          <p>Income replacement rate: {incomeReplacementRate.toFixed(0)}%</p>
+          <p>Annual income to replace: {formatCurrency(incomeReplacementAnnualNeed)} / year</p>
+          <p>Income-replacement target: {formatCurrency(incomeReplacementTarget)}</p>
+          <p className="text-xs opacity-70">
+            Projected income at retirement: {formatCurrency(projectedHouseholdIncomeAtRetirement)} /
+            year
+          </p>
+        </div>
+      </div>
+      <div className="text-muted-foreground space-y-1 rounded-md border p-3 text-xs sm:col-span-2">
+        <p className="text-foreground font-medium">Coast FIRE</p>
+        <p>Current portfolio: {formatCurrency(financialMathSnapshot.currentPortfolio)}</p>
+        <p>Target needed today: {formatCurrency(coastFireTargetToday)}</p>
+        <p className={hasReachedCoastFire ? 'text-accent font-semibold' : 'text-muted-foreground'}>
+          {hasReachedCoastFire
+            ? `Coast FIRE by ${formatCurrency(Math.abs(coastFireGap))}.`
+            : `Need ${formatCurrency(Math.abs(coastFireGap))} more.`}
+        </p>
+      </div>
+      <div className="rounded-md border p-3 sm:col-span-2">
+        <p className="text-muted-foreground mb-2 text-xs">FIRE targets:</p>
+        <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+          {fireTargets.map((target, index) => (
+            <div
+              key={target.label}
+              className={index === safeFireIndex ? 'text-accent font-semibold' : ''}
             >
-              {hasReachedCoastFire
-                ? `Coast FIRE by ${formatCurrency(Math.abs(coastFireGap))}.`
-                : `Need ${formatCurrency(Math.abs(coastFireGap))} more.`}
-            </p>
-          </div>
-          <div className="rounded-md border p-3 sm:col-span-2">
-            <p className="text-muted-foreground mb-2 text-xs">FIRE targets:</p>
-            <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-              {fireTargets.map((target, index) => (
-                <div
-                  key={target.label}
-                  className={index === safeFireIndex ? 'text-accent font-semibold' : ''}
-                >
-                  {target.label}: {formatCurrency(target.target)}
-                </div>
-              ))}
+              {target.label}: {formatCurrency(target.target)}
             </div>
-            <div className="text-muted-foreground mt-3 space-y-1 rounded-md border p-3 text-xs">
-              <p>Safe withdrawal rate: {suggestedSafeWithdrawalRate.toFixed(2)}%</p>
+          ))}
+        </div>
+        <div className="text-muted-foreground mt-3 space-y-1 rounded-md border p-3 text-xs">
+          <p>Safe withdrawal rate: {suggestedSafeWithdrawalRate.toFixed(2)}%</p>
+          <p>
+            Portfolio yearly income: {formatCurrency(financialMathSnapshot.yearlyPortfolioIncome)}
+          </p>
+          {selectedFireScenario && (
+            <>
               <p>
-                Portfolio yearly income:{' '}
-                {formatCurrency(financialMathSnapshot.yearlyPortfolioIncome)}
+                {selectedFireScenario.label} progress:{' '}
+                {selectedFireScenario.percentToGoal.toFixed(2)}%
               </p>
-              {selectedFireScenario && (
-                <>
-                  <p>
-                    {selectedFireScenario.label} progress:{' '}
-                    {selectedFireScenario.percentToGoal.toFixed(2)}%
-                  </p>
-                  <p>
-                    Years to goal:{' '}
-                    {selectedFireScenario.yearsUntilGoal === null
-                      ? 'Needs positive savings'
-                      : selectedFireScenario.yearsUntilGoal.toFixed(1)}
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
+              <p>
+                Years to goal:{' '}
+                {selectedFireScenario.yearsUntilGoal === null
+                  ? 'Needs positive savings'
+                  : selectedFireScenario.yearsUntilGoal.toFixed(1)}
+              </p>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

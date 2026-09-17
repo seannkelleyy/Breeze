@@ -27,7 +27,7 @@ function PeopleContent() {
   const { userId, isLoaded } = useCurrentUser();
 
   // Manage local UI state
-  const { collapsedSections, toggleSection } = usePlannerState();
+  const { collapsedSections } = usePlannerState();
 
   // Load planner data from API on mount and hydrate state
   usePlannerHydration();
@@ -54,9 +54,7 @@ function PeopleContent() {
 
       {/* Configuration Sections */}
       <div className="space-y-6">
-        <PeopleSection
-          isCollapsed={collapsedSections['people']}
-        />
+        <PeopleSection isCollapsed={collapsedSections['people']} />
       </div>
     </div>
   );

@@ -76,9 +76,11 @@ const RequiredMonthlyContributionCard = ({
               <p className="mt-0.5 text-lg font-semibold">
                 Age {financialFreedomAge}
                 <span className="text-muted-foreground ml-2 text-xs font-normal">
-                  ({financialFreedomAge - currentAge > 0
+                  (
+                  {financialFreedomAge - currentAge > 0
                     ? `in ${financialFreedomAge - currentAge} years`
-                    : 'now'})
+                    : 'now'}
+                  )
                 </span>
               </p>
             </div>

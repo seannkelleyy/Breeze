@@ -78,8 +78,7 @@ function usePortfolioCalculation(
     () =>
       accounts
         .filter(
-          (a) =>
-            !isCombinedAssetType(a.accountType) && !isLiabilityAccountType(a.accountType),
+          (a) => !isCombinedAssetType(a.accountType) && !isLiabilityAccountType(a.accountType),
         )
         .reduce((sum, a) => sum + clamp(a.startingBalance), 0),
     [accounts],

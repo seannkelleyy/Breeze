@@ -1,12 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import {
-  LayoutDashboard,
-  TrendingUp,
-  Wallet,
-  Users,
-  Target,
-  UserRound,
-} from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Wallet, Users, Target, UserRound } from 'lucide-react';
 
 export type RouteNavItem = {
   label: string;

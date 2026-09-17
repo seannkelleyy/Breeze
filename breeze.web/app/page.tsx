@@ -174,6 +174,8 @@ function DashboardContent() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+
   if (!isSignedIn || !isLoaded) {
     return (
       <section className="flex h-screen w-screen flex-col items-center justify-center">
@@ -201,8 +203,6 @@ function DashboardContent() {
   ];
   const completedSetupSteps = setupSteps.filter((s) => s.done).length;
 
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
-
   const toggleCard = (card: string) => {
     setExpandedCard((prev) => (prev === card ? null : card));
   };
@@ -226,21 +226,29 @@ function DashboardContent() {
               {data ? (
                 <>
                   {data.assetCount}{' '}
-                  <Link href="/accounts" className="text-foreground underline underline-offset-2 hover:no-underline">
+                  <Link
+                    href="/accounts"
+                    className="text-foreground underline underline-offset-2 hover:no-underline"
+                  >
                     assets
                   </Link>
                   , {data.liabilityCount}{' '}
-                  <Link href="/accounts" className="text-foreground underline underline-offset-2 hover:no-underline">
+                  <Link
+                    href="/accounts"
+                    className="text-foreground underline underline-offset-2 hover:no-underline"
+                  >
                     liabilities
                   </Link>
                 </>
-              ) : 'Loading...'}
+              ) : (
+                'Loading...'
+              )}
             </p>
           </CardContent>
         </Card>
 
         <Card
-          className="cursor-pointer transition-colors hover:bg-accent/50"
+          className="hover:bg-accent/50 cursor-pointer transition-colors"
           onClick={() => toggleCard('assets')}
         >
           <CardHeader className="pb-2">
@@ -271,7 +279,7 @@ function DashboardContent() {
         </Card>
 
         <Card
-          className="cursor-pointer transition-colors hover:bg-accent/50"
+          className="hover:bg-accent/50 cursor-pointer transition-colors"
           onClick={() => toggleCard('liabilities')}
         >
           <CardHeader className="pb-2">
