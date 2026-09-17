@@ -24,48 +24,46 @@ export function CurrentSnapshotSection({
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
   const netWorth = totalAssets - totalLiabilities;
   const monthlyIncome = annualHouseholdIncome / 12;
+  const monthlySavings = totalPlannedMonthlyInvestment;
+  const yearlyExpenses = monthlyExpenses * 12;
+  const yearlyIncome = annualHouseholdIncome;
+  const yearlySavings = monthlySavings * 12;
 
   return (
     <div className="space-y-3">
       <h2 className="text-lg font-semibold">Current Snapshot</h2>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Card>
-          <CardContent className="p-3">
-            <p className="text-muted-foreground text-xs">Monthly Income</p>
-            <p className="text-lg font-semibold">{fc(monthlyIncome)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3">
-            <p className="text-muted-foreground text-xs">Monthly Expenses</p>
-            <p className="text-lg font-semibold">{fc(monthlyExpenses)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3">
-            <p className="text-muted-foreground text-xs">Monthly Savings</p>
-            <p className="text-lg font-semibold">{fc(totalPlannedMonthlyInvestment)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3">
-            <p className="text-muted-foreground text-xs">Savings Rate</p>
-            <p className="text-lg font-semibold">{currentSavingsRate.toFixed(1)}%</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3">
-            <p className="text-muted-foreground text-xs">Net Worth</p>
-            <p className="text-lg font-semibold">{fc(netWorth)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3">
-            <p className="text-muted-foreground text-xs">Investments</p>
-            <p className="text-lg font-semibold">{fc(totalAssets - totalLiabilities)}</p>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="bg-muted/50">
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Income</p>
+              <p className="text-lg font-semibold">
+                {fc(monthlyIncome)} <span className="text-muted-foreground text-xs font-normal">per month</span>
+              </p>
+              <p className="text-muted-foreground text-xs">({fc(yearlyIncome)} per year)</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Expenses</p>
+              <p className="text-lg font-semibold">
+                {fc(monthlyExpenses)} <span className="text-muted-foreground text-xs font-normal">per month</span>
+              </p>
+              <p className="text-muted-foreground text-xs">({fc(yearlyExpenses)} per year)</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Savings</p>
+              <p className="text-lg font-semibold">
+                {fc(monthlySavings)} <span className="text-muted-foreground text-xs font-normal">per month</span>
+              </p>
+              <p className="text-muted-foreground text-xs">({fc(yearlySavings)} per year · {currentSavingsRate.toFixed(1)}% rate)</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Net Worth</p>
+              <p className="text-lg font-semibold">{fc(netWorth)}</p>
+              <p className="text-muted-foreground text-xs">({fc(totalAssets)} assets · {fc(totalLiabilities)} liabilities)</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
