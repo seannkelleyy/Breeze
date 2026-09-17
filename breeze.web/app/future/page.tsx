@@ -8,9 +8,9 @@ import { usePlannerState } from './hooks/usePlannerState';
 import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
 
 import { ProjectionsSection } from './components/sections';
+import { CurrentSnapshotSection } from './components/CurrentSnapshotSection';
 import { FIRETargetsSection } from './components/FIRETargetsSection';
 import { accountLineColors, getDefaultAssetFinanceDetailsForAccount } from './lib/plannerMath';
-import { PLANNER_DEFAULT_INCOME_REPLACEMENT_RATE } from './lib/constants';
 
 export default function PlannerPage() {
   return (
@@ -28,12 +28,11 @@ export default function PlannerPage() {
 
 function PlannerContent() {
   const { isLoaded: clerkLoaded } = useUser();
-  const { userId, isLoaded } = useCurrentUser();
+  const { userId, isLoaded, currencyCode } = useCurrentUser();
   const { data: connections } = usePlaidConnections(userId);
   const { mutate: syncConnection } = useSyncPlaidConnection();
   const hasSyncedRef = useRef(false);
 
-  // Auto-sync Plaid connections on page load (once per session)
   useEffect(() => {
     if (!connections || connections.length === 0 || hasSyncedRef.current) return;
     hasSyncedRef.current = true;
@@ -42,10 +41,7 @@ function PlannerContent() {
     }
   }, [connections, syncConnection]);
 
-  // Manage local UI state
   const { collapsedSections, toggleSection } = usePlannerState();
-
-  // Load planner data from API on mount and hydrate state
   const { data: plannerData } = useFetchPlanner();
 
   const {
@@ -97,7 +93,6 @@ function PlannerContent() {
     setCurrencyCode,
   ]);
 
-  // Calculate projections with user's preferences
   const {
     accounts,
     currentAge,
@@ -105,24 +100,15 @@ function PlannerContent() {
     projectionRows,
     accountBreakdownRows,
     dynamicChartConfig,
-    fireTargets,
-    baseFinancialFreedomTarget,
-    retirementHorizonYears,
-    suggestedSafeWithdrawalRate,
-    financialFreedomAge,
-    coastFireTargetToday,
-    coastFireGap,
-    hasReachedCoastFire,
-    projectedHouseholdIncomeAtRetirement,
-    incomeReplacementAnnualNeed,
-    incomeReplacementTarget,
-    investmentStartingBalance,
-    realWeightedAnnualRate,
-    monthlyGapToGoal,
-    isMonthlyGapPositive,
+    fireAchievementAges,
+    annualHouseholdIncome,
+    monthlyExpenses,
+    totalPlannedMonthlyInvestment,
+    totalAssets,
+    totalLiabilities,
+    currentSavingsRate,
   } = usePlannerModel();
 
-  // Show loading state while user data loads
   if (!clerkLoaded || !isLoaded || !userId) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -136,31 +122,26 @@ function PlannerContent() {
 
   return (
     <div className="mx-auto max-w-[1200px] space-y-6 px-4 pt-16 pb-6 sm:px-6 lg:px-8">
-      {/* Page Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Future</h1>
         <p className="text-muted-foreground text-sm">Track your path to financial independence</p>
       </div>
 
-      {/* FIRE Targets — inputs + variant cards */}
-      <FIRETargetsSection
-        fireTargets={fireTargets}
-        investmentStartingBalance={investmentStartingBalance}
-        realWeightedAnnualRate={realWeightedAnnualRate}
-        yearsToGoal={retirementHorizonYears}
-        financialFreedomAge={financialFreedomAge}
-        coastFireTargetToday={coastFireTargetToday}
-        coastFireGap={coastFireGap}
-        hasReachedCoastFire={hasReachedCoastFire}
-        incomeReplacementTarget={incomeReplacementTarget}
-        monthlyGapToGoal={monthlyGapToGoal}
-        isMonthlyGapPositive={isMonthlyGapPositive}
+      <CurrentSnapshotSection
+        annualHouseholdIncome={annualHouseholdIncome}
+        monthlyExpenses={monthlyExpenses}
+        totalPlannedMonthlyInvestment={totalPlannedMonthlyInvestment}
+        currentSavingsRate={currentSavingsRate}
+        totalAssets={totalAssets}
+        totalLiabilities={totalLiabilities}
+        currencyCode={currencyCode}
       />
 
-      {/* Projections — chart, breakdown, summary */}
+      <FIRETargetsSection fireAchievementAges={fireAchievementAges} currentAge={currentAge} />
+
       <ProjectionsSection
         currentAge={currentAge}
-        financialFreedomAge={financialFreedomAge}
+        financialFreedomAge={null}
         chartConfig={dynamicChartConfig}
         projectionRows={projectionRows}
         accounts={accounts}

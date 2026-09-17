@@ -406,6 +406,27 @@ function useFinancialFreedomAge(projectionRows: ProjectionRow[], financialFreedo
   }, [projectionRows, financialFreedomTarget]);
 }
 
+// ─── FIRE Achievement Ages ────────────────────────────────
+function useFireAchievementAges(
+  projectionRows: ProjectionRow[],
+  fireTargets: Array<{ label: string; target: number }>,
+  currentAge: number,
+) {
+  return useMemo(() => {
+    return fireTargets.map((ft) => {
+      const hit = projectionRows.find((r) => r.totalBalance >= ft.target);
+      const achievementAge = hit?.age ?? null;
+      const yearsToAchieve = achievementAge !== null ? achievementAge - currentAge : null;
+      return {
+        label: ft.label,
+        target: ft.target,
+        achievementAge,
+        yearsToAchieve,
+      };
+    });
+  }, [projectionRows, fireTargets, currentAge]);
+}
+
 // ─── Account Breakdown ────────────────────────────────────
 function useAccountBreakdown(
   accounts: ReturnType<typeof useCurrentUser>['plannerAccounts'],
@@ -539,6 +560,11 @@ const usePlannerModel = () => {
     projectionRows,
     targets.financialFreedomTarget,
   );
+  const fireAchievementAges = useFireAchievementAges(
+    projectionRows,
+    targets.fireTargets,
+    household.currentAge,
+  );
   const accountBreakdownRows = useAccountBreakdown(
     filteredAccounts,
     household,
@@ -604,6 +630,7 @@ const usePlannerModel = () => {
     accountBreakdownRows,
     dynamicChartConfig,
     fireTargets: targets.fireTargets,
+    fireAchievementAges,
     baseFinancialFreedomTarget: targets.baseFinancialFreedomTarget,
     retirementHorizonYears: targets.retirementHorizonYears,
     suggestedSafeWithdrawalRate: targets.suggestedSafeWithdrawalRate,
@@ -618,6 +645,12 @@ const usePlannerModel = () => {
     realWeightedAnnualRate: portfolio.realWeightedAnnualRate,
     monthlyGapToGoal: targets.monthlyGap,
     isMonthlyGapPositive: targets.isMonthlyGapPositive,
+    annualHouseholdIncome: household.annualHouseholdIncome,
+    monthlyExpenses: plannerMonthlyExpenses,
+    totalPlannedMonthlyInvestment: portfolio.totalPlannedMonthlyInvestment,
+    totalAssets: portfolio.totalAssets,
+    totalLiabilities: portfolio.totalLiabilities,
+    currentSavingsRate: portfolio.currentSavingsRateTotal,
   };
 };
 
