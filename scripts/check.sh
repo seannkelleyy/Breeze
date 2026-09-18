@@ -58,9 +58,6 @@ run_web() {
   info "[web] Prettier (auto-format)"
   npx prettier --write . --log-level warn 2>/dev/null || true
 
-  info "[web] Generate GraphQL types from API schema"
-  npm run gen 2>/dev/null || info "[web] gen skipped — run 'npm install' first"
-
   info "[web] Lint (auto-fix)"
   npm run lint:fix 2>/dev/null || npm run lint || fail "[web] lint"
 

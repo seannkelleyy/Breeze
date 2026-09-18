@@ -35,7 +35,6 @@ npm run build      # static export to out/
 npm run lint       # ESLint check
 npm run typecheck  # TypeScript check
 npm run check      # typecheck + lint + build
-npm run gen        # GraphQL codegen
 npm run test       # Vitest
 ```
 
