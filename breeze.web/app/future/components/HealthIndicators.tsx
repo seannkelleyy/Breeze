@@ -1,6 +1,6 @@
 'use client';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { formatCurrencyWithCode } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 

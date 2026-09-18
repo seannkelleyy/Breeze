@@ -7,7 +7,7 @@
  */
 
 import type { AccountType } from '../types/account';
-import type { ApiAssetType } from '../types/apiAsset';
+import type { ApiAssetType, ApiLiabilityType } from '../types/apiAsset';
 
 /**
  * Maps a frontend AccountType to the corresponding backend ApiAssetType.
@@ -54,6 +54,38 @@ export function apiAssetTypeToAccountType(apiType: ApiAssetType): AccountType {
     HSA: 'hsa',
     HOME: 'home',
     VEHICLE: 'vehicle',
+    OTHER: 'other',
+  };
+
+  return mapping[apiType];
+}
+
+/**
+ * Maps a frontend AccountType to the corresponding backend ApiLiabilityType.
+ * Returns 'OTHER' for non-liability types.
+ */
+export function accountTypeToApiLiabilityType(accountType: AccountType): ApiLiabilityType {
+  const mapping: Partial<Record<AccountType, ApiLiabilityType>> = {
+    'student-loan': 'STUDENT_LOAN',
+    'credit-card': 'CREDIT_CARD',
+    'personal-loan': 'PERSONAL_LOAN',
+    'auto-loan': 'AUTO_LOAN',
+    mortgage: 'MORTGAGE',
+  };
+
+  return mapping[accountType] ?? 'OTHER';
+}
+
+/**
+ * Maps a backend ApiLiabilityType to the corresponding frontend AccountType.
+ */
+export function apiLiabilityTypeToAccountType(apiType: ApiLiabilityType): AccountType {
+  const mapping: Record<ApiLiabilityType, AccountType> = {
+    STUDENT_LOAN: 'student-loan',
+    CREDIT_CARD: 'credit-card',
+    PERSONAL_LOAN: 'personal-loan',
+    AUTO_LOAN: 'auto-loan',
+    MORTGAGE: 'mortgage',
     OTHER: 'other',
   };
 

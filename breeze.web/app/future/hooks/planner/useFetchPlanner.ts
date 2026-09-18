@@ -5,7 +5,9 @@ import { ME_QUERY } from '@/lib/services/queries/users';
 import useGraphql from '@/lib/services/useGraphql';
 import { useQuery } from '@tanstack/react-query';
 import { PlannerAccount } from '../../types/account';
+import type { ApiAssetType, ApiLiabilityType } from '../../types/apiAsset';
 import { PlannerPerson } from '../../types/person';
+import { apiAssetTypeToAccountType, apiLiabilityTypeToAccountType } from '../../lib/typeMapping';
 
 interface MeResponse {
   me: {
@@ -126,9 +128,15 @@ const useFetchPlanner = () => {
         annualBonus: Number(p.annualBonus),
         incomeGrowthRate: Number(p.incomeGrowthRate),
         isPrimary: index === 0,
-        payType: ((p as Record<string, unknown>).payType as string || 'salary') as 'salary' | 'hourly' | 'commission',
+        payType: (((p as Record<string, unknown>).payType as string) || 'salary') as
+          | 'salary'
+          | 'hourly'
+          | 'commission',
         payDay: ((p as Record<string, unknown>).payDay as number) ?? 1,
-        payCadence: ((p as Record<string, unknown>).payCadence as string || 'biweekly') as 'weekly' | 'biweekly' | 'monthly',
+        payCadence: (((p as Record<string, unknown>).payCadence as string) || 'biweekly') as
+          | 'weekly'
+          | 'biweekly'
+          | 'monthly',
         hourlyRate: Number((p as Record<string, unknown>).hourlyRate) || 0,
         expectedHoursPerWeek: Number((p as Record<string, unknown>).expectedHoursPerWeek) || 0,
         createdAt: p.createdAt,
@@ -140,7 +148,7 @@ const useFetchPlanner = () => {
         id: a.id,
         name: a.name,
         personIds: a.personIds,
-        accountType: mapApiAssetTypeToPlanner(a.assetType),
+        accountType: apiAssetTypeToAccountType(a.assetType as ApiAssetType),
         contributionMode: (a.contributionMode || 'monthly') as PlannerAccount['contributionMode'],
         contributionValue: Number(a.contributionValue) || 0,
         employerMatchRate: (Number(a.employerMatchRate) || 0) * 100,
@@ -163,7 +171,7 @@ const useFetchPlanner = () => {
         id: l.id,
         name: l.name,
         personIds: l.personIds,
-        accountType: mapApiLiabilityTypeToPlanner(l.liabilityType),
+        accountType: apiLiabilityTypeToAccountType(l.liabilityType as ApiLiabilityType),
         contributionMode: (l.contributionMode || 'monthly') as PlannerAccount['contributionMode'],
         contributionValue: Number(l.contributionValue) || 0,
         employerMatchRate: 0,
@@ -198,49 +206,5 @@ const useFetchPlanner = () => {
     staleTime: 5 * 60 * 1000,
   });
 };
-
-function mapApiAssetTypeToPlanner(apiType: string): PlannerAccount['accountType'] {
-  switch (apiType) {
-    case '_401K':
-    case '_403B':
-    case '_457':
-      return '401k';
-    case 'ROTH_IRA':
-      return 'roth-ira';
-    case 'TRADITIONAL_IRA':
-      return 'traditional-ira';
-    case 'HSA':
-      return 'hsa';
-    case 'BROKERAGE':
-      return 'brokerage';
-    case 'HOME':
-      return 'home';
-    case 'VEHICLE':
-      return 'vehicle';
-    case 'CHECKING':
-      return 'checking';
-    case 'EMERGENCY_FUND':
-      return 'emergency-fund';
-    default:
-      return 'other';
-  }
-}
-
-function mapApiLiabilityTypeToPlanner(apiType: string): PlannerAccount['accountType'] {
-  switch (apiType) {
-    case 'STUDENT_LOAN':
-      return 'student-loan';
-    case 'CREDIT_CARD':
-      return 'credit-card';
-    case 'PERSONAL_LOAN':
-      return 'personal-loan';
-    case 'AUTO_LOAN':
-      return 'auto-loan';
-    case 'MORTGAGE':
-      return 'mortgage';
-    default:
-      return 'other';
-  }
-}
 
 export default useFetchPlanner;

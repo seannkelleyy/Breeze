@@ -17,6 +17,7 @@ import dayjs from 'dayjs';
 import { ArrowUpDown } from 'lucide-react';
 
 import { useBudgetContext } from '../../providers';
+import { formatCurrencyWithCode } from '@/lib/utils';
 
 import { EditIncomeDialog } from './dialogs/EditIncomeDialog';
 import { Income } from '../../types/income';
@@ -82,10 +83,7 @@ export const IncomeTable = () => {
         },
         cell: ({ row }) => {
           const amount = parseFloat(row.getValue('amount'));
-          const formatted = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-          }).format(amount);
+          const formatted = formatCurrencyWithCode(amount, 'USD');
           return <div className="text-left font-medium">{formatted}</div>;
         },
       },
@@ -156,11 +154,7 @@ export const IncomeTable = () => {
       <div className="mb-2 flex items-center justify-between">
         <span className="text-muted-foreground text-sm">Total Incomes: {incomes.length}</span>
         <span className="text-sm font-medium">
-          Total Amount:{' '}
-          {new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-          }).format(totalAmount)}
+          Total Amount: {formatCurrencyWithCode(totalAmount, 'USD')}
         </span>
       </div>
       <section className="max-h-96 overflow-auto rounded-md border" title="Incomes Table">

@@ -1,6 +1,6 @@
 'use client';
 import { type ReactNode } from 'react';
-import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { formatCurrencyWithCode } from '@/lib/utils';
 import { isLiabilityAccountType } from '../lib/config';
 import RequiredMonthlyContributionCard from './summaryCards/RequiredMonthlyContributionCard';
 import NetWorthSnapshotCard from './summaryCards/NetWorthSnapshotCard';

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo } from 'react';
 
-import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { formatCurrencyWithCode } from '@/lib/utils';
 import { FormattedNumberInput } from '../../../components/common/form/FormattedNumberInput';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';

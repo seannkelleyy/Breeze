@@ -1,6 +1,6 @@
 'use client';
 import { CardHeader, CardTitle } from '@/components/ui/card';
-import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { formatCurrencyWithCode } from '@/lib/utils';
 import { FinancialMathSnapshot } from '../types/finance';
 import ExpensesEmergencyFundCard from './financialMathCards/ExpensesEmergencyFundCard';
 import IncomeSavingsCard from './financialMathCards/IncomeSavingsCard';

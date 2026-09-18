@@ -26,17 +26,8 @@ export const accountLineColors = [
   'hsl(var(--chart-1))',
 ];
 export const clamp = (v: number, m = 0): number => (Number.isFinite(v) ? Math.max(m, v) : m);
-export const normalizeBonusMode = (v: string | undefined): 'dollars' | 'salary-percent' =>
-  v === 'salary-percent' || v === 'percent' ? 'salary-percent' : 'dollars';
 export const toIsoDate = (d: Date): string =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-export const formatCurrencyWithCode = (v: number, c: string): string => {
-  try {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: c }).format(v);
-  } catch {
-    return `${v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  }
-};
 export const getHomeAnnualGrowthRate = (p: string | undefined, r?: number): number => {
   if (p && p !== 'custom' && p in plannerConstants.PLANNER_HOME_GROWTH_PROFILE_RATES) {
     return plannerConstants.PLANNER_HOME_GROWTH_PROFILE_RATES[
@@ -453,46 +444,47 @@ export const getProjection = (
   let contributedTotal = 0;
   for (let year = 1; year <= years; year++) {
     const isPostRetirement = currentAge + year > targetAge;
-    const monthlyWithdrawal = isPostRetirement && annualWithdrawal
-      ? (annualWithdrawal / 12) * ((1 + inflationRatePercent / 100) ** (year - 1))
-      : 0;
+    const monthlyWithdrawal =
+      isPostRetirement && annualWithdrawal
+        ? (annualWithdrawal / 12) * (1 + inflationRatePercent / 100) ** (year - 1)
+        : 0;
 
     const projectedContributionPlanByAccount = isPostRetirement
       ? accounts.map(() => ({ monthlyEmployeeContribution: 0, monthlyEmployerMatch: 0 }))
       : accounts.map((account) => {
-      const ownerPersons = people.filter((p) => account.personIds.includes(p.id));
-      const ownerPerson = ownerPersons[0] ?? people[0];
-      const ownerAnnualIncome = ownerPerson
-        ? getAnnualIncomeWithGrowth(
-            ownerPerson.annualSalary,
-            ownerPerson.incomeGrowthRate,
+          const ownerPersons = people.filter((p) => account.personIds.includes(p.id));
+          const ownerPerson = ownerPersons[0] ?? people[0];
+          const ownerAnnualIncome = ownerPerson
+            ? getAnnualIncomeWithGrowth(
+                ownerPerson.annualSalary,
+                ownerPerson.incomeGrowthRate,
+                year - 1,
+              )
+            : 0;
+          const annualEmployeeContribution = getEmployeeMonthlyContribution(account, people) * 12;
+          const ownerAge = ownerPerson ? getAgeFromBirthday(ownerPerson.birthday) : 30;
+          const ownerAgeInProjectionYear = ownerAge + (year - 1);
+          const projectedAnnualIrsLimit = getProjectedAnnualIrsLimit(
+            account.accountType,
+            ownerAgeInProjectionYear,
             year - 1,
-          )
-        : 0;
-      const annualEmployeeContribution = getEmployeeMonthlyContribution(account, people) * 12;
-      const ownerAge = ownerPerson ? getAgeFromBirthday(ownerPerson.birthday) : 30;
-      const ownerAgeInProjectionYear = ownerAge + (year - 1);
-      const projectedAnnualIrsLimit = getProjectedAnnualIrsLimit(
-        account.accountType,
-        ownerAgeInProjectionYear,
-        year - 1,
-        irLimits,
-        people.length > 1,
-        annualIrsLimitGrowthRate,
-      );
-      const cappedAnnualEmployeeContribution =
-        projectedAnnualIrsLimit > 0
-          ? Math.min(annualEmployeeContribution, projectedAnnualIrsLimit)
-          : annualEmployeeContribution;
-      return {
-        monthlyEmployeeContribution: cappedAnnualEmployeeContribution / 12,
-        monthlyEmployerMatch: getEmployerMatchMonthlyFromAnnual(
-          account,
-          ownerAnnualIncome,
-          cappedAnnualEmployeeContribution,
-        ),
-      };
-    });
+            irLimits,
+            people.length > 1,
+            annualIrsLimitGrowthRate,
+          );
+          const cappedAnnualEmployeeContribution =
+            projectedAnnualIrsLimit > 0
+              ? Math.min(annualEmployeeContribution, projectedAnnualIrsLimit)
+              : annualEmployeeContribution;
+          return {
+            monthlyEmployeeContribution: cappedAnnualEmployeeContribution / 12,
+            monthlyEmployerMatch: getEmployerMatchMonthlyFromAnnual(
+              account,
+              ownerAnnualIncome,
+              cappedAnnualEmployeeContribution,
+            ),
+          };
+        });
     for (let month = 0; month < 12; month++) {
       for (let index = 0; index < accounts.length; index++) {
         const account = accounts[index];

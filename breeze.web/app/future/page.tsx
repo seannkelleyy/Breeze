@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 import { usePlannerModel, useFetchPlanner } from './hooks/planner/index';
@@ -10,7 +10,7 @@ import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hook
 import { ProjectionsSection } from './components/sections';
 import { CurrentSnapshotSection } from './components/CurrentSnapshotSection';
 import { FIRETargetsSection } from './components/FIRETargetsSection';
-import { accountLineColors, getDefaultAssetFinanceDetailsForAccount } from './lib/plannerMath';
+import { getDefaultAssetFinanceDetailsForAccount } from './lib/plannerMath';
 
 export default function PlannerPage() {
   return (
@@ -149,7 +149,6 @@ function PlannerContent() {
         chartConfig={dynamicChartConfig}
         projectionRows={projectionRows}
         accounts={accounts}
-        accountLineColors={accountLineColors}
         accountBreakdownRows={accountBreakdownRows}
         financialMathSnapshot={financialMathSnapshot}
         projectionEndAge={projectionEndAge}

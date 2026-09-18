@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { accountTypeToApiAssetType, apiAssetTypeToAccountType } from '../typeMapping';
+import {
+  accountTypeToApiAssetType,
+  accountTypeToApiLiabilityType,
+  apiAssetTypeToAccountType,
+  apiLiabilityTypeToAccountType,
+} from '../typeMapping';
 import { AccountType } from '../../types/account';
 
 describe('accountTypeToApiAssetType', () => {
@@ -124,6 +129,71 @@ describe('round-trip mapping', () => {
       expect(apiType).not.toBeNull();
       const backType = apiAssetTypeToAccountType(apiType!);
       expect(backType).toBe(type);
+    });
+  });
+});
+
+describe('accountTypeToApiLiabilityType', () => {
+  it('maps student-loan to STUDENT_LOAN', () => {
+    expect(accountTypeToApiLiabilityType('student-loan')).toBe('STUDENT_LOAN');
+  });
+
+  it('maps credit-card to CREDIT_CARD', () => {
+    expect(accountTypeToApiLiabilityType('credit-card')).toBe('CREDIT_CARD');
+  });
+
+  it('maps personal-loan to PERSONAL_LOAN', () => {
+    expect(accountTypeToApiLiabilityType('personal-loan')).toBe('PERSONAL_LOAN');
+  });
+
+  it('maps auto-loan to AUTO_LOAN', () => {
+    expect(accountTypeToApiLiabilityType('auto-loan')).toBe('AUTO_LOAN');
+  });
+
+  it('maps mortgage to MORTGAGE', () => {
+    expect(accountTypeToApiLiabilityType('mortgage')).toBe('MORTGAGE');
+  });
+
+  it('maps non-liability types to OTHER', () => {
+    expect(accountTypeToApiLiabilityType('401k')).toBe('OTHER');
+    expect(accountTypeToApiLiabilityType('checking')).toBe('OTHER');
+  });
+});
+
+describe('apiLiabilityTypeToAccountType', () => {
+  it('maps STUDENT_LOAN to student-loan', () => {
+    expect(apiLiabilityTypeToAccountType('STUDENT_LOAN')).toBe('student-loan');
+  });
+
+  it('maps CREDIT_CARD to credit-card', () => {
+    expect(apiLiabilityTypeToAccountType('CREDIT_CARD')).toBe('credit-card');
+  });
+
+  it('maps PERSONAL_LOAN to personal-loan', () => {
+    expect(apiLiabilityTypeToAccountType('PERSONAL_LOAN')).toBe('personal-loan');
+  });
+
+  it('maps AUTO_LOAN to auto-loan', () => {
+    expect(apiLiabilityTypeToAccountType('AUTO_LOAN')).toBe('auto-loan');
+  });
+
+  it('maps MORTGAGE to mortgage', () => {
+    expect(apiLiabilityTypeToAccountType('MORTGAGE')).toBe('mortgage');
+  });
+
+  it('maps OTHER to other', () => {
+    expect(apiLiabilityTypeToAccountType('OTHER')).toBe('other');
+  });
+});
+
+describe('liability round-trip mapping', () => {
+  const liabilityTypes = ['student-loan', 'credit-card', 'personal-loan', 'auto-loan', 'mortgage'];
+
+  liabilityTypes.forEach((type) => {
+    it(`round-trips ${type}`, () => {
+      const apiType = accountTypeToApiLiabilityType(type as AccountType);
+      expect(apiType).not.toBe('OTHER');
+      expect(apiLiabilityTypeToAccountType(apiType)).toBe(type);
     });
   });
 });

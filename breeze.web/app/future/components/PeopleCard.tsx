@@ -1,9 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { Pencil, Trash2, UserRound } from 'lucide-react';
+import { UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -23,26 +21,13 @@ import {
 } from '@/components/ui/select';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { DataCard } from '@/components/common/DataCard';
 import { usePlannerPeople, usePersonMutations } from '../hooks/planner/index';
 import { BonusMode, PayType, PayCadence, PlannerPerson } from '../types/person';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
+import { formatCurrencyWithCode } from '@/lib/utils';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import * as plannerConstants from '../lib/constants';
-
-function formatTimeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diffMs = now - then;
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 30) return `${diffDays}d ago`;
-  const diffMonths = Math.floor(diffDays / 30);
-  return `${diffMonths}mo ago`;
-}
 
 export interface PeopleCardProps {
   collapsed: boolean;
@@ -167,73 +152,33 @@ function PersonSummaryCard({
   onDelete: () => void;
   canRemove: boolean;
 }) {
-  const fc = (v: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(v);
+  const fc = (v: number) => formatCurrencyWithCode(v, 'USD', { maximumFractionDigits: 0 });
+
+  const summaryLines = [
+    person.payType === 'hourly'
+      ? `$${person.hourlyRate}/hr × ${person.expectedHoursPerWeek}hrs/wk`
+      : `Salary: ${fc(person.annualSalary)}`,
+    person.annualBonus > 0
+      ? person.bonusMode === 'salary-percent'
+        ? `Bonus: ${person.annualBonus}% of salary`
+        : `Bonus: ${fc(person.annualBonus)}`
+      : null,
+    `Growth: ${person.incomeGrowthRate}%`,
+    `${person.payCadence} · Pay day ${person.payDay}`,
+  ].filter(Boolean) as string[];
 
   return (
-    <Card className="relative">
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-full sm:size-10">
-              <UserRound className="text-muted-foreground size-4 sm:size-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="truncate font-medium">{person.name || 'Unnamed'}</p>
-                {person.isPrimary && (
-                  <Badge variant="secondary" className="shrink-0 text-[10px]">
-                    Primary
-                  </Badge>
-                )}
-              </div>
-              <p className="text-muted-foreground text-xs">Retire at {person.retirementAge}</p>
-            </div>
-          </div>
-          <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="size-8 cursor-pointer" onClick={onEdit}>
-              <Pencil className="size-3.5" />
-            </Button>
-            {canRemove && (
-              <Button
-                variant="destructive"
-                size="icon"
-                className="size-8 cursor-pointer"
-                onClick={onDelete}
-              >
-                <Trash2 className="size-3.5" />
-              </Button>
-            )}
-          </div>
-        </div>
-        <div className="text-muted-foreground mt-3 space-y-1 text-xs">
-          <p>
-            {person.payType === 'hourly'
-              ? `$${person.hourlyRate}/hr × ${person.expectedHoursPerWeek}hrs/wk`
-              : `Salary: ${fc(person.annualSalary)}`}
-          </p>
-          {person.annualBonus > 0 && (
-            <p>
-              Bonus:{' '}
-              {person.bonusMode === 'salary-percent'
-                ? `${person.annualBonus}% of salary`
-                : fc(person.annualBonus)}
-            </p>
-          )}
-          <p>Growth: {person.incomeGrowthRate}%</p>
-          <p className="capitalize">
-            {person.payCadence} · Pay day {person.payDay}
-          </p>
-          {person.updatedAt && (
-            <p className="text-[10px] opacity-60">Updated {formatTimeAgo(person.updatedAt)}</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <DataCard
+      icon={<UserRound className="size-4" />}
+      iconVariant="muted"
+      name={person.name || 'Unnamed'}
+      badges={person.isPrimary ? [{ label: 'Primary' }] : undefined}
+      summaryLines={summaryLines}
+      updatedAt={person.updatedAt}
+      onEdit={onEdit}
+      onDelete={onDelete}
+      canDelete={canRemove}
+    />
   );
 }
 
@@ -383,7 +328,9 @@ function PersonFormModal({
             <Label>Pay Day (1-28)</Label>
             <FormattedNumberInput
               value={person.payDay}
-              onValueChange={(v) => onUpdate((c) => ({ ...c, payDay: Math.min(28, Math.max(1, v)) }))}
+              onValueChange={(v) =>
+                onUpdate((c) => ({ ...c, payDay: Math.min(28, Math.max(1, v)) }))
+              }
               maxFractionDigits={0}
             />
           </div>

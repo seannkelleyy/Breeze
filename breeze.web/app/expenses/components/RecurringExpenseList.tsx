@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { RecurringExpenseTemplate } from '@/app/budget/hooks/recurring/recurringTemplateServices';
-import { formatCurrencyWithCode } from '@/app/future/lib/plannerMath';
+import { formatCurrencyWithCode } from '@/lib/utils';
 import { RecurringExpenseFormDialog } from './RecurringExpenseFormDialog';
 
 function toDateInputValue(dateStr: string | null | undefined): string {

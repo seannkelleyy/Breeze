@@ -2,7 +2,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { formatCurrencyWithCode } from '@/lib/utils';
 
 interface FIREVariantCardProps {
   label: string;
@@ -65,7 +65,8 @@ export function FIREVariantCard({
 
         <div className="mt-3 flex items-center justify-between text-xs">
           <span className="text-muted-foreground">
-            {fc(monthlyNeeded)}/mo <span className="text-[10px]">({fc(monthlyNeeded * 12)}/yr)</span>
+            {fc(monthlyNeeded)}/mo{' '}
+            <span className="text-[10px]">({fc(monthlyNeeded * 12)}/yr)</span>
           </span>
           <span className="text-muted-foreground">
             {achieved ? 'Achieved!' : yearsToGoal !== null ? `${yearsToGoal.toFixed(1)} yrs` : '—'}

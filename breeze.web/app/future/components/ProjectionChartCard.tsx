@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 
 import { Line } from 'recharts';
 
-import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { formatCurrencyWithCode } from '@/lib/utils';
 import BreezeLineChart from '../../../components/common/charts/BreezeLineChart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { ChartConfig } from '@/components/ui/chart';
@@ -24,7 +24,6 @@ export type ProjectionChartCardProps = {
   chartConfig: ChartConfig;
   projectionRows: ProjectionRow[];
   accounts: Array<{ id: string; name: string }>;
-  accountLineColors: string[];
   projectionEndAge: number;
   setProjectionEndAge: (age: number) => void;
 };
@@ -37,7 +36,6 @@ const ProjectionChartCard = ({
   chartConfig,
   projectionRows,
   accounts,
-  accountLineColors,
   projectionEndAge,
   setProjectionEndAge,
 }: ProjectionChartCardProps) => {

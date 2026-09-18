@@ -26,10 +26,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { formatCurrencyWithCode, formatTimeAgo } from '@/lib/utils';
 import * as plannerConstants from '../../lib/constants';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import {
-  formatCurrencyWithCode,
   getEmployeeMonthlyContribution,
   getAgeFromBirthday,
 } from '../../lib/plannerMath';
@@ -47,21 +47,6 @@ import InvestmentAccountFields from './InvestmentAccountFields';
 import LiabilityAccountFields from './LiabilityAccountFields';
 import VehicleAccountFields from './VehicleAccountFields';
 import { PlaidAccountLinker } from './PlaidAccountLinker';
-
-function formatTimeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diffMs = now - then;
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 30) return `${diffDays}d ago`;
-  const diffMonths = Math.floor(diffDays / 30);
-  return `${diffMonths}mo ago`;
-}
 
 const ACCOUNT_ICONS: Record<string, typeof PiggyBank> = {
   checking: Wallet,

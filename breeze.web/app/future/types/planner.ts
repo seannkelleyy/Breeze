@@ -1,15 +1,3 @@
-export type SectionKey =
-  | 'people'
-  | 'retirementInputs'
-  | 'plannerTools'
-  | 'accounts'
-  | 'requiredMonthly'
-  | 'plannedMonthly'
-  | 'retirementEstimateCard'
-  | 'projectionChart'
-  | 'yearlyProjection'
-  | 'accountBreakdown';
-
 export type PlannerSummary = {
   monthlyNeededForDesiredTarget: number;
   requiredMonthlyTargetLabel: string;
@@ -32,19 +20,3 @@ export type PlannerSummary = {
   financialFreedomTarget: number;
   monthlyNeededForFreedomTarget: number;
 };
-
-export interface PlannerUpsertRequest {
-  desiredInvestmentAmount: number;
-  monthlyExpenses: number;
-  inflationRate: number;
-  safeWithdrawalRate: number;
-  people: import('./person').PlannerPersonDto[];
-  accounts: import('./account').PlannerAccountDto[];
-}
-
-export interface PlannerResponse extends PlannerUpsertRequest {
-  id: number;
-  userId: string;
-  createdAtUtc: string;
-  updatedAtUtc: string;
-}

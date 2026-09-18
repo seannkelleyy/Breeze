@@ -1,6 +1,6 @@
 'use client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { Card, CardContent } from '@/components/ui/card';
+import { formatCurrencyWithCode } from '@/lib/utils';
 
 interface CurrentSnapshotSectionProps {
   annualHouseholdIncome: number;
@@ -36,30 +36,45 @@ export function CurrentSnapshotSection({
         <CardContent className="p-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Income</p>
+              <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                Income
+              </p>
               <p className="text-lg font-semibold">
-                {fc(monthlyIncome)} <span className="text-muted-foreground text-xs font-normal">per month</span>
+                {fc(monthlyIncome)}{' '}
+                <span className="text-muted-foreground text-xs font-normal">per month</span>
               </p>
               <p className="text-muted-foreground text-xs">({fc(yearlyIncome)} per year)</p>
             </div>
             <div>
-              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Expenses</p>
+              <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                Expenses
+              </p>
               <p className="text-lg font-semibold">
-                {fc(monthlyExpenses)} <span className="text-muted-foreground text-xs font-normal">per month</span>
+                {fc(monthlyExpenses)}{' '}
+                <span className="text-muted-foreground text-xs font-normal">per month</span>
               </p>
               <p className="text-muted-foreground text-xs">({fc(yearlyExpenses)} per year)</p>
             </div>
             <div>
-              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Savings</p>
-              <p className="text-lg font-semibold">
-                {fc(monthlySavings)} <span className="text-muted-foreground text-xs font-normal">per month</span>
+              <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                Savings
               </p>
-              <p className="text-muted-foreground text-xs">({fc(yearlySavings)} per year · {currentSavingsRate.toFixed(1)}% rate)</p>
+              <p className="text-lg font-semibold">
+                {fc(monthlySavings)}{' '}
+                <span className="text-muted-foreground text-xs font-normal">per month</span>
+              </p>
+              <p className="text-muted-foreground text-xs">
+                ({fc(yearlySavings)} per year · {currentSavingsRate.toFixed(1)}% rate)
+              </p>
             </div>
             <div>
-              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Net Worth</p>
+              <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                Net Worth
+              </p>
               <p className="text-lg font-semibold">{fc(netWorth)}</p>
-              <p className="text-muted-foreground text-xs">({fc(totalAssets)} assets · {fc(totalLiabilities)} liabilities)</p>
+              <p className="text-muted-foreground text-xs">
+                ({fc(totalAssets)} assets · {fc(totalLiabilities)} liabilities)
+              </p>
             </div>
           </div>
         </CardContent>

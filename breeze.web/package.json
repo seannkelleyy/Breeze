@@ -11,6 +11,7 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint && npm run build",
+    "setup": "./scripts/setup.sh",
     "gen": "graphql-codegen",
     "test": "vitest run",
     "test:watch": "vitest"

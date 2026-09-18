@@ -17,6 +17,7 @@ import { ArrowUpDown } from 'lucide-react';
 
 import { useBudgetContext } from '../../providers';
 import { Category } from '../../types/category';
+import { formatCurrencyWithCode } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,9 +68,7 @@ export const CategoriesTable = () => {
         ),
         cell: ({ row }) => {
           const amount = Number(row.getValue('allocation')) || 0;
-          return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-            amount,
-          );
+          return formatCurrencyWithCode(amount, 'USD');
         },
       },
       {
@@ -86,10 +85,7 @@ export const CategoriesTable = () => {
         ),
         cell: ({ row }) => {
           const amount = Number(row.getValue('currentSpend')) || 0;
-          const formatted = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-          }).format(amount);
+          const formatted = formatCurrencyWithCode(amount, 'USD');
           const allocation = Number(row.original.allocation) || 0;
           const overBudget = allocation > 0 && amount > allocation;
           return (
@@ -135,10 +131,7 @@ export const CategoriesTable = () => {
       <div className="mb-2 flex items-center justify-between">
         <CreateCategoryDialog />
         <span className="text-sm font-medium">
-          Total Allocation:{' '}
-          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-            totalAllocation,
-          )}
+          Total Allocation: {formatCurrencyWithCode(totalAllocation, 'USD')}
         </span>
       </div>
       <Input

@@ -394,6 +394,8 @@ function useProjections(
       irsLimits,
       inflationRate,
       useInflationAdjustedValues,
+      projectionEndAge,
+      annualWithdrawal,
     ],
   );
 

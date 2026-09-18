@@ -45,7 +45,6 @@ interface ProjectionsSectionProps {
   chartConfig: ChartConfig;
   projectionRows: ProjectionRow[];
   accounts: Array<{ id: string; name: string }>;
-  accountLineColors: string[];
   accountBreakdownRows: AccountBreakdownRow[];
   financialMathSnapshot: FinancialMathSnapshot;
   collapses: SectionCollapse;
@@ -66,7 +65,6 @@ export function ProjectionsSection({
   chartConfig,
   projectionRows,
   accounts,
-  accountLineColors,
   accountBreakdownRows,
   financialMathSnapshot,
   collapses,
@@ -108,7 +106,6 @@ export function ProjectionsSection({
         chartConfig={chartConfig}
         projectionRows={projectionRows}
         accounts={accounts}
-        accountLineColors={accountLineColors}
         projectionEndAge={projectionEndAge}
         setProjectionEndAge={setProjectionEndAge}
       />

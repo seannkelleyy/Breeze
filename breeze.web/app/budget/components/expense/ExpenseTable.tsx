@@ -17,6 +17,7 @@ import dayjs from 'dayjs';
 import { ArrowUpDown } from 'lucide-react';
 
 import { useBudgetContext } from '../../providers';
+import { formatCurrencyWithCode } from '@/lib/utils';
 
 import { EditExpenseDialog } from './dialogs/EditExpenseDialog';
 import { Button } from '@/components/ui/button';
@@ -78,10 +79,7 @@ export const ExpensesTable = () => {
         },
         cell: ({ row }) => {
           const amount = row.getValue('amount') as number;
-          return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-          }).format(amount);
+          return formatCurrencyWithCode(amount, 'USD');
         },
       },
       {

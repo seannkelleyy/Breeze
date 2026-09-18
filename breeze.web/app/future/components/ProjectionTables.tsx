@@ -2,7 +2,7 @@
 import { useState, type ReactNode } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
-import { formatCurrencyWithCode } from '../lib/plannerMath';
+import { formatCurrencyWithCode } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,

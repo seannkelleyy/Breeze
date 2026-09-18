@@ -10,7 +10,7 @@ import {
 } from '@/lib/services/queries/assets';
 import useGraphql from '@/lib/services/useGraphql';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { accountTypeToApiAssetType } from '../../lib/typeMapping';
+import { accountTypeToApiAssetType, accountTypeToApiLiabilityType } from '../../lib/typeMapping';
 import { AccountType, PlannerAccount } from '../../types/account';
 
 interface UseAccountMutationsParams {
@@ -23,28 +23,11 @@ function mapAccountTypeToApiType(accountType: string): string {
   return accountTypeToApiAssetType(accountType as AccountType) ?? 'OTHER';
 }
 
-function mapAccountTypeToLiabilityType(accountType: string): string {
-  switch (accountType) {
-    case 'student-loan':
-      return 'STUDENT_LOAN';
-    case 'credit-card':
-      return 'CREDIT_CARD';
-    case 'personal-loan':
-      return 'PERSONAL_LOAN';
-    case 'auto-loan':
-      return 'AUTO_LOAN';
-    case 'mortgage':
-      return 'MORTGAGE';
-    default:
-      return 'OTHER';
-  }
-}
-
 function buildLiabilityInput(account: PlannerAccount, liabilityUserId: string) {
   return {
     userId: liabilityUserId,
     name: account.name,
-    liabilityType: mapAccountTypeToLiabilityType(account.accountType),
+    liabilityType: accountTypeToApiLiabilityType(account.accountType),
     currentBalance: account.startingBalance.toString(),
     originalLoanAmount: account.originalLoanAmount?.toString() ?? null,
     interestRate: (account.annualRate / 100).toFixed(4),
