@@ -109,12 +109,10 @@ describe('getProjection', () => {
   });
 
   it('uses the real (inflation-adjusted) rate when enabled', () => {
-    const { projectionRows } = call(
-      [account({ startingBalance: 12000, annualRate: 12 })],
-      30,
-      31,
-      { inflationRatePercent: 2.5, useInflationAdjustedValues: true },
-    );
+    const { projectionRows } = call([account({ startingBalance: 12000, annualRate: 12 })], 30, 31, {
+      inflationRatePercent: 2.5,
+      useInflationAdjustedValues: true,
+    });
 
     const realRate = ((1 + 12 / 100) / (1 + 2.5 / 100) - 1) * 100;
     const expected = 12000 * Math.pow(1 + realRate / 100 / 12, 12);
@@ -234,12 +232,10 @@ describe('getProjection — employer match', () => {
 
 describe('getProjection — post-retirement withdrawals', () => {
   it('stops contributions and withdraws after the target age', () => {
-    const { projectionRows } = call(
-      [account({ startingBalance: 100000, annualRate: 0 })],
-      64,
-      65,
-      { projectionEndAge: 66, annualWithdrawal: 12000 },
-    );
+    const { projectionRows } = call([account({ startingBalance: 100000, annualRate: 0 })], 64, 65, {
+      projectionEndAge: 66,
+      annualWithdrawal: 12000,
+    });
 
     expect(projectionRows).toHaveLength(3);
     // Age 65: final accumulation year, no withdrawal
@@ -251,23 +247,19 @@ describe('getProjection — post-retirement withdrawals', () => {
   });
 
   it('does not withdraw when no annual withdrawal is provided', () => {
-    const { projectionRows } = call(
-      [account({ startingBalance: 100000, annualRate: 0 })],
-      64,
-      65,
-      { projectionEndAge: 66 },
-    );
+    const { projectionRows } = call([account({ startingBalance: 100000, annualRate: 0 })], 64, 65, {
+      projectionEndAge: 66,
+    });
 
     expect(projectionRows[2].totalBalance).toBeCloseTo(100000, 6);
   });
 
   it('scales withdrawals by inflation for each post-retirement year', () => {
-    const { projectionRows } = call(
-      [account({ startingBalance: 100000, annualRate: 0 })],
-      63,
-      64,
-      { projectionEndAge: 66, annualWithdrawal: 12000, inflationRatePercent: 10 },
-    );
+    const { projectionRows } = call([account({ startingBalance: 100000, annualRate: 0 })], 63, 64, {
+      projectionEndAge: 66,
+      annualWithdrawal: 12000,
+      inflationRatePercent: 10,
+    });
 
     // Year 2 (age 65→66): withdrawal = 12000 * 1.1^1
     expect(projectionRows[2].totalBalance).toBeCloseTo(100000 - 13200, 2);

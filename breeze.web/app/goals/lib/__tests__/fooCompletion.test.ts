@@ -76,24 +76,17 @@ describe('computeFooStepCompletion', () => {
 
   describe('step 2 — employer match', () => {
     it('completes when a 401k has employer match configured', () => {
-      const result = computeFooStepCompletion(
-        [account('401k', 0, 50)],
-        summary(),
-      );
+      const result = computeFooStepCompletion([account('401k', 0, 50)], summary());
       expect(result.get(2)).toBe(true);
     });
 
     it('accepts 403b and 457 plans with match', () => {
-      expect(
-        computeFooStepCompletion([account('403b', 0, 50)], summary()).get(2),
-      ).toBe(true);
+      expect(computeFooStepCompletion([account('403b', 0, 50)], summary()).get(2)).toBe(true);
       expect(computeFooStepCompletion([account('457', 0, 50)], summary()).get(2)).toBe(true);
     });
 
     it('does not complete for brokerage accounts with match configured', () => {
-      expect(computeFooStepCompletion([account('brokerage', 0, 50)], summary()).get(2)).toBe(
-        false,
-      );
+      expect(computeFooStepCompletion([account('brokerage', 0, 50)], summary()).get(2)).toBe(false);
     });
 
     it('does not complete when employer match rate is zero', () => {

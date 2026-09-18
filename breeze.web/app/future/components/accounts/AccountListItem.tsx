@@ -29,10 +29,7 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { formatCurrencyWithCode, formatTimeAgo } from '@/lib/utils';
 import * as plannerConstants from '../../lib/constants';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
-import {
-  getEmployeeMonthlyContribution,
-  getAgeFromBirthday,
-} from '../../lib/plannerMath';
+import { getEmployeeMonthlyContribution, getAgeFromBirthday } from '../../lib/plannerMath';
 import {
   AccountType,
   ContributionMode,
