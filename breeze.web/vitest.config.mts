@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import path from 'path';
+import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
   test: {
@@ -7,10 +7,11 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     include: ['**/*.test.ts', '**/*.test.tsx'],
     globals: true,
+    pool: 'vmThreads',
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname),
+      '@': fileURLToPath(new URL('.', import.meta.url)),
     },
   },
 });
