@@ -31,7 +31,8 @@ func generateIncomesForBudget(
 	monthEnd := monthStart.AddDate(0, 1, -1)
 
 	created := 0
-	for _, t := range templates {
+	for i := range templates {
+		t := &templates[i]
 		slog.Info("generateIncomesForBudget: template", "name", t.Name, "amount", t.Amount.String(), "start", t.StartDate, "end", t.EndDate, "interval", t.RecurrenceInterval)
 		if t.EndDate != nil && t.EndDate.Before(monthStart) {
 			slog.Info("generateIncomesForBudget: skipping (end before month)", "name", t.Name)
@@ -45,7 +46,7 @@ func generateIncomesForBudget(
 		occurrences := recurringOccurrences(t, monthStart, monthEnd)
 		slog.Info("generateIncomesForBudget: occurrences", "name", t.Name, "count", len(occurrences))
 		for _, occ := range occurrences {
-			if _, err := incomeSvc.Create(ctx, service.CreateIncomeInput{
+			if _, err := incomeSvc.Create(ctx, &service.CreateIncomeInput{
 				UserID:               userID,
 				BudgetID:             budgetID,
 				Name:                 t.Name,
@@ -67,7 +68,7 @@ func generateIncomesForBudget(
 
 // recurringOccurrences returns the dates within [monthStart, monthEnd] that a
 // recurring income template falls on, based on its recurrence interval.
-func recurringOccurrences(t service.RecurringIncome, monthStart, monthEnd time.Time) []time.Time {
+func recurringOccurrences(t *service.RecurringIncome, monthStart, monthEnd time.Time) []time.Time {
 	effectiveEnd := monthEnd
 	if t.EndDate != nil && t.EndDate.Before(monthEnd) {
 		effectiveEnd = *t.EndDate

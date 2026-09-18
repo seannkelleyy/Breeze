@@ -197,7 +197,8 @@ func (s *PlaidService) SyncAccounts(ctx context.Context, connectionID uuid.UUID)
 				balance = decimal.MustParse("0")
 			}
 
-			numeric, err := decimalToPGNumeric(&balance)
+			var numeric pgtype.Numeric
+			numeric, err = decimalToPGNumeric(&balance)
 			if err != nil {
 				return fmt.Errorf("convert balance: %w", err)
 			}
@@ -253,7 +254,8 @@ func (s *PlaidService) SyncAccounts(ctx context.Context, connectionID uuid.UUID)
 			balance = decimal.MustParse("0")
 		}
 
-		numeric, err := decimalToPGNumeric(&balance)
+		var numeric pgtype.Numeric
+		numeric, err = decimalToPGNumeric(&balance)
 		if err != nil {
 			return fmt.Errorf("convert balance: %w", err)
 		}

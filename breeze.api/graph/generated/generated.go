@@ -295,17 +295,22 @@ type ComplexityRoot struct {
 	}
 
 	PlannerPerson struct {
-		AnnualBonus      func(childComplexity int) int
-		AnnualSalary     func(childComplexity int) int
-		Birthday         func(childComplexity int) int
-		BonusMode        func(childComplexity int) int
-		CreatedAt        func(childComplexity int) int
-		ID               func(childComplexity int) int
-		IncomeGrowthRate func(childComplexity int) int
-		Name             func(childComplexity int) int
-		RetirementAge    func(childComplexity int) int
-		UpdatedAt        func(childComplexity int) int
-		UserID           func(childComplexity int) int
+		AnnualBonus          func(childComplexity int) int
+		AnnualSalary         func(childComplexity int) int
+		Birthday             func(childComplexity int) int
+		BonusMode            func(childComplexity int) int
+		CreatedAt            func(childComplexity int) int
+		ExpectedHoursPerWeek func(childComplexity int) int
+		HourlyRate           func(childComplexity int) int
+		ID                   func(childComplexity int) int
+		IncomeGrowthRate     func(childComplexity int) int
+		Name                 func(childComplexity int) int
+		PayCadence           func(childComplexity int) int
+		PayDay               func(childComplexity int) int
+		PayType              func(childComplexity int) int
+		RetirementAge        func(childComplexity int) int
+		UpdatedAt            func(childComplexity int) int
+		UserID               func(childComplexity int) int
 	}
 
 	Query struct {
@@ -2173,6 +2178,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.PlannerPerson.CreatedAt(childComplexity), true
+	case "PlannerPerson.expectedHoursPerWeek":
+		if e.ComplexityRoot.PlannerPerson.ExpectedHoursPerWeek == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.ExpectedHoursPerWeek(childComplexity), true
+	case "PlannerPerson.hourlyRate":
+		if e.ComplexityRoot.PlannerPerson.HourlyRate == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.HourlyRate(childComplexity), true
 	case "PlannerPerson.id":
 		if e.ComplexityRoot.PlannerPerson.ID == nil {
 			break
@@ -2191,6 +2208,24 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.PlannerPerson.Name(childComplexity), true
+	case "PlannerPerson.payCadence":
+		if e.ComplexityRoot.PlannerPerson.PayCadence == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.PayCadence(childComplexity), true
+	case "PlannerPerson.payDay":
+		if e.ComplexityRoot.PlannerPerson.PayDay == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.PayDay(childComplexity), true
+	case "PlannerPerson.payType":
+		if e.ComplexityRoot.PlannerPerson.PayType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlannerPerson.PayType(childComplexity), true
 	case "PlannerPerson.retirementAge":
 		if e.ComplexityRoot.PlannerPerson.RetirementAge == nil {
 			break
@@ -3882,6 +3917,11 @@ type PlannerPerson {
   bonusMode: String!
   annualBonus: String!
   incomeGrowthRate: String!
+  payType: String!
+  payDay: Int!
+  payCadence: String!
+  hourlyRate: String!
+  expectedHoursPerWeek: String!
   createdAt: String!
   updatedAt: String!
 }
@@ -4127,6 +4167,11 @@ input UpsertPlannerPersonInput {
   bonusMode: String!
   annualBonus: String!
   incomeGrowthRate: String!
+  payType: String!
+  payDay: Int!
+  payCadence: String!
+  hourlyRate: String!
+  expectedHoursPerWeek: String!
 }
 
 type TaxBracket {
@@ -4683,6 +4728,16 @@ func (ec *executionContext) childFields_PlannerPerson(ctx context.Context, field
 		return ec.fieldContext_PlannerPerson_annualBonus(ctx, field)
 	case "incomeGrowthRate":
 		return ec.fieldContext_PlannerPerson_incomeGrowthRate(ctx, field)
+	case "payType":
+		return ec.fieldContext_PlannerPerson_payType(ctx, field)
+	case "payDay":
+		return ec.fieldContext_PlannerPerson_payDay(ctx, field)
+	case "payCadence":
+		return ec.fieldContext_PlannerPerson_payCadence(ctx, field)
+	case "hourlyRate":
+		return ec.fieldContext_PlannerPerson_hourlyRate(ctx, field)
+	case "expectedHoursPerWeek":
+		return ec.fieldContext_PlannerPerson_expectedHoursPerWeek(ctx, field)
 	case "createdAt":
 		return ec.fieldContext_PlannerPerson_createdAt(ctx, field)
 	case "updatedAt":
@@ -12723,6 +12778,121 @@ func (ec *executionContext) fieldContext_PlannerPerson_incomeGrowthRate(_ contex
 	return graphql.NewScalarFieldContext("PlannerPerson", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
+func (ec *executionContext) _PlannerPerson_payType(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlannerPerson_payType(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PayType, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlannerPerson_payType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlannerPerson", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _PlannerPerson_payDay(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlannerPerson_payDay(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PayDay, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlannerPerson_payDay(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlannerPerson", field, false, false, errors.New("field of type Int does not have child fields"))
+}
+
+func (ec *executionContext) _PlannerPerson_payCadence(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlannerPerson_payCadence(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PayCadence, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlannerPerson_payCadence(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlannerPerson", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _PlannerPerson_hourlyRate(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlannerPerson_hourlyRate(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.HourlyRate, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlannerPerson_hourlyRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlannerPerson", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _PlannerPerson_expectedHoursPerWeek(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlannerPerson_expectedHoursPerWeek(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ExpectedHoursPerWeek, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlannerPerson_expectedHoursPerWeek(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlannerPerson", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
 func (ec *executionContext) _PlannerPerson_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.PlannerPerson) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -20432,7 +20602,7 @@ func (ec *executionContext) unmarshalInputUpsertPlannerPersonInput(ctx context.C
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "userId", "name", "birthday", "retirementAge", "annualSalary", "bonusMode", "annualBonus", "incomeGrowthRate"}
+	fieldsInOrder := [...]string{"id", "userId", "name", "birthday", "retirementAge", "annualSalary", "bonusMode", "annualBonus", "incomeGrowthRate", "payType", "payDay", "payCadence", "hourlyRate", "expectedHoursPerWeek"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -20502,6 +20672,41 @@ func (ec *executionContext) unmarshalInputUpsertPlannerPersonInput(ctx context.C
 				return it, err
 			}
 			it.IncomeGrowthRate = data
+		case "payType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payType"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PayType = data
+		case "payDay":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payDay"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PayDay = data
+		case "payCadence":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payCadence"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PayCadence = data
+		case "hourlyRate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hourlyRate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HourlyRate = data
+		case "expectedHoursPerWeek":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("expectedHoursPerWeek"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ExpectedHoursPerWeek = data
 		}
 	}
 	return it, nil
@@ -22263,6 +22468,31 @@ func (ec *executionContext) _PlannerPerson(ctx context.Context, sel ast.Selectio
 			}
 		case "incomeGrowthRate":
 			out.Values[i] = ec._PlannerPerson_incomeGrowthRate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "payType":
+			out.Values[i] = ec._PlannerPerson_payType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "payDay":
+			out.Values[i] = ec._PlannerPerson_payDay(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "payCadence":
+			out.Values[i] = ec._PlannerPerson_payCadence(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hourlyRate":
+			out.Values[i] = ec._PlannerPerson_hourlyRate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "expectedHoursPerWeek":
+			out.Values[i] = ec._PlannerPerson_expectedHoursPerWeek(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

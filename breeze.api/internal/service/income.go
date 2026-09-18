@@ -70,7 +70,7 @@ func NewIncomeService(queries incomeQuerier) *IncomeService {
 	return &IncomeService{queries: queries}
 }
 
-func (s *IncomeService) Create(ctx context.Context, input CreateIncomeInput) (*Income, error) {
+func (s *IncomeService) Create(ctx context.Context, input *CreateIncomeInput) (*Income, error) {
 	row, err := s.queries.CreateIncome(ctx, sqlc.CreateIncomeParams{
 		UserID:               input.UserID,
 		BudgetID:             input.BudgetID,
@@ -87,7 +87,7 @@ func (s *IncomeService) Create(ctx context.Context, input CreateIncomeInput) (*I
 		return nil, fmt.Errorf("create income: %w", err)
 	}
 
-	income := mapCreateIncomeRow(row)
+	income := mapCreateIncomeRow(&row)
 	return &income, nil
 }
 
@@ -100,7 +100,7 @@ func (s *IncomeService) GetByID(ctx context.Context, id uuid.UUID) (*Income, err
 		return nil, fmt.Errorf("get income by id: %w", err)
 	}
 
-	income := mapGetIncomeByIDRow(row)
+	income := mapGetIncomeByIDRow(&row)
 	return &income, nil
 }
 
@@ -111,14 +111,14 @@ func (s *IncomeService) ListByBudgetID(ctx context.Context, budgetID uuid.UUID) 
 	}
 
 	incomes := make([]Income, 0, len(rows))
-	for _, row := range rows {
-		incomes = append(incomes, mapListIncomeByBudgetIDRow(row))
+	for i := range rows {
+		incomes = append(incomes, mapListIncomeByBudgetIDRow(&rows[i]))
 	}
 
 	return incomes, nil
 }
 
-func (s *IncomeService) Update(ctx context.Context, input UpdateIncomeInput) (*Income, error) {
+func (s *IncomeService) Update(ctx context.Context, input *UpdateIncomeInput) (*Income, error) {
 	row, err := s.queries.UpdateIncome(ctx, sqlc.UpdateIncomeParams{
 		ID:                   input.ID,
 		Name:                 input.Name,
@@ -137,7 +137,7 @@ func (s *IncomeService) Update(ctx context.Context, input UpdateIncomeInput) (*I
 		return nil, fmt.Errorf("update income: %w", err)
 	}
 
-	income := mapUpdateIncomeRow(row)
+	income := mapUpdateIncomeRow(&row)
 	return &income, nil
 }
 
@@ -152,7 +152,7 @@ func (s *IncomeService) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func mapCreateIncomeRow(row sqlc.CreateIncomeRow) Income {
+func mapCreateIncomeRow(row *sqlc.CreateIncomeRow) Income {
 	return Income{
 		ID:                   row.ID,
 		UserID:               row.UserID,
@@ -170,7 +170,7 @@ func mapCreateIncomeRow(row sqlc.CreateIncomeRow) Income {
 	}
 }
 
-func mapGetIncomeByIDRow(row sqlc.GetIncomeByIDRow) Income {
+func mapGetIncomeByIDRow(row *sqlc.GetIncomeByIDRow) Income {
 	return Income{
 		ID:                   row.ID,
 		UserID:               row.UserID,
@@ -188,7 +188,7 @@ func mapGetIncomeByIDRow(row sqlc.GetIncomeByIDRow) Income {
 	}
 }
 
-func mapListIncomeByBudgetIDRow(row sqlc.ListIncomeByBudgetIDRow) Income {
+func mapListIncomeByBudgetIDRow(row *sqlc.ListIncomeByBudgetIDRow) Income {
 	return Income{
 		ID:                   row.ID,
 		UserID:               row.UserID,
@@ -206,7 +206,7 @@ func mapListIncomeByBudgetIDRow(row sqlc.ListIncomeByBudgetIDRow) Income {
 	}
 }
 
-func mapUpdateIncomeRow(row sqlc.UpdateIncomeRow) Income {
+func mapUpdateIncomeRow(row *sqlc.UpdateIncomeRow) Income {
 	return Income{
 		ID:                   row.ID,
 		UserID:               row.UserID,

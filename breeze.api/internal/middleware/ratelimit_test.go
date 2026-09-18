@@ -19,7 +19,7 @@ func TestRateLimit_AllowsRequests(t *testing.T) {
 	h := RateLimit(cfg, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls++
 	}))
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest("GET", "/", http.NoBody)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 	if calls != 1 {
@@ -38,7 +38,7 @@ func TestRateLimit_TooManyRequests(t *testing.T) {
 
 	cfg := RateLimiterConfig{RequestsPerSecond: 1, Burst: 1}
 	h := RateLimit(cfg, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest("GET", "/", http.NoBody)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req) // first allowed
 	rec2 := httptest.NewRecorder()

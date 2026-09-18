@@ -143,7 +143,7 @@ func TestExpenseService_Create_Validation(t *testing.T) {
 
 	svc := expenseTestService(&mockExpenseQuerier{})
 
-	_, err := svc.Create(ctx, CreateExpenseInput{
+	_, err := svc.Create(ctx, &CreateExpenseInput{
 		UserID:      expense.UserID,
 		BudgetID:    expense.BudgetID,
 		Amount:      expense.Amount,
@@ -162,7 +162,7 @@ func TestExpenseService_Create_SplitMismatch(t *testing.T) {
 
 	svc := expenseTestService(&mockExpenseQuerier{})
 
-	_, err := svc.Create(ctx, CreateExpenseInput{
+	_, err := svc.Create(ctx, &CreateExpenseInput{
 		UserID:      expense.UserID,
 		BudgetID:    expense.BudgetID,
 		Amount:      expense.Amount,
@@ -190,7 +190,7 @@ func TestExpenseService_Create_Success(t *testing.T) {
 	}
 
 	svc := expenseTestService(mock)
-	result, err := svc.Create(ctx, CreateExpenseInput{
+	result, err := svc.Create(ctx, &CreateExpenseInput{
 		UserID:      expense.UserID,
 		BudgetID:    expense.BudgetID,
 		Amount:      expense.Amount,
@@ -217,7 +217,7 @@ func TestExpenseService_Update_NotFound(t *testing.T) {
 	}
 
 	svc := expenseTestService(mock)
-	_, err := svc.Update(ctx, UpdateExpenseInput{
+	_, err := svc.Update(ctx, &UpdateExpenseInput{
 		ID:          uuid.New(),
 		Amount:      amount,
 		Date:        time.Now(),

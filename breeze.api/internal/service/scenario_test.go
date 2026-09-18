@@ -154,7 +154,7 @@ func TestScenarioService_Create(t *testing.T) {
 		return fn(mock)
 	})}
 
-	result, err := svc.Create(ctx, CreateScenarioInput{
+	result, err := svc.Create(ctx, &CreateScenarioInput{
 		UserID:             row.UserID,
 		Name:               row.Name,
 		CurrentAge:         int(row.CurrentAge),
@@ -213,7 +213,7 @@ func TestScenarioService_CompareByUserID(t *testing.T) {
 }
 
 func TestScenarioService_ValidateInput(t *testing.T) {
-	_, err := (&ScenarioService{}).Create(context.Background(), CreateScenarioInput{
+	_, err := (&ScenarioService{}).Create(context.Background(), &CreateScenarioInput{
 		UserID:             uuid.New(),
 		Name:               "Invalid",
 		CurrentAge:         60,

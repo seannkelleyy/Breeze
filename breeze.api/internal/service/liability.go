@@ -78,7 +78,7 @@ func NewLiabilityService(queries liabilityQuerier) *LiabilityService {
 	return &LiabilityService{queries: queries}
 }
 
-func (s *LiabilityService) Create(ctx context.Context, input CreateLiabilityInput) (*Liability, error) {
+func (s *LiabilityService) Create(ctx context.Context, input *CreateLiabilityInput) (*Liability, error) {
 	row, err := s.queries.CreateLiability(ctx, sqlc.CreateLiabilityParams{
 		UserID:             input.UserID,
 		Name:               input.Name,
@@ -97,7 +97,7 @@ func (s *LiabilityService) Create(ctx context.Context, input CreateLiabilityInpu
 		return nil, fmt.Errorf("create liability: %w", err)
 	}
 
-	liability := mapCreateLiabilityRow(row)
+	liability := mapCreateLiabilityRow(&row)
 	return &liability, nil
 }
 
@@ -110,7 +110,7 @@ func (s *LiabilityService) GetByID(ctx context.Context, id uuid.UUID) (*Liabilit
 		return nil, fmt.Errorf("get liability by id: %w", err)
 	}
 
-	liability := mapGetLiabilityByIDRow(row)
+	liability := mapGetLiabilityByIDRow(&row)
 	return &liability, nil
 }
 
@@ -121,14 +121,14 @@ func (s *LiabilityService) ListByUserID(ctx context.Context, userID uuid.UUID) (
 	}
 
 	liabilities := make([]Liability, 0, len(rows))
-	for _, row := range rows {
-		liabilities = append(liabilities, mapListLiabilitiesByUserIDRow(row))
+	for i := range rows {
+		liabilities = append(liabilities, mapListLiabilitiesByUserIDRow(&rows[i]))
 	}
 
 	return liabilities, nil
 }
 
-func (s *LiabilityService) Update(ctx context.Context, input UpdateLiabilityInput) (*Liability, error) {
+func (s *LiabilityService) Update(ctx context.Context, input *UpdateLiabilityInput) (*Liability, error) {
 	row, err := s.queries.UpdateLiability(ctx, sqlc.UpdateLiabilityParams{
 		ID:                 input.ID,
 		Name:               input.Name,
@@ -150,7 +150,7 @@ func (s *LiabilityService) Update(ctx context.Context, input UpdateLiabilityInpu
 		return nil, fmt.Errorf("update liability: %w", err)
 	}
 
-	liability := mapUpdateLiabilityRow(row)
+	liability := mapUpdateLiabilityRow(&row)
 	return &liability, nil
 }
 
@@ -165,7 +165,7 @@ func (s *LiabilityService) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func mapCreateLiabilityRow(row sqlc.CreateLiabilityRow) Liability {
+func mapCreateLiabilityRow(row *sqlc.CreateLiabilityRow) Liability {
 	return Liability{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -188,7 +188,7 @@ func mapCreateLiabilityRow(row sqlc.CreateLiabilityRow) Liability {
 	}
 }
 
-func mapGetLiabilityByIDRow(row sqlc.GetLiabilityByIDRow) Liability {
+func mapGetLiabilityByIDRow(row *sqlc.GetLiabilityByIDRow) Liability {
 	return Liability{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -211,7 +211,7 @@ func mapGetLiabilityByIDRow(row sqlc.GetLiabilityByIDRow) Liability {
 	}
 }
 
-func mapListLiabilitiesByUserIDRow(row sqlc.ListLiabilitiesByUserIDRow) Liability {
+func mapListLiabilitiesByUserIDRow(row *sqlc.ListLiabilitiesByUserIDRow) Liability {
 	return Liability{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -234,7 +234,7 @@ func mapListLiabilitiesByUserIDRow(row sqlc.ListLiabilitiesByUserIDRow) Liabilit
 	}
 }
 
-func mapUpdateLiabilityRow(row sqlc.UpdateLiabilityRow) Liability {
+func mapUpdateLiabilityRow(row *sqlc.UpdateLiabilityRow) Liability {
 	return Liability{
 		ID:                 row.ID,
 		UserID:             row.UserID,

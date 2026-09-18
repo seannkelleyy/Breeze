@@ -18,7 +18,7 @@ func (d *devPlaidClient) CreateLinkToken(ctx context.Context, userID string) (st
 	return fmt.Sprintf("dev-link-token-%s", userID), nil
 }
 
-func (d *devPlaidClient) ExchangePublicToken(ctx context.Context, publicToken string) (string, string, string, string, string, error) {
+func (d *devPlaidClient) ExchangePublicToken(ctx context.Context, publicToken string) (string, string, string, string, string, error) { //nolint:gocritic // dev mock interface
 	// Return deterministic values derived from publicToken for testing.
 	id := uuid.New().String()
 	access := fmt.Sprintf("dev_access_%s", publicToken)

@@ -165,7 +165,7 @@ func TestRecurringExpenseService_Create(t *testing.T) {
 
 	svc := NewRecurringExpenseService(mock)
 	startDate := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
-	result, err := svc.Create(ctx, CreateRecurringExpenseInput{
+	result, err := svc.Create(ctx, &CreateRecurringExpenseInput{
 		UserID:             expected.UserID,
 		Name:               expected.Name,
 		Amount:             expected.Amount,
@@ -194,7 +194,7 @@ func TestRecurringExpenseService_Create_Error(t *testing.T) {
 	}
 
 	svc := NewRecurringExpenseService(mock)
-	result, err := svc.Create(ctx, CreateRecurringExpenseInput{
+	result, err := svc.Create(ctx, &CreateRecurringExpenseInput{
 		UserID: uuid.New(),
 		Name:   "Test",
 	})
@@ -331,7 +331,7 @@ func TestRecurringExpenseService_Update(t *testing.T) {
 
 	svc := NewRecurringExpenseService(mock)
 	startDate := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
-	result, err := svc.Update(ctx, UpdateRecurringExpenseInput{
+	result, err := svc.Update(ctx, &UpdateRecurringExpenseInput{
 		ID:                 expected.ID,
 		Name:               expected.Name,
 		Amount:             expected.Amount,
@@ -357,7 +357,7 @@ func TestRecurringExpenseService_Update_NotFound(t *testing.T) {
 	}
 
 	svc := NewRecurringExpenseService(mock)
-	result, err := svc.Update(ctx, UpdateRecurringExpenseInput{
+	result, err := svc.Update(ctx, &UpdateRecurringExpenseInput{
 		ID:        uuid.New(),
 		Name:      "Test",
 		StartDate: time.Now(),
@@ -379,7 +379,7 @@ func TestRecurringExpenseService_Update_Error(t *testing.T) {
 	}
 
 	svc := NewRecurringExpenseService(mock)
-	result, err := svc.Update(ctx, UpdateRecurringExpenseInput{
+	result, err := svc.Update(ctx, &UpdateRecurringExpenseInput{
 		ID:        uuid.New(),
 		Name:      "Test",
 		StartDate: time.Now(),

@@ -744,18 +744,23 @@ type PlaidConnection struct {
 }
 
 type PlannerPerson struct {
-	ID               uuid.UUID          `json:"id"`
-	UserID           uuid.UUID          `json:"user_id"`
-	Name             string             `json:"name"`
-	Birthday         string             `json:"birthday"`
-	RetirementAge    int32              `json:"retirement_age"`
-	AnnualSalary     decimal.Decimal    `json:"annual_salary"`
-	BonusMode        string             `json:"bonus_mode"`
-	AnnualBonus      decimal.Decimal    `json:"annual_bonus"`
-	IncomeGrowthRate decimal.Decimal    `json:"income_growth_rate"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+	ID                   uuid.UUID          `json:"id"`
+	UserID               uuid.UUID          `json:"user_id"`
+	Name                 string             `json:"name"`
+	Birthday             string             `json:"birthday"`
+	RetirementAge        int32              `json:"retirement_age"`
+	AnnualSalary         decimal.Decimal    `json:"annual_salary"`
+	BonusMode            string             `json:"bonus_mode"`
+	AnnualBonus          decimal.Decimal    `json:"annual_bonus"`
+	IncomeGrowthRate     decimal.Decimal    `json:"income_growth_rate"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+	PayType              string             `json:"pay_type"`
+	PayDay               int32              `json:"pay_day"`
+	PayCadence           string             `json:"pay_cadence"`
+	HourlyRate           decimal.Decimal    `json:"hourly_rate"`
+	ExpectedHoursPerWeek decimal.Decimal    `json:"expected_hours_per_week"`
 }
 
 type RecurringExpense struct {

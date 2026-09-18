@@ -131,7 +131,7 @@ func NewScenarioService(queries *sqlc.Queries, pool *pgxpool.Pool) *ScenarioServ
 	}
 }
 
-func (s *ScenarioService) Create(ctx context.Context, input CreateScenarioInput) (*ScenarioProfile, error) {
+func (s *ScenarioService) Create(ctx context.Context, input *CreateScenarioInput) (*ScenarioProfile, error) {
 	if err := validateScenarioInput(input.CurrentAge, input.RetirementAge, input.AnnualSpend, input.SafeWithdrawalRate, input.InflationRate, input.ReturnRate, input.CurrentPortfolio); err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (s *ScenarioService) Create(ctx context.Context, input CreateScenarioInput)
 			return fmt.Errorf("create scenario profile: %w", err)
 		}
 
-		result, err := evaluateScenarioProfile(row)
+		result, err := evaluateScenarioProfile(&row)
 		if err != nil {
 			return err
 		}
@@ -169,7 +169,7 @@ func (s *ScenarioService) Create(ctx context.Context, input CreateScenarioInput)
 			return fmt.Errorf("upsert scenario result cache: %w", err)
 		}
 
-		created = mapScenarioProfileRecord(row)
+		created = mapScenarioProfileRecord(&row)
 		return nil
 	})
 	if err != nil {
@@ -188,7 +188,7 @@ func (s *ScenarioService) GetByID(ctx context.Context, id uuid.UUID) (*ScenarioP
 		return nil, fmt.Errorf("get scenario profile by id: %w", err)
 	}
 
-	profile := mapScenarioProfileRecord(row)
+	profile := mapScenarioProfileRecord(&row)
 	return &profile, nil
 }
 
@@ -199,14 +199,14 @@ func (s *ScenarioService) ListByUserID(ctx context.Context, userID uuid.UUID) ([
 	}
 
 	profiles := make([]ScenarioProfile, 0, len(rows))
-	for _, row := range rows {
-		profiles = append(profiles, mapScenarioProfileRecord(row))
+	for i := range rows {
+		profiles = append(profiles, mapScenarioProfileRecord(&rows[i]))
 	}
 
 	return profiles, nil
 }
 
-func (s *ScenarioService) Update(ctx context.Context, input UpdateScenarioInput) (*ScenarioProfile, error) {
+func (s *ScenarioService) Update(ctx context.Context, input *UpdateScenarioInput) (*ScenarioProfile, error) {
 	if err := validateScenarioInput(input.CurrentAge, input.RetirementAge, input.AnnualSpend, input.SafeWithdrawalRate, input.InflationRate, input.ReturnRate, input.CurrentPortfolio); err != nil {
 		return nil, err
 	}
@@ -231,7 +231,7 @@ func (s *ScenarioService) Update(ctx context.Context, input UpdateScenarioInput)
 			return fmt.Errorf("update scenario profile: %w", err)
 		}
 
-		result, err := evaluateScenarioProfile(row)
+		result, err := evaluateScenarioProfile(&row)
 		if err != nil {
 			return err
 		}
@@ -247,7 +247,7 @@ func (s *ScenarioService) Update(ctx context.Context, input UpdateScenarioInput)
 			return fmt.Errorf("upsert scenario result cache: %w", err)
 		}
 
-		updated = mapScenarioProfileRecord(row)
+		updated = mapScenarioProfileRecord(&row)
 		return nil
 	})
 	if err != nil {
@@ -275,8 +275,8 @@ func (s *ScenarioService) CompareByUserID(ctx context.Context, userID uuid.UUID)
 	}
 
 	results := make([]ScenarioResult, 0, len(rows))
-	for _, row := range rows {
-		results = append(results, mapScenarioComparisonRecord(row))
+	for i := range rows {
+		results = append(results, mapScenarioComparisonRecord(&rows[i]))
 	}
 
 	return results, nil
@@ -298,12 +298,12 @@ func validateScenarioInput(currentAge, retirementAge int, annualSpend, safeWithd
 	return nil
 }
 
-func evaluateScenarioProfile(row sqlc.ScenarioProfile) (ScenarioResult, error) {
+func evaluateScenarioProfile(row *sqlc.ScenarioProfile) (ScenarioResult, error) {
 	profile := mapScenarioProfileRecord(row)
-	return evaluateScenarioResult(profile)
+	return evaluateScenarioResult(&profile)
 }
 
-func evaluateScenarioResult(profile ScenarioProfile) (ScenarioResult, error) {
+func evaluateScenarioResult(profile *ScenarioProfile) (ScenarioResult, error) {
 	yearsToRetirement := profile.RetirementAge - profile.CurrentAge
 	if yearsToRetirement < 0 {
 		yearsToRetirement = 0
@@ -353,7 +353,7 @@ func evaluateScenarioResult(profile ScenarioProfile) (ScenarioResult, error) {
 	}, nil
 }
 
-func simulateDepletionAge(profile ScenarioProfile, startingBalance decimal.Decimal) *int {
+func simulateDepletionAge(profile *ScenarioProfile, startingBalance decimal.Decimal) *int {
 	one := decimal.MustParse("1")
 	returnBase, err := one.Add(profile.ReturnRate)
 	if err != nil {
@@ -406,7 +406,7 @@ func powDecimal(base decimal.Decimal, exponent int) (decimal.Decimal, error) {
 	return result, nil
 }
 
-func mapScenarioProfileRecord(row sqlc.ScenarioProfile) ScenarioProfile {
+func mapScenarioProfileRecord(row *sqlc.ScenarioProfile) ScenarioProfile {
 	return ScenarioProfile{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -423,7 +423,7 @@ func mapScenarioProfileRecord(row sqlc.ScenarioProfile) ScenarioProfile {
 	}
 }
 
-func mapScenarioComparisonRecord(row sqlc.ListScenarioComparisonsByUserIDRow) ScenarioResult {
+func mapScenarioComparisonRecord(row *sqlc.ListScenarioComparisonsByUserIDRow) ScenarioResult {
 	var projectedDepletionAge *int
 	if row.ProjectedDepletionAge != nil {
 		value := int(*row.ProjectedDepletionAge)

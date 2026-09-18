@@ -124,7 +124,7 @@ func TestIntegration_GoalsWithFOO(t *testing.T) {
 
 	t.Run("create goal persists all fields", func(t *testing.T) {
 		targetAmount := mustDecimal("10000.00")
-		goal, err := svc.Create(ctx, CreateGoalInput{
+		goal, err := svc.Create(ctx, &CreateGoalInput{
 			UserID:       userRow.ID,
 			Description:  "Emergency fund",
 			IsCompleted:  false,
@@ -145,7 +145,7 @@ func TestIntegration_GoalsWithFOO(t *testing.T) {
 	t.Run("create financial order steps", func(t *testing.T) {
 		goals, err := svc.CreateFinancialOrderSteps(ctx, userRow.ID)
 		require.NoError(t, err)
-		assert.Len(t, goals, 10, "should create 10 FOO steps")
+		assert.Len(t, goals, 9, "should create 9 FOO steps")
 
 		for i, g := range goals {
 			assert.True(t, g.IsFinancialOrderStep, "step %d should be marked as FOO", i)
@@ -157,7 +157,7 @@ func TestIntegration_GoalsWithFOO(t *testing.T) {
 
 	t.Run("list goals returns FOO and regular goals", func(t *testing.T) {
 		// Create a regular goal
-		_, err := svc.Create(ctx, CreateGoalInput{
+		_, err := svc.Create(ctx, &CreateGoalInput{
 			UserID:      userRow.ID,
 			Description: "Save for vacation",
 			IsCompleted: false,
@@ -177,7 +177,7 @@ func TestIntegration_GoalsWithFOO(t *testing.T) {
 				regularCount++
 			}
 		}
-		assert.Equal(t, 10, fooCount, "should have 10 FOO steps")
+		assert.Equal(t, 9, fooCount, "should have 9 FOO steps")
 		assert.GreaterOrEqual(t, regularCount, 2, "should have at least 2 regular goals")
 	})
 
@@ -195,7 +195,7 @@ func TestIntegration_GoalsWithFOO(t *testing.T) {
 		}
 		require.NotNil(t, firstFOO, "should find first FOO step")
 
-		updated, err := svc.Update(ctx, UpdateGoalInput{
+		updated, err := svc.Update(ctx, &UpdateGoalInput{
 			ID:          firstFOO.ID,
 			Description: firstFOO.Description,
 			IsCompleted: true,
@@ -224,7 +224,7 @@ func TestIntegration_AssetLiabilityLinking(t *testing.T) {
 
 	t.Run("create asset with linked liability", func(t *testing.T) {
 		// Create liability first
-		liability, err := liabilitySvc.Create(ctx, CreateLiabilityInput{
+		liability, err := liabilitySvc.Create(ctx, &CreateLiabilityInput{
 			UserID:             userRow.ID,
 			Name:               "Home Mortgage",
 			LiabilityType:      dbsqlc.LiabilityTypeMORTGAGE,
@@ -239,7 +239,7 @@ func TestIntegration_AssetLiabilityLinking(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create asset with linked liability
-		asset, err := assetSvc.Create(ctx, CreateAssetInput{
+		asset, err := assetSvc.Create(ctx, &CreateAssetInput{
 			UserID:                          userRow.ID,
 			Name:                            "My Home",
 			AssetType:                       dbsqlc.AssetTypeHOME,
@@ -290,7 +290,7 @@ func TestIntegration_AssetLiabilityLinking(t *testing.T) {
 		}
 		require.NotNil(t, homeAsset)
 
-		updated, err := assetSvc.Update(ctx, UpdateAssetInput{
+		updated, err := assetSvc.Update(ctx, &UpdateAssetInput{
 			ID:                              homeAsset.ID,
 			Name:                            homeAsset.Name,
 			AssetType:                       homeAsset.AssetType,
@@ -482,9 +482,9 @@ func TestIntegration_PlannerPersonLifecycle(t *testing.T) {
 			IncomeGrowthRate: mustDecimal("2.50"),
 		}
 
-		_, err := svc.Upsert(ctx, person1)
+		_, err := svc.Upsert(ctx, &person1)
 		require.NoError(t, err)
-		_, err = svc.Upsert(ctx, person2)
+		_, err = svc.Upsert(ctx, &person2)
 		require.NoError(t, err)
 
 		persons, err := svc.ListByUserID(ctx, userRow.ID)
@@ -524,7 +524,7 @@ func TestIntegration_PlannerPersonLifecycle(t *testing.T) {
 			AnnualBonus:      mustDecimal("12000.00"),
 			IncomeGrowthRate: mustDecimal("3.50"),
 		}
-		_, err = svc.Upsert(ctx, updatedAlice)
+		_, err = svc.Upsert(ctx, &updatedAlice)
 		require.NoError(t, err)
 
 		persons, err = svc.ListByUserID(ctx, userRow.ID)
@@ -570,7 +570,7 @@ func TestIntegration_BudgetExpenseLifecycle(t *testing.T) {
 	t.Run("create budget with expenses and categories", func(t *testing.T) {
 		// Create budget
 		budgetDate := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-		budget, err := budgetSvc.Create(ctx, CreateBudgetInput{
+		budget, err := budgetSvc.Create(ctx, &CreateBudgetInput{
 			UserID:          userRow.ID,
 			Date:            budgetDate,
 			MonthlyIncome:   mustDecimal("10000.00"),
@@ -579,7 +579,7 @@ func TestIntegration_BudgetExpenseLifecycle(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create category
-		category, err := categorySvc.Create(ctx, CreateExpenseCategoryInput{
+		category, err := categorySvc.Create(ctx, &CreateExpenseCategoryInput{
 			UserID:       userRow.ID,
 			BudgetID:     budget.ID,
 			Name:         "Groceries",
@@ -591,7 +591,7 @@ func TestIntegration_BudgetExpenseLifecycle(t *testing.T) {
 
 		// Create expense
 		expenseDate := time.Date(2026, 1, 15, 0, 0, 0, 0, time.UTC)
-		expense, err := expenseSvc.Create(ctx, CreateExpenseInput{
+		expense, err := expenseSvc.Create(ctx, &CreateExpenseInput{
 			UserID:      userRow.ID,
 			BudgetID:    budget.ID,
 			Amount:      mustDecimal("150.00"),
@@ -636,7 +636,7 @@ func TestIntegration_GoalWithConnectedAccounts(t *testing.T) {
 
 	t.Run("goal with connected account IDs persists", func(t *testing.T) {
 		// Create an asset
-		asset, err := assetSvc.Create(ctx, CreateAssetInput{
+		asset, err := assetSvc.Create(ctx, &CreateAssetInput{
 			UserID:                          userRow.ID,
 			Name:                            "Emergency Fund",
 			AssetType:                       dbsqlc.AssetTypeEMERGENCYFUND,
@@ -651,7 +651,7 @@ func TestIntegration_GoalWithConnectedAccounts(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create goal connected to the asset
-		goal, err := goalSvc.Create(ctx, CreateGoalInput{
+		goal, err := goalSvc.Create(ctx, &CreateGoalInput{
 			UserID:              userRow.ID,
 			Description:         "Build 6-month emergency fund",
 			IsCompleted:         false,
@@ -670,7 +670,7 @@ func TestIntegration_GoalWithConnectedAccounts(t *testing.T) {
 
 	t.Run("goal with multiple connected accounts", func(t *testing.T) {
 		// Create another asset
-		asset2, err := assetSvc.Create(ctx, CreateAssetInput{
+		asset2, err := assetSvc.Create(ctx, &CreateAssetInput{
 			UserID:                          userRow.ID,
 			Name:                            "House Down Payment",
 			AssetType:                       dbsqlc.AssetTypeBROKERAGE,
@@ -684,7 +684,7 @@ func TestIntegration_GoalWithConnectedAccounts(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		goal, err := goalSvc.Create(ctx, CreateGoalInput{
+		goal, err := goalSvc.Create(ctx, &CreateGoalInput{
 			UserID:              userRow.ID,
 			Description:         "Save for house down payment",
 			IsCompleted:         false,
@@ -713,7 +713,7 @@ func TestIntegration_AssetReturnProfile(t *testing.T) {
 	svc := NewAssetService(q)
 
 	t.Run("return profile persists through create and update", func(t *testing.T) {
-		asset, err := svc.Create(ctx, CreateAssetInput{
+		asset, err := svc.Create(ctx, &CreateAssetInput{
 			UserID:                          userRow.ID,
 			Name:                            "401k",
 			AssetType:                       dbsqlc.AssetType401K,
@@ -735,7 +735,7 @@ func TestIntegration_AssetReturnProfile(t *testing.T) {
 		assert.Equal(t, "stocks", *fetched.ReturnProfile)
 
 		// Update return profile
-		updated, err := svc.Update(ctx, UpdateAssetInput{
+		updated, err := svc.Update(ctx, &UpdateAssetInput{
 			ID:                              fetched.ID,
 			Name:                            fetched.Name,
 			AssetType:                       fetched.AssetType,
@@ -753,7 +753,7 @@ func TestIntegration_AssetReturnProfile(t *testing.T) {
 	})
 
 	t.Run("null return profile persists", func(t *testing.T) {
-		asset, err := svc.Create(ctx, CreateAssetInput{
+		asset, err := svc.Create(ctx, &CreateAssetInput{
 			UserID:                          userRow.ID,
 			Name:                            "Checking",
 			AssetType:                       dbsqlc.AssetTypeCHECKING,
@@ -785,7 +785,7 @@ func TestIntegration_LiabilityCRUD(t *testing.T) {
 
 	t.Run("create and retrieve liability with all fields", func(t *testing.T) {
 		origLoan := mustDecimal("250000.00")
-		liability, err := svc.Create(ctx, CreateLiabilityInput{
+		liability, err := svc.Create(ctx, &CreateLiabilityInput{
 			UserID:             userRow.ID,
 			Name:               "Home Mortgage",
 			LiabilityType:      dbsqlc.LiabilityTypeMORTGAGE,
@@ -818,7 +818,7 @@ func TestIntegration_LiabilityCRUD(t *testing.T) {
 		require.Len(t, liabilities, 1)
 
 		liability := liabilities[0]
-		updated, err := svc.Update(ctx, UpdateLiabilityInput{
+		updated, err := svc.Update(ctx, &UpdateLiabilityInput{
 			ID:                 liability.ID,
 			Name:               liability.Name,
 			LiabilityType:      liability.LiabilityType,
@@ -838,7 +838,7 @@ func TestIntegration_LiabilityCRUD(t *testing.T) {
 
 	t.Run("list returns all liability types", func(t *testing.T) {
 		// Add a credit card
-		_, err := svc.Create(ctx, CreateLiabilityInput{
+		_, err := svc.Create(ctx, &CreateLiabilityInput{
 			UserID:             userRow.ID,
 			Name:               "Visa",
 			LiabilityType:      dbsqlc.LiabilityTypeCREDITCARD,

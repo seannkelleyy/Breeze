@@ -24,7 +24,7 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
-	svcInput, err := createUserInputFromModel(input)
+	svcInput, err := createUserInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -39,7 +39,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
-	svcInput, err := updateUserInputFromModel(input)
+	svcInput, err := updateUserInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -72,7 +72,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 
 // CreateAsset is the resolver for the createAsset field.
 func (r *mutationResolver) CreateAsset(ctx context.Context, input model.CreateAssetInput) (*model.Asset, error) {
-	svcInput, err := createAssetInputFromModel(input)
+	svcInput, err := createAssetInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -82,7 +82,7 @@ func (r *mutationResolver) CreateAsset(ctx context.Context, input model.CreateAs
 		svcInput.UserID = resolvedID
 	}
 
-	asset, err := r.AssetService.Create(ctx, svcInput)
+	asset, err := r.AssetService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -92,12 +92,12 @@ func (r *mutationResolver) CreateAsset(ctx context.Context, input model.CreateAs
 
 // UpdateAsset is the resolver for the updateAsset field.
 func (r *mutationResolver) UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (*model.Asset, error) {
-	svcInput, err := updateAssetInputFromModel(input)
+	svcInput, err := updateAssetInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	asset, err := r.AssetService.Update(ctx, svcInput)
+	asset, err := r.AssetService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -125,7 +125,7 @@ func (r *mutationResolver) DeleteAsset(ctx context.Context, id string) (bool, er
 
 // CreateLiability is the resolver for the createLiability field.
 func (r *mutationResolver) CreateLiability(ctx context.Context, input model.CreateLiabilityInput) (*model.Liability, error) {
-	svcInput, err := createLiabilityInputFromModel(input)
+	svcInput, err := createLiabilityInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -135,7 +135,7 @@ func (r *mutationResolver) CreateLiability(ctx context.Context, input model.Crea
 		svcInput.UserID = resolvedID
 	}
 
-	liability, err := r.LiabilityService.Create(ctx, svcInput)
+	liability, err := r.LiabilityService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -145,12 +145,12 @@ func (r *mutationResolver) CreateLiability(ctx context.Context, input model.Crea
 
 // UpdateLiability is the resolver for the updateLiability field.
 func (r *mutationResolver) UpdateLiability(ctx context.Context, input model.UpdateLiabilityInput) (*model.Liability, error) {
-	svcInput, err := updateLiabilityInputFromModel(input)
+	svcInput, err := updateLiabilityInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	liability, err := r.LiabilityService.Update(ctx, svcInput)
+	liability, err := r.LiabilityService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -178,7 +178,7 @@ func (r *mutationResolver) DeleteLiability(ctx context.Context, id string) (bool
 
 // CreateBudget is the resolver for the createBudget field.
 func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateBudgetInput) (*model.Budget, error) {
-	svcInput, err := createBudgetInputFromModel(input)
+	svcInput, err := createBudgetInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -192,7 +192,7 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 	existing, lookupErr := r.BudgetService.GetByDate(ctx, svcInput.UserID, svcInput.Date)
 	if lookupErr == nil {
 		slog.Info("CreateBudget: updating existing budget", "budgetId", existing.ID.String(), "existingIncome", existing.MonthlyIncome.String())
-		budget, updateErr := r.BudgetService.Update(ctx, service.UpdateBudgetInput{
+		budget, updateErr := r.BudgetService.Update(ctx, &service.UpdateBudgetInput{
 			ID:              existing.ID,
 			MonthlyIncome:   svcInput.MonthlyIncome,
 			MonthlyExpenses: svcInput.MonthlyExpenses,
@@ -220,7 +220,7 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 		return mapBudgetToModel(budget), nil
 	}
 
-	budget, err := r.BudgetService.Create(ctx, svcInput)
+	budget, err := r.BudgetService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -242,12 +242,12 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 
 // UpdateBudget is the resolver for the updateBudget field.
 func (r *mutationResolver) UpdateBudget(ctx context.Context, input model.UpdateBudgetInput) (*model.Budget, error) {
-	svcInput, err := updateBudgetInputFromModel(input)
+	svcInput, err := updateBudgetInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	budget, err := r.BudgetService.Update(ctx, svcInput)
+	budget, err := r.BudgetService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -275,7 +275,7 @@ func (r *mutationResolver) DeleteBudget(ctx context.Context, id string) (bool, e
 
 // CreateGoal is the resolver for the createGoal field.
 func (r *mutationResolver) CreateGoal(ctx context.Context, input model.CreateGoalInput) (*model.Goal, error) {
-	svcInput, err := createGoalInputFromModel(input)
+	svcInput, err := createGoalInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -286,7 +286,7 @@ func (r *mutationResolver) CreateGoal(ctx context.Context, input model.CreateGoa
 		svcInput.UserID = userID
 	}
 
-	goal, err := r.GoalService.Create(ctx, svcInput)
+	goal, err := r.GoalService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -296,12 +296,12 @@ func (r *mutationResolver) CreateGoal(ctx context.Context, input model.CreateGoa
 
 // UpdateGoal is the resolver for the updateGoal field.
 func (r *mutationResolver) UpdateGoal(ctx context.Context, input model.UpdateGoalInput) (*model.Goal, error) {
-	svcInput, err := updateGoalInputFromModel(input)
+	svcInput, err := updateGoalInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	goal, err := r.GoalService.Update(ctx, svcInput)
+	goal, err := r.GoalService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -329,7 +329,7 @@ func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, err
 
 // CreateScenario is the resolver for the createScenario field.
 func (r *mutationResolver) CreateScenario(ctx context.Context, input model.CreateScenarioInput) (*model.Scenario, error) {
-	svcInput, err := createScenarioInputFromModel(input)
+	svcInput, err := createScenarioInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -339,7 +339,7 @@ func (r *mutationResolver) CreateScenario(ctx context.Context, input model.Creat
 		svcInput.UserID = resolvedID
 	}
 
-	scenario, err := r.ScenarioService.Create(ctx, svcInput)
+	scenario, err := r.ScenarioService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -349,12 +349,12 @@ func (r *mutationResolver) CreateScenario(ctx context.Context, input model.Creat
 
 // UpdateScenario is the resolver for the updateScenario field.
 func (r *mutationResolver) UpdateScenario(ctx context.Context, input model.UpdateScenarioInput) (*model.Scenario, error) {
-	svcInput, err := updateScenarioInputFromModel(input)
+	svcInput, err := updateScenarioInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	scenario, err := r.ScenarioService.Update(ctx, svcInput)
+	scenario, err := r.ScenarioService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -382,7 +382,7 @@ func (r *mutationResolver) DeleteScenario(ctx context.Context, id string) (bool,
 
 // CreateRetirementAccount is the resolver for the createRetirementAccount field.
 func (r *mutationResolver) CreateRetirementAccount(ctx context.Context, input model.CreateRetirementAccountInput) (*model.RetirementAccount, error) {
-	svcInput, err := createRetirementAccountInputFromModel(input)
+	svcInput, err := createRetirementAccountInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -392,7 +392,7 @@ func (r *mutationResolver) CreateRetirementAccount(ctx context.Context, input mo
 		svcInput.UserID = resolvedID
 	}
 
-	account, err := r.RetirementService.Create(ctx, svcInput)
+	account, err := r.RetirementService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -402,12 +402,12 @@ func (r *mutationResolver) CreateRetirementAccount(ctx context.Context, input mo
 
 // UpdateRetirementAccount is the resolver for the updateRetirementAccount field.
 func (r *mutationResolver) UpdateRetirementAccount(ctx context.Context, input model.UpdateRetirementAccountInput) (*model.RetirementAccount, error) {
-	svcInput, err := updateRetirementAccountInputFromModel(input)
+	svcInput, err := updateRetirementAccountInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	account, err := r.RetirementService.Update(ctx, svcInput)
+	account, err := r.RetirementService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -435,7 +435,7 @@ func (r *mutationResolver) DeleteRetirementAccount(ctx context.Context, id strin
 
 // AddContribution is the resolver for the addContribution field.
 func (r *mutationResolver) AddContribution(ctx context.Context, input model.AddContributionInput) (*model.ContributionEntry, error) {
-	svcInput, err := addContributionInputFromModel(input)
+	svcInput, err := addContributionInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -450,7 +450,7 @@ func (r *mutationResolver) AddContribution(ctx context.Context, input model.AddC
 
 // CreateExpenseCategory is the resolver for the createExpenseCategory field.
 func (r *mutationResolver) CreateExpenseCategory(ctx context.Context, input model.CreateExpenseCategoryInput) (*model.ExpenseCategory, error) {
-	svcInput, err := createExpenseCategoryInputFromModel(input)
+	svcInput, err := createExpenseCategoryInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -460,7 +460,7 @@ func (r *mutationResolver) CreateExpenseCategory(ctx context.Context, input mode
 		svcInput.UserID = resolvedID
 	}
 
-	category, err := r.ExpenseCategoryService.Create(ctx, svcInput)
+	category, err := r.ExpenseCategoryService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -470,12 +470,12 @@ func (r *mutationResolver) CreateExpenseCategory(ctx context.Context, input mode
 
 // UpdateExpenseCategory is the resolver for the updateExpenseCategory field.
 func (r *mutationResolver) UpdateExpenseCategory(ctx context.Context, input model.UpdateExpenseCategoryInput) (*model.ExpenseCategory, error) {
-	svcInput, err := updateExpenseCategoryInputFromModel(input)
+	svcInput, err := updateExpenseCategoryInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	category, err := r.ExpenseCategoryService.Update(ctx, svcInput)
+	category, err := r.ExpenseCategoryService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -503,7 +503,7 @@ func (r *mutationResolver) DeleteExpenseCategory(ctx context.Context, id string)
 
 // CreateExpense is the resolver for the createExpense field.
 func (r *mutationResolver) CreateExpense(ctx context.Context, input model.CreateExpenseInput) (*model.Expense, error) {
-	svcInput, err := createExpenseInputFromModel(input)
+	svcInput, err := createExpenseInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -513,7 +513,7 @@ func (r *mutationResolver) CreateExpense(ctx context.Context, input model.Create
 		svcInput.UserID = resolvedID
 	}
 
-	expense, err := r.ExpenseService.Create(ctx, svcInput)
+	expense, err := r.ExpenseService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -523,12 +523,12 @@ func (r *mutationResolver) CreateExpense(ctx context.Context, input model.Create
 
 // UpdateExpense is the resolver for the updateExpense field.
 func (r *mutationResolver) UpdateExpense(ctx context.Context, input model.UpdateExpenseInput) (*model.Expense, error) {
-	svcInput, err := updateExpenseInputFromModel(input)
+	svcInput, err := updateExpenseInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	expense, err := r.ExpenseService.Update(ctx, svcInput)
+	expense, err := r.ExpenseService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -556,7 +556,7 @@ func (r *mutationResolver) DeleteExpense(ctx context.Context, id string) (bool, 
 
 // CreateIncome is the resolver for the createIncome field.
 func (r *mutationResolver) CreateIncome(ctx context.Context, input model.CreateIncomeInput) (*model.Income, error) {
-	svcInput, err := createIncomeInputFromModel(input)
+	svcInput, err := createIncomeInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -566,7 +566,7 @@ func (r *mutationResolver) CreateIncome(ctx context.Context, input model.CreateI
 		svcInput.UserID = resolvedID
 	}
 
-	income, err := r.IncomeService.Create(ctx, svcInput)
+	income, err := r.IncomeService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -576,12 +576,12 @@ func (r *mutationResolver) CreateIncome(ctx context.Context, input model.CreateI
 
 // UpdateIncome is the resolver for the updateIncome field.
 func (r *mutationResolver) UpdateIncome(ctx context.Context, input model.UpdateIncomeInput) (*model.Income, error) {
-	svcInput, err := updateIncomeInputFromModel(input)
+	svcInput, err := updateIncomeInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	income, err := r.IncomeService.Update(ctx, svcInput)
+	income, err := r.IncomeService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -609,7 +609,7 @@ func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, e
 
 // CreateRecurringIncome is the resolver for the createRecurringIncome field.
 func (r *mutationResolver) CreateRecurringIncome(ctx context.Context, input model.CreateRecurringIncomeInput) (*model.RecurringIncome, error) {
-	svcInput, err := createRecurringIncomeInputFromModel(input)
+	svcInput, err := createRecurringIncomeInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -629,7 +629,7 @@ func (r *mutationResolver) CreateRecurringIncome(ctx context.Context, input mode
 
 // UpdateRecurringIncome is the resolver for the updateRecurringIncome field.
 func (r *mutationResolver) UpdateRecurringIncome(ctx context.Context, input model.UpdateRecurringIncomeInput) (*model.RecurringIncome, error) {
-	svcInput, err := updateRecurringIncomeInputFromModel(input)
+	svcInput, err := updateRecurringIncomeInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -662,7 +662,7 @@ func (r *mutationResolver) DeleteRecurringIncome(ctx context.Context, id string)
 
 // CreateRecurringExpense is the resolver for the createRecurringExpense field.
 func (r *mutationResolver) CreateRecurringExpense(ctx context.Context, input model.CreateRecurringExpenseInput) (*model.RecurringExpense, error) {
-	svcInput, err := createRecurringExpenseInputFromModel(input)
+	svcInput, err := createRecurringExpenseInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -672,7 +672,7 @@ func (r *mutationResolver) CreateRecurringExpense(ctx context.Context, input mod
 		svcInput.UserID = resolvedID
 	}
 
-	expense, err := r.RecurringExpenseService.Create(ctx, svcInput)
+	expense, err := r.RecurringExpenseService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -682,12 +682,12 @@ func (r *mutationResolver) CreateRecurringExpense(ctx context.Context, input mod
 
 // UpdateRecurringExpense is the resolver for the updateRecurringExpense field.
 func (r *mutationResolver) UpdateRecurringExpense(ctx context.Context, input model.UpdateRecurringExpenseInput) (*model.RecurringExpense, error) {
-	svcInput, err := updateRecurringExpenseInputFromModel(input)
+	svcInput, err := updateRecurringExpenseInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	expense, err := r.RecurringExpenseService.Update(ctx, svcInput)
+	expense, err := r.RecurringExpenseService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -715,7 +715,7 @@ func (r *mutationResolver) DeleteRecurringExpense(ctx context.Context, id string
 
 // UpsertPlannerPerson is the resolver for the upsertPlannerPerson field.
 func (r *mutationResolver) UpsertPlannerPerson(ctx context.Context, input model.UpsertPlannerPersonInput) (*model.PlannerPerson, error) {
-	svcInput, err := upsertPlannerPersonInputFromModel(input)
+	svcInput, err := upsertPlannerPersonInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -724,7 +724,7 @@ func (r *mutationResolver) UpsertPlannerPerson(ctx context.Context, input model.
 		svcInput.UserID = userID
 	}
 
-	person, err := r.PlannerPersonService.Upsert(ctx, svcInput)
+	person, err := r.PlannerPersonService.Upsert(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -752,7 +752,7 @@ func (r *mutationResolver) DeletePlannerPerson(ctx context.Context, id string) (
 
 // CreateTaxBracket is the resolver for the createTaxBracket field.
 func (r *mutationResolver) CreateTaxBracket(ctx context.Context, input model.CreateTaxBracketInput) (*model.TaxBracket, error) {
-	svcInput, err := createTaxBracketInputFromModel(input)
+	svcInput, err := createTaxBracketInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -767,7 +767,7 @@ func (r *mutationResolver) CreateTaxBracket(ctx context.Context, input model.Cre
 
 // UpdateTaxBracket is the resolver for the updateTaxBracket field.
 func (r *mutationResolver) UpdateTaxBracket(ctx context.Context, input model.UpdateTaxBracketInput) (*model.TaxBracket, error) {
-	svcInput, err := updateTaxBracketInputFromModel(input)
+	svcInput, err := updateTaxBracketInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -800,7 +800,7 @@ func (r *mutationResolver) DeleteTaxBracket(ctx context.Context, id string) (boo
 
 // CreateNetWorthSnapshot is the resolver for the createNetWorthSnapshot field.
 func (r *mutationResolver) CreateNetWorthSnapshot(ctx context.Context, input model.CreateNetWorthSnapshotInput) (*model.NetWorthSnapshot, error) {
-	svcInput, err := mapCreateNetWorthSnapshotInput(input)
+	svcInput, err := mapCreateNetWorthSnapshotInput(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -810,7 +810,7 @@ func (r *mutationResolver) CreateNetWorthSnapshot(ctx context.Context, input mod
 		svcInput.UserID = resolvedID
 	}
 
-	snapshot, err := r.NetWorthSnapshotService.Create(ctx, svcInput)
+	snapshot, err := r.NetWorthSnapshotService.Create(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -820,12 +820,12 @@ func (r *mutationResolver) CreateNetWorthSnapshot(ctx context.Context, input mod
 
 // UpdateNetWorthSnapshot is the resolver for the updateNetWorthSnapshot field.
 func (r *mutationResolver) UpdateNetWorthSnapshot(ctx context.Context, input model.UpdateNetWorthSnapshotInput) (*model.NetWorthSnapshot, error) {
-	svcInput, err := mapUpdateNetWorthSnapshotInput(input)
+	svcInput, err := mapUpdateNetWorthSnapshotInput(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	snapshot, err := r.NetWorthSnapshotService.Update(ctx, svcInput)
+	snapshot, err := r.NetWorthSnapshotService.Update(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -1237,7 +1237,7 @@ func (r *queryResolver) BudgetByDate(ctx context.Context, userID string, date st
 		}
 
 		// Auto-create a budget for this month when none exists.
-		budget, err = r.BudgetService.Create(ctx, service.CreateBudgetInput{
+		budget, err = r.BudgetService.Create(ctx, &service.CreateBudgetInput{
 			UserID:          parsedUserID,
 			Date:            budgetDate,
 			MonthlyIncome:   decimalZero(),

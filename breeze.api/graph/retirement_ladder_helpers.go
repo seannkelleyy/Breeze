@@ -51,13 +51,13 @@ func mapRetirementLadderProjectionToModel(proj *service.RetirementLadderProjecti
 }
 
 // parseRetirementLadderInput validates and converts GraphQL inputs.
-func parseRetirementLadderInput(initialBalance, annualExpenses string, currentAge, firstWithdrawalAge int, isRoth bool, year int, filingStatus model.FilingStatus) (decimal.Decimal, decimal.Decimal, int32, sqlc.FilingStatus, error) {
-	balDecimal, err := decimal.Parse(initialBalance)
+func parseRetirementLadderInput(initialBalance, annualExpenses string, currentAge, firstWithdrawalAge int, isRoth bool, year int, filingStatus model.FilingStatus) (balDecimal, expDecimal decimal.Decimal, yearInt int32, filingStatusOut sqlc.FilingStatus, err error) {
+	balDecimal, err = decimal.Parse(initialBalance)
 	if err != nil {
 		return decimal.Decimal{}, decimal.Decimal{}, 0, "", fmt.Errorf("parse initialBalance: %w", err)
 	}
 
-	expDecimal, err := decimal.Parse(annualExpenses)
+	expDecimal, err = decimal.Parse(annualExpenses)
 	if err != nil {
 		return decimal.Decimal{}, decimal.Decimal{}, 0, "", fmt.Errorf("parse annualExpenses: %w", err)
 	}

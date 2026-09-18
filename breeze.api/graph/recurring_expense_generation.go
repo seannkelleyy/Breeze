@@ -34,7 +34,8 @@ func generateExpenseCategoriesForBudget(
 	monthEnd := monthStart.AddDate(0, 1, -1)
 
 	created := 0
-	for _, t := range templates {
+	for i := range templates {
+		t := &templates[i]
 		slog.Info("generateExpenseCategoriesForBudget: template", "name", t.Name, "amount", t.Amount.String(), "start", t.StartDate, "end", t.EndDate, "interval", t.RecurrenceInterval)
 		if t.EndDate != nil && t.EndDate.Before(monthStart) {
 			continue
@@ -43,11 +44,12 @@ func generateExpenseCategoriesForBudget(
 			continue
 		}
 
-		occurrences := recurringOccurrences(t.RecurringIncome(), monthStart, monthEnd)
+		ri := t.RecurringIncome()
+		occurrences := recurringOccurrences(&ri, monthStart, monthEnd)
 		slog.Info("generateExpenseCategoriesForBudget: occurrences", "name", t.Name, "count", len(occurrences))
 		for _, occ := range occurrences {
 			// Create expense category
-			cat, err := categorySvc.Create(ctx, service.CreateExpenseCategoryInput{
+			cat, err := categorySvc.Create(ctx, &service.CreateExpenseCategoryInput{
 				UserID:           userID,
 				BudgetID:         budgetID,
 				Name:             t.Name,
@@ -62,7 +64,7 @@ func generateExpenseCategoriesForBudget(
 			}
 
 			// Create expense with a single split to the category
-			_, err = expenseSvc.Create(ctx, service.CreateExpenseInput{
+			_, err = expenseSvc.Create(ctx, &service.CreateExpenseInput{
 				UserID:           userID,
 				BudgetID:         budgetID,
 				Amount:           t.Amount,
@@ -101,9 +103,9 @@ func removeRecurringExpenseCategoriesForBudget(
 	if err != nil {
 		return err
 	}
-	for _, exp := range existingExpenses {
-		if exp.SourceType == sqlc.ExpenseSourceTypeRECURRINGTEMPLATE {
-			_ = expenseSvc.Delete(ctx, exp.ID)
+	for i := range existingExpenses {
+		if existingExpenses[i].SourceType == sqlc.ExpenseSourceTypeRECURRINGTEMPLATE {
+			_ = expenseSvc.Delete(ctx, existingExpenses[i].ID)
 		}
 	}
 
@@ -112,9 +114,9 @@ func removeRecurringExpenseCategoriesForBudget(
 	if err != nil {
 		return err
 	}
-	for _, cat := range existingCategories {
-		if cat.SourceType == sqlc.ExpenseSourceTypeRECURRINGTEMPLATE {
-			_ = categorySvc.Delete(ctx, cat.ID)
+	for i := range existingCategories {
+		if existingCategories[i].SourceType == sqlc.ExpenseSourceTypeRECURRINGTEMPLATE {
+			_ = categorySvc.Delete(ctx, existingCategories[i].ID)
 		}
 	}
 	return nil
@@ -134,10 +136,10 @@ func recalculateBudgetExpenses(
 		return budget
 	}
 	total := decimalZero()
-	for _, cat := range categories {
-		total, _ = total.Add(cat.Allocation)
+	for i := range categories {
+		total, _ = total.Add(categories[i].Allocation)
 	}
-	updated, updateErr := budgetSvc.Update(ctx, service.UpdateBudgetInput{
+	updated, updateErr := budgetSvc.Update(ctx, &service.UpdateBudgetInput{
 		ID:              budget.ID,
 		MonthlyIncome:   budget.MonthlyIncome,
 		MonthlyExpenses: total,

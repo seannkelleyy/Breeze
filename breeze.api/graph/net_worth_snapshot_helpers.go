@@ -27,7 +27,7 @@ func mapNetWorthSnapshotToModel(s *service.NetWorthSnapshot) *model.NetWorthSnap
 	}
 }
 
-func mapCreateNetWorthSnapshotInput(input model.CreateNetWorthSnapshotInput) (service.CreateNetWorthSnapshotInput, error) {
+func mapCreateNetWorthSnapshotInput(input *model.CreateNetWorthSnapshotInput) (service.CreateNetWorthSnapshotInput, error) {
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {
 		return service.CreateNetWorthSnapshotInput{}, fmt.Errorf("invalid user id: %w", err)
@@ -62,7 +62,7 @@ func mapCreateNetWorthSnapshotInput(input model.CreateNetWorthSnapshotInput) (se
 	}, nil
 }
 
-func mapUpdateNetWorthSnapshotInput(input model.UpdateNetWorthSnapshotInput) (service.UpdateNetWorthSnapshotInput, error) {
+func mapUpdateNetWorthSnapshotInput(input *model.UpdateNetWorthSnapshotInput) (service.UpdateNetWorthSnapshotInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateNetWorthSnapshotInput{}, fmt.Errorf("invalid id: %w", err)

@@ -79,7 +79,7 @@ func NewGoalService(queries goalQuerier) *GoalService {
 	return &GoalService{queries: queries}
 }
 
-func (s *GoalService) Create(ctx context.Context, input CreateGoalInput) (*Goal, error) {
+func (s *GoalService) Create(ctx context.Context, input *CreateGoalInput) (*Goal, error) {
 	targetAmount, err := decimalToPGNumeric(input.TargetAmount)
 	if err != nil {
 		return nil, fmt.Errorf("encode target amount: %w", err)
@@ -169,23 +169,23 @@ func (s *GoalService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]Goa
 	}
 
 	goals := make([]Goal, 0, len(rows))
-	for _, row := range rows {
+	for i := range rows {
 		goal := mapGoalRecord(
-			row.ID,
-			row.UserID,
-			row.Description,
-			row.IsCompleted,
-			row.TargetAmount,
-			row.TargetDate,
-			row.Category,
-			row.CustomCategory,
-			row.Priority,
-			row.Notes,
-			row.ConnectedAccountIds,
-			row.IsFinancialOrderStep,
-			row.FinancialOrderStep,
-			row.CreatedAt,
-			row.UpdatedAt,
+			rows[i].ID,
+			rows[i].UserID,
+			rows[i].Description,
+			rows[i].IsCompleted,
+			rows[i].TargetAmount,
+			rows[i].TargetDate,
+			rows[i].Category,
+			rows[i].CustomCategory,
+			rows[i].Priority,
+			rows[i].Notes,
+			rows[i].ConnectedAccountIds,
+			rows[i].IsFinancialOrderStep,
+			rows[i].FinancialOrderStep,
+			rows[i].CreatedAt,
+			rows[i].UpdatedAt,
 		)
 		goals = append(goals, goal)
 	}
@@ -193,7 +193,7 @@ func (s *GoalService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]Goa
 	return goals, nil
 }
 
-func (s *GoalService) Update(ctx context.Context, input UpdateGoalInput) (*Goal, error) {
+func (s *GoalService) Update(ctx context.Context, input *UpdateGoalInput) (*Goal, error) {
 	targetAmount, err := decimalToPGNumeric(input.TargetAmount)
 	if err != nil {
 		return nil, fmt.Errorf("encode target amount: %w", err)
@@ -268,23 +268,23 @@ func (s *GoalService) ListFinancialOrderSteps(ctx context.Context, userID uuid.U
 	}
 
 	goals := make([]Goal, 0, len(rows))
-	for _, row := range rows {
+	for i := range rows {
 		goal := mapGoalRecord(
-			row.ID,
-			row.UserID,
-			row.Description,
-			row.IsCompleted,
-			row.TargetAmount,
-			row.TargetDate,
-			row.Category,
-			row.CustomCategory,
-			row.Priority,
-			row.Notes,
-			row.ConnectedAccountIds,
-			row.IsFinancialOrderStep,
-			row.FinancialOrderStep,
-			row.CreatedAt,
-			row.UpdatedAt,
+			rows[i].ID,
+			rows[i].UserID,
+			rows[i].Description,
+			rows[i].IsCompleted,
+			rows[i].TargetAmount,
+			rows[i].TargetDate,
+			rows[i].Category,
+			rows[i].CustomCategory,
+			rows[i].Priority,
+			rows[i].Notes,
+			rows[i].ConnectedAccountIds,
+			rows[i].IsFinancialOrderStep,
+			rows[i].FinancialOrderStep,
+			rows[i].CreatedAt,
+			rows[i].UpdatedAt,
 		)
 		goals = append(goals, goal)
 	}
@@ -299,23 +299,23 @@ func (s *GoalService) CreateFinancialOrderSteps(ctx context.Context, userID uuid
 	}
 
 	goals := make([]Goal, 0, len(rows))
-	for _, row := range rows {
+	for i := range rows {
 		goal := mapGoalRecord(
-			row.ID,
-			row.UserID,
-			row.Description,
-			row.IsCompleted,
-			row.TargetAmount,
-			row.TargetDate,
-			row.Category,
-			row.CustomCategory,
-			row.Priority,
-			row.Notes,
-			row.ConnectedAccountIds,
-			row.IsFinancialOrderStep,
-			row.FinancialOrderStep,
-			row.CreatedAt,
-			row.UpdatedAt,
+			rows[i].ID,
+			rows[i].UserID,
+			rows[i].Description,
+			rows[i].IsCompleted,
+			rows[i].TargetAmount,
+			rows[i].TargetDate,
+			rows[i].Category,
+			rows[i].CustomCategory,
+			rows[i].Priority,
+			rows[i].Notes,
+			rows[i].ConnectedAccountIds,
+			rows[i].IsFinancialOrderStep,
+			rows[i].FinancialOrderStep,
+			rows[i].CreatedAt,
+			rows[i].UpdatedAt,
 		)
 		goals = append(goals, goal)
 	}

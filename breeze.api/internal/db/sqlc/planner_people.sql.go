@@ -10,24 +10,45 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const listPlannerPeopleByUserID = `-- name: ListPlannerPeopleByUserID :many
-SELECT id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, annual_bonus, income_growth_rate, created_at, updated_at, deleted_at
+SELECT id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, annual_bonus, income_growth_rate, pay_type, pay_day, pay_cadence, hourly_rate, expected_hours_per_week, created_at, updated_at, deleted_at
 FROM planner_people
 WHERE user_id = $1 AND deleted_at IS NULL
 ORDER BY created_at ASC
 `
 
-func (q *Queries) ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]PlannerPerson, error) {
+type ListPlannerPeopleByUserIDRow struct {
+	ID                   uuid.UUID          `json:"id"`
+	UserID               uuid.UUID          `json:"user_id"`
+	Name                 string             `json:"name"`
+	Birthday             string             `json:"birthday"`
+	RetirementAge        int32              `json:"retirement_age"`
+	AnnualSalary         decimal.Decimal    `json:"annual_salary"`
+	BonusMode            string             `json:"bonus_mode"`
+	AnnualBonus          decimal.Decimal    `json:"annual_bonus"`
+	IncomeGrowthRate     decimal.Decimal    `json:"income_growth_rate"`
+	PayType              string             `json:"pay_type"`
+	PayDay               int32              `json:"pay_day"`
+	PayCadence           string             `json:"pay_cadence"`
+	HourlyRate           decimal.Decimal    `json:"hourly_rate"`
+	ExpectedHoursPerWeek decimal.Decimal    `json:"expected_hours_per_week"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]ListPlannerPeopleByUserIDRow, error) {
 	rows, err := q.db.Query(ctx, listPlannerPeopleByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []PlannerPerson
+	var items []ListPlannerPeopleByUserIDRow
 	for rows.Next() {
-		var i PlannerPerson
+		var i ListPlannerPeopleByUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -38,6 +59,11 @@ func (q *Queries) ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUI
 			&i.BonusMode,
 			&i.AnnualBonus,
 			&i.IncomeGrowthRate,
+			&i.PayType,
+			&i.PayDay,
+			&i.PayCadence,
+			&i.HourlyRate,
+			&i.ExpectedHoursPerWeek,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -81,8 +107,8 @@ func (q *Queries) SoftDeletePlannerPerson(ctx context.Context, id uuid.UUID) (in
 }
 
 const upsertPlannerPerson = `-- name: UpsertPlannerPerson :one
-INSERT INTO planner_people (id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, annual_bonus, income_growth_rate)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO planner_people (id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, annual_bonus, income_growth_rate, pay_type, pay_day, pay_cadence, hourly_rate, expected_hours_per_week)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 ON CONFLICT (id) DO UPDATE
 SET name = EXCLUDED.name,
     birthday = EXCLUDED.birthday,
@@ -91,23 +117,53 @@ SET name = EXCLUDED.name,
     bonus_mode = EXCLUDED.bonus_mode,
     annual_bonus = EXCLUDED.annual_bonus,
     income_growth_rate = EXCLUDED.income_growth_rate,
+    pay_type = EXCLUDED.pay_type,
+    pay_day = EXCLUDED.pay_day,
+    pay_cadence = EXCLUDED.pay_cadence,
+    hourly_rate = EXCLUDED.hourly_rate,
+    expected_hours_per_week = EXCLUDED.expected_hours_per_week,
     updated_at = now()
-RETURNING id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, annual_bonus, income_growth_rate, created_at, updated_at, deleted_at
+RETURNING id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, annual_bonus, income_growth_rate, pay_type, pay_day, pay_cadence, hourly_rate, expected_hours_per_week, created_at, updated_at, deleted_at
 `
 
 type UpsertPlannerPersonParams struct {
-	ID               uuid.UUID       `json:"id"`
-	UserID           uuid.UUID       `json:"user_id"`
-	Name             string          `json:"name"`
-	Birthday         string          `json:"birthday"`
-	RetirementAge    int32           `json:"retirement_age"`
-	AnnualSalary     decimal.Decimal `json:"annual_salary"`
-	BonusMode        string          `json:"bonus_mode"`
-	AnnualBonus      decimal.Decimal `json:"annual_bonus"`
-	IncomeGrowthRate decimal.Decimal `json:"income_growth_rate"`
+	ID                   uuid.UUID       `json:"id"`
+	UserID               uuid.UUID       `json:"user_id"`
+	Name                 string          `json:"name"`
+	Birthday             string          `json:"birthday"`
+	RetirementAge        int32           `json:"retirement_age"`
+	AnnualSalary         decimal.Decimal `json:"annual_salary"`
+	BonusMode            string          `json:"bonus_mode"`
+	AnnualBonus          decimal.Decimal `json:"annual_bonus"`
+	IncomeGrowthRate     decimal.Decimal `json:"income_growth_rate"`
+	PayType              string          `json:"pay_type"`
+	PayDay               int32           `json:"pay_day"`
+	PayCadence           string          `json:"pay_cadence"`
+	HourlyRate           decimal.Decimal `json:"hourly_rate"`
+	ExpectedHoursPerWeek decimal.Decimal `json:"expected_hours_per_week"`
 }
 
-func (q *Queries) UpsertPlannerPerson(ctx context.Context, arg UpsertPlannerPersonParams) (PlannerPerson, error) {
+type UpsertPlannerPersonRow struct {
+	ID                   uuid.UUID          `json:"id"`
+	UserID               uuid.UUID          `json:"user_id"`
+	Name                 string             `json:"name"`
+	Birthday             string             `json:"birthday"`
+	RetirementAge        int32              `json:"retirement_age"`
+	AnnualSalary         decimal.Decimal    `json:"annual_salary"`
+	BonusMode            string             `json:"bonus_mode"`
+	AnnualBonus          decimal.Decimal    `json:"annual_bonus"`
+	IncomeGrowthRate     decimal.Decimal    `json:"income_growth_rate"`
+	PayType              string             `json:"pay_type"`
+	PayDay               int32              `json:"pay_day"`
+	PayCadence           string             `json:"pay_cadence"`
+	HourlyRate           decimal.Decimal    `json:"hourly_rate"`
+	ExpectedHoursPerWeek decimal.Decimal    `json:"expected_hours_per_week"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) UpsertPlannerPerson(ctx context.Context, arg UpsertPlannerPersonParams) (UpsertPlannerPersonRow, error) {
 	row := q.db.QueryRow(ctx, upsertPlannerPerson,
 		arg.ID,
 		arg.UserID,
@@ -118,8 +174,13 @@ func (q *Queries) UpsertPlannerPerson(ctx context.Context, arg UpsertPlannerPers
 		arg.BonusMode,
 		arg.AnnualBonus,
 		arg.IncomeGrowthRate,
+		arg.PayType,
+		arg.PayDay,
+		arg.PayCadence,
+		arg.HourlyRate,
+		arg.ExpectedHoursPerWeek,
 	)
-	var i PlannerPerson
+	var i UpsertPlannerPersonRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -130,6 +191,11 @@ func (q *Queries) UpsertPlannerPerson(ctx context.Context, arg UpsertPlannerPers
 		&i.BonusMode,
 		&i.AnnualBonus,
 		&i.IncomeGrowthRate,
+		&i.PayType,
+		&i.PayDay,
+		&i.PayCadence,
+		&i.HourlyRate,
+		&i.ExpectedHoursPerWeek,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,

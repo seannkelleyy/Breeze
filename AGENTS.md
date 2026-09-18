@@ -75,6 +75,37 @@ breeze/
 - Resolvers and services access the authenticated user via `middleware.UserIDFromCtx(ctx)`.
 - Never call `os.Getenv` in business logic — use `internal/config/config.go`.
 
+### Design Principles (Ousterhout)
+These principles from *A Philosophy of Software Design* apply to every code change in this repo.
+
+**Deep modules** — A module should have a simple interface that hides complex implementation. Our service layer exemplifies this: callers don't need to know about transactions, validation, or DB queries.
+- *When writing a service method:* push all complexity into the service, keep the resolver interface trivial.
+- *When writing a React hook:* expose one clean API, hide all query/mutation/cache logic.
+
+**Information hiding** — Never let implementation details leak across module boundaries.
+- `pgtype`, `sqlc`, and `uuid` types stay in `internal/service` — resolvers use `*uuid.UUID` and `string`.
+- GraphQL types use `String!` for money — never expose `decimal.Decimal` or `pgtype.Numeric`.
+- Frontend components never import from `lib/services/` directly — always go through hooks.
+
+**Define errors out of existence** — Design APIs that make error states impossible.
+- `ADD COLUMN IF NOT EXISTS` — migration can't fail on re-run.
+- Soft delete with `deleted_at` — no orphaned foreign key errors.
+- UUID defaults in DB — no client-generated ID collisions.
+
+**Pull complexity downstream** — Push hard decisions into modules that can handle them. Don't force callers to deal with complexity you could absorb.
+- Input validation belongs in the service, not the resolver or frontend.
+- Currency formatting belongs in one utility, not scattered across components.
+
+**Red flags — stop and fix:**
+| Red flag | What it means | Example fix |
+|---|---|---|
+| **Shallow module** | Interface nearly as complex as implementation | Inline the function, remove the abstraction |
+| **Information leakage** | `pgtype` or `sqlc` types in resolver code | Map to domain types in service layer |
+| **Pass-through method** | Function just forwards all args to another function | Remove the wrapper, call the target directly |
+| **Special-case code** | Repeated `if (type === 'X')` blocks | Use polymorphism, strategy pattern, or a lookup table |
+| **Leap of faith** | Comment says "this should never happen" | Handle the error or redesign to make it impossible |
+| **Coupling** | Changing module A requires changing module B | Hide the interface, break the dependency |
+
 ### Generated Code — Never Edit
 | Directory | Tool | Regenerate |
 |---|---|---|
@@ -88,15 +119,25 @@ breeze/
 ## 🏃 Quick Start (Development)
 
 ```bash
-# 1. Start PostgreSQL
-docker compose up -d postgres
+# 0. First time only — install tools + dependencies
+./scripts/setup.sh        # installs golangci-lint, atlas, starts Postgres, runs codegen, npm install
 
-# 2. API (in breeze.api/)
-make dev    # starts db (if needed) → migrate → gen → run
+# 1. Start everything (API + Web + DB)
+./scripts/dev.sh
 
-# 3. Web (in breeze.web/)
-npm run dev
+# 2. Or run individually:
+cd breeze.api && make dev   # API only
+cd breeze.web && npm run dev # Web only
 ```
+
+### Setup Scripts
+| Script | What it does |
+|---|---|
+| `./scripts/setup.sh` | **Master setup** — installs all tools, starts Postgres, runs migrations + codegen, npm install |
+| `cd breeze.api && ./scripts/setup.sh` | Installs golangci-lint + atlas (API tools) |
+| `cd breeze.web && ./scripts/setup.sh` | Runs `npm install` (Web dependencies) |
+| `cd breeze.api && make setup` | Same as API setup script |
+| `cd breeze.web && npm run setup` | Same as Web setup script |
 
 ---
 

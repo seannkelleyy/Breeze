@@ -21,7 +21,7 @@ type graphPlaidQuerierMock struct {
 	getPlaidAccountsByConnectionIDFunc func(context.Context, uuid.UUID) ([]sqlc.PlaidAccount, error)
 }
 
-func (m *graphPlaidQuerierMock) CreatePlaidConnection(ctx context.Context, arg sqlc.CreatePlaidConnectionParams) (sqlc.PlaidConnection, error) {
+func (m *graphPlaidQuerierMock) CreatePlaidConnection(ctx context.Context, arg sqlc.CreatePlaidConnectionParams) (sqlc.PlaidConnection, error) { //nolint:gocritic // interface impl
 	if m.createPlaidConnectionFunc != nil {
 		return m.createPlaidConnectionFunc(ctx, arg)
 	}
@@ -35,7 +35,7 @@ func (m *graphPlaidQuerierMock) GetPlaidConnectionByID(ctx context.Context, id u
 	return sqlc.PlaidConnection{}, nil
 }
 
-func (m *graphPlaidQuerierMock) UpsertPlaidAccount(ctx context.Context, arg sqlc.UpsertPlaidAccountParams) (sqlc.PlaidAccount, error) {
+func (m *graphPlaidQuerierMock) UpsertPlaidAccount(ctx context.Context, arg sqlc.UpsertPlaidAccountParams) (sqlc.PlaidAccount, error) { //nolint:gocritic // interface impl
 	if m.upsertPlaidAccountFunc != nil {
 		return m.upsertPlaidAccountFunc(ctx, arg)
 	}

@@ -59,7 +59,7 @@ func main() {
 	if err != nil {
 		slog.Error("Failed to connect to database", "error", err)
 		sentry.CaptureException(err)
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic // exitAfterDefer: acceptable in main
 	}
 	defer pool.Close()
 
@@ -134,14 +134,15 @@ func main() {
 
 	// Apply Clerk auth to the query endpoint when configured.
 	// In local mode without Clerk, use dev auth with a default user ID.
-	if cfg.ClerkSecretKey != "" {
+	switch {
+	case cfg.ClerkSecretKey != "":
 		slog.Info("auth middleware enabled")
 		mux.Handle("/query", middleware.RequireAuth(srv))
-	} else if cfg.IsLocalEnv() {
+	case cfg.IsLocalEnv():
 		slog.Info("dev auth middleware enabled (no CLERK_SECRET_KEY)")
 		devUserID := "550e8400-e29b-41d4-a716-446655440000"
 		mux.Handle("/query", middleware.DevAuth(devUserID)(srv))
-	} else {
+	default:
 		slog.Info("auth middleware disabled (no CLERK_SECRET_KEY)")
 		mux.Handle("/query", srv)
 	}

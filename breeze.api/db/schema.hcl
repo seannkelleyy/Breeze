@@ -293,7 +293,7 @@ table "assets" {
   }
 
   column "person_ids" {
-    type    = list(uuid)
+    type    = sql("uuid[]")
     null    = false
     default = sql("ARRAY[]::uuid[]")
   }
@@ -470,7 +470,7 @@ table "liabilities" {
   }
 
   column "person_ids" {
-    type    = list(uuid)
+    type    = sql("uuid[]")
     null    = false
     default = sql("ARRAY[]::uuid[]")
   }
@@ -893,7 +893,7 @@ table "goals" {
   }
 
   column "connected_account_ids" {
-    type    = list(uuid)
+    type    = sql("uuid[]")
     null    = false
     default = sql("ARRAY[]::uuid[]")
   }

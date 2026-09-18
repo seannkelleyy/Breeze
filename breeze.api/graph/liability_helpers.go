@@ -11,7 +11,7 @@ import (
 	"github.com/govalues/decimal"
 )
 
-func createLiabilityInputFromModel(input model.CreateLiabilityInput) (service.CreateLiabilityInput, error) {
+func createLiabilityInputFromModel(input *model.CreateLiabilityInput) (service.CreateLiabilityInput, error) {
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {
 		return service.CreateLiabilityInput{}, fmt.Errorf("invalid user id: %w", err)
@@ -24,7 +24,8 @@ func createLiabilityInputFromModel(input model.CreateLiabilityInput) (service.Cr
 
 	var originalLoanAmount *decimal.Decimal
 	if input.OriginalLoanAmount != nil {
-		v, err := decimal.Parse(*input.OriginalLoanAmount)
+		var v decimal.Decimal
+		v, err = decimal.Parse(*input.OriginalLoanAmount)
 		if err != nil {
 			return service.CreateLiabilityInput{}, fmt.Errorf("invalid original loan amount: %w", err)
 		}
@@ -72,7 +73,7 @@ func createLiabilityInputFromModel(input model.CreateLiabilityInput) (service.Cr
 	}, nil
 }
 
-func updateLiabilityInputFromModel(input model.UpdateLiabilityInput) (service.UpdateLiabilityInput, error) {
+func updateLiabilityInputFromModel(input *model.UpdateLiabilityInput) (service.UpdateLiabilityInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateLiabilityInput{}, fmt.Errorf("invalid liability id: %w", err)
@@ -85,7 +86,8 @@ func updateLiabilityInputFromModel(input model.UpdateLiabilityInput) (service.Up
 
 	var originalLoanAmount *decimal.Decimal
 	if input.OriginalLoanAmount != nil {
-		v, err := decimal.Parse(*input.OriginalLoanAmount)
+		var v decimal.Decimal
+		v, err = decimal.Parse(*input.OriginalLoanAmount)
 		if err != nil {
 			return service.UpdateLiabilityInput{}, fmt.Errorf("invalid original loan amount: %w", err)
 		}

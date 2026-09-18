@@ -10,7 +10,7 @@ import (
 	"github.com/govalues/decimal"
 )
 
-func upsertPlannerPersonInputFromModel(input model.UpsertPlannerPersonInput) (service.UpsertPlannerPersonInput, error) {
+func upsertPlannerPersonInputFromModel(input *model.UpsertPlannerPersonInput) (service.UpsertPlannerPersonInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpsertPlannerPersonInput{}, fmt.Errorf("invalid planner person id: %w", err)

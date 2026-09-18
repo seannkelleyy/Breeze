@@ -111,7 +111,7 @@ func TestAssetService_Create(t *testing.T) {
 		CurrentValue: assetRow.CurrentValue,
 	}
 
-	result, err := svc.Create(ctx, input)
+	result, err := svc.Create(ctx, &input)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -259,7 +259,7 @@ func TestAssetService_Update(t *testing.T) {
 	}
 
 	svc := NewAssetService(mock)
-	result, err := svc.Update(ctx, UpdateAssetInput{
+	result, err := svc.Update(ctx, &UpdateAssetInput{
 		ID:           assetRow.ID,
 		Name:         "Brokerage Updated",
 		AssetType:    sqlc.AssetTypeBROKERAGE,

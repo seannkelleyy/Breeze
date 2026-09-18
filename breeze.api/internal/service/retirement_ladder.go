@@ -199,13 +199,13 @@ func estimateTaxOnIncome(income decimal.Decimal, brackets []sqlc.TaxBracket) (de
 	totalTax := decimal.MustParse("0.00")
 	currentIncome := decimal.MustParse("0.00")
 
-	for _, bracket := range brackets {
+	for i := range brackets {
 		if currentIncome.Cmp(income) >= 0 {
 			break
 		}
 
 		// Calculate taxable amount in this bracket
-		upper := bracket.MaximumAmount
+		upper := brackets[i].MaximumAmount
 		var bracketMax decimal.Decimal
 		if upper.Valid {
 			raw, _ := upper.Value()
@@ -221,8 +221,8 @@ func estimateTaxOnIncome(income decimal.Decimal, brackets []sqlc.TaxBracket) (de
 
 		// Determine the taxable range in this bracket
 		var taxableInBracket decimal.Decimal
-		if currentIncome.Cmp(bracket.MinimumAmount) < 0 {
-			currentIncome = bracket.MinimumAmount
+		if currentIncome.Cmp(brackets[i].MinimumAmount) < 0 {
+			currentIncome = brackets[i].MinimumAmount
 		}
 		if income.Cmp(bracketMax) <= 0 {
 			taxableInBracket, _ = income.Sub(currentIncome)
@@ -231,7 +231,7 @@ func estimateTaxOnIncome(income decimal.Decimal, brackets []sqlc.TaxBracket) (de
 		}
 
 		if taxableInBracket.IsPos() {
-			bracketTax, _ := taxableInBracket.Mul(bracket.Rate)
+			bracketTax, _ := taxableInBracket.Mul(brackets[i].Rate)
 			var temp decimal.Decimal
 			temp, _ = totalTax.Add(bracketTax)
 			totalTax = temp

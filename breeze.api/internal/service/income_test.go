@@ -95,7 +95,7 @@ func TestIncomeService_Create(t *testing.T) {
 	}
 
 	svc := NewIncomeService(mock)
-	result, err := svc.Create(ctx, CreateIncomeInput{
+	result, err := svc.Create(ctx, &CreateIncomeInput{
 		UserID:               row.UserID,
 		BudgetID:             row.BudgetID,
 		Name:                 row.Name,
@@ -245,7 +245,7 @@ func TestIncomeService_Update(t *testing.T) {
 	}
 
 	svc := NewIncomeService(mock)
-	result, err := svc.Update(ctx, UpdateIncomeInput{
+	result, err := svc.Update(ctx, &UpdateIncomeInput{
 		ID:                   row.ID,
 		Name:                 row.Name,
 		Amount:               updatedAmount,

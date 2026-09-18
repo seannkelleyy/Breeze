@@ -86,66 +86,15 @@ func testGoalRow() sqlc.CreateGoalRow {
 }
 
 func goalRowToGetById(row sqlc.CreateGoalRow) sqlc.GetGoalByIDRow {
-	return sqlc.GetGoalByIDRow{
-		ID:                   row.ID,
-		UserID:               row.UserID,
-		Description:          row.Description,
-		IsCompleted:          row.IsCompleted,
-		TargetAmount:         row.TargetAmount,
-		TargetDate:           row.TargetDate,
-		Category:             row.Category,
-		CustomCategory:       row.CustomCategory,
-		Priority:             row.Priority,
-		Notes:                row.Notes,
-		ConnectedAccountIds:  row.ConnectedAccountIds,
-		IsFinancialOrderStep: row.IsFinancialOrderStep,
-		FinancialOrderStep:   row.FinancialOrderStep,
-		CreatedAt:            row.CreatedAt,
-		UpdatedAt:            row.UpdatedAt,
-		DeletedAt:            row.DeletedAt,
-	}
+	return sqlc.GetGoalByIDRow(row)
 }
 
 func goalRowToList(row sqlc.CreateGoalRow) sqlc.ListGoalsByUserIDRow {
-	return sqlc.ListGoalsByUserIDRow{
-		ID:                   row.ID,
-		UserID:               row.UserID,
-		Description:          row.Description,
-		IsCompleted:          row.IsCompleted,
-		TargetAmount:         row.TargetAmount,
-		TargetDate:           row.TargetDate,
-		Category:             row.Category,
-		CustomCategory:       row.CustomCategory,
-		Priority:             row.Priority,
-		Notes:                row.Notes,
-		ConnectedAccountIds:  row.ConnectedAccountIds,
-		IsFinancialOrderStep: row.IsFinancialOrderStep,
-		FinancialOrderStep:   row.FinancialOrderStep,
-		CreatedAt:            row.CreatedAt,
-		UpdatedAt:            row.UpdatedAt,
-		DeletedAt:            row.DeletedAt,
-	}
+	return sqlc.ListGoalsByUserIDRow(row)
 }
 
 func goalRowToUpdate(row sqlc.CreateGoalRow) sqlc.UpdateGoalRow {
-	return sqlc.UpdateGoalRow{
-		ID:                   row.ID,
-		UserID:               row.UserID,
-		Description:          row.Description,
-		IsCompleted:          row.IsCompleted,
-		TargetAmount:         row.TargetAmount,
-		TargetDate:           row.TargetDate,
-		Category:             row.Category,
-		CustomCategory:       row.CustomCategory,
-		Priority:             row.Priority,
-		Notes:                row.Notes,
-		ConnectedAccountIds:  row.ConnectedAccountIds,
-		IsFinancialOrderStep: row.IsFinancialOrderStep,
-		FinancialOrderStep:   row.FinancialOrderStep,
-		CreatedAt:            row.CreatedAt,
-		UpdatedAt:            row.UpdatedAt,
-		DeletedAt:            row.DeletedAt,
-	}
+	return sqlc.UpdateGoalRow(row)
 }
 
 func TestGoalService_Create(t *testing.T) {
@@ -162,7 +111,7 @@ func TestGoalService_Create(t *testing.T) {
 	}
 
 	svc := NewGoalService(mock)
-	result, err := svc.Create(ctx, CreateGoalInput{
+	result, err := svc.Create(ctx, &CreateGoalInput{
 		UserID:      row.UserID,
 		Description: row.Description,
 		IsCompleted: row.IsCompleted,
@@ -249,7 +198,7 @@ func TestGoalService_Update(t *testing.T) {
 	}
 
 	svc := NewGoalService(mock)
-	result, err := svc.Update(ctx, UpdateGoalInput{
+	result, err := svc.Update(ctx, &UpdateGoalInput{
 		ID:          row.ID,
 		Description: row.Description,
 		IsCompleted: true,

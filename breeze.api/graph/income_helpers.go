@@ -11,7 +11,7 @@ import (
 	"github.com/govalues/decimal"
 )
 
-func createIncomeInputFromModel(input model.CreateIncomeInput) (service.CreateIncomeInput, error) {
+func createIncomeInputFromModel(input *model.CreateIncomeInput) (service.CreateIncomeInput, error) {
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {
 		return service.CreateIncomeInput{}, fmt.Errorf("invalid user id: %w", err)
@@ -66,7 +66,7 @@ func createIncomeInputFromModel(input model.CreateIncomeInput) (service.CreateIn
 	}, nil
 }
 
-func updateIncomeInputFromModel(input model.UpdateIncomeInput) (service.UpdateIncomeInput, error) {
+func updateIncomeInputFromModel(input *model.UpdateIncomeInput) (service.UpdateIncomeInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateIncomeInput{}, fmt.Errorf("invalid income id: %w", err)
@@ -115,7 +115,7 @@ func updateIncomeInputFromModel(input model.UpdateIncomeInput) (service.UpdateIn
 	}, nil
 }
 
-func createRecurringIncomeInputFromModel(input model.CreateRecurringIncomeInput) (service.CreateRecurringIncomeInput, error) {
+func createRecurringIncomeInputFromModel(input *model.CreateRecurringIncomeInput) (service.CreateRecurringIncomeInput, error) {
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {
 		return service.CreateRecurringIncomeInput{}, fmt.Errorf("invalid user id: %w", err)
@@ -155,7 +155,7 @@ func createRecurringIncomeInputFromModel(input model.CreateRecurringIncomeInput)
 	}, nil
 }
 
-func updateRecurringIncomeInputFromModel(input model.UpdateRecurringIncomeInput) (service.UpdateRecurringIncomeInput, error) {
+func updateRecurringIncomeInputFromModel(input *model.UpdateRecurringIncomeInput) (service.UpdateRecurringIncomeInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateRecurringIncomeInput{}, fmt.Errorf("invalid recurring income id: %w", err)

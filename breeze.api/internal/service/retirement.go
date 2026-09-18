@@ -89,7 +89,7 @@ func NewRetirementAccountService(queries retirementQuerier) *RetirementAccountSe
 	return &RetirementAccountService{queries: queries}
 }
 
-func (s *RetirementAccountService) Create(ctx context.Context, input CreateRetirementAccountInput) (*RetirementAccount, error) {
+func (s *RetirementAccountService) Create(ctx context.Context, input *CreateRetirementAccountInput) (*RetirementAccount, error) {
 	if input.CurrentBalance.IsNeg() {
 		return nil, fmt.Errorf("current balance must be non-negative")
 	}
@@ -118,7 +118,7 @@ func (s *RetirementAccountService) Create(ctx context.Context, input CreateRetir
 		return nil, fmt.Errorf("create retirement account: %w", err)
 	}
 
-	account := mapRetirementAccountRecord(row)
+	account := mapRetirementAccountRecord(&row)
 	return &account, nil
 }
 
@@ -131,7 +131,7 @@ func (s *RetirementAccountService) GetByID(ctx context.Context, id uuid.UUID) (*
 		return nil, fmt.Errorf("get retirement account by id: %w", err)
 	}
 
-	account := mapRetirementAccountRecord(row)
+	account := mapRetirementAccountRecord(&row)
 	return &account, nil
 }
 
@@ -142,14 +142,14 @@ func (s *RetirementAccountService) ListByUserID(ctx context.Context, userID uuid
 	}
 
 	accounts := make([]RetirementAccount, 0, len(rows))
-	for _, row := range rows {
-		accounts = append(accounts, mapRetirementAccountRecord(row))
+	for i := range rows {
+		accounts = append(accounts, mapRetirementAccountRecord(&rows[i]))
 	}
 
 	return accounts, nil
 }
 
-func (s *RetirementAccountService) Update(ctx context.Context, input UpdateRetirementAccountInput) (*RetirementAccount, error) {
+func (s *RetirementAccountService) Update(ctx context.Context, input *UpdateRetirementAccountInput) (*RetirementAccount, error) {
 	if input.CurrentBalance.IsNeg() {
 		return nil, fmt.Errorf("current balance must be non-negative")
 	}
@@ -181,7 +181,7 @@ func (s *RetirementAccountService) Update(ctx context.Context, input UpdateRetir
 		return nil, fmt.Errorf("update retirement account: %w", err)
 	}
 
-	account := mapRetirementAccountRecord(row)
+	account := mapRetirementAccountRecord(&row)
 	return &account, nil
 }
 
@@ -232,7 +232,7 @@ func (s *RetirementAccountService) AddContribution(ctx context.Context, input Ad
 		return nil, fmt.Errorf("create contribution entry: %w", err)
 	}
 
-	entry := mapContributionEntryRecord(row)
+	entry := mapContributionEntryRecord(&row)
 	return &entry, nil
 }
 
@@ -255,7 +255,7 @@ func (s *RetirementAccountService) GetContributionProgress(ctx context.Context, 
 	return &progress, nil
 }
 
-func mapRetirementAccountRecord(row sqlc.RetirementAccount) RetirementAccount {
+func mapRetirementAccountRecord(row *sqlc.RetirementAccount) RetirementAccount {
 	return RetirementAccount{
 		ID:                      row.ID,
 		UserID:                  row.UserID,
@@ -270,7 +270,7 @@ func mapRetirementAccountRecord(row sqlc.RetirementAccount) RetirementAccount {
 	}
 }
 
-func mapContributionEntryRecord(row sqlc.ContributionEntry) ContributionEntry {
+func mapContributionEntryRecord(row *sqlc.ContributionEntry) ContributionEntry {
 	return ContributionEntry{
 		ID:                  row.ID,
 		RetirementAccountID: row.RetirementAccountID,

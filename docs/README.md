@@ -59,6 +59,29 @@ If you are a person or an AI agent, start here first.
 
 ## Common Workflows
 
+### 0. First-Time Setup
+
+Clone the repo, then run:
+
+```bash
+./scripts/setup.sh   # installs everything: brew tools, Postgres, migrations, codegen, npm
+```
+
+This installs:
+- `golangci-lint` and `atlas` via Homebrew (API linting + migrations)
+- Starts Postgres via Docker Compose
+- Runs database migrations and codegen (sqlc + gqlgen)
+- Runs `npm install` (web dependencies)
+
+Individual setup scripts are also available:
+| Script | Scope |
+|---|---|
+| `./scripts/setup.sh` | Full setup (API + Web + DB) |
+| `cd breeze.api && make setup` | API tools only (golangci-lint, atlas) |
+| `cd breeze.web && npm run setup` | Web dependencies only (npm install) |
+
+After setup, use `./scripts/dev.sh` to run everything.
+
 ### 1. Add a Full-Stack Slice
 
 1. Update `breeze.api/db/schema.hcl`

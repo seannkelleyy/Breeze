@@ -14,24 +14,24 @@ import (
 )
 
 type mockPlannerPersonQuerier struct {
-	upsertPlannerPersonFunc             func(context.Context, sqlc.UpsertPlannerPersonParams) (sqlc.PlannerPerson, error)
-	listPlannerPeopleByUserIDFunc       func(context.Context, uuid.UUID) ([]sqlc.PlannerPerson, error)
+	upsertPlannerPersonFunc             func(context.Context, sqlc.UpsertPlannerPersonParams) (sqlc.UpsertPlannerPersonRow, error)
+	listPlannerPeopleByUserIDFunc       func(context.Context, uuid.UUID) ([]sqlc.ListPlannerPeopleByUserIDRow, error)
 	softDeletePlannerPersonFunc         func(context.Context, uuid.UUID) (int64, error)
 	softDeletePlannerPeopleByUserIDFunc func(context.Context, uuid.UUID) (int64, error)
 }
 
-func (m *mockPlannerPersonQuerier) UpsertPlannerPerson(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.PlannerPerson, error) {
+func (m *mockPlannerPersonQuerier) UpsertPlannerPerson(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.UpsertPlannerPersonRow, error) {
 	if m.upsertPlannerPersonFunc != nil {
 		return m.upsertPlannerPersonFunc(ctx, arg)
 	}
-	return sqlc.PlannerPerson{}, nil
+	return sqlc.UpsertPlannerPersonRow{}, nil
 }
 
-func (m *mockPlannerPersonQuerier) ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.PlannerPerson, error) {
+func (m *mockPlannerPersonQuerier) ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListPlannerPeopleByUserIDRow, error) {
 	if m.listPlannerPeopleByUserIDFunc != nil {
 		return m.listPlannerPeopleByUserIDFunc(ctx, userID)
 	}
-	return []sqlc.PlannerPerson{}, nil
+	return []sqlc.ListPlannerPeopleByUserIDRow{}, nil
 }
 
 func (m *mockPlannerPersonQuerier) SoftDeletePlannerPerson(ctx context.Context, id uuid.UUID) (int64, error) {
@@ -48,7 +48,7 @@ func (m *mockPlannerPersonQuerier) SoftDeletePlannerPeopleByUserID(ctx context.C
 	return 0, nil
 }
 
-func testPlannerPersonRow() sqlc.PlannerPerson {
+func testPlannerPersonRow() sqlc.UpsertPlannerPersonRow {
 	personID := uuid.New()
 	userID := uuid.New()
 	salary, _ := decimal.Parse("85000.00")
@@ -56,7 +56,31 @@ func testPlannerPersonRow() sqlc.PlannerPerson {
 	growthRate, _ := decimal.Parse("3.50")
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.PlannerPerson{
+	return sqlc.UpsertPlannerPersonRow{
+		ID:               personID,
+		UserID:           userID,
+		Name:             "Jane Doe",
+		Birthday:         "1990-06-15",
+		RetirementAge:    65,
+		AnnualSalary:     salary,
+		BonusMode:        "dollars",
+		AnnualBonus:      bonus,
+		IncomeGrowthRate: growthRate,
+		CreatedAt:        timestamp,
+		UpdatedAt:        timestamp,
+		DeletedAt:        pgtype.Timestamptz{},
+	}
+}
+
+func testPlannerPersonListRow() sqlc.ListPlannerPeopleByUserIDRow {
+	personID := uuid.New()
+	userID := uuid.New()
+	salary, _ := decimal.Parse("85000.00")
+	bonus, _ := decimal.Parse("5000.00")
+	growthRate, _ := decimal.Parse("3.50")
+	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
+
+	return sqlc.ListPlannerPeopleByUserIDRow{
 		ID:               personID,
 		UserID:           userID,
 		Name:             "Jane Doe",
@@ -77,13 +101,13 @@ func TestPlannerPersonService_Upsert(t *testing.T) {
 	expected := testPlannerPersonRow()
 
 	mock := &mockPlannerPersonQuerier{
-		upsertPlannerPersonFunc: func(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.PlannerPerson, error) {
+		upsertPlannerPersonFunc: func(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.UpsertPlannerPersonRow, error) {
 			return expected, nil
 		},
 	}
 
 	svc := NewPlannerPersonService(mock)
-	result, err := svc.Upsert(ctx, UpsertPlannerPersonInput{
+	result, err := svc.Upsert(ctx, &UpsertPlannerPersonInput{
 		ID:               expected.ID,
 		UserID:           expected.UserID,
 		Name:             expected.Name,
@@ -113,13 +137,13 @@ func TestPlannerPersonService_Upsert_Error(t *testing.T) {
 	dbErr := errors.New("db connection failed")
 
 	mock := &mockPlannerPersonQuerier{
-		upsertPlannerPersonFunc: func(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.PlannerPerson, error) {
-			return sqlc.PlannerPerson{}, dbErr
+		upsertPlannerPersonFunc: func(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.UpsertPlannerPersonRow, error) {
+			return sqlc.UpsertPlannerPersonRow{}, dbErr
 		},
 	}
 
 	svc := NewPlannerPersonService(mock)
-	result, err := svc.Upsert(ctx, UpsertPlannerPersonInput{
+	result, err := svc.Upsert(ctx, &UpsertPlannerPersonInput{
 		ID:     uuid.New(),
 		UserID: uuid.New(),
 		Name:   "Test",
@@ -133,15 +157,15 @@ func TestPlannerPersonService_Upsert_Error(t *testing.T) {
 func TestPlannerPersonService_ListByUserID(t *testing.T) {
 	ctx := context.Background()
 	userID := uuid.New()
-	person1 := testPlannerPersonRow()
+	person1 := testPlannerPersonListRow()
 	person1.UserID = userID
-	person2 := testPlannerPersonRow()
+	person2 := testPlannerPersonListRow()
 	person2.UserID = userID
 
 	mock := &mockPlannerPersonQuerier{
-		listPlannerPeopleByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.PlannerPerson, error) {
+		listPlannerPeopleByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.ListPlannerPeopleByUserIDRow, error) {
 			assert.Equal(t, userID, uid)
-			return []sqlc.PlannerPerson{person1, person2}, nil
+			return []sqlc.ListPlannerPeopleByUserIDRow{person1, person2}, nil
 		},
 	}
 
@@ -159,8 +183,8 @@ func TestPlannerPersonService_ListByUserID_Empty(t *testing.T) {
 	userID := uuid.New()
 
 	mock := &mockPlannerPersonQuerier{
-		listPlannerPeopleByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.PlannerPerson, error) {
-			return []sqlc.PlannerPerson{}, nil
+		listPlannerPeopleByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.ListPlannerPeopleByUserIDRow, error) {
+			return []sqlc.ListPlannerPeopleByUserIDRow{}, nil
 		},
 	}
 
@@ -176,7 +200,7 @@ func TestPlannerPersonService_ListByUserID_Error(t *testing.T) {
 	dbErr := errors.New("query failed")
 
 	mock := &mockPlannerPersonQuerier{
-		listPlannerPeopleByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.PlannerPerson, error) {
+		listPlannerPeopleByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.ListPlannerPeopleByUserIDRow, error) {
 			return nil, dbErr
 		},
 	}

@@ -56,7 +56,7 @@ func NewNetWorthSnapshotService(queries netWorthSnapshotQuerier) *NetWorthSnapsh
 	return &NetWorthSnapshotService{queries: queries}
 }
 
-func mapNetWorthSnapshotRecord(record sqlc.NetWorthSnapshot) (*NetWorthSnapshot, error) {
+func mapNetWorthSnapshotRecord(record *sqlc.NetWorthSnapshot) (*NetWorthSnapshot, error) {
 	return &NetWorthSnapshot{
 		ID:               record.ID,
 		UserID:           record.UserID,
@@ -69,7 +69,7 @@ func mapNetWorthSnapshotRecord(record sqlc.NetWorthSnapshot) (*NetWorthSnapshot,
 	}, nil
 }
 
-func (s *NetWorthSnapshotService) Create(ctx context.Context, input CreateNetWorthSnapshotInput) (*NetWorthSnapshot, error) {
+func (s *NetWorthSnapshotService) Create(ctx context.Context, input *CreateNetWorthSnapshotInput) (*NetWorthSnapshot, error) {
 	row, err := s.queries.CreateNetWorthSnapshot(ctx, sqlc.CreateNetWorthSnapshotParams{
 		UserID:           input.UserID,
 		SnapshotDate:     pgtype.Date{Time: input.SnapshotDate, Valid: true},
@@ -81,7 +81,7 @@ func (s *NetWorthSnapshotService) Create(ctx context.Context, input CreateNetWor
 		return nil, fmt.Errorf("create net worth snapshot: %w", err)
 	}
 
-	return mapNetWorthSnapshotRecord(row)
+	return mapNetWorthSnapshotRecord(&row)
 }
 
 func (s *NetWorthSnapshotService) Get(ctx context.Context, id uuid.UUID) (*NetWorthSnapshot, error) {
@@ -93,7 +93,7 @@ func (s *NetWorthSnapshotService) Get(ctx context.Context, id uuid.UUID) (*NetWo
 		return nil, fmt.Errorf("get net worth snapshot: %w", err)
 	}
 
-	return mapNetWorthSnapshotRecord(row)
+	return mapNetWorthSnapshotRecord(&row)
 }
 
 func (s *NetWorthSnapshotService) GetByDate(ctx context.Context, userID uuid.UUID, date time.Time) (*NetWorthSnapshot, error) {
@@ -108,7 +108,7 @@ func (s *NetWorthSnapshotService) GetByDate(ctx context.Context, userID uuid.UUI
 		return nil, fmt.Errorf("get net worth snapshot by date: %w", err)
 	}
 
-	return mapNetWorthSnapshotRecord(row)
+	return mapNetWorthSnapshotRecord(&row)
 }
 
 func (s *NetWorthSnapshotService) List(ctx context.Context, userID uuid.UUID) ([]NetWorthSnapshot, error) {
@@ -118,8 +118,8 @@ func (s *NetWorthSnapshotService) List(ctx context.Context, userID uuid.UUID) ([
 	}
 
 	var snapshots []NetWorthSnapshot
-	for _, row := range rows {
-		snapshot, err := mapNetWorthSnapshotRecord(row)
+	for i := range rows {
+		snapshot, err := mapNetWorthSnapshotRecord(&rows[i])
 		if err != nil {
 			return nil, fmt.Errorf("map net worth snapshot: %w", err)
 		}
@@ -129,7 +129,7 @@ func (s *NetWorthSnapshotService) List(ctx context.Context, userID uuid.UUID) ([
 	return snapshots, nil
 }
 
-func (s *NetWorthSnapshotService) Update(ctx context.Context, input UpdateNetWorthSnapshotInput) (*NetWorthSnapshot, error) {
+func (s *NetWorthSnapshotService) Update(ctx context.Context, input *UpdateNetWorthSnapshotInput) (*NetWorthSnapshot, error) {
 	totalAssets, err := decimalToPGNumeric(input.TotalAssets)
 	if err != nil {
 		return nil, fmt.Errorf("encode total assets: %w", err)
@@ -156,7 +156,7 @@ func (s *NetWorthSnapshotService) Update(ctx context.Context, input UpdateNetWor
 		return nil, fmt.Errorf("update net worth snapshot: %w", err)
 	}
 
-	return mapNetWorthSnapshotRecord(row)
+	return mapNetWorthSnapshotRecord(&row)
 }
 
 func (s *NetWorthSnapshotService) Delete(ctx context.Context, id uuid.UUID) error {

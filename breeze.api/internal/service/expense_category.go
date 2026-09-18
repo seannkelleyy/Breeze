@@ -61,7 +61,7 @@ func NewExpenseCategoryService(queries expenseCategoryQuerier) *ExpenseCategoryS
 	return &ExpenseCategoryService{queries: queries}
 }
 
-func (s *ExpenseCategoryService) Create(ctx context.Context, input CreateExpenseCategoryInput) (*ExpenseCategory, error) {
+func (s *ExpenseCategoryService) Create(ctx context.Context, input *CreateExpenseCategoryInput) (*ExpenseCategory, error) {
 	row, err := s.queries.CreateExpenseCategory(ctx, sqlc.CreateExpenseCategoryParams{
 		UserID:           input.UserID,
 		BudgetID:         input.BudgetID,
@@ -76,7 +76,7 @@ func (s *ExpenseCategoryService) Create(ctx context.Context, input CreateExpense
 		return nil, fmt.Errorf("create expense category: %w", err)
 	}
 
-	category := mapCreateExpenseCategoryRow(row)
+	category := mapCreateExpenseCategoryRow(&row)
 	return &category, nil
 }
 
@@ -89,7 +89,7 @@ func (s *ExpenseCategoryService) GetByID(ctx context.Context, id uuid.UUID) (*Ex
 		return nil, fmt.Errorf("get expense category by id: %w", err)
 	}
 
-	category := mapGetExpenseCategoryByIDRow(row)
+	category := mapGetExpenseCategoryByIDRow(&row)
 	return &category, nil
 }
 
@@ -100,14 +100,14 @@ func (s *ExpenseCategoryService) ListByBudgetID(ctx context.Context, budgetID uu
 	}
 
 	categories := make([]ExpenseCategory, 0, len(rows))
-	for _, row := range rows {
-		categories = append(categories, mapListExpenseCategoriesByBudgetIDRow(row))
+	for i := range rows {
+		categories = append(categories, mapListExpenseCategoriesByBudgetIDRow(&rows[i]))
 	}
 
 	return categories, nil
 }
 
-func (s *ExpenseCategoryService) Update(ctx context.Context, input UpdateExpenseCategoryInput) (*ExpenseCategory, error) {
+func (s *ExpenseCategoryService) Update(ctx context.Context, input *UpdateExpenseCategoryInput) (*ExpenseCategory, error) {
 	row, err := s.queries.UpdateExpenseCategory(ctx, sqlc.UpdateExpenseCategoryParams{
 		ID:           input.ID,
 		Name:         input.Name,
@@ -121,7 +121,7 @@ func (s *ExpenseCategoryService) Update(ctx context.Context, input UpdateExpense
 		return nil, fmt.Errorf("update expense category: %w", err)
 	}
 
-	category := mapUpdateExpenseCategoryRow(row)
+	category := mapUpdateExpenseCategoryRow(&row)
 	return &category, nil
 }
 
@@ -136,7 +136,7 @@ func (s *ExpenseCategoryService) Delete(ctx context.Context, id uuid.UUID) error
 	return nil
 }
 
-func mapExpenseCategoryRecord(row sqlc.ExpenseCategory) ExpenseCategory {
+func mapCreateExpenseCategoryRow(row *sqlc.CreateExpenseCategoryRow) ExpenseCategory {
 	return ExpenseCategory{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -152,7 +152,7 @@ func mapExpenseCategoryRecord(row sqlc.ExpenseCategory) ExpenseCategory {
 	}
 }
 
-func mapCreateExpenseCategoryRow(row sqlc.CreateExpenseCategoryRow) ExpenseCategory {
+func mapGetExpenseCategoryByIDRow(row *sqlc.GetExpenseCategoryByIDRow) ExpenseCategory {
 	return ExpenseCategory{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -168,7 +168,7 @@ func mapCreateExpenseCategoryRow(row sqlc.CreateExpenseCategoryRow) ExpenseCateg
 	}
 }
 
-func mapGetExpenseCategoryByIDRow(row sqlc.GetExpenseCategoryByIDRow) ExpenseCategory {
+func mapListExpenseCategoriesByBudgetIDRow(row *sqlc.ListExpenseCategoriesByBudgetIDRow) ExpenseCategory {
 	return ExpenseCategory{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -184,23 +184,7 @@ func mapGetExpenseCategoryByIDRow(row sqlc.GetExpenseCategoryByIDRow) ExpenseCat
 	}
 }
 
-func mapListExpenseCategoriesByBudgetIDRow(row sqlc.ListExpenseCategoriesByBudgetIDRow) ExpenseCategory {
-	return ExpenseCategory{
-		ID:               row.ID,
-		UserID:           row.UserID,
-		BudgetID:         row.BudgetID,
-		Name:             row.Name,
-		Allocation:       row.Allocation,
-		CurrentSpend:     row.CurrentSpend,
-		SourceType:       row.SourceType,
-		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
-		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
-		CreatedAt:        timestamptzToTime(row.CreatedAt),
-		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
-	}
-}
-
-func mapUpdateExpenseCategoryRow(row sqlc.UpdateExpenseCategoryRow) ExpenseCategory {
+func mapUpdateExpenseCategoryRow(row *sqlc.UpdateExpenseCategoryRow) ExpenseCategory {
 	return ExpenseCategory{
 		ID:               row.ID,
 		UserID:           row.UserID,

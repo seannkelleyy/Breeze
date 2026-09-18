@@ -65,7 +65,7 @@ func NewRecurringExpenseService(queries recurringExpenseQuerier) *RecurringExpen
 	return &RecurringExpenseService{queries: queries}
 }
 
-func (s *RecurringExpenseService) Create(ctx context.Context, input CreateRecurringExpenseInput) (*RecurringExpense, error) {
+func (s *RecurringExpenseService) Create(ctx context.Context, input *CreateRecurringExpenseInput) (*RecurringExpense, error) {
 	row, err := s.queries.CreateRecurringExpense(ctx, sqlc.CreateRecurringExpenseParams{
 		UserID:             input.UserID,
 		Name:               input.Name,
@@ -80,7 +80,7 @@ func (s *RecurringExpenseService) Create(ctx context.Context, input CreateRecurr
 		return nil, fmt.Errorf("create recurring expense: %w", err)
 	}
 
-	expense := mapCreateRecurringExpenseRow(row)
+	expense := mapCreateRecurringExpenseRow(&row)
 	return &expense, nil
 }
 
@@ -93,7 +93,7 @@ func (s *RecurringExpenseService) GetByID(ctx context.Context, id uuid.UUID) (*R
 		return nil, fmt.Errorf("get recurring expense by id: %w", err)
 	}
 
-	expense := mapGetRecurringExpenseByIDRow(row)
+	expense := mapGetRecurringExpenseByIDRow(&row)
 	return &expense, nil
 }
 
@@ -104,14 +104,14 @@ func (s *RecurringExpenseService) ListByUserID(ctx context.Context, userID uuid.
 	}
 
 	expenses := make([]RecurringExpense, 0, len(rows))
-	for _, row := range rows {
-		expenses = append(expenses, mapListRecurringExpensesByUserIDRow(row))
+	for i := range rows {
+		expenses = append(expenses, mapListRecurringExpensesByUserIDRow(&rows[i]))
 	}
 
 	return expenses, nil
 }
 
-func (s *RecurringExpenseService) Update(ctx context.Context, input UpdateRecurringExpenseInput) (*RecurringExpense, error) {
+func (s *RecurringExpenseService) Update(ctx context.Context, input *UpdateRecurringExpenseInput) (*RecurringExpense, error) {
 	row, err := s.queries.UpdateRecurringExpense(ctx, sqlc.UpdateRecurringExpenseParams{
 		ID:                 input.ID,
 		Name:               input.Name,
@@ -129,7 +129,7 @@ func (s *RecurringExpenseService) Update(ctx context.Context, input UpdateRecurr
 		return nil, fmt.Errorf("update recurring expense: %w", err)
 	}
 
-	expense := mapUpdateRecurringExpenseRow(row)
+	expense := mapUpdateRecurringExpenseRow(&row)
 	return &expense, nil
 }
 
@@ -144,7 +144,7 @@ func (s *RecurringExpenseService) Delete(ctx context.Context, id uuid.UUID) erro
 	return nil
 }
 
-func mapCreateRecurringExpenseRow(row sqlc.CreateRecurringExpenseRow) RecurringExpense {
+func mapCreateRecurringExpenseRow(row *sqlc.CreateRecurringExpenseRow) RecurringExpense {
 	return RecurringExpense{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -160,7 +160,7 @@ func mapCreateRecurringExpenseRow(row sqlc.CreateRecurringExpenseRow) RecurringE
 	}
 }
 
-func mapGetRecurringExpenseByIDRow(row sqlc.GetRecurringExpenseByIDRow) RecurringExpense {
+func mapGetRecurringExpenseByIDRow(row *sqlc.GetRecurringExpenseByIDRow) RecurringExpense {
 	return RecurringExpense{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -176,7 +176,7 @@ func mapGetRecurringExpenseByIDRow(row sqlc.GetRecurringExpenseByIDRow) Recurrin
 	}
 }
 
-func mapListRecurringExpensesByUserIDRow(row sqlc.ListRecurringExpensesByUserIDRow) RecurringExpense {
+func mapListRecurringExpensesByUserIDRow(row *sqlc.ListRecurringExpensesByUserIDRow) RecurringExpense {
 	return RecurringExpense{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -192,7 +192,7 @@ func mapListRecurringExpensesByUserIDRow(row sqlc.ListRecurringExpensesByUserIDR
 	}
 }
 
-func mapUpdateRecurringExpenseRow(row sqlc.UpdateRecurringExpenseRow) RecurringExpense {
+func mapUpdateRecurringExpenseRow(row *sqlc.UpdateRecurringExpenseRow) RecurringExpense {
 	return RecurringExpense{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -210,7 +210,7 @@ func mapUpdateRecurringExpenseRow(row sqlc.UpdateRecurringExpenseRow) RecurringE
 
 // RecurringIncome converts a RecurringExpense to a RecurringIncome so it can
 // be passed to the shared recurringOccurrences function.
-func (e RecurringExpense) RecurringIncome() RecurringIncome {
+func (e *RecurringExpense) RecurringIncome() RecurringIncome {
 	return RecurringIncome{
 		ID:                 e.ID,
 		StartDate:          e.StartDate,

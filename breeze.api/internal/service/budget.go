@@ -53,7 +53,7 @@ func NewBudgetService(queries budgetQuerier) *BudgetService {
 	return &BudgetService{queries: queries}
 }
 
-func (s *BudgetService) Create(ctx context.Context, input CreateBudgetInput) (*Budget, error) {
+func (s *BudgetService) Create(ctx context.Context, input *CreateBudgetInput) (*Budget, error) {
 	row, err := s.queries.CreateBudget(ctx, sqlc.CreateBudgetParams{
 		UserID:          input.UserID,
 		Date:            pgtype.Date{Time: input.Date, Valid: true},
@@ -64,7 +64,7 @@ func (s *BudgetService) Create(ctx context.Context, input CreateBudgetInput) (*B
 		return nil, fmt.Errorf("create budget: %w", err)
 	}
 
-	budget := mapBudgetRecord(row)
+	budget := mapBudgetRecord(&row)
 	return &budget, nil
 }
 
@@ -77,7 +77,7 @@ func (s *BudgetService) GetByID(ctx context.Context, id uuid.UUID) (*Budget, err
 		return nil, fmt.Errorf("get budget by id: %w", err)
 	}
 
-	budget := mapBudgetRecord(row)
+	budget := mapBudgetRecord(&row)
 	return &budget, nil
 }
 
@@ -93,7 +93,7 @@ func (s *BudgetService) GetByDate(ctx context.Context, userID uuid.UUID, date ti
 		return nil, fmt.Errorf("get budget by date: %w", err)
 	}
 
-	budget := mapBudgetRecord(row)
+	budget := mapBudgetRecord(&row)
 	return &budget, nil
 }
 
@@ -104,14 +104,14 @@ func (s *BudgetService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]B
 	}
 
 	budgets := make([]Budget, 0, len(rows))
-	for _, row := range rows {
-		budgets = append(budgets, mapBudgetRecord(row))
+	for i := range rows {
+		budgets = append(budgets, mapBudgetRecord(&rows[i]))
 	}
 
 	return budgets, nil
 }
 
-func (s *BudgetService) Update(ctx context.Context, input UpdateBudgetInput) (*Budget, error) {
+func (s *BudgetService) Update(ctx context.Context, input *UpdateBudgetInput) (*Budget, error) {
 	row, err := s.queries.UpdateBudget(ctx, sqlc.UpdateBudgetParams{
 		ID:              input.ID,
 		MonthlyIncome:   input.MonthlyIncome,
@@ -124,7 +124,7 @@ func (s *BudgetService) Update(ctx context.Context, input UpdateBudgetInput) (*B
 		return nil, fmt.Errorf("update budget: %w", err)
 	}
 
-	budget := mapBudgetRecord(row)
+	budget := mapBudgetRecord(&row)
 	return &budget, nil
 }
 
@@ -139,7 +139,7 @@ func (s *BudgetService) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func mapBudgetRecord(row sqlc.Budget) Budget {
+func mapBudgetRecord(row *sqlc.Budget) Budget {
 	return Budget{
 		ID:              row.ID,
 		UserID:          row.UserID,

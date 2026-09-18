@@ -99,7 +99,7 @@ func TestNetWorthSnapshotService_Create(t *testing.T) {
 	}
 
 	svc := NewNetWorthSnapshotService(mock)
-	result, err := svc.Create(ctx, CreateNetWorthSnapshotInput{
+	result, err := svc.Create(ctx, &CreateNetWorthSnapshotInput{
 		UserID:           row.UserID,
 		SnapshotDate:     row.SnapshotDate.Time,
 		TotalAssets:      row.TotalAssets,
@@ -224,7 +224,7 @@ func TestNetWorthSnapshotService_Update(t *testing.T) {
 	}
 
 	svc := NewNetWorthSnapshotService(mock)
-	result, err := svc.Update(ctx, UpdateNetWorthSnapshotInput{
+	result, err := svc.Update(ctx, &UpdateNetWorthSnapshotInput{
 		ID:          row.ID,
 		TotalAssets: &updatedAssets,
 	})

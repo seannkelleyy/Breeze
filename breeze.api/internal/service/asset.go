@@ -90,7 +90,7 @@ func NewAssetService(queries assetQuerier) *AssetService {
 	return &AssetService{queries: queries}
 }
 
-func (s *AssetService) Create(ctx context.Context, input CreateAssetInput) (*Asset, error) {
+func (s *AssetService) Create(ctx context.Context, input *CreateAssetInput) (*Asset, error) {
 	purchaseDate := pgtypeDateFromString(input.PurchaseDate)
 	purchasePrice := pgtypeNumericFromDecimal(input.PurchasePrice)
 	linkedLiabilityID := pgtypeUUIDFromPtr(input.LinkedLiabilityID)
@@ -117,7 +117,7 @@ func (s *AssetService) Create(ctx context.Context, input CreateAssetInput) (*Ass
 		return nil, fmt.Errorf("create asset: %w", err)
 	}
 
-	asset := mapCreateAssetRow(row)
+	asset := mapCreateAssetRow(&row)
 	return &asset, nil
 }
 
@@ -130,7 +130,7 @@ func (s *AssetService) GetByID(ctx context.Context, id uuid.UUID) (*Asset, error
 		return nil, fmt.Errorf("get asset by id: %w", err)
 	}
 
-	asset := mapGetAssetByIDRow(row)
+	asset := mapGetAssetByIDRow(&row)
 	return &asset, nil
 }
 
@@ -141,14 +141,14 @@ func (s *AssetService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]As
 	}
 
 	assets := make([]Asset, 0, len(rows))
-	for _, row := range rows {
-		assets = append(assets, mapListAssetsByUserIDRow(row))
+	for i := range rows {
+		assets = append(assets, mapListAssetsByUserIDRow(&rows[i]))
 	}
 
 	return assets, nil
 }
 
-func (s *AssetService) Update(ctx context.Context, input UpdateAssetInput) (*Asset, error) {
+func (s *AssetService) Update(ctx context.Context, input *UpdateAssetInput) (*Asset, error) {
 	purchaseDate := pgtypeDateFromString(input.PurchaseDate)
 	purchasePrice := pgtypeNumericFromDecimal(input.PurchasePrice)
 	linkedLiabilityID := pgtypeUUIDFromPtr(input.LinkedLiabilityID)
@@ -178,7 +178,7 @@ func (s *AssetService) Update(ctx context.Context, input UpdateAssetInput) (*Ass
 		return nil, fmt.Errorf("update asset: %w", err)
 	}
 
-	asset := mapUpdateAssetRow(row)
+	asset := mapUpdateAssetRow(&row)
 	return &asset, nil
 }
 
@@ -193,7 +193,7 @@ func (s *AssetService) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func mapCreateAssetRow(row sqlc.CreateAssetRow) Asset {
+func mapCreateAssetRow(row *sqlc.CreateAssetRow) Asset {
 	return Asset{
 		ID:           row.ID,
 		UserID:       row.UserID,
@@ -220,7 +220,7 @@ func mapCreateAssetRow(row sqlc.CreateAssetRow) Asset {
 	}
 }
 
-func mapGetAssetByIDRow(row sqlc.GetAssetByIDRow) Asset {
+func mapGetAssetByIDRow(row *sqlc.GetAssetByIDRow) Asset {
 	return Asset{
 		ID:           row.ID,
 		UserID:       row.UserID,
@@ -247,7 +247,7 @@ func mapGetAssetByIDRow(row sqlc.GetAssetByIDRow) Asset {
 	}
 }
 
-func mapListAssetsByUserIDRow(row sqlc.ListAssetsByUserIDRow) Asset {
+func mapListAssetsByUserIDRow(row *sqlc.ListAssetsByUserIDRow) Asset {
 	return Asset{
 		ID:           row.ID,
 		UserID:       row.UserID,
@@ -274,7 +274,7 @@ func mapListAssetsByUserIDRow(row sqlc.ListAssetsByUserIDRow) Asset {
 	}
 }
 
-func mapUpdateAssetRow(row sqlc.UpdateAssetRow) Asset {
+func mapUpdateAssetRow(row *sqlc.UpdateAssetRow) Asset {
 	return Asset{
 		ID:           row.ID,
 		UserID:       row.UserID,

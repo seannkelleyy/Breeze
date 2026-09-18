@@ -11,7 +11,7 @@ import (
 	"github.com/govalues/decimal"
 )
 
-func createExpenseCategoryInputFromModel(input model.CreateExpenseCategoryInput) (service.CreateExpenseCategoryInput, error) {
+func createExpenseCategoryInputFromModel(input *model.CreateExpenseCategoryInput) (service.CreateExpenseCategoryInput, error) {
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {
 		return service.CreateExpenseCategoryInput{}, fmt.Errorf("invalid user id: %w", err)
@@ -42,7 +42,7 @@ func createExpenseCategoryInputFromModel(input model.CreateExpenseCategoryInput)
 	}, nil
 }
 
-func updateExpenseCategoryInputFromModel(input model.UpdateExpenseCategoryInput) (service.UpdateExpenseCategoryInput, error) {
+func updateExpenseCategoryInputFromModel(input *model.UpdateExpenseCategoryInput) (service.UpdateExpenseCategoryInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateExpenseCategoryInput{}, fmt.Errorf("invalid expense category id: %w", err)

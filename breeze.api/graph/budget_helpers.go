@@ -17,7 +17,7 @@ func decimalZero() decimal.Decimal {
 	return decimal.MustParse("0")
 }
 
-func createBudgetInputFromModel(input model.CreateBudgetInput) (service.CreateBudgetInput, error) {
+func createBudgetInputFromModel(input *model.CreateBudgetInput) (service.CreateBudgetInput, error) {
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {
 		return service.CreateBudgetInput{}, fmt.Errorf("invalid user id: %w", err)
@@ -46,7 +46,7 @@ func createBudgetInputFromModel(input model.CreateBudgetInput) (service.CreateBu
 	}, nil
 }
 
-func updateBudgetInputFromModel(input model.UpdateBudgetInput) (service.UpdateBudgetInput, error) {
+func updateBudgetInputFromModel(input *model.UpdateBudgetInput) (service.UpdateBudgetInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateBudgetInput{}, fmt.Errorf("invalid budget id: %w", err)
@@ -76,9 +76,9 @@ func removeRecurringIncomesForBudget(ctx context.Context, incomeSvc *service.Inc
 	if err != nil {
 		return err
 	}
-	for _, inc := range existingIncomes {
-		if inc.SourceType == sqlc.IncomeSourceTypeRECURRINGTEMPLATE {
-			_ = incomeSvc.Delete(ctx, inc.ID)
+	for i := range existingIncomes {
+		if existingIncomes[i].SourceType == sqlc.IncomeSourceTypeRECURRINGTEMPLATE {
+			_ = incomeSvc.Delete(ctx, existingIncomes[i].ID)
 		}
 	}
 	return nil
@@ -99,12 +99,12 @@ func recalculateBudgetIncome(
 	}
 	slog.Info("recalculateBudgetIncome: found incomes", "count", len(incomes))
 	total := decimalZero()
-	for _, inc := range incomes {
-		total, _ = total.Add(inc.Amount)
-		slog.Info("recalculateBudgetIncome: income", "name", inc.Name, "amount", inc.Amount.String())
+	for i := range incomes {
+		total, _ = total.Add(incomes[i].Amount)
+		slog.Info("recalculateBudgetIncome: income", "name", incomes[i].Name, "amount", incomes[i].Amount.String())
 	}
 	slog.Info("recalculateBudgetIncome: total", "total", total.String())
-	updated, updateErr := budgetSvc.Update(ctx, service.UpdateBudgetInput{
+	updated, updateErr := budgetSvc.Update(ctx, &service.UpdateBudgetInput{
 		ID:              budget.ID,
 		MonthlyIncome:   total,
 		MonthlyExpenses: budget.MonthlyExpenses,

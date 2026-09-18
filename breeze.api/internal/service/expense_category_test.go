@@ -96,7 +96,7 @@ func TestExpenseCategoryService_Create(t *testing.T) {
 	}
 
 	svc := NewExpenseCategoryService(mock)
-	result, err := svc.Create(ctx, CreateExpenseCategoryInput{
+	result, err := svc.Create(ctx, &CreateExpenseCategoryInput{
 		UserID:       cat.UserID,
 		BudgetID:     cat.BudgetID,
 		Name:         cat.Name,
@@ -185,7 +185,7 @@ func TestExpenseCategoryService_Update(t *testing.T) {
 	}
 
 	svc := NewExpenseCategoryService(mock)
-	result, err := svc.Update(ctx, UpdateExpenseCategoryInput{
+	result, err := svc.Update(ctx, &UpdateExpenseCategoryInput{
 		ID:           cat.ID,
 		Name:         "Updated Housing",
 		Allocation:   allocation,
@@ -208,7 +208,7 @@ func TestExpenseCategoryService_Update_NotFound(t *testing.T) {
 	}
 
 	svc := NewExpenseCategoryService(mock)
-	_, err := svc.Update(ctx, UpdateExpenseCategoryInput{
+	_, err := svc.Update(ctx, &UpdateExpenseCategoryInput{
 		ID:           uuid.New(),
 		Name:         "test",
 		Allocation:   allocation,

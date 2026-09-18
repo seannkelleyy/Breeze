@@ -84,15 +84,15 @@ func (s *TaxPlanningService) EstimateForYear(ctx context.Context, year int32, fi
 
 	// iterate through ordered brackets (SQL orders by minimum_amount ASC)
 	for _, row := range rows {
-		min := row.MinimumAmount
+		minAmount := row.MinimumAmount
 		// convert maximum (pgtype.Numeric) to *decimal.Decimal
 		maxPtr, err := decimalFromPGNumeric(row.MaximumAmount)
 		if err != nil {
 			return nil, fmt.Errorf("decode bracket maximum: %w", err)
 		}
 
-		// if taxableIncome <= min, nothing in this bracket
-		if taxableIncome.Cmp(min) <= 0 {
+		// if taxableIncome <= minAmount, nothing in this bracket
+		if taxableIncome.Cmp(minAmount) <= 0 {
 			continue
 		}
 
@@ -104,8 +104,8 @@ func (s *TaxPlanningService) EstimateForYear(ctx context.Context, year int32, fi
 			}
 		}
 
-		// amount taxed in this bracket = upper - min
-		amount, err := upper.Sub(min)
+		// amount taxed in this bracket = upper - minAmount
+		amount, err := upper.Sub(minAmount)
 		if err != nil {
 			return nil, fmt.Errorf("subtract bracket min: %w", err)
 		}

@@ -45,7 +45,7 @@ func mapTaxBracketToModel(bracket *service.TaxBracket) *model.TaxBracket {
 	}
 }
 
-func createTaxBracketInputFromModel(input model.CreateTaxBracketInput) (service.CreateTaxBracketInput, error) {
+func createTaxBracketInputFromModel(input *model.CreateTaxBracketInput) (service.CreateTaxBracketInput, error) {
 	year, err := taxBracketYearFromInput(input.Year)
 	if err != nil {
 		return service.CreateTaxBracketInput{}, err
@@ -79,13 +79,13 @@ func createTaxBracketInputFromModel(input model.CreateTaxBracketInput) (service.
 	}, nil
 }
 
-func updateTaxBracketInputFromModel(input model.UpdateTaxBracketInput) (service.UpdateTaxBracketInput, error) {
+func updateTaxBracketInputFromModel(input *model.UpdateTaxBracketInput) (service.UpdateTaxBracketInput, error) {
 	id, err := taxBracketIDFromString(input.ID)
 	if err != nil {
 		return service.UpdateTaxBracketInput{}, err
 	}
 
-	createInput, err := createTaxBracketInputFromModel(model.CreateTaxBracketInput{
+	createInput, err := createTaxBracketInputFromModel(&model.CreateTaxBracketInput{
 		Year:          input.Year,
 		FilingStatus:  input.FilingStatus,
 		MinimumAmount: input.MinimumAmount,

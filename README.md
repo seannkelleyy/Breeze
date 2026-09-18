@@ -50,14 +50,15 @@ Personal finance planner — track assets, liabilities, budgets, retirement proj
 ## Quick Start
 
 ```bash
-# 1. Start PostgreSQL
-docker compose up -d postgres
+# 0. First time only — install tools + dependencies
+./scripts/setup.sh        # installs golangci-lint, atlas, starts Postgres, runs codegen, npm install
 
-# 2. API (in breeze.api/)
-make dev    # migrate → gen → run
+# 1. Start everything (API + Web + DB)
+./scripts/dev.sh
 
-# 3. Web (in breeze.web/)
-npm run dev
+# 2. Or run individually:
+cd breeze.api && make dev   # API only
+cd breeze.web && npm run dev # Web only
 ```
 
 ## Monorepo Structure

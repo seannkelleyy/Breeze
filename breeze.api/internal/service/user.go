@@ -395,7 +395,6 @@ func (s *UserService) UpdateSetup(ctx context.Context, input UpdateSetupInput) (
 
 	var monthlyExpenses pgtype.Numeric
 	if input.MonthlyExpenses != nil {
-		var err error
 		monthlyExpenses, err = decimalToPGNumeric(input.MonthlyExpenses)
 		if err != nil {
 			return nil, fmt.Errorf("encode monthly expenses: %w", err)

@@ -10,7 +10,7 @@ import (
 	"github.com/govalues/decimal"
 )
 
-func createScenarioInputFromModel(input model.CreateScenarioInput) (service.CreateScenarioInput, error) {
+func createScenarioInputFromModel(input *model.CreateScenarioInput) (service.CreateScenarioInput, error) {
 	parsed, err := parseScenarioFields(input.Name, input.CurrentAge, input.RetirementAge, input.AnnualSpend, input.SafeWithdrawalRate, input.InflationRate, input.ReturnRate, input.CurrentPortfolio)
 	if err != nil {
 		return service.CreateScenarioInput{}, err
@@ -34,7 +34,7 @@ func createScenarioInputFromModel(input model.CreateScenarioInput) (service.Crea
 	}, nil
 }
 
-func updateScenarioInputFromModel(input model.UpdateScenarioInput) (service.UpdateScenarioInput, error) {
+func updateScenarioInputFromModel(input *model.UpdateScenarioInput) (service.UpdateScenarioInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateScenarioInput{}, fmt.Errorf("invalid scenario id: %w", err)

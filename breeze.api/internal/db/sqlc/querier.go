@@ -73,7 +73,7 @@ type Querier interface {
 	ListNetWorthSnapshots(ctx context.Context, userID uuid.UUID) ([]NetWorthSnapshot, error)
 	ListPlaidAccountsByConnectionID(ctx context.Context, plaidConnectionID uuid.UUID) ([]ListPlaidAccountsByConnectionIDRow, error)
 	ListPlaidConnectionsByUserID(ctx context.Context, userID uuid.UUID) ([]PlaidConnection, error)
-	ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]PlannerPerson, error)
+	ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]ListPlannerPeopleByUserIDRow, error)
 	ListRecurringExpensesByUserID(ctx context.Context, userID uuid.UUID) ([]ListRecurringExpensesByUserIDRow, error)
 	ListRecurringIncomeByUserID(ctx context.Context, userID uuid.UUID) ([]ListRecurringIncomeByUserIDRow, error)
 	ListRetirementAccountsByUserID(ctx context.Context, userID uuid.UUID) ([]RetirementAccount, error)
@@ -120,7 +120,7 @@ type Querier interface {
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error)
 	UpdateUserSetup(ctx context.Context, arg UpdateUserSetupParams) (UpdateUserSetupRow, error)
 	UpsertPlaidAccount(ctx context.Context, arg UpsertPlaidAccountParams) (PlaidAccount, error)
-	UpsertPlannerPerson(ctx context.Context, arg UpsertPlannerPersonParams) (PlannerPerson, error)
+	UpsertPlannerPerson(ctx context.Context, arg UpsertPlannerPersonParams) (UpsertPlannerPersonRow, error)
 	UpsertScenarioResultCache(ctx context.Context, arg UpsertScenarioResultCacheParams) (ScenarioResultsCache, error)
 }
 

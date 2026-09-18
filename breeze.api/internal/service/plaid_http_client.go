@@ -117,6 +117,8 @@ func (p *PlaidHTTPClient) CreateLinkToken(ctx context.Context, userID string) (s
 }
 
 // ExchangePublicToken implements PlaidClient.ExchangePublicToken
+//
+//nolint:gocritic // tooManyResultsChecker: interface requires 5 return values
 func (p *PlaidHTTPClient) ExchangePublicToken(ctx context.Context, publicToken string) (string, string, string, string, string, error) {
 	reqBody := exchangeReq{ClientID: p.clientID, Secret: p.secret, PublicToken: publicToken}
 	b, _ := json.Marshal(reqBody)

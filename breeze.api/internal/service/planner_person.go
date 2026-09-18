@@ -47,8 +47,8 @@ type UpsertPlannerPersonInput struct {
 }
 
 type plannerPersonQuerier interface {
-	UpsertPlannerPerson(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.PlannerPerson, error)
-	ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.PlannerPerson, error)
+	UpsertPlannerPerson(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.UpsertPlannerPersonRow, error)
+	ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListPlannerPeopleByUserIDRow, error)
 	SoftDeletePlannerPerson(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeletePlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) (int64, error)
 }
@@ -61,7 +61,7 @@ func NewPlannerPersonService(queries plannerPersonQuerier) *PlannerPersonService
 	return &PlannerPersonService{queries: queries}
 }
 
-func (s *PlannerPersonService) Upsert(ctx context.Context, input UpsertPlannerPersonInput) (*PlannerPerson, error) {
+func (s *PlannerPersonService) Upsert(ctx context.Context, input *UpsertPlannerPersonInput) (*PlannerPerson, error) {
 	row, err := s.queries.UpsertPlannerPerson(ctx, sqlc.UpsertPlannerPersonParams{
 		ID:                   input.ID,
 		UserID:               input.UserID,
@@ -82,7 +82,7 @@ func (s *PlannerPersonService) Upsert(ctx context.Context, input UpsertPlannerPe
 		return nil, fmt.Errorf("upsert planner person: %w", err)
 	}
 
-	person := mapPlannerPersonRecord(row)
+	person := mapPlannerPersonUpsertRecord(&row)
 	return &person, nil
 }
 
@@ -93,8 +93,8 @@ func (s *PlannerPersonService) ListByUserID(ctx context.Context, userID uuid.UUI
 	}
 
 	people := make([]PlannerPerson, 0, len(rows))
-	for _, row := range rows {
-		people = append(people, mapPlannerPersonRecord(row))
+	for i := range rows {
+		people = append(people, mapPlannerPersonRecord(&rows[i]))
 	}
 
 	return people, nil
@@ -111,7 +111,28 @@ func (s *PlannerPersonService) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func mapPlannerPersonRecord(row sqlc.PlannerPerson) PlannerPerson {
+func mapPlannerPersonRecord(row *sqlc.ListPlannerPeopleByUserIDRow) PlannerPerson {
+	return PlannerPerson{
+		ID:                   row.ID,
+		UserID:               row.UserID,
+		Name:                 row.Name,
+		Birthday:             row.Birthday,
+		RetirementAge:        row.RetirementAge,
+		AnnualSalary:         row.AnnualSalary,
+		BonusMode:            row.BonusMode,
+		AnnualBonus:          row.AnnualBonus,
+		IncomeGrowthRate:     row.IncomeGrowthRate,
+		PayType:              row.PayType,
+		PayDay:               row.PayDay,
+		PayCadence:           row.PayCadence,
+		HourlyRate:           row.HourlyRate,
+		ExpectedHoursPerWeek: row.ExpectedHoursPerWeek,
+		CreatedAt:            timestamptzToTime(row.CreatedAt),
+		UpdatedAt:            timestamptzToTime(row.UpdatedAt),
+	}
+}
+
+func mapPlannerPersonUpsertRecord(row *sqlc.UpsertPlannerPersonRow) PlannerPerson {
 	return PlannerPerson{
 		ID:                   row.ID,
 		UserID:               row.UserID,

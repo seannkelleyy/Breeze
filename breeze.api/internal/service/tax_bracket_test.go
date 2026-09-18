@@ -63,15 +63,15 @@ func testTaxBracketRow() sqlc.TaxBracket {
 	rate, _ := decimal.Parse("0.1000")
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	var max pgtype.Numeric
-	_ = max.Scan(maximumAmount.String())
+	var maxVal pgtype.Numeric
+	_ = maxVal.Scan(maximumAmount.String())
 
 	return sqlc.TaxBracket{
 		ID:            uuid.New(),
 		Year:          2026,
 		FilingStatus:  sqlc.FilingStatusSINGLE,
 		MinimumAmount: minimumAmount,
-		MaximumAmount: max,
+		MaximumAmount: maxVal,
 		Rate:          rate,
 		CreatedAt:     timestamp,
 		UpdatedAt:     timestamp,

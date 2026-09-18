@@ -11,7 +11,7 @@ import (
 	"github.com/govalues/decimal"
 )
 
-func createUserInputFromModel(input model.CreateUserInput) (service.CreateUserInput, error) {
+func createUserInputFromModel(input *model.CreateUserInput) (service.CreateUserInput, error) {
 	safeWithdrawalRate, err := decimal.Parse(input.SafeWithdrawalRate)
 	if err != nil {
 		return service.CreateUserInput{}, fmt.Errorf("invalid safe withdrawal rate: %w", err)
@@ -55,13 +55,13 @@ func createUserInputFromModel(input model.CreateUserInput) (service.CreateUserIn
 	}, nil
 }
 
-func updateUserInputFromModel(input model.UpdateUserInput) (service.UpdateUserInput, error) {
+func updateUserInputFromModel(input *model.UpdateUserInput) (service.UpdateUserInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateUserInput{}, fmt.Errorf("invalid user id: %w", err)
 	}
 
-	createInput, err := createUserInputFromModel(model.CreateUserInput{
+	createInput, err := createUserInputFromModel(&model.CreateUserInput{
 		IdentityProviderID: input.IdentityProviderID,
 		Email:              input.Email,
 		ReturnType:         input.ReturnType,

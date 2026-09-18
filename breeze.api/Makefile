@@ -62,8 +62,12 @@ build:
 tidy:
 	go mod tidy
 
+# Install tool dependencies + run generators
+setup:
+	./scripts/setup.sh
+
 # Run all generators then tidy
-setup: gen tidy
+gen-tidy: gen tidy
 
 # ─── Code Quality ────────────────────────────────────────────────
 

@@ -21,6 +21,6 @@ func TestMiddleware_PopulatesContext(t *testing.T) {
 		loader := FromContext(ctx)
 		assert.NotNil(t, loader)
 	}))
-	req, _ := http.NewRequest("GET", "/", nil)
+	req, _ := http.NewRequest("GET", "/", http.NoBody)
 	h.ServeHTTP(nil, req)
 }

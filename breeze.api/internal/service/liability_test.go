@@ -117,7 +117,7 @@ func TestLiabilityService_Create(t *testing.T) {
 	}
 
 	svc := NewLiabilityService(mock)
-	result, err := svc.Create(ctx, CreateLiabilityInput{
+	result, err := svc.Create(ctx, &CreateLiabilityInput{
 		UserID:             row.UserID,
 		Name:               row.Name,
 		LiabilityType:      row.LiabilityType,
@@ -284,7 +284,7 @@ func TestLiabilityService_Update(t *testing.T) {
 	}
 
 	svc := NewLiabilityService(mock)
-	result, err := svc.Update(ctx, UpdateLiabilityInput{
+	result, err := svc.Update(ctx, &UpdateLiabilityInput{
 		ID:                 row.ID,
 		Name:               "Mortgage Updated",
 		LiabilityType:      row.LiabilityType,

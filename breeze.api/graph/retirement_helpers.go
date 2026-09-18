@@ -11,7 +11,7 @@ import (
 	"github.com/govalues/decimal"
 )
 
-func createRetirementAccountInputFromModel(input model.CreateRetirementAccountInput) (service.CreateRetirementAccountInput, error) {
+func createRetirementAccountInputFromModel(input *model.CreateRetirementAccountInput) (service.CreateRetirementAccountInput, error) {
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {
 		return service.CreateRetirementAccountInput{}, fmt.Errorf("invalid user id: %w", err)
@@ -32,7 +32,7 @@ func createRetirementAccountInputFromModel(input model.CreateRetirementAccountIn
 	}, nil
 }
 
-func updateRetirementAccountInputFromModel(input model.UpdateRetirementAccountInput) (service.UpdateRetirementAccountInput, error) {
+func updateRetirementAccountInputFromModel(input *model.UpdateRetirementAccountInput) (service.UpdateRetirementAccountInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateRetirementAccountInput{}, fmt.Errorf("invalid retirement account id: %w", err)
@@ -53,7 +53,7 @@ func updateRetirementAccountInputFromModel(input model.UpdateRetirementAccountIn
 	}, nil
 }
 
-func addContributionInputFromModel(input model.AddContributionInput) (service.AddContributionInput, error) {
+func addContributionInputFromModel(input *model.AddContributionInput) (service.AddContributionInput, error) {
 	retirementAccountID, err := uuid.Parse(input.RetirementAccountID)
 	if err != nil {
 		return service.AddContributionInput{}, fmt.Errorf("invalid retirement account id: %w", err)

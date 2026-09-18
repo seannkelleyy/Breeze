@@ -136,7 +136,7 @@ func newExpenseServiceWithRunner(queries expenseQuerier, runner expenseTxRunner)
 	return &ExpenseService{queries: queries, txRunner: runner}
 }
 
-func (s *ExpenseService) Create(ctx context.Context, input CreateExpenseInput) (*Expense, error) {
+func (s *ExpenseService) Create(ctx context.Context, input *CreateExpenseInput) (*Expense, error) {
 	if err := validateExpenseSplits(input.Amount, input.Splits); err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func (s *ExpenseService) Create(ctx context.Context, input CreateExpenseInput) (
 		return nil, err
 	}
 
-	expense := mapCreateExpenseRow(expenseRow)
+	expense := mapCreateExpenseRow(&expenseRow)
 	expense.Splits = mapExpenseSplitRecords(splitRows)
 	return &expense, nil
 }
@@ -199,7 +199,7 @@ func (s *ExpenseService) GetByID(ctx context.Context, id uuid.UUID) (*Expense, e
 		return nil, fmt.Errorf("list expense splits: %w", err)
 	}
 
-	expense := mapGetExpenseByIDRow(expenseRow)
+	expense := mapGetExpenseByIDRow(&expenseRow)
 	expense.Splits = mapExpenseSplitRecords(splits)
 	return &expense, nil
 }
@@ -215,8 +215,8 @@ func (s *ExpenseService) ListByBudgetID(ctx context.Context, budgetID uuid.UUID)
 	}
 
 	expenseIDs := make([]uuid.UUID, 0, len(expenseRows))
-	for _, row := range expenseRows {
-		expenseIDs = append(expenseIDs, row.ID)
+	for i := range expenseRows {
+		expenseIDs = append(expenseIDs, expenseRows[i].ID)
 	}
 
 	splitRows, err := s.queries.ListExpenseSplitsByExpenseIDs(ctx, expenseIDs)
@@ -225,22 +225,22 @@ func (s *ExpenseService) ListByBudgetID(ctx context.Context, budgetID uuid.UUID)
 	}
 
 	splitsByExpense := make(map[uuid.UUID][]ExpenseSplit)
-	for _, split := range splitRows {
-		mapped := mapExpenseSplitRecord(split)
-		splitsByExpense[split.ExpenseID] = append(splitsByExpense[split.ExpenseID], mapped)
+	for i := range splitRows {
+		mapped := mapExpenseSplitRecord(&splitRows[i])
+		splitsByExpense[splitRows[i].ExpenseID] = append(splitsByExpense[splitRows[i].ExpenseID], mapped)
 	}
 
 	expenses := make([]Expense, 0, len(expenseRows))
-	for _, row := range expenseRows {
-		expense := mapListExpensesByBudgetIDRow(row)
-		expense.Splits = splitsByExpense[row.ID]
+	for i := range expenseRows {
+		expense := mapListExpensesByBudgetIDRow(&expenseRows[i])
+		expense.Splits = splitsByExpense[expenseRows[i].ID]
 		expenses = append(expenses, expense)
 	}
 
 	return expenses, nil
 }
 
-func (s *ExpenseService) Update(ctx context.Context, input UpdateExpenseInput) (*Expense, error) {
+func (s *ExpenseService) Update(ctx context.Context, input *UpdateExpenseInput) (*Expense, error) {
 	if err := validateExpenseSplits(input.Amount, input.Splits); err != nil {
 		return nil, err
 	}
@@ -287,7 +287,7 @@ func (s *ExpenseService) Update(ctx context.Context, input UpdateExpenseInput) (
 		return nil, err
 	}
 
-	expense := mapUpdateExpenseRow(expenseRow)
+	expense := mapUpdateExpenseRow(&expenseRow)
 	expense.Splits = mapExpenseSplitRecords(splitRows)
 	return &expense, nil
 }
@@ -346,7 +346,7 @@ func validateExpenseSplits(amount decimal.Decimal, splits []ExpenseSplitInput) e
 	return nil
 }
 
-func mapExpenseRecord(row sqlc.Expense) Expense {
+func mapCreateExpenseRow(row *sqlc.CreateExpenseRow) Expense {
 	return Expense{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -363,7 +363,7 @@ func mapExpenseRecord(row sqlc.Expense) Expense {
 	}
 }
 
-func mapCreateExpenseRow(row sqlc.CreateExpenseRow) Expense {
+func mapGetExpenseByIDRow(row *sqlc.GetExpenseByIDRow) Expense {
 	return Expense{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -380,7 +380,7 @@ func mapCreateExpenseRow(row sqlc.CreateExpenseRow) Expense {
 	}
 }
 
-func mapGetExpenseByIDRow(row sqlc.GetExpenseByIDRow) Expense {
+func mapListExpensesByBudgetIDRow(row *sqlc.ListExpensesByBudgetIDRow) Expense {
 	return Expense{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -397,7 +397,7 @@ func mapGetExpenseByIDRow(row sqlc.GetExpenseByIDRow) Expense {
 	}
 }
 
-func mapListExpensesByBudgetIDRow(row sqlc.ListExpensesByBudgetIDRow) Expense {
+func mapUpdateExpenseRow(row *sqlc.UpdateExpenseRow) Expense {
 	return Expense{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -414,24 +414,7 @@ func mapListExpensesByBudgetIDRow(row sqlc.ListExpensesByBudgetIDRow) Expense {
 	}
 }
 
-func mapUpdateExpenseRow(row sqlc.UpdateExpenseRow) Expense {
-	return Expense{
-		ID:               row.ID,
-		UserID:           row.UserID,
-		BudgetID:         row.BudgetID,
-		Amount:           row.Amount,
-		Date:             row.Date.Time,
-		Description:      row.Description,
-		PersonID:         uuidFromPGUUID(row.PersonID),
-		SourceType:       row.SourceType,
-		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
-		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
-		CreatedAt:        timestamptzToTime(row.CreatedAt),
-		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
-	}
-}
-
-func mapExpenseSplitRecord(row sqlc.ExpenseSplit) ExpenseSplit {
+func mapExpenseSplitRecord(row *sqlc.ExpenseSplit) ExpenseSplit {
 	return ExpenseSplit{
 		ID:          row.ID,
 		ExpenseID:   row.ExpenseID,
@@ -445,8 +428,8 @@ func mapExpenseSplitRecord(row sqlc.ExpenseSplit) ExpenseSplit {
 
 func mapExpenseSplitRecords(rows []sqlc.ExpenseSplit) []ExpenseSplit {
 	splits := make([]ExpenseSplit, 0, len(rows))
-	for _, row := range rows {
-		splits = append(splits, mapExpenseSplitRecord(row))
+	for i := range rows {
+		splits = append(splits, mapExpenseSplitRecord(&rows[i]))
 	}
 	return splits
 }

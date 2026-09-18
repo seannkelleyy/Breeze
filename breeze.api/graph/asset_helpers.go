@@ -11,7 +11,7 @@ import (
 	"github.com/govalues/decimal"
 )
 
-func createAssetInputFromModel(input model.CreateAssetInput) (service.CreateAssetInput, error) {
+func createAssetInputFromModel(input *model.CreateAssetInput) (service.CreateAssetInput, error) {
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {
 		return service.CreateAssetInput{}, fmt.Errorf("invalid user id: %w", err)
@@ -85,7 +85,7 @@ func createAssetInputFromModel(input model.CreateAssetInput) (service.CreateAsse
 	}, nil
 }
 
-func updateAssetInputFromModel(input model.UpdateAssetInput) (service.UpdateAssetInput, error) {
+func updateAssetInputFromModel(input *model.UpdateAssetInput) (service.UpdateAssetInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateAssetInput{}, fmt.Errorf("invalid asset id: %w", err)

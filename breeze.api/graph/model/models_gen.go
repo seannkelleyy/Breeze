@@ -387,17 +387,22 @@ type PlaidConnection struct {
 }
 
 type PlannerPerson struct {
-	ID               string `json:"id"`
-	UserID           string `json:"userId"`
-	Name             string `json:"name"`
-	Birthday         string `json:"birthday"`
-	RetirementAge    int    `json:"retirementAge"`
-	AnnualSalary     string `json:"annualSalary"`
-	BonusMode        string `json:"bonusMode"`
-	AnnualBonus      string `json:"annualBonus"`
-	IncomeGrowthRate string `json:"incomeGrowthRate"`
-	CreatedAt        string `json:"createdAt"`
-	UpdatedAt        string `json:"updatedAt"`
+	ID                   string `json:"id"`
+	UserID               string `json:"userId"`
+	Name                 string `json:"name"`
+	Birthday             string `json:"birthday"`
+	RetirementAge        int    `json:"retirementAge"`
+	AnnualSalary         string `json:"annualSalary"`
+	BonusMode            string `json:"bonusMode"`
+	AnnualBonus          string `json:"annualBonus"`
+	IncomeGrowthRate     string `json:"incomeGrowthRate"`
+	PayType              string `json:"payType"`
+	PayDay               int    `json:"payDay"`
+	PayCadence           string `json:"payCadence"`
+	HourlyRate           string `json:"hourlyRate"`
+	ExpectedHoursPerWeek string `json:"expectedHoursPerWeek"`
+	CreatedAt            string `json:"createdAt"`
+	UpdatedAt            string `json:"updatedAt"`
 }
 
 type Query struct {
@@ -674,15 +679,20 @@ type UpdateUserSetupInput struct {
 }
 
 type UpsertPlannerPersonInput struct {
-	ID               string `json:"id"`
-	UserID           string `json:"userId"`
-	Name             string `json:"name"`
-	Birthday         string `json:"birthday"`
-	RetirementAge    int    `json:"retirementAge"`
-	AnnualSalary     string `json:"annualSalary"`
-	BonusMode        string `json:"bonusMode"`
-	AnnualBonus      string `json:"annualBonus"`
-	IncomeGrowthRate string `json:"incomeGrowthRate"`
+	ID                   string `json:"id"`
+	UserID               string `json:"userId"`
+	Name                 string `json:"name"`
+	Birthday             string `json:"birthday"`
+	RetirementAge        int    `json:"retirementAge"`
+	AnnualSalary         string `json:"annualSalary"`
+	BonusMode            string `json:"bonusMode"`
+	AnnualBonus          string `json:"annualBonus"`
+	IncomeGrowthRate     string `json:"incomeGrowthRate"`
+	PayType              string `json:"payType"`
+	PayDay               int    `json:"payDay"`
+	PayCadence           string `json:"payCadence"`
+	HourlyRate           string `json:"hourlyRate"`
+	ExpectedHoursPerWeek string `json:"expectedHoursPerWeek"`
 }
 
 type User struct {

@@ -96,7 +96,7 @@ func TestBudgetService_Create(t *testing.T) {
 	}
 
 	svc := NewBudgetService(mock)
-	result, err := svc.Create(ctx, CreateBudgetInput{
+	result, err := svc.Create(ctx, &CreateBudgetInput{
 		UserID:          row.UserID,
 		Date:            row.Date.Time,
 		MonthlyIncome:   row.MonthlyIncome,
@@ -217,7 +217,7 @@ func TestBudgetService_Update(t *testing.T) {
 	}
 
 	svc := NewBudgetService(mock)
-	result, err := svc.Update(ctx, UpdateBudgetInput{
+	result, err := svc.Update(ctx, &UpdateBudgetInput{
 		ID:              row.ID,
 		MonthlyIncome:   row.MonthlyIncome,
 		MonthlyExpenses: updatedExpenses,

@@ -168,7 +168,7 @@ func TestRetirementAccountService_Create(t *testing.T) {
 	}
 
 	svc := NewRetirementAccountService(mock)
-	result, err := svc.Create(ctx, CreateRetirementAccountInput{
+	result, err := svc.Create(ctx, &CreateRetirementAccountInput{
 		UserID:         row.UserID,
 		Name:           row.Name,
 		AccountType:    row.AccountType,
@@ -261,7 +261,7 @@ func TestRetirementAccountService_Update(t *testing.T) {
 	}
 
 	svc := NewRetirementAccountService(mock)
-	result, err := svc.Update(ctx, UpdateRetirementAccountInput{
+	result, err := svc.Update(ctx, &UpdateRetirementAccountInput{
 		ID:             row.ID,
 		Name:           row.Name,
 		AccountType:    row.AccountType,

@@ -10,7 +10,7 @@ import (
 	"github.com/govalues/decimal"
 )
 
-func createGoalInputFromModel(input model.CreateGoalInput) (service.CreateGoalInput, error) {
+func createGoalInputFromModel(input *model.CreateGoalInput) (service.CreateGoalInput, error) {
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {
 		return service.CreateGoalInput{}, fmt.Errorf("invalid user id: %w", err)
@@ -59,7 +59,7 @@ func createGoalInputFromModel(input model.CreateGoalInput) (service.CreateGoalIn
 	}, nil
 }
 
-func updateGoalInputFromModel(input model.UpdateGoalInput) (service.UpdateGoalInput, error) {
+func updateGoalInputFromModel(input *model.UpdateGoalInput) (service.UpdateGoalInput, error) {
 	id, err := uuid.Parse(input.ID)
 	if err != nil {
 		return service.UpdateGoalInput{}, fmt.Errorf("invalid goal id: %w", err)

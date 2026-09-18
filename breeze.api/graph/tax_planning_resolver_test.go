@@ -19,7 +19,7 @@ type mockBracketQuerier struct {
 	listFunc func(context.Context, sqlc.ListTaxBracketsByYearAndFilingStatusParams) ([]sqlc.TaxBracket, error)
 }
 
-func (m *mockBracketQuerier) ListTaxBracketsByYearAndFilingStatus(ctx context.Context, arg sqlc.ListTaxBracketsByYearAndFilingStatusParams) ([]sqlc.TaxBracket, error) {
+func (m *mockBracketQuerier) ListTaxBracketsByYearAndFilingStatus(ctx context.Context, arg sqlc.ListTaxBracketsByYearAndFilingStatusParams) ([]sqlc.TaxBracket, error) { //nolint:gocritic // interface impl
 	if m.listFunc != nil {
 		return m.listFunc(ctx, arg)
 	}
@@ -32,7 +32,7 @@ func (m *mockBracketQuerier) CreateTaxBracket(ctx context.Context, arg sqlc.Crea
 func (m *mockBracketQuerier) GetTaxBracketByID(ctx context.Context, id uuid.UUID) (sqlc.TaxBracket, error) {
 	panic("not implemented")
 }
-func (m *mockBracketQuerier) UpdateTaxBracket(ctx context.Context, arg sqlc.UpdateTaxBracketParams) (sqlc.TaxBracket, error) {
+func (m *mockBracketQuerier) UpdateTaxBracket(ctx context.Context, arg sqlc.UpdateTaxBracketParams) (sqlc.TaxBracket, error) { //nolint:gocritic // interface impl
 	panic("not implemented")
 }
 func (m *mockBracketQuerier) SoftDeleteTaxBracket(ctx context.Context, id uuid.UUID) (int64, error) {
