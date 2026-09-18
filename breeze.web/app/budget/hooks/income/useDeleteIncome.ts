@@ -1,42 +1,20 @@
-import { useCallback } from 'react';
-
-import { useMutation } from '@tanstack/react-query';
-import { Income } from '../../types/income';
+import { createMutationHook } from '../createMutationHook';
 import { useIncomes } from './index';
+import { Income } from '../../types/income';
 
-interface DeleteIncomeProps {
-  onSuccess?: () => void;
-  onSettled?: () => void;
-}
-
-/**
- * A hook for deleting an income.
- * @param props.onSuccess: - Optional - The function to call when the mutation is successful.
- * @param props.onSettled: - Optional - The function to call when the mutation is settled.
- */
-
-interface DeleteIncomeMutationProps {
+export interface DeleteIncomeMutationProps {
   income: Income;
 }
 
 /**
- * Mutation function for deleting an income.
- * @param props.income: The income to delete.
+ * A hook for deleting an income.
+ * Accepts optional onSuccess/onSettled callbacks.
  */
-
-const useDeleteIncome = ({ onSuccess, onSettled }: DeleteIncomeProps) => {
-  const { deleteIncome } = useIncomes();
-
-  const mutationFn = useCallback(
-    ({ income }: DeleteIncomeMutationProps) => deleteIncome(income.id),
-    [deleteIncome],
-  );
-
-  return useMutation({
-    mutationFn,
-    onSuccess: onSuccess,
-    onSettled: onSettled,
-  });
-};
+const useDeleteIncome = createMutationHook(
+  useIncomes,
+  ({ deleteIncome }) =>
+    ({ income }: DeleteIncomeMutationProps) =>
+      deleteIncome(income.id),
+);
 
 export default useDeleteIncome;

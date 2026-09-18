@@ -1,42 +1,20 @@
-import { useCallback } from 'react';
-
-import { useMutation } from '@tanstack/react-query';
-import { Category } from '../../types/category';
+import { createMutationHook } from '../createMutationHook';
 import { useCategories } from './index';
+import { Category } from '../../types/category';
 
-interface DeleteCategoryProps {
-  onSuccess?: () => void;
-  onSettled?: () => void;
-}
-
-/**
- * A hook for deleting a category.
- * @param props.onSuccess: - Optional - The function to call when the mutation is successful.
- * @param props.onSettled: - Optional - The function to call when the mutation is settled.
- */
-
-interface DeleteCategoryMutationProps {
+export interface DeleteCategoryMutationProps {
   category: Category;
 }
 
 /**
- * Mutation function for deleting a category.
- * @param props.category: The category to delete.
+ * A hook for deleting a category.
+ * Accepts optional onSuccess/onSettled callbacks.
  */
-
-const useDeleteCategory = ({ onSuccess, onSettled }: DeleteCategoryProps) => {
-  const { deleteCategory } = useCategories();
-
-  const mutationFn = useCallback(
-    ({ category }: DeleteCategoryMutationProps) => deleteCategory(category.id),
-    [deleteCategory],
-  );
-
-  return useMutation({
-    mutationFn,
-    onSuccess: onSuccess,
-    onSettled: onSettled,
-  });
-};
+const useDeleteCategory = createMutationHook(
+  useCategories,
+  ({ deleteCategory }) =>
+    ({ category }: DeleteCategoryMutationProps) =>
+      deleteCategory(category.id),
+);
 
 export default useDeleteCategory;

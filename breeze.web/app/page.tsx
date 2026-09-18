@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/lib/services/queries/assets';
-import { GET_GOALS } from '@/lib/services/queries/goals';
+import useGoalsApi from '@/app/goals/hooks/useGoalsApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -101,6 +101,7 @@ function DashboardContent() {
     disclaimerAccepted,
   } = useCurrentUser();
   const { request } = useGraphql();
+  const { getGoals } = useGoalsApi();
 
   const { data } = useQuery({
     queryKey: ['dashboard-summary', userId],
@@ -117,12 +118,12 @@ function DashboardContent() {
             currentBalance: string;
           }>;
         }>(GET_LIABILITIES_BY_USER, { userId }),
-        request<{ goals: Goal[] }>(GET_GOALS, { userId }),
+        getGoals(),
       ]);
 
       const assets = assetsResp?.assets ?? [];
       const liabilities = liabilitiesResp?.liabilities ?? [];
-      const goals = goalsResp?.goals ?? [];
+      const goals = goalsResp ?? [];
 
       const totalAssets = assets.reduce((sum, a) => sum + (Number(a.currentValue) || 0), 0);
       const totalLiabilities = liabilities.reduce(
