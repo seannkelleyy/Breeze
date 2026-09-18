@@ -16,7 +16,7 @@ SQLC=go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 GQLGEN=go run github.com/99designs/gqlgen@v0.17.95
 MIGRATION_NAME?=init
 
-.PHONY: test test-verbose test-coverage gen migrate-clean migrate-diff migrate migrate-lint run db-up river build tidy setup fmt lint check dev seed
+.PHONY: test test-verbose test-coverage gen migrate-clean migrate-diff migrate migrate-deploy migrate-lint run db-up river build tidy setup fmt lint check dev seed
 
 # Generate all code (sqlc then gqlgen — order matters)
 gen:
@@ -33,6 +33,10 @@ migrate-diff:
 # Apply pending migrations to the database
 migrate:
 	export $(shell cat .env | xargs) && $(ATLAS) migrate apply --env local
+
+# Apply pending migrations in deploy environments (Render/CI) — uses DATABASE_URL from the environment
+migrate-deploy:
+	$(ATLAS) migrate apply --env local
 
 # Apply seed data (tax brackets, etc.)
 seed:

@@ -76,6 +76,22 @@ primary_region = "ord"  # Chicago — close to Neon us-east-2
 
 ---
 
+## Render Setup (API on native Go runtime)
+
+API runs on Render's native Go runtime with a managed Render Postgres linked to the service (which provides `DATABASE_URL`). Migrations apply automatically on every deploy.
+
+| Setting | Value |
+|---|---|
+| Build Command | `curl -sSf https://atlasgo.sh \| sh && make build` |
+| Pre-Deploy Command | `make migrate-deploy` |
+| Start Command | `./bin/api` — free tier (no pre-deploy hook): `make migrate-deploy && ./bin/api` |
+
+- Pre-deploy runs once per deploy — a failed migration blocks the rollout instead of crash-looping the API.
+- `atlas.hcl` resolves `url` from the `DATABASE_URL` env var, so `make migrate-deploy` needs no local `.env` file. Use the database's **internal** connection string.
+- `make migrate-deploy` is identical to `make migrate` minus the local `.env` export, so it also works in CI.
+
+---
+
 ## Hetzner VPS Setup
 
 Three config files are the entire production setup:
