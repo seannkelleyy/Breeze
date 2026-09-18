@@ -86,7 +86,7 @@ API runs on Render's native Go runtime with a managed Render Postgres linked to 
 | Pre-Deploy Command | (alternative to running it in Build Command) `make migrate-deploy` |
 | Start Command | `./bin/api` |
 
-- `make migrate-deploy` runs atlas via `go run ariga.io/atlas/cmd/atlas@latest`, so no binary install (or sudo) is needed on the deploy host. The first build compiles atlas; later builds reuse the module cache.
+- `make migrate-deploy` downloads the atlas binary straight to `bin/atlas` and runs it — the official install script needs `sudo` (absent on Render), and `go run ariga.io/atlas/cmd/atlas@latest` resolves to a 2023 module version that doesn't compile on modern Go.
 - Pre-deploy runs once per deploy — a failed migration blocks the rollout instead of crash-looping the API.
 - `atlas.hcl` resolves `url` from the `DATABASE_URL` env var, so `make migrate-deploy` needs no local `.env` file. Use the database's **internal** connection string.
 - Local `make migrate` uses the locally installed atlas binary + `.env`; `make migrate-deploy` is the deploy-safe variant (env var only, `go run`).
