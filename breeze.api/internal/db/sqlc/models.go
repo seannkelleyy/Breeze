@@ -646,6 +646,15 @@ type ExpenseSplit struct {
 	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type FicaParameter struct {
+	ID         uuid.UUID          `json:"id"`
+	Year       int32              `json:"year"`
+	SsWageBase decimal.Decimal    `json:"ss_wage_base"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt  pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type Goal struct {
 	ID                   uuid.UUID          `json:"id"`
 	UserID               uuid.UUID          `json:"user_id"`
@@ -843,6 +852,16 @@ type ScenarioResultsCache struct {
 	CreatedAt             pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt             pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type StandardDeduction struct {
+	ID           uuid.UUID          `json:"id"`
+	Year         int32              `json:"year"`
+	FilingStatus FilingStatus       `json:"filing_status"`
+	Amount       decimal.Decimal    `json:"amount"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type TaxBracket struct {

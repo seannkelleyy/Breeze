@@ -45,6 +45,20 @@ func mapTaxBracketToModel(bracket *service.TaxBracket) *model.TaxBracket {
 	}
 }
 
+func mapTaxYearDataToModel(data *service.TaxYearData) *model.TaxYearData {
+	brackets := make([]*model.TaxBracket, 0, len(data.Brackets))
+	for i := range data.Brackets {
+		brackets = append(brackets, mapTaxBracketToModel(&data.Brackets[i]))
+	}
+
+	return &model.TaxYearData{
+		Year:              int(data.Year),
+		Brackets:          brackets,
+		StandardDeduction: data.StandardDeduction.String(),
+		SsWageBase:        data.SSWageBase.String(),
+	}
+}
+
 func createTaxBracketInputFromModel(input *model.CreateTaxBracketInput) (service.CreateTaxBracketInput, error) {
 	year, err := taxBracketYearFromInput(input.Year)
 	if err != nil {

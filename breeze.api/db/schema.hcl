@@ -128,6 +128,101 @@ table "tax_brackets" {
   }
 }
 
+table "standard_deductions" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "year" {
+    type = int
+    null = false
+  }
+
+  column "filing_status" {
+    type = enum.filing_status
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_standard_deductions_year_status" {
+    columns = [column.year, column.filing_status]
+  }
+}
+
+table "fica_parameters" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "year" {
+    type = int
+    null = false
+  }
+
+  column "ss_wage_base" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_fica_parameters_year" {
+    columns = [column.year]
+  }
+}
+
 table "users" {
   schema = schema.public
 

@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { PlannerAccount } from '../../types/account';
 import type { PlannerPerson } from '../../types/person';
-import type { PlannerSummary } from '../../types/planner';
 import { PLANNER_DEFAULT_IRS_LIMITS } from '../constants';
 import { getProjection } from '../plannerMath';
 

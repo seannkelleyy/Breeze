@@ -35,10 +35,9 @@ describe('useAutoSave', () => {
 
   it('debounces rapid dependency changes into a single save', () => {
     const cb = vi.fn();
-    const { rerender } = renderHook(
-      ({ v }) => useAutoSave(cb, [v], 300),
-      { initialProps: { v: 1 } },
-    );
+    const { rerender } = renderHook(({ v }) => useAutoSave(cb, [v], 300), {
+      initialProps: { v: 1 },
+    });
 
     // Initial mount fires once after the delay
     act(() => vi.advanceTimersByTime(300));
@@ -57,10 +56,9 @@ describe('useAutoSave', () => {
 
   it('cancels a pending save on unmount', () => {
     const cb = vi.fn();
-    const { rerender, unmount } = renderHook(
-      ({ v }) => useAutoSave(cb, [v], 300),
-      { initialProps: { v: 1 } },
-    );
+    const { rerender, unmount } = renderHook(({ v }) => useAutoSave(cb, [v], 300), {
+      initialProps: { v: 1 },
+    });
 
     act(() => vi.advanceTimersByTime(300));
     expect(cb).toHaveBeenCalledTimes(1);

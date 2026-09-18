@@ -46,6 +46,10 @@ export const PLANNER_RETIREMENT_METHOD_OPTIONS = [
 export const PLANNER_DEFAULT_RETIREMENT_METHOD = 'target-amount';
 export const PLANNER_DEFAULT_INCOME_REPLACEMENT_RATE = 80;
 export const PLANNER_ANNUAL_EXTRA_EXPENSE_BUFFER_PERCENT = 10;
+
+// Used only while tax reference data loads from the API — replaced by the
+// computed effective rate once taxYearData resolves.
+export const PLANNER_NEUTRAL_NET_INCOME_FACTOR = 0.8;
 export const PLANNER_DEFAULT_RETURN_DISPLAY_MODE = 'real';
 export const PLANNER_RETURN_DISPLAY_MODE_OPTIONS = [
   { value: 'real', label: 'Real (Inflation-Adjusted)' },

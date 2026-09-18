@@ -10,6 +10,7 @@ import type {
 import type { IrsLimitConfig, IrsLimitKey } from '../types/irs';
 import type { PlannerPerson } from '../types/person';
 import type { ProjectionRow } from '../types/projection';
+import type { TaxBracketRow, TaxYearTables } from '../types/tax';
 import * as plannerConfig from './config';
 import * as plannerConstants from './constants';
 
@@ -225,83 +226,31 @@ export const getIrsLimitKeyFromApiType = (type: string): IrsLimitKey | null => {
   if (type === 'hsa') return 'hsa';
   return null;
 };
-const FEDERAL_BRACKETS_2025: Record<string, Array<{ min: number; max: number; rate: number }>> = {
-  SINGLE: [
-    { min: 0, max: 11925, rate: 0.1 },
-    { min: 11925, max: 48475, rate: 0.12 },
-    { min: 48475, max: 103350, rate: 0.22 },
-    { min: 103350, max: 197300, rate: 0.24 },
-    { min: 197300, max: 250525, rate: 0.32 },
-    { min: 250525, max: 626350, rate: 0.35 },
-    { min: 626350, max: Infinity, rate: 0.37 },
-  ],
-  MFJ: [
-    { min: 0, max: 23850, rate: 0.1 },
-    { min: 23850, max: 96950, rate: 0.12 },
-    { min: 96950, max: 206700, rate: 0.22 },
-    { min: 206700, max: 394600, rate: 0.24 },
-    { min: 394600, max: 501050, rate: 0.32 },
-    { min: 501050, max: 751600, rate: 0.35 },
-    { min: 751600, max: Infinity, rate: 0.37 },
-  ],
-  MFS: [
-    { min: 0, max: 11925, rate: 0.1 },
-    { min: 11925, max: 48475, rate: 0.12 },
-    { min: 48475, max: 103350, rate: 0.22 },
-    { min: 103350, max: 197300, rate: 0.24 },
-    { min: 197300, max: 250525, rate: 0.32 },
-    { min: 250525, max: 375600, rate: 0.35 },
-    { min: 375600, max: Infinity, rate: 0.37 },
-  ],
-  HOH: [
-    { min: 0, max: 17000, rate: 0.1 },
-    { min: 17000, max: 64850, rate: 0.12 },
-    { min: 64850, max: 103350, rate: 0.22 },
-    { min: 103350, max: 197300, rate: 0.24 },
-    { min: 197300, max: 250525, rate: 0.32 },
-    { min: 250525, max: 626350, rate: 0.35 },
-    { min: 626350, max: Infinity, rate: 0.37 },
-  ],
-};
-
-const STANDARD_DEDUCTION_2025: Record<string, number> = {
-  SINGLE: 15000,
-  MFJ: 30000,
-  MFS: 15000,
-  HOH: 22500,
-};
-
-const SS_WAGE_BASE = 176100;
-
-export const getFederalTax = (taxableIncome: number, filingStatus: string): number => {
-  const brackets = FEDERAL_BRACKETS_2025[filingStatus] ?? FEDERAL_BRACKETS_2025.SINGLE;
+export const getFederalTax = (taxableIncome: number, brackets: TaxBracketRow[]): number => {
   let tax = 0;
-  for (const b of brackets) {
-    if (taxableIncome <= b.min) break;
-    const amountInBracket = Math.min(taxableIncome, b.max) - b.min;
-    tax += amountInBracket * b.rate;
+  for (const bracket of brackets) {
+    if (taxableIncome <= bracket.minimum) break;
+    const upper = bracket.maximum === null ? taxableIncome : Math.min(taxableIncome, bracket.maximum);
+    tax += (upper - bracket.minimum) * bracket.rate;
   }
   return tax;
 };
 
-export const getFicaTax = (income: number): number => {
-  const ssTax = Math.min(income, SS_WAGE_BASE) * 0.062;
+export const getFicaTax = (income: number, ssWageBase: number): number => {
+  const ssTax = Math.min(income, ssWageBase) * 0.062;
   const medicareTax = income * 0.0145;
   return ssTax + medicareTax;
 };
 
 export const getEffectiveTaxRate = (
   grossIncome: number,
-  filingStatus: string,
+  tables: TaxYearTables,
   deductionType?: string,
 ): { effectiveRate: number; netIncomeFactor: number; taxableIncome: number } => {
-  const deduction =
-    deductionType === 'ITEMIZED'
-      ? 0
-      : (STANDARD_DEDUCTION_2025[filingStatus] ?? STANDARD_DEDUCTION_2025.SINGLE);
+  const deduction = deductionType === 'ITEMIZED' ? 0 : tables.standardDeduction;
   const taxableIncome = Math.max(0, grossIncome - deduction);
-  const federalTax = getFederalTax(taxableIncome, filingStatus);
-  const ficaTax = getFicaTax(grossIncome);
+  const federalTax = getFederalTax(taxableIncome, tables.brackets);
+  const ficaTax = getFicaTax(grossIncome, tables.ssWageBase);
   const totalTax = federalTax + ficaTax;
   const effectiveRate = grossIncome > 0 ? totalTax / grossIncome : 0;
   return {
@@ -311,18 +260,24 @@ export const getEffectiveTaxRate = (
   };
 };
 
-export const getFinancialMathSnapshot = (input: Record<string, unknown>): FinancialMathSnapshot => {
+export const getFinancialMathSnapshot = (
+  input: Record<string, unknown>,
+  taxTables: TaxYearTables | null,
+): FinancialMathSnapshot => {
   const monthlyExpenses = Number(input.monthlyExpenses ?? 0);
   const selfSalary = Number(input.selfSalary ?? 0);
   const spouseSalary = Number(input.spouseSalary ?? 0);
   const safeWithdrawalRate = Number(input.safeWithdrawalRate ?? 4);
   const currentPortfolio = Number(input.currentPortfolio ?? 0);
   const emergencyFundBalance = Number(input.emergencyFundBalance ?? 0);
-  const filingStatus = String(input.filingStatus ?? 'SINGLE');
   const deductionType = String(input.deductionType ?? 'STANDARD');
   const grossIncome = selfSalary + spouseSalary;
   const annualSpend = monthlyExpenses * 12;
-  const { netIncomeFactor } = getEffectiveTaxRate(grossIncome, filingStatus, deductionType);
+  // While tax reference data is loading, fall back to a neutral factor
+  // instead of blocking the whole projection on the fetch.
+  const netIncomeFactor = taxTables
+    ? getEffectiveTaxRate(grossIncome, taxTables, deductionType).netIncomeFactor
+    : plannerConstants.PLANNER_NEUTRAL_NET_INCOME_FACTOR;
   const netIncome = grossIncome * netIncomeFactor;
   const annualExtraExpenseBuffer =
     annualSpend * (plannerConstants.PLANNER_ANNUAL_EXTRA_EXPENSE_BUFFER_PERCENT / 100);

@@ -79,6 +79,7 @@ func main() {
 	recurringExpenseService := service.NewRecurringExpenseService(queries)
 	plannerPersonService := service.NewPlannerPersonService(queries)
 	taxBracketService := service.NewTaxBracketService(queries)
+	taxYearService := service.NewTaxYearService(queries)
 	taxPlanningService := service.NewTaxPlanningService(queries)
 	retirementLadderService := service.NewRetirementLadderService(queries)
 	netWorthSnapshotService := service.NewNetWorthSnapshotService(queries)
@@ -113,6 +114,7 @@ func main() {
 		RecurringExpenseService: recurringExpenseService,
 		PlannerPersonService:    plannerPersonService,
 		TaxBracketService:       taxBracketService,
+		TaxYearService:          taxYearService,
 		TaxPlanningService:      taxPlanningService,
 		RetirementLadderService: retirementLadderService,
 		NetWorthSnapshotService: netWorthSnapshotService,

@@ -1820,6 +1820,25 @@ func (r *queryResolver) TaxBrackets(ctx context.Context, year int, filingStatus 
 	return out, nil
 }
 
+// TaxYearData is the resolver for the taxYearData field.
+func (r *queryResolver) TaxYearData(ctx context.Context, year *int, filingStatus model.FilingStatus) (*model.TaxYearData, error) {
+	var serviceYear *int32
+	if year != nil {
+		parsed, err := taxBracketYearFromInput(*year)
+		if err != nil {
+			return nil, r.mapErr(ctx, err)
+		}
+		serviceYear = &parsed
+	}
+
+	data, err := r.TaxYearService.GetTaxYearData(ctx, serviceYear, sqlc.FilingStatus(filingStatus))
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	return mapTaxYearDataToModel(data), nil
+}
+
 // EstimateTaxesForYear is the resolver for the estimateTaxesForYear field.
 func (r *queryResolver) EstimateTaxesForYear(ctx context.Context, year int, filingStatus model.FilingStatus, income string, deduction *string) (*model.TaxEstimate, error) {
 	// Parse income as decimal

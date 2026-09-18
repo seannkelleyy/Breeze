@@ -511,6 +511,13 @@ type TaxEstimate struct {
 	MarginalRate  string `json:"marginalRate"`
 }
 
+type TaxYearData struct {
+	Year              int           `json:"year"`
+	Brackets          []*TaxBracket `json:"brackets"`
+	StandardDeduction string        `json:"standardDeduction"`
+	SsWageBase        string        `json:"ssWageBase"`
+}
+
 type UpdateAssetInput struct {
 	ID                              string    `json:"id"`
 	Name                            string    `json:"name"`

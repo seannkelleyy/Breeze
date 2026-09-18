@@ -28,6 +28,7 @@ type Resolver struct {
 	RecurringExpenseService *service.RecurringExpenseService
 	PlannerPersonService    *service.PlannerPersonService
 	TaxBracketService       *service.TaxBracketService
+	TaxYearService          *service.TaxYearService
 	TaxPlanningService      *service.TaxPlanningService
 	RetirementLadderService *service.RetirementLadderService
 	NetWorthSnapshotService *service.NetWorthSnapshotService

@@ -38,13 +38,7 @@ const person = (overrides: Partial<PlannerPerson> = {}): PlannerPerson => ({
   ...overrides,
 });
 
-function Provider({
-  children,
-  initial,
-}: {
-  children: React.ReactNode;
-  initial: PlannerPerson[];
-}) {
+function Provider({ children, initial }: { children: React.ReactNode; initial: PlannerPerson[] }) {
   const [people, setPeople] = useState(initial);
   return (
     <TestCtx.Provider value={{ plannerPeople: people, setPlannerPeople: setPeople }}>
@@ -62,9 +56,7 @@ function Harness() {
       <span data-testid="salary">{people[0]?.annualSalary}</span>
       <span data-testid="primary">{String(people[0]?.isPrimary)}</span>
       <span data-testid="last-name">{people[people.length - 1]?.name}</span>
-      <button
-        onClick={() => updatePerson(people[0].id, (p) => ({ ...p, name: 'Updated' }))}
-      >
+      <button onClick={() => updatePerson(people[0].id, (p) => ({ ...p, name: 'Updated' }))}>
         update
       </button>
       <button onClick={addPerson}>add</button>

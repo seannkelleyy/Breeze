@@ -29,7 +29,9 @@ import {
 import type { AssetFinanceDetails } from '../../types/finance';
 import type { IrsLimitConfig } from '../../types/irs';
 import type { ProjectionRow } from '../../types/projection';
+import type { TaxYearTables } from '../../types/tax';
 import useIrsLimits from './useIrsLimits';
+import useTaxYear from './useTaxYear';
 
 const { accountTypeOptions, isCombinedAssetType, isLiabilityAccountType } = plannerConfig;
 
@@ -332,28 +334,30 @@ function useFinancialMathSnapshot(
   household: ReturnType<typeof useHouseholdCalculation>,
   safeWithdrawalRate: number,
   portfolio: ReturnType<typeof usePortfolioCalculation>,
-  filingStatus: string,
+  taxTables: TaxYearTables | null,
   deductionType: string,
 ) {
   return useMemo(
     () =>
-      getFinancialMathSnapshot({
-        monthlyExpenses,
-        selfSalary: household.annualHouseholdIncome,
-        spouseSalary: 0,
-        safeWithdrawalRate,
-        currentPortfolio: portfolio.totalStartingBalance,
-        emergencyFundBalance: portfolio.emergencyFundBalance,
-        filingStatus,
-        deductionType,
-      }),
+      getFinancialMathSnapshot(
+        {
+          monthlyExpenses,
+          selfSalary: household.annualHouseholdIncome,
+          spouseSalary: 0,
+          safeWithdrawalRate,
+          currentPortfolio: portfolio.totalStartingBalance,
+          emergencyFundBalance: portfolio.emergencyFundBalance,
+          deductionType,
+        },
+        taxTables,
+      ),
     [
       monthlyExpenses,
       household.annualHouseholdIncome,
       safeWithdrawalRate,
       portfolio.totalStartingBalance,
       portfolio.emergencyFundBalance,
-      filingStatus,
+      taxTables,
       deductionType,
     ],
   );
@@ -514,6 +518,7 @@ const usePlannerModel = () => {
     deductionType,
   } = useCurrentUser();
   const { irsLimits } = useIrsLimits();
+  const taxTables = useTaxYear(filingStatus);
 
   const useInflationAdjustedValues = returnDisplayMode === 'real';
 
@@ -552,7 +557,7 @@ const usePlannerModel = () => {
     household,
     safeWithdrawalRate,
     portfolio,
-    filingStatus,
+    taxTables,
     deductionType,
   );
   const annualWithdrawal = plannerMonthlyExpenses * 12;
