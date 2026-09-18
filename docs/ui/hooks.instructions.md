@@ -79,9 +79,10 @@ export function usePlannerAccounts() {
 hooks/
 ├── planner/
 │   ├── usePlannerAccounts.ts    # Merges assets + liabilities into PlannerAccount[]
-│   ├── usePlannerModel.ts       # Model computation (FI number, projections, etc.)
+│   ├── usePlannerModel.ts       # Orchestrator over model/ hooks (household, portfolio, targets, projections)
+│   ├── model/                   # Focused computation hooks extracted from usePlannerModel
 │   ├── usePlannerPeople.ts      # Person management (self/spouse)
-│   ├── usePlannerPersistence.ts # Save/load planner state
+│   ├── useTaxYear.ts            # Tax tables from the taxYearData query
 │   └── useFetchPlanner.ts       # Server data fetching
 ├── useAssetsLiabilities.ts      # Raw asset/liability CRUD hooks
 ├── useAccountMutations.ts       # Create/update/delete mutations

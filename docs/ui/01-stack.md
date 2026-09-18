@@ -116,9 +116,9 @@ breeze.web/
 ├── app/                    # Next.js App Router pages
 │   ├── planner/            # Planner module (accounts, projections, etc.)
 │   │   ├── components/     # Planner-specific components
-│   │   ├── hooks/          # Domain-specific hooks
-│   │   ├── lib/            # Planner math, config, constants, type mapping
-│   │   ├── services/       # API service calls
+│   │   ├── hooks/          # Domain-specific hooks (usePlannerModel orchestrates model/ hooks)
+│   │   ├── lib/            # Planner modules: tax.ts, projection.ts, rates.ts, plannerMath.ts (contributions/IRS), config, constants, typeMapping
+│   │   ├── providers/      # PlannerStateProvider — planner state (people, accounts, summary, targets)
 │   │   └── types/          # Planner domain types
 │   ├── layout.tsx          # Root layout with Clerk + CurrentUserProvider
 │   └── page.tsx            # Home page (redirects to planner)
@@ -148,8 +148,8 @@ export type ContributionMode = 'monthly' | 'yearly' | 'salary-percent';
 export type AccountOwner = 'self' | 'spouse';
 ```
 
-Type mapping between frontend `AccountType` and API `ApiAssetType` lives in:
-`app/planner/lib/typeMapping.ts`
+Type mapping between frontend `AccountType` and API `ApiAssetType`/`ApiLiabilityType` lives in:
+`app/future/lib/typeMapping.ts`
 
 ---
 
