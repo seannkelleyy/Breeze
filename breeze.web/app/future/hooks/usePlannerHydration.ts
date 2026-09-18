@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useFetchPlanner } from '../hooks/planner/index';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from '../providers/PlannerStateProvider';
-import { getDefaultAssetFinanceDetailsForAccount } from '../lib/plannerMath';
+import { getDefaultAssetFinanceDetailsForAccount } from '../lib/projection';
 
 export const usePlannerHydration = () => {
   const { data: plannerData } = useFetchPlanner();

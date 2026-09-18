@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { PlannerAccount } from '../../types/account';
 import type { PlannerPerson } from '../../types/person';
 import { PLANNER_DEFAULT_IRS_LIMITS } from '../constants';
-import { getProjection } from '../plannerMath';
+import { getProjection } from '../projection';
 
 const person: PlannerPerson = {
   id: 'p1',

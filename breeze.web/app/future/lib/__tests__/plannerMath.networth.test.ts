@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getNetWorthStartingBalance, getAssetFinanceSnapshot } from '../plannerMath';
+import { getNetWorthStartingBalance, getAssetFinanceSnapshot } from '../projection';
 import type { PlannerAccount } from '../../types/account';
 import type { AssetFinanceDetails } from '../../types/finance';
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getVehicleAnnualDepreciationRate, getHomeAnnualGrowthRate } from '../plannerMath';
+import { getVehicleAnnualDepreciationRate, getHomeAnnualGrowthRate } from '../rates';
 import {
   PLANNER_VEHICLE_DEPRECIATION_FIRST_YEAR_RATES,
   PLANNER_VEHICLE_DEPRECIATION_MATURE_RATE_FLOORS,

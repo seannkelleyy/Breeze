@@ -6,20 +6,21 @@ import * as plannerConstants from '../../lib/constants';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from '../../providers/PlannerStateProvider';
 import {
-  clamp,
   getAccountAnnualRateFromProfile,
   getAccountRateProfileFromAnnualRate,
-  getAgeFromBirthday,
-  getAssetFinanceSnapshot,
-  getDefaultAssetFinanceDetailsForAccount,
   getDisplayedRatePercent,
-  getEmployeeMonthlyContribution,
-  getEmployerMatchMonthly,
   getHomeAnnualGrowthRate,
-  getPlannerContributionTotals,
-  getPlannerHouseholdSnapshot,
   getRealAnnualRatePercent,
   getStoredAnnualRateFromInput,
+} from '../../lib/rates';
+import { getAssetFinanceSnapshot, getDefaultAssetFinanceDetailsForAccount } from '../../lib/projection';
+import {
+  clamp,
+  getAgeFromBirthday,
+  getEmployeeMonthlyContribution,
+  getEmployerMatchMonthly,
+  getPlannerContributionTotals,
+  getPlannerHouseholdSnapshot,
   getSuggestedAnnualLimit,
   toIsoDate,
 } from '../../lib/plannerMath';

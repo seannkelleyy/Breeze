@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getFinancialMathSnapshot } from '../plannerMath';
+import { getFinancialMathSnapshot } from '../tax';
 import { SINGLE_2025_TABLES } from './fixtures';
 
 describe('getFinancialMathSnapshot', () => {

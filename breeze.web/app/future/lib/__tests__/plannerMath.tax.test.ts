@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getFederalTax, getFicaTax, getEffectiveTaxRate } from '../plannerMath';
+import { getFederalTax, getFicaTax, getEffectiveTaxRate } from '../tax';
 import { MFJ_2025_TABLES, SINGLE_2025_TABLES } from './fixtures';
 
 describe('getFederalTax', () => {

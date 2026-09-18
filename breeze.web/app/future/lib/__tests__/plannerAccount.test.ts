@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { AccountType, PlannerAccount } from '../../types/account';
-import { getDefaultAssetFinanceDetailsForAccount } from '../plannerMath';
+import { getDefaultAssetFinanceDetailsForAccount } from '../projection';
 
 describe('getDefaultAssetFinanceDetailsForAccount', () => {
   it('returns default details for home account', () => {

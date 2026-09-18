@@ -6,7 +6,7 @@ import {
   getSuggestedSafeWithdrawalRate,
   getAccountAnnualRateFromProfile,
   getAccountRateProfileFromAnnualRate,
-} from '../plannerMath';
+} from '../rates';
 
 describe('getRealAnnualRatePercent', () => {
   it('returns nominal rate when inflation is 0', () => {
