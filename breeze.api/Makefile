@@ -35,8 +35,9 @@ migrate:
 	export $(shell cat .env | xargs) && $(ATLAS) migrate apply --env local
 
 # Apply pending migrations in deploy environments (Render/CI) — uses DATABASE_URL from the environment
+# Runs atlas via `go run` so no binary install is needed on the deploy host
 migrate-deploy:
-	$(ATLAS) migrate apply --env local
+	go run ariga.io/atlas/cmd/atlas@latest migrate apply --env local
 
 # Apply seed data (tax brackets, etc.)
 seed:
