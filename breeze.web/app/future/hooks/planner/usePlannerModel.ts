@@ -30,13 +30,16 @@ import type { AssetFinanceDetails } from '../../types/finance';
 import type { IrsLimitConfig } from '../../types/irs';
 import type { ProjectionRow } from '../../types/projection';
 import type { TaxYearTables } from '../../types/tax';
+import type { PlannerAccount } from '../../types/account';
+import type { PlannerPerson } from '../../types/person';
+import { usePlannerState } from '../../providers/PlannerStateProvider';
 import useIrsLimits from './useIrsLimits';
 import useTaxYear from './useTaxYear';
 
 const { accountTypeOptions, isCombinedAssetType, isLiabilityAccountType } = plannerConfig;
 
 // ─── Household ────────────────────────────────────────────
-function useHouseholdCalculation(people: ReturnType<typeof useCurrentUser>['plannerPeople']) {
+function useHouseholdCalculation(people: PlannerPerson[]) {
   return useMemo(() => {
     const { householdIncome, currentAge } = getPlannerHouseholdSnapshot(people);
     const targetAge =
@@ -55,10 +58,8 @@ function useHouseholdCalculation(people: ReturnType<typeof useCurrentUser>['plan
 
 // ─── Portfolio & Rates ────────────────────────────────────
 function usePortfolioCalculation(
-  accounts: ReturnType<typeof useCurrentUser>['plannerAccounts'],
-  assetFinanceDetailsByAccountId: ReturnType<
-    typeof useCurrentUser
-  >['plannerAssetFinanceDetailsByAccountId'],
+  accounts: PlannerAccount[],
+  assetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>,
   household: ReturnType<typeof useHouseholdCalculation>,
   inflationRate: number,
   useInflationAdjustedValues: boolean,
@@ -365,7 +366,7 @@ function useFinancialMathSnapshot(
 
 // ─── Projections ──────────────────────────────────────────
 function useProjections(
-  accounts: ReturnType<typeof useCurrentUser>['plannerAccounts'],
+  accounts: PlannerAccount[],
   household: ReturnType<typeof useHouseholdCalculation>,
   assetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>,
   irsLimits: IrsLimitConfig,
@@ -439,9 +440,9 @@ function useFireAchievementAges(
 
 // ─── Account Breakdown ────────────────────────────────────
 function useAccountBreakdown(
-  accounts: ReturnType<typeof useCurrentUser>['plannerAccounts'],
+  accounts: PlannerAccount[],
   household: ReturnType<typeof useHouseholdCalculation>,
-  people: ReturnType<typeof useCurrentUser>['plannerPeople'],
+  people: PlannerPerson[],
   irsLimits: IrsLimitConfig,
   finalBalances: number[],
 ) {
@@ -488,7 +489,7 @@ function useAccountBreakdown(
 }
 
 // ─── Chart Config ─────────────────────────────────────────
-function useChartConfig(accounts: ReturnType<typeof useCurrentUser>['plannerAccounts']) {
+function useChartConfig(accounts: PlannerAccount[]) {
   return useMemo(() => {
     const entries = Object.fromEntries(
       accounts.map((a, i) => [
@@ -507,16 +508,18 @@ const usePlannerModel = () => {
     returnDisplayMode,
     inflationRate,
     safeWithdrawalRate,
-    setPlannerSummary,
+    filingStatus,
+    deductionType,
+  } = useCurrentUser();
+  const {
     plannerDesiredInvestmentAmount,
     plannerMonthlyExpenses,
     plannerRetirementMethod,
     plannerPeople,
     plannerAccounts,
     plannerAssetFinanceDetailsByAccountId,
-    filingStatus,
-    deductionType,
-  } = useCurrentUser();
+    setPlannerSummary,
+  } = usePlannerState();
   const { irsLimits } = useIrsLimits();
   const taxTables = useTaxYear(filingStatus);
 

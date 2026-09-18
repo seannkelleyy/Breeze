@@ -5,15 +5,15 @@ import usePlannerPeople from '../usePlannerPeople';
 import { getAgeFromBirthday } from '../../../lib/plannerMath';
 import type { PlannerPerson } from '../../../types/person';
 
-// The real CurrentUserProvider carries app-wide state; tests supply a minimal
-// context with live React state so mutations re-render the harness.
+// The real PlannerStateProvider carries planner-wide state; tests supply a
+// minimal context with live React state so mutations re-render the harness.
 const TestCtx = createContext<{
   plannerPeople: PlannerPerson[];
   setPlannerPeople: (value: PlannerPerson[] | ((prev: PlannerPerson[]) => PlannerPerson[])) => void;
 } | null>(null);
 
-vi.mock('@/lib/providers/CurrentUserProvider', () => ({
-  useCurrentUser: () => useContext(TestCtx),
+vi.mock('../../../providers/PlannerStateProvider', () => ({
+  usePlannerState: () => useContext(TestCtx),
 }));
 
 let uuidCounter = 0;

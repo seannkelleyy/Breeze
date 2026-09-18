@@ -4,7 +4,8 @@ import { useUser } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 import { usePlannerModel, useFetchPlanner } from './hooks/planner/index';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { usePlannerState } from './hooks/usePlannerState';
+import { usePlannerState } from './providers/PlannerStateProvider';
+import { usePlannerUiState } from './hooks/usePlannerUiState';
 import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
 
 import { ProjectionsSection } from './components/sections';
@@ -41,17 +42,15 @@ function PlannerContent() {
     }
   }, [connections, syncConnection]);
 
-  const { collapsedSections, toggleSection } = usePlannerState();
+  const { collapsedSections, toggleSection } = usePlannerUiState();
   const { data: plannerData } = useFetchPlanner();
 
   const {
     setPlannerAccounts,
     setPlannerPeople,
     setPlannerAssetFinanceDetailsByAccountId,
-    setInflationRate,
-    setSafeWithdrawalRate,
-    setCurrencyCode,
-  } = useCurrentUser();
+  } = usePlannerState();
+  const { setInflationRate, setSafeWithdrawalRate, setCurrencyCode } = useCurrentUser();
 
   useEffect(() => {
     if (!plannerData) return;

@@ -4,6 +4,7 @@ import * as plannerConfig from '../../lib/config';
 import * as plannerConstants from '../../lib/constants';
 
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { usePlannerState } from '../../providers/PlannerStateProvider';
 import {
   clamp,
   getAccountAnnualRateFromProfile,
@@ -27,6 +28,7 @@ import type { AssetFinanceDetails } from '../../types/finance';
 import useIrsLimits from './useIrsLimits';
 
 const usePlannerAccounts = () => {
+  const { returnDisplayMode, inflationRate } = useCurrentUser();
   const {
     plannerSummary,
     plannerAccounts,
@@ -34,9 +36,7 @@ const usePlannerAccounts = () => {
     plannerAssetFinanceDetailsByAccountId,
     setPlannerAssetFinanceDetailsByAccountId,
     plannerPeople,
-    returnDisplayMode,
-    inflationRate,
-  } = useCurrentUser();
+  } = usePlannerState();
   const { irsLimits, isIrsAccountsLoading, isIrsAccountsError } = useIrsLimits();
 
   const useInflationAdjustedValues = returnDisplayMode === 'real';

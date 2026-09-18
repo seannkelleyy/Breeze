@@ -3,7 +3,7 @@ import { Suspense, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { usePlannerState } from '../future/hooks/usePlannerState';
+import { usePlannerUiState } from '../future/hooks/usePlannerUiState';
 import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
 
 import { AccountsSection } from '../future/components/sections';
@@ -40,7 +40,7 @@ function AccountsContent() {
   }, [connections, syncConnection]);
 
   // Manage local UI state
-  const { collapsedSections } = usePlannerState();
+  const { collapsedSections } = usePlannerUiState();
 
   // Load planner data from API on mount and hydrate state
   usePlannerHydration();

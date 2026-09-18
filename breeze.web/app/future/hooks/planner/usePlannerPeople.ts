@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { usePlannerState } from '../../providers/PlannerStateProvider';
 import { getAgeFromBirthday } from '../../lib/plannerMath';
 import { PlannerPerson } from '../../types/person';
 
@@ -20,7 +20,7 @@ const PLANNER_DEFAULT_PERSON = {
 };
 
 const usePlannerPeople = () => {
-  const { plannerPeople, setPlannerPeople } = useCurrentUser();
+  const { plannerPeople, setPlannerPeople } = usePlannerState();
   const hasHydrated = useRef(false);
   const people = plannerPeople;
 

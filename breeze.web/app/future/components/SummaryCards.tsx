@@ -6,6 +6,7 @@ import RequiredMonthlyContributionCard from './summaryCards/RequiredMonthlyContr
 import NetWorthSnapshotCard from './summaryCards/NetWorthSnapshotCard';
 import RetirementNeedEstimateCard from './summaryCards/RetirementNeedEstimateCard';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { usePlannerState } from '../providers/PlannerStateProvider';
 
 export type SummaryCardProps = {
   requiredMonthlyCollapsed: boolean;
@@ -30,7 +31,8 @@ export const SummaryCards = ({
   currentAge,
   financialFreedomAge,
 }: SummaryCardProps) => {
-  const { plannerSummary, currencyCode, plannerAccounts } = useCurrentUser();
+  const { currencyCode } = useCurrentUser();
+  const { plannerSummary, plannerAccounts } = usePlannerState();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
 
   if (!plannerSummary) {

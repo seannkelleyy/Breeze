@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { usePlannerState } from '@/app/future/providers/PlannerStateProvider';
 import useGoalsApi from './hooks/useGoalsApi';
 import { Goal, GOAL_CATEGORIES } from './types/goal';
 import { computeFooStepCompletion } from './lib/fooCompletion';
@@ -25,7 +26,8 @@ export default function GoalsPage() {
 
 function GoalsContent() {
   const { isLoaded: clerkLoaded } = useUser();
-  const { userId, isLoaded, plannerAccounts, plannerSummary } = useCurrentUser();
+  const { userId, isLoaded } = useCurrentUser();
+  const { plannerAccounts, plannerSummary } = usePlannerState();
   const queryClient = useQueryClient();
   const api = useGoalsApi();
 

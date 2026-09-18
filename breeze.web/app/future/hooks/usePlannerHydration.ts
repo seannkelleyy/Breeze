@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { useFetchPlanner } from '../hooks/planner/index';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { usePlannerState } from '../providers/PlannerStateProvider';
 import { getDefaultAssetFinanceDetailsForAccount } from '../lib/plannerMath';
 
 export const usePlannerHydration = () => {
@@ -10,10 +11,8 @@ export const usePlannerHydration = () => {
     setPlannerAccounts,
     setPlannerPeople,
     setPlannerAssetFinanceDetailsByAccountId,
-    setInflationRate,
-    setSafeWithdrawalRate,
-    setCurrencyCode,
-  } = useCurrentUser();
+  } = usePlannerState();
+  const { setInflationRate, setSafeWithdrawalRate, setCurrencyCode } = useCurrentUser();
 
   const lastHydratedRef = useRef<string | null>(null);
 

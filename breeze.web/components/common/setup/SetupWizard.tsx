@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { usePlannerState } from '@/app/future/hooks/usePlannerState';
+import { usePlannerUiState } from '@/app/future/hooks/usePlannerUiState';
 import { usePlannerHydration } from '@/app/future/hooks/usePlannerHydration';
 import { PeopleSection, AccountsSection } from '@/app/future/components/sections';
 
@@ -34,7 +34,7 @@ export const SetupWizard = () => {
   const [acknowledged, setAcknowledged] = useState(false);
   const [manualClose, setManualClose] = useState(false);
   const router = useRouter();
-  const { collapsedSections } = usePlannerState();
+  const { collapsedSections } = usePlannerUiState();
   usePlannerHydration();
 
   const open = isLoaded && isSignedIn && !setupCompleted && !manualClose;

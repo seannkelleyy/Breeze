@@ -18,15 +18,7 @@ import {
   PLANNER_DEFAULT_RETURN_DISPLAY_MODE,
   PLANNER_DEFAULT_INFLATION_RATE,
   PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE,
-  PLANNER_DEFAULT_DESIRED_INVESTMENT_AMOUNT,
-  PLANNER_DEFAULT_MONTHLY_EXPENSES,
-  PLANNER_DEFAULT_RETIREMENT_METHOD,
-  PLANNER_DEFAULT_FIRE_LIFESTYLE_INDEX,
 } from '@/app/future/lib/constants';
-import { PlannerPerson } from '@/app/future/types/person';
-import { PlannerAccount } from '@/app/future/types/account';
-import { AssetFinanceDetails } from '@/app/future/types/finance';
-import { PlannerSummary } from '@/app/future/types/planner';
 import { useUser } from '@clerk/clerk-react';
 
 const DEV_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
@@ -100,8 +92,6 @@ const getBackendUserID = (user: ReturnType<typeof useUser>['user']): string => {
   return DEV_USER_ID;
 };
 
-export type PlannerRetirementMethod = 'target-amount' | 'fire' | 'income-replacement';
-
 export interface CurrentUserContextValue {
   user: ReturnType<typeof useUser>['user'];
   userId: string;
@@ -135,24 +125,6 @@ export interface CurrentUserContextValue {
     setupCompleted?: boolean;
     disclaimerAccepted?: boolean;
   }) => Promise<void>;
-  plannerDesiredInvestmentAmount: number;
-  setPlannerDesiredInvestmentAmount: Dispatch<SetStateAction<number>>;
-  plannerMonthlyExpenses: number;
-  setPlannerMonthlyExpenses: Dispatch<SetStateAction<number>>;
-  plannerRetirementMethod: PlannerRetirementMethod;
-  setPlannerRetirementMethod: Dispatch<SetStateAction<PlannerRetirementMethod>>;
-  plannerFireLifestyleIndex: number;
-  setPlannerFireLifestyleIndex: Dispatch<SetStateAction<number>>;
-  plannerSummary: PlannerSummary | null;
-  setPlannerSummary: (summary: PlannerSummary) => void;
-  plannerPeople: PlannerPerson[];
-  setPlannerPeople: Dispatch<SetStateAction<PlannerPerson[]>>;
-  plannerAccounts: PlannerAccount[];
-  setPlannerAccounts: Dispatch<SetStateAction<PlannerAccount[]>>;
-  plannerAssetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>;
-  setPlannerAssetFinanceDetailsByAccountId: Dispatch<
-    SetStateAction<Record<string, AssetFinanceDetails>>
-  >;
 }
 
 export const CurrentUserContext = createContext<CurrentUserContextValue | null>(null);
@@ -179,19 +151,6 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const [safeWithdrawalRate, setSafeWithdrawalRate] = useState(
     PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE,
   );
-  const [plannerDesiredInvestmentAmount, setPlannerDesiredInvestmentAmount] = useState(
-    PLANNER_DEFAULT_DESIRED_INVESTMENT_AMOUNT,
-  );
-  const [plannerMonthlyExpenses, setPlannerMonthlyExpenses] = useState(
-    PLANNER_DEFAULT_MONTHLY_EXPENSES,
-  );
-  const [plannerRetirementMethod, setPlannerRetirementMethod] = useState<PlannerRetirementMethod>(
-    PLANNER_DEFAULT_RETIREMENT_METHOD,
-  );
-  const [plannerFireLifestyleIndex, setPlannerFireLifestyleIndex] = useState(
-    PLANNER_DEFAULT_FIRE_LIFESTYLE_INDEX,
-  );
-  const [plannerSummary, setPlannerSummary] = useState<PlannerSummary | null>(null);
   const [deductionType, setDeductionType] = useState<'STANDARD' | 'ITEMIZED'>('STANDARD');
   const [deductionAmount, setDeductionAmount] = useState<string | null>(null);
   const [maxTaxBracketId, setMaxTaxBracketId] = useState<string | null>(null);
@@ -201,10 +160,6 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const [monthlyExpenses, setMonthlyExpenses] = useState<number | null>(null);
   const [setupCompleted, setSetupCompleted] = useState(false);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
-  const [plannerPeople, setPlannerPeople] = useState<PlannerPerson[]>([]);
-  const [plannerAccounts, setPlannerAccounts] = useState<PlannerAccount[]>([]);
-  const [plannerAssetFinanceDetailsByAccountId, setPlannerAssetFinanceDetailsByAccountId] =
-    useState<Record<string, AssetFinanceDetails>>({});
   const [resolvedUserId, setResolvedUserId] = useState<string>('');
   const providerKey = isSignedIn ? (user?.id ?? 'signed-in') : 'signed-out';
   const backendUserID = useMemo(() => getBackendUserID(user), [user]);
@@ -544,22 +499,6 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     disclaimerAccepted,
     setDisclaimerAccepted,
     updateUserSetup,
-    plannerDesiredInvestmentAmount,
-    setPlannerDesiredInvestmentAmount,
-    plannerMonthlyExpenses,
-    setPlannerMonthlyExpenses,
-    plannerRetirementMethod,
-    setPlannerRetirementMethod,
-    plannerFireLifestyleIndex,
-    setPlannerFireLifestyleIndex,
-    plannerSummary,
-    setPlannerSummary,
-    plannerPeople,
-    setPlannerPeople,
-    plannerAccounts,
-    setPlannerAccounts,
-    plannerAssetFinanceDetailsByAccountId,
-    setPlannerAssetFinanceDetailsByAccountId,
   };
 
   return (

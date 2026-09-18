@@ -1,11 +1,12 @@
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { usePlannerState } from '../../providers/PlannerStateProvider';
 import { useState } from 'react';
 import { clamp } from '../../lib/plannerMath';
 import { usePlanner } from './index';
 
 const usePlannerRetirementInputs = () => {
+  const { isSignedIn } = useCurrentUser();
   const {
-    isSignedIn,
     plannerDesiredInvestmentAmount,
     setPlannerDesiredInvestmentAmount,
     plannerMonthlyExpenses,
@@ -14,7 +15,7 @@ const usePlannerRetirementInputs = () => {
     setPlannerRetirementMethod,
     plannerFireLifestyleIndex,
     setPlannerFireLifestyleIndex,
-  } = useCurrentUser();
+  } = usePlannerState();
   const { getRecurringExpensesMonthlyTotal } = usePlanner();
   const [isRefreshingExpenses, setIsRefreshingExpenses] = useState(false);
 

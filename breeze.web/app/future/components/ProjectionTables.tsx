@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { usePlannerState } from '../providers/PlannerStateProvider';
 
 type AccountBreakdownRow = {
   id: string;
@@ -78,7 +79,8 @@ function SortableHead({
 }
 
 const ProjectionTables = ({ sections, data }: ProjectionTablesProps) => {
-  const { currencyCode, plannerSummary } = useCurrentUser();
+  const { currencyCode } = useCurrentUser();
+  const { plannerSummary } = usePlannerState();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
   const { accountBreakdownCollapsed, accountBreakdownToggleControl } = sections;
   const { accountBreakdownRows } = data;

@@ -1,5 +1,6 @@
 'use client';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { usePlannerState } from '../providers/PlannerStateProvider';
 import { formatCurrencyWithCode } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -56,8 +57,8 @@ function IndicatorCard({
 }
 
 export function HealthIndicators() {
-  const { plannerSummary, currencyCode, monthlyExpenses, plannerPeople, plannerAccounts } =
-    useCurrentUser();
+  const { currencyCode, monthlyExpenses } = useCurrentUser();
+  const { plannerSummary, plannerPeople, plannerAccounts } = usePlannerState();
   if (!plannerSummary) return null;
 
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);

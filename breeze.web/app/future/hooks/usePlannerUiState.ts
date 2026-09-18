@@ -25,7 +25,7 @@ const DEFAULT_UI_STATE: Omit<PlannerUIState, 'activeTab'> = {
   validationErrors: {},
 };
 
-export function usePlannerState() {
+export function usePlannerUiState() {
   const [activeTab, setActiveTab] = useTabParam<PlannerTab>('inputs', PLANNER_TABS);
   const [uiState, setUiState] = useState(DEFAULT_UI_STATE);
 
@@ -73,4 +73,4 @@ export function usePlannerState() {
   };
 }
 
-export default usePlannerState;
+export default usePlannerUiState;
