@@ -1,18 +1,11 @@
 'use client';
-import { SummaryCards } from '../SummaryCards';
-import FinancialMathCard from '../FinancialMathCard';
 import ProjectionChartCard from '../ProjectionChartCard';
 import ProjectionTables from '../ProjectionTables';
-import HealthIndicators from '../HealthIndicators';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { ChartConfig } from '@/components/ui/chart';
-import type { FinancialMathSnapshot } from '../../types/finance';
 
 type SectionCollapse = {
-  requiredMonthly: boolean;
-  plannedMonthly: boolean;
-  retirementEstimateCard: boolean;
   accountBreakdown: boolean;
   onToggle: (section: string) => void;
 };
@@ -41,15 +34,13 @@ type AccountBreakdownRow = {
 interface ProjectionsSectionProps {
   currentAge: number;
   targetAge: number;
-  financialFreedomAge: number | null;
   chartConfig: ChartConfig;
   projectionRows: ProjectionRow[];
   accounts: Array<{ id: string; name: string }>;
   accountBreakdownRows: AccountBreakdownRow[];
-  financialMathSnapshot: FinancialMathSnapshot;
-  collapses: SectionCollapse;
   projectionEndAge: number;
   setProjectionEndAge: (age: number) => void;
+  collapses: SectionCollapse;
 }
 
 const ToggleBtn = ({ collapsed, onClick }: { collapsed: boolean; onClick: () => void }) => (
@@ -61,43 +52,18 @@ const ToggleBtn = ({ collapsed, onClick }: { collapsed: boolean; onClick: () => 
 export function ProjectionsSection({
   currentAge,
   targetAge,
-  financialFreedomAge,
   chartConfig,
   projectionRows,
   accounts,
   accountBreakdownRows,
-  financialMathSnapshot,
-  collapses,
   projectionEndAge,
   setProjectionEndAge,
+  collapses,
 }: ProjectionsSectionProps) {
-  const { requiredMonthly, plannedMonthly, retirementEstimateCard, accountBreakdown, onToggle } =
-    collapses;
+  const { accountBreakdown, onToggle } = collapses;
 
   return (
     <div className="space-y-6">
-      <HealthIndicators />
-      <SummaryCards
-        requiredMonthlyCollapsed={requiredMonthly}
-        requiredMonthlyToggleControl={
-          <ToggleBtn collapsed={requiredMonthly} onClick={() => onToggle('requiredMonthly')} />
-        }
-        plannedMonthlyCollapsed={plannedMonthly}
-        plannedMonthlyToggleControl={
-          <ToggleBtn collapsed={plannedMonthly} onClick={() => onToggle('plannedMonthly')} />
-        }
-        retirementNeedCollapsed={retirementEstimateCard}
-        retirementNeedToggleControl={
-          <ToggleBtn
-            collapsed={retirementEstimateCard}
-            onClick={() => onToggle('retirementEstimateCard')}
-          />
-        }
-        currentPortfolio={financialMathSnapshot.currentPortfolio}
-        currentAge={currentAge}
-        financialFreedomAge={financialFreedomAge}
-      />
-      <FinancialMathCard snapshot={financialMathSnapshot} />
       <ProjectionChartCard
         collapsed={false}
         toggleControl={null}

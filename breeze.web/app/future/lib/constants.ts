@@ -31,12 +31,7 @@ export const PLANNER_SAFE_WITHDRAWAL_RATE_SUGGESTIONS = [
 ] as const;
 
 export const PLANNER_DEFAULT_DESIRED_INVESTMENT_AMOUNT = 1_500_000;
-export const PLANNER_DEFAULT_MONTHLY_EXPENSES = 4000;
 export const PLANNER_DEFAULT_INFLATION_RATE = 2.5;
-export const PLANNER_BONUS_MODE_OPTIONS = [
-  { value: 'dollars', label: 'Net Dollars (After Tax)' },
-  { value: 'salary-percent', label: '% of Salary' },
-] as const;
 export const PLANNER_DEFAULT_IRS_LIMIT_GROWTH_RATE = 2.5;
 export const PLANNER_RETIREMENT_METHOD_OPTIONS = [
   { value: 'target-amount', label: 'Custom Target' },

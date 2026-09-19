@@ -58,12 +58,18 @@ describe('getFinancialMathSnapshot', () => {
   });
 
   it('calculates withdrawal multiplier', () => {
-    const snap = getFinancialMathSnapshot({ ...defaultInput, safeWithdrawalRate: 4 }, SINGLE_2025_TABLES);
+    const snap = getFinancialMathSnapshot(
+      { ...defaultInput, safeWithdrawalRate: 4 },
+      SINGLE_2025_TABLES,
+    );
     expect(snap.withdrawalMultiplier).toBeCloseTo(25, 2);
   });
 
   it('handles 0% SWR gracefully', () => {
-    const snap = getFinancialMathSnapshot({ ...defaultInput, safeWithdrawalRate: 0 }, SINGLE_2025_TABLES);
+    const snap = getFinancialMathSnapshot(
+      { ...defaultInput, safeWithdrawalRate: 0 },
+      SINGLE_2025_TABLES,
+    );
     expect(snap.withdrawalMultiplier).toBe(25); // fallback
   });
 

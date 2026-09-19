@@ -1,13 +1,13 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 
-import type { ChartConfig } from '@/components/ui/chart';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import * as plannerConfig from '../../lib/config';
-import type { AssetFinanceDetails } from '../../types/finance';
-import type { ProjectionRow } from '../../types/projection';
-import type { TaxYearTables } from '../../types/tax';
 import { usePlannerState } from '../../providers/PlannerStateProvider';
+import {
+  getRecurringExpensesMonthlyTotal,
+  useRecurringExpenseTemplates,
+} from '@/app/budget/hooks/recurring/recurringTemplateServices';
 import useIrsLimits from './useIrsLimits';
 import useTaxYear from './useTaxYear';
 import { useHouseholdCalculation } from './model/useHouseholdCalculation';
@@ -24,26 +24,27 @@ const { isCombinedAssetType } = plannerConfig;
 // ─── Main Hook ────────────────────────────────────────────
 const usePlannerModel = () => {
   const [projectionEndAge, setProjectionEndAge] = useState<number | undefined>(undefined);
-  const {
-    returnDisplayMode,
-    inflationRate,
-    safeWithdrawalRate,
-    filingStatus,
-    deductionType,
-  } = useCurrentUser();
+  const { returnDisplayMode, inflationRate, safeWithdrawalRate, filingStatus, deductionType } =
+    useCurrentUser();
   const {
     plannerDesiredInvestmentAmount,
-    plannerMonthlyExpenses,
     plannerRetirementMethod,
     plannerPeople,
     plannerAccounts,
     plannerAssetFinanceDetailsByAccountId,
     setPlannerSummary,
   } = usePlannerState();
+  const { data: recurringExpenseTemplates } = useRecurringExpenseTemplates();
   const { irsLimits } = useIrsLimits();
   const taxTables = useTaxYear(filingStatus);
 
   const useInflationAdjustedValues = returnDisplayMode === 'real';
+
+  // Monthly expenses come from the Expenses tab's recurring expense templates
+  const monthlyExpenses = useMemo(
+    () => getRecurringExpensesMonthlyTotal(recurringExpenseTemplates ?? []),
+    [recurringExpenseTemplates],
+  );
 
   const household = useHouseholdCalculation(plannerPeople);
 
@@ -70,20 +71,20 @@ const usePlannerModel = () => {
     portfolio,
     inflationRate,
     safeWithdrawalRate,
-    plannerMonthlyExpenses,
+    monthlyExpenses,
     plannerDesiredInvestmentAmount,
     plannerRetirementMethod,
     useInflationAdjustedValues,
   );
   const financialMathSnapshot = useFinancialMathSnapshot(
-    plannerMonthlyExpenses,
+    monthlyExpenses,
     household,
     safeWithdrawalRate,
     portfolio,
     taxTables,
     deductionType,
   );
-  const annualWithdrawal = plannerMonthlyExpenses * 12;
+  const annualWithdrawal = monthlyExpenses * 12;
   const { projectionRows, finalBalances, projectedNetWorthAtTargetAge } = useProjections(
     filteredAccounts,
     household,
@@ -98,9 +99,26 @@ const usePlannerModel = () => {
     projectionRows,
     targets.financialFreedomTarget,
   );
-  const fireAchievementAges = useFireAchievementAges(
+  // Every goal worth tracking gets a milestone row: the five FIRE lifestyles
+  // and income replacement, sorted by target so the table reads as a ladder.
+  // Custom is always pinned last, regardless of its amount.
+  const milestoneTargets = useMemo(
+    () => {
+      const sorted = [
+        ...targets.fireTargets.map((ft) => ({ label: ft.label, target: ft.target })),
+        { label: 'Income replacement', target: targets.incomeReplacementTarget },
+      ]
+        .filter((m) => m.target > 0)
+        .sort((a, b) => a.target - b.target);
+      return plannerDesiredInvestmentAmount > 0
+        ? [...sorted, { label: 'Custom', target: plannerDesiredInvestmentAmount }]
+        : sorted;
+    },
+    [targets.fireTargets, targets.incomeReplacementTarget, plannerDesiredInvestmentAmount],
+  );
+  const milestones = useFireAchievementAges(
     projectionRows,
-    targets.fireTargets,
+    milestoneTargets,
     household.currentAge,
   );
   const accountBreakdownRows = useAccountBreakdown(
@@ -164,12 +182,14 @@ const usePlannerModel = () => {
     accounts: plannerAccounts,
     currentAge: household.currentAge,
     targetAge: household.targetAge,
+    totalStartingBalance: portfolio.totalStartingBalance,
+    projectedNetWorthAtTargetAge,
     financialMathSnapshot,
     projectionRows,
     accountBreakdownRows,
     dynamicChartConfig,
     fireTargets: targets.fireTargets,
-    fireAchievementAges,
+    milestones,
     baseFinancialFreedomTarget: targets.baseFinancialFreedomTarget,
     retirementHorizonYears: targets.retirementHorizonYears,
     suggestedSafeWithdrawalRate: targets.suggestedSafeWithdrawalRate,
@@ -185,10 +205,11 @@ const usePlannerModel = () => {
     monthlyGapToGoal: targets.monthlyGap,
     isMonthlyGapPositive: targets.isMonthlyGapPositive,
     annualHouseholdIncome: household.annualHouseholdIncome,
-    monthlyExpenses: plannerMonthlyExpenses,
+    monthlyExpenses,
     totalPlannedMonthlyInvestment: portfolio.totalPlannedMonthlyInvestment,
     totalAssets: portfolio.totalAssets,
     totalLiabilities: portfolio.totalLiabilities,
+    emergencyFundBalance: portfolio.emergencyFundBalance,
     currentSavingsRate: portfolio.currentSavingsRateTotal,
     projectionEndAge: projectionEndAge ?? household.targetAge,
     setProjectionEndAge,

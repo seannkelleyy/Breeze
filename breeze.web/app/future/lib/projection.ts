@@ -19,7 +19,12 @@ import {
   getVehicleAnnualDepreciationRate,
 } from './rates';
 import type { AccountType, PlannerAccount } from '../types/account';
-import type { AssetFinanceDetails, AssetFinanceSnapshot, HomeGrowthProfile, VehicleDepreciationProfile } from '../types/finance';
+import type {
+  AssetFinanceDetails,
+  AssetFinanceSnapshot,
+  HomeGrowthProfile,
+  VehicleDepreciationProfile,
+} from '../types/finance';
 import type { IrsLimitConfig } from '../types/irs';
 import type { PlannerPerson } from '../types/person';
 import type { ProjectionRow } from '../types/projection';

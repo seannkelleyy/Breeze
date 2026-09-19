@@ -11,9 +11,7 @@ import {
 
 import {
   PLANNER_DEFAULT_DESIRED_INVESTMENT_AMOUNT,
-  PLANNER_DEFAULT_MONTHLY_EXPENSES,
   PLANNER_DEFAULT_RETIREMENT_METHOD,
-  PLANNER_DEFAULT_FIRE_LIFESTYLE_INDEX,
 } from '../lib/constants';
 import { PlannerPerson } from '../types/person';
 import { PlannerAccount } from '../types/account';
@@ -40,12 +38,8 @@ export interface PlannerStateContextValue {
   // Retirement target inputs
   plannerDesiredInvestmentAmount: number;
   setPlannerDesiredInvestmentAmount: Dispatch<SetStateAction<number>>;
-  plannerMonthlyExpenses: number;
-  setPlannerMonthlyExpenses: Dispatch<SetStateAction<number>>;
   plannerRetirementMethod: PlannerRetirementMethod;
   setPlannerRetirementMethod: Dispatch<SetStateAction<PlannerRetirementMethod>>;
-  plannerFireLifestyleIndex: number;
-  setPlannerFireLifestyleIndex: Dispatch<SetStateAction<number>>;
 }
 
 const PlannerStateContext = createContext<PlannerStateContextValue | null>(null);
@@ -59,14 +53,8 @@ export const PlannerStateProvider = ({ children }: { children: ReactNode }) => {
   const [plannerDesiredInvestmentAmount, setPlannerDesiredInvestmentAmount] = useState(
     PLANNER_DEFAULT_DESIRED_INVESTMENT_AMOUNT,
   );
-  const [plannerMonthlyExpenses, setPlannerMonthlyExpenses] = useState(
-    PLANNER_DEFAULT_MONTHLY_EXPENSES,
-  );
   const [plannerRetirementMethod, setPlannerRetirementMethod] = useState<PlannerRetirementMethod>(
     PLANNER_DEFAULT_RETIREMENT_METHOD,
-  );
-  const [plannerFireLifestyleIndex, setPlannerFireLifestyleIndex] = useState(
-    PLANNER_DEFAULT_FIRE_LIFESTYLE_INDEX,
   );
 
   const value = useMemo<PlannerStateContextValue>(
@@ -81,12 +69,8 @@ export const PlannerStateProvider = ({ children }: { children: ReactNode }) => {
       setPlannerSummary,
       plannerDesiredInvestmentAmount,
       setPlannerDesiredInvestmentAmount,
-      plannerMonthlyExpenses,
-      setPlannerMonthlyExpenses,
       plannerRetirementMethod,
       setPlannerRetirementMethod,
-      plannerFireLifestyleIndex,
-      setPlannerFireLifestyleIndex,
     }),
     [
       plannerPeople,
@@ -94,9 +78,7 @@ export const PlannerStateProvider = ({ children }: { children: ReactNode }) => {
       plannerAssetFinanceDetailsByAccountId,
       plannerSummary,
       plannerDesiredInvestmentAmount,
-      plannerMonthlyExpenses,
       plannerRetirementMethod,
-      plannerFireLifestyleIndex,
     ],
   );
 

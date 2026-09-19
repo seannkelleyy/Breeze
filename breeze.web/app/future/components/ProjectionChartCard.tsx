@@ -142,7 +142,6 @@ const ProjectionChartCard = ({
             className="h-[320px] w-full"
             data={remappedRows}
             xAxisDataKey="age"
-            xAxisMinTickGap={0}
             margin={{ top: 8, right: 16, bottom: 8, left: 0 }}
             leftAxis={{
               dataKey: 'totalBalance',

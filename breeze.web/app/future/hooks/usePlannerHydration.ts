@@ -7,11 +7,8 @@ import { getDefaultAssetFinanceDetailsForAccount } from '../lib/projection';
 
 export const usePlannerHydration = () => {
   const { data: plannerData } = useFetchPlanner();
-  const {
-    setPlannerAccounts,
-    setPlannerPeople,
-    setPlannerAssetFinanceDetailsByAccountId,
-  } = usePlannerState();
+  const { setPlannerAccounts, setPlannerPeople, setPlannerAssetFinanceDetailsByAccountId } =
+    usePlannerState();
   const { setInflationRate, setSafeWithdrawalRate, setCurrencyCode } = useCurrentUser();
 
   const lastHydratedRef = useRef<string | null>(null);

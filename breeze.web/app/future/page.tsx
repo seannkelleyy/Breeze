@@ -10,7 +10,7 @@ import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hook
 
 import { ProjectionsSection } from './components/sections';
 import { CurrentSnapshotSection } from './components/CurrentSnapshotSection';
-import { FIRETargetsSection } from './components/FIRETargetsSection';
+import { RetirementPlannerSection } from './components/RetirementPlannerSection';
 import { getDefaultAssetFinanceDetailsForAccount } from './lib/projection';
 
 export default function PlannerPage() {
@@ -45,11 +45,8 @@ function PlannerContent() {
   const { collapsedSections, toggleSection } = usePlannerUiState();
   const { data: plannerData } = useFetchPlanner();
 
-  const {
-    setPlannerAccounts,
-    setPlannerPeople,
-    setPlannerAssetFinanceDetailsByAccountId,
-  } = usePlannerState();
+  const { setPlannerAccounts, setPlannerPeople, setPlannerAssetFinanceDetailsByAccountId } =
+    usePlannerState();
   const { setInflationRate, setSafeWithdrawalRate, setCurrencyCode } = useCurrentUser();
 
   useEffect(() => {
@@ -100,9 +97,11 @@ function PlannerContent() {
     projectionRows,
     accountBreakdownRows,
     dynamicChartConfig,
-    fireAchievementAges,
-    annualHouseholdIncome,
-    monthlyExpenses,
+    milestones,
+    totalStartingBalance,
+    investmentStartingBalance,
+    realWeightedAnnualRate,
+    projectedNetWorthAtTargetAge,
     totalPlannedMonthlyInvestment,
     totalAssets,
     totalLiabilities,
@@ -123,15 +122,18 @@ function PlannerContent() {
   }
 
   return (
-    <div className="mx-auto max-w-[1200px] space-y-6 px-4 pt-16 pb-6 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 pt-16 pb-6 sm:px-6 lg:px-8">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Future</h1>
         <p className="text-muted-foreground text-sm">Track your path to financial independence</p>
       </div>
 
       <CurrentSnapshotSection
-        annualHouseholdIncome={annualHouseholdIncome}
-        monthlyExpenses={monthlyExpenses}
+        snapshot={financialMathSnapshot}
+        accounts={accounts}
+        totalStartingBalance={totalStartingBalance}
+        projectedNetWorthAtTargetAge={projectedNetWorthAtTargetAge}
+        targetAge={targetAge}
         totalPlannedMonthlyInvestment={totalPlannedMonthlyInvestment}
         currentSavingsRate={currentSavingsRate}
         totalAssets={totalAssets}
@@ -139,23 +141,27 @@ function PlannerContent() {
         currencyCode={currencyCode}
       />
 
-      <FIRETargetsSection fireAchievementAges={fireAchievementAges} currentAge={currentAge} />
+      <RetirementPlannerSection
+        milestones={milestones}
+        currentAge={currentAge}
+        targetAge={targetAge}
+        investmentStartingBalance={investmentStartingBalance}
+        realWeightedAnnualRate={realWeightedAnnualRate}
+        projectedNetWorthAtTargetAge={projectedNetWorthAtTargetAge}
+        totalPlannedMonthlyInvestment={totalPlannedMonthlyInvestment}
+        currencyCode={currencyCode}
+      />
 
       <ProjectionsSection
         currentAge={currentAge}
         targetAge={targetAge}
-        financialFreedomAge={null}
         chartConfig={dynamicChartConfig}
         projectionRows={projectionRows}
         accounts={accounts}
         accountBreakdownRows={accountBreakdownRows}
-        financialMathSnapshot={financialMathSnapshot}
         projectionEndAge={projectionEndAge}
         setProjectionEndAge={setProjectionEndAge}
         collapses={{
-          requiredMonthly: collapsedSections['requiredMonthly'],
-          plannedMonthly: collapsedSections['plannedMonthly'],
-          retirementEstimateCard: collapsedSections['retirementEstimateCard'],
           accountBreakdown: collapsedSections['accountBreakdown'],
           onToggle: toggleSection,
         }}
