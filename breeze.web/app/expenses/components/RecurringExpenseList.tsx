@@ -99,7 +99,7 @@ export function RecurringExpenseList({
   return (
     <>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Recurring Expenses</h2>
+        <h2 className="text-lg font-semibold">Monthly Expenses · {templates.length}</h2>
         <Button
           onClick={() => {
             setEditing(null);

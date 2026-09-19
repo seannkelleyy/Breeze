@@ -6,6 +6,7 @@ import {
 } from '@/lib/services/queries/budget';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
+import { useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
 export type ScheduleType = 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
@@ -37,6 +38,51 @@ export interface RecurringExpenseTemplate {
   createdAt: string;
   updatedAt: string;
 }
+
+export function getRecurringExpenseMonthlyAmount(
+  template: Pick<RecurringExpenseTemplate, 'amount' | 'recurrenceInterval'>,
+): number {
+  const amount = Number(template.amount) || 0;
+  switch (template.recurrenceInterval) {
+    case 'WEEKLY':
+      return (amount * 52) / 12;
+    case 'BIWEEKLY':
+      return (amount * 26) / 12;
+    case 'QUARTERLY':
+      return amount / 3;
+    case 'YEARLY':
+      return amount / 12;
+    default:
+      return amount;
+  }
+}
+
+export function getRecurringExpensesMonthlyTotal(
+  templates: Array<Pick<RecurringExpenseTemplate, 'amount' | 'recurrenceInterval'>>,
+): number {
+  return templates.reduce((sum, t) => sum + getRecurringExpenseMonthlyAmount(t), 0);
+}
+
+/**
+ * Shared query for recurring expense templates. Cached by TanStack Query so
+ * every consumer (Expenses tab, Future planner) reads the same data.
+ */
+export const useRecurringExpenseTemplates = () => {
+  const { request: graphqlRequest } = useGraphql();
+  const { userId } = useCurrentUser();
+
+  return useQuery<RecurringExpenseTemplate[]>({
+    queryKey: ['recurring-expense-templates', userId],
+    queryFn: async () => {
+      const response = await graphqlRequest<{ recurringExpenses: RecurringExpenseTemplate[] }>(
+        GET_RECURRING_EXPENSES,
+        { userId },
+      );
+      return response.recurringExpenses;
+    },
+    enabled: !!userId,
+  });
+};
 
 export const useRecurringTemplates = () => {
   const { request: graphqlRequest } = useGraphql();

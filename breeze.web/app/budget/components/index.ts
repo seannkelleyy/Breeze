@@ -7,4 +7,3 @@ export { ExpensesTable } from './expense/ExpenseTable';
 export { CreateIncomeDialog } from './income/dialogs/CreateIncomeDialog';
 export { EditIncomeDialog } from './income/dialogs/EditIncomeDialog';
 export { IncomeTable } from './income/IncomeTable';
-export { RecurringTemplatesDialog } from './recurring/RecurringTemplatesDialog';

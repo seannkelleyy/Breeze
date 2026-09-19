@@ -21,14 +21,42 @@ import {
   RecurringExpenseTemplate,
   ScheduleType,
 } from '@/app/budget/hooks/recurring/recurringTemplateServices';
-import {
-  makeDefaultRecurringExpenseTemplate,
-  validateRecurringExpenseTemplate,
-} from '@/app/budget/components/recurring/RecurringCategorySection';
 
 function toDateInputValue(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
   return dateStr.slice(0, 10);
+}
+
+export function makeDefaultRecurringExpenseTemplate(
+  today: string,
+): Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'> {
+  return {
+    name: '',
+    amount: '0',
+    recurrenceInterval: 'MONTHLY',
+    paydayDayOfMonth: 1,
+    startDate: today,
+    endDate: null,
+  };
+}
+
+interface RecurringExpenseTemplateErrors {
+  name?: string;
+  amount?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export function validateRecurringExpenseTemplate(
+  template: Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+): RecurringExpenseTemplateErrors {
+  const errors: RecurringExpenseTemplateErrors = {};
+  if (!template.name.trim()) errors.name = 'Name is required.';
+  if (Number(template.amount) <= 0) errors.amount = 'Amount must be greater than 0.';
+  if (template.endDate && template.startDate && template.endDate < template.startDate) {
+    errors.endDate = 'End date must be on or after start date.';
+  }
+  return errors;
 }
 
 const SCHEDULE_OPTIONS: { value: ScheduleType; label: string }[] = [

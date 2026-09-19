@@ -132,7 +132,7 @@ const BudgetContent = () => {
         <Link href="/expenses">
           <Button variant="outline" className="gap-2">
             <Receipt className="h-4 w-4" />
-            Recurring Expenses
+            Monthly Expenses
           </Button>
         </Link>
       </div>
