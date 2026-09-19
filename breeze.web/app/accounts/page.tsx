@@ -58,7 +58,7 @@ function AccountsContent() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6 px-4 pt-16 pb-6 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 pt-16 pb-6 sm:px-6 lg:px-8">
       {/* Page Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Accounts</h1>

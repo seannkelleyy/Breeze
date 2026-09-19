@@ -1,9 +1,7 @@
 'use client';
 import { useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import {
-  ChevronDown,
-  ChevronUp,
-  Trash2,
   PiggyBank,
   CreditCard,
   Home,
@@ -18,6 +16,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -69,7 +75,6 @@ interface AccountListItemProps {
   currencyCode: string;
   people: PlannerPerson[];
   assetFinanceDetails: AssetFinanceDetails | undefined;
-  isAccountCollapsed: boolean;
   isLastAccount: boolean;
   isLiabilityAccountType: (type: AccountType) => boolean;
   isCombinedAssetType: (type: AccountType) => boolean;
@@ -90,7 +95,6 @@ interface AccountListItemProps {
   defaultVehicleDepreciationProfile: string;
   defaultHomeAppreciationRate: number;
   defaultVehicleDepreciationRate: number;
-  onToggleCollapse: (id: string) => void;
   onSave: (account: PlannerAccount) => void;
   onDelete: (account: PlannerAccount) => void;
   onUpdateAccount: (updater: (current: PlannerAccount) => PlannerAccount) => void;
@@ -113,7 +117,6 @@ export function AccountListItem({
   currencyCode,
   people,
   assetFinanceDetails,
-  isAccountCollapsed,
   isLastAccount,
   isLiabilityAccountType,
   isCombinedAssetType,
@@ -134,7 +137,6 @@ export function AccountListItem({
   defaultVehicleDepreciationProfile,
   defaultHomeAppreciationRate,
   defaultVehicleDepreciationRate,
-  onToggleCollapse,
   onSave,
   onDelete,
   onUpdateAccount,
@@ -144,6 +146,7 @@ export function AccountListItem({
   toIsoDate,
   getHomeAnnualGrowthRate,
 }: AccountListItemProps) {
+  const [editing, setEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useAutoSave(
@@ -300,248 +303,273 @@ export function AccountListItem({
   };
 
   const Icon = ACCOUNT_ICONS[account.accountType] || PiggyBank;
-  const collapsedSummary = isAccountCollapsed
-    ? isLiability
-      ? {
-          primary: formatCurrency(account.startingBalance),
-          secondary: `Payment: ${formatCurrency(employeeMonthly)}/mo (${formatCurrency(employeeMonthly * 12)}/yr)`,
-        }
-      : {
-          primary: formatCurrency(account.startingBalance),
-          secondary: `${formatCurrency(employeeMonthly)}/mo (${formatCurrency(employeeMonthly * 12)}/yr) contribution`,
-        }
-    : null;
+  const typeLabel =
+    accountTypeOptions.find((o) => o.value === account.accountType)?.label ?? account.accountType;
+  const isOverIrsLimit =
+    suggestedLimit > 0 &&
+    plannerConstants.isMoneyGreaterThanWithTolerance(employeeAnnual, suggestedLimit);
+  const displayedRate = getDisplayedRateForAccount(account).toFixed(2);
 
-  const lastUpdatedAgo = account.lastValueUpdatedAt
-    ? formatTimeAgo(account.lastValueUpdatedAt)
-    : null;
+  let infoLine: string;
+  if (isLiability) {
+    infoLine = `${formatCurrency(employeeMonthly)}/mo (${formatCurrency(employeeAnnual)}/yr) payment · ${displayedRate}% APR`;
+  } else if (hidesContributionInputs) {
+    infoLine = `${displayedRate}% /yr`;
+  } else {
+    infoLine = `${formatCurrency(employeeMonthly)}/mo (${formatCurrency(employeeAnnual)}/yr) · ${displayedRate}% return`;
+  }
 
   return (
-    <div
-      className={`group rounded-lg border transition-colors ${
-        isAccountCollapsed ? 'bg-muted/30 hover:bg-muted/50' : 'hover:border-primary/30'
-      }`}
-    >
-      {/* Header — always visible */}
-      <div
-        role="button"
-        tabIndex={0}
-        className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left"
-        onClick={() => onToggleCollapse(account.id)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onToggleCollapse(account.id);
-          }
-        }}
-      >
-        <div
-          className={`flex size-9 shrink-0 items-center justify-center rounded-md ${isLiability ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}
-        >
-          <Icon className="size-4" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-medium">
-              {account.name || 'Unnamed Account'}
-            </span>
-            <Badge
-              variant={isLiability ? 'destructive' : 'secondary'}
-              className="shrink-0 text-[10px]"
-            >
-              {isLiability ? 'Liability' : 'Asset'}
-            </Badge>
-          </div>
-          {isAccountCollapsed && collapsedSummary && (
-            <div className="mt-0.5 flex items-baseline gap-2 text-xs">
-              <span className="text-foreground font-semibold">{collapsedSummary.primary}</span>
-              <span className="text-muted-foreground">{collapsedSummary.secondary}</span>
-            </div>
-          )}
-          {!isAccountCollapsed && lastUpdatedAgo && (
-            <p className="text-muted-foreground mt-0.5 text-[10px]">Updated {lastUpdatedAgo}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="destructive"
-            size="icon"
-            className="size-8 cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowDeleteConfirm(true);
-            }}
-            disabled={isLastAccount}
+    <>
+      <div className="group hover:border-primary/30 rounded-lg border transition-colors">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <div
+            className={`flex size-9 shrink-0 items-center justify-center rounded-md ${isLiability ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}
           >
-            <Trash2 className="size-3.5" />
-          </Button>
-          {isAccountCollapsed ? (
-            <ChevronDown className="text-muted-foreground size-4" />
-          ) : (
-            <ChevronUp className="text-muted-foreground size-4" />
-          )}
+            <Icon className="size-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            {/* Row 1: name · value */}
+            <div className="flex items-baseline gap-2">
+              <span className="truncate text-sm font-medium">
+                {account.name || 'Unnamed Account'}
+              </span>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-sm font-semibold">{formatCurrency(account.startingBalance)}</span>
+            </div>
+            {/* Row 2: badges */}
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              <Badge
+                variant={isLiability ? 'destructive' : 'secondary'}
+                className="shrink-0 text-[10px]"
+              >
+                {isLiability ? 'Liability' : 'Asset'}
+              </Badge>
+              <Badge variant="secondary" className="shrink-0 text-[10px]">
+                {typeLabel}
+              </Badge>
+              {isUsingIrsMaxContribution && (
+                <Badge
+                  variant="default"
+                  className="bg-success text-success-foreground shrink-0 text-[10px]"
+                >
+                  Maxed Out
+                </Badge>
+              )}
+              {isOverIrsLimit && (
+                <Badge variant="destructive" className="shrink-0 text-[10px]">
+                  Over Limit
+                </Badge>
+              )}
+            </div>
+            {/* Row 3: contributions, payments, rate */}
+            <p className="text-muted-foreground mt-0.5 text-xs">{infoLine}</p>
+            {account.updatedAt && (
+              <p className="text-muted-foreground mt-0.5 text-[10px]">
+                Updated {formatTimeAgo(account.updatedAt)}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 cursor-pointer"
+              onClick={() => setEditing(true)}
+            >
+              <Pencil className="size-3.5" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              className="size-8 cursor-pointer"
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={isLastAccount}
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Expanded form */}
-      {!isAccountCollapsed && (
-        <div className="space-y-4 border-t px-4 pt-3 pb-4">
-          {/* Identity row */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Account Name</Label>
-              <Input
-                value={account.name}
-                onChange={(e) => onUpdateAccount((c) => ({ ...c, name: e.target.value }))}
-                className="h-8 text-sm"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Type</Label>
-              <Select value={account.accountType} onValueChange={handleAccountTypeChange}>
-                <SelectTrigger className="h-8 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {accountTypeOptions
-                    .filter((o) => isLiabilityAccountType(o.value as AccountType) === isLiability)
-                    .map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        {o.label}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+      {/* Edit Modal */}
+      <Dialog open={editing} onOpenChange={(open) => !open && setEditing(false)}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit {account.name || 'Account'}</DialogTitle>
+            <DialogDescription>Update the account details below.</DialogDescription>
+          </DialogHeader>
 
-          {/* Type-specific fields */}
-          {!isCombinedAsset ? (
-            isLiability ? (
-              <LiabilityAccountFields account={account} onUpdateAccount={onUpdateAccount} />
-            ) : (
-              <InvestmentAccountFields
-                account={account}
-                hidesContributionInputs={hidesContributionInputs}
-                contributionInputLabel={contributionInputLabel}
-                modeOptions={modeOptions}
-                suggestedLimit={suggestedLimit}
-                isUsingIrsMaxContribution={isUsingIrsMaxContribution}
-                accountRateProfileOptions={accountRateProfileOptions}
-                selectedRateProfile={selectedRateProfile}
-                usesDepreciationInput={usesDepreciationInput}
-                onUpdateAccount={onUpdateAccount}
-                onRateProfileChange={handleRateProfileChange}
-                onSetContributionToIrsMax={onSetContributionToIrsMax}
-                getDisplayedRateForAccount={getDisplayedRateForAccount}
-                getStoredAnnualRateForInput={getStoredAnnualRateForInput}
-              />
-            )
-          ) : (
-            <>
-              {account.accountType === 'home' ? (
-                <HomeAccountFields
-                  assetFinanceDetails={assetFinanceDetails}
-                  defaultHomeGrowthProfile={defaultHomeGrowthProfile}
-                  defaultHomeAppreciationRate={defaultHomeAppreciationRate}
-                  homeGrowthProfileOptions={homeGrowthProfileOptions}
-                  onUpdateAssetFinanceDetails={onUpdateAssetFinanceDetails}
-                  toIsoDate={toIsoDate}
-                  getHomeAnnualGrowthRate={getHomeAnnualGrowthRate}
+          <div className="space-y-4">
+            {/* Identity row */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Account Name</Label>
+                <Input
+                  value={account.name}
+                  onChange={(e) => onUpdateAccount((c) => ({ ...c, name: e.target.value }))}
+                  className="h-8 text-sm"
                 />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Type</Label>
+                <Select value={account.accountType} onValueChange={handleAccountTypeChange}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accountTypeOptions
+                      .filter(
+                        (o) => isLiabilityAccountType(o.value as AccountType) === isLiability,
+                      )
+                      .map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Type-specific fields */}
+            {!isCombinedAsset ? (
+              isLiability ? (
+                <LiabilityAccountFields account={account} onUpdateAccount={onUpdateAccount} />
               ) : (
-                <VehicleAccountFields
-                  assetFinanceDetails={assetFinanceDetails}
-                  defaultVehicleDepreciationProfile={defaultVehicleDepreciationProfile}
-                  defaultVehicleDepreciationRate={defaultVehicleDepreciationRate}
-                  vehicleDepreciationProfileOptions={vehicleDepreciationProfileOptions}
-                  onUpdateAssetFinanceDetails={onUpdateAssetFinanceDetails}
-                  toIsoDate={toIsoDate}
+                <InvestmentAccountFields
+                  account={account}
+                  hidesContributionInputs={hidesContributionInputs}
+                  contributionInputLabel={contributionInputLabel}
+                  modeOptions={modeOptions}
+                  suggestedLimit={suggestedLimit}
+                  isUsingIrsMaxContribution={isUsingIrsMaxContribution}
+                  accountRateProfileOptions={accountRateProfileOptions}
+                  selectedRateProfile={selectedRateProfile}
+                  usesDepreciationInput={usesDepreciationInput}
+                  onUpdateAccount={onUpdateAccount}
+                  onRateProfileChange={handleRateProfileChange}
+                  onSetContributionToIrsMax={onSetContributionToIrsMax}
+                  getDisplayedRateForAccount={getDisplayedRateForAccount}
+                  getStoredAnnualRateForInput={getStoredAnnualRateForInput}
                 />
-              )}
-              <CombinedAssetLoanFields
-                assetFinanceDetails={assetFinanceDetails}
-                onUpdateAssetFinanceDetails={onUpdateAssetFinanceDetails}
-                formatCurrency={formatCurrency}
-              />
-            </>
-          )}
-
-          {/* IRS limit hint */}
-          {!hidesContributionInputs && suggestedLimit > 0 && (
-            <div
-              className={`rounded-md px-3 py-2 text-xs ${isUsingIrsMaxContribution ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}
-            >
-              <span className="font-medium">
-                {formatCurrency(employeeAnnual)} / {formatCurrency(suggestedLimit)}
-              </span>
-              <span className="ml-1">IRS limit (age {ownerAge})</span>
-              {plannerConstants.isMoneyGreaterThanWithTolerance(employeeAnnual, suggestedLimit) && (
-                <span className="text-destructive ml-2 font-medium">
-                  Over by {formatCurrency(employeeAnnual - suggestedLimit)}
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Contribution summary */}
-          {!hidesContributionInputs && (
-            <div className="bg-muted/50 rounded-md px-3 py-2 text-xs">
-              <span className="font-medium">{formatCurrency(employeeMonthly)}/mo</span>
-              <span className="text-muted-foreground ml-1">
-                ({formatCurrency(employeeAnnual)}/yr)
-              </span>
-            </div>
-          )}
-
-          {/* Owners */}
-          <div className="space-y-1.5">
-            <Label className="text-xs">Owners</Label>
-            <div className="flex flex-wrap gap-1">
-              {people.map((p) => (
-                <label
-                  key={p.id}
-                  className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
-                    account.personIds?.includes(p.id)
-                      ? 'bg-primary/10 border-primary/30 text-primary'
-                      : 'text-muted-foreground hover:bg-accent'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    className="sr-only"
-                    checked={account.personIds?.includes(p.id) ?? false}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        onUpdateAccount((c) => ({
-                          ...c,
-                          personIds: [...(c.personIds ?? []), p.id],
-                        }));
-                      } else {
-                        onUpdateAccount((c) => ({
-                          ...c,
-                          personIds: (c.personIds ?? []).filter((id) => id !== p.id),
-                        }));
-                      }
-                    }}
+              )
+            ) : (
+              <>
+                {account.accountType === 'home' ? (
+                  <HomeAccountFields
+                    assetFinanceDetails={assetFinanceDetails}
+                    defaultHomeGrowthProfile={defaultHomeGrowthProfile}
+                    defaultHomeAppreciationRate={defaultHomeAppreciationRate}
+                    homeGrowthProfileOptions={homeGrowthProfileOptions}
+                    onUpdateAssetFinanceDetails={onUpdateAssetFinanceDetails}
+                    toIsoDate={toIsoDate}
+                    getHomeAnnualGrowthRate={getHomeAnnualGrowthRate}
                   />
-                  {p.name || 'Unnamed'}
-                </label>
-              ))}
-              {people.length === 0 && (
-                <span className="text-muted-foreground text-xs">No people configured</span>
-              )}
+                ) : (
+                  <VehicleAccountFields
+                    assetFinanceDetails={assetFinanceDetails}
+                    defaultVehicleDepreciationProfile={defaultVehicleDepreciationProfile}
+                    defaultVehicleDepreciationRate={defaultVehicleDepreciationRate}
+                    vehicleDepreciationProfileOptions={vehicleDepreciationProfileOptions}
+                    onUpdateAssetFinanceDetails={onUpdateAssetFinanceDetails}
+                    toIsoDate={toIsoDate}
+                  />
+                )}
+                <CombinedAssetLoanFields
+                  assetFinanceDetails={assetFinanceDetails}
+                  onUpdateAssetFinanceDetails={onUpdateAssetFinanceDetails}
+                  formatCurrency={formatCurrency}
+                />
+              </>
+            )}
+
+            {/* IRS limit hint */}
+            {!hidesContributionInputs && suggestedLimit > 0 && (
+              <div
+                className={`rounded-md px-3 py-2 text-xs ${isUsingIrsMaxContribution ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}
+              >
+                <span className="font-medium">
+                  {formatCurrency(employeeAnnual)} / {formatCurrency(suggestedLimit)}
+                </span>
+                <span className="ml-1">IRS limit (age {ownerAge})</span>
+                {plannerConstants.isMoneyGreaterThanWithTolerance(
+                  employeeAnnual,
+                  suggestedLimit,
+                ) && (
+                  <span className="text-destructive ml-2 font-medium">
+                    Over by {formatCurrency(employeeAnnual - suggestedLimit)}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Contribution summary */}
+            {!hidesContributionInputs && (
+              <div className="bg-muted/50 rounded-md px-3 py-2 text-xs">
+                <span className="font-medium">{formatCurrency(employeeMonthly)}/mo</span>
+                <span className="text-muted-foreground ml-1">
+                  ({formatCurrency(employeeAnnual)}/yr)
+                </span>
+              </div>
+            )}
+
+            {/* Owners */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">Owners</Label>
+              <div className="flex flex-wrap gap-1">
+                {people.map((p) => (
+                  <label
+                    key={p.id}
+                    className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
+                      account.personIds?.includes(p.id)
+                        ? 'bg-primary/10 border-primary/30 text-primary'
+                        : 'text-muted-foreground hover:bg-accent'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={account.personIds?.includes(p.id) ?? false}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          onUpdateAccount((c) => ({
+                            ...c,
+                            personIds: [...(c.personIds ?? []), p.id],
+                          }));
+                        } else {
+                          onUpdateAccount((c) => ({
+                            ...c,
+                            personIds: (c.personIds ?? []).filter((id) => id !== p.id),
+                          }));
+                        }
+                      }}
+                    />
+                    {p.name || 'Unnamed'}
+                  </label>
+                ))}
+                {people.length === 0 && (
+                  <span className="text-muted-foreground text-xs">No people configured</span>
+                )}
+              </div>
             </div>
+
+            {/* Plaid Link */}
+            <PlaidAccountLinker
+              accountId={account.id}
+              isLiability={isLiability}
+              plaidAccountId={account.plaidAccountId}
+            />
           </div>
 
-          {/* Plaid Link */}
-          <PlaidAccountLinker
-            accountId={account.id}
-            isLiability={isLiability}
-            plaidAccountId={account.plaidAccountId}
-          />
-        </div>
-      )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(false)}>
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <ConfirmDialog
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
@@ -550,7 +578,7 @@ export function AccountListItem({
         confirmLabel="Delete"
         onConfirm={() => onDelete(account)}
       />
-    </div>
+    </>
   );
 }
 

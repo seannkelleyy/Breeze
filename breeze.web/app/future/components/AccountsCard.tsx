@@ -42,17 +42,9 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
   const { currencyCode, userId } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
 
-  const [collapsedAccountIds, setCollapsedAccountIds] = useState<Record<string, boolean>>({});
   const [accountFilter, setAccountFilter] = useState<AccountFilter>('all');
 
   const { data, options, typeGuards, helpers, actions } = usePlannerAccounts();
-
-  // Keep collapsed state in sync when accounts change
-  const syncedCollapsedIds = useMemo(() => {
-    const next: Record<string, boolean> = {};
-    for (const a of data.plannerAccounts) next[a.id] = collapsedAccountIds[a.id] ?? false;
-    return next;
-  }, [data.plannerAccounts, collapsedAccountIds]);
 
   const {
     plannerAccounts,
@@ -113,8 +105,6 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
     updateAccount,
     removeAccount,
   });
-
-  const toggleCollapse = (id: string) => setCollapsedAccountIds((p) => ({ ...p, [id]: !p[id] }));
 
   const filteredAccounts = useMemo(() => {
     let accounts: PlannerAccount[];
@@ -308,7 +298,6 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
                 currencyCode={currencyCode}
                 people={people}
                 assetFinanceDetails={assetFinanceDetailsByAccountId[account.id]}
-                isAccountCollapsed={syncedCollapsedIds[account.id] ?? false}
                 isLastAccount={plannerAccounts.length === 1}
                 isLiabilityAccountType={isLiabilityAccountType}
                 isCombinedAssetType={isCombinedAssetType}
@@ -329,7 +318,6 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
                 defaultVehicleDepreciationProfile={defaultVehicleDepreciationProfile}
                 defaultHomeAppreciationRate={defaultHomeAppreciationRate}
                 defaultVehicleDepreciationRate={defaultVehicleDepreciationRate}
-                onToggleCollapse={toggleCollapse}
                 onSave={handleSave}
                 onDelete={handleDelete}
                 onUpdateAccount={(u) => updateAccount(account.id, u)}
@@ -341,7 +329,7 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
               />
             ))}
             {filteredAccounts.length === 0 && (
-              <div className="text-muted-foreground rounded-md border p-4 text-sm xl:col-span-2">
+              <div className="text-muted-foreground rounded-md border p-4 text-sm">
                 No accounts match this filter.
               </div>
             )}

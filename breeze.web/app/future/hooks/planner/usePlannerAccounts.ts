@@ -13,7 +13,10 @@ import {
   getRealAnnualRatePercent,
   getStoredAnnualRateFromInput,
 } from '../../lib/rates';
-import { getAssetFinanceSnapshot, getDefaultAssetFinanceDetailsForAccount } from '../../lib/projection';
+import {
+  getAssetFinanceSnapshot,
+  getDefaultAssetFinanceDetailsForAccount,
+} from '../../lib/projection';
 import {
   clamp,
   getAgeFromBirthday,
