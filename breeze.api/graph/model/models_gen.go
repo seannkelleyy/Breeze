@@ -361,6 +361,17 @@ type NetWorthSnapshot struct {
 	UpdatedAt        string `json:"updatedAt"`
 }
 
+type PaycheckDeduction struct {
+	ID        string `json:"id"`
+	UserID    string `json:"userId"`
+	PersonID  string `json:"personId"`
+	Name      string `json:"name"`
+	Amount    string `json:"amount"`
+	Pretax    bool   `json:"pretax"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
 type PlaidAccount struct {
 	ID                string  `json:"id"`
 	PlaidConnectionID string  `json:"plaidConnectionId"`
@@ -685,6 +696,15 @@ type UpdateUserSetupInput struct {
 	SetupCompleted       *bool   `json:"setupCompleted,omitempty"`
 	DisclaimerAccepted   *bool   `json:"disclaimerAccepted,omitempty"`
 	DisclaimerAcceptedAt *string `json:"disclaimerAcceptedAt,omitempty"`
+}
+
+type UpsertPaycheckDeductionInput struct {
+	ID       string `json:"id"`
+	UserID   string `json:"userId"`
+	PersonID string `json:"personId"`
+	Name     string `json:"name"`
+	Amount   string `json:"amount"`
+	Pretax   bool   `json:"pretax"`
 }
 
 type UpsertPlannerPersonInput struct {

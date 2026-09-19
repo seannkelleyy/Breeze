@@ -2182,6 +2182,89 @@ table "planner_people" {
   }
 }
 
+
+table "paycheck_deductions" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "person_id" {
+    type = uuid
+    null = false
+  }
+
+  column "name" {
+    type = varchar(255)
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "pretax" {
+    type    = boolean
+    null    = false
+    default = true
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_paycheck_deductions_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  foreign_key "fk_paycheck_deductions_person" {
+    columns     = [column.person_id]
+    ref_columns = [table.planner_people.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_paycheck_deductions_user_id" {
+    columns = [column.user_id]
+  }
+
+  index "idx_paycheck_deductions_person_active" {
+    columns = [column.person_id]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "paycheck_deductions_amounts_nonnegative" {
+    expr = "amount >= 0"
+  }
+}
+
 table "recurring_expenses" {
   schema = schema.public
 

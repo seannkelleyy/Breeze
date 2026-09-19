@@ -78,6 +78,7 @@ func main() {
 	recurringIncomeService := service.NewRecurringIncomeService(queries)
 	recurringExpenseService := service.NewRecurringExpenseService(queries)
 	plannerPersonService := service.NewPlannerPersonService(queries)
+	paycheckDeductionService := service.NewPaycheckDeductionService(queries)
 	taxBracketService := service.NewTaxBracketService(queries)
 	taxYearService := service.NewTaxYearService(queries)
 	taxPlanningService := service.NewTaxPlanningService(queries)
@@ -98,26 +99,27 @@ func main() {
 	}
 	plaidService := service.NewPlaidService(queries, pool, plaidClient)
 	resolver := &graph.Resolver{
-		HealthService:           healthService,
-		UserService:             userService,
-		AssetService:            assetService,
-		LiabilityService:        liabilityService,
-		BudgetService:           budgetService,
-		GoalService:             goalService,
-		ScenarioService:         scenarioService,
-		RetirementService:       retirementService,
-		PlaidService:            plaidService,
-		ExpenseCategoryService:  expenseCategoryService,
-		ExpenseService:          expenseService,
-		IncomeService:           incomeService,
-		RecurringIncomeService:  recurringIncomeService,
-		RecurringExpenseService: recurringExpenseService,
-		PlannerPersonService:    plannerPersonService,
-		TaxBracketService:       taxBracketService,
-		TaxYearService:          taxYearService,
-		TaxPlanningService:      taxPlanningService,
-		RetirementLadderService: retirementLadderService,
-		NetWorthSnapshotService: netWorthSnapshotService,
+		HealthService:            healthService,
+		UserService:              userService,
+		AssetService:             assetService,
+		LiabilityService:         liabilityService,
+		BudgetService:            budgetService,
+		GoalService:              goalService,
+		ScenarioService:          scenarioService,
+		RetirementService:        retirementService,
+		PlaidService:             plaidService,
+		ExpenseCategoryService:   expenseCategoryService,
+		ExpenseService:           expenseService,
+		IncomeService:            incomeService,
+		RecurringIncomeService:   recurringIncomeService,
+		RecurringExpenseService:  recurringExpenseService,
+		PlannerPersonService:     plannerPersonService,
+		PaycheckDeductionService: paycheckDeductionService,
+		TaxBracketService:        taxBracketService,
+		TaxYearService:           taxYearService,
+		TaxPlanningService:       taxPlanningService,
+		RetirementLadderService:  retirementLadderService,
+		NetWorthSnapshotService:  netWorthSnapshotService,
 	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 

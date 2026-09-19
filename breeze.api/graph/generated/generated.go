@@ -226,6 +226,7 @@ type ComplexityRoot struct {
 		DeleteIncome                    func(childComplexity int, id string) int
 		DeleteLiability                 func(childComplexity int, id string) int
 		DeleteNetWorthSnapshot          func(childComplexity int, id string) int
+		DeletePaycheckDeduction         func(childComplexity int, id string) int
 		DeletePlaidConnection           func(childComplexity int, id string) int
 		DeletePlannerPerson             func(childComplexity int, id string) int
 		DeleteRecurringExpense          func(childComplexity int, id string) int
@@ -255,6 +256,7 @@ type ComplexityRoot struct {
 		UpdateTaxBracket                func(childComplexity int, input model.UpdateTaxBracketInput) int
 		UpdateUser                      func(childComplexity int, input model.UpdateUserInput) int
 		UpdateUserSetup                 func(childComplexity int, input model.UpdateUserSetupInput) int
+		UpsertPaycheckDeduction         func(childComplexity int, input model.UpsertPaycheckDeductionInput) int
 		UpsertPlannerPerson             func(childComplexity int, input model.UpsertPlannerPersonInput) int
 	}
 
@@ -267,6 +269,17 @@ type ComplexityRoot struct {
 		TotalLiabilities func(childComplexity int) int
 		UpdatedAt        func(childComplexity int) int
 		UserID           func(childComplexity int) int
+	}
+
+	PaycheckDeduction struct {
+		Amount    func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		PersonID  func(childComplexity int) int
+		Pretax    func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+		UserID    func(childComplexity int) int
 	}
 
 	PlaidAccount struct {
@@ -341,6 +354,7 @@ type ComplexityRoot struct {
 		NetWorthSnapshot          func(childComplexity int, id string) int
 		NetWorthSnapshotByDate    func(childComplexity int, userID string, date string) int
 		NetWorthSnapshots         func(childComplexity int, userID string) int
+		PaycheckDeductions        func(childComplexity int, personID string) int
 		PlaidAccounts             func(childComplexity int, connectionID string) int
 		PlaidConnection           func(childComplexity int, id string) int
 		PlaidConnections          func(childComplexity int, userID string) int
@@ -537,6 +551,8 @@ type MutationResolver interface {
 	UpdateRecurringExpense(ctx context.Context, input model.UpdateRecurringExpenseInput) (*model.RecurringExpense, error)
 	DeleteRecurringExpense(ctx context.Context, id string) (bool, error)
 	UpsertPlannerPerson(ctx context.Context, input model.UpsertPlannerPersonInput) (*model.PlannerPerson, error)
+	UpsertPaycheckDeduction(ctx context.Context, input model.UpsertPaycheckDeductionInput) (*model.PaycheckDeduction, error)
+	DeletePaycheckDeduction(ctx context.Context, id string) (bool, error)
 	DeletePlannerPerson(ctx context.Context, id string) (bool, error)
 	CreateTaxBracket(ctx context.Context, input model.CreateTaxBracketInput) (*model.TaxBracket, error)
 	UpdateTaxBracket(ctx context.Context, input model.UpdateTaxBracketInput) (*model.TaxBracket, error)
@@ -590,6 +606,7 @@ type QueryResolver interface {
 	RecurringExpense(ctx context.Context, id string) (*model.RecurringExpense, error)
 	RecurringExpenses(ctx context.Context, userID string) ([]*model.RecurringExpense, error)
 	PlannerPeople(ctx context.Context, userID string) ([]*model.PlannerPerson, error)
+	PaycheckDeductions(ctx context.Context, personID string) ([]*model.PaycheckDeduction, error)
 	TaxBracket(ctx context.Context, id string) (*model.TaxBracket, error)
 	TaxBrackets(ctx context.Context, year int, filingStatus model.FilingStatus) ([]*model.TaxBracket, error)
 	TaxYearData(ctx context.Context, year *int, filingStatus model.FilingStatus) (*model.TaxYearData, error)
@@ -1663,6 +1680,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DeleteNetWorthSnapshot(childComplexity, args["id"].(string)), true
+	case "Mutation.deletePaycheckDeduction":
+		if e.ComplexityRoot.Mutation.DeletePaycheckDeduction == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deletePaycheckDeduction_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeletePaycheckDeduction(childComplexity, args["id"].(string)), true
 	case "Mutation.deletePlaidConnection":
 		if e.ComplexityRoot.Mutation.DeletePlaidConnection == nil {
 			break
@@ -1982,6 +2010,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.UpdateUserSetup(childComplexity, args["input"].(model.UpdateUserSetupInput)), true
+	case "Mutation.upsertPaycheckDeduction":
+		if e.ComplexityRoot.Mutation.UpsertPaycheckDeduction == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_upsertPaycheckDeduction_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpsertPaycheckDeduction(childComplexity, args["input"].(model.UpsertPaycheckDeductionInput)), true
 	case "Mutation.upsertPlannerPerson":
 		if e.ComplexityRoot.Mutation.UpsertPlannerPerson == nil {
 			break
@@ -2042,6 +2081,55 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.NetWorthSnapshot.UserID(childComplexity), true
+
+	case "PaycheckDeduction.amount":
+		if e.ComplexityRoot.PaycheckDeduction.Amount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PaycheckDeduction.Amount(childComplexity), true
+	case "PaycheckDeduction.createdAt":
+		if e.ComplexityRoot.PaycheckDeduction.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PaycheckDeduction.CreatedAt(childComplexity), true
+	case "PaycheckDeduction.id":
+		if e.ComplexityRoot.PaycheckDeduction.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PaycheckDeduction.ID(childComplexity), true
+	case "PaycheckDeduction.name":
+		if e.ComplexityRoot.PaycheckDeduction.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PaycheckDeduction.Name(childComplexity), true
+	case "PaycheckDeduction.personId":
+		if e.ComplexityRoot.PaycheckDeduction.PersonID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PaycheckDeduction.PersonID(childComplexity), true
+	case "PaycheckDeduction.pretax":
+		if e.ComplexityRoot.PaycheckDeduction.Pretax == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PaycheckDeduction.Pretax(childComplexity), true
+	case "PaycheckDeduction.updatedAt":
+		if e.ComplexityRoot.PaycheckDeduction.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PaycheckDeduction.UpdatedAt(childComplexity), true
+	case "PaycheckDeduction.userId":
+		if e.ComplexityRoot.PaycheckDeduction.UserID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PaycheckDeduction.UserID(childComplexity), true
 
 	case "PlaidAccount.createdAt":
 		if e.ComplexityRoot.PlaidAccount.CreatedAt == nil {
@@ -2534,6 +2622,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.NetWorthSnapshots(childComplexity, args["userId"].(string)), true
+	case "Query.paycheckDeductions":
+		if e.ComplexityRoot.Query.PaycheckDeductions == nil {
+			break
+		}
+
+		args, err := ec.field_Query_paycheckDeductions_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.PaycheckDeductions(childComplexity, args["personId"].(string)), true
 	case "Query.plaidAccounts":
 		if e.ComplexityRoot.Query.PlaidAccounts == nil {
 			break
@@ -3389,6 +3488,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUpdateTaxBracketInput,
 		ec.unmarshalInputUpdateUserInput,
 		ec.unmarshalInputUpdateUserSetupInput,
+		ec.unmarshalInputUpsertPaycheckDeductionInput,
 		ec.unmarshalInputUpsertPlannerPersonInput,
 	)
 	first := true
@@ -3501,6 +3601,7 @@ var sources = []*ast.Source{
   recurringExpense(id: ID!): RecurringExpense
   recurringExpenses(userId: ID!): [RecurringExpense!]!
   plannerPeople(userId: ID!): [PlannerPerson!]!
+  paycheckDeductions(personId: ID!): [PaycheckDeduction!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
   taxYearData(year: Int, filingStatus: FilingStatus!): TaxYearData!
@@ -3550,6 +3651,8 @@ type Mutation {
   updateRecurringExpense(input: UpdateRecurringExpenseInput!): RecurringExpense!
   deleteRecurringExpense(id: ID!): Boolean!
   upsertPlannerPerson(input: UpsertPlannerPersonInput!): PlannerPerson!
+  upsertPaycheckDeduction(input: UpsertPaycheckDeductionInput!): PaycheckDeduction!
+  deletePaycheckDeduction(id: ID!): Boolean!
   deletePlannerPerson(id: ID!): Boolean!
   createTaxBracket(input: CreateTaxBracketInput!): TaxBracket!
   updateTaxBracket(input: UpdateTaxBracketInput!): TaxBracket!
@@ -3986,6 +4089,26 @@ type PlannerPerson {
   expectedHoursPerWeek: String!
   createdAt: String!
   updatedAt: String!
+}
+
+type PaycheckDeduction {
+  id: ID!
+  userId: ID!
+  personId: ID!
+  name: String!
+  amount: String!
+  pretax: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input UpsertPaycheckDeductionInput {
+  id: ID!
+  userId: ID!
+  personId: ID!
+  name: String!
+  amount: String!
+  pretax: Boolean!
 }
 
 type PlaidConnection {
@@ -4727,6 +4850,28 @@ func (ec *executionContext) childFields_NetWorthSnapshot(ctx context.Context, fi
 		return ec.fieldContext_NetWorthSnapshot_updatedAt(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type NetWorthSnapshot", field.Name)
+}
+
+func (ec *executionContext) childFields_PaycheckDeduction(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_PaycheckDeduction_id(ctx, field)
+	case "userId":
+		return ec.fieldContext_PaycheckDeduction_userId(ctx, field)
+	case "personId":
+		return ec.fieldContext_PaycheckDeduction_personId(ctx, field)
+	case "name":
+		return ec.fieldContext_PaycheckDeduction_name(ctx, field)
+	case "amount":
+		return ec.fieldContext_PaycheckDeduction_amount(ctx, field)
+	case "pretax":
+		return ec.fieldContext_PaycheckDeduction_pretax(ctx, field)
+	case "createdAt":
+		return ec.fieldContext_PaycheckDeduction_createdAt(ctx, field)
+	case "updatedAt":
+		return ec.fieldContext_PaycheckDeduction_updatedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PaycheckDeduction", field.Name)
 }
 
 func (ec *executionContext) childFields_PlaidAccount(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -5523,6 +5668,20 @@ func (ec *executionContext) field_Mutation_deleteNetWorthSnapshot_args(ctx conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deletePaycheckDeduction_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deletePlaidConnection_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -5945,6 +6104,20 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (model.UpdateUserInput, error) {
 			return ec.unmarshalNUpdateUserInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateUserInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_upsertPaycheckDeduction_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (model.UpsertPaycheckDeductionInput, error) {
+			return ec.unmarshalNUpsertPaycheckDeductionInput2breezeᚗapiᚋgraphᚋmodelᚐUpsertPaycheckDeductionInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -6404,6 +6577,20 @@ func (ec *executionContext) field_Query_netWorthSnapshots_args(ctx context.Conte
 		return nil, err
 	}
 	args["userId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_paycheckDeductions_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "personId",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["personId"] = arg0
 	return args, nil
 }
 
@@ -11369,6 +11556,94 @@ func (ec *executionContext) fieldContext_Mutation_upsertPlannerPerson(ctx contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_upsertPaycheckDeduction(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_upsertPaycheckDeduction(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().UpsertPaycheckDeduction(ctx, fc.Args["input"].(model.UpsertPaycheckDeductionInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.PaycheckDeduction) graphql.Marshaler {
+			return ec.marshalNPaycheckDeduction2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPaycheckDeduction(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_upsertPaycheckDeduction(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PaycheckDeduction(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_upsertPaycheckDeduction_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deletePaycheckDeduction(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_deletePaycheckDeduction(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DeletePaycheckDeduction(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_deletePaycheckDeduction(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deletePaycheckDeduction_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_deletePlannerPerson(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -12243,6 +12518,190 @@ func (ec *executionContext) _NetWorthSnapshot_updatedAt(ctx context.Context, fie
 }
 func (ec *executionContext) fieldContext_NetWorthSnapshot_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("NetWorthSnapshot", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _PaycheckDeduction_id(ctx context.Context, field graphql.CollectedField, obj *model.PaycheckDeduction) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PaycheckDeduction_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PaycheckDeduction_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PaycheckDeduction", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _PaycheckDeduction_userId(ctx context.Context, field graphql.CollectedField, obj *model.PaycheckDeduction) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PaycheckDeduction_userId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PaycheckDeduction_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PaycheckDeduction", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _PaycheckDeduction_personId(ctx context.Context, field graphql.CollectedField, obj *model.PaycheckDeduction) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PaycheckDeduction_personId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PersonID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PaycheckDeduction_personId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PaycheckDeduction", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _PaycheckDeduction_name(ctx context.Context, field graphql.CollectedField, obj *model.PaycheckDeduction) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PaycheckDeduction_name(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PaycheckDeduction_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PaycheckDeduction", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _PaycheckDeduction_amount(ctx context.Context, field graphql.CollectedField, obj *model.PaycheckDeduction) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PaycheckDeduction_amount(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Amount, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PaycheckDeduction_amount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PaycheckDeduction", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _PaycheckDeduction_pretax(ctx context.Context, field graphql.CollectedField, obj *model.PaycheckDeduction) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PaycheckDeduction_pretax(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Pretax, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PaycheckDeduction_pretax(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PaycheckDeduction", field, false, false, errors.New("field of type Boolean does not have child fields"))
+}
+
+func (ec *executionContext) _PaycheckDeduction_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.PaycheckDeduction) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PaycheckDeduction_createdAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PaycheckDeduction_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PaycheckDeduction", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _PaycheckDeduction_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.PaycheckDeduction) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PaycheckDeduction_updatedAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PaycheckDeduction_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PaycheckDeduction", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PlaidAccount_id(ctx context.Context, field graphql.CollectedField, obj *model.PlaidAccount) (ret graphql.Marshaler) {
@@ -14594,6 +15053,50 @@ func (ec *executionContext) fieldContext_Query_plannerPeople(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_plannerPeople_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_paycheckDeductions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_paycheckDeductions(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().PaycheckDeductions(ctx, fc.Args["personId"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.PaycheckDeduction) graphql.Marshaler {
+			return ec.marshalNPaycheckDeduction2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐPaycheckDeductionᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_paycheckDeductions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PaycheckDeduction(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_paycheckDeductions_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -20893,6 +21396,71 @@ func (ec *executionContext) unmarshalInputUpdateUserSetupInput(ctx context.Conte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpsertPaycheckDeductionInput(ctx context.Context, obj any) (model.UpsertPaycheckDeductionInput, error) {
+	var it model.UpsertPaycheckDeductionInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "userId", "personId", "name", "amount", "pretax"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "userId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserID = data
+		case "personId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("personId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PersonID = data
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "amount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Amount = data
+		case "pretax":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pretax"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Pretax = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpsertPlannerPersonInput(ctx context.Context, obj any) (model.UpsertPlannerPersonInput, error) {
 	var it model.UpsertPlannerPersonInput
 	if obj == nil {
@@ -22363,6 +22931,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "upsertPaycheckDeduction":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_upsertPaycheckDeduction(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deletePaycheckDeduction":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deletePaycheckDeduction(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "deletePlannerPerson":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deletePlannerPerson(ctx, field)
@@ -22545,6 +23127,79 @@ func (ec *executionContext) _NetWorthSnapshot(ctx context.Context, sel ast.Selec
 			}
 		case "updatedAt":
 			out.Values[i] = ec._NetWorthSnapshot_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
+var paycheckDeductionImplementors = []string{"PaycheckDeduction"}
+
+func (ec *executionContext) _PaycheckDeduction(ctx context.Context, sel ast.SelectionSet, obj *model.PaycheckDeduction) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, paycheckDeductionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PaycheckDeduction")
+		case "id":
+			out.Values[i] = ec._PaycheckDeduction_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._PaycheckDeduction_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "personId":
+			out.Values[i] = ec._PaycheckDeduction_personId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._PaycheckDeduction_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "amount":
+			out.Values[i] = ec._PaycheckDeduction_amount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pretax":
+			out.Values[i] = ec._PaycheckDeduction_pretax(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._PaycheckDeduction_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._PaycheckDeduction_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -23631,6 +24286,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_plannerPeople(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "paycheckDeductions":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_paycheckDeductions(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -25607,6 +26284,32 @@ func (ec *executionContext) marshalNNetWorthSnapshot2ᚖbreezeᚗapiᚋgraphᚋm
 	return ec._NetWorthSnapshot(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNPaycheckDeduction2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐPaycheckDeductionᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PaycheckDeduction) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNPaycheckDeduction2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPaycheckDeduction(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNPaycheckDeduction2ᚖbreezeᚗapiᚋgraphᚋmodelᚐPaycheckDeduction(ctx context.Context, sel ast.SelectionSet, v *model.PaycheckDeduction) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PaycheckDeduction(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNPayoffStrategy2breezeᚗapiᚋgraphᚋmodelᚐPayoffStrategy(ctx context.Context, v any) (model.PayoffStrategy, error) {
 	var res model.PayoffStrategy
 	err := res.UnmarshalGQL(v)
@@ -25999,6 +26702,11 @@ func (ec *executionContext) unmarshalNUpdateUserInput2breezeᚗapiᚋgraphᚋmod
 
 func (ec *executionContext) unmarshalNUpdateUserSetupInput2breezeᚗapiᚋgraphᚋmodelᚐUpdateUserSetupInput(ctx context.Context, v any) (model.UpdateUserSetupInput, error) {
 	res, err := ec.unmarshalInputUpdateUserSetupInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpsertPaycheckDeductionInput2breezeᚗapiᚋgraphᚋmodelᚐUpsertPaycheckDeductionInput(ctx context.Context, v any) (model.UpsertPaycheckDeductionInput, error) {
+	res, err := ec.unmarshalInputUpsertPaycheckDeductionInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

@@ -724,6 +724,18 @@ type NetWorthSnapshot struct {
 	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type PaycheckDeduction struct {
+	ID        uuid.UUID          `json:"id"`
+	UserID    uuid.UUID          `json:"user_id"`
+	PersonID  uuid.UUID          `json:"person_id"`
+	Name      string             `json:"name"`
+	Amount    decimal.Decimal    `json:"amount"`
+	Pretax    bool               `json:"pretax"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type PlaidAccount struct {
 	ID                uuid.UUID          `json:"id"`
 	PlaidConnectionID uuid.UUID          `json:"plaid_connection_id"`

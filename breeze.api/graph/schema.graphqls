@@ -34,6 +34,7 @@ type Query {
   recurringExpense(id: ID!): RecurringExpense
   recurringExpenses(userId: ID!): [RecurringExpense!]!
   plannerPeople(userId: ID!): [PlannerPerson!]!
+  paycheckDeductions(personId: ID!): [PaycheckDeduction!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
   taxYearData(year: Int, filingStatus: FilingStatus!): TaxYearData!
@@ -83,6 +84,8 @@ type Mutation {
   updateRecurringExpense(input: UpdateRecurringExpenseInput!): RecurringExpense!
   deleteRecurringExpense(id: ID!): Boolean!
   upsertPlannerPerson(input: UpsertPlannerPersonInput!): PlannerPerson!
+  upsertPaycheckDeduction(input: UpsertPaycheckDeductionInput!): PaycheckDeduction!
+  deletePaycheckDeduction(id: ID!): Boolean!
   deletePlannerPerson(id: ID!): Boolean!
   createTaxBracket(input: CreateTaxBracketInput!): TaxBracket!
   updateTaxBracket(input: UpdateTaxBracketInput!): TaxBracket!
@@ -519,6 +522,26 @@ type PlannerPerson {
   expectedHoursPerWeek: String!
   createdAt: String!
   updatedAt: String!
+}
+
+type PaycheckDeduction {
+  id: ID!
+  userId: ID!
+  personId: ID!
+  name: String!
+  amount: String!
+  pretax: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input UpsertPaycheckDeductionInput {
+  id: ID!
+  userId: ID!
+  personId: ID!
+  name: String!
+  amount: String!
+  pretax: Boolean!
 }
 
 type PlaidConnection {

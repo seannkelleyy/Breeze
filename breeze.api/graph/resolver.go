@@ -12,26 +12,27 @@ import (
 
 // Resolver wires gqlgen resolvers to service-layer dependencies.
 type Resolver struct {
-	HealthService           *service.HealthService
-	UserService             *service.UserService
-	AssetService            *service.AssetService
-	LiabilityService        *service.LiabilityService
-	BudgetService           *service.BudgetService
-	GoalService             *service.GoalService
-	ScenarioService         *service.ScenarioService
-	RetirementService       *service.RetirementAccountService
-	PlaidService            *service.PlaidService
-	ExpenseCategoryService  *service.ExpenseCategoryService
-	ExpenseService          *service.ExpenseService
-	IncomeService           *service.IncomeService
-	RecurringIncomeService  *service.RecurringIncomeService
-	RecurringExpenseService *service.RecurringExpenseService
-	PlannerPersonService    *service.PlannerPersonService
-	TaxBracketService       *service.TaxBracketService
-	TaxYearService          *service.TaxYearService
-	TaxPlanningService      *service.TaxPlanningService
-	RetirementLadderService *service.RetirementLadderService
-	NetWorthSnapshotService *service.NetWorthSnapshotService
+	HealthService            *service.HealthService
+	UserService              *service.UserService
+	AssetService             *service.AssetService
+	LiabilityService         *service.LiabilityService
+	BudgetService            *service.BudgetService
+	GoalService              *service.GoalService
+	ScenarioService          *service.ScenarioService
+	RetirementService        *service.RetirementAccountService
+	PlaidService             *service.PlaidService
+	ExpenseCategoryService   *service.ExpenseCategoryService
+	ExpenseService           *service.ExpenseService
+	IncomeService            *service.IncomeService
+	RecurringIncomeService   *service.RecurringIncomeService
+	RecurringExpenseService  *service.RecurringExpenseService
+	PlannerPersonService     *service.PlannerPersonService
+	PaycheckDeductionService *service.PaycheckDeductionService
+	TaxBracketService        *service.TaxBracketService
+	TaxYearService           *service.TaxYearService
+	TaxPlanningService       *service.TaxPlanningService
+	RetirementLadderService  *service.RetirementLadderService
+	NetWorthSnapshotService  *service.NetWorthSnapshotService
 }
 
 // resolveUserIDFromCtx extracts the authenticated user's internal UUID from

@@ -732,6 +732,43 @@ func (r *mutationResolver) UpsertPlannerPerson(ctx context.Context, input model.
 	return mapPlannerPersonToModel(person), nil
 }
 
+// UpsertPaycheckDeduction is the resolver for the upsertPaycheckDeduction field.
+func (r *mutationResolver) UpsertPaycheckDeduction(ctx context.Context, input model.UpsertPaycheckDeductionInput) (*model.PaycheckDeduction, error) {
+	svcInput, err := upsertPaycheckDeductionInputFromModel(&input)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	if userID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
+		svcInput.UserID = userID
+	}
+
+	deduction, err := r.PaycheckDeductionService.Upsert(ctx, &svcInput)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	return mapPaycheckDeductionToModel(deduction), nil
+}
+
+// DeletePaycheckDeduction is the resolver for the deletePaycheckDeduction field.
+func (r *mutationResolver) DeletePaycheckDeduction(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid paycheck deduction id: %w", err)
+	}
+
+	err = r.PaycheckDeductionService.Delete(ctx, parsedID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, r.mapErr(ctx, err)
+	}
+
+	return true, nil
+}
+
 // DeletePlannerPerson is the resolver for the deletePlannerPerson field.
 func (r *mutationResolver) DeletePlannerPerson(ctx context.Context, id string) (bool, error) {
 	parsedID, err := uuid.Parse(id)
@@ -1779,6 +1816,30 @@ func (r *queryResolver) PlannerPeople(ctx context.Context, userID string) ([]*mo
 	}
 
 	return out, nil
+}
+
+// PaycheckDeductions is the resolver for the paycheckDeductions field.
+func (r *queryResolver) PaycheckDeductions(ctx context.Context, personID string) ([]*model.PaycheckDeduction, error) {
+	parsedPersonID, err := uuid.Parse(personID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid person id: %w", err)
+	}
+
+	userID := parsedPersonID
+	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
+		userID = resolvedID
+	}
+
+	deductions, err := r.PaycheckDeductionService.ListByPersonID(ctx, userID, parsedPersonID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	models := make([]*model.PaycheckDeduction, 0, len(deductions))
+	for i := range deductions {
+		models = append(models, mapPaycheckDeductionToModel(&deductions[i]))
+	}
+	return models, nil
 }
 
 // TaxBracket is the resolver for the taxBracket field.
