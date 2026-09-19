@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { PlannerAccount } from '../../types/account';
 import type { PlannerPerson } from '../../types/person';
+import type { AssetFinanceDetails } from '../../types/finance';
 import { PLANNER_DEFAULT_IRS_LIMITS } from '../constants';
 import { getProjection } from '../projection';
 
@@ -11,7 +12,8 @@ const person: PlannerPerson = {
   retirementAge: 65,
   annualSalary: 120000,
   bonusMode: 'dollars',
-  annualBonus: 0,
+  bonusFrequency: 'annual' as const,
+      annualBonus: 0,
   incomeGrowthRate: 0,
   isPrimary: true,
   payType: 'salary',
@@ -53,10 +55,12 @@ const call = (
   targetAge: number,
   options: {
     people?: PlannerPerson[];
+    details?: Record<string, AssetFinanceDetails>;
     inflationRatePercent?: number;
     useInflationAdjustedValues?: boolean;
     projectionEndAge?: number;
     annualWithdrawal?: number;
+    annualIrsLimitGrowthRate?: number;
   } = {},
 ) =>
   getProjection(
@@ -64,9 +68,9 @@ const call = (
     currentAge,
     targetAge,
     options.people ?? [person],
-    {},
+    options.details ?? {},
     PLANNER_DEFAULT_IRS_LIMITS,
-    2.5,
+    options.annualIrsLimitGrowthRate ?? 2.5,
     options.inflationRatePercent ?? 0,
     options.useInflationAdjustedValues ?? false,
     options.projectionEndAge,
@@ -262,5 +266,240 @@ describe('getProjection — post-retirement withdrawals', () => {
 
     // Year 2 (age 65→66): withdrawal = 12000 * 1.1^1
     expect(projectionRows[2].totalBalance).toBeCloseTo(100000 - 13200, 2);
+  });
+});
+
+const makeDetails = (overrides: Partial<AssetFinanceDetails> = {}): AssetFinanceDetails => ({
+  purchaseDate: '2026-01-15',
+  purchasePrice: 400000,
+  currentValue: 450000,
+  annualChangeRate: 4,
+  homeGrowthProfile: 'medium',
+  vehicleDepreciationProfile: 'medium',
+  hasLoan: false,
+  loanInterestRate: 6,
+  originalLoanAmount: 0,
+  loanMonthlyPayment: 0,
+  loanTermYears: 30,
+  loanStartDate: '2026-01-15',
+  currentLoanBalance: 0,
+  ...overrides,
+});
+
+describe('getProjection — combined assets (home/vehicle runtime)', () => {
+  // The engine dates AssetFinanceDetails against new Date(); pin the clock so
+  // monthsSincePurchase and loan elapsed months are deterministic.
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 15));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it('starts a home with loan at equity and grows the asset at the profile rate', () => {
+    const home = account({ id: 'home1', accountType: 'home', startingBalance: 999999 });
+    const details = makeDetails({
+      currentValue: 450000,
+      homeGrowthProfile: 'medium', // 4%/yr
+      hasLoan: true,
+      loanInterestRate: 0,
+      loanMonthlyPayment: 500,
+      currentLoanBalance: 12000,
+    });
+
+    const { projectionRows } = call([home], 30, 31, { details: { home1: details } });
+
+    // Row 0: equity = 450000 - 12000, not startingBalance
+    expect(projectionRows[0]['account-0']).toBe(438000);
+    // Row 1: asset compounded monthly at 4%/yr, loan drawn down 500/mo
+    const expectedAsset = 450000 * Math.pow(1 + 4 / 100 / 12, 12);
+    expect(projectionRows[1]['account-0']).toBeCloseTo(expectedAsset - 6000, 2);
+    expect(projectionRows[1].totalBalance).toBeCloseTo(expectedAsset - 6000, 2);
+  });
+
+  it('counts loan payments toward totalContributions', () => {
+    const home = account({ id: 'home1', accountType: 'home' });
+    const details = makeDetails({
+      homeGrowthProfile: 'none',
+      hasLoan: true,
+      loanInterestRate: 0,
+      loanMonthlyPayment: 500,
+      currentLoanBalance: 12000,
+    });
+
+    const { projectionRows } = call([home], 30, 31, { details: { home1: details } });
+
+    expect(projectionRows[1].totalContributions).toBeCloseTo(6000, 6);
+  });
+
+  it('accrues loan interest monthly and clamps the balance at 0 once paid off', () => {
+    const home = account({ id: 'home1', accountType: 'home' });
+    const details = makeDetails({
+      homeGrowthProfile: 'none',
+      hasLoan: true,
+      loanInterestRate: 12, // 1%/mo
+      loanMonthlyPayment: 500,
+      currentLoanBalance: 1200,
+    });
+
+    const { projectionRows } = call([home], 30, 31, { details: { home1: details } });
+
+    // 1200 at 1%/mo with 500/mo payments: 709, 206, then overshoots → clamped to 0
+    let loan = 1200;
+    let monthsPaid = 0;
+    while (loan > 0 && monthsPaid < 12) {
+      loan = Math.max(0, loan * 1.01 - 500);
+      monthsPaid++;
+    }
+    expect(loan).toBe(0);
+    expect(monthsPaid).toBe(3);
+    expect(projectionRows[1]['account-0']).toBeCloseTo(450000, 6); // asset - 0 loan
+    // Payment counted only for months the loan was outstanding
+    expect(projectionRows[1].totalContributions).toBeCloseTo(500 * 3, 6);
+  });
+
+  it('depreciates a vehicle monthly using its age-aware depreciation profile', () => {
+    const vehicle = account({ id: 'v1', accountType: 'vehicle' });
+    const details = makeDetails({
+      purchaseDate: '2024-01-15', // 24 months old at projection start
+      currentValue: 30000,
+      vehicleDepreciationProfile: 'medium',
+    });
+
+    const { projectionRows } = call([vehicle], 30, 31, { details: { v1: details } });
+
+    // Mirror of the engine loop: taper strength 0.55, first-year 16%, floor 6%
+    let expected = 30000;
+    for (let months = 24; months < 36; months++) {
+      const annualDep = Math.min(16, Math.max(6, 6 + (16 - 6) * Math.pow(0.55, months / 12)));
+      expected *= 1 - annualDep / 100 / 12;
+    }
+    expect(projectionRows[0]['account-0']).toBe(30000);
+    expect(projectionRows[1]['account-0']).toBeCloseTo(expected, 2);
+    // A depreciating asset never adds to contributions
+    expect(projectionRows[1].totalContributions).toBe(0);
+  });
+
+  it('uses the real (inflation-adjusted) asset rate when enabled', () => {
+    const home = account({ id: 'home1', accountType: 'home' });
+    const details = makeDetails({
+      currentValue: 450000,
+      homeGrowthProfile: 'custom',
+      annualChangeRate: 6,
+    });
+
+    const { projectionRows } = call([home], 30, 31, {
+      details: { home1: details },
+      inflationRatePercent: 2.5,
+      useInflationAdjustedValues: true,
+    });
+
+    const realRate = ((1 + 6 / 100) / (1 + 2.5 / 100) - 1) * 100;
+    const expected = 450000 * Math.pow(1 + realRate / 100 / 12, 12);
+    expect(projectionRows[1]['account-0']).toBeCloseTo(expected, 2);
+  });
+
+  it('never withdraws from combined assets post-retirement; liquid accounts absorb the full withdrawal pro-rata', () => {
+    const brokerage = account({ id: 'b1', startingBalance: 100000, annualRate: 0 });
+    const home = account({ id: 'home1', accountType: 'home' });
+    const details = makeDetails({
+      currentValue: 50000,
+      homeGrowthProfile: 'none',
+    });
+
+    const { projectionRows } = call([brokerage, home], 64, 65, {
+      details: { home1: details },
+      projectionEndAge: 66,
+      annualWithdrawal: 12000,
+    });
+
+    // Home equity untouched; brokerage pays its share of each month's
+    // withdrawal, with the share recomputed against current balances.
+    let expectedBrokerage = 100000;
+    for (let month = 0; month < 12; month++) {
+      const share = expectedBrokerage / (expectedBrokerage + 50000);
+      expectedBrokerage -= 1000 * share;
+    }
+    expect(projectionRows[2]['account-1']).toBe(50000);
+    expect(projectionRows[2]['account-0']).toBeCloseTo(expectedBrokerage, 2);
+    expect(projectionRows[2].totalBalance).toBeCloseTo(expectedBrokerage + 50000, 2);
+  });
+});
+
+describe('getProjection — IRS limit edge cases', () => {
+  it('uses the family HSA limit when the household has multiple people', () => {
+    const spouse: PlannerPerson = { ...person, id: 'p2', name: 'Spouse' };
+    const hsa = account({
+      id: 'h1',
+      accountType: 'hsa',
+      contributionValue: 1000, // 12000/yr attempted
+      startingBalance: 0,
+      annualRate: 0,
+    });
+
+    const { projectionRows } = call([hsa], 30, 31, {
+      people: [person, spouse],
+      annualIrsLimitGrowthRate: 0,
+    });
+
+    // Family limit 8750 caps the 12000 attempt (no growth, owner under 55)
+    expect(projectionRows[1]['account-0']).toBeCloseTo(8750, 6);
+    expect(projectionRows[1].totalContributions).toBeCloseTo(8750, 6);
+  });
+
+  it('grows the IRS limit by the configured growth rate for later projection years', () => {
+    const hsa = account({
+      id: 'h1',
+      accountType: 'hsa',
+      contributionValue: 1000,
+      startingBalance: 0,
+      annualRate: 0,
+    });
+
+    const { projectionRows } = call([hsa], 30, 32, {
+      annualIrsLimitGrowthRate: 10,
+    });
+
+    // Year 1: elapsed 0 years → limit ungrown (4400); Year 2 balance
+    // accumulates: 4400 + (4400 * 1.1)
+    expect(projectionRows[1]['account-0']).toBeCloseTo(4400, 6);
+    expect(projectionRows[2]['account-0']).toBeCloseTo(4400 + 4400 * 1.1, 6);
+  });
+
+  it('falls back to people[0] as the account owner when personIds match nobody', () => {
+    const orphan = account({
+      id: 'x1',
+      accountType: '401k',
+      personIds: ['unknown'],
+      contributionValue: 500,
+      employerMatchRate: 100,
+      employerMatchMaxPercentOfSalary: 5,
+      startingBalance: 0,
+      annualRate: 0,
+    });
+
+    const { projectionRows } = call([orphan], 30, 31);
+
+    // Owner falls back to people[0] (salary 120000): 500/mo employee + 500/mo match
+    expect(projectionRows[1]['account-0']).toBeCloseTo(12000, 6);
+    expect(projectionRows[1].totalContributions).toBeCloseTo(12000, 6);
+  });
+
+  it('applies no income growth, match, or catch-up when the household is empty', () => {
+    const orphan = account({
+      id: 'x1',
+      accountType: '401k',
+      personIds: ['unknown'],
+      contributionValue: 500,
+      employerMatchRate: 100,
+      employerMatchMaxPercentOfSalary: 5,
+      startingBalance: 0,
+      annualRate: 0,
+    });
+
+    const { projectionRows } = call([orphan], 30, 31, { people: [] });
+
+    // No owner at all: contributions still flow, employer match is 0 (no salary)
+    expect(projectionRows[1]['account-0']).toBeCloseTo(6000, 6);
+    expect(projectionRows[1].totalContributions).toBeCloseTo(6000, 6);
   });
 });
