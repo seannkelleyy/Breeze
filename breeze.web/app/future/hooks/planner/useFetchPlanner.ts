@@ -28,6 +28,8 @@ interface PlannerPeopleResponse {
     retirementAge: number;
     annualSalary: string;
     bonusMode: string;
+    bonusFrequency: string;
+    paycheck: string;
     annualBonus: string;
     incomeGrowthRate: string;
     createdAt: string;
@@ -125,6 +127,9 @@ const useFetchPlanner = () => {
         bonusMode: (p.bonusMode === 'salary-percent' ? 'salary-percent' : 'dollars') as
           | 'dollars'
           | 'salary-percent',
+        bonusFrequency: (['annual', 'quarterly', 'monthly'].includes(p.bonusFrequency)
+          ? p.bonusFrequency
+          : 'annual') as 'annual' | 'quarterly' | 'monthly',
         annualBonus: Number(p.annualBonus),
         incomeGrowthRate: Number(p.incomeGrowthRate),
         isPrimary: index === 0,
@@ -133,6 +138,7 @@ const useFetchPlanner = () => {
           | 'hourly'
           | 'commission',
         payDay: ((p as Record<string, unknown>).payDay as number) ?? 1,
+        paycheck: ((p as Record<string, unknown>).paycheck as string) || '',
         payCadence: (((p as Record<string, unknown>).payCadence as string) || 'biweekly') as
           | 'weekly'
           | 'biweekly'

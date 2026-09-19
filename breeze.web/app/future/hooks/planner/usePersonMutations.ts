@@ -22,8 +22,15 @@ export function usePersonMutations(userId: string) {
           retirementAge: person.retirementAge,
           annualSalary: person.annualSalary.toString(),
           bonusMode: person.bonusMode,
+          bonusFrequency: person.bonusFrequency,
           annualBonus: person.annualBonus.toString(),
           incomeGrowthRate: person.incomeGrowthRate.toString(),
+          payType: person.payType,
+          payDay: person.payDay,
+          payCadence: person.payCadence,
+          paycheck: person.paycheck ?? '',
+          hourlyRate: person.hourlyRate.toString(),
+          expectedHoursPerWeek: person.expectedHoursPerWeek.toString(),
         },
       });
       return response;

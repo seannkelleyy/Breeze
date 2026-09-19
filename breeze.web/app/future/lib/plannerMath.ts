@@ -6,7 +6,7 @@
 import type { ChartConfig } from '@/components/ui/chart';
 import type { AccountType, PlannerAccount } from '../types/account';
 import type { IrsLimitConfig, IrsLimitKey } from '../types/irs';
-import type { PlannerPerson } from '../types/person';
+import type { PayCadence, PlannerPerson } from '../types/person';
 import * as plannerConfig from './config';
 import * as plannerConstants from './constants';
 
@@ -168,4 +168,89 @@ export const getEmployerMatchMonthly = (a: PlannerAccount, people: PlannerPerson
   const cap = inc * (a.employerMatchMaxPercentOfSalary / 100);
   const eff = Math.min(emp * 12, cap);
   return clamp((eff * a.employerMatchRate) / 100 / 12);
+};
+
+// ── Pay & payday math ─────────────────────────────────────
+
+export const getPaychecksPerYear = (cadence: PayCadence): number => {
+  switch (cadence) {
+    case 'weekly':
+      return 52;
+    case 'biweekly':
+      return 26;
+    case 'semimonthly':
+      return 24;
+    case 'monthly':
+      return 12;
+  }
+};
+
+export const getPersonBaseAnnualIncome = (person: PlannerPerson): number =>
+  person.payType === 'hourly'
+    ? person.hourlyRate * person.expectedHoursPerWeek * 52
+    : person.annualSalary;
+
+export const getPersonBonusPerYear = (person: PlannerPerson): number => {
+  if (person.annualBonus <= 0) return 0;
+  const perYear =
+    person.bonusFrequency === 'quarterly' ? 4 : person.bonusFrequency === 'monthly' ? 12 : 1;
+  return person.bonusMode === 'salary-percent'
+    ? (getPersonBaseAnnualIncome(person) * person.annualBonus * perYear) / 100
+    : person.annualBonus;
+};
+
+export const getPersonTotalIncome = (person: PlannerPerson): number =>
+  getPersonBaseAnnualIncome(person) + getPersonBonusPerYear(person);
+
+export const getPersonPaycheckAmount = (person: PlannerPerson): number =>
+  getPersonBaseAnnualIncome(person) / getPaychecksPerYear(person.payCadence);
+
+// Weekday helpers: stored payDay uses 1 = Monday … 7 = Sunday.
+const mondayBasedWeekday = (date: Date): number => ((date.getDay() + 6) % 7) + 1;
+
+/**
+ * Paydays for a person within a calendar month (month is 0-based).
+ * - weekly: every matching weekday
+ * - biweekly: every 14 days anchored to the first matching weekday of the year,
+ *   so the schedule stays continuous across months
+ * - semimonthly: payDay and payDay + 15 (clamped to month length)
+ * - monthly: payDay (clamped to month length)
+ */
+export const getPersonPaydaysForMonth = (
+  person: PlannerPerson,
+  year: number,
+  month: number,
+): Date[] => {
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const clampToMonth = (day: number) => Math.min(Math.max(1, day), lastDay);
+
+  if (person.payCadence === 'semimonthly') {
+    const first = clampToMonth(person.payDay);
+    return [new Date(year, month, first), new Date(year, month, clampToMonth(first + 15))];
+  }
+  if (person.payCadence === 'monthly') {
+    return [new Date(year, month, clampToMonth(person.payDay))];
+  }
+
+  // weekly / biweekly — keyed off the stored weekday (1-7)
+  if (person.payDay < 1 || person.payDay > 7) return [];
+  const dates: Date[] = [];
+  if (person.payCadence === 'weekly') {
+    for (let day = 1; day <= lastDay; day++) {
+      const date = new Date(year, month, day);
+      if (mondayBasedWeekday(date) === person.payDay) dates.push(date);
+    }
+    return dates;
+  }
+  // biweekly: anchor to the first matching weekday of the year, step 14 days
+  let date = new Date(year, 0, 1);
+  while (mondayBasedWeekday(date) !== person.payDay) {
+    date = new Date(year, 0, date.getDate() + 1);
+  }
+  const monthEnd = new Date(year, month + 1, 0);
+  while (date <= monthEnd) {
+    if (date.getMonth() === month) dates.push(new Date(date));
+    date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 14);
+  }
+  return dates;
 };

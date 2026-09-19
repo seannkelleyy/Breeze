@@ -3,6 +3,7 @@ import {
   getTotalAnnualIncome,
   getEmployeeMonthlyContribution,
   getEmployerMatchMonthly,
+  getEmployerMatchMonthlyFromAnnual,
   getSuggestedAnnualLimit,
   getIrsLimitKeyFromApiType,
 } from '../plannerMath';
@@ -41,7 +42,8 @@ const makePerson = (overrides: Partial<PlannerPerson> = {}): PlannerPerson => ({
   retirementAge: 60,
   annualSalary: 120000,
   bonusMode: 'dollars',
-  annualBonus: 5000,
+  bonusFrequency: 'annual' as const,
+      annualBonus: 5000,
   incomeGrowthRate: 3,
   isPrimary: true,
   payType: 'salary',
@@ -60,13 +62,15 @@ describe('getTotalAnnualIncome', () => {
   });
 
   it('adds salary and dollar bonus', () => {
-    const person = makePerson({ annualSalary: 120000, annualBonus: 5000, bonusMode: 'dollars' });
+    const person = makePerson({ annualSalary: 120000, bonusFrequency: 'annual' as const,
+      annualBonus: 5000, bonusMode: 'dollars' });
     expect(getTotalAnnualIncome(person)).toBe(125000);
   });
 
   it('excludes salary-percent bonus from total', () => {
     const person = makePerson({
       annualSalary: 120000,
+      bonusFrequency: 'annual' as const,
       annualBonus: 10,
       bonusMode: 'salary-percent',
     });
@@ -74,7 +78,8 @@ describe('getTotalAnnualIncome', () => {
   });
 
   it('handles zero salary', () => {
-    const person = makePerson({ annualSalary: 0, annualBonus: 0 });
+    const person = makePerson({ annualSalary: 0, bonusFrequency: 'annual' as const,
+      annualBonus: 0 });
     expect(getTotalAnnualIncome(person)).toBe(0);
   });
 });
@@ -115,6 +120,32 @@ describe('getEmployeeMonthlyContribution', () => {
     });
     // 120000 * 0.10 / 12 = 1000
     expect(getEmployeeMonthlyContribution(account, people)).toBe(1000);
+  });
+
+  it('calculates biweekly contribution mode', () => {
+    const account = makeAccount({
+      contributionMode: 'biweekly',
+      contributionValue: 500,
+    });
+    // 500 * 26 / 12 = 1083.33
+    expect(getEmployeeMonthlyContribution(account, people)).toBeCloseTo(1083.33, 2);
+  });
+
+  it('calculates weekly contribution mode', () => {
+    const account = makeAccount({
+      contributionMode: 'weekly',
+      contributionValue: 250,
+    });
+    // 250 * 52 / 12 = 1083.33
+    expect(getEmployeeMonthlyContribution(account, people)).toBeCloseTo(1083.33, 2);
+  });
+
+  it('clamps negative contribution values to 0', () => {
+    const account = makeAccount({
+      contributionMode: 'monthly',
+      contributionValue: -100,
+    });
+    expect(getEmployeeMonthlyContribution(account, people)).toBe(0);
   });
 
   it('uses spouse income when account belongs to second person', () => {
@@ -168,6 +199,58 @@ describe('getEmployerMatchMonthly', () => {
     // Annual match: 3600 * 1.00 = 3600
     // Monthly: 3600 / 12 = 300
     expect(getEmployerMatchMonthly(account, people)).toBeCloseTo(300, 0);
+  });
+
+  it('matches the full contribution when it is below the salary cap', () => {
+    const account = makeAccount({
+      employerMatchRate: 50,
+      employerMatchMaxPercentOfSalary: 6,
+      contributionMode: 'monthly',
+      contributionValue: 200, // $200/mo = $2400/yr, below the 7200 matchable cap
+    });
+    // Eligible: min(2400, 7200) = 2400 → match 2400 * 0.50 / 12 = 100
+    expect(getEmployerMatchMonthly(account, people)).toBeCloseTo(100, 6);
+  });
+
+  it('clamps a negative match rate out of the result', () => {
+    const account = makeAccount({ employerMatchRate: -50 });
+    expect(getEmployerMatchMonthly(account, people)).toBe(0);
+  });
+});
+
+describe('getEmployerMatchMonthlyFromAnnual', () => {
+  it('returns 0 for non-401k accounts even with match configured', () => {
+    const account = makeAccount({
+      accountType: 'roth-ira',
+      employerMatchRate: 100,
+      employerMatchMaxPercentOfSalary: 6,
+    });
+    expect(getEmployerMatchMonthlyFromAnnual(account, 120000, 6000)).toBe(0);
+  });
+
+  it('returns 0 when owner income is 0', () => {
+    const account = makeAccount({ employerMatchRate: 100, employerMatchMaxPercentOfSalary: 6 });
+    expect(getEmployerMatchMonthlyFromAnnual(account, 0, 6000)).toBe(0);
+  });
+
+  it('matches the full contribution below the matchable cap', () => {
+    const account = makeAccount({ employerMatchRate: 50, employerMatchMaxPercentOfSalary: 6 });
+    // Matchable: 120000 * 6% = 7200; eligible min(2400, 7200) = 2400
+    // Annual match 2400 * 50% = 1200 → 100/mo
+    expect(getEmployerMatchMonthlyFromAnnual(account, 120000, 2400)).toBeCloseTo(100, 6);
+  });
+
+  it('caps the matched amount at max percent of the (grown) salary', () => {
+    const account = makeAccount({ employerMatchRate: 100, employerMatchMaxPercentOfSalary: 5 });
+    // Projection wiring: IRS-capped employee contribution vs grown salary
+    // Matchable: 130000 * 5% = 6500; eligible min(6000, 6500) = 6000 → 500/mo
+    expect(getEmployerMatchMonthlyFromAnnual(account, 130000, 6000)).toBeCloseTo(500, 6);
+  });
+
+  it('clamps negative income and contributions to 0', () => {
+    const account = makeAccount({ employerMatchRate: 100, employerMatchMaxPercentOfSalary: 5 });
+    expect(getEmployerMatchMonthlyFromAnnual(account, -120000, 6000)).toBe(0);
+    expect(getEmployerMatchMonthlyFromAnnual(account, 120000, -6000)).toBe(0);
   });
 });
 

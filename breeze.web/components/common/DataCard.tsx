@@ -13,6 +13,8 @@ export interface DataCardProps {
   icon: React.ReactNode;
   iconVariant?: 'primary' | 'destructive' | 'muted';
   name: string;
+  /** Optional headline value rendered next to the name ("Name · Value"). */
+  value?: string;
   badges?: DataCardBadge[];
   summaryLines?: string[];
   updatedAt?: string;
@@ -32,6 +34,7 @@ export function DataCard({
   icon,
   iconVariant = 'primary',
   name,
+  value,
   badges = [],
   summaryLines = [],
   updatedAt,
@@ -49,8 +52,14 @@ export function DataCard({
           {icon}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-baseline gap-2">
             <span className="truncate text-sm font-medium">{name || 'Unnamed'}</span>
+            {value && (
+              <>
+                <span className="text-muted-foreground">·</span>
+                <span className="text-sm font-semibold">{value}</span>
+              </>
+            )}
             {badges.map((badge, i) => (
               <Badge
                 key={i}
