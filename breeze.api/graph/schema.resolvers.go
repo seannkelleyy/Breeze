@@ -210,7 +210,7 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 
 		// Remove old recurring-generated expense categories so regeneration is idempotent.
 		_ = removeRecurringExpenseCategoriesForBudget(ctx, r.ExpenseCategoryService, r.ExpenseService, budget.ID)
-		if genErr := generateExpenseCategoriesForBudget(ctx, r.RecurringExpenseService, r.ExpenseCategoryService, r.ExpenseService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
+		if genErr := generateExpenseCategoriesForBudget(ctx, r.RecurringExpenseService, r.ExpenseCategoryService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
 			slog.Warn("failed to generate recurring expense categories for budget", "error", genErr)
 		}
 
@@ -231,7 +231,7 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 	}
 
 	// Generate expense categories from recurring templates for the new budget month.
-	if genErr := generateExpenseCategoriesForBudget(ctx, r.RecurringExpenseService, r.ExpenseCategoryService, r.ExpenseService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
+	if genErr := generateExpenseCategoriesForBudget(ctx, r.RecurringExpenseService, r.ExpenseCategoryService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
 		slog.Warn("failed to generate recurring expense categories for new budget", "error", genErr)
 	}
 

@@ -144,6 +144,41 @@ func (s *RecurringExpenseService) Delete(ctx context.Context, id uuid.UUID) erro
 	return nil
 }
 
+// MonthlyAmount normalizes the template's per-occurrence amount to an average
+// month (weekly = ×52/12, biweekly = ×26/12, quarterly = ×4/12), rounded
+// half-up to cents. MONTHLY and YEARLY amounts map directly.
+func (e *RecurringExpense) MonthlyAmount() decimal.Decimal {
+	whole, frac, ok := e.Amount.Int64(2)
+	if !ok {
+		return e.Amount
+	}
+	amountCents := whole*100 + frac
+
+	var occurrencesPerYear int64
+	switch e.RecurrenceInterval {
+	case sqlc.RecurrenceIntervalWEEKLY:
+		occurrencesPerYear = 52
+	case sqlc.RecurrenceIntervalBIWEEKLY:
+		occurrencesPerYear = 26
+	case sqlc.RecurrenceIntervalQUARTERLY:
+		occurrencesPerYear = 4
+	default:
+		return e.Amount
+	}
+
+	yearlyCents := amountCents * occurrencesPerYear
+	monthlyCents := yearlyCents / 12
+	if rem := yearlyCents % 12; rem*2 >= 12 {
+		monthlyCents++
+	}
+
+	monthly, err := decimal.New(monthlyCents, 2)
+	if err != nil {
+		return e.Amount
+	}
+	return monthly
+}
+
 func mapCreateRecurringExpenseRow(row *sqlc.CreateRecurringExpenseRow) RecurringExpense {
 	return RecurringExpense{
 		ID:                 row.ID,

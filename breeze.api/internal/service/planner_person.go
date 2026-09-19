@@ -18,11 +18,13 @@ type PlannerPerson struct {
 	RetirementAge        int32
 	AnnualSalary         decimal.Decimal
 	BonusMode            string
+	BonusFrequency       string
 	AnnualBonus          decimal.Decimal
 	IncomeGrowthRate     decimal.Decimal
 	PayType              string
 	PayDay               int32
 	PayCadence           string
+	Paycheck             string
 	HourlyRate           decimal.Decimal
 	ExpectedHoursPerWeek decimal.Decimal
 	CreatedAt            time.Time
@@ -37,11 +39,13 @@ type UpsertPlannerPersonInput struct {
 	RetirementAge        int32
 	AnnualSalary         decimal.Decimal
 	BonusMode            string
+	BonusFrequency       string
 	AnnualBonus          decimal.Decimal
 	IncomeGrowthRate     decimal.Decimal
 	PayType              string
 	PayDay               int32
 	PayCadence           string
+	Paycheck             string
 	HourlyRate           decimal.Decimal
 	ExpectedHoursPerWeek decimal.Decimal
 }
@@ -70,11 +74,13 @@ func (s *PlannerPersonService) Upsert(ctx context.Context, input *UpsertPlannerP
 		RetirementAge:        input.RetirementAge,
 		AnnualSalary:         input.AnnualSalary,
 		BonusMode:            input.BonusMode,
+		BonusFrequency:       input.BonusFrequency,
 		AnnualBonus:          input.AnnualBonus,
 		IncomeGrowthRate:     input.IncomeGrowthRate,
 		PayType:              input.PayType,
 		PayDay:               input.PayDay,
 		PayCadence:           input.PayCadence,
+		Paycheck:             input.Paycheck,
 		HourlyRate:           input.HourlyRate,
 		ExpectedHoursPerWeek: input.ExpectedHoursPerWeek,
 	})
@@ -120,11 +126,13 @@ func mapPlannerPersonRecord(row *sqlc.ListPlannerPeopleByUserIDRow) PlannerPerso
 		RetirementAge:        row.RetirementAge,
 		AnnualSalary:         row.AnnualSalary,
 		BonusMode:            row.BonusMode,
+		BonusFrequency:       row.BonusFrequency,
 		AnnualBonus:          row.AnnualBonus,
 		IncomeGrowthRate:     row.IncomeGrowthRate,
 		PayType:              row.PayType,
 		PayDay:               row.PayDay,
 		PayCadence:           row.PayCadence,
+		Paycheck:             row.Paycheck,
 		HourlyRate:           row.HourlyRate,
 		ExpectedHoursPerWeek: row.ExpectedHoursPerWeek,
 		CreatedAt:            timestamptzToTime(row.CreatedAt),
@@ -141,11 +149,13 @@ func mapPlannerPersonUpsertRecord(row *sqlc.UpsertPlannerPersonRow) PlannerPerso
 		RetirementAge:        row.RetirementAge,
 		AnnualSalary:         row.AnnualSalary,
 		BonusMode:            row.BonusMode,
+		BonusFrequency:       row.BonusFrequency,
 		AnnualBonus:          row.AnnualBonus,
 		IncomeGrowthRate:     row.IncomeGrowthRate,
 		PayType:              row.PayType,
 		PayDay:               row.PayDay,
 		PayCadence:           row.PayCadence,
+		Paycheck:             row.Paycheck,
 		HourlyRate:           row.HourlyRate,
 		ExpectedHoursPerWeek: row.ExpectedHoursPerWeek,
 		CreatedAt:            timestamptzToTime(row.CreatedAt),

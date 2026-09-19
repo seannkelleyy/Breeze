@@ -770,6 +770,8 @@ type PlannerPerson struct {
 	PayCadence           string             `json:"pay_cadence"`
 	HourlyRate           decimal.Decimal    `json:"hourly_rate"`
 	ExpectedHoursPerWeek decimal.Decimal    `json:"expected_hours_per_week"`
+	BonusFrequency       string             `json:"bonus_frequency"`
+	Paycheck             string             `json:"paycheck"`
 }
 
 type RecurringExpense struct {

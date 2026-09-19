@@ -394,11 +394,13 @@ type PlannerPerson struct {
 	RetirementAge        int    `json:"retirementAge"`
 	AnnualSalary         string `json:"annualSalary"`
 	BonusMode            string `json:"bonusMode"`
+	BonusFrequency       string `json:"bonusFrequency"`
 	AnnualBonus          string `json:"annualBonus"`
 	IncomeGrowthRate     string `json:"incomeGrowthRate"`
 	PayType              string `json:"payType"`
 	PayDay               int    `json:"payDay"`
 	PayCadence           string `json:"payCadence"`
+	Paycheck             string `json:"paycheck"`
 	HourlyRate           string `json:"hourlyRate"`
 	ExpectedHoursPerWeek string `json:"expectedHoursPerWeek"`
 	CreatedAt            string `json:"createdAt"`
@@ -693,11 +695,13 @@ type UpsertPlannerPersonInput struct {
 	RetirementAge        int    `json:"retirementAge"`
 	AnnualSalary         string `json:"annualSalary"`
 	BonusMode            string `json:"bonusMode"`
+	BonusFrequency       string `json:"bonusFrequency"`
 	AnnualBonus          string `json:"annualBonus"`
 	IncomeGrowthRate     string `json:"incomeGrowthRate"`
 	PayType              string `json:"payType"`
 	PayDay               int    `json:"payDay"`
 	PayCadence           string `json:"payCadence"`
+	Paycheck             string `json:"paycheck"`
 	HourlyRate           string `json:"hourlyRate"`
 	ExpectedHoursPerWeek string `json:"expectedHoursPerWeek"`
 }

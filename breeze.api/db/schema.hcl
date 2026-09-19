@@ -2091,6 +2091,12 @@ table "planner_people" {
     default = "dollars"
   }
 
+  column "bonus_frequency" {
+    type    = text
+    null    = false
+    default = "annual"
+  }
+
   column "annual_bonus" {
     type    = numeric(12,2)
     null    = false
@@ -2119,6 +2125,12 @@ table "planner_people" {
     type    = text
     null    = false
     default = "biweekly"
+  }
+
+  column "paycheck" {
+    type    = text
+    null    = false
+    default = ""
   }
 
   column "hourly_rate" {

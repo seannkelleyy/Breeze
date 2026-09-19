@@ -508,11 +508,13 @@ type PlannerPerson {
   retirementAge: Int!
   annualSalary: String!
   bonusMode: String!
+  bonusFrequency: String!
   annualBonus: String!
   incomeGrowthRate: String!
   payType: String!
   payDay: Int!
   payCadence: String!
+  paycheck: String!
   hourlyRate: String!
   expectedHoursPerWeek: String!
   createdAt: String!
@@ -758,11 +760,13 @@ input UpsertPlannerPersonInput {
   retirementAge: Int!
   annualSalary: String!
   bonusMode: String!
+  bonusFrequency: String!
   annualBonus: String!
   incomeGrowthRate: String!
   payType: String!
   payDay: Int!
   payCadence: String!
+  paycheck: String!
   hourlyRate: String!
   expectedHoursPerWeek: String!
 }

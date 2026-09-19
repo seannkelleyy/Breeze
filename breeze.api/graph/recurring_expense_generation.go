@@ -9,17 +9,16 @@ import (
 	"breeze.api/internal/db/sqlc"
 	"breeze.api/internal/service"
 	"github.com/google/uuid"
-	"github.com/govalues/decimal"
 )
 
-// generateExpenseCategoriesForBudget queries the user's recurring expense
-// templates and creates expense category + expense records for each occurrence
-// that falls within the budget month.
+// generateExpenseCategoriesForBudget creates one expense category per active
+// recurring expense template, with the template's amount normalized to a
+// monthly allocation. Budget expenses (actual spending) are recorded
+// separately against these categories.
 func generateExpenseCategoriesForBudget(
 	ctx context.Context,
 	recurringSvc *service.RecurringExpenseService,
 	categorySvc *service.ExpenseCategoryService,
-	expenseSvc *service.ExpenseService,
 	userID uuid.UUID,
 	budgetID uuid.UUID,
 	budgetDate time.Time,
@@ -33,10 +32,8 @@ func generateExpenseCategoriesForBudget(
 	monthStart := time.Date(budgetDate.Year(), budgetDate.Month(), 1, 0, 0, 0, 0, time.UTC)
 	monthEnd := monthStart.AddDate(0, 1, -1)
 
-	created := 0
 	for i := range templates {
 		t := &templates[i]
-		slog.Info("generateExpenseCategoriesForBudget: template", "name", t.Name, "amount", t.Amount.String(), "start", t.StartDate, "end", t.EndDate, "interval", t.RecurrenceInterval)
 		if t.EndDate != nil && t.EndDate.Before(monthStart) {
 			continue
 		}
@@ -44,49 +41,19 @@ func generateExpenseCategoriesForBudget(
 			continue
 		}
 
-		ri := t.RecurringIncome()
-		occurrences := recurringOccurrences(&ri, monthStart, monthEnd)
-		slog.Info("generateExpenseCategoriesForBudget: occurrences", "name", t.Name, "count", len(occurrences))
-		for _, occ := range occurrences {
-			// Create expense category
-			cat, err := categorySvc.Create(ctx, &service.CreateExpenseCategoryInput{
-				UserID:           userID,
-				BudgetID:         budgetID,
-				Name:             t.Name,
-				Allocation:       t.Amount,
-				CurrentSpend:     decimal.Zero,
-				SourceType:       sqlc.ExpenseSourceTypeRECURRINGTEMPLATE,
-				SourceTemplateID: &t.ID,
-				GenerationMonth:  &monthStart,
-			})
-			if err != nil {
-				return fmt.Errorf("create recurring expense category for %q: %w", t.Name, err)
-			}
-
-			// Create expense with a single split to the category
-			_, err = expenseSvc.Create(ctx, &service.CreateExpenseInput{
-				UserID:           userID,
-				BudgetID:         budgetID,
-				Amount:           t.Amount,
-				Date:             occ,
-				Description:      t.Name,
-				SourceType:       sqlc.ExpenseSourceTypeRECURRINGTEMPLATE,
-				SourceTemplateID: &t.ID,
-				GenerationMonth:  &monthStart,
-				Splits: []service.ExpenseSplitInput{
-					{
-						CategoryID: cat.ID,
-						Amount:     t.Amount,
-					},
-				},
-			})
-			if err != nil {
-				return fmt.Errorf("create recurring expense for %q: %w", t.Name, err)
-			}
-			created++
+		if _, err := categorySvc.Create(ctx, &service.CreateExpenseCategoryInput{
+			UserID:           userID,
+			BudgetID:         budgetID,
+			Name:             t.Name,
+			Allocation:       t.MonthlyAmount(),
+			CurrentSpend:     decimalZero(),
+			SourceType:       sqlc.ExpenseSourceTypeRECURRINGTEMPLATE,
+			SourceTemplateID: &t.ID,
+			GenerationMonth:  &monthStart,
+		}); err != nil {
+			return fmt.Errorf("create recurring expense category for %q: %w", t.Name, err)
 		}
 	}
-	slog.Info("generateExpenseCategoriesForBudget: done", "created", created)
 	return nil
 }
 

@@ -1,4 +1,4 @@
-h1:o5j+fv/HoAO7UfuKX4Csl1tkka+9ezNwxZdBE9kIrp4=
+h1:Wv3EkEWagiUUGLGcuY65yUdwELZ4MZgkrDPKukaf3dE=
 20260401213128_initial_schema.sql h1:/GVoKJxw6oD5DTPSxCdkRcOHQLi/iT4Qe7Zz9XXGrc0=
 20260401214314_users_full_stack.sql h1:ZqbaWes3gnXoHUCh3t9e34eVE+n5ac85yzmIBzH8h7Y=
 20260415010436_assets_full_stack.sql h1:2O4xE9IkLsMLQR+aqZzQEm8ptOXh95J6w0GPjnHqzs4=
@@ -31,3 +31,5 @@ h1:o5j+fv/HoAO7UfuKX4Csl1tkka+9ezNwxZdBE9kIrp4=
 20260811000000_add_return_profile_to_assets.sql h1:q+33XTaZpWTMxkIZCpT8f5Mhd2zhlaNt0EfqRKa6abQ=
 20260918000545_add_person_income_fields.sql h1:1vOjPGqjNVYPxao0a6W0uWSWpNM3f2eU1JPxaPp6vlc=
 20260918141007_add_tax_year_parameters.sql h1:clJIAJ1rU5wTc/FzDlPMPmv38EkQY7AJR39KZDURU9U=
+20260919022720_add_planner_person_bonus_frequency.sql h1:+HeU3TQ2Zezab/8Vd47zmACeDUK+A+PT4xj/yx8DFAM=
+20260919140741_add_planner_person_paycheck.sql h1:0xgR3wrm7nd3aRXqbDyoMuRqYzDZxT4zsG7gIWxS3G0=
