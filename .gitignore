@@ -49,3 +49,4 @@ pnpm-debug.log*
 # api keys
 .continue/
 .DS_Store
+.env
