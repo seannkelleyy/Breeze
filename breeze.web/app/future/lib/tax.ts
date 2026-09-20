@@ -4,6 +4,7 @@
  */
 import type { TaxBracketRow, TaxYearTables } from '../types/tax';
 import type { FinancialMathSnapshot } from '../types/finance';
+import type { PersonWaterfall } from './paycheck';
 import * as plannerConstants from './constants';
 
 export const getFederalTax = (taxableIncome: number, brackets: TaxBracketRow[]): number => {
@@ -44,6 +45,7 @@ export const getEffectiveTaxRate = (
 export const getFinancialMathSnapshot = (
   input: Record<string, unknown>,
   taxTables: TaxYearTables | null,
+  waterfall?: PersonWaterfall,
 ): FinancialMathSnapshot => {
   const monthlyExpenses = Number(input.monthlyExpenses ?? 0);
   const selfSalary = Number(input.selfSalary ?? 0);
@@ -56,13 +58,25 @@ export const getFinancialMathSnapshot = (
   const annualSpend = monthlyExpenses * 12;
   // While tax reference data is loading, fall back to a neutral factor
   // instead of blocking the whole projection on the fetch.
-  const netIncomeFactor = taxTables
-    ? getEffectiveTaxRate(grossIncome, taxTables, deductionType).netIncomeFactor
-    : plannerConstants.PLANNER_NEUTRAL_NET_INCOME_FACTOR;
-  const netIncome = grossIncome * netIncomeFactor;
+  // When the real paycheck waterfall is available, after-tax income and
+  // savings capacity come from it (it accounts for pre-tax savings and
+  // withholdings); otherwise fall back to a flat effective-rate estimate.
+  const netIncomeFactor = waterfall
+    ? waterfall.grossMonthly > 0
+      ? 1 - waterfall.taxesMonthly / waterfall.grossMonthly
+      : plannerConstants.PLANNER_NEUTRAL_NET_INCOME_FACTOR
+    : taxTables
+      ? getEffectiveTaxRate(grossIncome, taxTables, deductionType).netIncomeFactor
+      : plannerConstants.PLANNER_NEUTRAL_NET_INCOME_FACTOR;
+  const netIncome = waterfall
+    ? (waterfall.grossMonthly - waterfall.taxesMonthly) * 12
+    : grossIncome * netIncomeFactor;
   const annualExtraExpenseBuffer =
     annualSpend * (plannerConstants.PLANNER_ANNUAL_EXTRA_EXPENSE_BUFFER_PERCENT / 100);
-  const yearlySavings = Math.max(0, netIncome - annualSpend - annualExtraExpenseBuffer);
+  const yearlySavings = Math.max(
+    0,
+    (waterfall ? waterfall.takeHomeAnnual : netIncome) - annualSpend - annualExtraExpenseBuffer,
+  );
   const withdrawalMultiplier = safeWithdrawalRate > 0 ? 1 / (safeWithdrawalRate / 100) : 25;
   const yearlyPortfolioIncome = currentPortfolio * (safeWithdrawalRate / 100);
   return {
@@ -85,5 +99,6 @@ export const getFinancialMathSnapshot = (
     yearlyPortfolioIncome,
     yearsToGoalRatePercent: 0,
     scenarios: [],
+    payroll: waterfall,
   };
 };

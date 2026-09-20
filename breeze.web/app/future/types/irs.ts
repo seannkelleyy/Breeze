@@ -5,6 +5,8 @@ export type IrsLimitRule = {
   familyAnnualLimit?: number;
   catchUpAmount: number;
   catchUpAge: number;
+  /** Ages 60–63 super catch-up (replaces the regular catch-up). 0 = none. */
+  superCatchUpAmount?: number;
 };
 
 export type IrsLimitConfig = Record<IrsLimitKey, IrsLimitRule>;

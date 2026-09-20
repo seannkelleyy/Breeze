@@ -70,8 +70,7 @@ func main() {
 	liabilityService := service.NewLiabilityService(queries)
 	budgetService := service.NewBudgetService(queries)
 	goalService := service.NewGoalService(queries)
-	scenarioService := service.NewScenarioService(queries, pool)
-	retirementService := service.NewRetirementAccountService(queries)
+	contributionLimitService := service.NewContributionLimitService(queries)
 	expenseCategoryService := service.NewExpenseCategoryService(queries)
 	expenseService := service.NewExpenseService(queries, pool)
 	incomeService := service.NewIncomeService(queries)
@@ -83,7 +82,8 @@ func main() {
 	taxYearService := service.NewTaxYearService(queries)
 	taxPlanningService := service.NewTaxPlanningService(queries)
 	retirementLadderService := service.NewRetirementLadderService(queries)
-	netWorthSnapshotService := service.NewNetWorthSnapshotService(queries)
+	netWorthSnapshotService := service.NewNetWorthSnapshotService(queries, pool)
+	transactionService := service.NewTransactionService(queries)
 	// Plaid client/service (dev-mode when local and no credentials)
 	var plaidClient service.PlaidClient
 	if cfg.IsLocalEnv() && (cfg.PlaidClientID == "" || cfg.PlaidSecret == "") {
@@ -105,8 +105,7 @@ func main() {
 		LiabilityService:         liabilityService,
 		BudgetService:            budgetService,
 		GoalService:              goalService,
-		ScenarioService:          scenarioService,
-		RetirementService:        retirementService,
+		ContributionLimitService: contributionLimitService,
 		PlaidService:             plaidService,
 		ExpenseCategoryService:   expenseCategoryService,
 		ExpenseService:           expenseService,
@@ -120,6 +119,7 @@ func main() {
 		TaxPlanningService:       taxPlanningService,
 		RetirementLadderService:  retirementLadderService,
 		NetWorthSnapshotService:  netWorthSnapshotService,
+		TransactionService:       transactionService,
 	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 

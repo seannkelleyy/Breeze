@@ -52,24 +52,6 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	return mapUserToModel(user), nil
 }
 
-// DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, error) {
-	parsedID, err := uuid.Parse(id)
-	if err != nil {
-		return false, fmt.Errorf("invalid user id: %w", err)
-	}
-
-	err = r.UserService.Delete(ctx, parsedID)
-	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
-			return false, nil
-		}
-		return false, r.mapErr(ctx, err)
-	}
-
-	return true, nil
-}
-
 // CreateAsset is the resolver for the createAsset field.
 func (r *mutationResolver) CreateAsset(ctx context.Context, input model.CreateAssetInput) (*model.Asset, error) {
 	svcInput, err := createAssetInputFromModel(&input)
@@ -208,6 +190,14 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 			slog.Warn("failed to generate recurring incomes for budget", "error", genErr)
 		}
 
+		// Replace people-payroll incomes (per-person payday net amounts).
+		// Omitted input leaves existing payroll rows untouched.
+		if input.PayrollIncomes != nil {
+			if replaceErr := replacePayrollIncomesForBudget(ctx, r.IncomeService, svcInput.UserID, budget.ID, svcInput.Date, input.PayrollIncomes); replaceErr != nil {
+				slog.Warn("failed to replace payroll incomes for budget", "error", replaceErr)
+			}
+		}
+
 		// Remove old recurring-generated expense categories so regeneration is idempotent.
 		_ = removeRecurringExpenseCategoriesForBudget(ctx, r.ExpenseCategoryService, r.ExpenseService, budget.ID)
 		if genErr := generateExpenseCategoriesForBudget(ctx, r.RecurringExpenseService, r.ExpenseCategoryService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
@@ -228,6 +218,14 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 	// Generate incomes from recurring templates for the new budget month.
 	if genErr := generateIncomesForBudget(ctx, r.RecurringIncomeService, r.IncomeService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
 		slog.Warn("failed to generate recurring incomes for new budget", "error", genErr)
+	}
+
+	// Replace people-payroll incomes (per-person payday net amounts).
+	// Omitted input leaves existing payroll rows untouched.
+	if input.PayrollIncomes != nil {
+		if replaceErr := replacePayrollIncomesForBudget(ctx, r.IncomeService, svcInput.UserID, budget.ID, svcInput.Date, input.PayrollIncomes); replaceErr != nil {
+			slog.Warn("failed to replace payroll incomes for new budget", "error", replaceErr)
+		}
 	}
 
 	// Generate expense categories from recurring templates for the new budget month.
@@ -327,127 +325,6 @@ func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, err
 	return true, nil
 }
 
-// CreateScenario is the resolver for the createScenario field.
-func (r *mutationResolver) CreateScenario(ctx context.Context, input model.CreateScenarioInput) (*model.Scenario, error) {
-	svcInput, err := createScenarioInputFromModel(&input)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	// Resolve the authenticated user from context when available.
-	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
-		svcInput.UserID = resolvedID
-	}
-
-	scenario, err := r.ScenarioService.Create(ctx, &svcInput)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	return mapScenarioToModel(scenario), nil
-}
-
-// UpdateScenario is the resolver for the updateScenario field.
-func (r *mutationResolver) UpdateScenario(ctx context.Context, input model.UpdateScenarioInput) (*model.Scenario, error) {
-	svcInput, err := updateScenarioInputFromModel(&input)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	scenario, err := r.ScenarioService.Update(ctx, &svcInput)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	return mapScenarioToModel(scenario), nil
-}
-
-// DeleteScenario is the resolver for the deleteScenario field.
-func (r *mutationResolver) DeleteScenario(ctx context.Context, id string) (bool, error) {
-	parsedID, err := uuid.Parse(id)
-	if err != nil {
-		return false, fmt.Errorf("invalid scenario id: %w", err)
-	}
-
-	err = r.ScenarioService.Delete(ctx, parsedID)
-	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
-			return false, nil
-		}
-		return false, r.mapErr(ctx, err)
-	}
-
-	return true, nil
-}
-
-// CreateRetirementAccount is the resolver for the createRetirementAccount field.
-func (r *mutationResolver) CreateRetirementAccount(ctx context.Context, input model.CreateRetirementAccountInput) (*model.RetirementAccount, error) {
-	svcInput, err := createRetirementAccountInputFromModel(&input)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	// Resolve the authenticated user from context when available.
-	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
-		svcInput.UserID = resolvedID
-	}
-
-	account, err := r.RetirementService.Create(ctx, &svcInput)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	return mapRetirementAccountToModel(account), nil
-}
-
-// UpdateRetirementAccount is the resolver for the updateRetirementAccount field.
-func (r *mutationResolver) UpdateRetirementAccount(ctx context.Context, input model.UpdateRetirementAccountInput) (*model.RetirementAccount, error) {
-	svcInput, err := updateRetirementAccountInputFromModel(&input)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	account, err := r.RetirementService.Update(ctx, &svcInput)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	return mapRetirementAccountToModel(account), nil
-}
-
-// DeleteRetirementAccount is the resolver for the deleteRetirementAccount field.
-func (r *mutationResolver) DeleteRetirementAccount(ctx context.Context, id string) (bool, error) {
-	parsedID, err := uuid.Parse(id)
-	if err != nil {
-		return false, fmt.Errorf("invalid retirement account id: %w", err)
-	}
-
-	err = r.RetirementService.Delete(ctx, parsedID)
-	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
-			return false, nil
-		}
-		return false, r.mapErr(ctx, err)
-	}
-
-	return true, nil
-}
-
-// AddContribution is the resolver for the addContribution field.
-func (r *mutationResolver) AddContribution(ctx context.Context, input model.AddContributionInput) (*model.ContributionEntry, error) {
-	svcInput, err := addContributionInputFromModel(&input)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	entry, err := r.RetirementService.AddContribution(ctx, svcInput)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	return mapContributionEntryToModel(entry), nil
-}
-
 // CreateExpenseCategory is the resolver for the createExpenseCategory field.
 func (r *mutationResolver) CreateExpenseCategory(ctx context.Context, input model.CreateExpenseCategoryInput) (*model.ExpenseCategory, error) {
 	svcInput, err := createExpenseCategoryInputFromModel(&input)
@@ -466,6 +343,83 @@ func (r *mutationResolver) CreateExpenseCategory(ctx context.Context, input mode
 	}
 
 	return mapExpenseCategoryToModel(category), nil
+}
+
+// CreateTransaction is the resolver for the createTransaction field.
+func (r *mutationResolver) CreateTransaction(ctx context.Context, input model.CreateTransactionInput) (*model.Transaction, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return nil, err
+	}
+
+	date, err := parseDate(input.Date)
+	if err != nil {
+		return nil, fmt.Errorf("invalid date: %w", err)
+	}
+
+	amount, err := decimal.Parse(input.Amount)
+	if err != nil {
+		return nil, fmt.Errorf("invalid amount: %w", err)
+	}
+
+	var categoryID *uuid.UUID
+	if input.ExpenseCategoryID != nil && *input.ExpenseCategoryID != "" {
+		parsed, parseErr := uuid.Parse(*input.ExpenseCategoryID)
+		if parseErr != nil {
+			return nil, fmt.Errorf("invalid category id: %w", parseErr)
+		}
+		categoryID = &parsed
+	}
+
+	transaction, err := r.TransactionService.Create(ctx, &service.CreateTransactionInput{
+		UserID:            userID,
+		Date:              date,
+		Amount:            amount,
+		Name:              input.Name,
+		ExpenseCategoryID: categoryID,
+	})
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	return mapTransactionToModel(transaction), nil
+}
+
+// AssignTransactionCategory is the resolver for the assignTransactionCategory field.
+func (r *mutationResolver) AssignTransactionCategory(ctx context.Context, id string, expenseCategoryID *string) (*model.Transaction, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid transaction id: %w", err)
+	}
+
+	var categoryID *uuid.UUID
+	if expenseCategoryID != nil && *expenseCategoryID != "" {
+		parsed, parseErr := uuid.Parse(*expenseCategoryID)
+		if parseErr != nil {
+			return nil, fmt.Errorf("invalid category id: %w", parseErr)
+		}
+		categoryID = &parsed
+	}
+
+	transaction, err := r.TransactionService.AssignCategory(ctx, parsedID, categoryID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	return mapTransactionToModel(transaction), nil
+}
+
+// DeleteTransaction is the resolver for the deleteTransaction field.
+func (r *mutationResolver) DeleteTransaction(ctx context.Context, id string) (bool, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid transaction id: %w", err)
+	}
+
+	if err := r.TransactionService.Delete(ctx, parsedID); err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+	return true, nil
 }
 
 // UpdateExpenseCategory is the resolver for the updateExpenseCategory field.
@@ -927,6 +881,11 @@ func (r *mutationResolver) SyncPlaidConnection(ctx context.Context, id string) (
 	if err := r.PlaidService.SyncAccounts(ctx, parsedID); err != nil {
 		return false, r.mapErr(ctx, err)
 	}
+	// Bank transactions ride along with every account sync; failures here
+	// shouldn't fail the balance sync, so log-and-continue.
+	if err := r.PlaidService.SyncTransactions(ctx, parsedID); err != nil {
+		middleware.LoggerFromCtx(ctx).Error("sync plaid transactions", "connection", id, "error", err)
+	}
 	return true, nil
 }
 
@@ -1363,76 +1322,6 @@ func (r *queryResolver) Goals(ctx context.Context, userID string) ([]*model.Goal
 	return out, nil
 }
 
-// Scenario is the resolver for the scenario field.
-func (r *queryResolver) Scenario(ctx context.Context, id string) (*model.Scenario, error) {
-	parsedID, err := uuid.Parse(id)
-	if err != nil {
-		return nil, fmt.Errorf("invalid scenario id: %w", err)
-	}
-
-	scenario, err := r.ScenarioService.GetByID(ctx, parsedID)
-	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
-			return nil, nil
-		}
-		return nil, r.mapErr(ctx, err)
-	}
-
-	return mapScenarioToModel(scenario), nil
-}
-
-// Scenarios is the resolver for the scenarios field.
-func (r *queryResolver) Scenarios(ctx context.Context, userID string) ([]*model.Scenario, error) {
-	parsedUserID, err := uuid.Parse(userID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user id: %w", err)
-	}
-
-	// Resolve the authenticated user from context when available.
-	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
-		parsedUserID = resolvedID
-	}
-
-	scenarios, err := r.ScenarioService.ListByUserID(ctx, parsedUserID)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	out := make([]*model.Scenario, 0, len(scenarios))
-	for i := range scenarios {
-		scenario := scenarios[i]
-		out = append(out, mapScenarioToModel(&scenario))
-	}
-
-	return out, nil
-}
-
-// CompareScenarios is the resolver for the compareScenarios field.
-func (r *queryResolver) CompareScenarios(ctx context.Context, userID string) ([]*model.ScenarioResult, error) {
-	parsedUserID, err := uuid.Parse(userID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user id: %w", err)
-	}
-
-	// Resolve the authenticated user from context when available.
-	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
-		parsedUserID = resolvedID
-	}
-
-	results, err := r.ScenarioService.CompareByUserID(ctx, parsedUserID)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	out := make([]*model.ScenarioResult, 0, len(results))
-	for i := range results {
-		result := results[i]
-		out = append(out, mapScenarioResultToModel(&result))
-	}
-
-	return out, nil
-}
-
 // PlaidConnection is the resolver for the plaidConnection field.
 func (r *queryResolver) PlaidConnection(ctx context.Context, id string) (*model.PlaidConnection, error) {
 	parsedID, err := uuid.Parse(id)
@@ -1503,84 +1392,18 @@ func (r *queryResolver) CreatePlaidLinkToken(ctx context.Context, userID string)
 	return token, nil
 }
 
-// RetirementAccount is the resolver for the retirementAccount field.
-func (r *queryResolver) RetirementAccount(ctx context.Context, id string) (*model.RetirementAccount, error) {
-	parsedID, err := uuid.Parse(id)
-	if err != nil {
-		return nil, fmt.Errorf("invalid retirement account id: %w", err)
-	}
-
-	account, err := r.RetirementService.GetByID(ctx, parsedID)
-	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
-			return nil, nil
-		}
-		return nil, r.mapErr(ctx, err)
-	}
-
-	return mapRetirementAccountToModel(account), nil
-}
-
-// RetirementAccounts is the resolver for the retirementAccounts field.
-func (r *queryResolver) RetirementAccounts(ctx context.Context, userID string) ([]*model.RetirementAccount, error) {
-	parsedUserID, err := uuid.Parse(userID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user id: %w", err)
-	}
-
-	// Resolve the authenticated user from context when available.
-	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
-		parsedUserID = resolvedID
-	}
-
-	accounts, err := r.RetirementService.ListByUserID(ctx, parsedUserID)
+// ContributionLimits is the resolver for the contributionLimits field.
+func (r *queryResolver) ContributionLimits(ctx context.Context, taxYear int) ([]*model.ContributionLimit, error) {
+	limits, err := r.ContributionLimitService.ListByTaxYear(ctx, taxYear)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	out := make([]*model.RetirementAccount, 0, len(accounts))
-	for i := range accounts {
-		account := accounts[i]
-		out = append(out, mapRetirementAccountToModel(&account))
+	out := make([]*model.ContributionLimit, 0, len(limits))
+	for i := range limits {
+		out = append(out, mapContributionLimitToModel(&limits[i]))
 	}
-
 	return out, nil
-}
-
-// ContributionProgress is the resolver for the contributionProgress field.
-func (r *queryResolver) ContributionProgress(ctx context.Context, retirementAccountID string, taxYear int) (*model.ContributionProgress, error) {
-	parsedID, err := uuid.Parse(retirementAccountID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid retirement account id: %w", err)
-	}
-
-	progress, err := r.RetirementService.GetContributionProgress(ctx, parsedID, taxYear)
-	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
-			return nil, fmt.Errorf("retirement account not found")
-		}
-		return nil, r.mapErr(ctx, err)
-	}
-
-	return mapContributionProgressToModel(progress), nil
-}
-
-// ExpenseCategory is the resolver for the expenseCategory field.
-func (r *queryResolver) ExpenseCategory(ctx context.Context, id string) (*model.ExpenseCategory, error) {
-	parsedID, err := uuid.Parse(id)
-	if err != nil {
-		return nil, fmt.Errorf("invalid expense category id: %w", err)
-	}
-
-	category, err := r.ExpenseCategoryService.GetByID(ctx, parsedID)
-	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
-			return nil, nil
-		}
-		return nil, r.mapErr(ctx, err)
-	}
-
-	return mapExpenseCategoryToModel(category), nil
 }
 
 // ExpenseCategories is the resolver for the expenseCategories field.
@@ -1601,6 +1424,39 @@ func (r *queryResolver) ExpenseCategories(ctx context.Context, budgetID string) 
 		out = append(out, mapExpenseCategoryToModel(&category))
 	}
 
+	return out, nil
+}
+
+// Transactions is the resolver for the transactions field.
+func (r *queryResolver) Transactions(ctx context.Context, userID string, fromDate *string, toDate *string) ([]*model.Transaction, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	now := time.Now().UTC()
+	from := now.AddDate(0, -3, 0)
+	to := now
+	if fromDate != nil {
+		if parsed, parseErr := parseDate(*fromDate); parseErr == nil {
+			from = parsed
+		}
+	}
+	if toDate != nil {
+		if parsed, parseErr := parseDate(*toDate); parseErr == nil {
+			to = parsed
+		}
+	}
+
+	transactions, err := r.TransactionService.ListByUserID(ctx, parsedUserID, from, to)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	out := make([]*model.Transaction, 0, len(transactions))
+	for i := range transactions {
+		out = append(out, mapTransactionToModel(&transactions[i]))
+	}
 	return out, nil
 }
 
@@ -1641,29 +1497,6 @@ func (r *queryResolver) Expenses(ctx context.Context, budgetID string) ([]*model
 	}
 
 	return out, nil
-}
-
-// WeightedMonthlyExpenses is the resolver for the weightedMonthlyExpenses field.
-func (r *queryResolver) WeightedMonthlyExpenses(ctx context.Context, userID string) (string, error) {
-	parsedID, err := uuid.Parse(userID)
-	if err != nil {
-		return "", fmt.Errorf("invalid user id: %w", err)
-	}
-
-	authUserID, authErr := resolveUserIDFromCtx(ctx, r.UserService)
-	if authErr != nil {
-		return "", authErr
-	}
-	if parsedID != authUserID {
-		return "", fmt.Errorf("unauthorized: cannot view another user's expenses")
-	}
-
-	result, err := r.ExpenseService.GetWeightedMonthlyExpenses(ctx, parsedID)
-	if err != nil {
-		return "", r.mapErr(ctx, err)
-	}
-
-	return result.String(), nil
 }
 
 // Income is the resolver for the income field.
@@ -1831,6 +1664,29 @@ func (r *queryResolver) PaycheckDeductions(ctx context.Context, personID string)
 	}
 
 	deductions, err := r.PaycheckDeductionService.ListByPersonID(ctx, userID, parsedPersonID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	models := make([]*model.PaycheckDeduction, 0, len(deductions))
+	for i := range deductions {
+		models = append(models, mapPaycheckDeductionToModel(&deductions[i]))
+	}
+	return models, nil
+}
+
+// PaycheckDeductionsByUser is the resolver for the paycheckDeductionsByUser field.
+func (r *queryResolver) PaycheckDeductionsByUser(ctx context.Context, userID string) ([]*model.PaycheckDeduction, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
+		parsedUserID = resolvedID
+	}
+
+	deductions, err := r.PaycheckDeductionService.ListByUserID(ctx, parsedUserID)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}

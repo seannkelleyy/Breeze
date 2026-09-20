@@ -1,5 +1,5 @@
 ---
-applyTo: "breeze.web/app/planner/components/**"
+applyTo: "breeze.web/app/future/components/**"
 ---
 
 # Web UI — Component Instructions

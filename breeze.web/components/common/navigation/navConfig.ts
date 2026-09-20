@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, TrendingUp, Users, Target, UserRound, Receipt } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Users, Target, UserRound, Receipt, Wallet, Calculator, Link2 } from 'lucide-react';
 
 export type RouteNavItem = {
   label: string;
@@ -8,6 +8,7 @@ export type RouteNavItem = {
   icon: LucideIcon;
 };
 
+/** Core routes — the desktop nav bar and the mobile bottom tab bar. */
 export const routeNavItems: ReadonlyArray<RouteNavItem> = [
   {
     label: 'Dashboard',
@@ -44,5 +45,27 @@ export const routeNavItems: ReadonlyArray<RouteNavItem> = [
     to: '/goals',
     title: 'Goals',
     icon: Target,
+  },
+];
+
+/** Secondary routes — desktop nav bar only (former Tools dropdown contents). */
+export const secondaryNavItems: ReadonlyArray<RouteNavItem> = [
+  {
+    label: 'Budget',
+    to: '/budget',
+    title: 'Budget',
+    icon: Wallet,
+  },
+  {
+    label: 'Mortgage',
+    to: '/mortgage',
+    title: 'Mortgage Calculator',
+    icon: Calculator,
+  },
+  {
+    label: 'Connections',
+    to: '/plaid-connections',
+    title: 'Plaid Connections',
+    icon: Link2,
   },
 ];

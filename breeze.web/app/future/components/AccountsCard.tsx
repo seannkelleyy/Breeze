@@ -295,6 +295,7 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
               <AccountListItem
                 key={account.id}
                 account={account}
+                accounts={plannerAccounts}
                 currencyCode={currencyCode}
                 people={people}
                 assetFinanceDetails={assetFinanceDetailsByAccountId[account.id]}

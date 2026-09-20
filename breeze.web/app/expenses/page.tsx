@@ -10,6 +10,7 @@ import {
 } from '@/app/budget/hooks/recurring/recurringTemplateServices';
 import { useRegenerateBudget } from '@/app/budget/hooks/budget/useRegenerateBudget';
 import { ExpensesSummaryCard } from './components/ExpensesSummaryCard';
+import { TransactionsCard } from './components/TransactionsCard';
 import { RecurringExpenseList } from './components/RecurringExpenseList';
 
 export default function ExpensesPage() {
@@ -95,6 +96,7 @@ export default function ExpensesPage() {
       ) : (
         <>
           <ExpensesSummaryCard templates={templates} currencyCode={currencyCode} />
+          <TransactionsCard userId={userId} currencyCode={currencyCode} />
           <RecurringExpenseList
             templates={templates}
             currencyCode={currencyCode}

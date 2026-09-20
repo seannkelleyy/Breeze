@@ -46,7 +46,6 @@ type UpdateExpenseCategoryInput struct {
 
 type expenseCategoryQuerier interface {
 	CreateExpenseCategory(ctx context.Context, arg sqlc.CreateExpenseCategoryParams) (sqlc.CreateExpenseCategoryRow, error)
-	GetExpenseCategoryByID(ctx context.Context, id uuid.UUID) (sqlc.GetExpenseCategoryByIDRow, error)
 	ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListExpenseCategoriesByBudgetIDRow, error)
 	UpdateExpenseCategory(ctx context.Context, arg sqlc.UpdateExpenseCategoryParams) (sqlc.UpdateExpenseCategoryRow, error)
 	SoftDeleteExpenseCategory(ctx context.Context, id uuid.UUID) (int64, error)
@@ -77,19 +76,6 @@ func (s *ExpenseCategoryService) Create(ctx context.Context, input *CreateExpens
 	}
 
 	category := mapCreateExpenseCategoryRow(&row)
-	return &category, nil
-}
-
-func (s *ExpenseCategoryService) GetByID(ctx context.Context, id uuid.UUID) (*ExpenseCategory, error) {
-	row, err := s.queries.GetExpenseCategoryByID(ctx, id)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, ErrNotFound
-		}
-		return nil, fmt.Errorf("get expense category by id: %w", err)
-	}
-
-	category := mapGetExpenseCategoryByIDRow(&row)
 	return &category, nil
 }
 
@@ -137,22 +123,6 @@ func (s *ExpenseCategoryService) Delete(ctx context.Context, id uuid.UUID) error
 }
 
 func mapCreateExpenseCategoryRow(row *sqlc.CreateExpenseCategoryRow) ExpenseCategory {
-	return ExpenseCategory{
-		ID:               row.ID,
-		UserID:           row.UserID,
-		BudgetID:         row.BudgetID,
-		Name:             row.Name,
-		Allocation:       row.Allocation,
-		CurrentSpend:     row.CurrentSpend,
-		SourceType:       row.SourceType,
-		SourceTemplateID: uuidFromPGUUID(row.SourceTemplateID),
-		GenerationMonth:  dateFromPGDate(row.GenerationMonth),
-		CreatedAt:        timestamptzToTime(row.CreatedAt),
-		UpdatedAt:        timestamptzToTime(row.UpdatedAt),
-	}
-}
-
-func mapGetExpenseCategoryByIDRow(row *sqlc.GetExpenseCategoryByIDRow) ExpenseCategory {
 	return ExpenseCategory{
 		ID:               row.ID,
 		UserID:           row.UserID,

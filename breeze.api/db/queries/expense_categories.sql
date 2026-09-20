@@ -23,25 +23,6 @@ RETURNING
   updated_at,
   deleted_at;
 
--- name: GetExpenseCategoryByID :one
-SELECT
-  id,
-  user_id,
-  budget_id,
-  name,
-  allocation,
-  current_spend,
-  source_type,
-  source_template_id,
-  generation_month,
-  created_at,
-  updated_at,
-  deleted_at
-FROM expense_categories
-WHERE id = $1
-  AND deleted_at IS NULL
-LIMIT 1;
-
 -- name: ListExpenseCategoriesByBudgetID :many
 SELECT
   id,

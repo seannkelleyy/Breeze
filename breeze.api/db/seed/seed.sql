@@ -94,3 +94,25 @@ VALUES
   (168600, 2024),
   (176100, 2025)
 ON CONFLICT DO NOTHING;
+
+-- IRS contribution limits (2025 and 2026 tax years).
+INSERT INTO contribution_limits (account_type, tax_year, annual_limit, catch_up_age, catch_up_amount, family_annual_limit, super_catch_up_amount)
+VALUES
+  ('ACCOUNT_401K', 2025, 23500.00, 50, 7500.00, NULL, 11250.00),
+  ('ACCOUNT_403B', 2025, 23500.00, 50, 7500.00, NULL, 11250.00),
+  ('ACCOUNT_457', 2025, 23500.00, 50, 7500.00, NULL, 11250.00),
+  ('ROTH_IRA', 2025, 7000.00, 50, 1100.00, NULL, 0.00),
+  ('TRADITIONAL_IRA', 2025, 7000.00, 50, 1100.00, NULL, 0.00),
+  ('HSA', 2025, 4300.00, 55, 1000.00, 8550.00, 0.00),
+  ('ACCOUNT_401K', 2026, 24500.00, 50, 8000.00, NULL, 11250.00),
+  ('ACCOUNT_403B', 2026, 24500.00, 50, 8000.00, NULL, 11250.00),
+  ('ACCOUNT_457', 2026, 24500.00, 50, 8000.00, NULL, 11250.00),
+  ('ROTH_IRA', 2026, 7500.00, 50, 1100.00, NULL, 0.00),
+  ('TRADITIONAL_IRA', 2026, 7500.00, 50, 1100.00, NULL, 0.00),
+  ('HSA', 2026, 4400.00, 55, 1000.00, 8750.00, 0.00)
+ON CONFLICT (account_type, tax_year) DO UPDATE SET
+  annual_limit = EXCLUDED.annual_limit,
+  catch_up_age = EXCLUDED.catch_up_age,
+  catch_up_amount = EXCLUDED.catch_up_amount,
+  family_annual_limit = EXCLUDED.family_annual_limit,
+  super_catch_up_amount = EXCLUDED.super_catch_up_amount;

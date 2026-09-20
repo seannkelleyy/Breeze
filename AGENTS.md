@@ -68,7 +68,7 @@ breeze/
 - `asset_type` enum: `CHECKING`, `EMERGENCY_FUND`, `BROKERAGE`, `_401K`, `_403B`, `_457`, `ROTH_IRA`, `TRADITIONAL_IRA`, `HSA`, `HOME`, `VEHICLE`, `OTHER`
 - Numeric-prefixed values use underscore prefix (`_401K`, `_403B`, `_457`) since PostgreSQL/GraphQL enums can't start with digits.
 - Liability types (`STUDENT_LOAN`, `CREDIT_CARD`, `PERSONAL_LOAN`, `AUTO_LOAN`, `MORTGAGE`, `OTHER`) live in the separate `liability_type` enum.
-- Frontend mapping: `breeze.web/app/planner/lib/typeMapping.ts` handles `AccountType <-> ApiAssetType` translation.
+- Frontend mapping: `breeze.web/app/future/lib/typeMapping.ts` handles `AccountType <-> ApiAssetType` translation.
 
 ### Auth
 - Clerk SDK is imported **only** in `breeze.api/internal/middleware/auth.go`.
@@ -209,8 +209,8 @@ Primary index: [`docs/README.md`](docs/README.md)
 | [`resolvers.instructions.md`](docs/api/resolvers.instructions.md) | `graph/**` | Resolver patterns, error mapping, DataLoaders |
 | [`schema.instructions.md`](docs/api/schema.instructions.md) | `db/**` | Atlas schema conventions, sqlc query rules |
 | [`services.instructions.md`](docs/api/services.instructions.md) | `internal/service/**` | Service structure, transactions, auth, projections |
-| [`hooks.instructions.md`](docs/ui/hooks.instructions.md) | `app/planner/hooks/**` | React Query hook conventions in planner module |
-| [`components.instructions.md`](docs/ui/components.instructions.md) | `app/planner/components/**` | Planner component conventions and UI patterns |
+| [`hooks.instructions.md`](docs/ui/hooks.instructions.md) | `app/future/hooks/planner/**` | React Query hook conventions in planner module |
+| [`components.instructions.md`](docs/ui/components.instructions.md) | `app/future/components/**` | Planner component conventions and UI patterns |
 | [`budget.instructions.md`](docs/ui/budget.instructions.md) | `app/budget/**` | Budget module hook/provider/component conventions |
 
 ---

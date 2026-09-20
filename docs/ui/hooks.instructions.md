@@ -1,5 +1,5 @@
 ---
-applyTo: "breeze.web/app/planner/hooks/**"
+applyTo: "breeze.web/app/future/hooks/planner/**"
 ---
 
 # Web UI — Hooks Instructions
@@ -76,17 +76,20 @@ export function usePlannerAccounts() {
 ## File Structure
 
 ```
-hooks/
+app/future/hooks/
 ├── planner/
-│   ├── usePlannerAccounts.ts    # Merges assets + liabilities into PlannerAccount[]
+│   ├── usePlannerAccounts.ts    # Merges assets + liabilities into PlannerAccount[] (data/options/typeGuards/helpers/actions)
 │   ├── usePlannerModel.ts       # Orchestrator over model/ hooks (household, portfolio, targets, projections)
 │   ├── model/                   # Focused computation hooks extracted from usePlannerModel
-│   ├── usePlannerPeople.ts      # Person management (self/spouse)
+│   ├── usePlannerPeople.ts      # Person management
+│   ├── usePersonMutations.ts    # Planner person upsert/delete mutations
+│   ├── usePaycheckDeductions.ts # Per-person paycheck withholding CRUD (query keyed by person, or 'all')
+│   ├── useAccountMutations.ts   # Asset/liability create/update/delete mutations
+│   ├── useIrsLimits.ts          # IRS contribution limits
 │   ├── useTaxYear.ts            # Tax tables from the taxYearData query
 │   └── useFetchPlanner.ts       # Server data fetching
-├── useAssetsLiabilities.ts      # Raw asset/liability CRUD hooks
-├── useAccountMutations.ts       # Create/update/delete mutations
-└── useRetirementAccounts.ts     # Retirement account hooks
+├── usePlannerHydration.ts       # Hydrates planner state from the server on mount
+└── usePlannerUiState.ts         # Collapsed-section UI state
 ```
 
 ## Key Conventions

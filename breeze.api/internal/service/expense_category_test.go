@@ -15,7 +15,6 @@ import (
 
 type mockExpenseCategoryQuerier struct {
 	createExpenseCategoryFunc                 func(context.Context, sqlc.CreateExpenseCategoryParams) (sqlc.CreateExpenseCategoryRow, error)
-	getExpenseCategoryByIDFunc                func(context.Context, uuid.UUID) (sqlc.GetExpenseCategoryByIDRow, error)
 	listExpenseCategoriesFunc                 func(context.Context, uuid.UUID) ([]sqlc.ListExpenseCategoriesByBudgetIDRow, error)
 	updateExpenseCategoryFunc                 func(context.Context, sqlc.UpdateExpenseCategoryParams) (sqlc.UpdateExpenseCategoryRow, error)
 	softDeleteExpenseCategoryFunc             func(context.Context, uuid.UUID) (int64, error)
@@ -27,13 +26,6 @@ func (m *mockExpenseCategoryQuerier) CreateExpenseCategory(ctx context.Context, 
 		return m.createExpenseCategoryFunc(ctx, arg)
 	}
 	return sqlc.CreateExpenseCategoryRow{}, nil
-}
-
-func (m *mockExpenseCategoryQuerier) GetExpenseCategoryByID(ctx context.Context, id uuid.UUID) (sqlc.GetExpenseCategoryByIDRow, error) {
-	if m.getExpenseCategoryByIDFunc != nil {
-		return m.getExpenseCategoryByIDFunc(ctx, id)
-	}
-	return sqlc.GetExpenseCategoryByIDRow{}, nil
 }
 
 func (m *mockExpenseCategoryQuerier) ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListExpenseCategoriesByBudgetIDRow, error) {
@@ -107,20 +99,6 @@ func TestExpenseCategoryService_Create(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, cat.Name, result.Name)
-}
-
-func TestExpenseCategoryService_GetByID_NotFound(t *testing.T) {
-	ctx := context.Background()
-
-	mock := &mockExpenseCategoryQuerier{
-		getExpenseCategoryByIDFunc: func(_ context.Context, _ uuid.UUID) (sqlc.GetExpenseCategoryByIDRow, error) {
-			return sqlc.GetExpenseCategoryByIDRow{}, pgx.ErrNoRows
-		},
-	}
-
-	svc := NewExpenseCategoryService(mock)
-	_, err := svc.GetByID(ctx, uuid.New())
-	assert.ErrorIs(t, err, ErrNotFound)
 }
 
 func TestExpenseCategoryService_ListByBudgetID(t *testing.T) {

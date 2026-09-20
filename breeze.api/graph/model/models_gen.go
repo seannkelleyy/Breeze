@@ -9,12 +9,6 @@ import (
 	"strconv"
 )
 
-type AddContributionInput struct {
-	RetirementAccountID string `json:"retirementAccountId"`
-	ContributionDate    string `json:"contributionDate"`
-	Amount              string `json:"amount"`
-}
-
 type Asset struct {
 	ID                              string    `json:"id"`
 	UserID                          string    `json:"userId"`
@@ -27,6 +21,7 @@ type Asset struct {
 	EmployerMatchMaxPercentOfSalary string    `json:"employerMatchMaxPercentOfSalary"`
 	AnnualRate                      string    `json:"annualRate"`
 	ReturnProfile                   *string   `json:"returnProfile,omitempty"`
+	TaxTreatment                    string    `json:"taxTreatment"`
 	PersonIds                       []string  `json:"personIds"`
 	PurchaseDate                    *string   `json:"purchaseDate,omitempty"`
 	PurchasePrice                   *string   `json:"purchasePrice,omitempty"`
@@ -49,24 +44,17 @@ type Budget struct {
 	UpdatedAt       string `json:"updatedAt"`
 }
 
-type ContributionEntry struct {
-	ID                  string `json:"id"`
-	RetirementAccountID string `json:"retirementAccountId"`
-	TaxYear             int    `json:"taxYear"`
-	ContributionDate    string `json:"contributionDate"`
-	Amount              string `json:"amount"`
-	CreatedAt           string `json:"createdAt"`
-	UpdatedAt           string `json:"updatedAt"`
-}
-
-type ContributionProgress struct {
-	RetirementAccountID string `json:"retirementAccountId"`
-	TaxYear             int    `json:"taxYear"`
-	AnnualLimit         string `json:"annualLimit"`
-	ContributedYtd      string `json:"contributedYtd"`
-	RemainingAmount     string `json:"remainingAmount"`
-	PercentUsed         string `json:"percentUsed"`
-	IsMaxed             bool   `json:"isMaxed"`
+type ContributionLimit struct {
+	ID                 string                `json:"id"`
+	AccountType        RetirementAccountType `json:"accountType"`
+	TaxYear            int                   `json:"taxYear"`
+	AnnualLimit        string                `json:"annualLimit"`
+	CatchUpAge         int                   `json:"catchUpAge"`
+	CatchUpAmount      string                `json:"catchUpAmount"`
+	SuperCatchUpAmount string                `json:"superCatchUpAmount"`
+	FamilyAnnualLimit  *string               `json:"familyAnnualLimit,omitempty"`
+	CreatedAt          string                `json:"createdAt"`
+	UpdatedAt          string                `json:"updatedAt"`
 }
 
 type CreateAssetInput struct {
@@ -80,6 +68,7 @@ type CreateAssetInput struct {
 	EmployerMatchMaxPercentOfSalary string    `json:"employerMatchMaxPercentOfSalary"`
 	AnnualRate                      string    `json:"annualRate"`
 	ReturnProfile                   *string   `json:"returnProfile,omitempty"`
+	TaxTreatment                    string    `json:"taxTreatment"`
 	PurchaseDate                    *string   `json:"purchaseDate,omitempty"`
 	PurchasePrice                   *string   `json:"purchasePrice,omitempty"`
 	HomeGrowthProfile               *string   `json:"homeGrowthProfile,omitempty"`
@@ -90,10 +79,11 @@ type CreateAssetInput struct {
 }
 
 type CreateBudgetInput struct {
-	UserID          string `json:"userId"`
-	Date            string `json:"date"`
-	MonthlyIncome   string `json:"monthlyIncome"`
-	MonthlyExpenses string `json:"monthlyExpenses"`
+	UserID          string                `json:"userId"`
+	Date            string                `json:"date"`
+	MonthlyIncome   string                `json:"monthlyIncome"`
+	MonthlyExpenses string                `json:"monthlyExpenses"`
+	PayrollIncomes  []*PayrollIncomeInput `json:"payrollIncomes,omitempty"`
 }
 
 type CreateExpenseCategoryInput struct {
@@ -158,11 +148,12 @@ type CreateLiabilityInput struct {
 }
 
 type CreateNetWorthSnapshotInput struct {
-	UserID           string `json:"userId"`
-	SnapshotDate     string `json:"snapshotDate"`
-	TotalAssets      string `json:"totalAssets"`
-	TotalLiabilities string `json:"totalLiabilities"`
-	NetWorth         string `json:"netWorth"`
+	UserID           string                       `json:"userId"`
+	SnapshotDate     string                       `json:"snapshotDate"`
+	TotalAssets      string                       `json:"totalAssets"`
+	TotalLiabilities string                       `json:"totalLiabilities"`
+	NetWorth         string                       `json:"netWorth"`
+	Items            []*NetWorthSnapshotItemInput `json:"items,omitempty"`
 }
 
 type CreateRecurringExpenseInput struct {
@@ -187,33 +178,19 @@ type CreateRecurringIncomeInput struct {
 	PersonID           *string            `json:"personId,omitempty"`
 }
 
-type CreateRetirementAccountInput struct {
-	UserID         string                 `json:"userId"`
-	Name           string                 `json:"name"`
-	AccountType    RetirementAccountType  `json:"accountType"`
-	Owner          RetirementAccountOwner `json:"owner"`
-	TaxTreatment   RetirementTaxTreatment `json:"taxTreatment"`
-	CurrentBalance string                 `json:"currentBalance"`
-}
-
-type CreateScenarioInput struct {
-	UserID             string `json:"userId"`
-	Name               string `json:"name"`
-	CurrentAge         int    `json:"currentAge"`
-	RetirementAge      int    `json:"retirementAge"`
-	AnnualSpend        string `json:"annualSpend"`
-	SafeWithdrawalRate string `json:"safeWithdrawalRate"`
-	InflationRate      string `json:"inflationRate"`
-	ReturnRate         string `json:"returnRate"`
-	CurrentPortfolio   string `json:"currentPortfolio"`
-}
-
 type CreateTaxBracketInput struct {
 	Year          int          `json:"year"`
 	FilingStatus  FilingStatus `json:"filingStatus"`
 	MinimumAmount string       `json:"minimumAmount"`
 	MaximumAmount *string      `json:"maximumAmount,omitempty"`
 	Rate          string       `json:"rate"`
+}
+
+type CreateTransactionInput struct {
+	Date              string  `json:"date"`
+	Amount            string  `json:"amount"`
+	Name              string  `json:"name"`
+	ExpenseCategoryID *string `json:"expenseCategoryId,omitempty"`
 }
 
 type CreateUserInput struct {
@@ -351,25 +328,53 @@ type Mutation struct {
 }
 
 type NetWorthSnapshot struct {
-	ID               string `json:"id"`
-	UserID           string `json:"userId"`
-	SnapshotDate     string `json:"snapshotDate"`
-	TotalAssets      string `json:"totalAssets"`
-	TotalLiabilities string `json:"totalLiabilities"`
-	NetWorth         string `json:"netWorth"`
-	CreatedAt        string `json:"createdAt"`
-	UpdatedAt        string `json:"updatedAt"`
+	ID               string                  `json:"id"`
+	UserID           string                  `json:"userId"`
+	SnapshotDate     string                  `json:"snapshotDate"`
+	TotalAssets      string                  `json:"totalAssets"`
+	TotalLiabilities string                  `json:"totalLiabilities"`
+	NetWorth         string                  `json:"netWorth"`
+	CreatedAt        string                  `json:"createdAt"`
+	UpdatedAt        string                  `json:"updatedAt"`
+	Items            []*NetWorthSnapshotItem `json:"items"`
+}
+
+type NetWorthSnapshotItem struct {
+	ID         string  `json:"id"`
+	SnapshotID string  `json:"snapshotId"`
+	AccountID  *string `json:"accountId,omitempty"`
+	Label      string  `json:"label"`
+	Amount     string  `json:"amount"`
+	Kind       string  `json:"kind"`
+	CreatedAt  string  `json:"createdAt"`
+	UpdatedAt  string  `json:"updatedAt"`
+}
+
+type NetWorthSnapshotItemInput struct {
+	AccountID *string `json:"accountId,omitempty"`
+	Label     string  `json:"label"`
+	Amount    string  `json:"amount"`
+	Kind      string  `json:"kind"`
 }
 
 type PaycheckDeduction struct {
-	ID        string `json:"id"`
-	UserID    string `json:"userId"`
-	PersonID  string `json:"personId"`
-	Name      string `json:"name"`
-	Amount    string `json:"amount"`
-	Pretax    bool   `json:"pretax"`
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
+	ID              string  `json:"id"`
+	UserID          string  `json:"userId"`
+	PersonID        string  `json:"personId"`
+	Name            string  `json:"name"`
+	Amount          string  `json:"amount"`
+	Pretax          bool    `json:"pretax"`
+	Kind            string  `json:"kind"`
+	LinkedAccountID *string `json:"linkedAccountId,omitempty"`
+	CreatedAt       string  `json:"createdAt"`
+	UpdatedAt       string  `json:"updatedAt"`
+}
+
+type PayrollIncomeInput struct {
+	PersonID string `json:"personId"`
+	Name     string `json:"name"`
+	Amount   string `json:"amount"`
+	Date     string `json:"date"`
 }
 
 type PlaidAccount struct {
@@ -411,7 +416,6 @@ type PlannerPerson struct {
 	PayType              string `json:"payType"`
 	PayDay               int    `json:"payDay"`
 	PayCadence           string `json:"payCadence"`
-	Paycheck             string `json:"paycheck"`
 	HourlyRate           string `json:"hourlyRate"`
 	ExpectedHoursPerWeek string `json:"expectedHoursPerWeek"`
 	CreatedAt            string `json:"createdAt"`
@@ -449,19 +453,6 @@ type RecurringIncome struct {
 	UpdatedAt          string             `json:"updatedAt"`
 }
 
-type RetirementAccount struct {
-	ID                      string                 `json:"id"`
-	UserID                  string                 `json:"userId"`
-	Name                    string                 `json:"name"`
-	AccountType             RetirementAccountType  `json:"accountType"`
-	Owner                   RetirementAccountOwner `json:"owner"`
-	TaxTreatment            RetirementTaxTreatment `json:"taxTreatment"`
-	CurrentBalance          string                 `json:"currentBalance"`
-	AnnualContributionLimit string                 `json:"annualContributionLimit"`
-	CreatedAt               string                 `json:"createdAt"`
-	UpdatedAt               string                 `json:"updatedAt"`
-}
-
 type RetirementLadderProjection struct {
 	InitialBalance        string        `json:"initialBalance"`
 	AnnualExpenses        string        `json:"annualExpenses"`
@@ -471,39 +462,6 @@ type RetirementLadderProjection struct {
 	ProjectedSteps        []*LadderStep `json:"projectedSteps"`
 	IsSustainable         bool          `json:"isSustainable"`
 	ProjectedDepletionAge *int          `json:"projectedDepletionAge,omitempty"`
-}
-
-type Scenario struct {
-	ID                 string `json:"id"`
-	UserID             string `json:"userId"`
-	Name               string `json:"name"`
-	CurrentAge         int    `json:"currentAge"`
-	RetirementAge      int    `json:"retirementAge"`
-	AnnualSpend        string `json:"annualSpend"`
-	SafeWithdrawalRate string `json:"safeWithdrawalRate"`
-	InflationRate      string `json:"inflationRate"`
-	ReturnRate         string `json:"returnRate"`
-	CurrentPortfolio   string `json:"currentPortfolio"`
-	CreatedAt          string `json:"createdAt"`
-	UpdatedAt          string `json:"updatedAt"`
-}
-
-type ScenarioResult struct {
-	ScenarioProfileID     string `json:"scenarioProfileId"`
-	Name                  string `json:"name"`
-	CurrentAge            int    `json:"currentAge"`
-	RetirementAge         int    `json:"retirementAge"`
-	AnnualSpend           string `json:"annualSpend"`
-	SafeWithdrawalRate    string `json:"safeWithdrawalRate"`
-	InflationRate         string `json:"inflationRate"`
-	ReturnRate            string `json:"returnRate"`
-	CurrentPortfolio      string `json:"currentPortfolio"`
-	PortfolioAtRetirement string `json:"portfolioAtRetirement"`
-	RequiredPortfolio     string `json:"requiredPortfolio"`
-	ProjectedDepletionAge *int   `json:"projectedDepletionAge,omitempty"`
-	IsSustainable         bool   `json:"isSustainable"`
-	CreatedAt             string `json:"createdAt"`
-	UpdatedAt             string `json:"updatedAt"`
 }
 
 type TaxBracket struct {
@@ -531,6 +489,20 @@ type TaxYearData struct {
 	SsWageBase        string        `json:"ssWageBase"`
 }
 
+type Transaction struct {
+	ID                 string  `json:"id"`
+	UserID             string  `json:"userId"`
+	PlaidAccountID     *string `json:"plaidAccountId,omitempty"`
+	PlaidTransactionID *string `json:"plaidTransactionId,omitempty"`
+	Date               string  `json:"date"`
+	Amount             string  `json:"amount"`
+	Name               string  `json:"name"`
+	ExpenseCategoryID  *string `json:"expenseCategoryId,omitempty"`
+	Pending            bool    `json:"pending"`
+	CreatedAt          string  `json:"createdAt"`
+	UpdatedAt          string  `json:"updatedAt"`
+}
+
 type UpdateAssetInput struct {
 	ID                              string    `json:"id"`
 	Name                            string    `json:"name"`
@@ -542,6 +514,7 @@ type UpdateAssetInput struct {
 	EmployerMatchMaxPercentOfSalary string    `json:"employerMatchMaxPercentOfSalary"`
 	AnnualRate                      string    `json:"annualRate"`
 	ReturnProfile                   *string   `json:"returnProfile,omitempty"`
+	TaxTreatment                    string    `json:"taxTreatment"`
 	PurchaseDate                    *string   `json:"purchaseDate,omitempty"`
 	PurchasePrice                   *string   `json:"purchasePrice,omitempty"`
 	HomeGrowthProfile               *string   `json:"homeGrowthProfile,omitempty"`
@@ -616,10 +589,11 @@ type UpdateLiabilityInput struct {
 }
 
 type UpdateNetWorthSnapshotInput struct {
-	ID               string  `json:"id"`
-	TotalAssets      *string `json:"totalAssets,omitempty"`
-	TotalLiabilities *string `json:"totalLiabilities,omitempty"`
-	NetWorth         *string `json:"netWorth,omitempty"`
+	ID               string                       `json:"id"`
+	TotalAssets      *string                      `json:"totalAssets,omitempty"`
+	TotalLiabilities *string                      `json:"totalLiabilities,omitempty"`
+	NetWorth         *string                      `json:"netWorth,omitempty"`
+	Items            []*NetWorthSnapshotItemInput `json:"items,omitempty"`
 }
 
 type UpdateRecurringExpenseInput struct {
@@ -642,27 +616,6 @@ type UpdateRecurringIncomeInput struct {
 	StartDate          string             `json:"startDate"`
 	EndDate            *string            `json:"endDate,omitempty"`
 	PersonID           *string            `json:"personId,omitempty"`
-}
-
-type UpdateRetirementAccountInput struct {
-	ID             string                 `json:"id"`
-	Name           string                 `json:"name"`
-	AccountType    RetirementAccountType  `json:"accountType"`
-	Owner          RetirementAccountOwner `json:"owner"`
-	TaxTreatment   RetirementTaxTreatment `json:"taxTreatment"`
-	CurrentBalance string                 `json:"currentBalance"`
-}
-
-type UpdateScenarioInput struct {
-	ID                 string `json:"id"`
-	Name               string `json:"name"`
-	CurrentAge         int    `json:"currentAge"`
-	RetirementAge      int    `json:"retirementAge"`
-	AnnualSpend        string `json:"annualSpend"`
-	SafeWithdrawalRate string `json:"safeWithdrawalRate"`
-	InflationRate      string `json:"inflationRate"`
-	ReturnRate         string `json:"returnRate"`
-	CurrentPortfolio   string `json:"currentPortfolio"`
 }
 
 type UpdateTaxBracketInput struct {
@@ -699,12 +652,14 @@ type UpdateUserSetupInput struct {
 }
 
 type UpsertPaycheckDeductionInput struct {
-	ID       string `json:"id"`
-	UserID   string `json:"userId"`
-	PersonID string `json:"personId"`
-	Name     string `json:"name"`
-	Amount   string `json:"amount"`
-	Pretax   bool   `json:"pretax"`
+	ID              string  `json:"id"`
+	UserID          string  `json:"userId"`
+	PersonID        string  `json:"personId"`
+	Name            string  `json:"name"`
+	Amount          string  `json:"amount"`
+	Pretax          bool    `json:"pretax"`
+	Kind            string  `json:"kind"`
+	LinkedAccountID *string `json:"linkedAccountId,omitempty"`
 }
 
 type UpsertPlannerPersonInput struct {
@@ -721,7 +676,6 @@ type UpsertPlannerPersonInput struct {
 	PayType              string `json:"payType"`
 	PayDay               int    `json:"payDay"`
 	PayCadence           string `json:"payCadence"`
-	Paycheck             string `json:"paycheck"`
 	HourlyRate           string `json:"hourlyRate"`
 	ExpectedHoursPerWeek string `json:"expectedHoursPerWeek"`
 }
@@ -1228,61 +1182,6 @@ func (e RecurrenceInterval) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-type RetirementAccountOwner string
-
-const (
-	RetirementAccountOwnerSelf   RetirementAccountOwner = "SELF"
-	RetirementAccountOwnerSpouse RetirementAccountOwner = "SPOUSE"
-)
-
-var AllRetirementAccountOwner = []RetirementAccountOwner{
-	RetirementAccountOwnerSelf,
-	RetirementAccountOwnerSpouse,
-}
-
-func (e RetirementAccountOwner) IsValid() bool {
-	switch e {
-	case RetirementAccountOwnerSelf, RetirementAccountOwnerSpouse:
-		return true
-	}
-	return false
-}
-
-func (e RetirementAccountOwner) String() string {
-	return string(e)
-}
-
-func (e *RetirementAccountOwner) UnmarshalGQL(v any) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = RetirementAccountOwner(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid RetirementAccountOwner", str)
-	}
-	return nil
-}
-
-func (e RetirementAccountOwner) MarshalGQL(w io.Writer) {
-	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-func (e *RetirementAccountOwner) UnmarshalJSON(b []byte) error {
-	s, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	return e.UnmarshalGQL(s)
-}
-
-func (e RetirementAccountOwner) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	e.MarshalGQL(&buf)
-	return buf.Bytes(), nil
-}
-
 type RetirementAccountType string
 
 const (
@@ -1343,67 +1242,6 @@ func (e *RetirementAccountType) UnmarshalJSON(b []byte) error {
 }
 
 func (e RetirementAccountType) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	e.MarshalGQL(&buf)
-	return buf.Bytes(), nil
-}
-
-type RetirementTaxTreatment string
-
-const (
-	RetirementTaxTreatmentPreTax      RetirementTaxTreatment = "PRE_TAX"
-	RetirementTaxTreatmentRoth        RetirementTaxTreatment = "ROTH"
-	RetirementTaxTreatmentTaxDeferred RetirementTaxTreatment = "TAX_DEFERRED"
-	RetirementTaxTreatmentTaxable     RetirementTaxTreatment = "TAXABLE"
-	RetirementTaxTreatmentOther       RetirementTaxTreatment = "OTHER"
-)
-
-var AllRetirementTaxTreatment = []RetirementTaxTreatment{
-	RetirementTaxTreatmentPreTax,
-	RetirementTaxTreatmentRoth,
-	RetirementTaxTreatmentTaxDeferred,
-	RetirementTaxTreatmentTaxable,
-	RetirementTaxTreatmentOther,
-}
-
-func (e RetirementTaxTreatment) IsValid() bool {
-	switch e {
-	case RetirementTaxTreatmentPreTax, RetirementTaxTreatmentRoth, RetirementTaxTreatmentTaxDeferred, RetirementTaxTreatmentTaxable, RetirementTaxTreatmentOther:
-		return true
-	}
-	return false
-}
-
-func (e RetirementTaxTreatment) String() string {
-	return string(e)
-}
-
-func (e *RetirementTaxTreatment) UnmarshalGQL(v any) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = RetirementTaxTreatment(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid RetirementTaxTreatment", str)
-	}
-	return nil
-}
-
-func (e RetirementTaxTreatment) MarshalGQL(w io.Writer) {
-	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-func (e *RetirementTaxTreatment) UnmarshalJSON(b []byte) error {
-	s, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	return e.UnmarshalGQL(s)
-}
-
-func (e RetirementTaxTreatment) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

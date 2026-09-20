@@ -134,7 +134,7 @@ breeze.web/
 
 ## Key Types
 
-Account and liability types are defined in `app/planner/types/account.ts`:
+Account and liability types are defined in `app/future/types/account.ts`:
 
 ```typescript
 export type AccountType =

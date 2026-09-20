@@ -43,7 +43,7 @@ const makePerson = (overrides: Partial<PlannerPerson> = {}): PlannerPerson => ({
   annualSalary: 120000,
   bonusMode: 'dollars',
   bonusFrequency: 'annual' as const,
-      annualBonus: 5000,
+  annualBonus: 5000,
   incomeGrowthRate: 3,
   isPrimary: true,
   payType: 'salary',
@@ -143,13 +143,17 @@ describe('getPersonsAnnualIncome', () => {
 describe('getPlannerHouseholdSnapshot', () => {
   it('sums total annual income across the household including dollar bonuses', () => {
     const people = [
-      makePerson({ annualSalary: 120000, bonusFrequency: 'annual' as const,
-      annualBonus: 5000, bonusMode: 'dollars' }),
+      makePerson({
+        annualSalary: 120000,
+        bonusFrequency: 'annual' as const,
+        annualBonus: 5000,
+        bonusMode: 'dollars',
+      }),
       makePerson({
         id: 'p2',
         annualSalary: 80000,
         bonusFrequency: 'annual' as const,
-      annualBonus: 10,
+        annualBonus: 10,
         bonusMode: 'salary-percent',
       }),
     ];

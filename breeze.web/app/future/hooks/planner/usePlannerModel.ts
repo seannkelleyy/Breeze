@@ -10,6 +10,7 @@ import {
 } from '@/app/budget/hooks/recurring/recurringTemplateServices';
 import useIrsLimits from './useIrsLimits';
 import useTaxYear from './useTaxYear';
+import usePaycheckDeductions from './usePaycheckDeductions';
 import { useHouseholdCalculation } from './model/useHouseholdCalculation';
 import { usePortfolioCalculation } from './model/usePortfolioCalculation';
 import { useRetirementTargets } from './model/useRetirementTargets';
@@ -37,6 +38,7 @@ const usePlannerModel = () => {
   const { data: recurringExpenseTemplates } = useRecurringExpenseTemplates();
   const { irsLimits } = useIrsLimits();
   const taxTables = useTaxYear(filingStatus);
+  const { deductions: allWithholdings } = usePaycheckDeductions(null);
 
   const useInflationAdjustedValues = returnDisplayMode === 'real';
 
@@ -83,6 +85,9 @@ const usePlannerModel = () => {
     portfolio,
     taxTables,
     deductionType,
+    plannerPeople,
+    filteredAccounts,
+    allWithholdings,
   );
   const annualWithdrawal = monthlyExpenses * 12;
   const { projectionRows, finalBalances, projectedNetWorthAtTargetAge } = useProjections(
@@ -102,25 +107,18 @@ const usePlannerModel = () => {
   // Every goal worth tracking gets a milestone row: the five FIRE lifestyles
   // and income replacement, sorted by target so the table reads as a ladder.
   // Custom is always pinned last, regardless of its amount.
-  const milestoneTargets = useMemo(
-    () => {
-      const sorted = [
-        ...targets.fireTargets.map((ft) => ({ label: ft.label, target: ft.target })),
-        { label: 'Income replacement', target: targets.incomeReplacementTarget },
-      ]
-        .filter((m) => m.target > 0)
-        .sort((a, b) => a.target - b.target);
-      return plannerDesiredInvestmentAmount > 0
-        ? [...sorted, { label: 'Custom', target: plannerDesiredInvestmentAmount }]
-        : sorted;
-    },
-    [targets.fireTargets, targets.incomeReplacementTarget, plannerDesiredInvestmentAmount],
-  );
-  const milestones = useFireAchievementAges(
-    projectionRows,
-    milestoneTargets,
-    household.currentAge,
-  );
+  const milestoneTargets = useMemo(() => {
+    const sorted = [
+      ...targets.fireTargets.map((ft) => ({ label: ft.label, target: ft.target })),
+      { label: 'Income replacement', target: targets.incomeReplacementTarget },
+    ]
+      .filter((m) => m.target > 0)
+      .sort((a, b) => a.target - b.target);
+    return plannerDesiredInvestmentAmount > 0
+      ? [...sorted, { label: 'Custom', target: plannerDesiredInvestmentAmount }]
+      : sorted;
+  }, [targets.fireTargets, targets.incomeReplacementTarget, plannerDesiredInvestmentAmount]);
+  const milestones = useFireAchievementAges(projectionRows, milestoneTargets, household.currentAge);
   const accountBreakdownRows = useAccountBreakdown(
     filteredAccounts,
     household,

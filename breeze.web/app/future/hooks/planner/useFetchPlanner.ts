@@ -29,7 +29,6 @@ interface PlannerPeopleResponse {
     annualSalary: string;
     bonusMode: string;
     bonusFrequency: string;
-    paycheck: string;
     annualBonus: string;
     incomeGrowthRate: string;
     createdAt: string;
@@ -49,6 +48,7 @@ interface AssetsResponse {
     employerMatchMaxPercentOfSalary: string;
     annualRate: string;
     returnProfile: string | null;
+    taxTreatment: string;
     personIds: string[];
     purchaseDate: string | null;
     purchasePrice: string | null;
@@ -138,7 +138,6 @@ const useFetchPlanner = () => {
           | 'hourly'
           | 'commission',
         payDay: ((p as Record<string, unknown>).payDay as number) ?? 1,
-        paycheck: ((p as Record<string, unknown>).paycheck as string) || '',
         payCadence: (((p as Record<string, unknown>).payCadence as string) || 'biweekly') as
           | 'weekly'
           | 'biweekly'
@@ -162,6 +161,7 @@ const useFetchPlanner = () => {
         startingBalance: Number(a.currentValue) || 0,
         annualRate: (Number(a.annualRate) || 0) * 100,
         returnProfile: a.returnProfile as PlannerAccount['returnProfile'] | null,
+        taxTreatment: a.taxTreatment || 'PRE_TAX',
         purchaseDate: a.purchaseDate ?? null,
         purchasePrice: a.purchasePrice ? Number(a.purchasePrice) : null,
         homeGrowthProfile: a.homeGrowthProfile ?? null,

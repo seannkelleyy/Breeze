@@ -58,6 +58,14 @@ func (m *mockPlaidQuerier) GetPlaidAccountsByConnectionID(ctx context.Context, c
 	return []sqlc.PlaidAccount{}, nil
 }
 
+func (m *mockPlaidQuerier) ListActivePlaidConnections(ctx context.Context) ([]sqlc.PlaidConnection, error) {
+	return []sqlc.PlaidConnection{}, nil
+}
+
+func (m *mockPlaidQuerier) UpsertPlaidTransaction(ctx context.Context, arg sqlc.UpsertPlaidTransactionParams) (sqlc.Transaction, error) {
+	return sqlc.Transaction{}, nil
+}
+
 func (m *mockPlaidQuerier) SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error) {
 	return 1, nil
 }

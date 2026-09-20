@@ -13,7 +13,7 @@ const person: PlannerPerson = {
   annualSalary: 120000,
   bonusMode: 'dollars',
   bonusFrequency: 'annual' as const,
-      annualBonus: 0,
+  annualBonus: 0,
   incomeGrowthRate: 0,
   isPrimary: true,
   payType: 'salary',

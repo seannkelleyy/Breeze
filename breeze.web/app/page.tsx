@@ -29,13 +29,9 @@ import {
   LinkIcon,
 } from 'lucide-react';
 import type { Goal } from '@/app/goals/types/goal';
+import { NetWorthHistoryCard } from '@/components/common/NetWorthHistoryCard';
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(value);
+
 
 const quickLinks = [
   {
@@ -64,7 +60,7 @@ const quickLinks = [
   },
   {
     label: 'Mortgage Calculator',
-    href: '/tools/mortgage',
+    href: '/mortgage',
     icon: Home,
     description: 'Analyze amortization, refinance choices, and extra payment strategies.',
   },
@@ -99,6 +95,7 @@ function DashboardContent() {
     setupCompleted,
     monthlyExpenses,
     disclaimerAccepted,
+    currencyCode,
   } = useCurrentUser();
   const { request } = useGraphql();
   const { getGoals } = useGoalsApi();
@@ -159,6 +156,11 @@ function DashboardContent() {
         totalAssets,
         totalLiabilities,
         netWorth,
+        assets: assets.map((a) => ({ name: a.name, value: Number(a.currentValue) || 0 })),
+        liabilities: liabilities.map((l) => ({
+          name: l.name,
+          value: Number(l.currentBalance) || 0,
+        })),
         assetCount: assets.length,
         liabilityCount: liabilities.length,
         assetsByType: Object.fromEntries(assetsByType),
@@ -174,6 +176,13 @@ function DashboardContent() {
     enabled: isSignedIn && !!userId,
     staleTime: 5 * 60 * 1000,
   });
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode,
+      maximumFractionDigits: 0,
+    }).format(value);
 
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
@@ -310,6 +319,15 @@ function DashboardContent() {
           </CardContent>
         </Card>
       </div>
+
+      <NetWorthHistoryCard
+        userId={userId}
+        currencyCode={currencyCode}
+        accounts={[
+          ...(data?.assets ?? []).map((a) => ({ ...a, kind: 'ASSET' as const })),
+          ...(data?.liabilities ?? []).map((l) => ({ ...l, kind: 'LIABILITY' as const })),
+        ]}
+      />
 
       {/* Setup Progress */}
       {!setupCompleted && (

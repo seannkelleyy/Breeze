@@ -94,61 +94,6 @@ func (q *Queries) CreateExpenseCategory(ctx context.Context, arg CreateExpenseCa
 	return i, err
 }
 
-const getExpenseCategoryByID = `-- name: GetExpenseCategoryByID :one
-SELECT
-  id,
-  user_id,
-  budget_id,
-  name,
-  allocation,
-  current_spend,
-  source_type,
-  source_template_id,
-  generation_month,
-  created_at,
-  updated_at,
-  deleted_at
-FROM expense_categories
-WHERE id = $1
-  AND deleted_at IS NULL
-LIMIT 1
-`
-
-type GetExpenseCategoryByIDRow struct {
-	ID               uuid.UUID          `json:"id"`
-	UserID           uuid.UUID          `json:"user_id"`
-	BudgetID         uuid.UUID          `json:"budget_id"`
-	Name             string             `json:"name"`
-	Allocation       decimal.Decimal    `json:"allocation"`
-	CurrentSpend     decimal.Decimal    `json:"current_spend"`
-	SourceType       ExpenseSourceType  `json:"source_type"`
-	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
-	GenerationMonth  pgtype.Date        `json:"generation_month"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) GetExpenseCategoryByID(ctx context.Context, id uuid.UUID) (GetExpenseCategoryByIDRow, error) {
-	row := q.db.QueryRow(ctx, getExpenseCategoryByID, id)
-	var i GetExpenseCategoryByIDRow
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.BudgetID,
-		&i.Name,
-		&i.Allocation,
-		&i.CurrentSpend,
-		&i.SourceType,
-		&i.SourceTemplateID,
-		&i.GenerationMonth,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.DeletedAt,
-	)
-	return i, err
-}
-
 const listExpenseCategoriesByBudgetID = `-- name: ListExpenseCategoriesByBudgetID :many
 SELECT
   id,

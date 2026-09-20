@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"breeze.api/internal/db/sqlc"
 	"github.com/google/uuid"
@@ -24,10 +25,23 @@ type PlaidAccount struct {
 	ISOCurrencyCode *string
 }
 
+// PlaidTransaction is one bank transaction pulled from Plaid. Amount is
+// positive for money out (spend) and negative for money in, matching Plaid.
+type PlaidTransaction struct {
+	ExternalID     string
+	PlaidAccountID string
+	Date           time.Time
+	Amount         decimal.Decimal
+	Name           string
+	Pending        bool
+}
+
 // PlaidClient abstracts the external Plaid API calls.
 type PlaidClient interface {
 	// FetchAccounts returns accounts for an access token.
 	FetchAccounts(ctx context.Context, accessToken string) ([]PlaidAccount, error)
+	// FetchTransactions returns posted and pending transactions in the range.
+	FetchTransactions(ctx context.Context, accessToken string, startDate, endDate time.Time) ([]PlaidTransaction, error)
 	// ExchangePublicToken exchanges a Link public_token for an access_token and item_id and institution info.
 	ExchangePublicToken(ctx context.Context, publicToken string) (accessToken, itemID, institutionID, institutionName, environment string, err error)
 	// CreateLinkToken creates a Link token for initializing Plaid Link.
@@ -46,8 +60,10 @@ type plaidQuerier interface {
 	UpsertPlaidAccount(ctx context.Context, arg sqlc.UpsertPlaidAccountParams) (sqlc.PlaidAccount, error)
 	UpdatePlaidConnection(ctx context.Context, arg sqlc.UpdatePlaidConnectionParams) (sqlc.PlaidConnection, error)
 	ListPlaidConnectionsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.PlaidConnection, error)
+	ListActivePlaidConnections(ctx context.Context) ([]sqlc.PlaidConnection, error)
 	GetPlaidAccountsByConnectionID(ctx context.Context, connectionID uuid.UUID) ([]sqlc.PlaidAccount, error)
 	SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error)
+	UpsertPlaidTransaction(ctx context.Context, arg sqlc.UpsertPlaidTransactionParams) (sqlc.Transaction, error)
 	LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) error
 	UnlinkAssetFromPlaidAccount(ctx context.Context, id uuid.UUID) error
 	LinkLiabilityToPlaidAccount(ctx context.Context, arg sqlc.LinkLiabilityToPlaidAccountParams) error
@@ -295,3 +311,68 @@ func (s *PlaidService) SyncAccounts(ctx context.Context, connectionID uuid.UUID)
 
 // Helper timestamp conversion used elsewhere in service layer (consistent with other services)
 // timestamptzToTime removed; service-wide helper exists in other files.
+
+// SyncTransactions pulls the last 90 days of transactions for a connection
+// and upserts them, keyed by the Plaid transaction id. Assigned categories
+// survive re-syncs.
+func (s *PlaidService) SyncTransactions(ctx context.Context, connectionID uuid.UUID) error {
+	conn, err := s.queries.GetPlaidConnectionByID(ctx, connectionID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		return fmt.Errorf("get plaid connection: %w", err)
+	}
+
+	accounts, err := s.queries.GetPlaidAccountsByConnectionID(ctx, connectionID)
+	if err != nil {
+		return fmt.Errorf("list plaid accounts: %w", err)
+	}
+	localAccountByExternal := make(map[string]uuid.UUID, len(accounts))
+	for _, a := range accounts {
+		localAccountByExternal[a.ExternalID] = a.ID
+	}
+
+	end := time.Now().UTC()
+	start := end.AddDate(0, 0, -90)
+	transactions, err := s.client.FetchTransactions(ctx, conn.AccessToken, start, end)
+	if err != nil {
+		return fmt.Errorf("fetch transactions: %w", err)
+	}
+
+	for _, t := range transactions {
+		localAccountID, ok := localAccountByExternal[t.PlaidAccountID]
+		if !ok {
+			continue
+		}
+		externalID := t.ExternalID
+		if _, err := s.queries.UpsertPlaidTransaction(ctx, sqlc.UpsertPlaidTransactionParams{
+			UserID:             conn.UserID,
+			PlaidAccountID:     uuidToPGUUID(&localAccountID),
+			PlaidTransactionID: &externalID,
+			Date:               pgtype.Date{Time: t.Date, Valid: true},
+			Amount:             t.Amount,
+			Name:               t.Name,
+			Pending:            t.Pending,
+		}); err != nil {
+			return fmt.Errorf("upsert plaid transaction: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// SyncConnection refreshes account balances, then pulls the latest
+// transactions. A transaction failure fails the whole call so scheduled runs
+// surface it; callers may choose to log-and-continue.
+func (s *PlaidService) SyncConnection(ctx context.Context, connectionID uuid.UUID) error {
+	if err := s.SyncAccounts(ctx, connectionID); err != nil {
+		return err
+	}
+	return s.SyncTransactions(ctx, connectionID)
+}
+
+// ListAllConnections returns every active connection across all users.
+func (s *PlaidService) ListAllConnections(ctx context.Context) ([]sqlc.PlaidConnection, error) {
+	return s.queries.ListActivePlaidConnections(ctx)
+}

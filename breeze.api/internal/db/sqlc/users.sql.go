@@ -497,22 +497,6 @@ func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 	return items, nil
 }
 
-const softDeleteUser = `-- name: SoftDeleteUser :execrows
-UPDATE users
-SET deleted_at = now(),
-    updated_at = now()
-WHERE id = $1
-  AND deleted_at IS NULL
-`
-
-func (q *Queries) SoftDeleteUser(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteUser, id)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected(), nil
-}
-
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET

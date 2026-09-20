@@ -53,6 +53,11 @@ export const FormattedNumberInput = ({
     }
   }, [value, isFocused, error]);
 
+  // While an invalid draft is pending, keep showing exactly what the user
+  // typed — reverting to the old value made errors flash and disappear.
+  const displayValue =
+    isFocused || error ? draftValue : formatNumber(value, maxFractionDigits);
+
   const commitValue = (rawValue: string) => {
     const cleaned = rawValue.replace(/,/g, '').trim();
     if (cleaned === '') {
@@ -81,11 +86,11 @@ export const FormattedNumberInput = ({
         inputMode={inputMode}
         placeholder={placeholder}
         className={error ? 'border-destructive' : ''}
-        value={isFocused ? draftValue : formatNumber(value, maxFractionDigits)}
+        value={displayValue}
         onFocus={() => {
           setIsFocused(true);
-          setDraftValue(String(value));
-          setError(null);
+          // Keep an invalid draft on screen so it can be corrected in place.
+          if (!error) setDraftValue(String(value));
         }}
         onChange={(event) => {
           setDraftValue(event.target.value);

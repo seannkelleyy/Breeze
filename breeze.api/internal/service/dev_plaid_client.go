@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
+	"time"
 )
 
 // NewDevPlaidClient returns a PlaidClient implementation suitable for local development and UI testing.
@@ -55,3 +56,26 @@ func (d *devPlaidClient) FetchAccounts(ctx context.Context, accessToken string) 
 }
 
 func ptrString(s string) *string { return &s }
+
+func (d *devPlaidClient) FetchTransactions(ctx context.Context, accessToken string, startDate, endDate time.Time) ([]PlaidTransaction, error) {
+	amount1 := decimal.MustParse("-42.50")
+	amount2 := decimal.MustParse("19.99")
+	return []PlaidTransaction{
+		{
+			ExternalID:     "dev-txn-1",
+			PlaidAccountID: "dev-ext-1",
+			Date:           startDate.AddDate(0, 0, 3),
+			Amount:         amount1,
+			Name:           "Dev Paycheck Deposit",
+			Pending:        false,
+		},
+		{
+			ExternalID:     "dev-txn-2",
+			PlaidAccountID: "dev-ext-1",
+			Date:           startDate.AddDate(0, 0, 5),
+			Amount:         amount2,
+			Name:           "Dev Grocery Store",
+			Pending:        true,
+		},
+	}, nil
+}

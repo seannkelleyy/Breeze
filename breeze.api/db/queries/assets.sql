@@ -10,6 +10,7 @@ INSERT INTO assets (
   employer_match_max_percent_of_salary,
   annual_rate,
   return_profile,
+  tax_treatment,
   person_ids,
   purchase_date,
   purchase_price,
@@ -17,7 +18,7 @@ INSERT INTO assets (
   vehicle_depreciation_profile,
   linked_liability_id
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 RETURNING
   id,
   user_id,
@@ -30,6 +31,7 @@ RETURNING
   employer_match_max_percent_of_salary,
   annual_rate,
   return_profile,
+  tax_treatment,
   person_ids,
   purchase_date,
   purchase_price,
@@ -55,6 +57,7 @@ SELECT
   employer_match_max_percent_of_salary,
   annual_rate,
   return_profile,
+  tax_treatment,
   person_ids,
   purchase_date,
   purchase_price,
@@ -84,6 +87,7 @@ SELECT
   employer_match_max_percent_of_salary,
   annual_rate,
   return_profile,
+  tax_treatment,
   person_ids,
   purchase_date,
   purchase_price,
@@ -112,6 +116,7 @@ SET
   employer_match_max_percent_of_salary = $8,
   annual_rate = $9,
   return_profile = $10,
+  tax_treatment = $17,
   person_ids = $11,
   purchase_date = $12,
   purchase_price = $13,
@@ -137,6 +142,7 @@ RETURNING
   employer_match_max_percent_of_salary,
   annual_rate,
   return_profile,
+  tax_treatment,
   person_ids,
   purchase_date,
   purchase_price,

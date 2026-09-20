@@ -1,148 +1,259 @@
 import type { PlannerPerson } from '../types/person';
+import type { PlannerAccount } from '../types/account';
 import type { TaxYearTables } from '../types/tax';
 import { getEffectiveTaxRate } from './tax';
-import { getPaychecksPerYear } from './plannerMath';
+import {
+  getEmployeeMonthlyContribution,
+  getPaychecksPerYear,
+  getPersonPaydaysForMonth,
+} from './plannerMath';
 
 /**
- * Per-person paycheck modeling: gross pay plus itemized deductions, from which
- * we estimate taxes and arrive at the take-home amount that lands in the bank.
+ * Monthly income waterfall for one person:
+ *   gross − pre-tax savings − pre-tax withholdings = taxable
+ *   → taxes (est.) = after-tax → − savings − post-tax withholdings = take-home
+ *
+ * Savings-type deductions (401(k), HSA) are account-backed: their contributions
+ * come from the accounts system and never land in the bank. Pre-tax accounts
+ * (401(k) traditional, HSA) reduce taxable income; Roth does not.
+ * Insurance/FSA-type withholdings are non-saved: they reduce spendable income.
  */
 
-export interface PaycheckDeduction {
+export interface PaycheckWithholding {
   id: string;
+  personId: string;
   name: string;
-  /** Amount per paycheck. */
+  /** Monthly amount. */
   amount: number;
-  /** Pre-tax deductions (401k, HSA, FSA...) reduce taxable income. */
   pretax: boolean;
-  /** Account the deducted money flows into (401k/HSA/investment). */
+  /** Category: INSURANCE, FSA, HSA, OTHER. */
+  kind: string;
+  /** Optional account the withheld money flows into (e.g. an HSA). */
   linkedAccountId: string | null;
 }
 
-export interface PersonPaycheckConfig {
-  /** Overrides the derived gross-per-check (annual base / paychecks per year). */
-  grossPerCheck: number | null;
-  deductions: PaycheckDeduction[];
+export const WITHHOLDING_KIND_OPTIONS = [
+  { value: 'INSURANCE', label: 'Insurance' },
+  { value: 'FSA', label: 'FSA' },
+  { value: 'HSA', label: 'HSA' },
+  { value: 'OTHER', label: 'Other' },
+] as const;
+
+export function withholdingKindLabel(kind: string | undefined): string {
+  return (
+    WITHHOLDING_KIND_OPTIONS.find((o) => o.value === kind)?.label ??
+    WITHHOLDING_KIND_OPTIONS[WITHHOLDING_KIND_OPTIONS.length - 1].label
+  );
 }
 
-export interface PaycheckComputation {
-  grossPerCheck: number;
-  pretaxPerCheck: number;
-  taxablePerCheck: number;
-  taxRate: number;
-  taxesPerCheck: number;
-  posttaxPerCheck: number;
-  netPerCheck: number;
-  checksPerYear: number;
-  grossAnnual: number;
-  netAnnual: number;
+export interface PersonWaterfall {
+  grossMonthly: number;
+  /** 401(k)/HSA employee contributions (savings — never lands in the bank). */
+  savingsMonthly: number;
+  /** Savings into pre-tax accounts (reduce taxable income). */
+  pretaxSavingsMonthly: number;
+  /** Savings into Roth accounts (post-tax; do not reduce taxable income). */
+  rothSavingsMonthly: number;
+  /** Non-saved pre-tax withholdings (insurance, FSA…). */
+  pretaxWithholdingsMonthly: number;
+  /** Post-tax withholdings. */
+  posttaxWithholdingsMonthly: number;
+  taxableMonthly: number;
+  effectiveRate: number;
+  taxesMonthly: number;
+  /** Gross minus taxes. */
+  netAfterTaxesMonthly: number;
+  /** What actually lands in the bank account each month. */
+  takeHomeMonthly: number;
+  /** Annual take-home. */
+  takeHomeAnnual: number;
 }
 
-const EMPTY_CONFIG: PersonPaycheckConfig = { grossPerCheck: null, deductions: [] };
+const SAVINGS_ACCOUNT_TYPES = new Set(['401k', '403b', '457', 'hsa']);
 
-export function parsePaycheckConfig(json: string | undefined | null): PersonPaycheckConfig {
-  if (!json) return { ...EMPTY_CONFIG, deductions: [] };
-  try {
-    const parsed = JSON.parse(json) as Partial<PersonPaycheckConfig> | null;
-    if (!parsed || typeof parsed !== 'object') return { ...EMPTY_CONFIG, deductions: [] };
-    return {
-      grossPerCheck: typeof parsed.grossPerCheck === 'number' ? parsed.grossPerCheck : null,
-      deductions: Array.isArray(parsed.deductions)
-        ? parsed.deductions
-            .filter((d) => d && typeof d.name === 'string' && typeof d.amount === 'number')
-            .map((d, i) => ({
-              id: d.id ?? `deduction-${i}`,
-              name: d.name,
-              amount: d.amount,
-              pretax: d.pretax ?? true,
-              linkedAccountId: d.linkedAccountId ?? null,
-            }))
-        : [],
-    };
-  } catch {
-    return { ...EMPTY_CONFIG, deductions: [] };
-  }
-}
-
-export function serializePaycheckConfig(config: PersonPaycheckConfig): string {
-  return JSON.stringify(config);
-}
-
-export function isPaycheckConfigured(person: PlannerPerson): boolean {
-  const config = parsePaycheckConfig(person.paycheck);
-  return config.grossPerCheck !== null || config.deductions.length > 0;
-}
-
-export function makePaycheckDeduction(): PaycheckDeduction {
-  return {
-    id: crypto.randomUUID(),
-    name: '',
-    amount: 0,
-    pretax: true,
-    linkedAccountId: null,
-  };
+function isPretaxTreatment(account: PlannerAccount): boolean {
+  return account.taxTreatment !== 'ROTH';
 }
 
 /**
- * Full paycheck waterfall for one person:
- *   gross − pre-tax deductions = taxable → taxes (est.) → − post-tax deductions = net
+ * Payroll-deducted savings accounts (401(k), 403(b), 457, HSA) owned by this
+ * person. IRAs are excluded — they are not payroll-deducted.
  */
-export function computePaycheck(
+export function getPersonSavingsAccounts(
   person: PlannerPerson,
+  accounts: PlannerAccount[],
+): PlannerAccount[] {
+  return accounts.filter(
+    (a) => a.personIds.includes(person.id) && SAVINGS_ACCOUNT_TYPES.has(a.accountType),
+  );
+}
+
+/**
+ * Employee contributions to payroll-deducted savings accounts (401(k), 403(b),
+ * 457, HSA), split by tax treatment. IRAs are excluded — they are not
+ * payroll-deducted.
+ */
+export function getPersonSavingsSplit(
+  person: PlannerPerson,
+  accounts: PlannerAccount[],
+): { pretaxMonthly: number; rothMonthly: number } {
+  let pretaxMonthly = 0;
+  let rothMonthly = 0;
+  for (const a of getPersonSavingsAccounts(person, accounts)) {
+    if (isPretaxTreatment(a)) pretaxMonthly += getEmployeeMonthlyContribution(a, [person]);
+    else rothMonthly += getEmployeeMonthlyContribution(a, [person]);
+  }
+  return { pretaxMonthly, rothMonthly };
+}
+
+export function getPersonSavingsMonthly(person: PlannerPerson, accounts: PlannerAccount[]): number {
+  const { pretaxMonthly, rothMonthly } = getPersonSavingsSplit(person, accounts);
+  return pretaxMonthly + rothMonthly;
+}
+
+export function computePersonWaterfall(
+  person: PlannerPerson,
+  accounts: PlannerAccount[],
+  withholdings: PaycheckWithholding[],
   taxTables: TaxYearTables | null,
   deductionType: string,
-): PaycheckComputation {
-  const config = parsePaycheckConfig(person.paycheck);
-  const checksPerYear = getPaychecksPerYear(person.payCadence);
+): PersonWaterfall {
   const baseAnnual =
     person.payType === 'hourly'
       ? person.hourlyRate * person.expectedHoursPerWeek * 52
       : person.annualSalary;
-  const grossPerCheck = config.grossPerCheck ?? baseAnnual / checksPerYear;
-  const grossAnnual = grossPerCheck * checksPerYear;
+  const grossMonthly = baseAnnual / 12;
 
-  const pretaxPerCheck = config.deductions
-    .filter((d) => d.pretax)
-    .reduce((sum, d) => sum + d.amount, 0);
-  const posttaxPerCheck = config.deductions
-    .filter((d) => !d.pretax)
-    .reduce((sum, d) => sum + d.amount, 0);
+  const { pretaxMonthly: pretaxSavingsMonthly, rothMonthly: rothSavingsMonthly } =
+    getPersonSavingsSplit(person, accounts);
+  const savingsMonthly = pretaxSavingsMonthly + rothSavingsMonthly;
+  // Only this person's withholdings — callers may pass the whole household list.
+  const personWithholdings = withholdings.filter((w) => w.personId === person.id);
+  const pretaxWithholdingsMonthly = personWithholdings
+    .filter((w) => w.pretax)
+    .reduce((sum, w) => sum + w.amount, 0);
+  const posttaxWithholdingsMonthly = personWithholdings
+    .filter((w) => !w.pretax)
+    .reduce((sum, w) => sum + w.amount, 0);
 
-  const taxablePerCheck = Math.max(0, grossPerCheck - pretaxPerCheck);
-  const taxableAnnual = taxablePerCheck * checksPerYear;
-  const taxRate = taxTables
+  // Pre-tax savings and withholdings reduce taxable income; Roth does not.
+  const taxableMonthly = Math.max(
+    0,
+    grossMonthly - pretaxSavingsMonthly - pretaxWithholdingsMonthly,
+  );
+  const taxableAnnual = taxableMonthly * 12;
+  // getEffectiveTaxRate returns a fraction (0.22 = 22%).
+  const effectiveRate = taxTables
     ? getEffectiveTaxRate(taxableAnnual, taxTables, deductionType).effectiveRate
-    : 0.2;
-  const taxesPerCheck = taxablePerCheck * taxRate;
+    : 1 - NEUTRAL_NET_FACTOR;
+  const taxesMonthly = taxableMonthly * effectiveRate;
 
-  const netPerCheck = grossPerCheck - pretaxPerCheck - taxesPerCheck - posttaxPerCheck;
+  const netAfterTaxesMonthly = grossMonthly - taxesMonthly;
+  // Savings and post-tax withholdings leave the paycheck before it hits the bank.
+  const takeHomeMonthly = netAfterTaxesMonthly - savingsMonthly - posttaxWithholdingsMonthly;
 
   return {
-    grossPerCheck,
-    pretaxPerCheck,
-    taxablePerCheck,
-    taxRate,
-    taxesPerCheck,
-    posttaxPerCheck,
-    netPerCheck,
-    checksPerYear,
-    grossAnnual,
-    netAnnual: netPerCheck * checksPerYear,
+    grossMonthly,
+    savingsMonthly,
+    pretaxSavingsMonthly,
+    rothSavingsMonthly,
+    pretaxWithholdingsMonthly,
+    posttaxWithholdingsMonthly,
+    taxableMonthly,
+    effectiveRate,
+    taxesMonthly,
+    netAfterTaxesMonthly,
+    takeHomeMonthly,
+    takeHomeAnnual: takeHomeMonthly * 12,
   };
 }
 
-/** Annual take-home for a person; falls back to the estimated waterfall when no paycheck is configured. */
-export function getPersonNetAnnual(
-  person: PlannerPerson,
+const NEUTRAL_NET_FACTOR = 0.8;
+
+export interface PayrollIncomeItem {
+  personId: string;
+  name: string;
+  amount: number;
+  /** YYYY-MM-DD */
+  date: string;
+}
+
+/**
+ * One income row per actual payday in the given month, per person, using the
+ * net (take-home) per-check amount from the paycheck waterfall. This is what
+ * budget months consume so planned income matches real paydays — including
+ * three-check biweekly months.
+ */
+export function getMonthPayrollIncomes(
+  people: PlannerPerson[],
+  accounts: PlannerAccount[],
+  withholdings: PaycheckWithholding[],
   taxTables: TaxYearTables | null,
   deductionType: string,
-): number {
-  if (isPaycheckConfigured(person)) {
-    return computePaycheck(person, taxTables, deductionType).netAnnual;
+  year: number,
+  month: number, // 1-based
+): PayrollIncomeItem[] {
+  const items: PayrollIncomeItem[] = [];
+  for (const person of people) {
+    const waterfall = computePersonWaterfall(person, accounts, withholdings, taxTables, deductionType);
+    const checksPerYear = getPaychecksPerYear(person.payCadence);
+    if (checksPerYear <= 0) continue;
+    const netPerCheck = Math.round((waterfall.takeHomeAnnual / checksPerYear) * 100) / 100;
+
+    for (const payday of getPersonPaydaysForMonth(person, year, month - 1)) {
+      const pad = (n: number) => String(n).padStart(2, '0');
+      items.push({
+        personId: person.id,
+        name: `${person.name || 'Household'} paycheck`,
+        amount: netPerCheck,
+        date: `${payday.getFullYear()}-${pad(payday.getMonth() + 1)}-${pad(payday.getDate())}`,
+      });
+    }
   }
-  const baseAnnual =
-    person.payType === 'hourly'
-      ? person.hourlyRate * person.expectedHoursPerWeek * 52
-      : person.annualSalary;
-  return baseAnnual * 0.8; // neutral take-home estimate, matching the tax fallback
+  return items;
+}
+
+/**
+ * Household-wide waterfall: the sum of every person's waterfall. The
+ * effective rate is recomputed against the combined gross so the ratio stays
+ * meaningful.
+ */
+export function computeHouseholdWaterfall(
+  people: PlannerPerson[],
+  accounts: PlannerAccount[],
+  withholdings: PaycheckWithholding[],
+  taxTables: TaxYearTables | null,
+  deductionType: string,
+): PersonWaterfall {
+  const sum: PersonWaterfall = {
+    grossMonthly: 0,
+    savingsMonthly: 0,
+    pretaxSavingsMonthly: 0,
+    rothSavingsMonthly: 0,
+    pretaxWithholdingsMonthly: 0,
+    posttaxWithholdingsMonthly: 0,
+    taxableMonthly: 0,
+    effectiveRate: 0,
+    taxesMonthly: 0,
+    netAfterTaxesMonthly: 0,
+    takeHomeMonthly: 0,
+    takeHomeAnnual: 0,
+  };
+
+  for (const person of people) {
+    const wf = computePersonWaterfall(person, accounts, withholdings, taxTables, deductionType);
+    sum.grossMonthly += wf.grossMonthly;
+    sum.savingsMonthly += wf.savingsMonthly;
+    sum.pretaxSavingsMonthly += wf.pretaxSavingsMonthly;
+    sum.rothSavingsMonthly += wf.rothSavingsMonthly;
+    sum.pretaxWithholdingsMonthly += wf.pretaxWithholdingsMonthly;
+    sum.posttaxWithholdingsMonthly += wf.posttaxWithholdingsMonthly;
+    sum.taxableMonthly += wf.taxableMonthly;
+    sum.taxesMonthly += wf.taxesMonthly;
+    sum.netAfterTaxesMonthly += wf.netAfterTaxesMonthly;
+    sum.takeHomeMonthly += wf.takeHomeMonthly;
+    sum.takeHomeAnnual += wf.takeHomeAnnual;
+  }
+  sum.effectiveRate = sum.grossMonthly > 0 ? sum.taxesMonthly / sum.grossMonthly : 0;
+  return sum;
 }

@@ -10,8 +10,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from '@/app/future/providers/PlannerStateProvider';
+import { usePlannerHydration } from '@/app/future/hooks/usePlannerHydration';
+import { Progress } from '@/components/ui/progress';
+import { formatCurrencyWithCode } from '@/lib/utils';
 import useGoalsApi from './hooks/useGoalsApi';
 import { Goal, GOAL_CATEGORIES } from './types/goal';
+import type { PlannerAccount } from '@/app/future/types/account';
 import { computeFooStepCompletion } from './lib/fooCompletion';
 
 const GOALS_QUERY_KEY = ['goals'];
@@ -30,6 +34,9 @@ function GoalsContent() {
   const { plannerAccounts, plannerSummary } = usePlannerState();
   const queryClient = useQueryClient();
   const api = useGoalsApi();
+
+  // Goal progress reads live account balances from the planner state.
+  usePlannerHydration();
 
   const {
     data: goals,
@@ -144,7 +151,7 @@ function GoalsContent() {
 
       <FinancialOrderSection steps={footSteps} />
 
-      <GoalsList goals={regularGoals} />
+      <GoalsList goals={regularGoals} accounts={plannerAccounts} />
     </>
   );
 }
@@ -183,7 +190,7 @@ function FinancialOrderSection({ steps }: { steps: Goal[] }) {
   );
 }
 
-function GoalsList({ goals }: { goals: Goal[] }) {
+function GoalsList({ goals, accounts }: { goals: Goal[]; accounts: PlannerAccount[] }) {
   const queryClient = useQueryClient();
   const api = useGoalsApi();
   const [showForm, setShowForm] = useState(false);
@@ -315,6 +322,7 @@ function GoalsList({ goals }: { goals: Goal[] }) {
                     {goal.category && (
                       <p className="text-muted-foreground text-xs">{levelLabel(goal.category)}</p>
                     )}
+                    <GoalProgressRow goal={goal} accounts={accounts} />
                   </>
                 )}
               </div>
@@ -331,6 +339,28 @@ function GoalsList({ goals }: { goals: Goal[] }) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function GoalProgressRow({ goal, accounts }: { goal: Goal; accounts: PlannerAccount[] }) {
+  const { currencyCode } = useCurrentUser();
+  const target = Number(goal.targetAmount ?? 0);
+  const connected = goal.connectedAccountIds ?? [];
+  if (!(target > 0) || connected.length === 0) return null;
+
+  const saved = accounts
+    .filter((a) => connected.includes(a.id))
+    .reduce((sum, a) => sum + (a.startingBalance || 0), 0);
+  const percent = Math.min(100, (saved / target) * 100);
+
+  return (
+    <div className="mt-1 space-y-0.5">
+      <Progress value={percent} className="h-1.5" />
+      <p className="text-muted-foreground text-[10px]">
+        {formatCurrencyWithCode(saved, currencyCode)} of{' '}
+        {formatCurrencyWithCode(target, currencyCode)} ({percent.toFixed(0)}%)
+      </p>
+    </div>
   );
 }
 

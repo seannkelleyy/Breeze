@@ -128,3 +128,59 @@ func mapBudgetToModel(budget *service.Budget) *model.Budget {
 		UpdatedAt:       budget.UpdatedAt.Format(time.RFC3339),
 	}
 }
+
+// replacePayrollIncomesForBudget swaps the budget's people-payroll incomes
+// (per-person paycheck net amounts computed by the planner) for the provided
+// set. A nil/empty input clears existing payroll rows, keeping regeneration
+// idempotent.
+func replacePayrollIncomesForBudget(
+	ctx context.Context,
+	incomeSvc *service.IncomeService,
+	userID uuid.UUID,
+	budgetID uuid.UUID,
+	budgetDate time.Time,
+	items []*model.PayrollIncomeInput,
+) error {
+	existingIncomes, err := incomeSvc.ListByBudgetID(ctx, budgetID)
+	if err != nil {
+		return err
+	}
+	for i := range existingIncomes {
+		if existingIncomes[i].SourceType == sqlc.IncomeSourceTypePEOPLEPAYROLL {
+			_ = incomeSvc.Delete(ctx, existingIncomes[i].ID)
+		}
+	}
+
+	monthStart := time.Date(budgetDate.Year(), budgetDate.Month(), 1, 0, 0, 0, 0, time.UTC)
+	for _, item := range items {
+		if item == nil {
+			continue
+		}
+		personID, err := uuid.Parse(item.PersonID)
+		if err != nil {
+			return fmt.Errorf("invalid payroll income person id: %w", err)
+		}
+		amount, err := decimal.Parse(item.Amount)
+		if err != nil {
+			return fmt.Errorf("invalid payroll income amount: %w", err)
+		}
+		date, err := parseDate(item.Date)
+		if err != nil {
+			return fmt.Errorf("invalid payroll income date: %w", err)
+		}
+
+		if _, err := incomeSvc.Create(ctx, &service.CreateIncomeInput{
+			UserID:          userID,
+			BudgetID:        budgetID,
+			Name:            item.Name,
+			Amount:          amount,
+			Date:            date,
+			PersonID:        &personID,
+			SourceType:      sqlc.IncomeSourceTypePEOPLEPAYROLL,
+			GenerationMonth: &monthStart,
+		}); err != nil {
+			return fmt.Errorf("create payroll income for %q: %w", item.Name, err)
+		}
+	}
+	return nil
+}

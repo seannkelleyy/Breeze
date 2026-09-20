@@ -20,7 +20,6 @@
 | Money amounts | `NUMERIC(12,2)` — never FLOAT |
 | Large balances | `NUMERIC(14,2)` for asset/liability values; `NUMERIC(15,2)` for net worth totals |
 | Rates / percentages | `DECIMAL(5,4)` — e.g. 0.0350 for 3.5% |
-| Override values | `DECIMAL(12,4)` — scenario override values with higher precision |
 | Tax bracket rates | `DECIMAL(5,4)` — e.g. 0.2200 for 22% |
 | Budget date | DATE always first-of-month — e.g. 2026-03-01, never separate month/year integers |
 | Person arrays | `list(uuid)` with `DEFAULT ARRAY[]::uuid[]` — used on assets and liabilities for multi-person assignment |
@@ -154,18 +153,24 @@ table "users" {
 
 ```hcl
 table "planner_people" {
-  column "id"                { type = uuid          default = sql("gen_random_uuid()") }
-  column "user_id"           { type = uuid }
-  column "name"              { type = text           default = "" }
-  column "birthday"          { type = text           default = "" }
-  column "retirement_age"    { type = integer        default = 60 }
-  column "annual_salary"     { type = numeric(12,2)  default = 0 }
-  column "bonus_mode"        { type = text           default = "dollars" }
-  column "annual_bonus"      { type = numeric(12,2)  default = 0 }
-  column "income_growth_rate" { type = numeric(5,2)  default = 0 }
-  column "created_at"        { type = timestamptz    default = sql("now()") }
-  column "updated_at"        { type = timestamptz    default = sql("now()") }
-  column "deleted_at"        { type = timestamptz    null = true }
+  column "id"                 { type = uuid          default = sql("gen_random_uuid()") }
+  column "user_id"            { type = uuid }
+  column "name"               { type = text           default = "" }
+  column "birthday"           { type = text           default = "" }
+  column "retirement_age"     { type = integer        default = 60 }
+  column "annual_salary"      { type = numeric(12,2)  default = 0 }
+  column "bonus_mode"         { type = text           default = "dollars" }
+  column "bonus_frequency"    { type = text           default = "annual" }
+  column "annual_bonus"       { type = numeric(12,2)  default = 0 }
+  column "income_growth_rate" { type = numeric(7,4)   default = 0 }
+  column "pay_type"           { type = text           default = "salary" }
+  column "pay_day"            { type = integer        default = 1 }
+  column "pay_cadence"        { type = text           default = "biweekly" }
+  column "hourly_rate"        { type = numeric(8,2)   default = 0 }
+  column "expected_hours_per_week" { type = numeric(5,2) default = 0 }
+  column "created_at"         { type = timestamptz    default = sql("now()") }
+  column "updated_at"         { type = timestamptz    default = sql("now()") }
+  column "deleted_at"         { type = timestamptz    null = true }
 
   primary_key { columns = [column.id] }
   foreign_key "fk_planner_people_user" {
@@ -186,6 +191,7 @@ table "assets" {
   column "user_id"                               { type = uuid }
   column "name"                                  { type = varchar(255) }
   column "asset_type"                            { type = enum.asset_type }
+  column "tax_treatment"                         { type = text          default = "PRE_TAX" }
   column "current_value"                         { type = numeric(14,2) }
   column "person_ids"                            { type = list(uuid)    default = sql("ARRAY[]::uuid[]") }
   column "contribution_mode"                     { type = varchar(32) }
@@ -193,11 +199,13 @@ table "assets" {
   column "employer_match_rate"                   { type = decimal(5,4) }
   column "employer_match_max_percent_of_salary"  { type = decimal(5,4) }
   column "annual_rate"                           { type = decimal(5,4) }
+  column "return_profile"                        { type = varchar(32)   null = true }
   column "purchase_date"                         { type = date          null = true }
   column "purchase_price"                        { type = numeric(14,2) null = true }
   column "home_growth_profile"                   { type = varchar(32)   null = true }
   column "vehicle_depreciation_profile"          { type = varchar(32)   null = true }
   column "linked_liability_id"                   { type = uuid          null = true }
+  column "plaid_account_id"                      { type = uuid          null = true }
   column "last_value_updated_at"                 { type = timestamptz   default = sql("now()") }
   column "created_at"                            { type = timestamptz   default = sql("now()") }
   column "updated_at"                            { type = timestamptz   default = sql("now()") }
@@ -216,6 +224,107 @@ table "assets" {
   }
   index "idx_assets_user_id"     { columns = [column.user_id] }
   index "idx_assets_user_active" { columns = [column.user_id, column.created_at]  where = "deleted_at IS NULL" }
+}
+```
+
+### paycheck_deductions
+
+Per-person paycheck withholdings with no account behind them — health insurance, FSA,
+dental, etc. Savings-type deductions (401(k), HSA) are accounts and live in `assets` instead.
+
+```hcl
+table "paycheck_deductions" {
+  column "id"                { type = uuid          default = sql("gen_random_uuid()") }
+  column "user_id"           { type = uuid }
+  column "person_id"         { type = uuid }
+  column "name"              { type = varchar(255) }
+  column "amount"            { type = numeric(12,2) }   -- monthly amount
+  column "pretax"            { type = boolean        default = true }
+  column "kind"              { type = text           default = "OTHER" }   -- INSURANCE, FSA, HSA, OTHER
+  column "linked_account_id" { type = uuid           null = true }         -- optional asset the withholding funds (e.g. HSA)
+  column "created_at"        { type = timestamptz    default = sql("now()") }
+  column "updated_at"        { type = timestamptz    default = sql("now()") }
+  column "deleted_at"        { type = timestamptz    null = true }
+
+  primary_key { columns = [column.id] }
+  foreign_key "fk_paycheck_deductions_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+  foreign_key "fk_paycheck_deductions_person" {
+    columns     = [column.person_id]
+    ref_columns = [table.planner_people.column.id]
+    on_delete   = CASCADE
+  }
+  foreign_key "fk_paycheck_deductions_linked_account" {
+    columns     = [column.linked_account_id]
+    ref_columns = [table.assets.column.id]
+    on_delete   = SET_NULL
+  }
+  index "idx_paycheck_deductions_user_id"       { columns = [column.user_id] }
+  index "idx_paycheck_deductions_person_active" { columns = [column.person_id]  where = "deleted_at IS NULL" }
+  index "idx_paycheck_deductions_linked_account" { columns = [column.linked_account_id] }
+  check "paycheck_deductions_amounts_nonnegative" {
+    expr = "amount >= 0"
+  }
+}
+```
+
+### transactions
+
+Bank transactions synced from Plaid (or entered manually). Amount is signed:
+positive = money out (spend), negative = money in. Assigning an expense
+category files a transaction under the budget's monthly spending.
+
+```hcl
+table "transactions" {
+  column "id"                   { type = uuid           default = sql("gen_random_uuid()") }
+  column "user_id"              { type = uuid }
+  column "plaid_account_id"     { type = uuid           null = true }
+  column "plaid_transaction_id" { type = text           null = true }
+  column "date"                 { type = date }
+  column "amount"               { type = numeric(12,2) }
+  column "name"                 { type = text           default = "" }
+  column "expense_category_id"  { type = uuid           null = true }
+  column "pending"              { type = boolean        default = false }
+  column "created_at"           { type = timestamptz    default = sql("now()") }
+  column "updated_at"           { type = timestamptz    default = sql("now()") }
+  column "deleted_at"           { type = timestamptz    null = true }
+
+  primary_key { columns = [column.id] }
+  foreign_key "fk_transactions_user"             { columns = [column.user_id]              ref_columns = [table.users.column.id]              on_delete = CASCADE }
+  foreign_key "fk_transactions_plaid_account"    { columns = [column.plaid_account_id]     ref_columns = [table.plaid_accounts.column.id]     on_delete = SET_NULL }
+  foreign_key "fk_transactions_expense_category" { columns = [column.expense_category_id]  ref_columns = [table.expense_categories.column.id] on_delete = SET_NULL }
+  index "idx_transactions_user_id"    { columns = [column.user_id] }
+  index "idx_transactions_user_date"  { columns = [column.user_id, column.date] }
+  index "idx_transactions_plaid_transaction_id" { columns = [column.plaid_transaction_id]  unique = true  where = "plaid_transaction_id IS NOT NULL AND deleted_at IS NULL" }
+  check "transactions_amount_nonzero" { expr = "amount <> 0" }
+}
+```
+
+### net_worth_snapshot_items
+
+Optional per-account breakdown rows for a net worth snapshot. When items are
+present, the API derives the snapshot totals from them.
+
+```hcl
+table "net_worth_snapshot_items" {
+  column "id"          { type = uuid          default = sql("gen_random_uuid()") }
+  column "snapshot_id" { type = uuid }
+  column "account_id"  { type = uuid          null = true }
+  column "label"       { type = text          default = "" }
+  column "amount"      { type = numeric(15,2) }
+  column "kind"        { type = text          default = "ASSET" }  -- ASSET | LIABILITY
+  column "created_at"  { type = timestamptz   default = sql("now()") }
+  column "updated_at"  { type = timestamptz   default = sql("now()") }
+  column "deleted_at"  { type = timestamptz   null = true }
+
+  primary_key { columns = [column.id] }
+  foreign_key "fk_net_worth_snapshot_items_snapshot" { columns = [column.snapshot_id] ref_columns = [table.net_worth_snapshots.column.id] on_delete = CASCADE }
+  foreign_key "fk_net_worth_snapshot_items_account"  { columns = [column.account_id]  ref_columns = [table.assets.column.id]             on_delete = SET_NULL }
+  index "idx_net_worth_snapshot_items_snapshot" { columns = [column.snapshot_id] }
+  check "net_worth_snapshot_items_kind_valid" { expr = "kind IN ('ASSET', 'LIABILITY')" }
 }
 ```
 
@@ -581,40 +690,10 @@ table "net_worth_snapshots" {
 }
 ```
 
-### retirement_accounts
-
-```hcl
-table "retirement_accounts" {
-  column "id"                        { type = uuid          default = sql("gen_random_uuid()") }
-  column "user_id"                   { type = uuid }
-  column "name"                      { type = varchar(255) }
-  column "account_type"              { type = enum.retirement_account_type }
-  column "owner"                     { type = enum.retirement_account_owner }
-  column "tax_treatment"             { type = enum.retirement_tax_treatment }
-  column "current_balance"           { type = numeric(14,2)  default = sql("0") }
-  column "annual_contribution_limit" { type = numeric(12,2)  default = sql("0") }
-  column "created_at"                { type = timestamptz    default = sql("now()") }
-  column "updated_at"                { type = timestamptz    default = sql("now()") }
-  column "deleted_at"                { type = timestamptz    null = true }
-
-  primary_key { columns = [column.id] }
-  foreign_key "fk_retirement_accounts_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_delete   = CASCADE
-  }
-  index "idx_retirement_accounts_user_id"     { columns = [column.user_id] }
-  index "idx_retirement_accounts_user_active" { columns = [column.user_id, column.created_at]  where = "deleted_at IS NULL" }
-  check "retirement_accounts_current_balance_non_negative" {
-    expr = "current_balance >= 0"
-  }
-  check "retirement_accounts_annual_contribution_limit_non_negative" {
-    expr = "annual_contribution_limit >= 0"
-  }
-}
-```
-
 ### contribution_limits
+
+Reference data — IRS annual contribution limits per account type per tax year,
+seeded in `db/seed/seed.sql` and served to the planner's IRS-limit features.
 
 ```hcl
 table "contribution_limits" {
@@ -624,6 +703,8 @@ table "contribution_limits" {
   column "annual_limit"   { type = numeric(12,2) }
   column "catch_up_age"   { type = int }
   column "catch_up_amount" { type = numeric(12,2) }
+  column "family_annual_limit" { type = numeric(12,2)  null = true }
+  column "super_catch_up_amount" { type = numeric(12,2)  default = "0" }
   column "created_at"     { type = timestamptz    default = sql("now()") }
   column "updated_at"     { type = timestamptz    default = sql("now()") }
   column "deleted_at"     { type = timestamptz    null = true }
@@ -635,69 +716,6 @@ table "contribution_limits" {
   }
   check "contribution_limits_catch_up_non_negative" {
     expr = "catch_up_amount >= 0 AND catch_up_age >= 0"
-  }
-}
-```
-
-### contribution_entries
-
-```hcl
-table "contribution_entries" {
-  column "id"                   { type = uuid          default = sql("gen_random_uuid()") }
-  column "retirement_account_id" { type = uuid }
-  column "tax_year"             { type = int }
-  column "contribution_date"    { type = date }
-  column "amount"               { type = numeric(12,2) }
-  column "created_at"           { type = timestamptz    default = sql("now()") }
-  column "updated_at"           { type = timestamptz    default = sql("now()") }
-  column "deleted_at"           { type = timestamptz    null = true }
-
-  primary_key { columns = [column.id] }
-  foreign_key "fk_contribution_entries_retirement_account" {
-    columns     = [column.retirement_account_id]
-    ref_columns = [table.retirement_accounts.column.id]
-    on_delete   = CASCADE
-  }
-  index "idx_contribution_entries_account_id"     { columns = [column.retirement_account_id] }
-  index "idx_contribution_entries_account_year"   { columns = [column.retirement_account_id, column.tax_year] }
-  index "idx_contribution_entries_account_active" { columns = [column.retirement_account_id, column.contribution_date]  where = "deleted_at IS NULL" }
-  check "contribution_entries_amount_positive" {
-    expr = "amount > 0"
-  }
-}
-```
-
-### scenario_profiles
-
-```hcl
-table "scenario_profiles" {
-  column "id"                  { type = uuid          default = sql("gen_random_uuid()") }
-  column "user_id"             { type = uuid }
-  column "name"                { type = varchar(255) }
-  column "current_age"         { type = int }
-  column "retirement_age"      { type = int }
-  column "annual_spend"        { type = numeric(12,2) }
-  column "safe_withdrawal_rate" { type = decimal(5,4) }
-  column "inflation_rate"      { type = decimal(5,4) }
-  column "return_rate"         { type = decimal(5,4) }
-  column "current_portfolio"   { type = numeric(14,2) }
-  column "created_at"          { type = timestamptz    default = sql("now()") }
-  column "updated_at"          { type = timestamptz    default = sql("now()") }
-  column "deleted_at"          { type = timestamptz    null = true }
-
-  primary_key { columns = [column.id] }
-  foreign_key "fk_scenario_profiles_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_delete   = CASCADE
-  }
-  index "idx_scenario_profiles_user_id"     { columns = [column.user_id] }
-  index "idx_scenario_profiles_user_active" { columns = [column.user_id, column.created_at]  where = "deleted_at IS NULL" }
-  check "scenario_profiles_current_age_non_negative" {
-    expr = "current_age >= 0 AND retirement_age >= current_age"
-  }
-  check "scenario_profiles_money_positive" {
-    expr = "annual_spend > 0 AND current_portfolio >= 0"
   }
 }
 ```

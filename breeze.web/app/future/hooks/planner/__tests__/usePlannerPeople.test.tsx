@@ -26,7 +26,7 @@ const person = (overrides: Partial<PlannerPerson> = {}): PlannerPerson => ({
   annualSalary: 100000,
   bonusMode: 'dollars',
   bonusFrequency: 'annual' as const,
-      annualBonus: 0,
+  annualBonus: 0,
   incomeGrowthRate: 0,
   isPrimary: true,
   payType: 'salary',

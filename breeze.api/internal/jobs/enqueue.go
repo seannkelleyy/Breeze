@@ -7,10 +7,9 @@ import (
 	"github.com/riverqueue/river"
 )
 
-func EnqueuePlaidSync(ctx context.Context, client *river.Client[pgx.Tx], userID, accountID string) error {
+func EnqueuePlaidSync(ctx context.Context, client *river.Client[pgx.Tx], userID string) error {
 	_, err := client.Insert(ctx, PlaidSyncArgs{
-		UserID:    userID,
-		AccountID: accountID,
+		UserID: userID,
 	}, nil)
 	return err
 }

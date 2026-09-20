@@ -17,7 +17,6 @@ export type PlannerPerson = {
   payType: PayType;
   payDay: number;
   payCadence: PayCadence;
-  paycheck?: string;
   hourlyRate: number;
   expectedHoursPerWeek: number;
   createdAt: string;
@@ -36,7 +35,6 @@ export interface PlannerPersonDto {
   payType: string;
   payDay: number;
   payCadence: string;
-  paycheck: string;
   hourlyRate: number;
   expectedHoursPerWeek: number;
 }

@@ -65,6 +65,18 @@ func (m *mockNetWorthSnapshotQuerier) DeleteNetWorthSnapshot(ctx context.Context
 	return nil
 }
 
+func (m *mockNetWorthSnapshotQuerier) CreateNetWorthSnapshotItem(ctx context.Context, arg sqlc.CreateNetWorthSnapshotItemParams) (sqlc.NetWorthSnapshotItem, error) {
+	return sqlc.NetWorthSnapshotItem{}, nil
+}
+
+func (m *mockNetWorthSnapshotQuerier) ListNetWorthSnapshotItemsBySnapshotID(ctx context.Context, snapshotID uuid.UUID) ([]sqlc.NetWorthSnapshotItem, error) {
+	return []sqlc.NetWorthSnapshotItem{}, nil
+}
+
+func (m *mockNetWorthSnapshotQuerier) SoftDeleteNetWorthSnapshotItems(ctx context.Context, snapshotID uuid.UUID) (int64, error) {
+	return 0, nil
+}
+
 func testNetWorthSnapshotRow() sqlc.NetWorthSnapshot {
 	totalAssets, _ := decimal.Parse("450000.00")
 	totalLiabilities, _ := decimal.Parse("250000.00")
@@ -98,7 +110,7 @@ func TestNetWorthSnapshotService_Create(t *testing.T) {
 		},
 	}
 
-	svc := NewNetWorthSnapshotService(mock)
+	svc := NewNetWorthSnapshotService(mock, nil)
 	result, err := svc.Create(ctx, &CreateNetWorthSnapshotInput{
 		UserID:           row.UserID,
 		SnapshotDate:     row.SnapshotDate.Time,
@@ -124,7 +136,7 @@ func TestNetWorthSnapshotService_Get(t *testing.T) {
 			},
 		}
 
-		svc := NewNetWorthSnapshotService(mock)
+		svc := NewNetWorthSnapshotService(mock, nil)
 		result, err := svc.Get(ctx, row.ID)
 
 		assert.NoError(t, err)
@@ -139,7 +151,7 @@ func TestNetWorthSnapshotService_Get(t *testing.T) {
 			},
 		}
 
-		svc := NewNetWorthSnapshotService(mock)
+		svc := NewNetWorthSnapshotService(mock, nil)
 		result, err := svc.Get(ctx, row.ID)
 
 		assert.ErrorIs(t, err, ErrNotFound)
@@ -160,7 +172,7 @@ func TestNetWorthSnapshotService_GetByDate(t *testing.T) {
 			},
 		}
 
-		svc := NewNetWorthSnapshotService(mock)
+		svc := NewNetWorthSnapshotService(mock, nil)
 		result, err := svc.GetByDate(ctx, row.UserID, row.SnapshotDate.Time)
 
 		assert.NoError(t, err)
@@ -175,7 +187,7 @@ func TestNetWorthSnapshotService_GetByDate(t *testing.T) {
 			},
 		}
 
-		svc := NewNetWorthSnapshotService(mock)
+		svc := NewNetWorthSnapshotService(mock, nil)
 		result, err := svc.GetByDate(ctx, row.UserID, row.SnapshotDate.Time)
 
 		assert.ErrorIs(t, err, ErrNotFound)
@@ -196,7 +208,7 @@ func TestNetWorthSnapshotService_List(t *testing.T) {
 		},
 	}
 
-	svc := NewNetWorthSnapshotService(mock)
+	svc := NewNetWorthSnapshotService(mock, nil)
 	result, err := svc.List(ctx, row1.UserID)
 
 	assert.NoError(t, err)
@@ -221,9 +233,15 @@ func TestNetWorthSnapshotService_Update(t *testing.T) {
 			updated.TotalAssets = updatedAssets
 			return updated, nil
 		},
+		getNetWorthSnapshotFunc: func(ctx context.Context, id uuid.UUID) (sqlc.NetWorthSnapshot, error) {
+			assert.Equal(t, row.ID, id)
+			updated := row
+			updated.TotalAssets = updatedAssets
+			return updated, nil
+		},
 	}
 
-	svc := NewNetWorthSnapshotService(mock)
+	svc := NewNetWorthSnapshotService(mock, nil)
 	result, err := svc.Update(ctx, &UpdateNetWorthSnapshotInput{
 		ID:          row.ID,
 		TotalAssets: &updatedAssets,
@@ -245,7 +263,7 @@ func TestNetWorthSnapshotService_Delete(t *testing.T) {
 		},
 	}
 
-	svc := NewNetWorthSnapshotService(mock)
+	svc := NewNetWorthSnapshotService(mock, nil)
 	err := svc.Delete(ctx, row.ID)
 
 	assert.NoError(t, err)
@@ -261,7 +279,7 @@ func TestNetWorthSnapshotService_Delete_ReturnsError(t *testing.T) {
 		},
 	}
 
-	svc := NewNetWorthSnapshotService(mock)
+	svc := NewNetWorthSnapshotService(mock, nil)
 	err := svc.Delete(ctx, uuid.New())
 
 	assert.ErrorIs(t, err, errDelete)

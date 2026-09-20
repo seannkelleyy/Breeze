@@ -214,3 +214,91 @@ func (p *PlaidHTTPClient) FetchAccounts(ctx context.Context, accessToken string)
 	}
 	return res, nil
 }
+
+type transactionsReq struct {
+	ClientID    string `json:"client_id"`
+	Secret      string `json:"secret"`
+	AccessToken string `json:"access_token"`
+	StartDate   string `json:"start_date"`
+	EndDate     string `json:"end_date"`
+	Count       int    `json:"count,omitempty"`
+	Offset      int    `json:"offset,omitempty"`
+}
+
+type plaidTransaction struct {
+	TransactionID string      `json:"transaction_id"`
+	AccountID     string      `json:"account_id"`
+	Date          string      `json:"date"`
+	Amount        json.Number `json:"amount"`
+	Name          string      `json:"name"`
+	Pending       bool        `json:"pending"`
+}
+
+type transactionsResp struct {
+	TotalTransactions int                `json:"total_transactions"`
+	Transactions      []plaidTransaction `json:"transactions"`
+}
+
+// FetchTransactions implements PlaidClient.FetchTransactions, paging through
+// /transactions/get until every transaction in the range is returned.
+func (p *PlaidHTTPClient) FetchTransactions(ctx context.Context, accessToken string, startDate, endDate time.Time) ([]PlaidTransaction, error) {
+	const pageSize = 100
+
+	var out []PlaidTransaction
+	for offset := 0; ; offset += pageSize {
+		reqBody := transactionsReq{
+			ClientID:    p.clientID,
+			Secret:      p.secret,
+			AccessToken: accessToken,
+			StartDate:   startDate.Format("2006-01-02"),
+			EndDate:     endDate.Format("2006-01-02"),
+			Count:       pageSize,
+			Offset:      offset,
+		}
+		b, _ := json.Marshal(reqBody)
+		req, err := http.NewRequestWithContext(ctx, "POST", p.baseURL+"/transactions/get", bytes.NewReader(b))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := p.httpClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		if resp.StatusCode != http.StatusOK {
+			_ = resp.Body.Close()
+			return nil, fmt.Errorf("plaid transactions returned %d", resp.StatusCode)
+		}
+
+		var page transactionsResp
+		decodeErr := json.NewDecoder(resp.Body).Decode(&page)
+		_ = resp.Body.Close()
+		if decodeErr != nil {
+			return nil, decodeErr
+		}
+
+		for _, t := range page.Transactions {
+			date, err := time.Parse("2006-01-02", t.Date)
+			if err != nil {
+				return nil, fmt.Errorf("parse transaction date %q: %w", t.Date, err)
+			}
+			amount, err := decimal.Parse(t.Amount.String())
+			if err != nil {
+				return nil, fmt.Errorf("parse transaction amount: %w", err)
+			}
+			out = append(out, PlaidTransaction{
+				ExternalID:     t.TransactionID,
+				PlaidAccountID: t.AccountID,
+				Date:           date,
+				Amount:         amount,
+				Name:           t.Name,
+				Pending:        t.Pending,
+			})
+		}
+
+		if len(out) >= page.TotalTransactions || len(page.Transactions) == 0 {
+			return out, nil
+		}
+	}
+}

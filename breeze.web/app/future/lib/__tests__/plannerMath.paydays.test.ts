@@ -88,7 +88,11 @@ describe('income helpers', () => {
   });
 
   it('computes fixed bonuses at their annual equivalent regardless of frequency', () => {
-    const person = makePerson({ annualSalary: 120000, annualBonus: 10000, bonusFrequency: 'quarterly' });
+    const person = makePerson({
+      annualSalary: 120000,
+      annualBonus: 10000,
+      bonusFrequency: 'quarterly',
+    });
     expect(getPersonBonusPerYear(person)).toBe(10000);
     expect(getPersonTotalIncome(person)).toBe(130000);
   });

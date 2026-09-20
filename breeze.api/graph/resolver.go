@@ -18,8 +18,7 @@ type Resolver struct {
 	LiabilityService         *service.LiabilityService
 	BudgetService            *service.BudgetService
 	GoalService              *service.GoalService
-	ScenarioService          *service.ScenarioService
-	RetirementService        *service.RetirementAccountService
+	ContributionLimitService *service.ContributionLimitService
 	PlaidService             *service.PlaidService
 	ExpenseCategoryService   *service.ExpenseCategoryService
 	ExpenseService           *service.ExpenseService
@@ -33,6 +32,7 @@ type Resolver struct {
 	TaxPlanningService       *service.TaxPlanningService
 	RetirementLadderService  *service.RetirementLadderService
 	NetWorthSnapshotService  *service.NetWorthSnapshotService
+	TransactionService       *service.TransactionService
 }
 
 // resolveUserIDFromCtx extracts the authenticated user's internal UUID from
@@ -67,8 +67,6 @@ func (r *Resolver) mapErr(ctx context.Context, err error) error {
 	case errors.Is(err, service.ErrSplitMismatch),
 		errors.Is(err, service.ErrNoSplits),
 		errors.Is(err, service.ErrSplitAmountNonPositive),
-		errors.Is(err, service.ErrContributionLimitExceeded),
-		errors.Is(err, service.ErrContributionAmountNonPositive),
 		errors.Is(err, service.ErrInvalidScenarioInput):
 		code = errCodeValidation
 	}

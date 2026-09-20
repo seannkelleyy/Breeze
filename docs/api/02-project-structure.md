@@ -103,7 +103,7 @@ breeze.web/                          # Next.js 16 web app
 │   ├── goals/                       # Goals page (FOO checklist + goal CRUD)
 │   ├── preferences/                 # Preferences page (user settings)
 │   ├── budget/                      # Budget module
-│   ├── tools/                       # Tools (mortgage calculator, etc.)
+│   ├── mortgage/                    # Mortgage calculator (amortization, refinance, loan compare)
 │   ├── plaid-connections/           # Plaid connect/sync UI
 │   ├── layout.tsx
 │   └── page.tsx                     # Dashboard

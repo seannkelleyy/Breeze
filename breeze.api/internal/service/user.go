@@ -72,7 +72,6 @@ type userQuerier interface {
 	ListUsers(ctx context.Context) ([]sqlc.ListUsersRow, error)
 	UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error)
 	UpdateUserSetup(ctx context.Context, arg sqlc.UpdateUserSetupParams) (sqlc.UpdateUserSetupRow, error)
-	SoftDeleteUser(ctx context.Context, id uuid.UUID) (int64, error)
 }
 
 type UserService struct {
@@ -364,17 +363,6 @@ func (s *UserService) Update(ctx context.Context, input UpdateUserInput) (*User,
 	}
 
 	return user, nil
-}
-
-func (s *UserService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeleteUser(ctx, id)
-	if err != nil {
-		return fmt.Errorf("delete user: %w", err)
-	}
-	if rows == 0 {
-		return ErrNotFound
-	}
-	return nil
 }
 
 type UpdateSetupInput struct {

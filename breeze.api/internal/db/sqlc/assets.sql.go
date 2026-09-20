@@ -25,6 +25,7 @@ INSERT INTO assets (
   employer_match_max_percent_of_salary,
   annual_rate,
   return_profile,
+  tax_treatment,
   person_ids,
   purchase_date,
   purchase_price,
@@ -32,7 +33,7 @@ INSERT INTO assets (
   vehicle_depreciation_profile,
   linked_liability_id
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 RETURNING
   id,
   user_id,
@@ -45,6 +46,7 @@ RETURNING
   employer_match_max_percent_of_salary,
   annual_rate,
   return_profile,
+  tax_treatment,
   person_ids,
   purchase_date,
   purchase_price,
@@ -69,6 +71,7 @@ type CreateAssetParams struct {
 	EmployerMatchMaxPercentOfSalary decimal.Decimal `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal `json:"annual_rate"`
 	ReturnProfile                   *string         `json:"return_profile"`
+	TaxTreatment                    string          `json:"tax_treatment"`
 	PersonIds                       []uuid.UUID     `json:"person_ids"`
 	PurchaseDate                    pgtype.Date     `json:"purchase_date"`
 	PurchasePrice                   pgtype.Numeric  `json:"purchase_price"`
@@ -89,6 +92,7 @@ type CreateAssetRow struct {
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
 	ReturnProfile                   *string            `json:"return_profile"`
+	TaxTreatment                    string             `json:"tax_treatment"`
 	PersonIds                       []uuid.UUID        `json:"person_ids"`
 	PurchaseDate                    pgtype.Date        `json:"purchase_date"`
 	PurchasePrice                   pgtype.Numeric     `json:"purchase_price"`
@@ -114,6 +118,7 @@ func (q *Queries) CreateAsset(ctx context.Context, arg CreateAssetParams) (Creat
 		arg.EmployerMatchMaxPercentOfSalary,
 		arg.AnnualRate,
 		arg.ReturnProfile,
+		arg.TaxTreatment,
 		arg.PersonIds,
 		arg.PurchaseDate,
 		arg.PurchasePrice,
@@ -134,6 +139,7 @@ func (q *Queries) CreateAsset(ctx context.Context, arg CreateAssetParams) (Creat
 		&i.EmployerMatchMaxPercentOfSalary,
 		&i.AnnualRate,
 		&i.ReturnProfile,
+		&i.TaxTreatment,
 		&i.PersonIds,
 		&i.PurchaseDate,
 		&i.PurchasePrice,
@@ -162,6 +168,7 @@ SELECT
   employer_match_max_percent_of_salary,
   annual_rate,
   return_profile,
+  tax_treatment,
   person_ids,
   purchase_date,
   purchase_price,
@@ -191,6 +198,7 @@ type GetAssetByIDRow struct {
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
 	ReturnProfile                   *string            `json:"return_profile"`
+	TaxTreatment                    string             `json:"tax_treatment"`
 	PersonIds                       []uuid.UUID        `json:"person_ids"`
 	PurchaseDate                    pgtype.Date        `json:"purchase_date"`
 	PurchasePrice                   pgtype.Numeric     `json:"purchase_price"`
@@ -219,6 +227,7 @@ func (q *Queries) GetAssetByID(ctx context.Context, id uuid.UUID) (GetAssetByIDR
 		&i.EmployerMatchMaxPercentOfSalary,
 		&i.AnnualRate,
 		&i.ReturnProfile,
+		&i.TaxTreatment,
 		&i.PersonIds,
 		&i.PurchaseDate,
 		&i.PurchasePrice,
@@ -247,6 +256,7 @@ SELECT
   employer_match_max_percent_of_salary,
   annual_rate,
   return_profile,
+  tax_treatment,
   person_ids,
   purchase_date,
   purchase_price,
@@ -276,6 +286,7 @@ type ListAssetsByUserIDRow struct {
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
 	ReturnProfile                   *string            `json:"return_profile"`
+	TaxTreatment                    string             `json:"tax_treatment"`
 	PersonIds                       []uuid.UUID        `json:"person_ids"`
 	PurchaseDate                    pgtype.Date        `json:"purchase_date"`
 	PurchasePrice                   pgtype.Numeric     `json:"purchase_price"`
@@ -310,6 +321,7 @@ func (q *Queries) ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]L
 			&i.EmployerMatchMaxPercentOfSalary,
 			&i.AnnualRate,
 			&i.ReturnProfile,
+			&i.TaxTreatment,
 			&i.PersonIds,
 			&i.PurchaseDate,
 			&i.PurchasePrice,
@@ -360,6 +372,7 @@ SET
   employer_match_max_percent_of_salary = $8,
   annual_rate = $9,
   return_profile = $10,
+  tax_treatment = $17,
   person_ids = $11,
   purchase_date = $12,
   purchase_price = $13,
@@ -385,6 +398,7 @@ RETURNING
   employer_match_max_percent_of_salary,
   annual_rate,
   return_profile,
+  tax_treatment,
   person_ids,
   purchase_date,
   purchase_price,
@@ -415,6 +429,7 @@ type UpdateAssetParams struct {
 	HomeGrowthProfile               *string         `json:"home_growth_profile"`
 	VehicleDepreciationProfile      *string         `json:"vehicle_depreciation_profile"`
 	LinkedLiabilityID               pgtype.UUID     `json:"linked_liability_id"`
+	TaxTreatment                    string          `json:"tax_treatment"`
 }
 
 type UpdateAssetRow struct {
@@ -429,6 +444,7 @@ type UpdateAssetRow struct {
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
 	ReturnProfile                   *string            `json:"return_profile"`
+	TaxTreatment                    string             `json:"tax_treatment"`
 	PersonIds                       []uuid.UUID        `json:"person_ids"`
 	PurchaseDate                    pgtype.Date        `json:"purchase_date"`
 	PurchasePrice                   pgtype.Numeric     `json:"purchase_price"`
@@ -460,6 +476,7 @@ func (q *Queries) UpdateAsset(ctx context.Context, arg UpdateAssetParams) (Updat
 		arg.HomeGrowthProfile,
 		arg.VehicleDepreciationProfile,
 		arg.LinkedLiabilityID,
+		arg.TaxTreatment,
 	)
 	var i UpdateAssetRow
 	err := row.Scan(
@@ -474,6 +491,7 @@ func (q *Queries) UpdateAsset(ctx context.Context, arg UpdateAssetParams) (Updat
 		&i.EmployerMatchMaxPercentOfSalary,
 		&i.AnnualRate,
 		&i.ReturnProfile,
+		&i.TaxTreatment,
 		&i.PersonIds,
 		&i.PurchaseDate,
 		&i.PurchasePrice,

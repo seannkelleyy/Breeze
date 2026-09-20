@@ -43,7 +43,7 @@ const makePerson = (overrides: Partial<PlannerPerson> = {}): PlannerPerson => ({
   annualSalary: 120000,
   bonusMode: 'dollars',
   bonusFrequency: 'annual' as const,
-      annualBonus: 5000,
+  annualBonus: 5000,
   incomeGrowthRate: 3,
   isPrimary: true,
   payType: 'salary',
@@ -62,8 +62,12 @@ describe('getTotalAnnualIncome', () => {
   });
 
   it('adds salary and dollar bonus', () => {
-    const person = makePerson({ annualSalary: 120000, bonusFrequency: 'annual' as const,
-      annualBonus: 5000, bonusMode: 'dollars' });
+    const person = makePerson({
+      annualSalary: 120000,
+      bonusFrequency: 'annual' as const,
+      annualBonus: 5000,
+      bonusMode: 'dollars',
+    });
     expect(getTotalAnnualIncome(person)).toBe(125000);
   });
 
@@ -78,8 +82,11 @@ describe('getTotalAnnualIncome', () => {
   });
 
   it('handles zero salary', () => {
-    const person = makePerson({ annualSalary: 0, bonusFrequency: 'annual' as const,
-      annualBonus: 0 });
+    const person = makePerson({
+      annualSalary: 0,
+      bonusFrequency: 'annual' as const,
+      annualBonus: 0,
+    });
     expect(getTotalAnnualIncome(person)).toBe(0);
   });
 });
@@ -297,10 +304,10 @@ describe('getSuggestedAnnualLimit', () => {
 });
 
 describe('getIrsLimitKeyFromApiType', () => {
-  it('maps 401k, 403b, 457 to 401k', () => {
+  it('maps 401k + 403b to the shared deferral key and 457 to its own', () => {
     expect(getIrsLimitKeyFromApiType('401k')).toBe('401k');
     expect(getIrsLimitKeyFromApiType('403b')).toBe('401k');
-    expect(getIrsLimitKeyFromApiType('457')).toBe('401k');
+    expect(getIrsLimitKeyFromApiType('457')).toBe('457');
   });
 
   it('maps roth-ira to roth-ira', () => {

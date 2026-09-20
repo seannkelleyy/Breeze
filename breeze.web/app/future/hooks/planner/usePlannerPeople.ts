@@ -16,7 +16,6 @@ const PLANNER_DEFAULT_PERSON = {
   payType: 'salary' as const,
   payDay: 1,
   payCadence: 'biweekly' as const,
-  paycheck: '',
   hourlyRate: 0,
   expectedHoursPerWeek: 0,
 };

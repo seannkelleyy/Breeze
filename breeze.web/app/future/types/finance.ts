@@ -1,3 +1,4 @@
+import type { PersonWaterfall } from '../lib/paycheck';
 export type VehicleDepreciationProfile = 'low' | 'medium' | 'high' | 'custom';
 export type HomeGrowthProfile = 'none' | 'low' | 'medium' | 'high' | 'custom';
 
@@ -48,6 +49,8 @@ export type FinancialMathSnapshot = {
   netIncome: number;
   annualExtraExpenseBuffer: number;
   yearlySavings: number;
+  /** Real per-person paycheck waterfall (household sums) — present when people are configured. */
+  payroll?: PersonWaterfall;
   safeWithdrawalRatePercent: number;
   withdrawalMultiplier: number;
   currentPortfolio: number;

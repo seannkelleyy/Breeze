@@ -64,11 +64,10 @@ Goal:
 
 Reference implementation:
 
-- app/planner/hooks/planner/useFetchPlanner.ts
-- app/planner/hooks/planner/usePlannerAccounts.ts
-- app/planner/hooks/planner/useAccountMutations.ts
-- app/planner/hooks/planner/usePlanner.ts
-- app/planner/components/AccountsCard.tsx
+- app/future/hooks/planner/useFetchPlanner.ts
+- app/future/hooks/planner/usePlannerAccounts.ts
+- app/future/hooks/planner/useAccountMutations.ts
+- app/future/components/AccountsCard.tsx
 - lib/services/useGraphql.ts
 - lib/providers/CurrentUserProvider.tsx
 

@@ -89,11 +89,51 @@ export const getSuggestedAnnualLimit = (
   const rule = limits[key];
   if (!rule) return 0;
   let limit = rule.baseAnnualLimit;
-  if (age >= rule.catchUpAge) limit += rule.catchUpAmount;
+  // Ages 60–63 get the enhanced "super catch-up", which replaces the regular
+  // catch-up rather than adding to it (IRS SECURE 2.0 rule for 401k-style plans).
+  if (rule.superCatchUpAmount && age >= 60 && age <= 63) {
+    limit += rule.superCatchUpAmount;
+  } else if (age >= rule.catchUpAge) {
+    limit += rule.catchUpAmount;
+  }
   return inclSpouse && rule.familyAnnualLimit ? rule.familyAnnualLimit : limit;
 };
+/** IRS limit groups: account types whose contributions share one limit. */
+export type IrsLimitGroup = 'deferral' | '457' | 'ira' | 'hsa';
+
+export const getIrsLimitGroup = (type: string): IrsLimitGroup | null => {
+  if (type === '401k' || type === '403b') return 'deferral';
+  if (type === '457') return '457';
+  if (type === 'roth-ira' || type === 'traditional-ira') return 'ira';
+  if (type === 'hsa') return 'hsa';
+  return null;
+};
+
+/**
+ * A person's total annual employee contributions across every account in the
+ * same IRS limit group (e.g. all their 401(k)+403(b) accounts together).
+ */
+export const getPersonGroupAnnualContribution = (
+  personId: string,
+  group: IrsLimitGroup,
+  accounts: PlannerAccount[],
+  people: PlannerPerson[],
+): number => {
+  const groupTypes: Record<IrsLimitGroup, Set<string>> = {
+    deferral: new Set(['401k', '403b']),
+    '457': new Set(['457']),
+    ira: new Set(['roth-ira', 'traditional-ira']),
+    hsa: new Set(['hsa']),
+  };
+  return accounts
+    .filter((a) => groupTypes[group].has(a.accountType) && a.personIds.includes(personId))
+    .reduce((sum, a) => sum + getEmployeeMonthlyContribution(a, people) * 12, 0);
+};
+
 export const getIrsLimitKeyFromApiType = (type: string): IrsLimitKey | null => {
-  if (type === '401k' || type === '403b' || type === '457') return '401k';
+  // 401k + 403b share the IRS elective-deferral limit; 457(b) has its own.
+  if (type === '401k' || type === '403b') return '401k';
+  if (type === '457') return '457';
   if (type === 'roth-ira') return 'roth-ira';
   if (type === 'traditional-ira') return 'traditional-ira';
   if (type === 'hsa') return 'hsa';

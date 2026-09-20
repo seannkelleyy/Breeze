@@ -35,7 +35,12 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { formatCurrencyWithCode, formatTimeAgo } from '@/lib/utils';
 import * as plannerConstants from '../../lib/constants';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
-import { getEmployeeMonthlyContribution, getAgeFromBirthday } from '../../lib/plannerMath';
+import {
+  getAgeFromBirthday,
+  getEmployeeMonthlyContribution,
+  getIrsLimitGroup,
+  getPersonGroupAnnualContribution,
+} from '../../lib/plannerMath';
 import {
   AccountType,
   ContributionMode,
@@ -70,8 +75,21 @@ const ACCOUNT_ICONS: Record<string, typeof PiggyBank> = {
   mortgage: CreditCard,
 };
 
+const TAX_ADVANTAGED_TYPES = new Set(['401k', '403b', '457', 'roth-ira', 'traditional-ira', 'hsa']);
+
+const TAX_TREATMENT_OPTIONS = [
+  { value: 'PRE_TAX', label: 'Pre-tax' },
+  { value: 'ROTH', label: 'Roth' },
+] as const;
+
+function defaultTaxTreatmentFor(accountType: string): string {
+  return accountType === 'roth-ira' ? 'ROTH' : 'PRE_TAX';
+}
+
 interface AccountListItemProps {
   account: PlannerAccount;
+  /** All household accounts — used to aggregate per-person IRS limit usage. */
+  accounts: PlannerAccount[];
   currencyCode: string;
   people: PlannerPerson[];
   assetFinanceDetails: AssetFinanceDetails | undefined;
@@ -97,6 +115,8 @@ interface AccountListItemProps {
   defaultVehicleDepreciationRate: number;
   onSave: (account: PlannerAccount) => void;
   onDelete: (account: PlannerAccount) => void;
+  /** Notifies parents when the edit dialog opens/closes (e.g. to keep a filtered row mounted). */
+  onEditDialogChange?: (open: boolean) => void;
   onUpdateAccount: (updater: (current: PlannerAccount) => PlannerAccount) => void;
   onUpdateAssetFinanceDetails: (
     updater: (current: AssetFinanceDetails) => AssetFinanceDetails,
@@ -114,6 +134,7 @@ interface AccountListItemProps {
 
 export function AccountListItem({
   account,
+  accounts,
   currencyCode,
   people,
   assetFinanceDetails,
@@ -139,6 +160,7 @@ export function AccountListItem({
   defaultVehicleDepreciationRate,
   onSave,
   onDelete,
+  onEditDialogChange,
   onUpdateAccount,
   onUpdateAssetFinanceDetails,
   setPlannerAssetFinanceDetailsByAccountId,
@@ -162,6 +184,7 @@ export function AccountListItem({
       account.startingBalance,
       account.annualRate,
       account.returnProfile,
+      account.taxTreatment,
       account.linkedLiabilityId,
       account.purchaseDate,
       account.purchasePrice,
@@ -215,9 +238,20 @@ export function AccountListItem({
       : people[0];
   const ownerAge = getAgeFromBirthday(ownerPerson?.birthday ?? '');
   const suggestedLimit = getSuggestedAnnualLimitForAccount(account.accountType, ownerAge);
+
+  // IRS limits apply per person across all same-group accounts (401k + 403b
+  // share the deferral limit), so maxed/over is judged on the group total.
+  const limitGroup = getIrsLimitGroup(account.accountType);
+  const personGroupAnnual =
+    limitGroup && ownerPerson
+      ? getPersonGroupAnnualContribution(ownerPerson.id, limitGroup, accounts, people)
+      : employeeAnnual;
+  const otherGroupAccountsAnnual = Math.max(0, personGroupAnnual - employeeAnnual);
+  const remainingRoom = Math.max(0, suggestedLimit - otherGroupAccountsAnnual);
+
   const isUsingIrsMaxContribution =
     suggestedLimit > 0 &&
-    plannerConstants.isMoneyEqualWithinTolerance(employeeAnnual, suggestedLimit);
+    plannerConstants.isMoneyEqualWithinTolerance(personGroupAnnual, suggestedLimit);
 
   const modeOptions = isLiability ? liabilityContributionModeOptions : contributionModeOptions;
   const contributionInputLabel =
@@ -243,23 +277,25 @@ export function AccountListItem({
 
   const onSetContributionToIrsMax = () => {
     const mode = account.contributionMode;
+    // Max out fills only the room this account has left within the person's
+    // shared limit group.
     let value: number;
     if (mode === 'yearly') {
-      value = suggestedLimit;
+      value = remainingRoom;
     } else if (mode === 'biweekly') {
-      value = suggestedLimit / 26;
+      value = remainingRoom / 26;
     } else if (mode === 'weekly') {
-      value = suggestedLimit / 52;
+      value = remainingRoom / 52;
     } else if (mode === 'salary-percent') {
       // Keep current value for salary percent mode
       value = account.contributionValue;
     } else {
       // monthly
-      value = suggestedLimit / 12;
+      value = remainingRoom / 12;
     }
     onUpdateAccount((current) => ({
       ...current,
-      contributionValue: suggestedLimit > 0 ? Number(value.toFixed(2)) : current.contributionValue,
+      contributionValue: remainingRoom > 0 ? Number(value.toFixed(2)) : current.contributionValue,
     }));
   };
 
@@ -271,6 +307,9 @@ export function AccountListItem({
       ...current,
       accountType: selectedType,
       returnProfile: null,
+      taxTreatment: TAX_ADVANTAGED_TYPES.has(selectedType)
+        ? defaultTaxTreatmentFor(selectedType)
+        : current.taxTreatment,
       annualRate:
         selectedType === 'vehicle'
           ? current.accountType !== 'vehicle'
@@ -307,7 +346,7 @@ export function AccountListItem({
     accountTypeOptions.find((o) => o.value === account.accountType)?.label ?? account.accountType;
   const isOverIrsLimit =
     suggestedLimit > 0 &&
-    plannerConstants.isMoneyGreaterThanWithTolerance(employeeAnnual, suggestedLimit);
+    plannerConstants.isMoneyGreaterThanWithTolerance(personGroupAnnual, suggestedLimit);
   const displayedRate = getDisplayedRateForAccount(account).toFixed(2);
 
   let infoLine: string;
@@ -335,7 +374,9 @@ export function AccountListItem({
                 {account.name || 'Unnamed Account'}
               </span>
               <span className="text-muted-foreground">·</span>
-              <span className="text-sm font-semibold">{formatCurrency(account.startingBalance)}</span>
+              <span className="text-sm font-semibold">
+                {formatCurrency(account.startingBalance)}
+              </span>
             </div>
             {/* Row 2: badges */}
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -348,6 +389,19 @@ export function AccountListItem({
               <Badge variant="secondary" className="shrink-0 text-[10px]">
                 {typeLabel}
               </Badge>
+              {ownerPersons.map((p) => (
+                <Badge key={p.id} variant="default" className="shrink-0 text-[10px]">
+                  {p.name || 'Unnamed'}
+                </Badge>
+              ))}
+              {!isLiability && TAX_ADVANTAGED_TYPES.has(account.accountType) && (
+                <Badge
+                  variant={account.taxTreatment === 'ROTH' ? 'default' : 'secondary'}
+                  className="shrink-0 text-[10px]"
+                >
+                  {account.taxTreatment === 'ROTH' ? 'Roth' : 'Pre-tax'}
+                </Badge>
+              )}
               {isUsingIrsMaxContribution && (
                 <Badge
                   variant="default"
@@ -375,7 +429,10 @@ export function AccountListItem({
               variant="ghost"
               size="icon"
               className="size-8 cursor-pointer"
-              onClick={() => setEditing(true)}
+              onClick={() => {
+                setEditing(true);
+                onEditDialogChange?.(true);
+              }}
             >
               <Pencil className="size-3.5" />
             </Button>
@@ -393,7 +450,15 @@ export function AccountListItem({
       </div>
 
       {/* Edit Modal */}
-      <Dialog open={editing} onOpenChange={(open) => !open && setEditing(false)}>
+      <Dialog
+        open={editing}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditing(false);
+            onEditDialogChange?.(false);
+          }
+        }}
+      >
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Edit {account.name || 'Account'}</DialogTitle>
@@ -419,9 +484,7 @@ export function AccountListItem({
                   </SelectTrigger>
                   <SelectContent>
                     {accountTypeOptions
-                      .filter(
-                        (o) => isLiabilityAccountType(o.value as AccountType) === isLiability,
-                      )
+                      .filter((o) => isLiabilityAccountType(o.value as AccountType) === isLiability)
                       .map((o) => (
                         <SelectItem key={o.value} value={o.value}>
                           {o.label}
@@ -431,6 +494,33 @@ export function AccountListItem({
                 </Select>
               </div>
             </div>
+
+            {/* Tax treatment */}
+            {!isLiability && TAX_ADVANTAGED_TYPES.has(account.accountType) && (
+              <div className="space-y-1.5">
+                <Label className="text-xs">Tax Treatment</Label>
+                <Select
+                  value={account.taxTreatment ?? 'PRE_TAX'}
+                  onValueChange={(v) => onUpdateAccount((c) => ({ ...c, taxTreatment: v }))}
+                >
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TAX_TREATMENT_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-muted-foreground text-xs">
+                  {account.taxTreatment === 'ROTH'
+                    ? 'Contributions are post-tax; qualified withdrawals are tax-free.'
+                    : 'Contributions reduce taxable income now; withdrawals are taxed.'}
+                </p>
+              </div>
+            )}
 
             {/* Type-specific fields */}
             {!isCombinedAsset ? (
@@ -490,15 +580,21 @@ export function AccountListItem({
                 className={`rounded-md px-3 py-2 text-xs ${isUsingIrsMaxContribution ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}
               >
                 <span className="font-medium">
-                  {formatCurrency(employeeAnnual)} / {formatCurrency(suggestedLimit)}
+                  {formatCurrency(personGroupAnnual)} / {formatCurrency(suggestedLimit)}
                 </span>
-                <span className="ml-1">IRS limit (age {ownerAge})</span>
+                <span className="ml-1">
+                  IRS limit (age {ownerAge}
+                  {otherGroupAccountsAnnual > 0
+                    ? `, incl. ${formatCurrency(otherGroupAccountsAnnual)} in other accounts`
+                    : ''}
+                  )
+                </span>
                 {plannerConstants.isMoneyGreaterThanWithTolerance(
-                  employeeAnnual,
+                  personGroupAnnual,
                   suggestedLimit,
                 ) && (
                   <span className="text-destructive ml-2 font-medium">
-                    Over by {formatCurrency(employeeAnnual - suggestedLimit)}
+                    Over by {formatCurrency(personGroupAnnual - suggestedLimit)}
                   </span>
                 )}
               </div>
@@ -523,8 +619,8 @@ export function AccountListItem({
                     key={p.id}
                     className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
                       account.personIds?.includes(p.id)
-                        ? 'bg-primary/10 border-primary/30 text-primary'
-                        : 'text-muted-foreground hover:bg-accent'
+                        ? 'bg-primary border-primary text-primary-foreground'
+                        : 'border-border text-muted-foreground hover:bg-accent'
                     }`}
                   >
                     <input
@@ -532,17 +628,15 @@ export function AccountListItem({
                       className="sr-only"
                       checked={account.personIds?.includes(p.id) ?? false}
                       onChange={(e) => {
-                        if (e.target.checked) {
-                          onUpdateAccount((c) => ({
-                            ...c,
-                            personIds: [...(c.personIds ?? []), p.id],
-                          }));
-                        } else {
-                          onUpdateAccount((c) => ({
-                            ...c,
-                            personIds: (c.personIds ?? []).filter((id) => id !== p.id),
-                          }));
-                        }
+                        // Owner changes save immediately — un-owning the person
+                        // whose list this row renders in can unmount the row, and
+                        // a debounced save would be cancelled with it.
+                        const nextPersonIds = e.target.checked
+                          ? [...(account.personIds ?? []), p.id]
+                          : (account.personIds ?? []).filter((id) => id !== p.id);
+                        const next = { ...account, personIds: nextPersonIds };
+                        onUpdateAccount((c) => ({ ...c, personIds: nextPersonIds }));
+                        onSave(next);
                       }}
                     />
                     {p.name || 'Unnamed'}

@@ -23,7 +23,6 @@ type mockQuerier struct {
 	listUsersFunc                   func(context.Context) ([]sqlc.ListUsersRow, error)
 	updateUserFunc                  func(context.Context, sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error)
 	updateUserSetupFunc             func(context.Context, sqlc.UpdateUserSetupParams) (sqlc.UpdateUserSetupRow, error)
-	softDeleteUserFunc              func(context.Context, uuid.UUID) (int64, error)
 }
 
 func (m *mockQuerier) CreateUser(ctx context.Context, params sqlc.CreateUserParams) (sqlc.CreateUserRow, error) {
@@ -66,13 +65,6 @@ func (m *mockQuerier) UpdateUser(ctx context.Context, params sqlc.UpdateUserPara
 		return m.updateUserFunc(ctx, params)
 	}
 	return sqlc.UpdateUserRow{}, nil
-}
-
-func (m *mockQuerier) SoftDeleteUser(ctx context.Context, id uuid.UUID) (int64, error) {
-	if m.softDeleteUserFunc != nil {
-		return m.softDeleteUserFunc(ctx, id)
-	}
-	return 0, nil
 }
 
 func (m *mockQuerier) UpdateUserSetup(ctx context.Context, params sqlc.UpdateUserSetupParams) (sqlc.UpdateUserSetupRow, error) {
@@ -453,52 +445,6 @@ func TestUserService_Update(t *testing.T) {
 
 		assert.ErrorIs(t, err, ErrNotFound)
 		assert.Nil(t, result)
-	})
-}
-
-func TestUserService_Delete(t *testing.T) {
-	ctx := context.Background()
-	testID := uuid.New()
-
-	t.Run("deletes user successfully", func(t *testing.T) {
-		mock := &mockQuerier{
-			softDeleteUserFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-				assert.Equal(t, testID, id)
-				return 1, nil
-			},
-		}
-
-		svc := NewUserService(mock)
-		err := svc.Delete(ctx, testID)
-
-		assert.NoError(t, err)
-	})
-
-	t.Run("returns ErrNotFound when user does not exist", func(t *testing.T) {
-		mock := &mockQuerier{
-			softDeleteUserFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-				return 0, nil
-			},
-		}
-
-		svc := NewUserService(mock)
-		err := svc.Delete(ctx, testID)
-
-		assert.ErrorIs(t, err, ErrNotFound)
-	})
-
-	t.Run("wraps database errors", func(t *testing.T) {
-		mock := &mockQuerier{
-			softDeleteUserFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-				return 0, errors.New("database error")
-			},
-		}
-
-		svc := NewUserService(mock)
-		err := svc.Delete(ctx, testID)
-
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "delete user")
 	})
 }
 

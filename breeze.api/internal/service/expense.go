@@ -78,7 +78,6 @@ type expenseQuerier interface {
 	CreateExpenseSplit(ctx context.Context, arg sqlc.CreateExpenseSplitParams) (sqlc.ExpenseSplit, error)
 	ListExpenseSplitsByExpenseIDs(ctx context.Context, expenseIDs []uuid.UUID) ([]sqlc.ExpenseSplit, error)
 	SoftDeleteExpenseSplitsByExpenseID(ctx context.Context, expenseID uuid.UUID) (int64, error)
-	GetWeightedMonthlyExpenses(ctx context.Context, userID uuid.UUID) (decimal.Decimal, error)
 }
 
 type expenseTxRunner interface {
@@ -312,14 +311,6 @@ func (s *ExpenseService) Delete(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 	return nil
-}
-
-func (s *ExpenseService) GetWeightedMonthlyExpenses(ctx context.Context, userID uuid.UUID) (decimal.Decimal, error) {
-	result, err := s.queries.GetWeightedMonthlyExpenses(ctx, userID)
-	if err != nil {
-		return decimal.Zero, fmt.Errorf("get weighted monthly expenses: %w", err)
-	}
-	return result, nil
 }
 
 func validateExpenseSplits(amount decimal.Decimal, splits []ExpenseSplitInput) error {

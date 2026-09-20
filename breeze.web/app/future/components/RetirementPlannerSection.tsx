@@ -152,22 +152,22 @@ export function RetirementPlannerSection({
               <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                 Milestone
               </p>
-              <p className="text-right text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              <p className="text-muted-foreground text-right text-xs font-medium tracking-wide uppercase">
                 Target
               </p>
               <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                 Progress
               </p>
-              <p className="text-right text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              <p className="text-muted-foreground text-right text-xs font-medium tracking-wide uppercase">
                 Age
               </p>
-              <p className="hidden text-right text-muted-foreground text-xs font-medium tracking-wide uppercase sm:block">
+              <p className="text-muted-foreground hidden text-right text-xs font-medium tracking-wide uppercase sm:block">
                 Req. Rate
               </p>
-              <p className="hidden text-right text-muted-foreground text-xs font-medium tracking-wide uppercase sm:block">
+              <p className="text-muted-foreground hidden text-right text-xs font-medium tracking-wide uppercase sm:block">
                 In
               </p>
-              <p className="hidden text-right text-muted-foreground text-xs font-medium tracking-wide uppercase sm:block">
+              <p className="text-muted-foreground hidden text-right text-xs font-medium tracking-wide uppercase sm:block">
                 Year
               </p>
             </div>
@@ -253,7 +253,7 @@ export function RetirementPlannerSection({
                       `${m.yearsToAchieve} yrs`
                     )}
                   </p>
-                  <p className="hidden text-right text-xs text-muted-foreground sm:block">
+                  <p className="text-muted-foreground hidden text-right text-xs sm:block">
                     {m.yearsToAchieve === null ? '—' : new Date().getFullYear() + m.yearsToAchieve}
                   </p>
                 </div>

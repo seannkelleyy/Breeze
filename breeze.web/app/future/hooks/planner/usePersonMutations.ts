@@ -28,7 +28,6 @@ export function usePersonMutations(userId: string) {
           payType: person.payType,
           payDay: person.payDay,
           payCadence: person.payCadence,
-          paycheck: person.paycheck ?? '',
           hourlyRate: person.hourlyRate.toString(),
           expectedHoursPerWeek: person.expectedHoursPerWeek.toString(),
         },

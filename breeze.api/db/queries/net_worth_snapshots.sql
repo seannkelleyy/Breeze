@@ -36,3 +36,24 @@ RETURNING *;
 UPDATE net_worth_snapshots
 SET deleted_at = now(), updated_at = now()
 WHERE id = $1 AND deleted_at IS NULL;
+
+-- name: CreateNetWorthSnapshotItem :one
+INSERT INTO net_worth_snapshot_items (
+    snapshot_id,
+    account_id,
+    label,
+    amount,
+    kind
+) VALUES (
+    $1, $2, $3, $4, $5
+) RETURNING *;
+
+-- name: ListNetWorthSnapshotItemsBySnapshotID :many
+SELECT * FROM net_worth_snapshot_items
+WHERE snapshot_id = $1 AND deleted_at IS NULL
+ORDER BY kind, label;
+
+-- name: SoftDeleteNetWorthSnapshotItems :execrows
+UPDATE net_worth_snapshot_items
+SET deleted_at = now(), updated_at = now()
+WHERE snapshot_id = $1 AND deleted_at IS NULL;

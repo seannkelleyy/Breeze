@@ -5,51 +5,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn, formatCurrencyWithCode } from '@/lib/utils';
 import {
-  getRecurringExpensesMonthlyTotal,
-  useRecurringExpenseTemplates,
-} from '@/app/budget/hooks/recurring/recurringTemplateServices';
-import {
   getPersonBonusPerYear,
-  getPersonPaycheckAmount,
   getPersonPaydaysForMonth,
   getPersonTotalIncome,
+  getPaychecksPerYear,
 } from '../../lib/plannerMath';
-import { computePaycheck, isPaycheckConfigured } from '../../lib/paycheck';
+import { computePersonWaterfall } from '../../lib/paycheck';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useTaxYear from '../../hooks/planner/useTaxYear';
 import type { PlannerPerson } from '../../types/person';
-import type { HouseholdIncomeBreakdown } from '../../hooks/planner/useHouseholdIncomeBreakdown';
-
-type CalendarDayEntry = { person: PlannerPerson; amount: number };
-
-function buildPaydayCalendar(
-  people: PlannerPerson[],
-  view: Date,
-  amountFor: (person: PlannerPerson) => number,
-): {
-  year: number;
-  month: number;
-  lastDay: number;
-  leadingBlanks: number;
-  byDay: Map<number, CalendarDayEntry[]>;
-} {
-  const year = view.getFullYear();
-  const month = view.getMonth();
-  const lastDay = new Date(year, month + 1, 0).getDate();
-  const leadingBlanks = (new Date(year, month, 1).getDay() + 6) % 7; // Monday-first
-  const byDay = new Map<number, CalendarDayEntry[]>();
-  for (const person of people) {
-    for (const date of getPersonPaydaysForMonth(person, year, month)) {
-      const day = date.getDate();
-      const entry = {
-        person,
-        amount: amountFor(person),
-      };
-      byDay.set(day, [...(byDay.get(day) ?? []), entry]);
-    }
-  }
-  return { year, month, lastDay, leadingBlanks, byDay };
-}
+import type { PlannerAccount } from '../../types/account';
+import type { PaycheckWithholding } from '../../lib/paycheck';
 
 const WEEKDAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTH_NAMES = [
@@ -67,71 +33,62 @@ const MONTH_NAMES = [
   'December',
 ];
 
-/** Household income as an equation: Base Pay + Bonus = Gross − Pre-Tax − Taxes = Net. */
-export function HouseholdPayStats({
-  people,
-  currencyCode,
-  breakdown,
-}: HouseholdPayPanelProps & { breakdown: HouseholdIncomeBreakdown }) {
+/** Household paycheck equation: Base Pay + Bonus = Total − Taxes − Savings − Withholdings = Take-home. */
+export function HouseholdPayStats({ people, accounts, withholdings, currencyCode }: PanelProps) {
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode, { maximumFractionDigits: 0 });
+  const { filingStatus, deductionType } = useCurrentUser();
+  const taxTables = useTaxYear(filingStatus);
 
   const totals = useMemo(() => {
     let totalIncome = 0;
     let bonusIncome = 0;
+    let taxes = 0;
+    let savings = 0;
+    let withhold = 0;
+    let takeHome = 0;
     for (const person of people) {
       totalIncome += getPersonTotalIncome(person);
-      bonusIncome += getPersonBonusPerYear(person);
+      bonusIncome += getPersonBonusPerYear(person) / 12;
+      const wf = computePersonWaterfall(person, accounts, withholdings, taxTables, deductionType);
+      taxes += wf.taxesMonthly;
+      savings += wf.savingsMonthly;
+      withhold += wf.pretaxWithholdingsMonthly + wf.posttaxWithholdingsMonthly;
+      takeHome += wf.takeHomeMonthly;
     }
-    return { totalIncome, bonusIncome, baseIncome: totalIncome - bonusIncome };
-  }, [people]);
-
-  const { data: recurringExpenseTemplates } = useRecurringExpenseTemplates();
-  const monthlyExpenses = getRecurringExpensesMonthlyTotal(recurringExpenseTemplates ?? []);
-  const baseMonthly = totals.baseIncome / 12;
-  const bonusMonthly = totals.bonusIncome / 12;
-  const grossMonthly = breakdown.grossAnnual / 12;
-  const preTaxMonthly = breakdown.preTaxAnnual / 12;
-  const taxableMonthly = breakdown.taxableAnnual / 12;
-  const taxMonthly = breakdown.taxAnnual / 12;
-  const netMonthly = breakdown.netAnnual / 12;
-  const leftover = netMonthly - monthlyExpenses;
+    return {
+      totalIncome,
+      bonusMonthly: bonusIncome,
+      baseMonthly: totalIncome / 12 - bonusIncome,
+      taxesMonthly: taxes,
+      savingsMonthly: savings,
+      withholdingsMonthly: withhold,
+      takeHomeMonthly: takeHome,
+    };
+  }, [people, accounts, withholdings, taxTables, deductionType]);
 
   return (
-    <Card className="bg-muted/50">
-      <CardContent className="p-4">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-5">
-          <Term value={fc(baseMonthly)} label="Base Pay (Monthly)" />
-          <Operator>+</Operator>
-          <Term value={fc(bonusMonthly)} label="Bonus (Monthly)" />
-          <Operator>=</Operator>
-          <Term value={fc(grossMonthly)} label="Gross (Monthly)" />
-          {breakdown.preTaxAnnual > 0 && (
-            <>
-              <Operator>−</Operator>
-              <Term value={fc(preTaxMonthly)} label="401(k) / HSA (Pre-Tax)" />
-              <Operator>=</Operator>
-              <Term value={fc(taxableMonthly)} label="Taxable (Monthly)" emphasized />
-            </>
-          )}
-          <Operator>−</Operator>
-          <Term
-            value={fc(taxMonthly)}
-            label={`Taxes (est. ${(breakdown.effectiveRate * 100).toFixed(0)}% of taxable)`}
-          />
-          <Operator>=</Operator>
-          <Term
-            value={fc(netMonthly)}
-            label="Net (Monthly) — planning figure"
-            emphasized
-            valueClassName="text-success"
-          />
-        </div>
-        <p className="text-muted-foreground mt-4 text-xs">
-          Net is what lands in bank accounts. After {fc(monthlyExpenses)}/mo tracked expenses,{' '}
-          {fc(leftover)}/mo remains for saving and investing.
-        </p>
-      </CardContent>
-    </Card>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-5">
+      <Term value={fc(totals.baseMonthly)} label="Base Pay (Monthly)" />
+      <Operator>+</Operator>
+      <Term value={fc(totals.bonusMonthly)} label="Bonus (Monthly)" />
+      <Operator>=</Operator>
+      <Term value={fc(totals.totalIncome / 12)} label="Total (Monthly)" emphasized />
+      <Operator>−</Operator>
+      <Term
+        value={fc(totals.taxesMonthly)}
+        label={`Taxes (est. ${((totals.taxesMonthly / totals.totalIncome) * 100 || 0).toFixed(0)}% effective)`}
+      />
+      <Operator>−</Operator>
+      <Term value={fc(totals.savingsMonthly)} label="Savings (401k, HSA)" />
+      <Operator>−</Operator>
+      <Term value={fc(totals.withholdingsMonthly)} label="Withholdings" />
+      <Operator>=</Operator>
+      <Term
+        value={fc(totals.takeHomeMonthly)}
+        label="Take-home (Monthly)"
+        valueClassName="text-success"
+      />
+    </div>
   );
 }
 
@@ -160,21 +117,11 @@ function Operator({ children }: { children: string }) {
   return <span className="text-muted-foreground self-center text-2xl font-light">{children}</span>;
 }
 
-/** Month-view calendar marking each person's after-tax payday and amount. */
-export function PaydayCalendar({
-  people,
-  currencyCode,
-  netRatio = 1,
-}: HouseholdPayPanelProps & { netRatio?: number }) {
+/** Month-view calendar marking each person's take-home payday and amount. */
+export function PaydayCalendar({ people, accounts, withholdings, currencyCode }: PanelProps) {
+  const fc = (v: number) => formatCurrencyWithCode(v, currencyCode, { maximumFractionDigits: 0 });
   const { filingStatus, deductionType } = useCurrentUser();
   const taxTables = useTaxYear(filingStatus);
-  // Configured paychecks use their computed take-home; others scale gross by the
-  // household net ratio.
-  const amountFor = (person: PlannerPerson): number =>
-    isPaycheckConfigured(person)
-      ? computePaycheck(person, taxTables, deductionType).netPerCheck
-      : getPersonPaycheckAmount(person) * netRatio;
-  const fc = (v: number) => formatCurrencyWithCode(v, currencyCode, { maximumFractionDigits: 0 });
   const now = new Date();
   const [today] = useState(() => new Date(now.getFullYear(), now.getMonth(), now.getDate()));
   const [monthOffset, setMonthOffset] = useState(0);
@@ -184,7 +131,24 @@ export function PaydayCalendar({
     [today, monthOffset],
   );
 
-  const calendar = buildPaydayCalendar(people, view, amountFor);
+  const calendar = useMemo(() => {
+    const year = view.getFullYear();
+    const month = view.getMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const leadingBlanks = (new Date(year, month, 1).getDay() + 6) % 7;
+    const byDay = new Map<number, { person: PlannerPerson; amount: number }[]>();
+    for (const person of people) {
+      const wf = computePersonWaterfall(person, accounts, withholdings, taxTables, deductionType);
+      const checksPerYear = getPaychecksPerYear(person.payCadence);
+      const netPerCheck = wf.takeHomeAnnual / checksPerYear;
+      for (const date of getPersonPaydaysForMonth(person, year, month)) {
+        const day = date.getDate();
+        const entry = { person, amount: netPerCheck };
+        byDay.set(day, [...(byDay.get(day) ?? []), entry]);
+      }
+    }
+    return { year, month, lastDay, leadingBlanks, byDay };
+  }, [view, people, accounts, withholdings, taxTables, deductionType]);
 
   return (
     <Card className="bg-muted/50">
@@ -281,7 +245,9 @@ export function PaydayCalendar({
   );
 }
 
-interface HouseholdPayPanelProps {
+interface PanelProps {
   people: PlannerPerson[];
+  accounts: PlannerAccount[];
+  withholdings: PaycheckWithholding[];
   currencyCode: string;
 }

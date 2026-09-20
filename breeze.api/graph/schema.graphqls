@@ -12,21 +12,15 @@ type Query {
   budgets(userId: ID!): [Budget!]!
   goal(id: ID!): Goal
   goals(userId: ID!): [Goal!]!
-  scenario(id: ID!): Scenario
-  scenarios(userId: ID!): [Scenario!]!
-  compareScenarios(userId: ID!): [ScenarioResult!]!
   plaidConnection(id: ID!): PlaidConnection
   plaidConnections(userId: ID!): [PlaidConnection!]!
   plaidAccounts(connectionId: ID!): [PlaidAccount!]!
   createPlaidLinkToken(userId: ID!): String!
-  retirementAccount(id: ID!): RetirementAccount
-  retirementAccounts(userId: ID!): [RetirementAccount!]!
-  contributionProgress(retirementAccountId: ID!, taxYear: Int!): ContributionProgress!
-  expenseCategory(id: ID!): ExpenseCategory
+  contributionLimits(taxYear: Int!): [ContributionLimit!]!
   expenseCategories(budgetId: ID!): [ExpenseCategory!]!
+  transactions(userId: ID!, fromDate: String, toDate: String): [Transaction!]!
   expense(id: ID!): Expense
   expenses(budgetId: ID!): [Expense!]!
-  weightedMonthlyExpenses(userId: ID!): String!
   income(id: ID!): Income
   incomes(budgetId: ID!): [Income!]!
   recurringIncome(id: ID!): RecurringIncome
@@ -35,6 +29,7 @@ type Query {
   recurringExpenses(userId: ID!): [RecurringExpense!]!
   plannerPeople(userId: ID!): [PlannerPerson!]!
   paycheckDeductions(personId: ID!): [PaycheckDeduction!]!
+  paycheckDeductionsByUser(userId: ID!): [PaycheckDeduction!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
   taxYearData(year: Int, filingStatus: FilingStatus!): TaxYearData!
@@ -48,7 +43,6 @@ type Query {
 type Mutation {
   createUser(input: CreateUserInput!): User!
   updateUser(input: UpdateUserInput!): User!
-  deleteUser(id: ID!): Boolean!
   createAsset(input: CreateAssetInput!): Asset!
   updateAsset(input: UpdateAssetInput!): Asset!
   deleteAsset(id: ID!): Boolean!
@@ -61,14 +55,10 @@ type Mutation {
   createGoal(input: CreateGoalInput!): Goal!
   updateGoal(input: UpdateGoalInput!): Goal!
   deleteGoal(id: ID!): Boolean!
-  createScenario(input: CreateScenarioInput!): Scenario!
-  updateScenario(input: UpdateScenarioInput!): Scenario!
-  deleteScenario(id: ID!): Boolean!
-  createRetirementAccount(input: CreateRetirementAccountInput!): RetirementAccount!
-  updateRetirementAccount(input: UpdateRetirementAccountInput!): RetirementAccount!
-  deleteRetirementAccount(id: ID!): Boolean!
-  addContribution(input: AddContributionInput!): ContributionEntry!
   createExpenseCategory(input: CreateExpenseCategoryInput!): ExpenseCategory!
+  createTransaction(input: CreateTransactionInput!): Transaction!
+  assignTransactionCategory(id: ID!, expenseCategoryId: ID): Transaction!
+  deleteTransaction(id: ID!): Boolean!
   updateExpenseCategory(input: UpdateExpenseCategoryInput!): ExpenseCategory!
   deleteExpenseCategory(id: ID!): Boolean!
   createExpense(input: CreateExpenseInput!): Expense!
@@ -165,11 +155,6 @@ enum AssetType {
   OTHER
 }
 
-enum RetirementAccountOwner {
-  SELF
-  SPOUSE
-}
-
 enum RetirementAccountType {
   ACCOUNT_401K
   ACCOUNT_403B
@@ -180,12 +165,17 @@ enum RetirementAccountType {
   OTHER
 }
 
-enum RetirementTaxTreatment {
-  PRE_TAX
-  ROTH
-  TAX_DEFERRED
-  TAXABLE
-  OTHER
+type ContributionLimit {
+  id: ID!
+  accountType: RetirementAccountType!
+  taxYear: Int!
+  annualLimit: String!
+  catchUpAge: Int!
+  catchUpAmount: String!
+  superCatchUpAmount: String!
+  familyAnnualLimit: String
+  createdAt: String!
+  updatedAt: String!
 }
 
 enum LiabilityType {
@@ -269,6 +259,7 @@ type Asset {
   employerMatchMaxPercentOfSalary: String!
   annualRate: String!
   returnProfile: String
+  taxTreatment: String!
   personIds: [ID!]!
   purchaseDate: String
   purchasePrice: String
@@ -327,96 +318,6 @@ type Goal {
   financialOrderStep: Int
   createdAt: String!
   updatedAt: String!
-}
-
-type Scenario {
-  id: ID!
-  userId: ID!
-  name: String!
-  currentAge: Int!
-  retirementAge: Int!
-  annualSpend: String!
-  safeWithdrawalRate: String!
-  inflationRate: String!
-  returnRate: String!
-  currentPortfolio: String!
-  createdAt: String!
-  updatedAt: String!
-}
-
-type ScenarioResult {
-  scenarioProfileId: ID!
-  name: String!
-  currentAge: Int!
-  retirementAge: Int!
-  annualSpend: String!
-  safeWithdrawalRate: String!
-  inflationRate: String!
-  returnRate: String!
-  currentPortfolio: String!
-  portfolioAtRetirement: String!
-  requiredPortfolio: String!
-  projectedDepletionAge: Int
-  isSustainable: Boolean!
-  createdAt: String!
-  updatedAt: String!
-}
-
-type RetirementAccount {
-  id: ID!
-  userId: ID!
-  name: String!
-  accountType: RetirementAccountType!
-  owner: RetirementAccountOwner!
-  taxTreatment: RetirementTaxTreatment!
-  currentBalance: String!
-  annualContributionLimit: String!
-  createdAt: String!
-  updatedAt: String!
-}
-
-type ContributionEntry {
-  id: ID!
-  retirementAccountId: ID!
-  taxYear: Int!
-  contributionDate: String!
-  amount: String!
-  createdAt: String!
-  updatedAt: String!
-}
-
-type ContributionProgress {
-  retirementAccountId: ID!
-  taxYear: Int!
-  annualLimit: String!
-  contributedYtd: String!
-  remainingAmount: String!
-  percentUsed: String!
-  isMaxed: Boolean!
-}
-
-input CreateRetirementAccountInput {
-  userId: ID!
-  name: String!
-  accountType: RetirementAccountType!
-  owner: RetirementAccountOwner!
-  taxTreatment: RetirementTaxTreatment!
-  currentBalance: String!
-}
-
-input UpdateRetirementAccountInput {
-  id: ID!
-  name: String!
-  accountType: RetirementAccountType!
-  owner: RetirementAccountOwner!
-  taxTreatment: RetirementTaxTreatment!
-  currentBalance: String!
-}
-
-input AddContributionInput {
-  retirementAccountId: ID!
-  contributionDate: String!
-  amount: String!
 }
 
 type ExpenseCategory {
@@ -517,7 +418,6 @@ type PlannerPerson {
   payType: String!
   payDay: Int!
   payCadence: String!
-  paycheck: String!
   hourlyRate: String!
   expectedHoursPerWeek: String!
   createdAt: String!
@@ -531,6 +431,8 @@ type PaycheckDeduction {
   name: String!
   amount: String!
   pretax: Boolean!
+  kind: String!
+  linkedAccountId: ID
   createdAt: String!
   updatedAt: String!
 }
@@ -542,6 +444,8 @@ input UpsertPaycheckDeductionInput {
   name: String!
   amount: String!
   pretax: Boolean!
+  kind: String!
+  linkedAccountId: ID
 }
 
 type PlaidConnection {
@@ -604,6 +508,14 @@ input CreateBudgetInput {
   date: String!
   monthlyIncome: String!
   monthlyExpenses: String!
+  payrollIncomes: [PayrollIncomeInput!]
+}
+
+input PayrollIncomeInput {
+  personId: ID!
+  name: String!
+  amount: String!
+  date: String!
 }
 
 input UpdateBudgetInput {
@@ -627,18 +539,6 @@ input CreateGoalInput {
   financialOrderStep: Int
 }
 
-input CreateScenarioInput {
-  userId: ID!
-  name: String!
-  currentAge: Int!
-  retirementAge: Int!
-  annualSpend: String!
-  safeWithdrawalRate: String!
-  inflationRate: String!
-  returnRate: String!
-  currentPortfolio: String!
-}
-
 input UpdateGoalInput {
   id: ID!
   description: String!
@@ -652,18 +552,6 @@ input UpdateGoalInput {
   connectedAccountIds: [ID!]!
   isFinancialOrderStep: Boolean!
   financialOrderStep: Int
-}
-
-input UpdateScenarioInput {
-  id: ID!
-  name: String!
-  currentAge: Int!
-  retirementAge: Int!
-  annualSpend: String!
-  safeWithdrawalRate: String!
-  inflationRate: String!
-  returnRate: String!
-  currentPortfolio: String!
 }
 
 input CreateExpenseCategoryInput {
@@ -789,7 +677,6 @@ input UpsertPlannerPersonInput {
   payType: String!
   payDay: Int!
   payCadence: String!
-  paycheck: String!
   hourlyRate: String!
   expectedHoursPerWeek: String!
 }
@@ -847,6 +734,7 @@ input CreateAssetInput {
   employerMatchMaxPercentOfSalary: String!
   annualRate: String!
   returnProfile: String
+  taxTreatment: String!
   purchaseDate: String
   purchasePrice: String
   homeGrowthProfile: String
@@ -867,6 +755,7 @@ input UpdateAssetInput {
   employerMatchMaxPercentOfSalary: String!
   annualRate: String!
   returnProfile: String
+  taxTreatment: String!
   purchaseDate: String
   purchasePrice: String
   homeGrowthProfile: String
@@ -877,6 +766,46 @@ input UpdateAssetInput {
 }
 
 
+type NetWorthSnapshotItem {
+  id: ID!
+  snapshotId: ID!
+  accountId: ID
+  label: String!
+  amount: String!
+  kind: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input NetWorthSnapshotItemInput {
+  accountId: ID
+  label: String!
+  amount: String!
+  kind: String!
+}
+
+# amount sign convention: positive = money out (spend), negative = money in.
+type Transaction {
+  id: ID!
+  userId: ID!
+  plaidAccountId: ID
+  plaidTransactionId: String
+  date: String!
+  amount: String!
+  name: String!
+  expenseCategoryId: ID
+  pending: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateTransactionInput {
+  date: String!
+  amount: String!
+  name: String!
+  expenseCategoryId: ID
+}
+
 type NetWorthSnapshot {
   id: ID!
   userId: ID!
@@ -886,6 +815,7 @@ type NetWorthSnapshot {
   netWorth: String!
   createdAt: String!
   updatedAt: String!
+  items: [NetWorthSnapshotItem!]!
 }
 
 input CreateNetWorthSnapshotInput {
@@ -894,6 +824,7 @@ input CreateNetWorthSnapshotInput {
   totalAssets: String!
   totalLiabilities: String!
   netWorth: String!
+  items: [NetWorthSnapshotItemInput!]
 }
 
 input UpdateNetWorthSnapshotInput {
@@ -901,6 +832,7 @@ input UpdateNetWorthSnapshotInput {
   totalAssets: String
   totalLiabilities: String
   netWorth: String
+  items: [NetWorthSnapshotItemInput!]
 }
 
 type LadderStep {

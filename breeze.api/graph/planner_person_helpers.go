@@ -60,7 +60,6 @@ func upsertPlannerPersonInputFromModel(input *model.UpsertPlannerPersonInput) (s
 		PayType:              input.PayType,
 		PayDay:               int32(input.PayDay),
 		PayCadence:           input.PayCadence,
-		Paycheck:             input.Paycheck,
 		HourlyRate:           hourlyRate,
 		ExpectedHoursPerWeek: expectedHoursPerWeek,
 	}, nil
@@ -81,7 +80,6 @@ func mapPlannerPersonToModel(person *service.PlannerPerson) *model.PlannerPerson
 		PayType:              person.PayType,
 		PayDay:               int(person.PayDay),
 		PayCadence:           person.PayCadence,
-		Paycheck:             person.Paycheck,
 		HourlyRate:           person.HourlyRate.String(),
 		ExpectedHoursPerWeek: person.ExpectedHoursPerWeek.String(),
 		CreatedAt:            person.CreatedAt.Format(time.RFC3339),

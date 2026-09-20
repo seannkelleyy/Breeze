@@ -56,6 +56,49 @@ func (q *Queries) CreateNetWorthSnapshot(ctx context.Context, arg CreateNetWorth
 	return i, err
 }
 
+const createNetWorthSnapshotItem = `-- name: CreateNetWorthSnapshotItem :one
+INSERT INTO net_worth_snapshot_items (
+    snapshot_id,
+    account_id,
+    label,
+    amount,
+    kind
+) VALUES (
+    $1, $2, $3, $4, $5
+) RETURNING id, snapshot_id, account_id, label, amount, kind, created_at, updated_at, deleted_at
+`
+
+type CreateNetWorthSnapshotItemParams struct {
+	SnapshotID uuid.UUID       `json:"snapshot_id"`
+	AccountID  pgtype.UUID     `json:"account_id"`
+	Label      string          `json:"label"`
+	Amount     decimal.Decimal `json:"amount"`
+	Kind       string          `json:"kind"`
+}
+
+func (q *Queries) CreateNetWorthSnapshotItem(ctx context.Context, arg CreateNetWorthSnapshotItemParams) (NetWorthSnapshotItem, error) {
+	row := q.db.QueryRow(ctx, createNetWorthSnapshotItem,
+		arg.SnapshotID,
+		arg.AccountID,
+		arg.Label,
+		arg.Amount,
+		arg.Kind,
+	)
+	var i NetWorthSnapshotItem
+	err := row.Scan(
+		&i.ID,
+		&i.SnapshotID,
+		&i.AccountID,
+		&i.Label,
+		&i.Amount,
+		&i.Kind,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const deleteNetWorthSnapshot = `-- name: DeleteNetWorthSnapshot :exec
 UPDATE net_worth_snapshots
 SET deleted_at = now(), updated_at = now()
@@ -116,6 +159,42 @@ func (q *Queries) GetNetWorthSnapshotByDate(ctx context.Context, arg GetNetWorth
 	return i, err
 }
 
+const listNetWorthSnapshotItemsBySnapshotID = `-- name: ListNetWorthSnapshotItemsBySnapshotID :many
+SELECT id, snapshot_id, account_id, label, amount, kind, created_at, updated_at, deleted_at FROM net_worth_snapshot_items
+WHERE snapshot_id = $1 AND deleted_at IS NULL
+ORDER BY kind, label
+`
+
+func (q *Queries) ListNetWorthSnapshotItemsBySnapshotID(ctx context.Context, snapshotID uuid.UUID) ([]NetWorthSnapshotItem, error) {
+	rows, err := q.db.Query(ctx, listNetWorthSnapshotItemsBySnapshotID, snapshotID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []NetWorthSnapshotItem
+	for rows.Next() {
+		var i NetWorthSnapshotItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.SnapshotID,
+			&i.AccountID,
+			&i.Label,
+			&i.Amount,
+			&i.Kind,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listNetWorthSnapshots = `-- name: ListNetWorthSnapshots :many
 SELECT id, user_id, snapshot_date, total_assets, total_liabilities, net_worth, created_at, updated_at, deleted_at FROM net_worth_snapshots
 WHERE user_id = $1 AND deleted_at IS NULL
@@ -150,6 +229,20 @@ func (q *Queries) ListNetWorthSnapshots(ctx context.Context, userID uuid.UUID) (
 		return nil, err
 	}
 	return items, nil
+}
+
+const softDeleteNetWorthSnapshotItems = `-- name: SoftDeleteNetWorthSnapshotItems :execrows
+UPDATE net_worth_snapshot_items
+SET deleted_at = now(), updated_at = now()
+WHERE snapshot_id = $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) SoftDeleteNetWorthSnapshotItems(ctx context.Context, snapshotID uuid.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteNetWorthSnapshotItems, snapshotID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const updateNetWorthSnapshot = `-- name: UpdateNetWorthSnapshot :one

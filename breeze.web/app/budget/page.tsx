@@ -4,8 +4,9 @@ import { Suspense, useEffect, useState } from 'react';
 
 import dayjs from 'dayjs';
 import Link from 'next/link';
-import { MoveLeft, MoveRight, RefreshCw, Loader2, Target, Receipt } from 'lucide-react';
+import { MoveLeft, MoveRight, RefreshCw, Loader2, Receipt } from 'lucide-react';
 
+import { BankActualsCard } from './components/BankActualsCard';
 import { useBudgetContext } from './providers/index';
 import { useRegenerateBudget } from './hooks/budget/index';
 import { Button } from '@/components/ui/button';
@@ -16,10 +17,16 @@ import {
   ExpensesTable,
   IncomeTable,
 } from './components/index';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { isMoneyGreaterThanOrEqualWithTolerance } from '../future/lib/constants';
+import { getMonthPayrollIncomes } from '../future/lib/paycheck';
+import { usePlannerHydration } from '../future/hooks/usePlannerHydration';
+import { usePlannerState } from '../future/providers/PlannerStateProvider';
+import { usePaycheckDeductions } from '../future/hooks/planner/usePaycheckDeductions';
+import useTaxYear from '../future/hooks/planner/useTaxYear';
 import { useTabParam } from '@/lib/hooks/useTabParam';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { formatCurrencyWithCode } from '@/lib/utils';
 
 const BUDGET_TABS = ['categories', 'expenses', 'income'] as const;
 
@@ -41,6 +48,15 @@ const BudgetContent = () => {
   const { budget, getBudgetForDate, refetchBudget, refetchIncomes, refetchCategories } =
     useBudgetContext();
   const { regenerateBudgetMonth } = useRegenerateBudget();
+  const { userId, filingStatus, deductionType, currencyCode } = useCurrentUser();
+
+  // Paycheck income comes from the planner: people + accounts + withholdings
+  // feed the per-person waterfall that generates this month's payday incomes.
+  usePlannerHydration();
+  const { plannerPeople, plannerAccounts } = usePlannerState();
+  const { deductions: allWithholdings } = usePaycheckDeductions(null);
+  const taxTables = useTaxYear(filingStatus);
+
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [confirmRegenerate, setConfirmRegenerate] = useState(false);
@@ -72,18 +88,28 @@ const BudgetContent = () => {
     }
   };
 
-  const budgetDifference =
-    Number(budget?.monthlyIncome ?? 0) - Number(budget?.monthlyExpenses ?? 0);
-  const isBudgetDifferencePositive = isMoneyGreaterThanOrEqualWithTolerance(budgetDifference, 0);
+  const isBudgetDifferencePositive = isMoneyGreaterThanOrEqualWithTolerance(
+    Number(budget?.monthlyIncome ?? 0) - Number(budget?.monthlyExpenses ?? 0),
+    0,
+  );
 
   const handleRegenerate = async () => {
     setRegenerating(true);
     setRegenerateMessage('');
     try {
-      await regenerateBudgetMonth(currentYear, currentMonth + 1);
+      const payrollIncomes = getMonthPayrollIncomes(
+        plannerPeople,
+        plannerAccounts,
+        allWithholdings,
+        taxTables,
+        deductionType,
+        currentYear,
+        currentMonth + 1,
+      );
+      await regenerateBudgetMonth(currentYear, currentMonth + 1, payrollIncomes);
       await Promise.all([refetchBudget(), refetchIncomes(), refetchCategories()]);
       setRegenerateMessage(
-        `Recurring templates regenerated for ${dayjs(new Date(currentYear, currentMonth)).format('MMMM YYYY')}.`,
+        `Income and recurring templates regenerated for ${dayjs(new Date(currentYear, currentMonth)).format('MMMM YYYY')}.`,
       );
     } catch {
       setRegenerateMessage('Failed to regenerate recurring templates. Please try again.');
@@ -107,15 +133,19 @@ const BudgetContent = () => {
         </Button>
       </div>
       <h2 className="text-lg">
-        Income: ${' '}
-        <span className="text-accent font-bold">{budget?.monthlyIncome ?? 'Loading...'}</span>
+        Income:{' '}
+        <span className="text-accent font-bold">
+          {budget ? formatCurrencyWithCode(Number(budget.monthlyIncome), currencyCode) : 'Loading...'}
+        </span>
       </h2>
       <h2 className="text-lg">
-        Expenses: ${' '}
-        <span className="text-accent font-bold">{budget?.monthlyExpenses ?? 'Loading...'}</span>
+        Expenses:{' '}
+        <span className="text-accent font-bold">
+          {budget ? formatCurrencyWithCode(Number(budget.monthlyExpenses), currencyCode) : 'Loading...'}
+        </span>
       </h2>
       <h2 className="text-lg">
-        Difference: ${' '}
+        Difference:{' '}
         <span
           className={
             isBudgetDifferencePositive
@@ -123,7 +153,9 @@ const BudgetContent = () => {
               : 'bg-destructive rounded-sm p-1'
           }
         >
-          {budgetDifference}
+          {budget
+            ? formatCurrencyWithCode(Number(budget.monthlyIncome ?? 0) - Number(budget.monthlyExpenses ?? 0), currencyCode)
+            : 'Loading...'}
         </span>
       </h2>
       <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
@@ -180,19 +212,12 @@ const BudgetContent = () => {
           {regenerateMessage}
         </div>
       ) : null}
-      <Link href="/goals">
-        <Card className="hover:bg-accent transition-colors">
-          <CardHeader className="flex flex-row items-center gap-3 pb-2">
-            <Target className="text-muted-foreground h-5 w-5" />
-            <CardTitle className="text-lg">Goals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm">
-              Track your financial goals and Financial Order of Operations on the Goals page.
-            </p>
-          </CardContent>
-        </Card>
-      </Link>
+      <BankActualsCard
+        userId={userId}
+        monthDate={new Date(currentYear, currentMonth)}
+        budgetId={budget?.id ?? null}
+        currencyCode={currencyCode}
+      />
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as typeof activeTab)}

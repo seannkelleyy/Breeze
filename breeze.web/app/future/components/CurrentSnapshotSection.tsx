@@ -33,6 +33,7 @@ export function CurrentSnapshotSection({
   currencyCode,
 }: CurrentSnapshotSectionProps) {
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
+  const payroll = snapshot.payroll ?? null;
   const monthlyIncome = snapshot.grossIncome / 12;
   const monthlySavings = totalPlannedMonthlyInvestment;
   const yearlySavingsPlanned = monthlySavings * 12;
@@ -46,7 +47,12 @@ export function CurrentSnapshotSection({
       : 0;
 
   const assetAccounts = accounts
-    .filter((a) => !isLiabilityAccountType(a.accountType) && a.accountType !== 'home' && a.accountType !== 'vehicle')
+    .filter(
+      (a) =>
+        !isLiabilityAccountType(a.accountType) &&
+        a.accountType !== 'home' &&
+        a.accountType !== 'vehicle',
+    )
     .map((a) => ({ id: a.id, name: a.name, balance: a.startingBalance }));
   const liabilityAccounts = accounts
     .filter((a) => isLiabilityAccountType(a.accountType))
@@ -85,9 +91,7 @@ export function CurrentSnapshotSection({
                 {fc(snapshot.monthlyExpenses)}{' '}
                 <span className="text-muted-foreground text-xs font-normal">per month</span>
               </p>
-              <p className="text-muted-foreground text-xs">
-                ({fc(snapshot.annualSpend)} per year)
-              </p>
+              <p className="text-muted-foreground text-xs">({fc(snapshot.annualSpend)} per year)</p>
             </div>
             <div>
               <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
@@ -134,26 +138,63 @@ export function CurrentSnapshotSection({
           <div className="grid grid-cols-1 gap-6 border-t pt-6 lg:grid-cols-2">
             <div className="space-y-3">
               <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Savings Breakdown
+                Income Waterfall
               </p>
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    Net income ({(snapshot.netIncomeFactor * 100).toFixed(0)}% of gross)
-                  </span>
-                  <span className="font-medium">{fc(snapshot.netIncome)}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Extra reserve</span>
-                  <span>{fc(snapshot.annualExtraExpenseBuffer)}</span>
-                </div>
-                <div className="border-t pt-1">
-                  <div className="flex items-center justify-between text-sm font-medium">
-                    <span className="text-success">Yearly saving</span>
-                    <span className="text-success">{fc(snapshot.yearlySavings)}</span>
+              {payroll ? (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Gross</span>
+                    <span className="font-medium">{fc(payroll.grossMonthly)}/mo</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">− Pre-tax savings (401k, HSA)</span>
+                    <span>{fc(payroll.pretaxSavingsMonthly)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">− Pre-tax withholdings</span>
+                    <span>{fc(payroll.pretaxWithholdingsMonthly)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Taxes (est. {(payroll.effectiveRate * 100).toFixed(1)}% effective)
+                    </span>
+                    <span>{fc(payroll.taxesMonthly)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      − Roth savings · post-tax withholdings
+                    </span>
+                    <span>
+                      {fc(payroll.rothSavingsMonthly + payroll.posttaxWithholdingsMonthly)}
+                    </span>
+                  </div>
+                  <div className="border-t pt-1">
+                    <div className="flex items-center justify-between text-sm font-medium">
+                      <span className="text-success">Take-home</span>
+                      <span className="text-success">{fc(payroll.takeHomeMonthly)}/mo</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">
+                      Free after expenses ({fc(snapshot.monthlyExpenses)}/mo)
+                    </span>
+                    <span
+                      className={cn(
+                        'font-medium',
+                        payroll.takeHomeMonthly - snapshot.monthlyExpenses >= 0
+                          ? 'text-success'
+                          : 'text-destructive',
+                      )}
+                    >
+                      {fc(payroll.takeHomeMonthly - snapshot.monthlyExpenses)}/mo
+                    </span>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <p className="text-muted-foreground text-xs">
+                  Add people on the People page to model your income waterfall.
+                </p>
+              )}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">Savings rate (of gross income)</span>
@@ -161,7 +202,7 @@ export function CurrentSnapshotSection({
                 </div>
                 <Progress
                   value={savingsRateOfGross}
-                  className="h-2 [&>[data-slot=progress-indicator]]:bg-success"
+                  className="[&>[data-slot=progress-indicator]]:bg-success h-2"
                 />
               </div>
             </div>
@@ -173,9 +214,7 @@ export function CurrentSnapshotSection({
               {hasLiabilities ? (
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-success font-medium">
-                      Assets {fc(totalAssets)}
-                    </span>
+                    <span className="text-success font-medium">Assets {fc(totalAssets)}</span>
                     <span className="text-destructive font-medium">
                       Liabilities {fc(totalLiabilities)}
                     </span>
@@ -240,7 +279,7 @@ export function CurrentSnapshotSection({
                 </div>
                 <Progress
                   value={targetProgress}
-                  className="h-2 [&>[data-slot=progress-indicator]]:bg-info"
+                  className="[&>[data-slot=progress-indicator]]:bg-info h-2"
                 />
               </div>
             </div>

@@ -165,6 +165,43 @@ func (q *Queries) GetPlaidConnectionByID(ctx context.Context, id uuid.UUID) (Pla
 	return i, err
 }
 
+const listActivePlaidConnections = `-- name: ListActivePlaidConnections :many
+SELECT id, user_id, environment, institution_id, institution_name, access_token, item_id, created_at, updated_at, deleted_at FROM plaid_connections
+WHERE deleted_at IS NULL
+ORDER BY created_at
+`
+
+func (q *Queries) ListActivePlaidConnections(ctx context.Context) ([]PlaidConnection, error) {
+	rows, err := q.db.Query(ctx, listActivePlaidConnections)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PlaidConnection
+	for rows.Next() {
+		var i PlaidConnection
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Environment,
+			&i.InstitutionID,
+			&i.InstitutionName,
+			&i.AccessToken,
+			&i.ItemID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listPlaidConnectionsByUserID = `-- name: ListPlaidConnectionsByUserID :many
 SELECT id, user_id, environment, institution_id, institution_name, access_token, item_id, created_at, updated_at, deleted_at
 FROM plaid_connections

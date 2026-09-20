@@ -10,11 +10,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const listPaycheckDeductionsByPersonID = `-- name: ListPaycheckDeductionsByPersonID :many
-SELECT id, user_id, person_id, name, amount, pretax, created_at, updated_at, deleted_at
-FROM paycheck_deductions
+SELECT id, user_id, person_id, name, amount, pretax, created_at, updated_at, deleted_at, kind, linked_account_id FROM paycheck_deductions
 WHERE user_id = $1 AND person_id = $2 AND deleted_at IS NULL
 ORDER BY created_at ASC
 `
@@ -43,6 +43,46 @@ func (q *Queries) ListPaycheckDeductionsByPersonID(ctx context.Context, arg List
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
+			&i.Kind,
+			&i.LinkedAccountID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPaycheckDeductionsByUserID = `-- name: ListPaycheckDeductionsByUserID :many
+SELECT id, user_id, person_id, name, amount, pretax, created_at, updated_at, deleted_at, kind, linked_account_id FROM paycheck_deductions
+WHERE user_id = $1 AND deleted_at IS NULL
+ORDER BY created_at ASC
+`
+
+func (q *Queries) ListPaycheckDeductionsByUserID(ctx context.Context, userID uuid.UUID) ([]PaycheckDeduction, error) {
+	rows, err := q.db.Query(ctx, listPaycheckDeductionsByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PaycheckDeduction
+	for rows.Next() {
+		var i PaycheckDeduction
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.PersonID,
+			&i.Name,
+			&i.Amount,
+			&i.Pretax,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.Kind,
+			&i.LinkedAccountID,
 		); err != nil {
 			return nil, err
 		}
@@ -69,26 +109,42 @@ func (q *Queries) SoftDeletePaycheckDeduction(ctx context.Context, id uuid.UUID)
 }
 
 const upsertPaycheckDeduction = `-- name: UpsertPaycheckDeduction :one
-INSERT INTO paycheck_deductions (id, user_id, person_id, name, amount, pretax)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO paycheck_deductions (id, user_id, person_id, name, amount, pretax, kind, linked_account_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 ON CONFLICT (id) DO UPDATE
 SET name = EXCLUDED.name,
     amount = EXCLUDED.amount,
     pretax = EXCLUDED.pretax,
     updated_at = now()
-RETURNING id, user_id, person_id, name, amount, pretax, created_at, updated_at, deleted_at
+RETURNING id, user_id, person_id, name, amount, pretax, kind, linked_account_id, created_at, updated_at, deleted_at
 `
 
 type UpsertPaycheckDeductionParams struct {
-	ID       uuid.UUID       `json:"id"`
-	UserID   uuid.UUID       `json:"user_id"`
-	PersonID uuid.UUID       `json:"person_id"`
-	Name     string          `json:"name"`
-	Amount   decimal.Decimal `json:"amount"`
-	Pretax   bool            `json:"pretax"`
+	ID              uuid.UUID       `json:"id"`
+	UserID          uuid.UUID       `json:"user_id"`
+	PersonID        uuid.UUID       `json:"person_id"`
+	Name            string          `json:"name"`
+	Amount          decimal.Decimal `json:"amount"`
+	Pretax          bool            `json:"pretax"`
+	Kind            string          `json:"kind"`
+	LinkedAccountID pgtype.UUID     `json:"linked_account_id"`
 }
 
-func (q *Queries) UpsertPaycheckDeduction(ctx context.Context, arg UpsertPaycheckDeductionParams) (PaycheckDeduction, error) {
+type UpsertPaycheckDeductionRow struct {
+	ID              uuid.UUID          `json:"id"`
+	UserID          uuid.UUID          `json:"user_id"`
+	PersonID        uuid.UUID          `json:"person_id"`
+	Name            string             `json:"name"`
+	Amount          decimal.Decimal    `json:"amount"`
+	Pretax          bool               `json:"pretax"`
+	Kind            string             `json:"kind"`
+	LinkedAccountID pgtype.UUID        `json:"linked_account_id"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
+}
+
+func (q *Queries) UpsertPaycheckDeduction(ctx context.Context, arg UpsertPaycheckDeductionParams) (UpsertPaycheckDeductionRow, error) {
 	row := q.db.QueryRow(ctx, upsertPaycheckDeduction,
 		arg.ID,
 		arg.UserID,
@@ -96,8 +152,10 @@ func (q *Queries) UpsertPaycheckDeduction(ctx context.Context, arg UpsertPaychec
 		arg.Name,
 		arg.Amount,
 		arg.Pretax,
+		arg.Kind,
+		arg.LinkedAccountID,
 	)
-	var i PaycheckDeduction
+	var i UpsertPaycheckDeductionRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -105,6 +163,8 @@ func (q *Queries) UpsertPaycheckDeduction(ctx context.Context, arg UpsertPaychec
 		&i.Name,
 		&i.Amount,
 		&i.Pretax,
+		&i.Kind,
+		&i.LinkedAccountID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,

@@ -49,19 +49,9 @@ enum "expense_source_type" {
   values = ["MANUAL", "RECURRING_TEMPLATE"]
 }
 
-enum "retirement_account_owner" {
-  schema = schema.public
-  values = ["SELF", "SPOUSE"]
-}
-
 enum "retirement_account_type" {
   schema = schema.public
   values = ["ACCOUNT_401K", "ACCOUNT_403B", "ACCOUNT_457", "ROTH_IRA", "TRADITIONAL_IRA", "HSA", "OTHER"]
-}
-
-enum "retirement_tax_treatment" {
-  schema = schema.public
-  values = ["PRE_TAX", "ROTH", "TAX_DEFERRED", "TAXABLE", "OTHER"]
 }
 
 table "tax_brackets" {
@@ -380,6 +370,12 @@ table "assets" {
   column "asset_type" {
     type = enum.asset_type
     null = false
+  }
+
+  column "tax_treatment" {
+    type    = text
+    null    = false
+    default = "PRE_TAX"
   }
 
   column "current_value" {
@@ -1046,97 +1042,6 @@ table "goals" {
   }
 }
 
-table "retirement_accounts" {
-  schema = schema.public
-
-  column "id" {
-    type    = uuid
-    null    = false
-    default = sql("gen_random_uuid()")
-  }
-
-  column "user_id" {
-    type = uuid
-    null = false
-  }
-
-  column "name" {
-    type = varchar(255)
-    null = false
-  }
-
-  column "account_type" {
-    type = enum.retirement_account_type
-    null = false
-  }
-
-  column "owner" {
-    type = enum.retirement_account_owner
-    null = false
-  }
-
-  column "tax_treatment" {
-    type = enum.retirement_tax_treatment
-    null = false
-  }
-
-  column "current_balance" {
-    type    = numeric(14,2)
-    null    = false
-    default = sql("0")
-  }
-
-  column "annual_contribution_limit" {
-    type    = numeric(12,2)
-    null    = false
-    default = sql("0")
-  }
-
-  column "created_at" {
-    type    = timestamptz
-    null    = false
-    default = sql("now()")
-  }
-
-  column "updated_at" {
-    type    = timestamptz
-    null    = false
-    default = sql("now()")
-  }
-
-  column "deleted_at" {
-    type = timestamptz
-    null = true
-  }
-
-  primary_key {
-    columns = [column.id]
-  }
-
-  foreign_key "fk_retirement_accounts_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_delete   = CASCADE
-  }
-
-  index "idx_retirement_accounts_user_id" {
-    columns = [column.user_id]
-  }
-
-  index "idx_retirement_accounts_user_active" {
-    columns = [column.user_id, column.created_at]
-    where   = "deleted_at IS NULL"
-  }
-
-  check "retirement_accounts_current_balance_non_negative" {
-    expr = "current_balance >= 0"
-  }
-
-  check "retirement_accounts_annual_contribution_limit_non_negative" {
-    expr = "annual_contribution_limit >= 0"
-  }
-}
-
 table "contribution_limits" {
   schema = schema.public
 
@@ -1171,6 +1076,17 @@ table "contribution_limits" {
     null = false
   }
 
+  column "family_annual_limit" {
+    type = numeric(12,2)
+    null = true
+  }
+
+  column "super_catch_up_amount" {
+    type    = numeric(12,2)
+    null    = false
+    default = "0"
+  }
+
   column "created_at" {
     type    = timestamptz
     null    = false
@@ -1203,312 +1119,6 @@ table "contribution_limits" {
 
   check "contribution_limits_catch_up_non_negative" {
     expr = "catch_up_amount >= 0 AND catch_up_age >= 0"
-  }
-}
-
-table "contribution_entries" {
-  schema = schema.public
-
-  column "id" {
-    type    = uuid
-    null    = false
-    default = sql("gen_random_uuid()")
-  }
-
-  column "retirement_account_id" {
-    type = uuid
-    null = false
-  }
-
-  column "tax_year" {
-    type = int
-    null = false
-  }
-
-  column "contribution_date" {
-    type = date
-    null = false
-  }
-
-  column "amount" {
-    type = numeric(12,2)
-    null = false
-  }
-
-  column "created_at" {
-    type    = timestamptz
-    null    = false
-    default = sql("now()")
-  }
-
-  column "updated_at" {
-    type    = timestamptz
-    null    = false
-    default = sql("now()")
-  }
-
-  column "deleted_at" {
-    type = timestamptz
-    null = true
-  }
-
-  primary_key {
-    columns = [column.id]
-  }
-
-  foreign_key "fk_contribution_entries_retirement_account" {
-    columns     = [column.retirement_account_id]
-    ref_columns = [table.retirement_accounts.column.id]
-    on_delete   = CASCADE
-  }
-
-  index "idx_contribution_entries_account_id" {
-    columns = [column.retirement_account_id]
-  }
-
-  index "idx_contribution_entries_account_year" {
-    columns = [column.retirement_account_id, column.tax_year]
-  }
-
-  index "idx_contribution_entries_account_active" {
-    columns = [column.retirement_account_id, column.contribution_date]
-    where   = "deleted_at IS NULL"
-  }
-
-  check "contribution_entries_amount_positive" {
-    expr = "amount > 0"
-  }
-}
-
-table "scenario_profiles" {
-  schema = schema.public
-
-  column "id" {
-    type    = uuid
-    null    = false
-    default = sql("gen_random_uuid()")
-  }
-
-  column "user_id" {
-    type = uuid
-    null = false
-  }
-
-  column "name" {
-    type = varchar(255)
-    null = false
-  }
-
-  column "current_age" {
-    type = int
-    null = false
-  }
-
-  column "retirement_age" {
-    type = int
-    null = false
-  }
-
-  column "annual_spend" {
-    type = numeric(12,2)
-    null = false
-  }
-
-  column "safe_withdrawal_rate" {
-    type = decimal(5,4)
-    null = false
-  }
-
-  column "inflation_rate" {
-    type = decimal(5,4)
-    null = false
-  }
-
-  column "return_rate" {
-    type = decimal(5,4)
-    null = false
-  }
-
-  column "current_portfolio" {
-    type = numeric(14,2)
-    null = false
-  }
-
-  column "created_at" {
-    type    = timestamptz
-    null    = false
-    default = sql("now()")
-  }
-
-  column "updated_at" {
-    type    = timestamptz
-    null    = false
-    default = sql("now()")
-  }
-
-  column "deleted_at" {
-    type = timestamptz
-    null = true
-  }
-
-  primary_key {
-    columns = [column.id]
-  }
-
-  foreign_key "fk_scenario_profiles_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_delete   = CASCADE
-  }
-
-  index "idx_scenario_profiles_user_id" {
-    columns = [column.user_id]
-  }
-
-  index "idx_scenario_profiles_user_active" {
-    columns = [column.user_id, column.created_at]
-    where   = "deleted_at IS NULL"
-  }
-
-  check "scenario_profiles_current_age_non_negative" {
-    expr = "current_age >= 0 AND retirement_age >= current_age"
-  }
-
-  check "scenario_profiles_money_positive" {
-    expr = "annual_spend > 0 AND current_portfolio >= 0"
-  }
-}
-
-table "scenario_overrides" {
-  schema = schema.public
-
-  column "id" {
-    type    = uuid
-    null    = false
-    default = sql("gen_random_uuid()")
-  }
-
-  column "scenario_profile_id" {
-    type = uuid
-    null = false
-  }
-
-  column "override_key" {
-    type = varchar(255)
-    null = false
-  }
-
-  column "override_value" {
-    type = decimal(12,4)
-    null = false
-  }
-
-  column "created_at" {
-    type    = timestamptz
-    null    = false
-    default = sql("now()")
-  }
-
-  column "updated_at" {
-    type    = timestamptz
-    null    = false
-    default = sql("now()")
-  }
-
-  column "deleted_at" {
-    type = timestamptz
-    null = true
-  }
-
-  primary_key {
-    columns = [column.id]
-  }
-
-  foreign_key "fk_scenario_overrides_profile" {
-    columns     = [column.scenario_profile_id]
-    ref_columns = [table.scenario_profiles.column.id]
-    on_delete   = CASCADE
-  }
-
-  index "idx_scenario_overrides_profile_id" {
-    columns = [column.scenario_profile_id]
-  }
-
-  index "idx_scenario_overrides_profile_active" {
-    columns = [column.scenario_profile_id, column.override_key]
-    where   = "deleted_at IS NULL"
-  }
-}
-
-table "scenario_results_cache" {
-  schema = schema.public
-
-  column "id" {
-    type    = uuid
-    null    = false
-    default = sql("gen_random_uuid()")
-  }
-
-  column "scenario_profile_id" {
-    type = uuid
-    null = false
-  }
-
-  column "portfolio_at_retirement" {
-    type = numeric(14,2)
-    null = false
-  }
-
-  column "required_portfolio" {
-    type = numeric(14,2)
-    null = false
-  }
-
-  column "projected_depletion_age" {
-    type = int
-    null = true
-  }
-
-  column "is_sustainable" {
-    type = boolean
-    null = false
-  }
-
-  column "created_at" {
-    type    = timestamptz
-    null    = false
-    default = sql("now()")
-  }
-
-  column "updated_at" {
-    type    = timestamptz
-    null    = false
-    default = sql("now()")
-  }
-
-  column "deleted_at" {
-    type = timestamptz
-    null = true
-  }
-
-  primary_key {
-    columns = [column.id]
-  }
-
-  foreign_key "fk_scenario_results_cache_profile" {
-    columns     = [column.scenario_profile_id]
-    ref_columns = [table.scenario_profiles.column.id]
-    on_delete   = CASCADE
-  }
-
-  index "idx_scenario_results_cache_profile_id" {
-    columns = [column.scenario_profile_id]
-    unique  = true
-  }
-
-  index "idx_scenario_results_cache_profile_active" {
-    columns = [column.scenario_profile_id, column.created_at]
-    where   = "deleted_at IS NULL"
   }
 }
 
@@ -2047,6 +1657,198 @@ table "net_worth_snapshots" {
   }
 }
 
+
+table "net_worth_snapshot_items" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "snapshot_id" {
+    type = uuid
+    null = false
+  }
+
+  column "account_id" {
+    type = uuid
+    null = true
+  }
+
+  column "label" {
+    type    = text
+    null    = false
+    default = ""
+  }
+
+  column "amount" {
+    type = numeric(15,2)
+    null = false
+  }
+
+  column "kind" {
+    type    = text
+    null    = false
+    default = "ASSET"
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_net_worth_snapshot_items_snapshot" {
+    columns     = [column.snapshot_id]
+    ref_columns = [table.net_worth_snapshots.column.id]
+    on_delete   = CASCADE
+  }
+
+  foreign_key "fk_net_worth_snapshot_items_account" {
+    columns     = [column.account_id]
+    ref_columns = [table.assets.column.id]
+    on_delete   = SET_NULL
+  }
+
+  index "idx_net_worth_snapshot_items_snapshot" {
+    columns = [column.snapshot_id]
+  }
+
+  check "net_worth_snapshot_items_kind_valid" {
+    expr = "kind IN ('ASSET', 'LIABILITY')"
+  }
+}
+
+table "transactions" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "plaid_account_id" {
+    type = uuid
+    null = true
+  }
+
+  column "plaid_transaction_id" {
+    type = text
+    null = true
+  }
+
+  column "date" {
+    type = date
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "name" {
+    type    = text
+    null    = false
+    default = ""
+  }
+
+  column "expense_category_id" {
+    type = uuid
+    null = true
+  }
+
+  column "pending" {
+    type    = boolean
+    null    = false
+    default = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_transactions_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  foreign_key "fk_transactions_plaid_account" {
+    columns     = [column.plaid_account_id]
+    ref_columns = [table.plaid_accounts.column.id]
+    on_delete   = SET_NULL
+  }
+
+  foreign_key "fk_transactions_expense_category" {
+    columns     = [column.expense_category_id]
+    ref_columns = [table.expense_categories.column.id]
+    on_delete   = SET_NULL
+  }
+
+  index "idx_transactions_user_id" {
+    columns = [column.user_id]
+  }
+
+  index "idx_transactions_user_date" {
+    columns = [column.user_id, column.date]
+  }
+
+  index "idx_transactions_plaid_account" {
+    columns = [column.plaid_account_id]
+  }
+
+  index "idx_transactions_plaid_transaction_id" {
+    columns = [column.plaid_transaction_id]
+    unique  = true
+    where   = "plaid_transaction_id IS NOT NULL AND deleted_at IS NULL"
+  }
+
+  check "transactions_amount_nonzero" {
+    expr = "amount <> 0"
+  }
+}
+
 table "planner_people" {
   schema = schema.public
 
@@ -2125,12 +1927,6 @@ table "planner_people" {
     type    = text
     null    = false
     default = "biweekly"
-  }
-
-  column "paycheck" {
-    type    = text
-    null    = false
-    default = ""
   }
 
   column "hourly_rate" {
@@ -2218,6 +2014,17 @@ table "paycheck_deductions" {
     default = true
   }
 
+  column "kind" {
+    type    = text
+    null    = false
+    default = "OTHER"
+  }
+
+  column "linked_account_id" {
+    type = uuid
+    null = true
+  }
+
   column "created_at" {
     type    = timestamptz
     null    = false
@@ -2251,6 +2058,12 @@ table "paycheck_deductions" {
     on_delete   = CASCADE
   }
 
+  foreign_key "fk_paycheck_deductions_linked_account" {
+    columns     = [column.linked_account_id]
+    ref_columns = [table.assets.column.id]
+    on_delete   = SET_NULL
+  }
+
   index "idx_paycheck_deductions_user_id" {
     columns = [column.user_id]
   }
@@ -2258,6 +2071,10 @@ table "paycheck_deductions" {
   index "idx_paycheck_deductions_person_active" {
     columns = [column.person_id]
     where   = "deleted_at IS NULL"
+  }
+
+  index "idx_paycheck_deductions_linked_account" {
+    columns = [column.linked_account_id]
   }
 
   check "paycheck_deductions_amounts_nonnegative" {

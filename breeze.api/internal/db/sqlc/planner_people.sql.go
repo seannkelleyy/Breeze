@@ -14,7 +14,7 @@ import (
 )
 
 const listPlannerPeopleByUserID = `-- name: ListPlannerPeopleByUserID :many
-SELECT id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, bonus_frequency, annual_bonus, income_growth_rate, pay_type, pay_day, pay_cadence, paycheck, hourly_rate, expected_hours_per_week, created_at, updated_at, deleted_at
+SELECT id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, bonus_frequency, annual_bonus, income_growth_rate, pay_type, pay_day, pay_cadence, hourly_rate, expected_hours_per_week, created_at, updated_at, deleted_at
 FROM planner_people
 WHERE user_id = $1 AND deleted_at IS NULL
 ORDER BY created_at ASC
@@ -34,7 +34,6 @@ type ListPlannerPeopleByUserIDRow struct {
 	PayType              string             `json:"pay_type"`
 	PayDay               int32              `json:"pay_day"`
 	PayCadence           string             `json:"pay_cadence"`
-	Paycheck             string             `json:"paycheck"`
 	HourlyRate           decimal.Decimal    `json:"hourly_rate"`
 	ExpectedHoursPerWeek decimal.Decimal    `json:"expected_hours_per_week"`
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
@@ -65,7 +64,6 @@ func (q *Queries) ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUI
 			&i.PayType,
 			&i.PayDay,
 			&i.PayCadence,
-			&i.Paycheck,
 			&i.HourlyRate,
 			&i.ExpectedHoursPerWeek,
 			&i.CreatedAt,
@@ -111,8 +109,8 @@ func (q *Queries) SoftDeletePlannerPerson(ctx context.Context, id uuid.UUID) (in
 }
 
 const upsertPlannerPerson = `-- name: UpsertPlannerPerson :one
-INSERT INTO planner_people (id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, bonus_frequency, annual_bonus, income_growth_rate, pay_type, pay_day, pay_cadence, paycheck, hourly_rate, expected_hours_per_week)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+INSERT INTO planner_people (id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, bonus_frequency, annual_bonus, income_growth_rate, pay_type, pay_day, pay_cadence, hourly_rate, expected_hours_per_week)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 ON CONFLICT (id) DO UPDATE
 SET name = EXCLUDED.name,
     birthday = EXCLUDED.birthday,
@@ -125,11 +123,10 @@ SET name = EXCLUDED.name,
     pay_type = EXCLUDED.pay_type,
     pay_day = EXCLUDED.pay_day,
     pay_cadence = EXCLUDED.pay_cadence,
-    paycheck = EXCLUDED.paycheck,
     hourly_rate = EXCLUDED.hourly_rate,
     expected_hours_per_week = EXCLUDED.expected_hours_per_week,
     updated_at = now()
-RETURNING id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, bonus_frequency, annual_bonus, income_growth_rate, pay_type, pay_day, pay_cadence, paycheck, hourly_rate, expected_hours_per_week, created_at, updated_at, deleted_at
+RETURNING id, user_id, name, birthday, retirement_age, annual_salary, bonus_mode, bonus_frequency, annual_bonus, income_growth_rate, pay_type, pay_day, pay_cadence, hourly_rate, expected_hours_per_week, created_at, updated_at, deleted_at
 `
 
 type UpsertPlannerPersonParams struct {
@@ -146,7 +143,6 @@ type UpsertPlannerPersonParams struct {
 	PayType              string          `json:"pay_type"`
 	PayDay               int32           `json:"pay_day"`
 	PayCadence           string          `json:"pay_cadence"`
-	Paycheck             string          `json:"paycheck"`
 	HourlyRate           decimal.Decimal `json:"hourly_rate"`
 	ExpectedHoursPerWeek decimal.Decimal `json:"expected_hours_per_week"`
 }
@@ -165,7 +161,6 @@ type UpsertPlannerPersonRow struct {
 	PayType              string             `json:"pay_type"`
 	PayDay               int32              `json:"pay_day"`
 	PayCadence           string             `json:"pay_cadence"`
-	Paycheck             string             `json:"paycheck"`
 	HourlyRate           decimal.Decimal    `json:"hourly_rate"`
 	ExpectedHoursPerWeek decimal.Decimal    `json:"expected_hours_per_week"`
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
@@ -188,7 +183,6 @@ func (q *Queries) UpsertPlannerPerson(ctx context.Context, arg UpsertPlannerPers
 		arg.PayType,
 		arg.PayDay,
 		arg.PayCadence,
-		arg.Paycheck,
 		arg.HourlyRate,
 		arg.ExpectedHoursPerWeek,
 	)
@@ -207,7 +201,6 @@ func (q *Queries) UpsertPlannerPerson(ctx context.Context, arg UpsertPlannerPers
 		&i.PayType,
 		&i.PayDay,
 		&i.PayCadence,
-		&i.Paycheck,
 		&i.HourlyRate,
 		&i.ExpectedHoursPerWeek,
 		&i.CreatedAt,

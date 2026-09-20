@@ -198,6 +198,7 @@ type IncomeSourceType string
 const (
 	IncomeSourceTypeMANUAL            IncomeSourceType = "MANUAL"
 	IncomeSourceTypeRECURRINGTEMPLATE IncomeSourceType = "RECURRING_TEMPLATE"
+	IncomeSourceTypePEOPLEPAYROLL     IncomeSourceType = "PEOPLE_PAYROLL"
 )
 
 func (e *IncomeSourceType) Scan(src interface{}) error {
@@ -369,48 +370,6 @@ func (ns NullRecurrenceInterval) Value() (driver.Value, error) {
 	return string(ns.RecurrenceInterval), nil
 }
 
-type RetirementAccountOwner string
-
-const (
-	RetirementAccountOwnerSELF   RetirementAccountOwner = "SELF"
-	RetirementAccountOwnerSPOUSE RetirementAccountOwner = "SPOUSE"
-)
-
-func (e *RetirementAccountOwner) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = RetirementAccountOwner(s)
-	case string:
-		*e = RetirementAccountOwner(s)
-	default:
-		return fmt.Errorf("unsupported scan type for RetirementAccountOwner: %T", src)
-	}
-	return nil
-}
-
-type NullRetirementAccountOwner struct {
-	RetirementAccountOwner RetirementAccountOwner `json:"retirement_account_owner"`
-	Valid                  bool                   `json:"valid"` // Valid is true if RetirementAccountOwner is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullRetirementAccountOwner) Scan(value interface{}) error {
-	if value == nil {
-		ns.RetirementAccountOwner, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.RetirementAccountOwner.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullRetirementAccountOwner) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.RetirementAccountOwner), nil
-}
-
 type RetirementAccountType string
 
 const (
@@ -456,51 +415,6 @@ func (ns NullRetirementAccountType) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.RetirementAccountType), nil
-}
-
-type RetirementTaxTreatment string
-
-const (
-	RetirementTaxTreatmentPRETAX      RetirementTaxTreatment = "PRE_TAX"
-	RetirementTaxTreatmentROTH        RetirementTaxTreatment = "ROTH"
-	RetirementTaxTreatmentTAXDEFERRED RetirementTaxTreatment = "TAX_DEFERRED"
-	RetirementTaxTreatmentTAXABLE     RetirementTaxTreatment = "TAXABLE"
-	RetirementTaxTreatmentOTHER       RetirementTaxTreatment = "OTHER"
-)
-
-func (e *RetirementTaxTreatment) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = RetirementTaxTreatment(s)
-	case string:
-		*e = RetirementTaxTreatment(s)
-	default:
-		return fmt.Errorf("unsupported scan type for RetirementTaxTreatment: %T", src)
-	}
-	return nil
-}
-
-type NullRetirementTaxTreatment struct {
-	RetirementTaxTreatment RetirementTaxTreatment `json:"retirement_tax_treatment"`
-	Valid                  bool                   `json:"valid"` // Valid is true if RetirementTaxTreatment is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullRetirementTaxTreatment) Scan(value interface{}) error {
-	if value == nil {
-		ns.RetirementTaxTreatment, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.RetirementTaxTreatment.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullRetirementTaxTreatment) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.RetirementTaxTreatment), nil
 }
 
 type ReturnType string
@@ -568,6 +482,7 @@ type Asset struct {
 	LinkedLiabilityID               pgtype.UUID        `json:"linked_liability_id"`
 	PlaidAccountID                  pgtype.UUID        `json:"plaid_account_id"`
 	ReturnProfile                   *string            `json:"return_profile"`
+	TaxTreatment                    string             `json:"tax_treatment"`
 }
 
 type Budget struct {
@@ -581,27 +496,18 @@ type Budget struct {
 	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
 }
 
-type ContributionEntry struct {
-	ID                  uuid.UUID          `json:"id"`
-	RetirementAccountID uuid.UUID          `json:"retirement_account_id"`
-	TaxYear             int32              `json:"tax_year"`
-	ContributionDate    pgtype.Date        `json:"contribution_date"`
-	Amount              decimal.Decimal    `json:"amount"`
-	CreatedAt           pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
-}
-
 type ContributionLimit struct {
-	ID            uuid.UUID             `json:"id"`
-	AccountType   RetirementAccountType `json:"account_type"`
-	TaxYear       int32                 `json:"tax_year"`
-	AnnualLimit   decimal.Decimal       `json:"annual_limit"`
-	CatchUpAge    int32                 `json:"catch_up_age"`
-	CatchUpAmount decimal.Decimal       `json:"catch_up_amount"`
-	CreatedAt     pgtype.Timestamptz    `json:"created_at"`
-	UpdatedAt     pgtype.Timestamptz    `json:"updated_at"`
-	DeletedAt     pgtype.Timestamptz    `json:"deleted_at"`
+	ID                 uuid.UUID             `json:"id"`
+	AccountType        RetirementAccountType `json:"account_type"`
+	TaxYear            int32                 `json:"tax_year"`
+	AnnualLimit        decimal.Decimal       `json:"annual_limit"`
+	CatchUpAge         int32                 `json:"catch_up_age"`
+	CatchUpAmount      decimal.Decimal       `json:"catch_up_amount"`
+	CreatedAt          pgtype.Timestamptz    `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz    `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz    `json:"deleted_at"`
+	FamilyAnnualLimit  pgtype.Numeric        `json:"family_annual_limit"`
+	SuperCatchUpAmount decimal.Decimal       `json:"super_catch_up_amount"`
 }
 
 type Expense struct {
@@ -724,16 +630,30 @@ type NetWorthSnapshot struct {
 	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type NetWorthSnapshotItem struct {
+	ID         uuid.UUID          `json:"id"`
+	SnapshotID uuid.UUID          `json:"snapshot_id"`
+	AccountID  pgtype.UUID        `json:"account_id"`
+	Label      string             `json:"label"`
+	Amount     decimal.Decimal    `json:"amount"`
+	Kind       string             `json:"kind"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt  pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type PaycheckDeduction struct {
-	ID        uuid.UUID          `json:"id"`
-	UserID    uuid.UUID          `json:"user_id"`
-	PersonID  uuid.UUID          `json:"person_id"`
-	Name      string             `json:"name"`
-	Amount    decimal.Decimal    `json:"amount"`
-	Pretax    bool               `json:"pretax"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+	ID              uuid.UUID          `json:"id"`
+	UserID          uuid.UUID          `json:"user_id"`
+	PersonID        uuid.UUID          `json:"person_id"`
+	Name            string             `json:"name"`
+	Amount          decimal.Decimal    `json:"amount"`
+	Pretax          bool               `json:"pretax"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
+	Kind            string             `json:"kind"`
+	LinkedAccountID pgtype.UUID        `json:"linked_account_id"`
 }
 
 type PlaidAccount struct {
@@ -783,7 +703,6 @@ type PlannerPerson struct {
 	HourlyRate           decimal.Decimal    `json:"hourly_rate"`
 	ExpectedHoursPerWeek decimal.Decimal    `json:"expected_hours_per_week"`
 	BonusFrequency       string             `json:"bonus_frequency"`
-	Paycheck             string             `json:"paycheck"`
 }
 
 type RecurringExpense struct {
@@ -816,30 +735,6 @@ type RecurringIncome struct {
 	PersonID           pgtype.UUID        `json:"person_id"`
 }
 
-type RetirementAccount struct {
-	ID                      uuid.UUID              `json:"id"`
-	UserID                  uuid.UUID              `json:"user_id"`
-	Name                    string                 `json:"name"`
-	AccountType             RetirementAccountType  `json:"account_type"`
-	Owner                   RetirementAccountOwner `json:"owner"`
-	TaxTreatment            RetirementTaxTreatment `json:"tax_treatment"`
-	CurrentBalance          decimal.Decimal        `json:"current_balance"`
-	AnnualContributionLimit decimal.Decimal        `json:"annual_contribution_limit"`
-	CreatedAt               pgtype.Timestamptz     `json:"created_at"`
-	UpdatedAt               pgtype.Timestamptz     `json:"updated_at"`
-	DeletedAt               pgtype.Timestamptz     `json:"deleted_at"`
-}
-
-type ScenarioOverride struct {
-	ID                uuid.UUID          `json:"id"`
-	ScenarioProfileID uuid.UUID          `json:"scenario_profile_id"`
-	OverrideKey       string             `json:"override_key"`
-	OverrideValue     decimal.Decimal    `json:"override_value"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt         pgtype.Timestamptz `json:"deleted_at"`
-}
-
 type ScenarioProfile struct {
 	ID                 uuid.UUID          `json:"id"`
 	UserID             uuid.UUID          `json:"user_id"`
@@ -854,18 +749,6 @@ type ScenarioProfile struct {
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
-}
-
-type ScenarioResultsCache struct {
-	ID                    uuid.UUID          `json:"id"`
-	ScenarioProfileID     uuid.UUID          `json:"scenario_profile_id"`
-	PortfolioAtRetirement decimal.Decimal    `json:"portfolio_at_retirement"`
-	RequiredPortfolio     decimal.Decimal    `json:"required_portfolio"`
-	ProjectedDepletionAge *int32             `json:"projected_depletion_age"`
-	IsSustainable         bool               `json:"is_sustainable"`
-	CreatedAt             pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt             pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type StandardDeduction struct {
@@ -888,6 +771,21 @@ type TaxBracket struct {
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt     pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type Transaction struct {
+	ID                 uuid.UUID          `json:"id"`
+	UserID             uuid.UUID          `json:"user_id"`
+	PlaidAccountID     pgtype.UUID        `json:"plaid_account_id"`
+	PlaidTransactionID *string            `json:"plaid_transaction_id"`
+	Date               pgtype.Date        `json:"date"`
+	Amount             decimal.Decimal    `json:"amount"`
+	Name               string             `json:"name"`
+	ExpenseCategoryID  pgtype.UUID        `json:"expense_category_id"`
+	Pending            bool               `json:"pending"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type User struct {

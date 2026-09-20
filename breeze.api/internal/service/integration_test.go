@@ -48,10 +48,11 @@ func createTestUser(t *testing.T, q *dbsqlc.Queries) dbsqlc.CreateUserRow {
 	return row
 }
 
-// cleanupUser deletes a test user by ID.
-func cleanupUser(t *testing.T, q *dbsqlc.Queries, userID uuid.UUID) {
+// cleanupUser deletes a test user and all child rows by ID. There is no
+// product-level user deletion, so tests use a hard delete for cleanup.
+func cleanupUser(t *testing.T, pool *pgxpool.Pool, userID uuid.UUID) {
 	t.Helper()
-	_, _ = q.SoftDeleteUser(context.Background(), userID)
+	_, _ = pool.Exec(context.Background(), "DELETE FROM users WHERE id = $1", userID)
 }
 
 func TestIntegration_UserSetupFields(t *testing.T) {
@@ -60,7 +61,7 @@ func TestIntegration_UserSetupFields(t *testing.T) {
 	ctx := context.Background()
 
 	userRow := createTestUser(t, q)
-	defer cleanupUser(t, q, userRow.ID)
+	defer cleanupUser(t, pool, userRow.ID)
 
 	svc := NewUserService(q)
 
@@ -118,7 +119,7 @@ func TestIntegration_GoalsWithFOO(t *testing.T) {
 	ctx := context.Background()
 
 	userRow := createTestUser(t, q)
-	defer cleanupUser(t, q, userRow.ID)
+	defer cleanupUser(t, pool, userRow.ID)
 
 	svc := NewGoalService(q)
 
@@ -217,7 +218,7 @@ func TestIntegration_AssetLiabilityLinking(t *testing.T) {
 	ctx := context.Background()
 
 	userRow := createTestUser(t, q)
-	defer cleanupUser(t, q, userRow.ID)
+	defer cleanupUser(t, pool, userRow.ID)
 
 	assetSvc := NewAssetService(q)
 	liabilitySvc := NewLiabilityService(q)
@@ -313,23 +314,6 @@ func TestIntegration_AssetLiabilityLinking(t *testing.T) {
 	})
 }
 
-func TestIntegration_WeightedMonthlyExpenses(t *testing.T) {
-	pool := getTestPool(t)
-	q := dbsqlc.New(pool)
-	ctx := context.Background()
-
-	userRow := createTestUser(t, q)
-	defer cleanupUser(t, q, userRow.ID)
-
-	expenseSvc := NewExpenseService(dbsqlc.New(pool), pool)
-
-	t.Run("returns zero when no expenses exist", func(t *testing.T) {
-		result, err := expenseSvc.GetWeightedMonthlyExpenses(ctx, userRow.ID)
-		require.NoError(t, err)
-		assert.True(t, result.IsZero(), "should return zero when no expenses exist")
-	})
-}
-
 func TestIntegration_UserCRUD(t *testing.T) {
 	pool := getTestPool(t)
 	q := dbsqlc.New(pool)
@@ -355,7 +339,7 @@ func TestIntegration_UserCRUD(t *testing.T) {
 			PayoffStrategy:     dbsqlc.PayoffStrategySNOWBALL,
 		})
 		require.NoError(t, err)
-		defer cleanupUser(t, q, created.ID)
+		defer cleanupUser(t, pool, created.ID)
 
 		// Verify all fields persisted
 		fetched, err := svc.GetByID(ctx, created.ID)
@@ -383,7 +367,7 @@ func TestIntegration_UserCRUD(t *testing.T) {
 			PayoffStrategy:     dbsqlc.PayoffStrategyAVALANCHE,
 		})
 		require.NoError(t, err)
-		defer cleanupUser(t, q, created.ID)
+		defer cleanupUser(t, pool, created.ID)
 
 		newSWR := mustDecimal("0.0350")
 		newIR := mustDecimal("0.0200")
@@ -418,7 +402,7 @@ func TestIntegration_UserCRUD(t *testing.T) {
 			PayoffStrategy:     dbsqlc.PayoffStrategyAVALANCHE,
 		})
 		require.NoError(t, err)
-		defer cleanupUser(t, q, created.ID)
+		defer cleanupUser(t, pool, created.ID)
 
 		fetched, err := svc.GetByIdentityProviderID(ctx, ipid)
 		require.NoError(t, err)
@@ -426,26 +410,6 @@ func TestIntegration_UserCRUD(t *testing.T) {
 		assert.Equal(t, created.Email, fetched.Email)
 	})
 
-	t.Run("soft delete prevents retrieval", func(t *testing.T) {
-		created, err := svc.Create(ctx, CreateUserInput{
-			IdentityProviderID: "test-delete-" + uuid.New().String(),
-			Email:              "delete-" + uuid.New().String() + "@example.com",
-			ReturnType:         dbsqlc.ReturnTypeREAL,
-			SafeWithdrawalRate: mustDecimal("0.0400"),
-			CurrencyType:       "USD",
-			InflationRate:      mustDecimal("0.0300"),
-			DeductionType:      dbsqlc.DeductionTypeSTANDARD,
-			FilingStatus:       dbsqlc.FilingStatusSINGLE,
-			PayoffStrategy:     dbsqlc.PayoffStrategyAVALANCHE,
-		})
-		require.NoError(t, err)
-
-		err = svc.Delete(ctx, created.ID)
-		require.NoError(t, err)
-
-		_, err = svc.GetByID(ctx, created.ID)
-		assert.ErrorIs(t, err, ErrNotFound)
-	})
 }
 
 func TestIntegration_PlannerPersonLifecycle(t *testing.T) {
@@ -454,7 +418,7 @@ func TestIntegration_PlannerPersonLifecycle(t *testing.T) {
 	ctx := context.Background()
 
 	userRow := createTestUser(t, q)
-	defer cleanupUser(t, q, userRow.ID)
+	defer cleanupUser(t, pool, userRow.ID)
 
 	svc := NewPlannerPersonService(q)
 
@@ -561,7 +525,7 @@ func TestIntegration_BudgetExpenseLifecycle(t *testing.T) {
 	ctx := context.Background()
 
 	userRow := createTestUser(t, q)
-	defer cleanupUser(t, q, userRow.ID)
+	defer cleanupUser(t, pool, userRow.ID)
 
 	budgetSvc := NewBudgetService(q)
 	expenseSvc := NewExpenseService(dbsqlc.New(pool), pool)
@@ -629,7 +593,7 @@ func TestIntegration_GoalWithConnectedAccounts(t *testing.T) {
 	ctx := context.Background()
 
 	userRow := createTestUser(t, q)
-	defer cleanupUser(t, q, userRow.ID)
+	defer cleanupUser(t, pool, userRow.ID)
 
 	goalSvc := NewGoalService(q)
 	assetSvc := NewAssetService(q)
@@ -708,7 +672,7 @@ func TestIntegration_AssetReturnProfile(t *testing.T) {
 	ctx := context.Background()
 
 	userRow := createTestUser(t, q)
-	defer cleanupUser(t, q, userRow.ID)
+	defer cleanupUser(t, pool, userRow.ID)
 
 	svc := NewAssetService(q)
 
@@ -779,7 +743,7 @@ func TestIntegration_LiabilityCRUD(t *testing.T) {
 	ctx := context.Background()
 
 	userRow := createTestUser(t, q)
-	defer cleanupUser(t, q, userRow.ID)
+	defer cleanupUser(t, pool, userRow.ID)
 
 	svc := NewLiabilityService(q)
 

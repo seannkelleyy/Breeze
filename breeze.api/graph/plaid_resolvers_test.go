@@ -35,6 +35,14 @@ func (m *graphPlaidQuerierMock) GetPlaidConnectionByID(ctx context.Context, id u
 	return sqlc.PlaidConnection{}, nil
 }
 
+func (m *graphPlaidQuerierMock) ListActivePlaidConnections(ctx context.Context) ([]sqlc.PlaidConnection, error) {
+	return []sqlc.PlaidConnection{}, nil
+}
+
+func (m *graphPlaidQuerierMock) UpsertPlaidTransaction(ctx context.Context, arg sqlc.UpsertPlaidTransactionParams) (sqlc.Transaction, error) {
+	return sqlc.Transaction{}, nil
+}
+
 func (m *graphPlaidQuerierMock) UpsertPlaidAccount(ctx context.Context, arg sqlc.UpsertPlaidAccountParams) (sqlc.PlaidAccount, error) { //nolint:gocritic // interface impl
 	if m.upsertPlaidAccountFunc != nil {
 		return m.upsertPlaidAccountFunc(ctx, arg)

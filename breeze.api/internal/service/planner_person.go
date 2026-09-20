@@ -24,7 +24,6 @@ type PlannerPerson struct {
 	PayType              string
 	PayDay               int32
 	PayCadence           string
-	Paycheck             string
 	HourlyRate           decimal.Decimal
 	ExpectedHoursPerWeek decimal.Decimal
 	CreatedAt            time.Time
@@ -45,7 +44,6 @@ type UpsertPlannerPersonInput struct {
 	PayType              string
 	PayDay               int32
 	PayCadence           string
-	Paycheck             string
 	HourlyRate           decimal.Decimal
 	ExpectedHoursPerWeek decimal.Decimal
 }
@@ -80,7 +78,6 @@ func (s *PlannerPersonService) Upsert(ctx context.Context, input *UpsertPlannerP
 		PayType:              input.PayType,
 		PayDay:               input.PayDay,
 		PayCadence:           input.PayCadence,
-		Paycheck:             input.Paycheck,
 		HourlyRate:           input.HourlyRate,
 		ExpectedHoursPerWeek: input.ExpectedHoursPerWeek,
 	})
@@ -132,7 +129,6 @@ func mapPlannerPersonRecord(row *sqlc.ListPlannerPeopleByUserIDRow) PlannerPerso
 		PayType:              row.PayType,
 		PayDay:               row.PayDay,
 		PayCadence:           row.PayCadence,
-		Paycheck:             row.Paycheck,
 		HourlyRate:           row.HourlyRate,
 		ExpectedHoursPerWeek: row.ExpectedHoursPerWeek,
 		CreatedAt:            timestamptzToTime(row.CreatedAt),
@@ -155,7 +151,6 @@ func mapPlannerPersonUpsertRecord(row *sqlc.UpsertPlannerPersonRow) PlannerPerso
 		PayType:              row.PayType,
 		PayDay:               row.PayDay,
 		PayCadence:           row.PayCadence,
-		Paycheck:             row.Paycheck,
 		HourlyRate:           row.HourlyRate,
 		ExpectedHoursPerWeek: row.ExpectedHoursPerWeek,
 		CreatedAt:            timestamptzToTime(row.CreatedAt),

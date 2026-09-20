@@ -23,16 +23,16 @@ import { FormattedNumberInput } from '@/components/common/form/FormattedNumberIn
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { DataCard } from '@/components/common/DataCard';
 import { HouseholdPayStats, PaydayCalendar } from './people/HouseholdPayPanel';
-import { useHouseholdIncomeBreakdown } from '../hooks/planner/useHouseholdIncomeBreakdown';
+import { SavingsAccountsSection } from './people/SavingsAccountsSection';
 import { usePlannerState } from '../providers/PlannerStateProvider';
 import useTaxYear from '../hooks/planner/useTaxYear';
 import {
-  computePaycheck,
-  isPaycheckConfigured,
-  makePaycheckDeduction,
-  parsePaycheckConfig,
-  serializePaycheckConfig,
+  computePersonWaterfall,
+  getPersonSavingsAccounts,
+  WITHHOLDING_KIND_OPTIONS,
+  type PaycheckWithholding,
 } from '../lib/paycheck';
+import { usePaycheckDeductions } from '../hooks/planner/usePaycheckDeductions';
 import type { TaxYearTables } from '../types/tax';
 import { usePlannerPeople, usePersonMutations } from '../hooks/planner/index';
 import { PayCadence, PayType, PlannerPerson } from '../types/person';
@@ -52,15 +52,7 @@ const CADENCE_LABELS: Record<PayCadence, string> = {
   monthly: 'Once a month',
 };
 
-const WEEKDAYS = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-];
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 const BONUS_FREQUENCY_OPTIONS = [
   { value: 'annual', label: 'Once a year', perYear: 1 },
@@ -85,7 +77,7 @@ const PeopleCard = ({ collapsed }: PeopleCardProps) => {
   const { people, updatePerson, addPerson, removePerson } = usePlannerPeople();
   const { plannerAccounts } = usePlannerState();
   const taxTables = useTaxYear(filingStatus);
-  const incomeBreakdown = useHouseholdIncomeBreakdown(people, plannerAccounts);
+  const { deductions: allWithholdings } = usePaycheckDeductions(null);
   const { upsertPersonMutation, deletePersonMutation } = usePersonMutations(userId);
 
   const [editingPerson, setEditingPerson] = useState<PlannerPerson | null>(null);
@@ -131,14 +123,17 @@ const PeopleCard = ({ collapsed }: PeopleCardProps) => {
       <div className="space-y-4">
         <HouseholdPayStats
           people={people}
+          accounts={plannerAccounts}
+          withholdings={allWithholdings}
           currencyCode={currencyCode}
-          breakdown={incomeBreakdown}
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {people.map((person) => (
             <PersonSummaryCard
               key={person.id}
               person={person}
+              accounts={plannerAccounts}
+              withholdings={allWithholdings}
               currencyCode={currencyCode}
               taxTables={taxTables}
               deductionType={deductionType}
@@ -156,8 +151,9 @@ const PeopleCard = ({ collapsed }: PeopleCardProps) => {
 
         <PaydayCalendar
           people={people}
+          accounts={plannerAccounts}
+          withholdings={allWithholdings}
           currencyCode={currencyCode}
-          netRatio={incomeBreakdown.netRatio}
         />
       </div>
 
@@ -166,7 +162,9 @@ const PeopleCard = ({ collapsed }: PeopleCardProps) => {
         <PersonFormModal
           key={editingLive.id}
           person={editingLive}
+          people={people}
           accounts={plannerAccounts}
+          currencyCode={currencyCode}
           taxTables={taxTables}
           deductionType={deductionType}
           inflationRate={inflationRate}
@@ -194,7 +192,9 @@ const PeopleCard = ({ collapsed }: PeopleCardProps) => {
         <PersonFormModal
           key={people[people.length - 1].id}
           person={people[people.length - 1]}
+          people={people}
           accounts={plannerAccounts}
+          currencyCode={currencyCode}
           taxTables={taxTables}
           deductionType={deductionType}
           inflationRate={inflationRate}
@@ -220,26 +220,29 @@ const PeopleCard = ({ collapsed }: PeopleCardProps) => {
 
 function PersonSummaryCard({
   person,
-  currencyCode,
+  accounts,
+  withholdings,
   taxTables,
   deductionType,
+  currencyCode,
   onEdit,
   onDelete,
   canRemove,
 }: {
   person: PlannerPerson;
-  currencyCode: string;
+  accounts: PlannerAccount[];
+  withholdings: PaycheckWithholding[];
   taxTables: TaxYearTables | null;
   deductionType: string;
+  currencyCode: string;
   onEdit: () => void;
   onDelete: () => void;
   canRemove: boolean;
 }) {
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode, { maximumFractionDigits: 0 });
   const perYear =
-    BONUS_FREQUENCY_OPTIONS.find(
-      (o) => o.value === (person.bonusFrequency ?? 'annual'),
-    )?.perYear ?? 1;
+    BONUS_FREQUENCY_OPTIONS.find((o) => o.value === (person.bonusFrequency ?? 'annual'))?.perYear ??
+    1;
   const bonusDollars =
     person.bonusMode === 'salary-percent'
       ? Math.round((person.annualSalary * person.annualBonus * perYear) / 100)
@@ -266,14 +269,17 @@ function PersonSummaryCard({
     }
   }
 
-  const takeHome =
-    isPaycheckConfigured(person)
-      ? computePaycheck(person, taxTables, deductionType).netPerCheck
-      : null;
+  const wf = computePersonWaterfall(person, accounts, withholdings, taxTables, deductionType);
+  const ownedSavings = getPersonSavingsAccounts(person, accounts);
+  const savingsLine =
+    ownedSavings.length > 0
+      ? `Savings: ${ownedSavings.map((a) => a.name || 'Unnamed').join(', ')}`
+      : 'Savings: none';
   const summaryLines = [
-    ...(takeHome !== null ? [`Take-home: ${fc(takeHome)}/check`] : []),
+    `Take-home: ${fc(wf.takeHomeMonthly)}/mo`,
     `Base pay: ${basePay}`,
     bonusLine,
+    savingsLine,
     `Total: ${fc(totalIncome)}/yr`,
     `Growth: ${person.incomeGrowthRate}%`,
     `${payCadenceLabel(person.payCadence)}${payDayLabel(person)}`,
@@ -297,7 +303,9 @@ function PersonSummaryCard({
 
 function PersonFormModal({
   person,
+  people,
   accounts,
+  currencyCode,
   taxTables,
   deductionType,
   inflationRate,
@@ -307,7 +315,9 @@ function PersonFormModal({
   mode,
 }: {
   person: PlannerPerson;
+  people: PlannerPerson[];
   accounts: PlannerAccount[];
+  currencyCode: string;
   taxTables: TaxYearTables | null;
   deductionType: string;
   inflationRate: number;
@@ -316,29 +326,63 @@ function PersonFormModal({
   onSaveAndAddAnother?: () => void;
   mode: 'edit' | 'add';
 }) {
-  const paycheckConfig = parsePaycheckConfig(person.paycheck);
-  const computation = computePaycheck(person, taxTables, deductionType);
+  // Per-person withholdings (insurance, FSA…) live server-side.
+  const {
+    deductions: withholdings,
+    upsertDeduction,
+    deleteDeduction,
+  } = usePaycheckDeductions(person.id);
+  const [withholdingDrafts, setWithholdingDrafts] = useState<Record<string, PaycheckWithholding>>(
+    {},
+  );
+  const draftFor = (row: PaycheckWithholding): PaycheckWithholding =>
+    withholdingDrafts[row.id] ?? row;
+  const updateDraft = (row: PaycheckWithholding) =>
+    setWithholdingDrafts((prev) => ({ ...prev, [row.id]: row }));
+  const commitWithholding = (row: PaycheckWithholding) => {
+    upsertDeduction.mutate({
+      id: row.id,
+      personId: person.id,
+      name: row.name,
+      amount: row.amount,
+      pretax: row.pretax,
+      kind: row.kind,
+      linkedAccountId: row.linkedAccountId,
+    });
+    setWithholdingDrafts((prev) => {
+      const next = { ...prev };
+      delete next[row.id];
+      return next;
+    });
+  };
+  const addWithholding = () => {
+    const row: PaycheckWithholding = {
+      id: crypto.randomUUID(),
+      personId: person.id,
+      name: '',
+      amount: 0,
+      pretax: true,
+      kind: 'OTHER',
+      linkedAccountId: null,
+    };
+    setWithholdingDrafts((prev) => ({ ...prev, [row.id]: row }));
+  };
+  const removeWithholding = (row: PaycheckWithholding) => {
+    deleteDeduction.mutate(row.id);
+    setWithholdingDrafts((prev) => {
+      const next = { ...prev };
+      delete next[row.id];
+      return next;
+    });
+  };
 
-  const updateConfig = (next: typeof paycheckConfig) =>
-    onUpdate((c) => ({ ...c, paycheck: serializePaycheckConfig(next) }));
-  const updateDeduction = (
-    id: string,
-    u: (d: ReturnType<typeof makePaycheckDeduction>) => ReturnType<typeof makePaycheckDeduction>,
-  ) =>
-    updateConfig({
-      ...paycheckConfig,
-      deductions: paycheckConfig.deductions.map((d) => (d.id === id ? u(d) : d)),
-    });
-  const addDeduction = () =>
-    updateConfig({
-      ...paycheckConfig,
-      deductions: [...paycheckConfig.deductions, makePaycheckDeduction()],
-    });
-  const removeDeduction = (id: string) =>
-    updateConfig({
-      ...paycheckConfig,
-      deductions: paycheckConfig.deductions.filter((d) => d.id !== id),
-    });
+  // Live waterfall including uncommitted drafts.
+  const mergedWithholdings: PaycheckWithholding[] = [
+    ...withholdings.map((w) => withholdingDrafts[w.id] ?? w),
+    ...Object.values(withholdingDrafts).filter((d) => !withholdings.some((w) => w.id === d.id)),
+  ];
+  const wf = computePersonWaterfall(person, accounts, mergedWithholdings, taxTables, deductionType);
+
   // Growth presets are relative to the user's saved inflation preference.
   const growthOptions = [
     { value: 0, label: 'No growth (0%)' },
@@ -356,8 +400,7 @@ function PersonFormModal({
     (o) => Math.abs(o.value - person.incomeGrowthRate) < 0.0001,
   );
   const growthSelectValue = growthOptionIndex >= 0 ? String(growthOptionIndex) : 'custom';
-  const isWeeklyish =
-    person.payCadence === 'weekly' || person.payCadence === 'biweekly';
+  const isWeeklyish = person.payCadence === 'weekly' || person.payCadence === 'biweekly';
 
   // Custom growth rate entry: true once the user picks Custom from the dropdown.
   const [customGrowth, setCustomGrowth] = useState(false);
@@ -386,8 +429,7 @@ function PersonFormModal({
   };
 
   const handleBonusFrequencyChange = (v: string) => {
-    const nextPerYear =
-      BONUS_FREQUENCY_OPTIONS.find((o) => o.value === v)?.perYear ?? 1;
+    const nextPerYear = BONUS_FREQUENCY_OPTIONS.find((o) => o.value === v)?.perYear ?? 1;
     const perOcc = person.annualBonus / bonusPerYear;
     onUpdate((c) => ({
       ...c,
@@ -414,7 +456,7 @@ function PersonFormModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {mode === 'edit' ? `Edit ${person.name || 'Person'}` : 'Add Person'}
@@ -581,20 +623,6 @@ function PersonFormModal({
               </>
             )}
           </div>
-          <div className="space-y-2">
-            <Label>Gross per Check (optional override)</Label>
-            <FormattedNumberInput
-              value={paycheckConfig.grossPerCheck ?? 0}
-              onValueChange={(v) =>
-                updateConfig({ ...paycheckConfig, grossPerCheck: v > 0 ? v : null })
-              }
-              maxFractionDigits={2}
-            />
-            <p className="text-muted-foreground text-xs">
-              Leave 0 to derive from annual pay ({formatCurrencyWithCode(computation.grossPerCheck, 'USD')} per
-              check at {computation.checksPerYear}/yr).
-            </p>
-          </div>
           <div className="space-y-2 sm:col-span-2">
             <Label>Income Growth</Label>
             <Select
@@ -656,10 +684,7 @@ function PersonFormModal({
             <>
               <div className="space-y-2">
                 <Label>How Often</Label>
-                <Select
-                  value={bonusFrequency}
-                  onValueChange={handleBonusFrequencyChange}
-                >
+                <Select value={bonusFrequency} onValueChange={handleBonusFrequencyChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
@@ -701,85 +726,109 @@ function PersonFormModal({
             </p>
             <div className="flex items-center justify-between">
               <p className="text-muted-foreground text-xs">
-                modeled per paycheck — 401(k), HSA, insurance…
+                Insurance, FSA and other withholdings — saved per person, no account needed.
               </p>
-              <Button type="button" variant="outline" size="sm" onClick={addDeduction}>
-                + Add Deduction
+              <Button type="button" variant="outline" size="sm" onClick={addWithholding}>
+                + Add Withholding
               </Button>
             </div>
-            {paycheckConfig.deductions.length === 0 && (
+            {withholdings.length === 0 && Object.keys(withholdingDrafts).length === 0 && (
               <p className="text-muted-foreground text-xs">
-                No deductions — net equals gross minus estimated taxes.
+                No withholdings — take-home equals gross minus estimated taxes.
               </p>
             )}
             <div className="space-y-2">
-              {paycheckConfig.deductions.map((d) => (
-                <div key={d.id} className="flex flex-wrap items-end gap-2">
-                  <div className="min-w-36 flex-1 space-y-1">
-                    <Label className="text-xs">Name</Label>
-                    <Input
-                      value={d.name}
-                      onChange={(e) =>
-                        updateDeduction(d.id, (dd) => ({ ...dd, name: e.target.value }))
-                      }
-                      placeholder="401(k), HSA, Health Insurance…"
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                  <div className="w-28 space-y-1">
-                    <Label className="text-xs">Amount</Label>
-                    <FormattedNumberInput
-                      value={d.amount}
-                      onValueChange={(v) => updateDeduction(d.id, (dd) => ({ ...dd, amount: v }))}
-                      maxFractionDigits={2}
-                    />
-                  </div>
-                  <label className="flex cursor-pointer items-center gap-1.5 pb-1.5 text-xs">
-                    <input
-                      type="checkbox"
-                      className="accent-primary"
-                      checked={d.pretax}
-                      onChange={(e) =>
-                        updateDeduction(d.id, (dd) => ({ ...dd, pretax: e.target.checked }))
-                      }
-                    />
-                    Pre-tax
-                  </label>
-                  <div className="w-44 space-y-1 pb-0.5">
-                    <Select
-                      value={d.linkedAccountId ?? 'none'}
-                      onValueChange={(v) =>
-                        updateDeduction(d.id, (dd) => ({
-                          ...dd,
-                          linkedAccountId: v === 'none' ? null : v,
-                        }))
-                      }
-                    >
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Links to account" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No linked account</SelectItem>
-                        {accounts.map((a) => (
-                          <SelectItem key={a.id} value={a.id}>
-                            {a.name || 'Unnamed account'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="size-8"
-                    onClick={() => removeDeduction(d.id)}
-                  >
-                    <Trash2 className="size-3.5" />
-                  </Button>
-                </div>
-              ))}
+              {(Object.values(withholdingDrafts).length > 0
+                ? withholdings
+                    .map((w) => withholdingDrafts[w.id] ?? w)
+                    .concat(
+                      Object.values(withholdingDrafts).filter(
+                        (d) => !withholdings.some((w) => w.id === d.id),
+                      ),
+                    )
+                : withholdings
+              )
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((row) => {
+                  const d = draftFor(row);
+                  return (
+                    <div key={d.id} className="flex flex-wrap items-end gap-2">
+                      <div className="min-w-36 flex-1 space-y-1">
+                        <Label className="text-xs">Name</Label>
+                        <Input
+                          value={d.name}
+                          onChange={(e) => updateDraft({ ...d, name: e.target.value })}
+                          onBlur={() => commitWithholding(d)}
+                          placeholder="Health Insurance, FSA…"
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div className="w-28 space-y-1">
+                        <Label className="text-xs">Amount / mo</Label>
+                        <FormattedNumberInput
+                          value={d.amount}
+                          onValueChange={(v) => updateDraft({ ...d, amount: v })}
+                          maxFractionDigits={2}
+                        />
+                      </div>
+                      <div className="w-28 space-y-1">
+                        <Label className="text-xs">Kind</Label>
+                        <Select
+                          value={
+                            WITHHOLDING_KIND_OPTIONS.some((o) => o.value === d.kind)
+                              ? d.kind
+                              : 'OTHER'
+                          }
+                          onValueChange={(v) => {
+                            const next = { ...d, kind: v };
+                            updateDraft(next);
+                            commitWithholding(next);
+                          }}
+                        >
+                          <SelectTrigger className="h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {WITHHOLDING_KIND_OPTIONS.map((o) => (
+                              <SelectItem key={o.value} value={o.value}>
+                                {o.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <label className="flex cursor-pointer items-center gap-1.5 pb-1.5 text-xs">
+                        <input
+                          type="checkbox"
+                          className="accent-primary"
+                          checked={d.pretax}
+                          onChange={(e) => {
+                            const next = { ...d, pretax: e.target.checked };
+                            updateDraft(next);
+                            commitWithholding(next);
+                          }}
+                        />
+                        Pre-tax
+                      </label>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="size-8"
+                        onClick={() => removeWithholding(d)}
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </div>
+                  );
+                })}
             </div>
+          </div>
+
+          {/* -- Savings Accounts ------------------------------------------ */}
+          <div className="space-y-2 sm:col-span-2">
+            <SavingsAccountsSection person={person} people={people} currencyCode={currencyCode} />
           </div>
 
           {/* -- Totals --------------------------------------------------- */}
@@ -789,16 +838,20 @@ function PersonFormModal({
             </p>
             <div className="bg-muted/50 space-y-1 rounded-md px-3 py-2 text-xs">
               <p>
-                Gross {formatCurrencyWithCode(computation.grossPerCheck, 'USD')} · Pre-tax{' '}
-                {formatCurrencyWithCode(computation.pretaxPerCheck, 'USD')} · Taxes (est.{' '}
-                {(computation.taxRate * 100).toFixed(1)}%){' '}
-                {formatCurrencyWithCode(computation.taxesPerCheck, 'USD')} · Post-tax{' '}
-                {formatCurrencyWithCode(computation.posttaxPerCheck, 'USD')}
+                Gross {formatCurrencyWithCode(wf.grossMonthly, 'USD')} − Pre-tax savings{' '}
+                {formatCurrencyWithCode(wf.pretaxSavingsMonthly, 'USD')} − Pre-tax withholdings{' '}
+                {formatCurrencyWithCode(wf.pretaxWithholdingsMonthly, 'USD')} = Taxable{' '}
+                {formatCurrencyWithCode(wf.taxableMonthly, 'USD')}
+              </p>
+              <p>
+                Taxes (est. {(wf.effectiveRate * 100).toFixed(1)}%){' '}
+                {formatCurrencyWithCode(wf.taxesMonthly, 'USD')} − Savings{' '}
+                {formatCurrencyWithCode(wf.savingsMonthly, 'USD')} − Post-tax withholdings{' '}
+                {formatCurrencyWithCode(wf.posttaxWithholdingsMonthly, 'USD')}
               </p>
               <p className="text-success font-semibold">
-                Net {formatCurrencyWithCode(computation.netPerCheck, 'USD')} per check ×{' '}
-                {computation.checksPerYear}/yr ={' '}
-                {formatCurrencyWithCode(computation.netAnnual, 'USD')}
+                Take-home {formatCurrencyWithCode(wf.takeHomeMonthly, 'USD')} per month × 12 ={' '}
+                {formatCurrencyWithCode(wf.takeHomeAnnual, 'USD')}
               </p>
             </div>
           </div>
