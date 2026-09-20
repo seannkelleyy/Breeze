@@ -64,8 +64,6 @@ const AccountsCardInner = ({ collapsed }: { collapsed: boolean }) => {
   const {
     isLiabilityAccountType,
     isCombinedAssetType,
-    isNonContributingAccountType,
-    isDepreciatingAssetType,
   } = typeGuards;
 
   // Calculate debt payments from liability accounts
