@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
 
-interface EntityMutationProps<TVars> {
+interface EntityMutationProps {
   onSuccess?: () => void;
   onSettled?: () => void;
 }
@@ -19,7 +19,7 @@ export function createMutationHook<TVars, TService>(
   toMutationFn: (service: TService) => (variables: TVars) => Promise<unknown>,
 ) {
   return function useEntityMutation(
-    props: EntityMutationProps<TVars> = {},
+    props: EntityMutationProps = {},
   ): UseMutationResult<unknown, Error, TVars> {
     const service = useService();
     const mutationFn = useCallback(

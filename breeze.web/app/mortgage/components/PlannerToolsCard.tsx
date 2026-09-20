@@ -32,54 +32,54 @@ type RatioChartDisplayMode = 'share' | 'amount' | 'both';
 const amortizationChartConfig = {
   balance: {
     label: 'Remaining Balance',
-    color: 'hsl(var(--chart-1))',
+    color: 'var(--chart-1))',
   },
   acceleratedBalance: {
     label: 'Accelerated Balance',
-    color: 'hsl(var(--chart-1))',
+    color: 'var(--chart-1))',
   },
   cumulativeInterest: {
     label: 'Total Interest Paid',
-    color: 'hsl(var(--chart-4))',
+    color: 'var(--chart-4))',
   },
   acceleratedCumulativeInterest: {
     label: 'Accelerated Total Interest',
-    color: 'hsl(var(--chart-4))',
+    color: 'var(--chart-4))',
   },
 } satisfies ChartConfig;
 
 const amortizationRatioChartConfig = {
   principalSharePercent: {
     label: 'Principal Share %',
-    color: 'hsl(var(--chart-2))',
+    color: 'var(--chart-2))',
   },
   interestSharePercent: {
     label: 'Interest Share %',
-    color: 'hsl(var(--chart-3))',
+    color: 'var(--chart-3))',
   },
   principalAmount: {
     label: 'Principal Amount',
-    color: 'hsl(var(--chart-2))',
+    color: 'var(--chart-2))',
   },
   interestAmount: {
     label: 'Interest Amount',
-    color: 'hsl(var(--chart-3))',
+    color: 'var(--chart-3))',
   },
   acceleratedPrincipalAmount: {
     label: 'Accelerated Principal Amount',
-    color: 'hsl(var(--chart-2))',
+    color: 'var(--chart-2))',
   },
   acceleratedInterestAmount: {
     label: 'Accelerated Interest Amount',
-    color: 'hsl(var(--chart-3))',
+    color: 'var(--chart-3))',
   },
   acceleratedPrincipalSharePercent: {
     label: 'Accelerated Principal Share %',
-    color: 'hsl(var(--chart-2))',
+    color: 'var(--chart-2))',
   },
   acceleratedInterestSharePercent: {
     label: 'Accelerated Interest Share %',
-    color: 'hsl(var(--chart-3))',
+    color: 'var(--chart-3))',
   },
 } satisfies ChartConfig;
 

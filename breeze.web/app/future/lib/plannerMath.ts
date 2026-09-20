@@ -13,14 +13,16 @@ import * as plannerConstants from './constants';
 const { isNonContributingAccountType } = plannerConfig;
 
 export const plannerChartConfig = {
-  totalBalance: { label: 'Total Portfolio', color: 'hsl(var(--chart-1))' },
+  totalBalance: { label: 'All Assets', color: 'var(--chart-1))' },
+  investable: { label: 'Investable', color: 'var(--chart-2)' },
+  property: { label: 'Property', color: 'var(--chart-4)' },
 } satisfies ChartConfig;
 export const accountLineColors = [
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
-  'hsl(var(--chart-1))',
+  'var(--chart-2))',
+  'var(--chart-3))',
+  'var(--chart-4))',
+  'var(--chart-5))',
+  'var(--chart-1))',
 ];
 export const clamp = (v: number, m = 0): number => (Number.isFinite(v) ? Math.max(m, v) : m);
 export const toIsoDate = (d: Date): string =>

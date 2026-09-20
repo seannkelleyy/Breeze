@@ -24,7 +24,9 @@ const { isCombinedAssetType } = plannerConfig;
 
 // ─── Main Hook ────────────────────────────────────────────
 const usePlannerModel = () => {
-  const [projectionEndAge, setProjectionEndAge] = useState<number | undefined>(undefined);
+  // Default to a full-life projection so the post-retirement drawdown phase
+  // (contributions stop, inflation-adjusted withdrawals begin) is visible.
+  const [projectionEndAge, setProjectionEndAge] = useState<number>(95);
   const { returnDisplayMode, inflationRate, safeWithdrawalRate, filingStatus, deductionType } =
     useCurrentUser();
   const {
@@ -50,6 +52,18 @@ const usePlannerModel = () => {
 
   const household = useHouseholdCalculation(plannerPeople);
 
+  // Chart what-if: picking a different retirement age re-runs the whole model
+  // (projections, milestones, targets) without changing the saved value on
+  // the person — null means "use the person's saved retirement age".
+  const [retirementAgeOverride, setRetirementAgeOverride] = useState<number | null>(null);
+  // Market stress test: negative shift applied to every asset's projected
+  // return (liabilities excluded) — a what-if for bad market sequences.
+  const [marketAdjustment, setMarketAdjustment] = useState(0);
+  const effectiveHousehold = useMemo(
+    () => ({ ...household, targetAge: retirementAgeOverride ?? household.targetAge }),
+    [household, retirementAgeOverride],
+  );
+
   // Exclude linked liabilities from calculations — their data is already
   // incorporated into the parent asset's equity via getAssetFinanceSnapshot.
   const filteredAccounts = useMemo(() => {
@@ -69,7 +83,7 @@ const usePlannerModel = () => {
     useInflationAdjustedValues,
   );
   const targets = useRetirementTargets(
-    household,
+    effectiveHousehold,
     portfolio,
     inflationRate,
     safeWithdrawalRate,
@@ -80,7 +94,7 @@ const usePlannerModel = () => {
   );
   const financialMathSnapshot = useFinancialMathSnapshot(
     monthlyExpenses,
-    household,
+    effectiveHousehold,
     safeWithdrawalRate,
     portfolio,
     taxTables,
@@ -92,13 +106,14 @@ const usePlannerModel = () => {
   const annualWithdrawal = monthlyExpenses * 12;
   const { projectionRows, finalBalances, projectedNetWorthAtTargetAge } = useProjections(
     filteredAccounts,
-    household,
+    effectiveHousehold,
     plannerAssetFinanceDetailsByAccountId,
     irsLimits,
     inflationRate,
     useInflationAdjustedValues,
     projectionEndAge,
     annualWithdrawal,
+    marketAdjustment,
   );
   const financialFreedomAge = useFinancialFreedomAge(
     projectionRows,
@@ -121,7 +136,7 @@ const usePlannerModel = () => {
   const milestones = useFireAchievementAges(projectionRows, milestoneTargets, household.currentAge);
   const accountBreakdownRows = useAccountBreakdown(
     filteredAccounts,
-    household,
+    effectiveHousehold,
     plannerPeople,
     irsLimits,
     finalBalances,
@@ -133,19 +148,19 @@ const usePlannerModel = () => {
     setPlannerSummary({
       monthlyNeededForDesiredTarget: targets.monthlyNeededForDesiredTarget,
       requiredMonthlyTargetLabel: targets.selectedRetirementMethodLabel,
-      annualHouseholdIncome: household.annualHouseholdIncome,
+      annualHouseholdIncome: effectiveHousehold.annualHouseholdIncome,
       currentSavingsRateEmployeePercent: portfolio.currentSavingsRateEmployee,
       currentSavingsRateTotalPercent: portfolio.currentSavingsRateTotal,
       requiredSavingsRatePercent: targets.requiredSavingsRate,
       savingsRateGapPercent: targets.savingsRateGap,
       weightedAnnualRate: portfolio.effectiveWeightedAnnualRate,
-      yearsToGoal: household.yearsToGoal,
+      yearsToGoal: effectiveHousehold.yearsToGoal,
       monthlyGapToGoal: targets.monthlyGap,
       isMonthlyGapPositive: targets.isMonthlyGapPositive,
       totalStartingBalance: portfolio.totalStartingBalance,
       totalAssets: portfolio.totalAssets,
       totalLiabilities: portfolio.totalLiabilities,
-      targetAge: household.targetAge,
+      targetAge: effectiveHousehold.targetAge,
       projectedNetWorthAtTargetAge,
       totalPlannedMonthlyInvestment: portfolio.totalPlannedMonthlyInvestment,
       annualNeedAtRetirement: targets.annualNeedAtRetirement,
@@ -155,19 +170,19 @@ const usePlannerModel = () => {
   }, [
     targets.monthlyNeededForDesiredTarget,
     targets.selectedRetirementMethodLabel,
-    household.annualHouseholdIncome,
+    effectiveHousehold.annualHouseholdIncome,
     portfolio.currentSavingsRateEmployee,
     portfolio.currentSavingsRateTotal,
     targets.requiredSavingsRate,
     targets.savingsRateGap,
     portfolio.effectiveWeightedAnnualRate,
-    household.yearsToGoal,
+    effectiveHousehold.yearsToGoal,
     targets.monthlyGap,
     targets.isMonthlyGapPositive,
     portfolio.totalStartingBalance,
     portfolio.totalAssets,
     portfolio.totalLiabilities,
-    household.targetAge,
+    effectiveHousehold.targetAge,
     projectedNetWorthAtTargetAge,
     portfolio.totalPlannedMonthlyInvestment,
     targets.annualNeedAtRetirement,
@@ -179,7 +194,10 @@ const usePlannerModel = () => {
   return {
     accounts: plannerAccounts,
     currentAge: household.currentAge,
-    targetAge: household.targetAge,
+    targetAge: effectiveHousehold.targetAge,
+    setRetirementAgeOverride,
+    marketAdjustment,
+    setMarketAdjustment,
     totalStartingBalance: portfolio.totalStartingBalance,
     projectedNetWorthAtTargetAge,
     financialMathSnapshot,
@@ -202,14 +220,14 @@ const usePlannerModel = () => {
     realWeightedAnnualRate: portfolio.realWeightedAnnualRate,
     monthlyGapToGoal: targets.monthlyGap,
     isMonthlyGapPositive: targets.isMonthlyGapPositive,
-    annualHouseholdIncome: household.annualHouseholdIncome,
+    annualHouseholdIncome: effectiveHousehold.annualHouseholdIncome,
     monthlyExpenses,
     totalPlannedMonthlyInvestment: portfolio.totalPlannedMonthlyInvestment,
     totalAssets: portfolio.totalAssets,
     totalLiabilities: portfolio.totalLiabilities,
     emergencyFundBalance: portfolio.emergencyFundBalance,
     currentSavingsRate: portfolio.currentSavingsRateTotal,
-    projectionEndAge: projectionEndAge ?? household.targetAge,
+    projectionEndAge: projectionEndAge ?? effectiveHousehold.targetAge,
     setProjectionEndAge,
   };
 };

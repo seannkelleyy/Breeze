@@ -4,17 +4,11 @@ import ProjectionTables from '../ProjectionTables';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { ChartConfig } from '@/components/ui/chart';
+import type { ProjectionRow } from '../../types/projection';
 
 type SectionCollapse = {
   accountBreakdown: boolean;
   onToggle: (section: string) => void;
-};
-
-type ProjectionRow = {
-  age: number;
-  totalBalance: number;
-  totalContributions: number;
-  [key: `account-${number}`]: number;
 };
 
 type AccountBreakdownRow = {
@@ -36,10 +30,14 @@ interface ProjectionsSectionProps {
   targetAge: number;
   chartConfig: ChartConfig;
   projectionRows: ProjectionRow[];
-  accounts: Array<{ id: string; name: string }>;
+  accounts: Array<{ id: string; name: string; accountType: string }>;
   accountBreakdownRows: AccountBreakdownRow[];
   projectionEndAge: number;
   setProjectionEndAge: (age: number) => void;
+  retirementAge: number;
+  setRetirementAge: (age: number) => void;
+  marketAdjustment: number;
+  setMarketAdjustment: (adjustment: number) => void;
   collapses: SectionCollapse;
 }
 
@@ -58,6 +56,10 @@ export function ProjectionsSection({
   accountBreakdownRows,
   projectionEndAge,
   setProjectionEndAge,
+  retirementAge,
+  setRetirementAge,
+  marketAdjustment,
+  setMarketAdjustment,
   collapses,
 }: ProjectionsSectionProps) {
   const { accountBreakdown, onToggle } = collapses;
@@ -74,6 +76,10 @@ export function ProjectionsSection({
         accounts={accounts}
         projectionEndAge={projectionEndAge}
         setProjectionEndAge={setProjectionEndAge}
+        retirementAge={retirementAge}
+        setRetirementAge={setRetirementAge}
+        marketAdjustment={marketAdjustment}
+        setMarketAdjustment={setMarketAdjustment}
       />
       <ProjectionTables
         sections={{

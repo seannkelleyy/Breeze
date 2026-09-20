@@ -111,6 +111,9 @@ function PlannerContent() {
     currentSavingsRate,
     projectionEndAge,
     setProjectionEndAge,
+    setRetirementAgeOverride,
+    marketAdjustment,
+    setMarketAdjustment,
   } = usePlannerModel();
 
   if (!clerkLoaded || !isLoaded || !userId) {
@@ -159,6 +162,10 @@ function PlannerContent() {
       <ProjectionsSection
         currentAge={currentAge}
         targetAge={targetAge}
+        retirementAge={targetAge}
+        setRetirementAge={setRetirementAgeOverride}
+        marketAdjustment={marketAdjustment}
+        setMarketAdjustment={setMarketAdjustment}
         chartConfig={dynamicChartConfig}
         projectionRows={projectionRows}
         accounts={accounts}

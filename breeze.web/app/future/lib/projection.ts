@@ -109,6 +109,8 @@ export const getProjection = (
   useInflationAdjustedValues: boolean,
   projectionEndAge?: number,
   annualWithdrawal?: number,
+  /** Market stress test: shifts every asset's return by this many %/yr (negative = bad markets). */
+  annualReturnAdjustmentPercent = 0,
 ): { projectionRows: ProjectionRow[]; finalBalances: number[] } => {
   const endAge = projectionEndAge ?? targetAge;
   const years = Math.max(0, endAge - currentAge);
@@ -129,7 +131,7 @@ export const getProjection = (
     return {
       accountType: account.accountType,
       assetValue: snapshot.assetValue,
-      assetAnnualRate: details.annualChangeRate,
+      assetAnnualRate: details.annualChangeRate + annualReturnAdjustmentPercent,
       homeGrowthProfile:
         details.homeGrowthProfile ?? plannerConstants.PLANNER_DEFAULT_HOME_GROWTH_PROFILE,
       vehicleDepreciationProfile: details.vehicleDepreciationProfile,
@@ -240,7 +242,9 @@ export const getProjection = (
           continue;
         }
         const effAnnualRate = getEffectiveAnnualRatePercent(
-          account.annualRate,
+          isLiabilityAccountType(account.accountType)
+            ? account.annualRate
+            : account.annualRate + annualReturnAdjustmentPercent,
           inflationRatePercent,
           useInflationAdjustedValues,
         );

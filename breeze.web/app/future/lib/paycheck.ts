@@ -1,6 +1,7 @@
 import type { PlannerPerson } from '../types/person';
 import type { PlannerAccount } from '../types/account';
 import type { TaxYearTables } from '../types/tax';
+import { PAYROLL_SAVINGS_ACCOUNT_TYPES } from './config';
 import { getEffectiveTaxRate } from './tax';
 import {
   getEmployeeMonthlyContribution,
@@ -39,13 +40,6 @@ export const WITHHOLDING_KIND_OPTIONS = [
   { value: 'OTHER', label: 'Other' },
 ] as const;
 
-export function withholdingKindLabel(kind: string | undefined): string {
-  return (
-    WITHHOLDING_KIND_OPTIONS.find((o) => o.value === kind)?.label ??
-    WITHHOLDING_KIND_OPTIONS[WITHHOLDING_KIND_OPTIONS.length - 1].label
-  );
-}
-
 export interface PersonWaterfall {
   grossMonthly: number;
   /** 401(k)/HSA employee contributions (savings — never lands in the bank). */
@@ -69,8 +63,6 @@ export interface PersonWaterfall {
   takeHomeAnnual: number;
 }
 
-const SAVINGS_ACCOUNT_TYPES = new Set(['401k', '403b', '457', 'hsa']);
-
 function isPretaxTreatment(account: PlannerAccount): boolean {
   return account.taxTreatment !== 'ROTH';
 }
@@ -84,7 +76,7 @@ export function getPersonSavingsAccounts(
   accounts: PlannerAccount[],
 ): PlannerAccount[] {
   return accounts.filter(
-    (a) => a.personIds.includes(person.id) && SAVINGS_ACCOUNT_TYPES.has(a.accountType),
+    (a) => a.personIds.includes(person.id) && PAYROLL_SAVINGS_ACCOUNT_TYPES.has(a.accountType),
   );
 }
 
@@ -104,11 +96,6 @@ export function getPersonSavingsSplit(
     else rothMonthly += getEmployeeMonthlyContribution(a, [person]);
   }
   return { pretaxMonthly, rothMonthly };
-}
-
-export function getPersonSavingsMonthly(person: PlannerPerson, accounts: PlannerAccount[]): number {
-  const { pretaxMonthly, rothMonthly } = getPersonSavingsSplit(person, accounts);
-  return pretaxMonthly + rothMonthly;
 }
 
 export function computePersonWaterfall(

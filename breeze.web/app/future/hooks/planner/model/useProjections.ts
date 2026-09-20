@@ -16,8 +16,9 @@ export function useProjections(
   useInflationAdjustedValues: boolean,
   projectionEndAge?: number,
   annualWithdrawal?: number,
+  annualReturnAdjustmentPercent = 0,
 ) {
-  const { projectionRows, finalBalances } = useMemo(
+  const { projectionRows } = useMemo(
     () =>
       getProjection(
         accounts,
@@ -31,6 +32,7 @@ export function useProjections(
         useInflationAdjustedValues,
         projectionEndAge,
         annualWithdrawal,
+        annualReturnAdjustmentPercent,
       ),
     [
       accounts,
@@ -43,10 +45,19 @@ export function useProjections(
       useInflationAdjustedValues,
       projectionEndAge,
       annualWithdrawal,
+      annualReturnAdjustmentPercent,
     ],
   );
 
-  const projectedNetWorthAtTargetAge = projectionRows[projectionRows.length - 1]?.totalBalance ?? 0;
+  // Stats described as "at target age" must read the target-age row — not the
+  // final row — so extending the chart past retirement doesn't change them.
+  const targetRow =
+    projectionRows.find((row) => row.age === household.targetAge) ??
+    projectionRows[projectionRows.length - 1];
+  const projectedNetWorthAtTargetAge = targetRow?.totalBalance ?? 0;
+  const targetAgeBalances = accounts.map(
+    (_, index) => (targetRow?.[`account-${index}`] as number | undefined) ?? 0,
+  );
 
-  return { projectionRows, finalBalances, projectedNetWorthAtTargetAge };
+  return { projectionRows, finalBalances: targetAgeBalances, projectedNetWorthAtTargetAge };
 }

@@ -6,7 +6,7 @@ import useGraphql from '@/lib/services/useGraphql';
 import { useQuery } from '@tanstack/react-query';
 import { PlannerAccount } from '../../types/account';
 import type { ApiAssetType, ApiLiabilityType } from '../../types/apiAsset';
-import { PlannerPerson } from '../../types/person';
+import { PayCadence, PlannerPerson } from '../../types/person';
 import { apiAssetTypeToAccountType, apiLiabilityTypeToAccountType } from '../../lib/typeMapping';
 
 interface MeResponse {
@@ -138,10 +138,8 @@ const useFetchPlanner = () => {
           | 'hourly'
           | 'commission',
         payDay: ((p as Record<string, unknown>).payDay as number) ?? 1,
-        payCadence: (((p as Record<string, unknown>).payCadence as string) || 'biweekly') as
-          | 'weekly'
-          | 'biweekly'
-          | 'monthly',
+        payCadence: (((p as Record<string, unknown>).payCadence as string) ||
+          'biweekly') as PayCadence,
         hourlyRate: Number((p as Record<string, unknown>).hourlyRate) || 0,
         expectedHoursPerWeek: Number((p as Record<string, unknown>).expectedHoursPerWeek) || 0,
         createdAt: p.createdAt,

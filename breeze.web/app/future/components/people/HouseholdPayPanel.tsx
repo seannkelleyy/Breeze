@@ -10,7 +10,7 @@ import {
   getPersonTotalIncome,
   getPaychecksPerYear,
 } from '../../lib/plannerMath';
-import { computePersonWaterfall } from '../../lib/paycheck';
+import { computeHouseholdWaterfall, computePersonWaterfall } from '../../lib/paycheck';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useTaxYear from '../../hooks/planner/useTaxYear';
 import type { PlannerPerson } from '../../types/person';
@@ -40,29 +40,17 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
   const taxTables = useTaxYear(filingStatus);
 
   const totals = useMemo(() => {
-    let totalIncome = 0;
-    let bonusIncome = 0;
-    let taxes = 0;
-    let savings = 0;
-    let withhold = 0;
-    let takeHome = 0;
-    for (const person of people) {
-      totalIncome += getPersonTotalIncome(person);
-      bonusIncome += getPersonBonusPerYear(person) / 12;
-      const wf = computePersonWaterfall(person, accounts, withholdings, taxTables, deductionType);
-      taxes += wf.taxesMonthly;
-      savings += wf.savingsMonthly;
-      withhold += wf.pretaxWithholdingsMonthly + wf.posttaxWithholdingsMonthly;
-      takeHome += wf.takeHomeMonthly;
-    }
+    const wf = computeHouseholdWaterfall(people, accounts, withholdings, taxTables, deductionType);
+    const totalIncome = people.reduce((sum, p) => sum + getPersonTotalIncome(p), 0);
+    const bonusIncome = people.reduce((sum, p) => sum + getPersonBonusPerYear(p) / 12, 0);
     return {
       totalIncome,
       bonusMonthly: bonusIncome,
       baseMonthly: totalIncome / 12 - bonusIncome,
-      taxesMonthly: taxes,
-      savingsMonthly: savings,
-      withholdingsMonthly: withhold,
-      takeHomeMonthly: takeHome,
+      taxesMonthly: wf.taxesMonthly,
+      savingsMonthly: wf.savingsMonthly,
+      withholdingsMonthly: wf.pretaxWithholdingsMonthly + wf.posttaxWithholdingsMonthly,
+      takeHomeMonthly: wf.takeHomeMonthly,
     };
   }, [people, accounts, withholdings, taxTables, deductionType]);
 

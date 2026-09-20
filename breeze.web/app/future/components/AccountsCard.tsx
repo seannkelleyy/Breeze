@@ -6,11 +6,9 @@ import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { getEmployeeMonthlyContribution } from '../lib/plannerMath';
 import { formatCurrencyWithCode } from '@/lib/utils';
-import { usePlannerAccounts } from '../hooks/planner/index';
-import { useAccountMutations } from '../hooks/planner/useAccountMutations';
 import { AccountListItem } from './accounts/AccountListItem';
-import { PlannerAccount, AccountType } from '../types/account';
-import { HomeGrowthProfile } from '../types/finance';
+import { AccountEditorProvider, useAccountEditor } from './accounts/AccountEditorContext';
+import type { PlannerAccount, AccountType } from '../types/account';
 
 export interface AccountsCardProps {
   collapsed: boolean;
@@ -39,35 +37,30 @@ const ACCOUNT_TYPE_ORDER: Record<AccountType, number> = {
 };
 
 const AccountsCard = ({ collapsed }: AccountsCardProps) => {
-  const { currencyCode, userId } = useCurrentUser();
-  const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
+  return (
+    <AccountEditorProvider>
+      <AccountsCardInner collapsed={collapsed} />
+    </AccountEditorProvider>
+  );
+};
 
+const AccountsCardInner = ({ collapsed }: { collapsed: boolean }) => {
+  const { currencyCode } = useCurrentUser();
+  const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
   const [accountFilter, setAccountFilter] = useState<AccountFilter>('all');
 
-  const { data, options, typeGuards, helpers, actions } = usePlannerAccounts();
-
+  const editor = useAccountEditor();
   const {
-    plannerAccounts,
-    assetFinanceDetailsByAccountId,
+    accounts: plannerAccounts,
     people,
     isIrsAccountsLoading,
     isIrsAccountsError,
     totalPlannedMonthlyEmployee,
     totalPlannedMonthlyMatch,
     totalPlannedMonthlyInvestment,
-  } = data;
-  const {
-    accountRateProfileOptions,
-    accountTypeOptions,
-    contributionModeOptions,
-    liabilityContributionModeOptions,
-    homeGrowthProfileOptions,
-    vehicleDepreciationProfileOptions,
-    defaultHomeGrowthProfile,
-    defaultVehicleDepreciationProfile,
-    defaultHomeAppreciationRate,
-    defaultVehicleDepreciationRate,
-  } = options;
+  } = editor.data;
+  const { assetFinanceDetailsByAccountId } = editor;
+  const { typeGuards, helpers } = editor;
   const {
     isLiabilityAccountType,
     isCombinedAssetType,
@@ -76,35 +69,15 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
   } = typeGuards;
 
   // Calculate debt payments from liability accounts
-  const totalPlannedMonthlyDebtPayments = useMemo(() => {
-    return plannerAccounts
-      .filter((a) => isLiabilityAccountType(a.accountType))
-      .reduce((sum, a) => sum + getEmployeeMonthlyContribution(a, people), 0);
-  }, [plannerAccounts, people, isLiabilityAccountType]);
-  const {
-    getSuggestedAnnualLimitForAccount,
-    getDisplayedRateForAccount,
-    getStoredAnnualRateForInput,
-    getRateProfileFromAnnualRate,
-    getAnnualRateFromProfile,
-    getDefaultAssetFinanceDetailsForAccount,
-    getHomeAnnualGrowthRate,
-    toIsoDate,
-  } = helpers;
-  const {
-    updateAccount,
-    updateAssetFinanceDetails,
-    removeAccount,
-    addAccount,
-    addLiability,
-    setPlannerAssetFinanceDetailsByAccountId,
-  } = actions;
-
-  const mutations = useAccountMutations({
-    userId,
-    updateAccount,
-    removeAccount,
-  });
+  const totalPlannedMonthlyDebtPayments = useMemo(
+    () =>
+      plannerAccounts
+        .filter((a) => isLiabilityAccountType(a.accountType))
+        .reduce((sum, a) => sum + getEmployeeMonthlyContribution(a, people), 0),
+    [plannerAccounts, people, isLiabilityAccountType],
+  );
+  const { getSuggestedAnnualLimitForAccount } = helpers;
+  const { addAccount, addLiability } = editor;
 
   const filteredAccounts = useMemo(() => {
     let accounts: PlannerAccount[];
@@ -142,119 +115,6 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
     isCombinedAssetType,
     getSuggestedAnnualLimitForAccount,
   ]);
-
-  const handleSave = async (account: PlannerAccount) => {
-    const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      account.id,
-    );
-    const isLiability = isLiabilityAccountType(account.accountType);
-
-    try {
-      if (isLiability) {
-        if (!isValidUuid) await mutations.createLiabilityMutation.mutateAsync(account);
-        else await mutations.updateLiabilityMutation.mutateAsync(account);
-        return;
-      }
-
-      // Combined asset with loan: ensure linked liability exists
-      if (
-        isCombinedAssetType(account.accountType) &&
-        assetFinanceDetailsByAccountId[account.id]?.hasLoan
-      ) {
-        const details = assetFinanceDetailsByAccountId[account.id];
-        if (!account.linkedLiabilityId) {
-          // Create a liability for the loan
-          const loanAccount: PlannerAccount = {
-            ...account,
-            id: `local-${crypto.randomUUID()}`,
-            name: `${account.name} Loan`,
-            accountType: account.accountType === 'home' ? 'mortgage' : 'auto-loan',
-            startingBalance: details.currentLoanBalance,
-            annualRate: details.loanInterestRate,
-            contributionMode: 'monthly',
-            contributionValue: details.loanMonthlyPayment,
-            originalLoanAmount: details.originalLoanAmount,
-          };
-          const resp = await mutations.createLiabilityMutation.mutateAsync(loanAccount);
-          const newLiabilityId = (resp as { createLiability: { id: string } }).createLiability.id;
-          // Save asset with linked liability
-          const assetWithLink = { ...account, linkedLiabilityId: newLiabilityId };
-          if (!isValidUuid) await mutations.createAssetMutation.mutateAsync(assetWithLink);
-          else await mutations.updateAssetMutation.mutateAsync(assetWithLink);
-          return;
-        }
-
-        // Linked liability exists: save asset + update liability
-        const saveAssetPromise = !isValidUuid
-          ? mutations.createAssetMutation.mutateAsync(account)
-          : mutations.updateAssetMutation.mutateAsync(account);
-
-        // Update the linked liability with loan details
-        const linkedLiability: PlannerAccount = {
-          id: account.linkedLiabilityId,
-          name: `${account.name} Loan`,
-          personIds: account.personIds,
-          accountType: account.accountType === 'home' ? 'mortgage' : 'auto-loan',
-          contributionMode: 'monthly',
-          contributionValue: details.loanMonthlyPayment,
-          employerMatchRate: 0,
-          employerMatchMaxPercentOfSalary: 0,
-          startingBalance: details.currentLoanBalance,
-          annualRate: details.loanInterestRate,
-          returnProfile: null,
-          purchaseDate: null,
-          purchasePrice: null,
-          homeGrowthProfile: null,
-          vehicleDepreciationProfile: null,
-          linkedLiabilityId: null,
-          plaidAccountId: null,
-          lastValueUpdatedAt: null,
-          originalLoanAmount: details.originalLoanAmount,
-          createdAt: account.createdAt,
-          updatedAt: account.updatedAt,
-        };
-        await Promise.all([
-          saveAssetPromise,
-          mutations.updateLiabilityMutation.mutateAsync(linkedLiability),
-        ]);
-        return;
-      }
-
-      // Combined asset without loan: unlink if needed
-      if (
-        isCombinedAssetType(account.accountType) &&
-        account.linkedLiabilityId &&
-        !assetFinanceDetailsByAccountId[account.id]?.hasLoan
-      ) {
-        const unlinked = { ...account, linkedLiabilityId: null };
-        if (!isValidUuid) await mutations.createAssetMutation.mutateAsync(unlinked);
-        else await mutations.updateAssetMutation.mutateAsync(unlinked);
-        return;
-      }
-
-      if (!isValidUuid) await mutations.createAssetMutation.mutateAsync(account);
-      else await mutations.updateAssetMutation.mutateAsync(account);
-    } finally {
-      mutations.invalidatePlanner();
-    }
-  };
-
-  const handleDelete = async (account: PlannerAccount) => {
-    const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      account.id,
-    );
-    const isLiability = isLiabilityAccountType(account.accountType);
-    if (isValidUuid) {
-      try {
-        if (isLiability) await mutations.deleteLiabilityMutation.mutateAsync(account.id);
-        else await mutations.deleteAssetMutation.mutateAsync(account.id);
-      } finally {
-        mutations.invalidatePlanner();
-      }
-    } else {
-      removeAccount(account.id);
-    }
-  };
 
   const filterButtons: { key: AccountFilter; label: string }[] = [
     { key: 'all', label: 'All' },
@@ -295,38 +155,7 @@ const AccountsCard = ({ collapsed }: AccountsCardProps) => {
               <AccountListItem
                 key={account.id}
                 account={account}
-                accounts={plannerAccounts}
-                currencyCode={currencyCode}
-                people={people}
-                assetFinanceDetails={assetFinanceDetailsByAccountId[account.id]}
                 isLastAccount={plannerAccounts.length === 1}
-                isLiabilityAccountType={isLiabilityAccountType}
-                isCombinedAssetType={isCombinedAssetType}
-                isNonContributingAccountType={isNonContributingAccountType}
-                isDepreciatingAssetType={isDepreciatingAssetType}
-                getSuggestedAnnualLimitForAccount={getSuggestedAnnualLimitForAccount}
-                getDisplayedRateForAccount={getDisplayedRateForAccount}
-                getStoredAnnualRateForInput={getStoredAnnualRateForInput}
-                getRateProfileFromAnnualRate={getRateProfileFromAnnualRate}
-                getAnnualRateFromProfile={getAnnualRateFromProfile}
-                accountRateProfileOptions={accountRateProfileOptions}
-                accountTypeOptions={accountTypeOptions}
-                contributionModeOptions={contributionModeOptions}
-                liabilityContributionModeOptions={liabilityContributionModeOptions}
-                homeGrowthProfileOptions={homeGrowthProfileOptions}
-                vehicleDepreciationProfileOptions={vehicleDepreciationProfileOptions}
-                defaultHomeGrowthProfile={defaultHomeGrowthProfile as HomeGrowthProfile}
-                defaultVehicleDepreciationProfile={defaultVehicleDepreciationProfile}
-                defaultHomeAppreciationRate={defaultHomeAppreciationRate}
-                defaultVehicleDepreciationRate={defaultVehicleDepreciationRate}
-                onSave={handleSave}
-                onDelete={handleDelete}
-                onUpdateAccount={(u) => updateAccount(account.id, u)}
-                onUpdateAssetFinanceDetails={(u) => updateAssetFinanceDetails(account.id, u)}
-                setPlannerAssetFinanceDetailsByAccountId={setPlannerAssetFinanceDetailsByAccountId}
-                getDefaultAssetFinanceDetailsForAccount={getDefaultAssetFinanceDetailsForAccount}
-                toIsoDate={toIsoDate}
-                getHomeAnnualGrowthRate={getHomeAnnualGrowthRate}
               />
             ))}
             {filteredAccounts.length === 0 && (

@@ -28,7 +28,6 @@ import {
   Home,
   LinkIcon,
 } from 'lucide-react';
-import type { Goal } from '@/app/goals/types/goal';
 import { NetWorthHistoryCard } from '@/components/common/NetWorthHistoryCard';
 
 

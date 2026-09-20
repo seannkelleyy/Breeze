@@ -43,12 +43,12 @@ import {
 } from '../../lib/plannerMath';
 import {
   AccountType,
-  ContributionMode,
   AccountRateProfile,
   PlannerAccount,
 } from '../../types/account';
-import { AssetFinanceDetails, HomeGrowthProfile } from '../../types/finance';
-import { PlannerPerson } from '../../types/person';
+import { TAX_ADVANTAGED_ACCOUNT_TYPES } from '../../lib/config';
+import { useAccountEditor } from './AccountEditorContext';
+import type { AssetFinanceDetails } from '../../types/finance';
 import CombinedAssetLoanFields from './CombinedAssetLoanFields';
 import HomeAccountFields from './HomeAccountFields';
 import InvestmentAccountFields from './InvestmentAccountFields';
@@ -75,8 +75,6 @@ const ACCOUNT_ICONS: Record<string, typeof PiggyBank> = {
   mortgage: CreditCard,
 };
 
-const TAX_ADVANTAGED_TYPES = new Set(['401k', '403b', '457', 'roth-ira', 'traditional-ira', 'hsa']);
-
 const TAX_TREATMENT_OPTIONS = [
   { value: 'PRE_TAX', label: 'Pre-tax' },
   { value: 'ROTH', label: 'Roth' },
@@ -86,88 +84,56 @@ function defaultTaxTreatmentFor(accountType: string): string {
   return accountType === 'roth-ira' ? 'ROTH' : 'PRE_TAX';
 }
 
-interface AccountListItemProps {
+export interface AccountListItemProps {
   account: PlannerAccount;
-  /** All household accounts — used to aggregate per-person IRS limit usage. */
-  accounts: PlannerAccount[];
-  currencyCode: string;
-  people: PlannerPerson[];
-  assetFinanceDetails: AssetFinanceDetails | undefined;
+  /** Disable delete when this is the household's last account. */
   isLastAccount: boolean;
-  isLiabilityAccountType: (type: AccountType) => boolean;
-  isCombinedAssetType: (type: AccountType) => boolean;
-  isNonContributingAccountType: (type: AccountType) => boolean;
-  isDepreciatingAssetType: (type: AccountType) => boolean;
-  getSuggestedAnnualLimitForAccount: (type: AccountType, age: number) => number;
-  getDisplayedRateForAccount: (account: PlannerAccount) => number;
-  getStoredAnnualRateForInput: (account: PlannerAccount, value: number) => number;
-  getRateProfileFromAnnualRate: (annualRate: number) => AccountRateProfile;
-  getAnnualRateFromProfile: (profile: AccountRateProfile, currentAnnualRate: number) => number;
-  accountRateProfileOptions: ReadonlyArray<{ value: AccountRateProfile; label: string }>;
-  accountTypeOptions: ReadonlyArray<{ value: string; label: string }>;
-  contributionModeOptions: ReadonlyArray<{ value: ContributionMode; label: string }>;
-  liabilityContributionModeOptions: ReadonlyArray<{ value: ContributionMode; label: string }>;
-  homeGrowthProfileOptions: ReadonlyArray<{ value: HomeGrowthProfile; label: string }>;
-  vehicleDepreciationProfileOptions: ReadonlyArray<{ value: string; label: string }>;
-  defaultHomeGrowthProfile: HomeGrowthProfile;
-  defaultVehicleDepreciationProfile: string;
-  defaultHomeAppreciationRate: number;
-  defaultVehicleDepreciationRate: number;
-  onSave: (account: PlannerAccount) => void;
-  onDelete: (account: PlannerAccount) => void;
   /** Notifies parents when the edit dialog opens/closes (e.g. to keep a filtered row mounted). */
   onEditDialogChange?: (open: boolean) => void;
-  onUpdateAccount: (updater: (current: PlannerAccount) => PlannerAccount) => void;
-  onUpdateAssetFinanceDetails: (
-    updater: (current: AssetFinanceDetails) => AssetFinanceDetails,
-  ) => void;
-  setPlannerAssetFinanceDetailsByAccountId: (
-    updater: (prev: Record<string, AssetFinanceDetails>) => Record<string, AssetFinanceDetails>,
-  ) => void;
-  getDefaultAssetFinanceDetailsForAccount: (account: PlannerAccount) => AssetFinanceDetails;
-  toIsoDate: (date: Date) => string;
-  getHomeAnnualGrowthRate: (
-    profile: HomeGrowthProfile | string | undefined,
-    customRate: number,
-  ) => number;
 }
 
 export function AccountListItem({
   account,
-  accounts,
-  currencyCode,
-  people,
-  assetFinanceDetails,
   isLastAccount,
-  isLiabilityAccountType,
-  isCombinedAssetType,
-  isNonContributingAccountType,
-  isDepreciatingAssetType,
-  getSuggestedAnnualLimitForAccount,
-  getDisplayedRateForAccount,
-  getStoredAnnualRateForInput,
-  getRateProfileFromAnnualRate,
-  getAnnualRateFromProfile,
-  accountRateProfileOptions,
-  accountTypeOptions,
-  contributionModeOptions,
-  liabilityContributionModeOptions,
-  homeGrowthProfileOptions,
-  vehicleDepreciationProfileOptions,
-  defaultHomeGrowthProfile,
-  defaultVehicleDepreciationProfile,
-  defaultHomeAppreciationRate,
-  defaultVehicleDepreciationRate,
-  onSave,
-  onDelete,
   onEditDialogChange,
-  onUpdateAccount,
-  onUpdateAssetFinanceDetails,
-  setPlannerAssetFinanceDetailsByAccountId,
-  getDefaultAssetFinanceDetailsForAccount,
-  toIsoDate,
-  getHomeAnnualGrowthRate,
 }: AccountListItemProps) {
+  const editor = useAccountEditor();
+  const { currencyCode, people, assetFinanceDetailsByAccountId, setPlannerAssetFinanceDetailsByAccountId } = editor;
+  const assetFinanceDetails = assetFinanceDetailsByAccountId[account.id];
+  const {
+    accountRateProfileOptions,
+    accountTypeOptions,
+    contributionModeOptions,
+    liabilityContributionModeOptions,
+    homeGrowthProfileOptions,
+    vehicleDepreciationProfileOptions,
+    defaultHomeGrowthProfile,
+    defaultVehicleDepreciationProfile,
+    defaultHomeAppreciationRate,
+    defaultVehicleDepreciationRate,
+  } = editor.options;
+  const {
+    isLiabilityAccountType,
+    isCombinedAssetType,
+    isNonContributingAccountType,
+    isDepreciatingAssetType,
+  } = editor.typeGuards;
+  const {
+    getSuggestedAnnualLimitForAccount,
+    getDisplayedRateForAccount,
+    getStoredAnnualRateForInput,
+    getRateProfileFromAnnualRate,
+    getAnnualRateFromProfile,
+    getDefaultAssetFinanceDetailsForAccount,
+    toIsoDate,
+    getHomeAnnualGrowthRate,
+  } = editor.helpers;
+  const onSave = editor.saveAccount;
+  const onDelete = editor.deleteAccount;
+  const onUpdateAccount = (updater: (current: PlannerAccount) => PlannerAccount) =>
+    editor.updateAccount(account.id, updater);
+  const onUpdateAssetFinanceDetails = (updater: (current: AssetFinanceDetails) => AssetFinanceDetails) =>
+    editor.updateAssetFinanceDetails(account.id, updater);
   const [editing, setEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -244,7 +210,7 @@ export function AccountListItem({
   const limitGroup = getIrsLimitGroup(account.accountType);
   const personGroupAnnual =
     limitGroup && ownerPerson
-      ? getPersonGroupAnnualContribution(ownerPerson.id, limitGroup, accounts, people)
+      ? getPersonGroupAnnualContribution(ownerPerson.id, limitGroup, editor.accounts, people)
       : employeeAnnual;
   const otherGroupAccountsAnnual = Math.max(0, personGroupAnnual - employeeAnnual);
   const remainingRoom = Math.max(0, suggestedLimit - otherGroupAccountsAnnual);
@@ -307,7 +273,7 @@ export function AccountListItem({
       ...current,
       accountType: selectedType,
       returnProfile: null,
-      taxTreatment: TAX_ADVANTAGED_TYPES.has(selectedType)
+      taxTreatment: TAX_ADVANTAGED_ACCOUNT_TYPES.has(selectedType)
         ? defaultTaxTreatmentFor(selectedType)
         : current.taxTreatment,
       annualRate:
@@ -394,7 +360,7 @@ export function AccountListItem({
                   {p.name || 'Unnamed'}
                 </Badge>
               ))}
-              {!isLiability && TAX_ADVANTAGED_TYPES.has(account.accountType) && (
+              {!isLiability && TAX_ADVANTAGED_ACCOUNT_TYPES.has(account.accountType) && (
                 <Badge
                   variant={account.taxTreatment === 'ROTH' ? 'default' : 'secondary'}
                   className="shrink-0 text-[10px]"
@@ -496,7 +462,7 @@ export function AccountListItem({
             </div>
 
             {/* Tax treatment */}
-            {!isLiability && TAX_ADVANTAGED_TYPES.has(account.accountType) && (
+            {!isLiability && TAX_ADVANTAGED_ACCOUNT_TYPES.has(account.accountType) && (
               <div className="space-y-1.5">
                 <Label className="text-xs">Tax Treatment</Label>
                 <Select

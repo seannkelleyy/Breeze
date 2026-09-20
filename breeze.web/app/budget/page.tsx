@@ -6,7 +6,6 @@ import dayjs from 'dayjs';
 import Link from 'next/link';
 import { MoveLeft, MoveRight, RefreshCw, Loader2, Receipt } from 'lucide-react';
 
-import { BankActualsCard } from './components/BankActualsCard';
 import { useBudgetContext } from './providers/index';
 import { useRegenerateBudget } from './hooks/budget/index';
 import { Button } from '@/components/ui/button';
@@ -48,7 +47,7 @@ const BudgetContent = () => {
   const { budget, getBudgetForDate, refetchBudget, refetchIncomes, refetchCategories } =
     useBudgetContext();
   const { regenerateBudgetMonth } = useRegenerateBudget();
-  const { userId, filingStatus, deductionType, currencyCode } = useCurrentUser();
+  const { filingStatus, deductionType, currencyCode } = useCurrentUser();
 
   // Paycheck income comes from the planner: people + accounts + withholdings
   // feed the per-person waterfall that generates this month's payday incomes.
@@ -212,12 +211,6 @@ const BudgetContent = () => {
           {regenerateMessage}
         </div>
       ) : null}
-      <BankActualsCard
-        userId={userId}
-        monthDate={new Date(currentYear, currentMonth)}
-        budgetId={budget?.id ?? null}
-        currencyCode={currencyCode}
-      />
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as typeof activeTab)}

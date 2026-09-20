@@ -1,20 +1,20 @@
 import type { ReactNode } from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
-import { Line } from 'recharts';
+import { isCombinedAssetType, isLiabilityAccountType } from '../lib/config';
+import type { AccountType } from '../types/account';
+import type { ProjectionRow } from '../types/projection';
 
+import { Line, ReferenceLine } from 'recharts';
+
+import { Button } from '@/components/ui/button';
 import { formatCurrencyWithCode } from '@/lib/utils';
 import BreezeLineChart from '../../../components/common/charts/BreezeLineChart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { ChartConfig } from '@/components/ui/chart';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 
-type ProjectionRow = {
-  age: number;
-  totalBalance: number;
-  totalContributions: number;
-  [key: `account-${number}`]: number;
-};
+const AGGREGATE_SERIES = new Set(['totalBalance', 'investable', 'property']);
 
 export type ProjectionChartCardProps = {
   collapsed: boolean;
@@ -23,9 +23,13 @@ export type ProjectionChartCardProps = {
   targetAge: number;
   chartConfig: ChartConfig;
   projectionRows: ProjectionRow[];
-  accounts: Array<{ id: string; name: string }>;
+  accounts: Array<{ id: string; name: string; accountType: string }>;
   projectionEndAge: number;
   setProjectionEndAge: (age: number) => void;
+  retirementAge: number;
+  setRetirementAge: (age: number) => void;
+  marketAdjustment: number;
+  setMarketAdjustment: (adjustment: number) => void;
 };
 
 const ProjectionChartCard = ({
@@ -38,6 +42,10 @@ const ProjectionChartCard = ({
   accounts,
   projectionEndAge,
   setProjectionEndAge,
+  retirementAge,
+  setRetirementAge,
+  marketAdjustment,
+  setMarketAdjustment,
 }: ProjectionChartCardProps) => {
   const { currencyCode } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
@@ -55,26 +63,55 @@ const ProjectionChartCard = ({
       const bVal = (lastRow[`account-${bIdx}`] as number) ?? 0;
       return bVal - aVal;
     });
-    // Remap projection rows so account-0, account-1, etc. match sorted order
+    // Remap projection rows so account-0, account-1, etc. match sorted order,
+    // and split the total into investable vs property assets — home/vehicle
+    // equity keeps growing after retirement and hides portfolio drawdown.
     const remapped = projectionRows.map((row) => {
       const newRow: ProjectionRow = {
         age: row.age,
         totalBalance: row.totalBalance,
         totalContributions: row.totalContributions,
       };
+      let investable = 0;
+      let property = 0;
       sorted.forEach((account, newIdx) => {
         const origIdx = accounts.indexOf(account);
-        newRow[`account-${newIdx}` as keyof ProjectionRow] = row[
-          `account-${origIdx}` as keyof ProjectionRow
-        ] as number;
+        const value = row[`account-${origIdx}` as keyof ProjectionRow] as number;
+        newRow[`account-${newIdx}` as keyof ProjectionRow] = value;
+        if (isCombinedAssetType(account.accountType as AccountType)) property += value;
+        else if (!isLiabilityAccountType(account.accountType as AccountType)) investable += value;
       });
+      newRow.investable = investable;
+      newRow.property = property;
       return newRow;
     });
     return { sortedAccounts: sorted, remappedRows: remapped };
   }, [accounts, projectionRows]);
 
+  // Series visibility: the three aggregates default on, individual account
+  // lines default off (toggle with the chips under the sliders).
+  const [visibility, setVisibility] = useState<Record<string, boolean>>({});
+  const isVisible = (key: string) => visibility[key] ?? AGGREGATE_SERIES.has(key);
+  const toggleSeries = (key: string) =>
+    setVisibility((prev) => ({ ...prev, [key]: !(prev[key] ?? AGGREGATE_SERIES.has(key)) }));
+
+  const seriesChips = [
+    { key: 'totalBalance', label: 'All Assets' },
+    { key: 'investable', label: 'Investable' },
+    { key: 'property', label: 'Property' },
+    ...sortedAccounts.map((account, index) => ({
+      key: `account-${index}`,
+      label: account.name || 'Unnamed',
+    })),
+  ];
+
   // Map account dataKey to account name
-  const accountNameMap = Object.fromEntries(sortedAccounts.map((a, i) => [`account-${i}`, a.name]));
+  const accountNameMap: Record<string, string> = {
+    totalBalance: 'All Assets',
+    investable: 'Investable',
+    property: 'Property',
+    ...Object.fromEntries(sortedAccounts.map((a, i) => [`account-${i}`, a.name])),
+  };
 
   // Custom tooltip formatter: show account name next to number, colored
   const tooltipFormatter = (value: number, name: string) => {
@@ -125,6 +162,40 @@ const ProjectionChartCard = ({
       {!collapsed ? (
         <CardContent>
           <div className="mb-4 flex items-center gap-3">
+            <span className="text-muted-foreground text-xs">Retirement age:</span>
+            <input
+              type="range"
+              min={currentAge + 1}
+              max={95}
+              step={1}
+              value={retirementAge}
+              onChange={(e) => {
+                const age = Number(e.target.value);
+                setRetirementAge(age);
+                if (age > projectionEndAge) setProjectionEndAge(age);
+              }}
+              className="accent-primary h-1.5 flex-1 cursor-pointer"
+            />
+            <span className="w-16 text-right text-xs font-medium">Age {retirementAge}</span>
+          </div>
+          <div className="mb-4 flex items-center gap-3">
+            <span className="text-muted-foreground text-xs">Market adjustment:</span>
+            <input
+              type="range"
+              min={-5}
+              max={0}
+              step={0.25}
+              value={marketAdjustment}
+              onChange={(e) => setMarketAdjustment(Number(e.target.value))}
+              className="accent-destructive h-1.5 flex-1 cursor-pointer"
+            />
+            <span
+              className={`w-16 text-right text-xs font-medium ${marketAdjustment < 0 ? 'text-destructive' : ''}`}
+            >
+              {marketAdjustment === 0 ? 'Base' : `${marketAdjustment}%/yr`}
+            </span>
+          </div>
+          <div className="mb-4 flex items-center gap-3">
             <span className="text-muted-foreground text-xs">Projection range:</span>
             <input
               type="range"
@@ -136,6 +207,20 @@ const ProjectionChartCard = ({
               className="accent-primary h-1.5 flex-1 cursor-pointer"
             />
             <span className="w-16 text-right text-xs font-medium">Age {projectionEndAge}</span>
+          </div>
+          <div className="mb-4 flex flex-wrap items-center gap-1.5">
+            <span className="text-muted-foreground mr-1 text-xs">Show:</span>
+            {seriesChips.map((chip) => (
+              <Button
+                key={chip.key}
+                type="button"
+                size="xs"
+                variant={isVisible(chip.key) ? 'default' : 'outline'}
+                onClick={() => toggleSeries(chip.key)}
+              >
+                {chip.label}
+              </Button>
+            ))}
           </div>
           <BreezeLineChart
             config={chartConfig}
@@ -159,26 +244,64 @@ const ProjectionChartCard = ({
             tooltipFormatter={tooltipFormatter}
             tooltipLabelFormatter={tooltipLabelFormatter}
           >
-            <Line
-              type="monotone"
-              dataKey="totalBalance"
-              stroke="var(--chart-header)"
-              strokeWidth={3}
-              dot={false}
-              strokeDasharray="6 4"
+            <ReferenceLine
+              x={retirementAge}
               yAxisId="left"
+              stroke="var(--chart-header)"
+              strokeDasharray="4 4"
+              label={{
+                value: 'Retirement',
+                position: 'insideTopRight',
+                fill: 'var(--muted-foreground)',
+                fontSize: 10,
+              }}
             />
-            {sortedAccounts.map((account, index) => (
+            {isVisible('totalBalance') && (
               <Line
-                key={account.id}
                 type="monotone"
-                dataKey={`account-${index}`}
-                stroke={'var(--chart-' + ((index + 1) % 5) + ')'}
+                dataKey="totalBalance"
+                stroke="var(--chart-header)"
+                strokeWidth={3}
+                dot={false}
+                strokeDasharray="6 4"
+                yAxisId="left"
+              />
+            )}
+            {isVisible('investable') && (
+              <Line
+                type="monotone"
+                dataKey="investable"
+                stroke="var(--chart-2)"
                 strokeWidth={2}
                 dot={false}
                 yAxisId="left"
               />
-            ))}
+            )}
+            {isVisible('property') && (
+              <Line
+                type="monotone"
+                dataKey="property"
+                stroke="var(--chart-4)"
+                strokeWidth={2}
+                dot={false}
+                strokeDasharray="2 2"
+                yAxisId="left"
+              />
+            )}
+            {sortedAccounts.map(
+              (account, index) =>
+                isVisible(`account-${index}`) && (
+                  <Line
+                    key={account.id}
+                    type="monotone"
+                    dataKey={`account-${index}`}
+                    stroke={'var(--chart-' + ((index + 1) % 5) + ')'}
+                    strokeWidth={2}
+                    dot={false}
+                    yAxisId="left"
+                  />
+                ),
+            )}
           </BreezeLineChart>
           <div className="mt-3 flex flex-wrap gap-3 text-xs">
             <div className="inline-flex items-center gap-2">

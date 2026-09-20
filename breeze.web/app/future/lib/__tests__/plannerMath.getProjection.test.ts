@@ -61,6 +61,7 @@ const call = (
     projectionEndAge?: number;
     annualWithdrawal?: number;
     annualIrsLimitGrowthRate?: number;
+    annualReturnAdjustmentPercent?: number;
   } = {},
 ) =>
   getProjection(
@@ -75,6 +76,7 @@ const call = (
     options.useInflationAdjustedValues ?? false,
     options.projectionEndAge,
     options.annualWithdrawal,
+    options.annualReturnAdjustmentPercent,
   );
 
 describe('getProjection', () => {
@@ -501,5 +503,48 @@ describe('getProjection — IRS limit edge cases', () => {
     // No owner at all: contributions still flow, employer match is 0 (no salary)
     expect(projectionRows[1]['account-0']).toBeCloseTo(6000, 6);
     expect(projectionRows[1].totalContributions).toBeCloseTo(6000, 6);
+  });
+});
+
+describe('market adjustment (stress test)', () => {
+  const base = () => [
+    account({
+      id: 'inv',
+      accountType: '401k',
+      personIds: ['p1'],
+      contributionValue: 0,
+      startingBalance: 100000,
+      annualRate: 7,
+    }),
+  ];
+
+  it('lowers projected balances when returns are shifted down', () => {
+    const good = call(base(), 40, 50, { annualReturnAdjustmentPercent: 0 });
+    const bad = call(base(), 40, 50, { annualReturnAdjustmentPercent: -3 });
+
+    const goodFinal = good.projectionRows[good.projectionRows.length - 1].totalBalance;
+    const badFinal = bad.projectionRows[bad.projectionRows.length - 1].totalBalance;
+    expect(badFinal).toBeLessThan(goodFinal);
+    // 100k at 4% nominal, compounded monthly, for 10 years
+    expect(badFinal).toBeCloseTo(100000 * (1 + 0.04 / 12) ** 120, -2);
+  });
+
+  it('leaves liability interest rates untouched — bad markets do not shrink debt', () => {
+    const debt = [
+      account({
+        id: 'loan',
+        accountType: 'mortgage',
+        personIds: ['p1'],
+        contributionValue: 0,
+        startingBalance: -100000,
+        annualRate: 5,
+      }),
+    ];
+    const baseRun = call(debt, 40, 41);
+    const stressed = call(debt, 40, 41, { annualReturnAdjustmentPercent: -3 });
+    expect(stressed.projectionRows[1]['account-0']).toBeCloseTo(
+      baseRun.projectionRows[1]['account-0'],
+      6,
+    );
   });
 });

@@ -145,6 +145,8 @@ export const usePaycheckDeductions = (personId?: string | null) => {
         const exists = prev.some((d) => d.id === mapped.id);
         return exists ? prev.map((d) => (d.id === mapped.id ? mapped : d)) : [...prev, mapped];
       });
+      // Household ('all') and per-person caches must not disagree.
+      await queryClient.invalidateQueries({ queryKey: ['paycheckDeductions'] });
       return mapped;
     },
   });
@@ -155,6 +157,7 @@ export const usePaycheckDeductions = (personId?: string | null) => {
       queryClient.setQueryData<PaycheckDeduction[]>(queryKey, (prev = []) =>
         prev.filter((d) => d.id !== id),
       );
+      await queryClient.invalidateQueries({ queryKey: ['paycheckDeductions'] });
     },
   });
 
