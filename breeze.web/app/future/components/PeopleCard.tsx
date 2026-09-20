@@ -8,7 +8,6 @@ import { PersonFormModal } from './people/PersonFormModal';
 import { PersonSummaryCard } from './people/PersonSummaryCard';
 import { usePlannerState } from '../providers/PlannerStateProvider';
 import useTaxYear from '../hooks/planner/useTaxYear';
-import { computePersonWaterfall } from '../lib/paycheck';
 import { usePlannerPeople, usePersonMutations } from '../hooks/planner/index';
 import { PlannerPerson } from '../types/person';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
