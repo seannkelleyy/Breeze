@@ -20,7 +20,7 @@
 
 1. Balance sheet — assets, liabilities, net worth over time
 2. Budget — monthly envelope budgeting, categories, expense splits
-3. Account projections — retirement account growth, IRS limits, IsMaxing
+3. ~~Account projections — retirement account growth, IRS limits, IsMaxed~~ — DONE: FIRE planner equation card, per-person Maxed Out badge, per-person IRS aggregation (see #40)
 4. Retirement scenarios — FI number, FIRE progress, what-if modeling
 5. Plaid integration — auto-sync transactions
 6. Tax planning — form checklist, estimate
@@ -33,6 +33,13 @@
 
 ---
 
+## Completed (this session)
+
+- People page: income growth from dropdown (inflation-anchored presets + custom input), pay cadence expanded (weekly/biweekly/semimonthly/monthly), adaptive Paid On field (weekday vs day-of-month), bonus frequency (annual/quarterly/monthly), per-person waterfall (gross → pretax → taxable → taxes → post-tax → take-home), income equation card, per-person payday calendar with net amounts
+- Future page: Current Snapshot rebuilt (income equation, savings deductions with account-backed 401(k)/HSA, withholding CRUD, gross/net/take-home waterfall), FIRE & Retirement Planner milestone table, per-person paycheck modeling with server-backed `paycheck_deductions` table, Monthly Expenses page feeding budget generation
+- Accounts page: modal editor replacing inline expand, compact DataCards, per-person Maxed Out badge
+- Data layer: `planner_people.bonus_frequency` + `paycheck_deductions` table (`name`, monthly `amount`, `pretax`, `kind`, `linked_account_id` FK→assets) + `assets.tax_treatment` (PRE_TAX/ROTH); removed dead `paycheck` JSON column, `PLANNER_BONUS_MODE_OPTIONS`, `usePlanner.ts`, `usePlannerRetirementInputs.ts`, `PLANNER_DEFAULT_MONTHLY_EXPENSES`
+
 ## Refinements (from deployed review)
 
 ### Tier 1 — Small Effort (< 30 min each)
@@ -40,50 +47,44 @@
 | # | Page | Task | Priority | Notes |
 |---|------|------|----------|-------|
 | 1 | Dashboard | Remove redundant vertical scroll for blank space under cards | High | |
-| 2 | People | Remove the gray "People" card with top-right caret — not needed | High | |
-| 3 | Accounts | Hide the card header caret — same annoyance as People | High | |
-| 4 | Accounts | Delete icon should have no red background, add confirmation dialog | High | Solution #3 pattern |
-| 5 | Accounts | Fix missing pointer cursor on buttons | Medium | |
-| 6 | Accounts | Add info icons (tooltips) for fields | Medium | |
-| 7 | Accounts | Show purple badge for owners (border style when unselected, filled when selected) | Low | Currently plain purple text |
-| 8 | Accounts | Fix error messages on invalid input (chars in number fields) — currently flash and revert | High | Need to persist validation state |
-| 9 | Goals | Connect goals to accounts to track progress | Medium | |
-| 10 | Goals | FOO doesn't show real FOO for user | High | |
-| 11 | Tools | Remove Tools page entirely, show all tools as cards on Dashboard | Medium | |
-| 12 | Tools | Tool dropdown text + icon should flex space-between | Low | |
-| 13 | Future | Projection chart account name keys should match chart line colors | Medium | Currently all white |
-| 14 | Future | Basic Financial Health and Income + Savings sections can be combined | Medium | Consolidate into one card |
+| 2 | Accounts | Hide the card header caret — same annoyance as People | High | |
+| 3 | Accounts | Delete icon should have no red background, add confirmation dialog | High | Solution #3 pattern |
+| 4 | Accounts | Fix missing pointer cursor on buttons | Medium | |
+| 5 | Accounts | Add info icons (tooltips) for fields | Medium | |
+| 6 | Accounts | Show purple badge for owners (border style when unselected, filled when selected) | Low | Currently plain purple text |
+| 7 | Accounts | Fix error messages on invalid input (chars in number fields) — currently flash and revert | High | Need to persist validation state |
+| 8 | Goals | Connect goals to accounts to track progress | Medium | |
+| 9 | Goals | FOO doesn't show real FOO for user | High | |
+| 10 | Tools | Remove Tools page entirely, show all tools as cards on Dashboard | Medium | |
+| 11 | Tools | Tool dropdown text + icon should flex space-between | Low | |
+| 12 | Future | Projection chart account name keys should match chart line colors | Medium | Currently all white |
+| 13 | People | ~~Better UI for People cards — use modal editing~~ — DONE: DataCard + PersonFormModal with tabbed sections | High | |
+| 14 | People | ~~Show last updated time on each People card~~ — DONE: updatedAt on DataCard | Medium | |
+| 15 | People | ~~Income growth from dropdown instead of manual number input~~ — DONE: inflation-anchored presets + custom input | Medium | |
+| 16 | People | ~~Confirm before removing person~~ — DONE: ConfirmDialog | High | |
 
 ### Tier 2 — Medium Effort (30 min – 2 hrs each)
 
 | # | Page | Task | Priority | Notes |
 |---|------|------|----------|-------|
-| 15 | People | Better UI for People cards — use modal editing (Solution #1) | High | Click edit → modal instead of inline edit |
-| 16 | People | Show last updated time on each People card | Medium | Similar to accounts |
-| 17 | People | Income growth from dropdown instead of manual number input | Medium | Like return profile |
-| 18 | People | Confirm before removing person, reconcile tied accounts/items | High | Middleware pattern (Solution #2) |
-| 19 | People | Mobile view of cards needs improvement | Medium | |
-| 20 | People | Edit/add via modal — add edit pencil next to delete, "Save" or "Save & Create Another" | Medium | |
-| 21 | Accounts | Better collapsed card UI — not a large gray box next to open card | Medium | |
-| 22 | Accounts | Add buttons for each account type, sticky on scroll | Medium | |
-| 23 | Accounts | Weekly/biweekly contribution options — pull pay frequency from People page | Medium | New input mode |
-| 24 | Accounts | Show yearly total contributions + monthly in card | Medium | For IRS-max accounts show `$24,000/$30,000` format |
-| 25 | Dashboard | Allow clicking assets/liabilities for quick view (mini drill-down) | Medium | |
-| 26 | Dashboard | Replace Tools page with tool cards directly on Dashboard | Medium | (overlap with #11) |
-| 27 | Preferences | Combine profile picture + preferences + theme toggle into avatar dropdown | Medium | |
-| 28 | Future | Account contribution breakdown — sortable table, click account name to navigate | Medium | Need URL param routing to accounts page |
-| 29 | Future | Net Worth card — show asset amounts, subtract liabilities, click account names to link | Medium | |
+| 17 | People | ~~Edit/add via modal~~ — DONE: PersonFormModal | Medium | |
+| 18 | People | Mobile view of cards needs improvement | Medium | |
+| 19 | Accounts | ~~Weekly/biweekly contribution options~~ — DONE: contribution modes on assets | Medium | |
+| 20 | Accounts | ~~Show yearly total contributions~~ — DONE: Monthly total on ExpensesSummaryCard | Medium | |
+| 21 | Dashboard | Allow clicking assets/liabilities for quick view | Medium | |
+| 22 | Preferences | Combine profile picture + preferences + theme toggle into avatar dropdown | Medium | |
+| 23 | Future | Account contribution breakdown — sortable table | Medium | |
+| 24 | People | Add savings deduction → creates real account (401k/HSA) via same mutation as Accounts page | High | "Add Savings Account" button exists; needs create dialog wiring |
 
 ### Tier 3 — Large Effort (2+ hrs each)
 
 | # | Page | Task | Priority | Notes |
 |---|------|------|----------|-------|
-| 30 | Future | ~~Redesign left-side inputs~~ — DONE: merged into #33, single-column layout | Medium | Layout rethink |
-| 31 | Future | ~~Create Expenses tab~~ — DONE: /expenses page with recurring expense CRUD, summary card, nav link | High | New feature area |
-| 32 | Future | ~~Mark people as "primary" in household~~ — DONE: isPrimary badge on person cards, checkbox in form modal, single-primary enforcement | High | Affects retirement calc |
-| 33 | Future | ~~Retirement card rework~~ — DONE: single-column, FIRE variant cards with progress scores, compact inputs | High | Traditional, Coast FIRE, etc. with portfolio at age, year, ages |
-| 34 | Future | ~~Gross/Net income breakdown~~ — DONE: shows gross income, savings rate, monthly plan gap, emergency fund months (R/Y/G) | Medium | Consolidate multiple indicators |
-| 35 | Middleware | ~~Create reusable confirmation/delete pattern~~ — DONE: ConfirmDialog component shared across People, Accounts, Goals | Medium | Shared across People, Accounts, Goals |
+| 25 | People | Per-person IRS limit tracking — shared 401(k)+403(b) limit, separate 457, catch-up 50+, super catch-up 60–63 | High | Drives Maxed Out badge |
+| 26 | People | Roth vs pre-tax on account cards + editor | High | `assets.tax_treatment` column exists |
+| 27 | People | Employer match modeling (vesting, dollar cap) | Medium | |
+| 28 | People | HSA family vs individual limit awareness | Medium | |
+| 29 | Accounts | Plaid integration — auto-sync transactions, detect recurring expenses | Medium | |
 
 ---
 
