@@ -161,7 +161,11 @@ func main() {
 		Burst:             60,
 	}
 
-	handler := middleware.CORS(cfg.AllowedOrigin)(mux)
+	// Outermost first: panic recovery guards every handler, access log counts
+	// every request including those rejected by CORS/rate limiting.
+	handler := middleware.RecoverMiddleware(mux)
+	handler = middleware.AccessLogMiddleware(handler)
+	handler = middleware.CORS(cfg.AllowedOrigin)(handler)
 	if !cfg.IsLocalEnv() {
 		handler = middleware.RateLimit(rateLimitCfg, handler)
 	}
