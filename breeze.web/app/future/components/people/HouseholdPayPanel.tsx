@@ -64,7 +64,7 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
       <Operator>−</Operator>
       <Term
         value={fc(totals.taxesMonthly)}
-        label={`Taxes (est. ${((totals.taxesMonthly / totals.totalIncome) * 100 || 0).toFixed(0)}% effective)`}
+        label={`Taxes (est. ${((totals.taxesMonthly / (totals.totalIncome / 12)) * 100 || 0).toFixed(0)}% effective)`}
       />
       <Operator>−</Operator>
       <Term value={fc(totals.savingsMonthly)} label="Savings (401k, HSA)" />
