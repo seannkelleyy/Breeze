@@ -464,25 +464,25 @@ type Asset struct {
 	UserID                          uuid.UUID          `json:"user_id"`
 	Name                            string             `json:"name"`
 	AssetType                       AssetType          `json:"asset_type"`
+	TaxTreatment                    string             `json:"tax_treatment"`
 	CurrentValue                    decimal.Decimal    `json:"current_value"`
-	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
-	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt                       pgtype.Timestamptz `json:"deleted_at"`
+	PersonIds                       []uuid.UUID        `json:"person_ids"`
 	ContributionMode                string             `json:"contribution_mode"`
 	ContributionValue               decimal.Decimal    `json:"contribution_value"`
 	EmployerMatchRate               decimal.Decimal    `json:"employer_match_rate"`
 	EmployerMatchMaxPercentOfSalary decimal.Decimal    `json:"employer_match_max_percent_of_salary"`
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
-	PersonIds                       []uuid.UUID        `json:"person_ids"`
+	ReturnProfile                   *string            `json:"return_profile"`
 	PurchaseDate                    pgtype.Date        `json:"purchase_date"`
 	PurchasePrice                   pgtype.Numeric     `json:"purchase_price"`
 	HomeGrowthProfile               *string            `json:"home_growth_profile"`
 	VehicleDepreciationProfile      *string            `json:"vehicle_depreciation_profile"`
 	LinkedLiabilityID               pgtype.UUID        `json:"linked_liability_id"`
 	PlaidAccountID                  pgtype.UUID        `json:"plaid_account_id"`
-	ReturnProfile                   *string            `json:"return_profile"`
-	TaxTreatment                    string             `json:"tax_treatment"`
+	LastValueUpdatedAt              pgtype.Timestamptz `json:"last_value_updated_at"`
+	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt                       pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type Budget struct {
@@ -503,11 +503,11 @@ type ContributionLimit struct {
 	AnnualLimit        decimal.Decimal       `json:"annual_limit"`
 	CatchUpAge         int32                 `json:"catch_up_age"`
 	CatchUpAmount      decimal.Decimal       `json:"catch_up_amount"`
+	FamilyAnnualLimit  pgtype.Numeric        `json:"family_annual_limit"`
+	SuperCatchUpAmount decimal.Decimal       `json:"super_catch_up_amount"`
 	CreatedAt          pgtype.Timestamptz    `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz    `json:"updated_at"`
 	DeletedAt          pgtype.Timestamptz    `json:"deleted_at"`
-	FamilyAnnualLimit  pgtype.Numeric        `json:"family_annual_limit"`
-	SuperCatchUpAmount decimal.Decimal       `json:"super_catch_up_amount"`
 }
 
 type Expense struct {
@@ -517,13 +517,13 @@ type Expense struct {
 	Amount           decimal.Decimal    `json:"amount"`
 	Date             pgtype.Date        `json:"date"`
 	Description      string             `json:"description"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
 	SourceType       ExpenseSourceType  `json:"source_type"`
 	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
 	GenerationMonth  pgtype.Date        `json:"generation_month"`
 	PersonID         pgtype.UUID        `json:"person_id"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type ExpenseCategory struct {
@@ -533,12 +533,12 @@ type ExpenseCategory struct {
 	Name             string             `json:"name"`
 	Allocation       decimal.Decimal    `json:"allocation"`
 	CurrentSpend     decimal.Decimal    `json:"current_spend"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
 	SourceType       ExpenseSourceType  `json:"source_type"`
 	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
 	GenerationMonth  pgtype.Date        `json:"generation_month"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type ExpenseSplit struct {
@@ -566,9 +566,6 @@ type Goal struct {
 	UserID               uuid.UUID          `json:"user_id"`
 	Description          string             `json:"description"`
 	IsCompleted          bool               `json:"is_completed"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 	TargetAmount         pgtype.Numeric     `json:"target_amount"`
 	TargetDate           pgtype.Date        `json:"target_date"`
 	Category             *string            `json:"category"`
@@ -578,6 +575,9 @@ type Goal struct {
 	ConnectedAccountIds  []uuid.UUID        `json:"connected_account_ids"`
 	IsFinancialOrderStep bool               `json:"is_financial_order_step"`
 	FinancialOrderStep   *int32             `json:"financial_order_step"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type Income struct {
@@ -591,10 +591,10 @@ type Income struct {
 	SourceTemplateID     pgtype.UUID        `json:"source_template_id"`
 	SourceOccurrenceDate pgtype.Date        `json:"source_occurrence_date"`
 	GenerationMonth      pgtype.Date        `json:"generation_month"`
+	PersonID             pgtype.UUID        `json:"person_id"`
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-	PersonID             pgtype.UUID        `json:"person_id"`
 }
 
 type Liability struct {
@@ -603,19 +603,19 @@ type Liability struct {
 	Name                 string             `json:"name"`
 	LiabilityType        LiabilityType      `json:"liability_type"`
 	CurrentBalance       decimal.Decimal    `json:"current_balance"`
+	OriginalLoanAmount   pgtype.Numeric     `json:"original_loan_amount"`
 	InterestRate         decimal.Decimal    `json:"interest_rate"`
 	MinimumPayment       decimal.Decimal    `json:"minimum_payment"`
 	TargetExtraPayment   decimal.Decimal    `json:"target_extra_payment"`
 	PayoffPriority       int32              `json:"payoff_priority"`
+	PersonIds            []uuid.UUID        `json:"person_ids"`
+	ContributionMode     string             `json:"contribution_mode"`
+	ContributionValue    decimal.Decimal    `json:"contribution_value"`
+	PlaidAccountID       pgtype.UUID        `json:"plaid_account_id"`
 	LastBalanceUpdatedAt pgtype.Timestamptz `json:"last_balance_updated_at"`
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-	ContributionMode     string             `json:"contribution_mode"`
-	ContributionValue    decimal.Decimal    `json:"contribution_value"`
-	PersonIds            []uuid.UUID        `json:"person_ids"`
-	OriginalLoanAmount   pgtype.Numeric     `json:"original_loan_amount"`
-	PlaidAccountID       pgtype.UUID        `json:"plaid_account_id"`
 }
 
 type NetWorthSnapshot struct {
@@ -649,11 +649,11 @@ type PaycheckDeduction struct {
 	Name            string             `json:"name"`
 	Amount          decimal.Decimal    `json:"amount"`
 	Pretax          bool               `json:"pretax"`
+	Kind            string             `json:"kind"`
+	LinkedAccountID pgtype.UUID        `json:"linked_account_id"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
-	Kind            string             `json:"kind"`
-	LinkedAccountID pgtype.UUID        `json:"linked_account_id"`
 }
 
 type PlaidAccount struct {
@@ -692,17 +692,17 @@ type PlannerPerson struct {
 	RetirementAge        int32              `json:"retirement_age"`
 	AnnualSalary         decimal.Decimal    `json:"annual_salary"`
 	BonusMode            string             `json:"bonus_mode"`
+	BonusFrequency       string             `json:"bonus_frequency"`
 	AnnualBonus          decimal.Decimal    `json:"annual_bonus"`
 	IncomeGrowthRate     decimal.Decimal    `json:"income_growth_rate"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 	PayType              string             `json:"pay_type"`
 	PayDay               int32              `json:"pay_day"`
 	PayCadence           string             `json:"pay_cadence"`
 	HourlyRate           decimal.Decimal    `json:"hourly_rate"`
 	ExpectedHoursPerWeek decimal.Decimal    `json:"expected_hours_per_week"`
-	BonusFrequency       string             `json:"bonus_frequency"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type RecurringExpense struct {
@@ -714,10 +714,10 @@ type RecurringExpense struct {
 	PaydayDayOfMonth   *int32             `json:"payday_day_of_month"`
 	StartDate          pgtype.Date        `json:"start_date"`
 	EndDate            pgtype.Date        `json:"end_date"`
+	PersonID           pgtype.UUID        `json:"person_id"`
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
-	PersonID           pgtype.UUID        `json:"person_id"`
 }
 
 type RecurringIncome struct {
@@ -729,23 +729,7 @@ type RecurringIncome struct {
 	PaydayDayOfMonth   *int32             `json:"payday_day_of_month"`
 	StartDate          pgtype.Date        `json:"start_date"`
 	EndDate            pgtype.Date        `json:"end_date"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
 	PersonID           pgtype.UUID        `json:"person_id"`
-}
-
-type ScenarioProfile struct {
-	ID                 uuid.UUID          `json:"id"`
-	UserID             uuid.UUID          `json:"user_id"`
-	Name               string             `json:"name"`
-	CurrentAge         int32              `json:"current_age"`
-	RetirementAge      int32              `json:"retirement_age"`
-	AnnualSpend        decimal.Decimal    `json:"annual_spend"`
-	SafeWithdrawalRate decimal.Decimal    `json:"safe_withdrawal_rate"`
-	InflationRate      decimal.Decimal    `json:"inflation_rate"`
-	ReturnRate         decimal.Decimal    `json:"return_rate"`
-	CurrentPortfolio   decimal.Decimal    `json:"current_portfolio"`
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
@@ -791,9 +775,6 @@ type Transaction struct {
 type User struct {
 	ID                   uuid.UUID          `json:"id"`
 	Email                string             `json:"email"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 	IdentityProviderID   string             `json:"identity_provider_id"`
 	ReturnType           ReturnType         `json:"return_type"`
 	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
@@ -809,4 +790,7 @@ type User struct {
 	SetupCompleted       bool               `json:"setup_completed"`
 	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
 	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }

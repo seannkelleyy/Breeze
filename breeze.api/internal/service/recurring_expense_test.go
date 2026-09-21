@@ -15,39 +15,39 @@ import (
 )
 
 type mockRecurringExpenseQuerier struct {
-	createRecurringExpenseFunc        func(context.Context, sqlc.CreateRecurringExpenseParams) (sqlc.CreateRecurringExpenseRow, error)
-	getRecurringExpenseByIDFunc       func(context.Context, uuid.UUID) (sqlc.GetRecurringExpenseByIDRow, error)
-	listRecurringExpensesByUserIDFunc func(context.Context, uuid.UUID) ([]sqlc.ListRecurringExpensesByUserIDRow, error)
-	updateRecurringExpenseFunc        func(context.Context, sqlc.UpdateRecurringExpenseParams) (sqlc.UpdateRecurringExpenseRow, error)
+	createRecurringExpenseFunc        func(context.Context, sqlc.CreateRecurringExpenseParams) (sqlc.RecurringExpense, error)
+	getRecurringExpenseByIDFunc       func(context.Context, uuid.UUID) (sqlc.RecurringExpense, error)
+	listRecurringExpensesByUserIDFunc func(context.Context, uuid.UUID) ([]sqlc.RecurringExpense, error)
+	updateRecurringExpenseFunc        func(context.Context, sqlc.UpdateRecurringExpenseParams) (sqlc.RecurringExpense, error)
 	softDeleteRecurringExpenseFunc    func(context.Context, uuid.UUID) (int64, error)
 }
 
-func (m *mockRecurringExpenseQuerier) CreateRecurringExpense(ctx context.Context, arg sqlc.CreateRecurringExpenseParams) (sqlc.CreateRecurringExpenseRow, error) {
+func (m *mockRecurringExpenseQuerier) CreateRecurringExpense(ctx context.Context, arg sqlc.CreateRecurringExpenseParams) (sqlc.RecurringExpense, error) {
 	if m.createRecurringExpenseFunc != nil {
 		return m.createRecurringExpenseFunc(ctx, arg)
 	}
-	return sqlc.CreateRecurringExpenseRow{}, nil
+	return sqlc.RecurringExpense{}, nil
 }
 
-func (m *mockRecurringExpenseQuerier) GetRecurringExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.GetRecurringExpenseByIDRow, error) {
+func (m *mockRecurringExpenseQuerier) GetRecurringExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.RecurringExpense, error) {
 	if m.getRecurringExpenseByIDFunc != nil {
 		return m.getRecurringExpenseByIDFunc(ctx, id)
 	}
-	return sqlc.GetRecurringExpenseByIDRow{}, nil
+	return sqlc.RecurringExpense{}, nil
 }
 
-func (m *mockRecurringExpenseQuerier) ListRecurringExpensesByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListRecurringExpensesByUserIDRow, error) {
+func (m *mockRecurringExpenseQuerier) ListRecurringExpensesByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.RecurringExpense, error) {
 	if m.listRecurringExpensesByUserIDFunc != nil {
 		return m.listRecurringExpensesByUserIDFunc(ctx, userID)
 	}
-	return []sqlc.ListRecurringExpensesByUserIDRow{}, nil
+	return []sqlc.RecurringExpense{}, nil
 }
 
-func (m *mockRecurringExpenseQuerier) UpdateRecurringExpense(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.UpdateRecurringExpenseRow, error) {
+func (m *mockRecurringExpenseQuerier) UpdateRecurringExpense(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.RecurringExpense, error) {
 	if m.updateRecurringExpenseFunc != nil {
 		return m.updateRecurringExpenseFunc(ctx, arg)
 	}
-	return sqlc.UpdateRecurringExpenseRow{}, nil
+	return sqlc.RecurringExpense{}, nil
 }
 
 func (m *mockRecurringExpenseQuerier) SoftDeleteRecurringExpense(ctx context.Context, id uuid.UUID) (int64, error) {
@@ -57,14 +57,14 @@ func (m *mockRecurringExpenseQuerier) SoftDeleteRecurringExpense(ctx context.Con
 	return 0, nil
 }
 
-func testCreateRecurringExpenseRow() sqlc.CreateRecurringExpenseRow {
+func testCreateRecurringExpenseRow() sqlc.RecurringExpense {
 	expenseID := uuid.New()
 	userID := uuid.New()
 	amount, _ := decimal.Parse("150.00")
 	startDate := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.CreateRecurringExpenseRow{
+	return sqlc.RecurringExpense{
 		ID:                 expenseID,
 		UserID:             userID,
 		Name:               "Gym Membership",
@@ -80,14 +80,14 @@ func testCreateRecurringExpenseRow() sqlc.CreateRecurringExpenseRow {
 	}
 }
 
-func testGetRecurringExpenseByIDRow() sqlc.GetRecurringExpenseByIDRow {
+func testGetRecurringExpenseByIDRow() sqlc.RecurringExpense {
 	expenseID := uuid.New()
 	userID := uuid.New()
 	amount, _ := decimal.Parse("150.00")
 	startDate := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.GetRecurringExpenseByIDRow{
+	return sqlc.RecurringExpense{
 		ID:                 expenseID,
 		UserID:             userID,
 		Name:               "Gym Membership",
@@ -103,14 +103,14 @@ func testGetRecurringExpenseByIDRow() sqlc.GetRecurringExpenseByIDRow {
 	}
 }
 
-func testListRecurringExpensesByUserIDRow() sqlc.ListRecurringExpensesByUserIDRow {
+func testListRecurringExpensesByUserIDRow() sqlc.RecurringExpense {
 	expenseID := uuid.New()
 	userID := uuid.New()
 	amount, _ := decimal.Parse("150.00")
 	startDate := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.ListRecurringExpensesByUserIDRow{
+	return sqlc.RecurringExpense{
 		ID:                 expenseID,
 		UserID:             userID,
 		Name:               "Gym Membership",
@@ -126,14 +126,14 @@ func testListRecurringExpensesByUserIDRow() sqlc.ListRecurringExpensesByUserIDRo
 	}
 }
 
-func testUpdateRecurringExpenseRow() sqlc.UpdateRecurringExpenseRow {
+func testUpdateRecurringExpenseRow() sqlc.RecurringExpense {
 	expenseID := uuid.New()
 	userID := uuid.New()
 	amount, _ := decimal.Parse("200.00")
 	startDate := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.UpdateRecurringExpenseRow{
+	return sqlc.RecurringExpense{
 		ID:                 expenseID,
 		UserID:             userID,
 		Name:               "Gym Membership Premium",
@@ -158,7 +158,7 @@ func TestRecurringExpenseService_Create(t *testing.T) {
 	expected := testCreateRecurringExpenseRow()
 
 	mock := &mockRecurringExpenseQuerier{
-		createRecurringExpenseFunc: func(ctx context.Context, arg sqlc.CreateRecurringExpenseParams) (sqlc.CreateRecurringExpenseRow, error) {
+		createRecurringExpenseFunc: func(ctx context.Context, arg sqlc.CreateRecurringExpenseParams) (sqlc.RecurringExpense, error) {
 			return expected, nil
 		},
 	}
@@ -188,8 +188,8 @@ func TestRecurringExpenseService_Create_Error(t *testing.T) {
 	dbErr := errors.New("db connection failed")
 
 	mock := &mockRecurringExpenseQuerier{
-		createRecurringExpenseFunc: func(ctx context.Context, arg sqlc.CreateRecurringExpenseParams) (sqlc.CreateRecurringExpenseRow, error) {
-			return sqlc.CreateRecurringExpenseRow{}, dbErr
+		createRecurringExpenseFunc: func(ctx context.Context, arg sqlc.CreateRecurringExpenseParams) (sqlc.RecurringExpense, error) {
+			return sqlc.RecurringExpense{}, dbErr
 		},
 	}
 
@@ -209,7 +209,7 @@ func TestRecurringExpenseService_GetByID(t *testing.T) {
 	expected := testGetRecurringExpenseByIDRow()
 
 	mock := &mockRecurringExpenseQuerier{
-		getRecurringExpenseByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetRecurringExpenseByIDRow, error) {
+		getRecurringExpenseByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.RecurringExpense, error) {
 			assert.Equal(t, expected.ID, id)
 			return expected, nil
 		},
@@ -229,8 +229,8 @@ func TestRecurringExpenseService_GetByID_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	mock := &mockRecurringExpenseQuerier{
-		getRecurringExpenseByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetRecurringExpenseByIDRow, error) {
-			return sqlc.GetRecurringExpenseByIDRow{}, pgx.ErrNoRows
+		getRecurringExpenseByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.RecurringExpense, error) {
+			return sqlc.RecurringExpense{}, pgx.ErrNoRows
 		},
 	}
 
@@ -247,8 +247,8 @@ func TestRecurringExpenseService_GetByID_Error(t *testing.T) {
 	dbErr := errors.New("query failed")
 
 	mock := &mockRecurringExpenseQuerier{
-		getRecurringExpenseByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetRecurringExpenseByIDRow, error) {
-			return sqlc.GetRecurringExpenseByIDRow{}, dbErr
+		getRecurringExpenseByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.RecurringExpense, error) {
+			return sqlc.RecurringExpense{}, dbErr
 		},
 	}
 
@@ -269,9 +269,9 @@ func TestRecurringExpenseService_ListByUserID(t *testing.T) {
 	exp2.UserID = userID
 
 	mock := &mockRecurringExpenseQuerier{
-		listRecurringExpensesByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.ListRecurringExpensesByUserIDRow, error) {
+		listRecurringExpensesByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.RecurringExpense, error) {
 			assert.Equal(t, userID, uid)
-			return []sqlc.ListRecurringExpensesByUserIDRow{exp1, exp2}, nil
+			return []sqlc.RecurringExpense{exp1, exp2}, nil
 		},
 	}
 
@@ -288,8 +288,8 @@ func TestRecurringExpenseService_ListByUserID_Empty(t *testing.T) {
 	ctx := context.Background()
 
 	mock := &mockRecurringExpenseQuerier{
-		listRecurringExpensesByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.ListRecurringExpensesByUserIDRow, error) {
-			return []sqlc.ListRecurringExpensesByUserIDRow{}, nil
+		listRecurringExpensesByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.RecurringExpense, error) {
+			return []sqlc.RecurringExpense{}, nil
 		},
 	}
 
@@ -305,7 +305,7 @@ func TestRecurringExpenseService_ListByUserID_Error(t *testing.T) {
 	dbErr := errors.New("query failed")
 
 	mock := &mockRecurringExpenseQuerier{
-		listRecurringExpensesByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.ListRecurringExpensesByUserIDRow, error) {
+		listRecurringExpensesByUserIDFunc: func(ctx context.Context, uid uuid.UUID) ([]sqlc.RecurringExpense, error) {
 			return nil, dbErr
 		},
 	}
@@ -323,7 +323,7 @@ func TestRecurringExpenseService_Update(t *testing.T) {
 	expected := testUpdateRecurringExpenseRow()
 
 	mock := &mockRecurringExpenseQuerier{
-		updateRecurringExpenseFunc: func(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.UpdateRecurringExpenseRow, error) {
+		updateRecurringExpenseFunc: func(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.RecurringExpense, error) {
 			assert.Equal(t, expected.ID, arg.ID)
 			return expected, nil
 		},
@@ -351,8 +351,8 @@ func TestRecurringExpenseService_Update_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	mock := &mockRecurringExpenseQuerier{
-		updateRecurringExpenseFunc: func(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.UpdateRecurringExpenseRow, error) {
-			return sqlc.UpdateRecurringExpenseRow{}, pgx.ErrNoRows
+		updateRecurringExpenseFunc: func(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.RecurringExpense, error) {
+			return sqlc.RecurringExpense{}, pgx.ErrNoRows
 		},
 	}
 
@@ -373,8 +373,8 @@ func TestRecurringExpenseService_Update_Error(t *testing.T) {
 	dbErr := errors.New("update failed")
 
 	mock := &mockRecurringExpenseQuerier{
-		updateRecurringExpenseFunc: func(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.UpdateRecurringExpenseRow, error) {
-			return sqlc.UpdateRecurringExpenseRow{}, dbErr
+		updateRecurringExpenseFunc: func(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.RecurringExpense, error) {
+			return sqlc.RecurringExpense{}, dbErr
 		},
 	}
 

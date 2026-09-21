@@ -16,66 +16,66 @@ import (
 
 // mockQuerier is a minimal mock of sqlc.Querier for testing
 type mockQuerier struct {
-	createUserFunc                  func(context.Context, sqlc.CreateUserParams) (sqlc.CreateUserRow, error)
-	getUserByIDFunc                 func(context.Context, uuid.UUID) (sqlc.GetUserByIDRow, error)
-	getUserByIdentityProviderIDFunc func(context.Context, string) (sqlc.GetUserByIdentityProviderIDRow, error)
-	getOrCreateUserByEmailFunc      func(context.Context, sqlc.GetOrCreateUserByEmailParams) (sqlc.GetOrCreateUserByEmailRow, error)
-	listUsersFunc                   func(context.Context) ([]sqlc.ListUsersRow, error)
-	updateUserFunc                  func(context.Context, sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error)
-	updateUserSetupFunc             func(context.Context, sqlc.UpdateUserSetupParams) (sqlc.UpdateUserSetupRow, error)
+	createUserFunc                  func(context.Context, sqlc.CreateUserParams) (sqlc.User, error)
+	getUserByIDFunc                 func(context.Context, uuid.UUID) (sqlc.User, error)
+	getUserByIdentityProviderIDFunc func(context.Context, string) (sqlc.User, error)
+	getOrCreateUserByEmailFunc      func(context.Context, sqlc.GetOrCreateUserByEmailParams) (sqlc.User, error)
+	listUsersFunc                   func(context.Context) ([]sqlc.User, error)
+	updateUserFunc                  func(context.Context, sqlc.UpdateUserParams) (sqlc.User, error)
+	updateUserSetupFunc             func(context.Context, sqlc.UpdateUserSetupParams) (sqlc.User, error)
 }
 
-func (m *mockQuerier) CreateUser(ctx context.Context, params sqlc.CreateUserParams) (sqlc.CreateUserRow, error) {
+func (m *mockQuerier) CreateUser(ctx context.Context, params sqlc.CreateUserParams) (sqlc.User, error) {
 	if m.createUserFunc != nil {
 		return m.createUserFunc(ctx, params)
 	}
-	return sqlc.CreateUserRow{}, nil
+	return sqlc.User{}, nil
 }
 
-func (m *mockQuerier) GetUserByID(ctx context.Context, id uuid.UUID) (sqlc.GetUserByIDRow, error) {
+func (m *mockQuerier) GetUserByID(ctx context.Context, id uuid.UUID) (sqlc.User, error) {
 	if m.getUserByIDFunc != nil {
 		return m.getUserByIDFunc(ctx, id)
 	}
-	return sqlc.GetUserByIDRow{}, nil
+	return sqlc.User{}, nil
 }
 
-func (m *mockQuerier) GetUserByIdentityProviderID(ctx context.Context, id string) (sqlc.GetUserByIdentityProviderIDRow, error) {
+func (m *mockQuerier) GetUserByIdentityProviderID(ctx context.Context, id string) (sqlc.User, error) {
 	if m.getUserByIdentityProviderIDFunc != nil {
 		return m.getUserByIdentityProviderIDFunc(ctx, id)
 	}
-	return sqlc.GetUserByIdentityProviderIDRow{}, nil
+	return sqlc.User{}, nil
 }
 
-func (m *mockQuerier) GetOrCreateUserByEmail(ctx context.Context, params sqlc.GetOrCreateUserByEmailParams) (sqlc.GetOrCreateUserByEmailRow, error) {
+func (m *mockQuerier) GetOrCreateUserByEmail(ctx context.Context, params sqlc.GetOrCreateUserByEmailParams) (sqlc.User, error) {
 	if m.getOrCreateUserByEmailFunc != nil {
 		return m.getOrCreateUserByEmailFunc(ctx, params)
 	}
-	return sqlc.GetOrCreateUserByEmailRow{}, nil
+	return sqlc.User{}, nil
 }
 
-func (m *mockQuerier) ListUsers(ctx context.Context) ([]sqlc.ListUsersRow, error) {
+func (m *mockQuerier) ListUsers(ctx context.Context) ([]sqlc.User, error) {
 	if m.listUsersFunc != nil {
 		return m.listUsersFunc(ctx)
 	}
-	return []sqlc.ListUsersRow{}, nil
+	return []sqlc.User{}, nil
 }
 
-func (m *mockQuerier) UpdateUser(ctx context.Context, params sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error) {
+func (m *mockQuerier) UpdateUser(ctx context.Context, params sqlc.UpdateUserParams) (sqlc.User, error) {
 	if m.updateUserFunc != nil {
 		return m.updateUserFunc(ctx, params)
 	}
-	return sqlc.UpdateUserRow{}, nil
+	return sqlc.User{}, nil
 }
 
-func (m *mockQuerier) UpdateUserSetup(ctx context.Context, params sqlc.UpdateUserSetupParams) (sqlc.UpdateUserSetupRow, error) {
+func (m *mockQuerier) UpdateUserSetup(ctx context.Context, params sqlc.UpdateUserSetupParams) (sqlc.User, error) {
 	if m.updateUserSetupFunc != nil {
 		return m.updateUserSetupFunc(ctx, params)
 	}
-	return sqlc.UpdateUserSetupRow{}, nil
+	return sqlc.User{}, nil
 }
 
 // Helper to create a test user row
-func testUserRow() sqlc.CreateUserRow {
+func testUserRow() sqlc.User {
 	testID := uuid.New()
 	testDeductionAmount := mustNumeric("5000.00")
 	testTimestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
@@ -83,7 +83,7 @@ func testUserRow() sqlc.CreateUserRow {
 	safeWithdrawalRate, _ := decimal.Parse("0.0400")
 	inflationRate, _ := decimal.Parse("0.0300")
 
-	return sqlc.CreateUserRow{
+	return sqlc.User{
 		ID:                 testID,
 		IdentityProviderID: "user_123",
 		Email:              "test@example.com",
@@ -116,7 +116,7 @@ func TestUserService_Create(t *testing.T) {
 
 	t.Run("creates user successfully", func(t *testing.T) {
 		mock := &mockQuerier{
-			createUserFunc: func(ctx context.Context, params sqlc.CreateUserParams) (sqlc.CreateUserRow, error) {
+			createUserFunc: func(ctx context.Context, params sqlc.CreateUserParams) (sqlc.User, error) {
 				assert.Equal(t, "user_123", params.IdentityProviderID)
 				assert.Equal(t, "test@example.com", params.Email)
 				return userRow, nil
@@ -151,7 +151,7 @@ func TestUserService_Create(t *testing.T) {
 
 	t.Run("handles nil deduction amount", func(t *testing.T) {
 		mock := &mockQuerier{
-			createUserFunc: func(ctx context.Context, params sqlc.CreateUserParams) (sqlc.CreateUserRow, error) {
+			createUserFunc: func(ctx context.Context, params sqlc.CreateUserParams) (sqlc.User, error) {
 				return userRow, nil
 			},
 		}
@@ -188,9 +188,9 @@ func TestUserService_GetByID(t *testing.T) {
 
 	t.Run("retrieves user by id", func(t *testing.T) {
 		mock := &mockQuerier{
-			getUserByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetUserByIDRow, error) {
+			getUserByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.User, error) {
 				assert.Equal(t, testID, id)
-				return sqlc.GetUserByIDRow(userRow), nil
+				return sqlc.User(userRow), nil
 			},
 		}
 
@@ -205,8 +205,8 @@ func TestUserService_GetByID(t *testing.T) {
 
 	t.Run("returns ErrNotFound when user does not exist", func(t *testing.T) {
 		mock := &mockQuerier{
-			getUserByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetUserByIDRow, error) {
-				return sqlc.GetUserByIDRow{}, pgx.ErrNoRows
+			getUserByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.User, error) {
+				return sqlc.User{}, pgx.ErrNoRows
 			},
 		}
 
@@ -219,8 +219,8 @@ func TestUserService_GetByID(t *testing.T) {
 
 	t.Run("wraps database errors", func(t *testing.T) {
 		mock := &mockQuerier{
-			getUserByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetUserByIDRow, error) {
-				return sqlc.GetUserByIDRow{}, errors.New("database connection error")
+			getUserByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.User, error) {
+				return sqlc.User{}, errors.New("database connection error")
 			},
 		}
 
@@ -240,9 +240,9 @@ func TestUserService_GetByIdentityProviderID(t *testing.T) {
 
 	t.Run("retrieves user by identity provider id", func(t *testing.T) {
 		mock := &mockQuerier{
-			getUserByIdentityProviderIDFunc: func(ctx context.Context, id string) (sqlc.GetUserByIdentityProviderIDRow, error) {
+			getUserByIdentityProviderIDFunc: func(ctx context.Context, id string) (sqlc.User, error) {
 				assert.Equal(t, providerID, id)
-				return sqlc.GetUserByIdentityProviderIDRow(userRow), nil
+				return sqlc.User(userRow), nil
 			},
 		}
 
@@ -256,8 +256,8 @@ func TestUserService_GetByIdentityProviderID(t *testing.T) {
 
 	t.Run("returns ErrNotFound when user does not exist", func(t *testing.T) {
 		mock := &mockQuerier{
-			getUserByIdentityProviderIDFunc: func(ctx context.Context, id string) (sqlc.GetUserByIdentityProviderIDRow, error) {
-				return sqlc.GetUserByIdentityProviderIDRow{}, pgx.ErrNoRows
+			getUserByIdentityProviderIDFunc: func(ctx context.Context, id string) (sqlc.User, error) {
+				return sqlc.User{}, pgx.ErrNoRows
 			},
 		}
 
@@ -279,8 +279,8 @@ func TestUserService_List(t *testing.T) {
 		user2.Email = "other@example.com"
 
 		mock := &mockQuerier{
-			listUsersFunc: func(ctx context.Context) ([]sqlc.ListUsersRow, error) {
-				return []sqlc.ListUsersRow{
+			listUsersFunc: func(ctx context.Context) ([]sqlc.User, error) {
+				return []sqlc.User{
 					{
 						ID:                 user1.ID,
 						Email:              user1.Email,
@@ -331,8 +331,8 @@ func TestUserService_List(t *testing.T) {
 
 	t.Run("returns empty list when no users exist", func(t *testing.T) {
 		mock := &mockQuerier{
-			listUsersFunc: func(ctx context.Context) ([]sqlc.ListUsersRow, error) {
-				return []sqlc.ListUsersRow{}, nil
+			listUsersFunc: func(ctx context.Context) ([]sqlc.User, error) {
+				return []sqlc.User{}, nil
 			},
 		}
 
@@ -346,7 +346,7 @@ func TestUserService_List(t *testing.T) {
 
 	t.Run("wraps database errors", func(t *testing.T) {
 		mock := &mockQuerier{
-			listUsersFunc: func(ctx context.Context) ([]sqlc.ListUsersRow, error) {
+			listUsersFunc: func(ctx context.Context) ([]sqlc.User, error) {
 				return nil, errors.New("database error")
 			},
 		}
@@ -368,10 +368,10 @@ func TestUserService_Update(t *testing.T) {
 
 	t.Run("updates user successfully", func(t *testing.T) {
 		mock := &mockQuerier{
-			updateUserFunc: func(ctx context.Context, params sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error) {
+			updateUserFunc: func(ctx context.Context, params sqlc.UpdateUserParams) (sqlc.User, error) {
 				assert.Equal(t, testID, params.ID)
 				assert.Equal(t, "updated@example.com", params.Email)
-				updatedRow := sqlc.UpdateUserRow{
+				updatedRow := sqlc.User{
 					ID:                 userRow.ID,
 					Email:              "updated@example.com",
 					IdentityProviderID: userRow.IdentityProviderID,
@@ -419,8 +419,8 @@ func TestUserService_Update(t *testing.T) {
 
 	t.Run("returns ErrNotFound when user does not exist", func(t *testing.T) {
 		mock := &mockQuerier{
-			updateUserFunc: func(ctx context.Context, params sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error) {
-				return sqlc.UpdateUserRow{}, pgx.ErrNoRows
+			updateUserFunc: func(ctx context.Context, params sqlc.UpdateUserParams) (sqlc.User, error) {
+				return sqlc.User{}, pgx.ErrNoRows
 			},
 		}
 

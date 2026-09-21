@@ -14,39 +14,39 @@ import (
 )
 
 type mockRecurringIncomeQuerier struct {
-	createRecurringIncomeFunc     func(context.Context, sqlc.CreateRecurringIncomeParams) (sqlc.CreateRecurringIncomeRow, error)
-	getRecurringIncomeByIDFunc    func(context.Context, uuid.UUID) (sqlc.GetRecurringIncomeByIDRow, error)
-	listRecurringIncomeFunc       func(context.Context, uuid.UUID) ([]sqlc.ListRecurringIncomeByUserIDRow, error)
-	updateRecurringIncomeFunc     func(context.Context, sqlc.UpdateRecurringIncomeParams) (sqlc.UpdateRecurringIncomeRow, error)
+	createRecurringIncomeFunc     func(context.Context, sqlc.CreateRecurringIncomeParams) (sqlc.RecurringIncome, error)
+	getRecurringIncomeByIDFunc    func(context.Context, uuid.UUID) (sqlc.RecurringIncome, error)
+	listRecurringIncomeFunc       func(context.Context, uuid.UUID) ([]sqlc.RecurringIncome, error)
+	updateRecurringIncomeFunc     func(context.Context, sqlc.UpdateRecurringIncomeParams) (sqlc.RecurringIncome, error)
 	softDeleteRecurringIncomeFunc func(context.Context, uuid.UUID) (int64, error)
 }
 
-func (m *mockRecurringIncomeQuerier) CreateRecurringIncome(ctx context.Context, arg sqlc.CreateRecurringIncomeParams) (sqlc.CreateRecurringIncomeRow, error) {
+func (m *mockRecurringIncomeQuerier) CreateRecurringIncome(ctx context.Context, arg sqlc.CreateRecurringIncomeParams) (sqlc.RecurringIncome, error) {
 	if m.createRecurringIncomeFunc != nil {
 		return m.createRecurringIncomeFunc(ctx, arg)
 	}
-	return sqlc.CreateRecurringIncomeRow{}, nil
+	return sqlc.RecurringIncome{}, nil
 }
 
-func (m *mockRecurringIncomeQuerier) GetRecurringIncomeByID(ctx context.Context, id uuid.UUID) (sqlc.GetRecurringIncomeByIDRow, error) {
+func (m *mockRecurringIncomeQuerier) GetRecurringIncomeByID(ctx context.Context, id uuid.UUID) (sqlc.RecurringIncome, error) {
 	if m.getRecurringIncomeByIDFunc != nil {
 		return m.getRecurringIncomeByIDFunc(ctx, id)
 	}
-	return sqlc.GetRecurringIncomeByIDRow{}, nil
+	return sqlc.RecurringIncome{}, nil
 }
 
-func (m *mockRecurringIncomeQuerier) ListRecurringIncomeByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListRecurringIncomeByUserIDRow, error) {
+func (m *mockRecurringIncomeQuerier) ListRecurringIncomeByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.RecurringIncome, error) {
 	if m.listRecurringIncomeFunc != nil {
 		return m.listRecurringIncomeFunc(ctx, userID)
 	}
-	return []sqlc.ListRecurringIncomeByUserIDRow{}, nil
+	return []sqlc.RecurringIncome{}, nil
 }
 
-func (m *mockRecurringIncomeQuerier) UpdateRecurringIncome(ctx context.Context, arg sqlc.UpdateRecurringIncomeParams) (sqlc.UpdateRecurringIncomeRow, error) {
+func (m *mockRecurringIncomeQuerier) UpdateRecurringIncome(ctx context.Context, arg sqlc.UpdateRecurringIncomeParams) (sqlc.RecurringIncome, error) {
 	if m.updateRecurringIncomeFunc != nil {
 		return m.updateRecurringIncomeFunc(ctx, arg)
 	}
-	return sqlc.UpdateRecurringIncomeRow{}, nil
+	return sqlc.RecurringIncome{}, nil
 }
 
 func (m *mockRecurringIncomeQuerier) SoftDeleteRecurringIncome(ctx context.Context, id uuid.UUID) (int64, error) {
@@ -56,14 +56,14 @@ func (m *mockRecurringIncomeQuerier) SoftDeleteRecurringIncome(ctx context.Conte
 	return 0, nil
 }
 
-func testRecurringIncomeRow() sqlc.CreateRecurringIncomeRow {
+func testRecurringIncomeRow() sqlc.RecurringIncome {
 	amount, _ := decimal.Parse("2500.00")
 	startDate := pgtype.Date{Time: time.Now().UTC(), Valid: true}
 	endDate := pgtype.Date{Time: time.Now().AddDate(0, 6, 0).UTC(), Valid: true}
 	payday := int32(15)
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.CreateRecurringIncomeRow{
+	return sqlc.RecurringIncome{
 		ID:                 uuid.New(),
 		UserID:             uuid.New(),
 		Name:               "Salary",
@@ -83,7 +83,7 @@ func TestRecurringIncomeService_Create(t *testing.T) {
 	row := testRecurringIncomeRow()
 
 	mock := &mockRecurringIncomeQuerier{
-		createRecurringIncomeFunc: func(ctx context.Context, arg sqlc.CreateRecurringIncomeParams) (sqlc.CreateRecurringIncomeRow, error) {
+		createRecurringIncomeFunc: func(ctx context.Context, arg sqlc.CreateRecurringIncomeParams) (sqlc.RecurringIncome, error) {
 			assert.Equal(t, row.UserID, arg.UserID)
 			assert.Equal(t, row.Amount, arg.Amount)
 			return row, nil
@@ -109,7 +109,7 @@ func TestRecurringIncomeService_Create(t *testing.T) {
 func TestRecurringIncomeService_GetByID(t *testing.T) {
 	ctx := context.Background()
 	row := testRecurringIncomeRow()
-	getRow := sqlc.GetRecurringIncomeByIDRow{
+	getRow := sqlc.RecurringIncome{
 		ID:                 row.ID,
 		UserID:             row.UserID,
 		Name:               row.Name,
@@ -124,7 +124,7 @@ func TestRecurringIncomeService_GetByID(t *testing.T) {
 	}
 
 	mock := &mockRecurringIncomeQuerier{
-		getRecurringIncomeByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetRecurringIncomeByIDRow, error) {
+		getRecurringIncomeByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.RecurringIncome, error) {
 			assert.Equal(t, row.ID, id)
 			return getRow, nil
 		},
@@ -143,8 +143,8 @@ func TestRecurringIncomeService_GetByID_NotFound(t *testing.T) {
 	row := testRecurringIncomeRow()
 
 	mock := &mockRecurringIncomeQuerier{
-		getRecurringIncomeByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetRecurringIncomeByIDRow, error) {
-			return sqlc.GetRecurringIncomeByIDRow{}, pgx.ErrNoRows
+		getRecurringIncomeByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.RecurringIncome, error) {
+			return sqlc.RecurringIncome{}, pgx.ErrNoRows
 		},
 	}
 
@@ -161,7 +161,7 @@ func TestRecurringIncomeService_ListByUserID(t *testing.T) {
 	row2 := testRecurringIncomeRow()
 	row2.ID = uuid.New()
 
-	listRow1 := sqlc.ListRecurringIncomeByUserIDRow{
+	listRow1 := sqlc.RecurringIncome{
 		ID:                 row1.ID,
 		UserID:             row1.UserID,
 		Name:               row1.Name,
@@ -174,7 +174,7 @@ func TestRecurringIncomeService_ListByUserID(t *testing.T) {
 		UpdatedAt:          row1.UpdatedAt,
 		DeletedAt:          row1.DeletedAt,
 	}
-	listRow2 := sqlc.ListRecurringIncomeByUserIDRow{
+	listRow2 := sqlc.RecurringIncome{
 		ID:                 row2.ID,
 		UserID:             row2.UserID,
 		Name:               row2.Name,
@@ -189,9 +189,9 @@ func TestRecurringIncomeService_ListByUserID(t *testing.T) {
 	}
 
 	mock := &mockRecurringIncomeQuerier{
-		listRecurringIncomeFunc: func(ctx context.Context, userID uuid.UUID) ([]sqlc.ListRecurringIncomeByUserIDRow, error) {
+		listRecurringIncomeFunc: func(ctx context.Context, userID uuid.UUID) ([]sqlc.RecurringIncome, error) {
 			assert.Equal(t, row1.UserID, userID)
-			return []sqlc.ListRecurringIncomeByUserIDRow{listRow1, listRow2}, nil
+			return []sqlc.RecurringIncome{listRow1, listRow2}, nil
 		},
 	}
 
@@ -210,10 +210,10 @@ func TestRecurringIncomeService_Update(t *testing.T) {
 	updatedAmount, _ := decimal.Parse("2600.00")
 
 	mock := &mockRecurringIncomeQuerier{
-		updateRecurringIncomeFunc: func(ctx context.Context, arg sqlc.UpdateRecurringIncomeParams) (sqlc.UpdateRecurringIncomeRow, error) {
+		updateRecurringIncomeFunc: func(ctx context.Context, arg sqlc.UpdateRecurringIncomeParams) (sqlc.RecurringIncome, error) {
 			assert.Equal(t, row.ID, arg.ID)
 			assert.Equal(t, updatedAmount, arg.Amount)
-			updated := sqlc.UpdateRecurringIncomeRow{
+			updated := sqlc.RecurringIncome{
 				ID:                 row.ID,
 				UserID:             row.UserID,
 				Name:               row.Name,

@@ -14,10 +14,10 @@ import (
 )
 
 type mockExpenseQuerier struct {
-	createExpenseFunc                 func(context.Context, sqlc.CreateExpenseParams) (sqlc.CreateExpenseRow, error)
-	getExpenseByIDFunc                func(context.Context, uuid.UUID) (sqlc.GetExpenseByIDRow, error)
-	listExpensesByBudgetIDFunc        func(context.Context, uuid.UUID) ([]sqlc.ListExpensesByBudgetIDRow, error)
-	updateExpenseFunc                 func(context.Context, sqlc.UpdateExpenseParams) (sqlc.UpdateExpenseRow, error)
+	createExpenseFunc                 func(context.Context, sqlc.CreateExpenseParams) (sqlc.Expense, error)
+	getExpenseByIDFunc                func(context.Context, uuid.UUID) (sqlc.Expense, error)
+	listExpensesByBudgetIDFunc        func(context.Context, uuid.UUID) ([]sqlc.Expense, error)
+	updateExpenseFunc                 func(context.Context, sqlc.UpdateExpenseParams) (sqlc.Expense, error)
 	softDeleteExpenseFunc             func(context.Context, uuid.UUID) (int64, error)
 	softDeleteGeneratedExpensesFunc   func(context.Context, uuid.UUID) (int64, error)
 	createExpenseSplitFunc            func(context.Context, sqlc.CreateExpenseSplitParams) (sqlc.ExpenseSplit, error)
@@ -25,32 +25,32 @@ type mockExpenseQuerier struct {
 	softDeleteExpenseSplitsFunc       func(context.Context, uuid.UUID) (int64, error)
 }
 
-func (m *mockExpenseQuerier) CreateExpense(ctx context.Context, arg sqlc.CreateExpenseParams) (sqlc.CreateExpenseRow, error) {
+func (m *mockExpenseQuerier) CreateExpense(ctx context.Context, arg sqlc.CreateExpenseParams) (sqlc.Expense, error) {
 	if m.createExpenseFunc != nil {
 		return m.createExpenseFunc(ctx, arg)
 	}
-	return sqlc.CreateExpenseRow{}, nil
+	return sqlc.Expense{}, nil
 }
 
-func (m *mockExpenseQuerier) GetExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.GetExpenseByIDRow, error) {
+func (m *mockExpenseQuerier) GetExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.Expense, error) {
 	if m.getExpenseByIDFunc != nil {
 		return m.getExpenseByIDFunc(ctx, id)
 	}
-	return sqlc.GetExpenseByIDRow{}, nil
+	return sqlc.Expense{}, nil
 }
 
-func (m *mockExpenseQuerier) ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListExpensesByBudgetIDRow, error) {
+func (m *mockExpenseQuerier) ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.Expense, error) {
 	if m.listExpensesByBudgetIDFunc != nil {
 		return m.listExpensesByBudgetIDFunc(ctx, budgetID)
 	}
-	return []sqlc.ListExpensesByBudgetIDRow{}, nil
+	return []sqlc.Expense{}, nil
 }
 
-func (m *mockExpenseQuerier) UpdateExpense(ctx context.Context, arg sqlc.UpdateExpenseParams) (sqlc.UpdateExpenseRow, error) {
+func (m *mockExpenseQuerier) UpdateExpense(ctx context.Context, arg sqlc.UpdateExpenseParams) (sqlc.Expense, error) {
 	if m.updateExpenseFunc != nil {
 		return m.updateExpenseFunc(ctx, arg)
 	}
-	return sqlc.UpdateExpenseRow{}, nil
+	return sqlc.Expense{}, nil
 }
 
 func (m *mockExpenseQuerier) SoftDeleteExpense(ctx context.Context, id uuid.UUID) (int64, error) {
@@ -95,12 +95,12 @@ func expenseTestService(mock *mockExpenseQuerier) *ExpenseService {
 	return newExpenseServiceWithRunner(mock, runner)
 }
 
-func testCreateExpenseRow() sqlc.CreateExpenseRow {
+func testCreateExpenseRow() sqlc.Expense {
 	amount, _ := decimal.Parse("250.00")
 	date := pgtype.Date{Time: time.Now().UTC(), Valid: true}
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.CreateExpenseRow{
+	return sqlc.Expense{
 		ID:               uuid.New(),
 		UserID:           uuid.New(),
 		BudgetID:         uuid.New(),
@@ -177,7 +177,7 @@ func TestExpenseService_Create_Success(t *testing.T) {
 	split := testExpenseSplitRow(expense.ID)
 
 	mock := &mockExpenseQuerier{
-		createExpenseFunc: func(_ context.Context, _ sqlc.CreateExpenseParams) (sqlc.CreateExpenseRow, error) {
+		createExpenseFunc: func(_ context.Context, _ sqlc.CreateExpenseParams) (sqlc.Expense, error) {
 			return expense, nil
 		},
 		createExpenseSplitFunc: func(_ context.Context, _ sqlc.CreateExpenseSplitParams) (sqlc.ExpenseSplit, error) {
@@ -207,8 +207,8 @@ func TestExpenseService_Update_NotFound(t *testing.T) {
 	amount, _ := decimal.Parse("50.00")
 
 	mock := &mockExpenseQuerier{
-		updateExpenseFunc: func(_ context.Context, _ sqlc.UpdateExpenseParams) (sqlc.UpdateExpenseRow, error) {
-			return sqlc.UpdateExpenseRow{}, pgx.ErrNoRows
+		updateExpenseFunc: func(_ context.Context, _ sqlc.UpdateExpenseParams) (sqlc.Expense, error) {
+			return sqlc.Expense{}, pgx.ErrNoRows
 		},
 	}
 

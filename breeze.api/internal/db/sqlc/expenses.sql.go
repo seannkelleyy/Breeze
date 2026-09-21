@@ -53,23 +53,7 @@ type CreateExpenseParams struct {
 	PersonID         pgtype.UUID       `json:"person_id"`
 }
 
-type CreateExpenseRow struct {
-	ID               uuid.UUID          `json:"id"`
-	UserID           uuid.UUID          `json:"user_id"`
-	BudgetID         uuid.UUID          `json:"budget_id"`
-	Amount           decimal.Decimal    `json:"amount"`
-	Date             pgtype.Date        `json:"date"`
-	Description      string             `json:"description"`
-	SourceType       ExpenseSourceType  `json:"source_type"`
-	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
-	GenerationMonth  pgtype.Date        `json:"generation_month"`
-	PersonID         pgtype.UUID        `json:"person_id"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (CreateExpenseRow, error) {
+func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (Expense, error) {
 	row := q.db.QueryRow(ctx, createExpense,
 		arg.UserID,
 		arg.BudgetID,
@@ -81,7 +65,7 @@ func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (C
 		arg.GenerationMonth,
 		arg.PersonID,
 	)
-	var i CreateExpenseRow
+	var i Expense
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -167,25 +151,9 @@ WHERE id = $1
 LIMIT 1
 `
 
-type GetExpenseByIDRow struct {
-	ID               uuid.UUID          `json:"id"`
-	UserID           uuid.UUID          `json:"user_id"`
-	BudgetID         uuid.UUID          `json:"budget_id"`
-	Amount           decimal.Decimal    `json:"amount"`
-	Date             pgtype.Date        `json:"date"`
-	Description      string             `json:"description"`
-	SourceType       ExpenseSourceType  `json:"source_type"`
-	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
-	GenerationMonth  pgtype.Date        `json:"generation_month"`
-	PersonID         pgtype.UUID        `json:"person_id"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) GetExpenseByID(ctx context.Context, id uuid.UUID) (GetExpenseByIDRow, error) {
+func (q *Queries) GetExpenseByID(ctx context.Context, id uuid.UUID) (Expense, error) {
 	row := q.db.QueryRow(ctx, getExpenseByID, id)
-	var i GetExpenseByIDRow
+	var i Expense
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -270,31 +238,15 @@ WHERE budget_id = $1
 ORDER BY date DESC, created_at DESC
 `
 
-type ListExpensesByBudgetIDRow struct {
-	ID               uuid.UUID          `json:"id"`
-	UserID           uuid.UUID          `json:"user_id"`
-	BudgetID         uuid.UUID          `json:"budget_id"`
-	Amount           decimal.Decimal    `json:"amount"`
-	Date             pgtype.Date        `json:"date"`
-	Description      string             `json:"description"`
-	SourceType       ExpenseSourceType  `json:"source_type"`
-	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
-	GenerationMonth  pgtype.Date        `json:"generation_month"`
-	PersonID         pgtype.UUID        `json:"person_id"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]ListExpensesByBudgetIDRow, error) {
+func (q *Queries) ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]Expense, error) {
 	rows, err := q.db.Query(ctx, listExpensesByBudgetID, budgetID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListExpensesByBudgetIDRow
+	var items []Expense
 	for rows.Next() {
-		var i ListExpensesByBudgetIDRow
+		var i Expense
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -403,23 +355,7 @@ type UpdateExpenseParams struct {
 	PersonID    pgtype.UUID     `json:"person_id"`
 }
 
-type UpdateExpenseRow struct {
-	ID               uuid.UUID          `json:"id"`
-	UserID           uuid.UUID          `json:"user_id"`
-	BudgetID         uuid.UUID          `json:"budget_id"`
-	Amount           decimal.Decimal    `json:"amount"`
-	Date             pgtype.Date        `json:"date"`
-	Description      string             `json:"description"`
-	SourceType       ExpenseSourceType  `json:"source_type"`
-	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
-	GenerationMonth  pgtype.Date        `json:"generation_month"`
-	PersonID         pgtype.UUID        `json:"person_id"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (UpdateExpenseRow, error) {
+func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (Expense, error) {
 	row := q.db.QueryRow(ctx, updateExpense,
 		arg.ID,
 		arg.Amount,
@@ -427,7 +363,7 @@ func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (U
 		arg.Description,
 		arg.PersonID,
 	)
-	var i UpdateExpenseRow
+	var i Expense
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,

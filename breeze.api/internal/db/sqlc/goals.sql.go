@@ -51,34 +51,15 @@ RETURNING
   deleted_at
 `
 
-type CreateFinancialOrderStepsRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	UserID               uuid.UUID          `json:"user_id"`
-	Description          string             `json:"description"`
-	IsCompleted          bool               `json:"is_completed"`
-	TargetAmount         pgtype.Numeric     `json:"target_amount"`
-	TargetDate           pgtype.Date        `json:"target_date"`
-	Category             *string            `json:"category"`
-	CustomCategory       *string            `json:"custom_category"`
-	Priority             int32              `json:"priority"`
-	Notes                *string            `json:"notes"`
-	ConnectedAccountIds  []uuid.UUID        `json:"connected_account_ids"`
-	IsFinancialOrderStep bool               `json:"is_financial_order_step"`
-	FinancialOrderStep   *int32             `json:"financial_order_step"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) CreateFinancialOrderSteps(ctx context.Context, userID uuid.UUID) ([]CreateFinancialOrderStepsRow, error) {
+func (q *Queries) CreateFinancialOrderSteps(ctx context.Context, userID uuid.UUID) ([]Goal, error) {
 	rows, err := q.db.Query(ctx, createFinancialOrderSteps, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CreateFinancialOrderStepsRow
+	var items []Goal
 	for rows.Next() {
-		var i CreateFinancialOrderStepsRow
+		var i Goal
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -156,26 +137,7 @@ type CreateGoalParams struct {
 	FinancialOrderStep   *int32         `json:"financial_order_step"`
 }
 
-type CreateGoalRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	UserID               uuid.UUID          `json:"user_id"`
-	Description          string             `json:"description"`
-	IsCompleted          bool               `json:"is_completed"`
-	TargetAmount         pgtype.Numeric     `json:"target_amount"`
-	TargetDate           pgtype.Date        `json:"target_date"`
-	Category             *string            `json:"category"`
-	CustomCategory       *string            `json:"custom_category"`
-	Priority             int32              `json:"priority"`
-	Notes                *string            `json:"notes"`
-	ConnectedAccountIds  []uuid.UUID        `json:"connected_account_ids"`
-	IsFinancialOrderStep bool               `json:"is_financial_order_step"`
-	FinancialOrderStep   *int32             `json:"financial_order_step"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) CreateGoal(ctx context.Context, arg CreateGoalParams) (CreateGoalRow, error) {
+func (q *Queries) CreateGoal(ctx context.Context, arg CreateGoalParams) (Goal, error) {
 	row := q.db.QueryRow(ctx, createGoal,
 		arg.UserID,
 		arg.Description,
@@ -190,7 +152,7 @@ func (q *Queries) CreateGoal(ctx context.Context, arg CreateGoalParams) (CreateG
 		arg.IsFinancialOrderStep,
 		arg.FinancialOrderStep,
 	)
-	var i CreateGoalRow
+	var i Goal
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -236,28 +198,9 @@ WHERE id = $1
 LIMIT 1
 `
 
-type GetGoalByIDRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	UserID               uuid.UUID          `json:"user_id"`
-	Description          string             `json:"description"`
-	IsCompleted          bool               `json:"is_completed"`
-	TargetAmount         pgtype.Numeric     `json:"target_amount"`
-	TargetDate           pgtype.Date        `json:"target_date"`
-	Category             *string            `json:"category"`
-	CustomCategory       *string            `json:"custom_category"`
-	Priority             int32              `json:"priority"`
-	Notes                *string            `json:"notes"`
-	ConnectedAccountIds  []uuid.UUID        `json:"connected_account_ids"`
-	IsFinancialOrderStep bool               `json:"is_financial_order_step"`
-	FinancialOrderStep   *int32             `json:"financial_order_step"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) GetGoalByID(ctx context.Context, id uuid.UUID) (GetGoalByIDRow, error) {
+func (q *Queries) GetGoalByID(ctx context.Context, id uuid.UUID) (Goal, error) {
 	row := q.db.QueryRow(ctx, getGoalByID, id)
-	var i GetGoalByIDRow
+	var i Goal
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -304,34 +247,15 @@ WHERE user_id = $1
 ORDER BY financial_order_step ASC
 `
 
-type ListFinancialOrderStepsByUserIDRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	UserID               uuid.UUID          `json:"user_id"`
-	Description          string             `json:"description"`
-	IsCompleted          bool               `json:"is_completed"`
-	TargetAmount         pgtype.Numeric     `json:"target_amount"`
-	TargetDate           pgtype.Date        `json:"target_date"`
-	Category             *string            `json:"category"`
-	CustomCategory       *string            `json:"custom_category"`
-	Priority             int32              `json:"priority"`
-	Notes                *string            `json:"notes"`
-	ConnectedAccountIds  []uuid.UUID        `json:"connected_account_ids"`
-	IsFinancialOrderStep bool               `json:"is_financial_order_step"`
-	FinancialOrderStep   *int32             `json:"financial_order_step"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) ListFinancialOrderStepsByUserID(ctx context.Context, userID uuid.UUID) ([]ListFinancialOrderStepsByUserIDRow, error) {
+func (q *Queries) ListFinancialOrderStepsByUserID(ctx context.Context, userID uuid.UUID) ([]Goal, error) {
 	rows, err := q.db.Query(ctx, listFinancialOrderStepsByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListFinancialOrderStepsByUserIDRow
+	var items []Goal
 	for rows.Next() {
-		var i ListFinancialOrderStepsByUserIDRow
+		var i Goal
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -389,34 +313,15 @@ ORDER BY
   created_at DESC
 `
 
-type ListGoalsByUserIDRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	UserID               uuid.UUID          `json:"user_id"`
-	Description          string             `json:"description"`
-	IsCompleted          bool               `json:"is_completed"`
-	TargetAmount         pgtype.Numeric     `json:"target_amount"`
-	TargetDate           pgtype.Date        `json:"target_date"`
-	Category             *string            `json:"category"`
-	CustomCategory       *string            `json:"custom_category"`
-	Priority             int32              `json:"priority"`
-	Notes                *string            `json:"notes"`
-	ConnectedAccountIds  []uuid.UUID        `json:"connected_account_ids"`
-	IsFinancialOrderStep bool               `json:"is_financial_order_step"`
-	FinancialOrderStep   *int32             `json:"financial_order_step"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) ListGoalsByUserID(ctx context.Context, userID uuid.UUID) ([]ListGoalsByUserIDRow, error) {
+func (q *Queries) ListGoalsByUserID(ctx context.Context, userID uuid.UUID) ([]Goal, error) {
 	rows, err := q.db.Query(ctx, listGoalsByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListGoalsByUserIDRow
+	var items []Goal
 	for rows.Next() {
-		var i ListGoalsByUserIDRow
+		var i Goal
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -512,26 +417,7 @@ type UpdateGoalParams struct {
 	FinancialOrderStep   *int32         `json:"financial_order_step"`
 }
 
-type UpdateGoalRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	UserID               uuid.UUID          `json:"user_id"`
-	Description          string             `json:"description"`
-	IsCompleted          bool               `json:"is_completed"`
-	TargetAmount         pgtype.Numeric     `json:"target_amount"`
-	TargetDate           pgtype.Date        `json:"target_date"`
-	Category             *string            `json:"category"`
-	CustomCategory       *string            `json:"custom_category"`
-	Priority             int32              `json:"priority"`
-	Notes                *string            `json:"notes"`
-	ConnectedAccountIds  []uuid.UUID        `json:"connected_account_ids"`
-	IsFinancialOrderStep bool               `json:"is_financial_order_step"`
-	FinancialOrderStep   *int32             `json:"financial_order_step"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) UpdateGoal(ctx context.Context, arg UpdateGoalParams) (UpdateGoalRow, error) {
+func (q *Queries) UpdateGoal(ctx context.Context, arg UpdateGoalParams) (Goal, error) {
 	row := q.db.QueryRow(ctx, updateGoal,
 		arg.ID,
 		arg.Description,
@@ -546,7 +432,7 @@ func (q *Queries) UpdateGoal(ctx context.Context, arg UpdateGoalParams) (UpdateG
 		arg.IsFinancialOrderStep,
 		arg.FinancialOrderStep,
 	)
-	var i UpdateGoalRow
+	var i Goal
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,

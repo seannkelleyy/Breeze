@@ -50,10 +50,10 @@ type UpdateRecurringIncomeInput struct {
 }
 
 type recurringIncomeQuerier interface {
-	CreateRecurringIncome(ctx context.Context, arg sqlc.CreateRecurringIncomeParams) (sqlc.CreateRecurringIncomeRow, error)
-	GetRecurringIncomeByID(ctx context.Context, id uuid.UUID) (sqlc.GetRecurringIncomeByIDRow, error)
-	ListRecurringIncomeByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListRecurringIncomeByUserIDRow, error)
-	UpdateRecurringIncome(ctx context.Context, arg sqlc.UpdateRecurringIncomeParams) (sqlc.UpdateRecurringIncomeRow, error)
+	CreateRecurringIncome(ctx context.Context, arg sqlc.CreateRecurringIncomeParams) (sqlc.RecurringIncome, error)
+	GetRecurringIncomeByID(ctx context.Context, id uuid.UUID) (sqlc.RecurringIncome, error)
+	ListRecurringIncomeByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.RecurringIncome, error)
+	UpdateRecurringIncome(ctx context.Context, arg sqlc.UpdateRecurringIncomeParams) (sqlc.RecurringIncome, error)
 	SoftDeleteRecurringIncome(ctx context.Context, id uuid.UUID) (int64, error)
 }
 
@@ -144,7 +144,7 @@ func (s *RecurringIncomeService) Delete(ctx context.Context, id uuid.UUID) error
 	return nil
 }
 
-func mapCreateRecurringIncomeRow(row sqlc.CreateRecurringIncomeRow) RecurringIncome {
+func mapCreateRecurringIncomeRow(row sqlc.RecurringIncome) RecurringIncome {
 	return RecurringIncome{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -160,7 +160,7 @@ func mapCreateRecurringIncomeRow(row sqlc.CreateRecurringIncomeRow) RecurringInc
 	}
 }
 
-func mapGetRecurringIncomeByIDRow(row sqlc.GetRecurringIncomeByIDRow) RecurringIncome {
+func mapGetRecurringIncomeByIDRow(row sqlc.RecurringIncome) RecurringIncome {
 	return RecurringIncome{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -176,7 +176,7 @@ func mapGetRecurringIncomeByIDRow(row sqlc.GetRecurringIncomeByIDRow) RecurringI
 	}
 }
 
-func mapListRecurringIncomeByUserIDRow(row sqlc.ListRecurringIncomeByUserIDRow) RecurringIncome {
+func mapListRecurringIncomeByUserIDRow(row sqlc.RecurringIncome) RecurringIncome {
 	return RecurringIncome{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -192,7 +192,7 @@ func mapListRecurringIncomeByUserIDRow(row sqlc.ListRecurringIncomeByUserIDRow) 
 	}
 }
 
-func mapUpdateRecurringIncomeRow(row sqlc.UpdateRecurringIncomeRow) RecurringIncome {
+func mapUpdateRecurringIncomeRow(row sqlc.RecurringIncome) RecurringIncome {
 	return RecurringIncome{
 		ID:                 row.ID,
 		UserID:             row.UserID,

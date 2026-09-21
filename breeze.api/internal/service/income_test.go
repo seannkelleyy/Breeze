@@ -14,39 +14,39 @@ import (
 )
 
 type mockIncomeQuerier struct {
-	createIncomeFunc     func(context.Context, sqlc.CreateIncomeParams) (sqlc.CreateIncomeRow, error)
-	getIncomeByIDFunc    func(context.Context, uuid.UUID) (sqlc.GetIncomeByIDRow, error)
-	listIncomeFunc       func(context.Context, uuid.UUID) ([]sqlc.ListIncomeByBudgetIDRow, error)
-	updateIncomeFunc     func(context.Context, sqlc.UpdateIncomeParams) (sqlc.UpdateIncomeRow, error)
+	createIncomeFunc     func(context.Context, sqlc.CreateIncomeParams) (sqlc.Income, error)
+	getIncomeByIDFunc    func(context.Context, uuid.UUID) (sqlc.Income, error)
+	listIncomeFunc       func(context.Context, uuid.UUID) ([]sqlc.Income, error)
+	updateIncomeFunc     func(context.Context, sqlc.UpdateIncomeParams) (sqlc.Income, error)
 	softDeleteIncomeFunc func(context.Context, uuid.UUID) (int64, error)
 }
 
-func (m *mockIncomeQuerier) CreateIncome(ctx context.Context, arg sqlc.CreateIncomeParams) (sqlc.CreateIncomeRow, error) {
+func (m *mockIncomeQuerier) CreateIncome(ctx context.Context, arg sqlc.CreateIncomeParams) (sqlc.Income, error) {
 	if m.createIncomeFunc != nil {
 		return m.createIncomeFunc(ctx, arg)
 	}
-	return sqlc.CreateIncomeRow{}, nil
+	return sqlc.Income{}, nil
 }
 
-func (m *mockIncomeQuerier) GetIncomeByID(ctx context.Context, id uuid.UUID) (sqlc.GetIncomeByIDRow, error) {
+func (m *mockIncomeQuerier) GetIncomeByID(ctx context.Context, id uuid.UUID) (sqlc.Income, error) {
 	if m.getIncomeByIDFunc != nil {
 		return m.getIncomeByIDFunc(ctx, id)
 	}
-	return sqlc.GetIncomeByIDRow{}, nil
+	return sqlc.Income{}, nil
 }
 
-func (m *mockIncomeQuerier) ListIncomeByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListIncomeByBudgetIDRow, error) {
+func (m *mockIncomeQuerier) ListIncomeByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.Income, error) {
 	if m.listIncomeFunc != nil {
 		return m.listIncomeFunc(ctx, budgetID)
 	}
-	return []sqlc.ListIncomeByBudgetIDRow{}, nil
+	return []sqlc.Income{}, nil
 }
 
-func (m *mockIncomeQuerier) UpdateIncome(ctx context.Context, arg sqlc.UpdateIncomeParams) (sqlc.UpdateIncomeRow, error) {
+func (m *mockIncomeQuerier) UpdateIncome(ctx context.Context, arg sqlc.UpdateIncomeParams) (sqlc.Income, error) {
 	if m.updateIncomeFunc != nil {
 		return m.updateIncomeFunc(ctx, arg)
 	}
-	return sqlc.UpdateIncomeRow{}, nil
+	return sqlc.Income{}, nil
 }
 
 func (m *mockIncomeQuerier) SoftDeleteIncome(ctx context.Context, id uuid.UUID) (int64, error) {
@@ -56,7 +56,7 @@ func (m *mockIncomeQuerier) SoftDeleteIncome(ctx context.Context, id uuid.UUID) 
 	return 0, nil
 }
 
-func testIncomeRow() sqlc.CreateIncomeRow {
+func testIncomeRow() sqlc.Income {
 	amount, _ := decimal.Parse("4500.00")
 	incomeDate := pgtype.Date{Time: time.Now().UTC(), Valid: true}
 	sourceOccurrence := pgtype.Date{Time: time.Now().UTC(), Valid: true}
@@ -64,7 +64,7 @@ func testIncomeRow() sqlc.CreateIncomeRow {
 	templateID := uuid.New()
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.CreateIncomeRow{
+	return sqlc.Income{
 		ID:                   uuid.New(),
 		UserID:               uuid.New(),
 		BudgetID:             uuid.New(),
@@ -86,7 +86,7 @@ func TestIncomeService_Create(t *testing.T) {
 	row := testIncomeRow()
 
 	mock := &mockIncomeQuerier{
-		createIncomeFunc: func(ctx context.Context, arg sqlc.CreateIncomeParams) (sqlc.CreateIncomeRow, error) {
+		createIncomeFunc: func(ctx context.Context, arg sqlc.CreateIncomeParams) (sqlc.Income, error) {
 			assert.Equal(t, row.UserID, arg.UserID)
 			assert.Equal(t, row.BudgetID, arg.BudgetID)
 			assert.Equal(t, row.Amount, arg.Amount)
@@ -115,7 +115,7 @@ func TestIncomeService_Create(t *testing.T) {
 func TestIncomeService_GetByID(t *testing.T) {
 	ctx := context.Background()
 	row := testIncomeRow()
-	getRow := sqlc.GetIncomeByIDRow{
+	getRow := sqlc.Income{
 		ID:                   row.ID,
 		UserID:               row.UserID,
 		BudgetID:             row.BudgetID,
@@ -132,7 +132,7 @@ func TestIncomeService_GetByID(t *testing.T) {
 	}
 
 	mock := &mockIncomeQuerier{
-		getIncomeByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetIncomeByIDRow, error) {
+		getIncomeByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.Income, error) {
 			assert.Equal(t, row.ID, id)
 			return getRow, nil
 		},
@@ -151,8 +151,8 @@ func TestIncomeService_GetByID_NotFound(t *testing.T) {
 	row := testIncomeRow()
 
 	mock := &mockIncomeQuerier{
-		getIncomeByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetIncomeByIDRow, error) {
-			return sqlc.GetIncomeByIDRow{}, pgx.ErrNoRows
+		getIncomeByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.Income, error) {
+			return sqlc.Income{}, pgx.ErrNoRows
 		},
 	}
 
@@ -169,7 +169,7 @@ func TestIncomeService_ListByBudgetID(t *testing.T) {
 	row2 := testIncomeRow()
 	row2.ID = uuid.New()
 
-	listRow1 := sqlc.ListIncomeByBudgetIDRow{
+	listRow1 := sqlc.Income{
 		ID:                   row1.ID,
 		UserID:               row1.UserID,
 		BudgetID:             row1.BudgetID,
@@ -184,7 +184,7 @@ func TestIncomeService_ListByBudgetID(t *testing.T) {
 		UpdatedAt:            row1.UpdatedAt,
 		DeletedAt:            row1.DeletedAt,
 	}
-	listRow2 := sqlc.ListIncomeByBudgetIDRow{
+	listRow2 := sqlc.Income{
 		ID:                   row2.ID,
 		UserID:               row2.UserID,
 		BudgetID:             row2.BudgetID,
@@ -201,9 +201,9 @@ func TestIncomeService_ListByBudgetID(t *testing.T) {
 	}
 
 	mock := &mockIncomeQuerier{
-		listIncomeFunc: func(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListIncomeByBudgetIDRow, error) {
+		listIncomeFunc: func(ctx context.Context, budgetID uuid.UUID) ([]sqlc.Income, error) {
 			assert.Equal(t, row1.BudgetID, budgetID)
-			return []sqlc.ListIncomeByBudgetIDRow{listRow1, listRow2}, nil
+			return []sqlc.Income{listRow1, listRow2}, nil
 		},
 	}
 
@@ -222,10 +222,10 @@ func TestIncomeService_Update(t *testing.T) {
 	updatedAmount, _ := decimal.Parse("5000.00")
 
 	mock := &mockIncomeQuerier{
-		updateIncomeFunc: func(ctx context.Context, arg sqlc.UpdateIncomeParams) (sqlc.UpdateIncomeRow, error) {
+		updateIncomeFunc: func(ctx context.Context, arg sqlc.UpdateIncomeParams) (sqlc.Income, error) {
 			assert.Equal(t, row.ID, arg.ID)
 			assert.Equal(t, updatedAmount, arg.Amount)
-			updated := sqlc.UpdateIncomeRow{
+			updated := sqlc.Income{
 				ID:                   row.ID,
 				UserID:               row.UserID,
 				BudgetID:             row.BudgetID,

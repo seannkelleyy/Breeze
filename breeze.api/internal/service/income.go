@@ -55,10 +55,10 @@ type UpdateIncomeInput struct {
 }
 
 type incomeQuerier interface {
-	CreateIncome(ctx context.Context, arg sqlc.CreateIncomeParams) (sqlc.CreateIncomeRow, error)
-	GetIncomeByID(ctx context.Context, id uuid.UUID) (sqlc.GetIncomeByIDRow, error)
-	ListIncomeByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListIncomeByBudgetIDRow, error)
-	UpdateIncome(ctx context.Context, arg sqlc.UpdateIncomeParams) (sqlc.UpdateIncomeRow, error)
+	CreateIncome(ctx context.Context, arg sqlc.CreateIncomeParams) (sqlc.Income, error)
+	GetIncomeByID(ctx context.Context, id uuid.UUID) (sqlc.Income, error)
+	ListIncomeByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.Income, error)
+	UpdateIncome(ctx context.Context, arg sqlc.UpdateIncomeParams) (sqlc.Income, error)
 	SoftDeleteIncome(ctx context.Context, id uuid.UUID) (int64, error)
 }
 
@@ -152,7 +152,7 @@ func (s *IncomeService) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func mapCreateIncomeRow(row *sqlc.CreateIncomeRow) Income {
+func mapCreateIncomeRow(row *sqlc.Income) Income {
 	return Income{
 		ID:                   row.ID,
 		UserID:               row.UserID,
@@ -170,7 +170,7 @@ func mapCreateIncomeRow(row *sqlc.CreateIncomeRow) Income {
 	}
 }
 
-func mapGetIncomeByIDRow(row *sqlc.GetIncomeByIDRow) Income {
+func mapGetIncomeByIDRow(row *sqlc.Income) Income {
 	return Income{
 		ID:                   row.ID,
 		UserID:               row.UserID,
@@ -188,7 +188,7 @@ func mapGetIncomeByIDRow(row *sqlc.GetIncomeByIDRow) Income {
 	}
 }
 
-func mapListIncomeByBudgetIDRow(row *sqlc.ListIncomeByBudgetIDRow) Income {
+func mapListIncomeByBudgetIDRow(row *sqlc.Income) Income {
 	return Income{
 		ID:                   row.ID,
 		UserID:               row.UserID,
@@ -206,7 +206,7 @@ func mapListIncomeByBudgetIDRow(row *sqlc.ListIncomeByBudgetIDRow) Income {
 	}
 }
 
-func mapUpdateIncomeRow(row *sqlc.UpdateIncomeRow) Income {
+func mapUpdateIncomeRow(row *sqlc.Income) Income {
 	return Income{
 		ID:                   row.ID,
 		UserID:               row.UserID,

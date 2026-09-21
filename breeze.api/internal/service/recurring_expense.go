@@ -50,10 +50,10 @@ type UpdateRecurringExpenseInput struct {
 }
 
 type recurringExpenseQuerier interface {
-	CreateRecurringExpense(ctx context.Context, arg sqlc.CreateRecurringExpenseParams) (sqlc.CreateRecurringExpenseRow, error)
-	GetRecurringExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.GetRecurringExpenseByIDRow, error)
-	ListRecurringExpensesByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListRecurringExpensesByUserIDRow, error)
-	UpdateRecurringExpense(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.UpdateRecurringExpenseRow, error)
+	CreateRecurringExpense(ctx context.Context, arg sqlc.CreateRecurringExpenseParams) (sqlc.RecurringExpense, error)
+	GetRecurringExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.RecurringExpense, error)
+	ListRecurringExpensesByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.RecurringExpense, error)
+	UpdateRecurringExpense(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.RecurringExpense, error)
 	SoftDeleteRecurringExpense(ctx context.Context, id uuid.UUID) (int64, error)
 }
 
@@ -179,7 +179,7 @@ func (e *RecurringExpense) MonthlyAmount() decimal.Decimal {
 	return monthly
 }
 
-func mapCreateRecurringExpenseRow(row *sqlc.CreateRecurringExpenseRow) RecurringExpense {
+func mapCreateRecurringExpenseRow(row *sqlc.RecurringExpense) RecurringExpense {
 	return RecurringExpense{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -195,7 +195,7 @@ func mapCreateRecurringExpenseRow(row *sqlc.CreateRecurringExpenseRow) Recurring
 	}
 }
 
-func mapGetRecurringExpenseByIDRow(row *sqlc.GetRecurringExpenseByIDRow) RecurringExpense {
+func mapGetRecurringExpenseByIDRow(row *sqlc.RecurringExpense) RecurringExpense {
 	return RecurringExpense{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -211,7 +211,7 @@ func mapGetRecurringExpenseByIDRow(row *sqlc.GetRecurringExpenseByIDRow) Recurri
 	}
 }
 
-func mapListRecurringExpensesByUserIDRow(row *sqlc.ListRecurringExpensesByUserIDRow) RecurringExpense {
+func mapListRecurringExpensesByUserIDRow(row *sqlc.RecurringExpense) RecurringExpense {
 	return RecurringExpense{
 		ID:                 row.ID,
 		UserID:             row.UserID,
@@ -227,7 +227,7 @@ func mapListRecurringExpensesByUserIDRow(row *sqlc.ListRecurringExpensesByUserID
 	}
 }
 
-func mapUpdateRecurringExpenseRow(row *sqlc.UpdateRecurringExpenseRow) RecurringExpense {
+func mapUpdateRecurringExpenseRow(row *sqlc.RecurringExpense) RecurringExpense {
 	return RecurringExpense{
 		ID:                 row.ID,
 		UserID:             row.UserID,

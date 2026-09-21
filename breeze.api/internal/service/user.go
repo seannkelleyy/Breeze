@@ -65,13 +65,13 @@ type UpdateUserInput struct {
 }
 
 type userQuerier interface {
-	CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.CreateUserRow, error)
-	GetUserByID(ctx context.Context, id uuid.UUID) (sqlc.GetUserByIDRow, error)
-	GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (sqlc.GetUserByIdentityProviderIDRow, error)
-	GetOrCreateUserByEmail(ctx context.Context, arg sqlc.GetOrCreateUserByEmailParams) (sqlc.GetOrCreateUserByEmailRow, error)
-	ListUsers(ctx context.Context) ([]sqlc.ListUsersRow, error)
-	UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.UpdateUserRow, error)
-	UpdateUserSetup(ctx context.Context, arg sqlc.UpdateUserSetupParams) (sqlc.UpdateUserSetupRow, error)
+	CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (sqlc.User, error)
+	GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (sqlc.User, error)
+	GetOrCreateUserByEmail(ctx context.Context, arg sqlc.GetOrCreateUserByEmailParams) (sqlc.User, error)
+	ListUsers(ctx context.Context) ([]sqlc.User, error)
+	UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.User, error)
+	UpdateUserSetup(ctx context.Context, arg sqlc.UpdateUserSetupParams) (sqlc.User, error)
 }
 
 type UserService struct {

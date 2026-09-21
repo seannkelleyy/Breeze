@@ -50,22 +50,7 @@ type CreateExpenseCategoryParams struct {
 	GenerationMonth  pgtype.Date       `json:"generation_month"`
 }
 
-type CreateExpenseCategoryRow struct {
-	ID               uuid.UUID          `json:"id"`
-	UserID           uuid.UUID          `json:"user_id"`
-	BudgetID         uuid.UUID          `json:"budget_id"`
-	Name             string             `json:"name"`
-	Allocation       decimal.Decimal    `json:"allocation"`
-	CurrentSpend     decimal.Decimal    `json:"current_spend"`
-	SourceType       ExpenseSourceType  `json:"source_type"`
-	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
-	GenerationMonth  pgtype.Date        `json:"generation_month"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) CreateExpenseCategory(ctx context.Context, arg CreateExpenseCategoryParams) (CreateExpenseCategoryRow, error) {
+func (q *Queries) CreateExpenseCategory(ctx context.Context, arg CreateExpenseCategoryParams) (ExpenseCategory, error) {
 	row := q.db.QueryRow(ctx, createExpenseCategory,
 		arg.UserID,
 		arg.BudgetID,
@@ -76,7 +61,7 @@ func (q *Queries) CreateExpenseCategory(ctx context.Context, arg CreateExpenseCa
 		arg.SourceTemplateID,
 		arg.GenerationMonth,
 	)
-	var i CreateExpenseCategoryRow
+	var i ExpenseCategory
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -114,30 +99,15 @@ WHERE budget_id = $1
 ORDER BY created_at DESC
 `
 
-type ListExpenseCategoriesByBudgetIDRow struct {
-	ID               uuid.UUID          `json:"id"`
-	UserID           uuid.UUID          `json:"user_id"`
-	BudgetID         uuid.UUID          `json:"budget_id"`
-	Name             string             `json:"name"`
-	Allocation       decimal.Decimal    `json:"allocation"`
-	CurrentSpend     decimal.Decimal    `json:"current_spend"`
-	SourceType       ExpenseSourceType  `json:"source_type"`
-	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
-	GenerationMonth  pgtype.Date        `json:"generation_month"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]ListExpenseCategoriesByBudgetIDRow, error) {
+func (q *Queries) ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]ExpenseCategory, error) {
 	rows, err := q.db.Query(ctx, listExpenseCategoriesByBudgetID, budgetID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListExpenseCategoriesByBudgetIDRow
+	var items []ExpenseCategory
 	for rows.Next() {
-		var i ListExpenseCategoriesByBudgetIDRow
+		var i ExpenseCategory
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -226,29 +196,14 @@ type UpdateExpenseCategoryParams struct {
 	CurrentSpend decimal.Decimal `json:"current_spend"`
 }
 
-type UpdateExpenseCategoryRow struct {
-	ID               uuid.UUID          `json:"id"`
-	UserID           uuid.UUID          `json:"user_id"`
-	BudgetID         uuid.UUID          `json:"budget_id"`
-	Name             string             `json:"name"`
-	Allocation       decimal.Decimal    `json:"allocation"`
-	CurrentSpend     decimal.Decimal    `json:"current_spend"`
-	SourceType       ExpenseSourceType  `json:"source_type"`
-	SourceTemplateID pgtype.UUID        `json:"source_template_id"`
-	GenerationMonth  pgtype.Date        `json:"generation_month"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) UpdateExpenseCategory(ctx context.Context, arg UpdateExpenseCategoryParams) (UpdateExpenseCategoryRow, error) {
+func (q *Queries) UpdateExpenseCategory(ctx context.Context, arg UpdateExpenseCategoryParams) (ExpenseCategory, error) {
 	row := q.db.QueryRow(ctx, updateExpenseCategory,
 		arg.ID,
 		arg.Name,
 		arg.Allocation,
 		arg.CurrentSpend,
 	)
-	var i UpdateExpenseCategoryRow
+	var i ExpenseCategory
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,

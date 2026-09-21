@@ -10,7 +10,7 @@ import (
 )
 
 const getContributionLimitByAccountTypeAndTaxYear = `-- name: GetContributionLimitByAccountTypeAndTaxYear :one
-SELECT id, account_type, tax_year, annual_limit, catch_up_age, catch_up_amount, created_at, updated_at, deleted_at, family_annual_limit, super_catch_up_amount FROM contribution_limits
+SELECT id, account_type, tax_year, annual_limit, catch_up_age, catch_up_amount, family_annual_limit, super_catch_up_amount, created_at, updated_at, deleted_at FROM contribution_limits
 WHERE account_type = $1
   AND tax_year = $2
   AND deleted_at IS NULL
@@ -32,17 +32,17 @@ func (q *Queries) GetContributionLimitByAccountTypeAndTaxYear(ctx context.Contex
 		&i.AnnualLimit,
 		&i.CatchUpAge,
 		&i.CatchUpAmount,
+		&i.FamilyAnnualLimit,
+		&i.SuperCatchUpAmount,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
-		&i.FamilyAnnualLimit,
-		&i.SuperCatchUpAmount,
 	)
 	return i, err
 }
 
 const listContributionLimitsByTaxYear = `-- name: ListContributionLimitsByTaxYear :many
-SELECT id, account_type, tax_year, annual_limit, catch_up_age, catch_up_amount, created_at, updated_at, deleted_at, family_annual_limit, super_catch_up_amount FROM contribution_limits
+SELECT id, account_type, tax_year, annual_limit, catch_up_age, catch_up_amount, family_annual_limit, super_catch_up_amount, created_at, updated_at, deleted_at FROM contribution_limits
 WHERE tax_year = $1
   AND deleted_at IS NULL
 ORDER BY account_type
@@ -64,11 +64,11 @@ func (q *Queries) ListContributionLimitsByTaxYear(ctx context.Context, taxYear i
 			&i.AnnualLimit,
 			&i.CatchUpAge,
 			&i.CatchUpAmount,
+			&i.FamilyAnnualLimit,
+			&i.SuperCatchUpAmount,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
-			&i.FamilyAnnualLimit,
-			&i.SuperCatchUpAmount,
 		); err != nil {
 			return nil, err
 		}

@@ -38,7 +38,7 @@ type UpsertPaycheckDeductionInput struct {
 }
 
 type paycheckDeductionQuerier interface {
-	UpsertPaycheckDeduction(ctx context.Context, arg sqlc.UpsertPaycheckDeductionParams) (sqlc.UpsertPaycheckDeductionRow, error)
+	UpsertPaycheckDeduction(ctx context.Context, arg sqlc.UpsertPaycheckDeductionParams) (sqlc.PaycheckDeduction, error)
 	ListPaycheckDeductionsByPersonID(ctx context.Context, arg sqlc.ListPaycheckDeductionsByPersonIDParams) ([]sqlc.PaycheckDeduction, error)
 	ListPaycheckDeductionsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.PaycheckDeduction, error)
 	SoftDeletePaycheckDeduction(ctx context.Context, id uuid.UUID) (int64, error)
@@ -117,7 +117,7 @@ func (s *PaycheckDeductionService) Delete(ctx context.Context, id uuid.UUID) err
 	return nil
 }
 
-func mapUpsertRowToPaycheckDeduction(row sqlc.UpsertPaycheckDeductionRow) PaycheckDeduction {
+func mapUpsertRowToPaycheckDeduction(row sqlc.PaycheckDeduction) PaycheckDeduction {
 	return PaycheckDeduction{
 		ID:              row.ID,
 		UserID:          row.UserID,

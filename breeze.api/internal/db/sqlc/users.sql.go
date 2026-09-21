@@ -65,30 +65,7 @@ type CreateUserParams struct {
 	PayoffStrategy     PayoffStrategy  `json:"payoff_strategy"`
 }
 
-type CreateUserRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	Email                string             `json:"email"`
-	IdentityProviderID   string             `json:"identity_provider_id"`
-	ReturnType           ReturnType         `json:"return_type"`
-	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType         string             `json:"currency_type"`
-	InflationRate        decimal.Decimal    `json:"inflation_rate"`
-	DeductionType        DeductionType      `json:"deduction_type"`
-	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus         FilingStatus       `json:"filing_status"`
-	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
-	BudgetEnabled        bool               `json:"budget_enabled"`
-	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
-	SetupCompleted       bool               `json:"setup_completed"`
-	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
-	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser,
 		arg.Email,
 		arg.IdentityProviderID,
@@ -102,7 +79,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		arg.FilingStatus,
 		arg.PayoffStrategy,
 	)
-	var i CreateUserRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
@@ -185,30 +162,7 @@ type GetOrCreateUserByEmailParams struct {
 	PayoffStrategy     PayoffStrategy  `json:"payoff_strategy"`
 }
 
-type GetOrCreateUserByEmailRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	Email                string             `json:"email"`
-	IdentityProviderID   string             `json:"identity_provider_id"`
-	ReturnType           ReturnType         `json:"return_type"`
-	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType         string             `json:"currency_type"`
-	InflationRate        decimal.Decimal    `json:"inflation_rate"`
-	DeductionType        DeductionType      `json:"deduction_type"`
-	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus         FilingStatus       `json:"filing_status"`
-	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
-	BudgetEnabled        bool               `json:"budget_enabled"`
-	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
-	SetupCompleted       bool               `json:"setup_completed"`
-	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
-	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) GetOrCreateUserByEmail(ctx context.Context, arg GetOrCreateUserByEmailParams) (GetOrCreateUserByEmailRow, error) {
+func (q *Queries) GetOrCreateUserByEmail(ctx context.Context, arg GetOrCreateUserByEmailParams) (User, error) {
 	row := q.db.QueryRow(ctx, getOrCreateUserByEmail,
 		arg.Email,
 		arg.IdentityProviderID,
@@ -222,7 +176,7 @@ func (q *Queries) GetOrCreateUserByEmail(ctx context.Context, arg GetOrCreateUse
 		arg.FilingStatus,
 		arg.PayoffStrategy,
 	)
-	var i GetOrCreateUserByEmailRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
@@ -276,32 +230,9 @@ WHERE id = $1
 LIMIT 1
 `
 
-type GetUserByIDRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	Email                string             `json:"email"`
-	IdentityProviderID   string             `json:"identity_provider_id"`
-	ReturnType           ReturnType         `json:"return_type"`
-	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType         string             `json:"currency_type"`
-	InflationRate        decimal.Decimal    `json:"inflation_rate"`
-	DeductionType        DeductionType      `json:"deduction_type"`
-	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus         FilingStatus       `json:"filing_status"`
-	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
-	BudgetEnabled        bool               `json:"budget_enabled"`
-	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
-	SetupCompleted       bool               `json:"setup_completed"`
-	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
-	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
-	var i GetUserByIDRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
@@ -355,32 +286,9 @@ WHERE identity_provider_id = $1
 LIMIT 1
 `
 
-type GetUserByIdentityProviderIDRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	Email                string             `json:"email"`
-	IdentityProviderID   string             `json:"identity_provider_id"`
-	ReturnType           ReturnType         `json:"return_type"`
-	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType         string             `json:"currency_type"`
-	InflationRate        decimal.Decimal    `json:"inflation_rate"`
-	DeductionType        DeductionType      `json:"deduction_type"`
-	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus         FilingStatus       `json:"filing_status"`
-	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
-	BudgetEnabled        bool               `json:"budget_enabled"`
-	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
-	SetupCompleted       bool               `json:"setup_completed"`
-	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
-	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (GetUserByIdentityProviderIDRow, error) {
+func (q *Queries) GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByIdentityProviderID, identityProviderID)
-	var i GetUserByIdentityProviderIDRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
@@ -433,38 +341,15 @@ WHERE deleted_at IS NULL
 ORDER BY created_at DESC
 `
 
-type ListUsersRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	Email                string             `json:"email"`
-	IdentityProviderID   string             `json:"identity_provider_id"`
-	ReturnType           ReturnType         `json:"return_type"`
-	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType         string             `json:"currency_type"`
-	InflationRate        decimal.Decimal    `json:"inflation_rate"`
-	DeductionType        DeductionType      `json:"deduction_type"`
-	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus         FilingStatus       `json:"filing_status"`
-	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
-	BudgetEnabled        bool               `json:"budget_enabled"`
-	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
-	SetupCompleted       bool               `json:"setup_completed"`
-	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
-	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
+func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 	rows, err := q.db.Query(ctx, listUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListUsersRow
+	var items []User
 	for rows.Next() {
-		var i ListUsersRow
+		var i User
 		if err := rows.Scan(
 			&i.ID,
 			&i.Email,
@@ -552,30 +437,7 @@ type UpdateUserParams struct {
 	PayoffStrategy     PayoffStrategy  `json:"payoff_strategy"`
 }
 
-type UpdateUserRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	Email                string             `json:"email"`
-	IdentityProviderID   string             `json:"identity_provider_id"`
-	ReturnType           ReturnType         `json:"return_type"`
-	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType         string             `json:"currency_type"`
-	InflationRate        decimal.Decimal    `json:"inflation_rate"`
-	DeductionType        DeductionType      `json:"deduction_type"`
-	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus         FilingStatus       `json:"filing_status"`
-	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
-	BudgetEnabled        bool               `json:"budget_enabled"`
-	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
-	SetupCompleted       bool               `json:"setup_completed"`
-	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
-	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, updateUser,
 		arg.ID,
 		arg.Email,
@@ -590,7 +452,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateU
 		arg.FilingStatus,
 		arg.PayoffStrategy,
 	)
-	var i UpdateUserRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
@@ -659,30 +521,7 @@ type UpdateUserSetupParams struct {
 	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
 }
 
-type UpdateUserSetupRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	Email                string             `json:"email"`
-	IdentityProviderID   string             `json:"identity_provider_id"`
-	ReturnType           ReturnType         `json:"return_type"`
-	SafeWithdrawalRate   decimal.Decimal    `json:"safe_withdrawal_rate"`
-	CurrencyType         string             `json:"currency_type"`
-	InflationRate        decimal.Decimal    `json:"inflation_rate"`
-	DeductionType        DeductionType      `json:"deduction_type"`
-	DeductionAmount      pgtype.Numeric     `json:"deduction_amount"`
-	MaxTaxBracketID      pgtype.UUID        `json:"max_tax_bracket_id"`
-	FilingStatus         FilingStatus       `json:"filing_status"`
-	PayoffStrategy       PayoffStrategy     `json:"payoff_strategy"`
-	BudgetEnabled        bool               `json:"budget_enabled"`
-	MonthlyExpenses      pgtype.Numeric     `json:"monthly_expenses"`
-	SetupCompleted       bool               `json:"setup_completed"`
-	DisclaimerAccepted   bool               `json:"disclaimer_accepted"`
-	DisclaimerAcceptedAt pgtype.Timestamptz `json:"disclaimer_accepted_at"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) UpdateUserSetup(ctx context.Context, arg UpdateUserSetupParams) (UpdateUserSetupRow, error) {
+func (q *Queries) UpdateUserSetup(ctx context.Context, arg UpdateUserSetupParams) (User, error) {
 	row := q.db.QueryRow(ctx, updateUserSetup,
 		arg.ID,
 		arg.BudgetEnabled,
@@ -691,7 +530,7 @@ func (q *Queries) UpdateUserSetup(ctx context.Context, arg UpdateUserSetupParams
 		arg.DisclaimerAccepted,
 		arg.DisclaimerAcceptedAt,
 	)
-	var i UpdateUserSetupRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,

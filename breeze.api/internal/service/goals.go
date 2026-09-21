@@ -62,13 +62,13 @@ type UpdateGoalInput struct {
 }
 
 type goalQuerier interface {
-	CreateGoal(ctx context.Context, arg sqlc.CreateGoalParams) (sqlc.CreateGoalRow, error)
-	GetGoalByID(ctx context.Context, id uuid.UUID) (sqlc.GetGoalByIDRow, error)
-	ListGoalsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListGoalsByUserIDRow, error)
-	UpdateGoal(ctx context.Context, arg sqlc.UpdateGoalParams) (sqlc.UpdateGoalRow, error)
+	CreateGoal(ctx context.Context, arg sqlc.CreateGoalParams) (sqlc.Goal, error)
+	GetGoalByID(ctx context.Context, id uuid.UUID) (sqlc.Goal, error)
+	ListGoalsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Goal, error)
+	UpdateGoal(ctx context.Context, arg sqlc.UpdateGoalParams) (sqlc.Goal, error)
 	SoftDeleteGoal(ctx context.Context, id uuid.UUID) (int64, error)
-	ListFinancialOrderStepsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListFinancialOrderStepsByUserIDRow, error)
-	CreateFinancialOrderSteps(ctx context.Context, userID uuid.UUID) ([]sqlc.CreateFinancialOrderStepsRow, error)
+	ListFinancialOrderStepsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Goal, error)
+	CreateFinancialOrderSteps(ctx context.Context, userID uuid.UUID) ([]sqlc.Goal, error)
 }
 
 type GoalService struct {

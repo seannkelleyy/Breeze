@@ -14,7 +14,7 @@ import (
 )
 
 const listPaycheckDeductionsByPersonID = `-- name: ListPaycheckDeductionsByPersonID :many
-SELECT id, user_id, person_id, name, amount, pretax, created_at, updated_at, deleted_at, kind, linked_account_id FROM paycheck_deductions
+SELECT id, user_id, person_id, name, amount, pretax, kind, linked_account_id, created_at, updated_at, deleted_at FROM paycheck_deductions
 WHERE user_id = $1 AND person_id = $2 AND deleted_at IS NULL
 ORDER BY created_at ASC
 `
@@ -40,11 +40,11 @@ func (q *Queries) ListPaycheckDeductionsByPersonID(ctx context.Context, arg List
 			&i.Name,
 			&i.Amount,
 			&i.Pretax,
+			&i.Kind,
+			&i.LinkedAccountID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
-			&i.Kind,
-			&i.LinkedAccountID,
 		); err != nil {
 			return nil, err
 		}
@@ -57,7 +57,7 @@ func (q *Queries) ListPaycheckDeductionsByPersonID(ctx context.Context, arg List
 }
 
 const listPaycheckDeductionsByUserID = `-- name: ListPaycheckDeductionsByUserID :many
-SELECT id, user_id, person_id, name, amount, pretax, created_at, updated_at, deleted_at, kind, linked_account_id FROM paycheck_deductions
+SELECT id, user_id, person_id, name, amount, pretax, kind, linked_account_id, created_at, updated_at, deleted_at FROM paycheck_deductions
 WHERE user_id = $1 AND deleted_at IS NULL
 ORDER BY created_at ASC
 `
@@ -78,11 +78,11 @@ func (q *Queries) ListPaycheckDeductionsByUserID(ctx context.Context, userID uui
 			&i.Name,
 			&i.Amount,
 			&i.Pretax,
+			&i.Kind,
+			&i.LinkedAccountID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
-			&i.Kind,
-			&i.LinkedAccountID,
 		); err != nil {
 			return nil, err
 		}
@@ -130,21 +130,7 @@ type UpsertPaycheckDeductionParams struct {
 	LinkedAccountID pgtype.UUID     `json:"linked_account_id"`
 }
 
-type UpsertPaycheckDeductionRow struct {
-	ID              uuid.UUID          `json:"id"`
-	UserID          uuid.UUID          `json:"user_id"`
-	PersonID        uuid.UUID          `json:"person_id"`
-	Name            string             `json:"name"`
-	Amount          decimal.Decimal    `json:"amount"`
-	Pretax          bool               `json:"pretax"`
-	Kind            string             `json:"kind"`
-	LinkedAccountID pgtype.UUID        `json:"linked_account_id"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) UpsertPaycheckDeduction(ctx context.Context, arg UpsertPaycheckDeductionParams) (UpsertPaycheckDeductionRow, error) {
+func (q *Queries) UpsertPaycheckDeduction(ctx context.Context, arg UpsertPaycheckDeductionParams) (PaycheckDeduction, error) {
 	row := q.db.QueryRow(ctx, upsertPaycheckDeduction,
 		arg.ID,
 		arg.UserID,
@@ -155,7 +141,7 @@ func (q *Queries) UpsertPaycheckDeduction(ctx context.Context, arg UpsertPaychec
 		arg.Kind,
 		arg.LinkedAccountID,
 	)
-	var i UpsertPaycheckDeductionRow
+	var i PaycheckDeduction
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,

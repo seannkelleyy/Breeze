@@ -13,41 +13,41 @@ import (
 )
 
 type mockGoalQuerier struct {
-	createGoalFunc                func(context.Context, sqlc.CreateGoalParams) (sqlc.CreateGoalRow, error)
-	getGoalByIDFunc               func(context.Context, uuid.UUID) (sqlc.GetGoalByIDRow, error)
-	listGoalsFunc                 func(context.Context, uuid.UUID) ([]sqlc.ListGoalsByUserIDRow, error)
-	updateGoalFunc                func(context.Context, sqlc.UpdateGoalParams) (sqlc.UpdateGoalRow, error)
+	createGoalFunc                func(context.Context, sqlc.CreateGoalParams) (sqlc.Goal, error)
+	getGoalByIDFunc               func(context.Context, uuid.UUID) (sqlc.Goal, error)
+	listGoalsFunc                 func(context.Context, uuid.UUID) ([]sqlc.Goal, error)
+	updateGoalFunc                func(context.Context, sqlc.UpdateGoalParams) (sqlc.Goal, error)
 	softDeleteGoalFunc            func(context.Context, uuid.UUID) (int64, error)
-	listFinancialOrderStepsFunc   func(context.Context, uuid.UUID) ([]sqlc.ListFinancialOrderStepsByUserIDRow, error)
-	createFinancialOrderStepsFunc func(context.Context, uuid.UUID) ([]sqlc.CreateFinancialOrderStepsRow, error)
+	listFinancialOrderStepsFunc   func(context.Context, uuid.UUID) ([]sqlc.Goal, error)
+	createFinancialOrderStepsFunc func(context.Context, uuid.UUID) ([]sqlc.Goal, error)
 }
 
-func (m *mockGoalQuerier) CreateGoal(ctx context.Context, arg sqlc.CreateGoalParams) (sqlc.CreateGoalRow, error) {
+func (m *mockGoalQuerier) CreateGoal(ctx context.Context, arg sqlc.CreateGoalParams) (sqlc.Goal, error) {
 	if m.createGoalFunc != nil {
 		return m.createGoalFunc(ctx, arg)
 	}
-	return sqlc.CreateGoalRow{}, nil
+	return sqlc.Goal{}, nil
 }
 
-func (m *mockGoalQuerier) GetGoalByID(ctx context.Context, id uuid.UUID) (sqlc.GetGoalByIDRow, error) {
+func (m *mockGoalQuerier) GetGoalByID(ctx context.Context, id uuid.UUID) (sqlc.Goal, error) {
 	if m.getGoalByIDFunc != nil {
 		return m.getGoalByIDFunc(ctx, id)
 	}
-	return sqlc.GetGoalByIDRow{}, nil
+	return sqlc.Goal{}, nil
 }
 
-func (m *mockGoalQuerier) ListGoalsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListGoalsByUserIDRow, error) {
+func (m *mockGoalQuerier) ListGoalsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Goal, error) {
 	if m.listGoalsFunc != nil {
 		return m.listGoalsFunc(ctx, userID)
 	}
-	return []sqlc.ListGoalsByUserIDRow{}, nil
+	return []sqlc.Goal{}, nil
 }
 
-func (m *mockGoalQuerier) UpdateGoal(ctx context.Context, arg sqlc.UpdateGoalParams) (sqlc.UpdateGoalRow, error) {
+func (m *mockGoalQuerier) UpdateGoal(ctx context.Context, arg sqlc.UpdateGoalParams) (sqlc.Goal, error) {
 	if m.updateGoalFunc != nil {
 		return m.updateGoalFunc(ctx, arg)
 	}
-	return sqlc.UpdateGoalRow{}, nil
+	return sqlc.Goal{}, nil
 }
 
 func (m *mockGoalQuerier) SoftDeleteGoal(ctx context.Context, id uuid.UUID) (int64, error) {
@@ -57,24 +57,24 @@ func (m *mockGoalQuerier) SoftDeleteGoal(ctx context.Context, id uuid.UUID) (int
 	return 0, nil
 }
 
-func (m *mockGoalQuerier) ListFinancialOrderStepsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListFinancialOrderStepsByUserIDRow, error) {
+func (m *mockGoalQuerier) ListFinancialOrderStepsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Goal, error) {
 	if m.listFinancialOrderStepsFunc != nil {
 		return m.listFinancialOrderStepsFunc(ctx, userID)
 	}
-	return []sqlc.ListFinancialOrderStepsByUserIDRow{}, nil
+	return []sqlc.Goal{}, nil
 }
 
-func (m *mockGoalQuerier) CreateFinancialOrderSteps(ctx context.Context, userID uuid.UUID) ([]sqlc.CreateFinancialOrderStepsRow, error) {
+func (m *mockGoalQuerier) CreateFinancialOrderSteps(ctx context.Context, userID uuid.UUID) ([]sqlc.Goal, error) {
 	if m.createFinancialOrderStepsFunc != nil {
 		return m.createFinancialOrderStepsFunc(ctx, userID)
 	}
-	return []sqlc.CreateFinancialOrderStepsRow{}, nil
+	return []sqlc.Goal{}, nil
 }
 
-func testGoalRow() sqlc.CreateGoalRow {
+func testGoalRow() sqlc.Goal {
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.CreateGoalRow{
+	return sqlc.Goal{
 		ID:          uuid.New(),
 		UserID:      uuid.New(),
 		Description: "Build emergency fund",
@@ -85,16 +85,16 @@ func testGoalRow() sqlc.CreateGoalRow {
 	}
 }
 
-func goalRowToGetById(row sqlc.CreateGoalRow) sqlc.GetGoalByIDRow {
-	return sqlc.GetGoalByIDRow(row)
+func goalRowToGetById(row sqlc.Goal) sqlc.Goal {
+	return sqlc.Goal(row)
 }
 
-func goalRowToList(row sqlc.CreateGoalRow) sqlc.ListGoalsByUserIDRow {
-	return sqlc.ListGoalsByUserIDRow(row)
+func goalRowToList(row sqlc.Goal) sqlc.Goal {
+	return sqlc.Goal(row)
 }
 
-func goalRowToUpdate(row sqlc.CreateGoalRow) sqlc.UpdateGoalRow {
-	return sqlc.UpdateGoalRow(row)
+func goalRowToUpdate(row sqlc.Goal) sqlc.Goal {
+	return sqlc.Goal(row)
 }
 
 func TestGoalService_Create(t *testing.T) {
@@ -102,7 +102,7 @@ func TestGoalService_Create(t *testing.T) {
 	row := testGoalRow()
 
 	mock := &mockGoalQuerier{
-		createGoalFunc: func(ctx context.Context, arg sqlc.CreateGoalParams) (sqlc.CreateGoalRow, error) {
+		createGoalFunc: func(ctx context.Context, arg sqlc.CreateGoalParams) (sqlc.Goal, error) {
 			assert.Equal(t, row.UserID, arg.UserID)
 			assert.Equal(t, row.Description, arg.Description)
 			assert.Equal(t, row.IsCompleted, arg.IsCompleted)
@@ -128,7 +128,7 @@ func TestGoalService_GetByID(t *testing.T) {
 
 	t.Run("retrieves by id", func(t *testing.T) {
 		mock := &mockGoalQuerier{
-			getGoalByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetGoalByIDRow, error) {
+			getGoalByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.Goal, error) {
 				assert.Equal(t, row.ID, id)
 				return goalRowToGetById(row), nil
 			},
@@ -144,8 +144,8 @@ func TestGoalService_GetByID(t *testing.T) {
 
 	t.Run("returns not found", func(t *testing.T) {
 		mock := &mockGoalQuerier{
-			getGoalByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.GetGoalByIDRow, error) {
-				return sqlc.GetGoalByIDRow{}, pgx.ErrNoRows
+			getGoalByIDFunc: func(ctx context.Context, id uuid.UUID) (sqlc.Goal, error) {
+				return sqlc.Goal{}, pgx.ErrNoRows
 			},
 		}
 
@@ -166,9 +166,9 @@ func TestGoalService_ListByUserID(t *testing.T) {
 	row2.IsCompleted = true
 
 	mock := &mockGoalQuerier{
-		listGoalsFunc: func(ctx context.Context, userID uuid.UUID) ([]sqlc.ListGoalsByUserIDRow, error) {
+		listGoalsFunc: func(ctx context.Context, userID uuid.UUID) ([]sqlc.Goal, error) {
 			assert.Equal(t, row1.UserID, userID)
-			return []sqlc.ListGoalsByUserIDRow{goalRowToList(row1), goalRowToList(row2)}, nil
+			return []sqlc.Goal{goalRowToList(row1), goalRowToList(row2)}, nil
 		},
 	}
 
@@ -186,7 +186,7 @@ func TestGoalService_Update(t *testing.T) {
 	row := testGoalRow()
 
 	mock := &mockGoalQuerier{
-		updateGoalFunc: func(ctx context.Context, arg sqlc.UpdateGoalParams) (sqlc.UpdateGoalRow, error) {
+		updateGoalFunc: func(ctx context.Context, arg sqlc.UpdateGoalParams) (sqlc.Goal, error) {
 			assert.Equal(t, row.ID, arg.ID)
 			assert.Equal(t, row.Description, arg.Description)
 			assert.True(t, arg.IsCompleted)

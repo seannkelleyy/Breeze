@@ -69,10 +69,10 @@ type UpdateExpenseInput struct {
 }
 
 type expenseQuerier interface {
-	CreateExpense(ctx context.Context, arg sqlc.CreateExpenseParams) (sqlc.CreateExpenseRow, error)
-	GetExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.GetExpenseByIDRow, error)
-	ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListExpensesByBudgetIDRow, error)
-	UpdateExpense(ctx context.Context, arg sqlc.UpdateExpenseParams) (sqlc.UpdateExpenseRow, error)
+	CreateExpense(ctx context.Context, arg sqlc.CreateExpenseParams) (sqlc.Expense, error)
+	GetExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.Expense, error)
+	ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.Expense, error)
+	UpdateExpense(ctx context.Context, arg sqlc.UpdateExpenseParams) (sqlc.Expense, error)
 	SoftDeleteExpense(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteGeneratedExpensesByBudget(ctx context.Context, budgetID uuid.UUID) (int64, error)
 	CreateExpenseSplit(ctx context.Context, arg sqlc.CreateExpenseSplitParams) (sqlc.ExpenseSplit, error)
@@ -140,7 +140,7 @@ func (s *ExpenseService) Create(ctx context.Context, input *CreateExpenseInput) 
 		return nil, err
 	}
 
-	var expenseRow sqlc.CreateExpenseRow
+	var expenseRow sqlc.Expense
 	splitRows := make([]sqlc.ExpenseSplit, 0, len(input.Splits))
 
 	err := s.txRunner.Run(ctx, func(q expenseQuerier) error {
@@ -244,7 +244,7 @@ func (s *ExpenseService) Update(ctx context.Context, input *UpdateExpenseInput) 
 		return nil, err
 	}
 
-	var expenseRow sqlc.UpdateExpenseRow
+	var expenseRow sqlc.Expense
 	splitRows := make([]sqlc.ExpenseSplit, 0, len(input.Splits))
 
 	err := s.txRunner.Run(ctx, func(q expenseQuerier) error {
@@ -337,7 +337,7 @@ func validateExpenseSplits(amount decimal.Decimal, splits []ExpenseSplitInput) e
 	return nil
 }
 
-func mapCreateExpenseRow(row *sqlc.CreateExpenseRow) Expense {
+func mapCreateExpenseRow(row *sqlc.Expense) Expense {
 	return Expense{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -354,7 +354,7 @@ func mapCreateExpenseRow(row *sqlc.CreateExpenseRow) Expense {
 	}
 }
 
-func mapGetExpenseByIDRow(row *sqlc.GetExpenseByIDRow) Expense {
+func mapGetExpenseByIDRow(row *sqlc.Expense) Expense {
 	return Expense{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -371,7 +371,7 @@ func mapGetExpenseByIDRow(row *sqlc.GetExpenseByIDRow) Expense {
 	}
 }
 
-func mapListExpensesByBudgetIDRow(row *sqlc.ListExpensesByBudgetIDRow) Expense {
+func mapListExpensesByBudgetIDRow(row *sqlc.Expense) Expense {
 	return Expense{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -388,7 +388,7 @@ func mapListExpensesByBudgetIDRow(row *sqlc.ListExpensesByBudgetIDRow) Expense {
 	}
 }
 
-func mapUpdateExpenseRow(row *sqlc.UpdateExpenseRow) Expense {
+func mapUpdateExpenseRow(row *sqlc.Expense) Expense {
 	return Expense{
 		ID:               row.ID,
 		UserID:           row.UserID,

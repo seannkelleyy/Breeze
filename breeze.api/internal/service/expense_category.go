@@ -45,9 +45,9 @@ type UpdateExpenseCategoryInput struct {
 }
 
 type expenseCategoryQuerier interface {
-	CreateExpenseCategory(ctx context.Context, arg sqlc.CreateExpenseCategoryParams) (sqlc.CreateExpenseCategoryRow, error)
-	ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListExpenseCategoriesByBudgetIDRow, error)
-	UpdateExpenseCategory(ctx context.Context, arg sqlc.UpdateExpenseCategoryParams) (sqlc.UpdateExpenseCategoryRow, error)
+	CreateExpenseCategory(ctx context.Context, arg sqlc.CreateExpenseCategoryParams) (sqlc.ExpenseCategory, error)
+	ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ExpenseCategory, error)
+	UpdateExpenseCategory(ctx context.Context, arg sqlc.UpdateExpenseCategoryParams) (sqlc.ExpenseCategory, error)
 	SoftDeleteExpenseCategory(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteGeneratedCategoriesByBudget(ctx context.Context, budgetID uuid.UUID) (int64, error)
 }
@@ -122,7 +122,7 @@ func (s *ExpenseCategoryService) Delete(ctx context.Context, id uuid.UUID) error
 	return nil
 }
 
-func mapCreateExpenseCategoryRow(row *sqlc.CreateExpenseCategoryRow) ExpenseCategory {
+func mapCreateExpenseCategoryRow(row *sqlc.ExpenseCategory) ExpenseCategory {
 	return ExpenseCategory{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -138,7 +138,7 @@ func mapCreateExpenseCategoryRow(row *sqlc.CreateExpenseCategoryRow) ExpenseCate
 	}
 }
 
-func mapListExpenseCategoriesByBudgetIDRow(row *sqlc.ListExpenseCategoriesByBudgetIDRow) ExpenseCategory {
+func mapListExpenseCategoriesByBudgetIDRow(row *sqlc.ExpenseCategory) ExpenseCategory {
 	return ExpenseCategory{
 		ID:               row.ID,
 		UserID:           row.UserID,
@@ -154,7 +154,7 @@ func mapListExpenseCategoriesByBudgetIDRow(row *sqlc.ListExpenseCategoriesByBudg
 	}
 }
 
-func mapUpdateExpenseCategoryRow(row *sqlc.UpdateExpenseCategoryRow) ExpenseCategory {
+func mapUpdateExpenseCategoryRow(row *sqlc.ExpenseCategory) ExpenseCategory {
 	return ExpenseCategory{
 		ID:               row.ID,
 		UserID:           row.UserID,

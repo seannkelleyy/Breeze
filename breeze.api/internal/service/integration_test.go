@@ -30,7 +30,7 @@ func getTestPool(t *testing.T) *pgxpool.Pool {
 }
 
 // createTestUser creates a user directly via sqlc and returns the row.
-func createTestUser(t *testing.T, q *dbsqlc.Queries) dbsqlc.CreateUserRow {
+func createTestUser(t *testing.T, q *dbsqlc.Queries) dbsqlc.User {
 	t.Helper()
 	ctx := context.Background()
 	row, err := q.CreateUser(ctx, dbsqlc.CreateUserParams{

@@ -56,24 +56,7 @@ type CreateIncomeParams struct {
 	PersonID             pgtype.UUID      `json:"person_id"`
 }
 
-type CreateIncomeRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	UserID               uuid.UUID          `json:"user_id"`
-	BudgetID             uuid.UUID          `json:"budget_id"`
-	Name                 string             `json:"name"`
-	Amount               decimal.Decimal    `json:"amount"`
-	Date                 pgtype.Date        `json:"date"`
-	SourceType           IncomeSourceType   `json:"source_type"`
-	SourceTemplateID     pgtype.UUID        `json:"source_template_id"`
-	SourceOccurrenceDate pgtype.Date        `json:"source_occurrence_date"`
-	GenerationMonth      pgtype.Date        `json:"generation_month"`
-	PersonID             pgtype.UUID        `json:"person_id"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) CreateIncome(ctx context.Context, arg CreateIncomeParams) (CreateIncomeRow, error) {
+func (q *Queries) CreateIncome(ctx context.Context, arg CreateIncomeParams) (Income, error) {
 	row := q.db.QueryRow(ctx, createIncome,
 		arg.UserID,
 		arg.BudgetID,
@@ -86,7 +69,7 @@ func (q *Queries) CreateIncome(ctx context.Context, arg CreateIncomeParams) (Cre
 		arg.GenerationMonth,
 		arg.PersonID,
 	)
-	var i CreateIncomeRow
+	var i Income
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -143,22 +126,7 @@ type CreateRecurringIncomeParams struct {
 	PersonID           pgtype.UUID        `json:"person_id"`
 }
 
-type CreateRecurringIncomeRow struct {
-	ID                 uuid.UUID          `json:"id"`
-	UserID             uuid.UUID          `json:"user_id"`
-	Name               string             `json:"name"`
-	Amount             decimal.Decimal    `json:"amount"`
-	RecurrenceInterval RecurrenceInterval `json:"recurrence_interval"`
-	PaydayDayOfMonth   *int32             `json:"payday_day_of_month"`
-	StartDate          pgtype.Date        `json:"start_date"`
-	EndDate            pgtype.Date        `json:"end_date"`
-	PersonID           pgtype.UUID        `json:"person_id"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) CreateRecurringIncome(ctx context.Context, arg CreateRecurringIncomeParams) (CreateRecurringIncomeRow, error) {
+func (q *Queries) CreateRecurringIncome(ctx context.Context, arg CreateRecurringIncomeParams) (RecurringIncome, error) {
 	row := q.db.QueryRow(ctx, createRecurringIncome,
 		arg.UserID,
 		arg.Name,
@@ -169,7 +137,7 @@ func (q *Queries) CreateRecurringIncome(ctx context.Context, arg CreateRecurring
 		arg.EndDate,
 		arg.PersonID,
 	)
-	var i CreateRecurringIncomeRow
+	var i RecurringIncome
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -209,26 +177,9 @@ WHERE id = $1
 LIMIT 1
 `
 
-type GetIncomeByIDRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	UserID               uuid.UUID          `json:"user_id"`
-	BudgetID             uuid.UUID          `json:"budget_id"`
-	Name                 string             `json:"name"`
-	Amount               decimal.Decimal    `json:"amount"`
-	Date                 pgtype.Date        `json:"date"`
-	SourceType           IncomeSourceType   `json:"source_type"`
-	SourceTemplateID     pgtype.UUID        `json:"source_template_id"`
-	SourceOccurrenceDate pgtype.Date        `json:"source_occurrence_date"`
-	GenerationMonth      pgtype.Date        `json:"generation_month"`
-	PersonID             pgtype.UUID        `json:"person_id"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) GetIncomeByID(ctx context.Context, id uuid.UUID) (GetIncomeByIDRow, error) {
+func (q *Queries) GetIncomeByID(ctx context.Context, id uuid.UUID) (Income, error) {
 	row := q.db.QueryRow(ctx, getIncomeByID, id)
-	var i GetIncomeByIDRow
+	var i Income
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -268,24 +219,9 @@ WHERE id = $1
 LIMIT 1
 `
 
-type GetRecurringIncomeByIDRow struct {
-	ID                 uuid.UUID          `json:"id"`
-	UserID             uuid.UUID          `json:"user_id"`
-	Name               string             `json:"name"`
-	Amount             decimal.Decimal    `json:"amount"`
-	RecurrenceInterval RecurrenceInterval `json:"recurrence_interval"`
-	PaydayDayOfMonth   *int32             `json:"payday_day_of_month"`
-	StartDate          pgtype.Date        `json:"start_date"`
-	EndDate            pgtype.Date        `json:"end_date"`
-	PersonID           pgtype.UUID        `json:"person_id"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) GetRecurringIncomeByID(ctx context.Context, id uuid.UUID) (GetRecurringIncomeByIDRow, error) {
+func (q *Queries) GetRecurringIncomeByID(ctx context.Context, id uuid.UUID) (RecurringIncome, error) {
 	row := q.db.QueryRow(ctx, getRecurringIncomeByID, id)
-	var i GetRecurringIncomeByIDRow
+	var i RecurringIncome
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -325,32 +261,15 @@ WHERE budget_id = $1
 ORDER BY date DESC, created_at DESC
 `
 
-type ListIncomeByBudgetIDRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	UserID               uuid.UUID          `json:"user_id"`
-	BudgetID             uuid.UUID          `json:"budget_id"`
-	Name                 string             `json:"name"`
-	Amount               decimal.Decimal    `json:"amount"`
-	Date                 pgtype.Date        `json:"date"`
-	SourceType           IncomeSourceType   `json:"source_type"`
-	SourceTemplateID     pgtype.UUID        `json:"source_template_id"`
-	SourceOccurrenceDate pgtype.Date        `json:"source_occurrence_date"`
-	GenerationMonth      pgtype.Date        `json:"generation_month"`
-	PersonID             pgtype.UUID        `json:"person_id"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) ListIncomeByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]ListIncomeByBudgetIDRow, error) {
+func (q *Queries) ListIncomeByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]Income, error) {
 	rows, err := q.db.Query(ctx, listIncomeByBudgetID, budgetID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListIncomeByBudgetIDRow
+	var items []Income
 	for rows.Next() {
-		var i ListIncomeByBudgetIDRow
+		var i Income
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -397,30 +316,15 @@ WHERE user_id = $1
 ORDER BY created_at DESC
 `
 
-type ListRecurringIncomeByUserIDRow struct {
-	ID                 uuid.UUID          `json:"id"`
-	UserID             uuid.UUID          `json:"user_id"`
-	Name               string             `json:"name"`
-	Amount             decimal.Decimal    `json:"amount"`
-	RecurrenceInterval RecurrenceInterval `json:"recurrence_interval"`
-	PaydayDayOfMonth   *int32             `json:"payday_day_of_month"`
-	StartDate          pgtype.Date        `json:"start_date"`
-	EndDate            pgtype.Date        `json:"end_date"`
-	PersonID           pgtype.UUID        `json:"person_id"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) ListRecurringIncomeByUserID(ctx context.Context, userID uuid.UUID) ([]ListRecurringIncomeByUserIDRow, error) {
+func (q *Queries) ListRecurringIncomeByUserID(ctx context.Context, userID uuid.UUID) ([]RecurringIncome, error) {
 	rows, err := q.db.Query(ctx, listRecurringIncomeByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListRecurringIncomeByUserIDRow
+	var items []RecurringIncome
 	for rows.Next() {
-		var i ListRecurringIncomeByUserIDRow
+		var i RecurringIncome
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -520,24 +424,7 @@ type UpdateIncomeParams struct {
 	PersonID             pgtype.UUID      `json:"person_id"`
 }
 
-type UpdateIncomeRow struct {
-	ID                   uuid.UUID          `json:"id"`
-	UserID               uuid.UUID          `json:"user_id"`
-	BudgetID             uuid.UUID          `json:"budget_id"`
-	Name                 string             `json:"name"`
-	Amount               decimal.Decimal    `json:"amount"`
-	Date                 pgtype.Date        `json:"date"`
-	SourceType           IncomeSourceType   `json:"source_type"`
-	SourceTemplateID     pgtype.UUID        `json:"source_template_id"`
-	SourceOccurrenceDate pgtype.Date        `json:"source_occurrence_date"`
-	GenerationMonth      pgtype.Date        `json:"generation_month"`
-	PersonID             pgtype.UUID        `json:"person_id"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) UpdateIncome(ctx context.Context, arg UpdateIncomeParams) (UpdateIncomeRow, error) {
+func (q *Queries) UpdateIncome(ctx context.Context, arg UpdateIncomeParams) (Income, error) {
 	row := q.db.QueryRow(ctx, updateIncome,
 		arg.ID,
 		arg.Name,
@@ -549,7 +436,7 @@ func (q *Queries) UpdateIncome(ctx context.Context, arg UpdateIncomeParams) (Upd
 		arg.GenerationMonth,
 		arg.PersonID,
 	)
-	var i UpdateIncomeRow
+	var i Income
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -608,22 +495,7 @@ type UpdateRecurringIncomeParams struct {
 	PersonID           pgtype.UUID        `json:"person_id"`
 }
 
-type UpdateRecurringIncomeRow struct {
-	ID                 uuid.UUID          `json:"id"`
-	UserID             uuid.UUID          `json:"user_id"`
-	Name               string             `json:"name"`
-	Amount             decimal.Decimal    `json:"amount"`
-	RecurrenceInterval RecurrenceInterval `json:"recurrence_interval"`
-	PaydayDayOfMonth   *int32             `json:"payday_day_of_month"`
-	StartDate          pgtype.Date        `json:"start_date"`
-	EndDate            pgtype.Date        `json:"end_date"`
-	PersonID           pgtype.UUID        `json:"person_id"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
-}
-
-func (q *Queries) UpdateRecurringIncome(ctx context.Context, arg UpdateRecurringIncomeParams) (UpdateRecurringIncomeRow, error) {
+func (q *Queries) UpdateRecurringIncome(ctx context.Context, arg UpdateRecurringIncomeParams) (RecurringIncome, error) {
 	row := q.db.QueryRow(ctx, updateRecurringIncome,
 		arg.ID,
 		arg.Name,
@@ -634,7 +506,7 @@ func (q *Queries) UpdateRecurringIncome(ctx context.Context, arg UpdateRecurring
 		arg.EndDate,
 		arg.PersonID,
 	)
-	var i UpdateRecurringIncomeRow
+	var i RecurringIncome
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,

@@ -57,13 +57,13 @@ func (m *mockAssetQuerier) SoftDeleteAsset(ctx context.Context, id uuid.UUID) (i
 	return 0, nil
 }
 
-func testAssetRow() sqlc.Asset {
+func testAssetRow() sqlc.UpdateAssetRow {
 	assetID := uuid.New()
 	userID := uuid.New()
 	currentValue, _ := decimal.Parse("125000.55")
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.Asset{
+	return sqlc.UpdateAssetRow{
 		ID:                 assetID,
 		UserID:             userID,
 		Name:               "Brokerage",

@@ -14,32 +14,32 @@ import (
 )
 
 type mockExpenseCategoryQuerier struct {
-	createExpenseCategoryFunc                 func(context.Context, sqlc.CreateExpenseCategoryParams) (sqlc.CreateExpenseCategoryRow, error)
-	listExpenseCategoriesFunc                 func(context.Context, uuid.UUID) ([]sqlc.ListExpenseCategoriesByBudgetIDRow, error)
-	updateExpenseCategoryFunc                 func(context.Context, sqlc.UpdateExpenseCategoryParams) (sqlc.UpdateExpenseCategoryRow, error)
+	createExpenseCategoryFunc                 func(context.Context, sqlc.CreateExpenseCategoryParams) (sqlc.ExpenseCategory, error)
+	listExpenseCategoriesFunc                 func(context.Context, uuid.UUID) ([]sqlc.ExpenseCategory, error)
+	updateExpenseCategoryFunc                 func(context.Context, sqlc.UpdateExpenseCategoryParams) (sqlc.ExpenseCategory, error)
 	softDeleteExpenseCategoryFunc             func(context.Context, uuid.UUID) (int64, error)
 	softDeleteGeneratedCategoriesByBudgetFunc func(context.Context, uuid.UUID) (int64, error)
 }
 
-func (m *mockExpenseCategoryQuerier) CreateExpenseCategory(ctx context.Context, arg sqlc.CreateExpenseCategoryParams) (sqlc.CreateExpenseCategoryRow, error) {
+func (m *mockExpenseCategoryQuerier) CreateExpenseCategory(ctx context.Context, arg sqlc.CreateExpenseCategoryParams) (sqlc.ExpenseCategory, error) {
 	if m.createExpenseCategoryFunc != nil {
 		return m.createExpenseCategoryFunc(ctx, arg)
 	}
-	return sqlc.CreateExpenseCategoryRow{}, nil
+	return sqlc.ExpenseCategory{}, nil
 }
 
-func (m *mockExpenseCategoryQuerier) ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ListExpenseCategoriesByBudgetIDRow, error) {
+func (m *mockExpenseCategoryQuerier) ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ExpenseCategory, error) {
 	if m.listExpenseCategoriesFunc != nil {
 		return m.listExpenseCategoriesFunc(ctx, budgetID)
 	}
-	return []sqlc.ListExpenseCategoriesByBudgetIDRow{}, nil
+	return []sqlc.ExpenseCategory{}, nil
 }
 
-func (m *mockExpenseCategoryQuerier) UpdateExpenseCategory(ctx context.Context, arg sqlc.UpdateExpenseCategoryParams) (sqlc.UpdateExpenseCategoryRow, error) {
+func (m *mockExpenseCategoryQuerier) UpdateExpenseCategory(ctx context.Context, arg sqlc.UpdateExpenseCategoryParams) (sqlc.ExpenseCategory, error) {
 	if m.updateExpenseCategoryFunc != nil {
 		return m.updateExpenseCategoryFunc(ctx, arg)
 	}
-	return sqlc.UpdateExpenseCategoryRow{}, nil
+	return sqlc.ExpenseCategory{}, nil
 }
 
 func (m *mockExpenseCategoryQuerier) SoftDeleteExpenseCategory(ctx context.Context, id uuid.UUID) (int64, error) {
@@ -56,12 +56,12 @@ func (m *mockExpenseCategoryQuerier) SoftDeleteGeneratedCategoriesByBudget(ctx c
 	return 0, nil
 }
 
-func testCreateExpenseCategoryRow() sqlc.CreateExpenseCategoryRow {
+func testCreateExpenseCategoryRow() sqlc.ExpenseCategory {
 	allocation, _ := decimal.Parse("850.00")
 	currentSpend, _ := decimal.Parse("0")
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
-	return sqlc.CreateExpenseCategoryRow{
+	return sqlc.ExpenseCategory{
 		ID:               uuid.New(),
 		UserID:           uuid.New(),
 		BudgetID:         uuid.New(),
@@ -82,7 +82,7 @@ func TestExpenseCategoryService_Create(t *testing.T) {
 	cat := testCreateExpenseCategoryRow()
 
 	mock := &mockExpenseCategoryQuerier{
-		createExpenseCategoryFunc: func(_ context.Context, _ sqlc.CreateExpenseCategoryParams) (sqlc.CreateExpenseCategoryRow, error) {
+		createExpenseCategoryFunc: func(_ context.Context, _ sqlc.CreateExpenseCategoryParams) (sqlc.ExpenseCategory, error) {
 			return cat, nil
 		},
 	}
@@ -109,8 +109,8 @@ func TestExpenseCategoryService_ListByBudgetID(t *testing.T) {
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
 	mock := &mockExpenseCategoryQuerier{
-		listExpenseCategoriesFunc: func(_ context.Context, _ uuid.UUID) ([]sqlc.ListExpenseCategoriesByBudgetIDRow, error) {
-			return []sqlc.ListExpenseCategoriesByBudgetIDRow{
+		listExpenseCategoriesFunc: func(_ context.Context, _ uuid.UUID) ([]sqlc.ExpenseCategory, error) {
+			return []sqlc.ExpenseCategory{
 				{
 					ID:               uuid.New(),
 					UserID:           uuid.New(),
@@ -144,8 +144,8 @@ func TestExpenseCategoryService_Update(t *testing.T) {
 	timestamp := pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true}
 
 	mock := &mockExpenseCategoryQuerier{
-		updateExpenseCategoryFunc: func(_ context.Context, _ sqlc.UpdateExpenseCategoryParams) (sqlc.UpdateExpenseCategoryRow, error) {
-			return sqlc.UpdateExpenseCategoryRow{
+		updateExpenseCategoryFunc: func(_ context.Context, _ sqlc.UpdateExpenseCategoryParams) (sqlc.ExpenseCategory, error) {
+			return sqlc.ExpenseCategory{
 				ID:               cat.ID,
 				UserID:           cat.UserID,
 				BudgetID:         cat.BudgetID,
@@ -180,8 +180,8 @@ func TestExpenseCategoryService_Update_NotFound(t *testing.T) {
 	currentSpend, _ := decimal.Parse("0")
 
 	mock := &mockExpenseCategoryQuerier{
-		updateExpenseCategoryFunc: func(_ context.Context, _ sqlc.UpdateExpenseCategoryParams) (sqlc.UpdateExpenseCategoryRow, error) {
-			return sqlc.UpdateExpenseCategoryRow{}, pgx.ErrNoRows
+		updateExpenseCategoryFunc: func(_ context.Context, _ sqlc.UpdateExpenseCategoryParams) (sqlc.ExpenseCategory, error) {
+			return sqlc.ExpenseCategory{}, pgx.ErrNoRows
 		},
 	}
 

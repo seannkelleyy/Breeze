@@ -49,8 +49,8 @@ type UpsertPlannerPersonInput struct {
 }
 
 type plannerPersonQuerier interface {
-	UpsertPlannerPerson(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.UpsertPlannerPersonRow, error)
-	ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListPlannerPeopleByUserIDRow, error)
+	UpsertPlannerPerson(ctx context.Context, arg sqlc.UpsertPlannerPersonParams) (sqlc.PlannerPerson, error)
+	ListPlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.PlannerPerson, error)
 	SoftDeletePlannerPerson(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeletePlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) (int64, error)
 }
@@ -114,7 +114,7 @@ func (s *PlannerPersonService) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func mapPlannerPersonRecord(row *sqlc.ListPlannerPeopleByUserIDRow) PlannerPerson {
+func mapPlannerPersonRecord(row *sqlc.PlannerPerson) PlannerPerson {
 	return PlannerPerson{
 		ID:                   row.ID,
 		UserID:               row.UserID,
@@ -136,7 +136,7 @@ func mapPlannerPersonRecord(row *sqlc.ListPlannerPeopleByUserIDRow) PlannerPerso
 	}
 }
 
-func mapPlannerPersonUpsertRecord(row *sqlc.UpsertPlannerPersonRow) PlannerPerson {
+func mapPlannerPersonUpsertRecord(row *sqlc.PlannerPerson) PlannerPerson {
 	return PlannerPerson{
 		ID:                   row.ID,
 		UserID:               row.UserID,
