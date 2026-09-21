@@ -1,5 +1,5 @@
 -- Recreate the public schema dropped by schema-clean
-CREATE SCHEMA public;
+CREATE SCHEMA IF NOT EXISTS public;
 
 -- Create enum type "filing_status"
 CREATE TYPE "filing_status" AS ENUM ('SINGLE', 'MFJ', 'MFS', 'HOH');
