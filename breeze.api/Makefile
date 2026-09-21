@@ -37,6 +37,9 @@ migrate:
 # Apply pending migrations in deploy environments (Render/CI) — uses DATABASE_URL from the environment
 # Downloads the atlas binary directly: the install script needs sudo, and `go run` resolves
 # to an ancient cmd/atlas module version that doesn't compile on modern Go
+seed-deploy:
+	go run ./cmd/seed
+
 migrate-deploy:
 	mkdir -p bin
 	curl -sSfL https://atlasbinaries.com/atlas/atlas-linux-amd64-latest -o bin/atlas
