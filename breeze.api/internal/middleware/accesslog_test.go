@@ -13,7 +13,7 @@ func TestAccessLogMiddleware_RecordsStatus(t *testing.T) {
 	}))
 
 	rec := httptest.NewRecorder()
-	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/query", nil))
+	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/query", http.NoBody))
 
 	loggedStatus = rec.Code
 	if loggedStatus != http.StatusTeapot {
@@ -27,7 +27,7 @@ func TestRecoverMiddleware_Returns500AndRecovers(t *testing.T) {
 	}))
 
 	rec := httptest.NewRecorder()
-	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/query", nil))
+	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/query", http.NoBody))
 
 	if rec.Code != http.StatusInternalServerError {
 		t.Fatalf("expected 500, got %d", rec.Code)
@@ -40,7 +40,7 @@ func TestRecoverMiddleware_PassesHealthyRequestsThrough(t *testing.T) {
 	}))
 
 	rec := httptest.NewRecorder()
-	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/health", nil))
+	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/health", http.NoBody))
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
