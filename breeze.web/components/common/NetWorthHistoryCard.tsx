@@ -42,13 +42,13 @@ const chartConfig = {
  * Net worth history: user-captured snapshots (total-only or full breakdown)
  charted over time, per the roadmap dashboard item.
  */
-export function NetWorthHistoryCard({
-  userId,
-  currencyCode,
-  accounts,
-}: NetWorthHistoryCardProps) {
+export function NetWorthHistoryCard({ userId, currencyCode, accounts }: NetWorthHistoryCardProps) {
   const fc = (v: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, maximumFractionDigits: 0 }).format(v);
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode,
+      maximumFractionDigits: 0,
+    }).format(v);
   const { snapshots, isLoading, createSnapshot, deleteSnapshot } = useNetWorthSnapshots(userId);
 
   const [showAdd, setShowAdd] = useState(false);
@@ -207,7 +207,11 @@ function AddSnapshotDialog({
   }) => Promise<void>;
 }) {
   const fc = (v: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, maximumFractionDigits: 0 }).format(v);
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode,
+      maximumFractionDigits: 0,
+    }).format(v);
   const [snapshotDate, setSnapshotDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [mode, setMode] = useState<'totals' | 'breakdown'>(
     accounts.length > 0 ? 'breakdown' : 'totals',
@@ -224,10 +228,16 @@ function AddSnapshotDialog({
   );
   const [items, setItems] = useState<DraftItem[]>(initialItems);
   const [totalAssets, setTotalAssets] = useState(() =>
-    Math.max(0, accounts.filter((a) => a.kind === 'ASSET').reduce((s, a) => s + a.value, 0)),
+    Math.max(
+      0,
+      accounts.filter((a) => a.kind === 'ASSET').reduce((s, a) => s + a.value, 0),
+    ),
   );
   const [totalLiabilities, setTotalLiabilities] = useState(() =>
-    Math.max(0, accounts.filter((a) => a.kind === 'LIABILITY').reduce((s, a) => s + a.value, 0)),
+    Math.max(
+      0,
+      accounts.filter((a) => a.kind === 'LIABILITY').reduce((s, a) => s + a.value, 0),
+    ),
   );
 
   const itemsAssets = items.filter((i) => i.kind === 'ASSET').reduce((s, i) => s + i.amount, 0);

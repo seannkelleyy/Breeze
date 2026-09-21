@@ -90,7 +90,11 @@ describe('computePersonWaterfall', () => {
   it('pre-tax 401(k) contributions reduce taxable income and take-home', () => {
     const person = makePerson();
     const accounts = [
-      makeAccount({ contributionMode: 'monthly', contributionValue: 1000, taxTreatment: 'PRE_TAX' }),
+      makeAccount({
+        contributionMode: 'monthly',
+        contributionValue: 1000,
+        taxTreatment: 'PRE_TAX',
+      }),
     ];
     const withSavings = wf(person, accounts);
     const withoutSavings = wf(person);
@@ -173,10 +177,7 @@ describe('computePersonWaterfall', () => {
     expect(result.pretaxWithholdingsMonthly).toBe(200);
     expect(result.posttaxWithholdingsMonthly).toBe(100);
     expect(result.taxableMonthly).toBe(9800);
-    expect(result.takeHomeMonthly).toBeCloseTo(
-      result.grossMonthly - result.taxesMonthly - 100,
-      6,
-    );
+    expect(result.takeHomeMonthly).toBeCloseTo(result.grossMonthly - result.taxesMonthly - 100, 6);
   });
 
   it('ignores withholdings that belong to other people', () => {
@@ -190,7 +191,11 @@ describe('computePersonWaterfall', () => {
   it('floors taxable income at zero when pre-tax deductions exceed gross', () => {
     const person = makePerson();
     const accounts = [
-      makeAccount({ contributionMode: 'monthly', contributionValue: 9000, taxTreatment: 'PRE_TAX' }),
+      makeAccount({
+        contributionMode: 'monthly',
+        contributionValue: 9000,
+        taxTreatment: 'PRE_TAX',
+      }),
     ];
     const withholdings = [makeWithholding({ amount: 5000, pretax: true })];
     const result = wf(person, accounts, withholdings);
@@ -200,9 +205,7 @@ describe('computePersonWaterfall', () => {
 
   it('supports salary-percent savings contributions', () => {
     const person = makePerson();
-    const accounts = [
-      makeAccount({ contributionMode: 'salary-percent', contributionValue: 10 }),
-    ];
+    const accounts = [makeAccount({ contributionMode: 'salary-percent', contributionValue: 10 })];
     const result = wf(person, accounts);
     expect(result.savingsMonthly).toBeCloseTo(1000, 6);
   });
@@ -232,9 +235,21 @@ describe('getMonthPayrollIncomes', () => {
   it('creates one row per payday with the net per-check amount', () => {
     const person = makePerson({ name: 'Sean', payCadence: 'biweekly', payDay: 1 });
     const accounts = [
-      makeAccount({ contributionMode: 'monthly', contributionValue: 1000, taxTreatment: 'PRE_TAX' }),
+      makeAccount({
+        contributionMode: 'monthly',
+        contributionValue: 1000,
+        taxTreatment: 'PRE_TAX',
+      }),
     ];
-    const rows = getMonthPayrollIncomes([person], accounts, [], SINGLE_2025_TABLES, 'STANDARD', 2026, 7);
+    const rows = getMonthPayrollIncomes(
+      [person],
+      accounts,
+      [],
+      SINGLE_2025_TABLES,
+      'STANDARD',
+      2026,
+      7,
+    );
 
     // July 2026 biweekly Mondays: 6 and 20
     expect(rows.map((r) => r.date)).toEqual(['2026-07-06', '2026-07-20']);
@@ -261,7 +276,13 @@ describe('computeHouseholdWaterfall', () => {
     ];
     const withholdings = [makeWithholding({ personId: 'p2', amount: 200, pretax: true })];
 
-    const total = computeHouseholdWaterfall([p1, p2], accounts, withholdings, SINGLE_2025_TABLES, 'STANDARD');
+    const total = computeHouseholdWaterfall(
+      [p1, p2],
+      accounts,
+      withholdings,
+      SINGLE_2025_TABLES,
+      'STANDARD',
+    );
     expect(total.grossMonthly).toBeCloseTo(15000, 6);
     expect(total.savingsMonthly).toBe(1000);
     expect(total.pretaxWithholdingsMonthly).toBe(200);

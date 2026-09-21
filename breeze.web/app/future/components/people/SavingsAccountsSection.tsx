@@ -21,14 +21,14 @@ interface SavingsAccountsSectionProps {
  * edited with the same AccountListItem editor as the Accounts page —
  * contributions here feed the paycheck waterfall as pre-tax/Roth deductions.
  */
-export function SavingsAccountsSection({ person, people, currencyCode }: SavingsAccountsSectionProps) {
+export function SavingsAccountsSection({
+  person,
+  people,
+  currencyCode,
+}: SavingsAccountsSectionProps) {
   return (
     <AccountEditorProvider>
-      <SavingsAccountsSectionInner
-        person={person}
-        people={people}
-        currencyCode={currencyCode}
-      />
+      <SavingsAccountsSectionInner person={person} people={people} currencyCode={currencyCode} />
     </AccountEditorProvider>
   );
 }
@@ -88,8 +88,8 @@ function SavingsAccountsSectionInner({ person }: SavingsAccountsSectionProps) {
       </p>
       {savingsAccounts.length === 0 && (
         <p className="text-muted-foreground text-xs">
-          No savings accounts for {person.name || 'this person'} yet — add one here, or set them
-          as an owner from the Accounts page.
+          No savings accounts for {person.name || 'this person'} yet — add one here, or set them as
+          an owner from the Accounts page.
         </p>
       )}
       <div className="space-y-2">

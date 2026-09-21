@@ -67,8 +67,7 @@ export function TransactionsCard({ userId, currencyCode }: TransactionsCardProps
   );
 
   const sorted = useMemo(
-    () =>
-      [...transactions].sort((a, b) => b.date.localeCompare(a.date)),
+    () => [...transactions].sort((a, b) => b.date.localeCompare(a.date)),
     [transactions],
   );
 
@@ -81,8 +80,8 @@ export function TransactionsCard({ userId, currencyCode }: TransactionsCardProps
             <div>
               <CardTitle className="text-sm font-medium">Bank Transactions</CardTitle>
               <CardDescription className="text-xs">
-                {categorizedCount} of {transactions.length} assigned to a spending category · last
-                6 months
+                {categorizedCount} of {transactions.length} assigned to a spending category · last 6
+                months
               </CardDescription>
             </div>
           </div>

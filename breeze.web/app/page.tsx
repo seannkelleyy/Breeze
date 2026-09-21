@@ -30,8 +30,6 @@ import {
 } from 'lucide-react';
 import { NetWorthHistoryCard } from '@/components/common/NetWorthHistoryCard';
 
-
-
 const quickLinks = [
   {
     label: 'Future',

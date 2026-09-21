@@ -36,8 +36,12 @@ export function useAccountEditor(): AccountEditor {
 
 function useAccountEditorState() {
   const { userId, currencyCode } = useCurrentUser();
-  const { plannerPeople, plannerAccounts, plannerAssetFinanceDetailsByAccountId, setPlannerAssetFinanceDetailsByAccountId } =
-    usePlannerState();
+  const {
+    plannerPeople,
+    plannerAccounts,
+    plannerAssetFinanceDetailsByAccountId,
+    setPlannerAssetFinanceDetailsByAccountId,
+  } = usePlannerState();
   const {
     options,
     typeGuards,
@@ -71,10 +75,7 @@ function useAccountEditorState() {
 
         // Combined asset with loan: ensure the linked liability exists and
         // stays in sync with the loan details.
-        if (
-          typeGuards.isCombinedAssetType(account.accountType) &&
-          details?.hasLoan
-        ) {
+        if (typeGuards.isCombinedAssetType(account.accountType) && details?.hasLoan) {
           if (!account.linkedLiabilityId) {
             const loanAccount: PlannerAccount = {
               ...account,

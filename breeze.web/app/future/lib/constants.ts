@@ -117,8 +117,18 @@ export const PLANNER_DEFAULT_NEW_ACCOUNT: {
 };
 
 export const PLANNER_DEFAULT_IRS_LIMITS = {
-  '401k': { baseAnnualLimit: 24500, catchUpAmount: 8000, catchUpAge: 50, superCatchUpAmount: 11250 },
-  '403b': { baseAnnualLimit: 24500, catchUpAmount: 8000, catchUpAge: 50, superCatchUpAmount: 11250 },
+  '401k': {
+    baseAnnualLimit: 24500,
+    catchUpAmount: 8000,
+    catchUpAge: 50,
+    superCatchUpAmount: 11250,
+  },
+  '403b': {
+    baseAnnualLimit: 24500,
+    catchUpAmount: 8000,
+    catchUpAge: 50,
+    superCatchUpAmount: 11250,
+  },
   '457': { baseAnnualLimit: 24500, catchUpAmount: 8000, catchUpAge: 50, superCatchUpAmount: 11250 },
   'roth-ira': { baseAnnualLimit: 7500, catchUpAmount: 1100, catchUpAge: 50 },
   'traditional-ira': {

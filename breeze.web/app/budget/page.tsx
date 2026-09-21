@@ -134,13 +134,17 @@ const BudgetContent = () => {
       <h2 className="text-lg">
         Income:{' '}
         <span className="text-accent font-bold">
-          {budget ? formatCurrencyWithCode(Number(budget.monthlyIncome), currencyCode) : 'Loading...'}
+          {budget
+            ? formatCurrencyWithCode(Number(budget.monthlyIncome), currencyCode)
+            : 'Loading...'}
         </span>
       </h2>
       <h2 className="text-lg">
         Expenses:{' '}
         <span className="text-accent font-bold">
-          {budget ? formatCurrencyWithCode(Number(budget.monthlyExpenses), currencyCode) : 'Loading...'}
+          {budget
+            ? formatCurrencyWithCode(Number(budget.monthlyExpenses), currencyCode)
+            : 'Loading...'}
         </span>
       </h2>
       <h2 className="text-lg">
@@ -153,7 +157,10 @@ const BudgetContent = () => {
           }
         >
           {budget
-            ? formatCurrencyWithCode(Number(budget.monthlyIncome ?? 0) - Number(budget.monthlyExpenses ?? 0), currencyCode)
+            ? formatCurrencyWithCode(
+                Number(budget.monthlyIncome ?? 0) - Number(budget.monthlyExpenses ?? 0),
+                currencyCode,
+              )
             : 'Loading...'}
         </span>
       </h2>

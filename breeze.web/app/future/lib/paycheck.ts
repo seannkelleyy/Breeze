@@ -182,7 +182,13 @@ export function getMonthPayrollIncomes(
 ): PayrollIncomeItem[] {
   const items: PayrollIncomeItem[] = [];
   for (const person of people) {
-    const waterfall = computePersonWaterfall(person, accounts, withholdings, taxTables, deductionType);
+    const waterfall = computePersonWaterfall(
+      person,
+      accounts,
+      withholdings,
+      taxTables,
+      deductionType,
+    );
     const checksPerYear = getPaychecksPerYear(person.payCadence);
     if (checksPerYear <= 0) continue;
     const netPerCheck = Math.round((waterfall.takeHomeAnnual / checksPerYear) * 100) / 100;

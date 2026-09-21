@@ -107,19 +107,19 @@ export const useNetWorthSnapshots = (userId?: string | null) => {
         amount: String(i.amount),
         kind: i.kind,
       }));
-      const response = await request<
-        { createNetWorthSnapshot: SnapshotDto },
-        { input: object }
-      >(CREATE_NET_WORTH_SNAPSHOT, {
-        input: {
-          userId: userId as string,
-          snapshotDate: input.snapshotDate,
-          totalAssets: String(input.totalAssets),
-          totalLiabilities: String(input.totalLiabilities),
-          netWorth: String(input.netWorth),
-          items: gqlItems,
+      const response = await request<{ createNetWorthSnapshot: SnapshotDto }, { input: object }>(
+        CREATE_NET_WORTH_SNAPSHOT,
+        {
+          input: {
+            userId: userId as string,
+            snapshotDate: input.snapshotDate,
+            totalAssets: String(input.totalAssets),
+            totalLiabilities: String(input.totalLiabilities),
+            netWorth: String(input.netWorth),
+            items: gqlItems,
+          },
         },
-      });
+      );
       const created = mapSnapshot(response.createNetWorthSnapshot);
       queryClient.setQueryData<NetWorthSnapshot[]>(queryKey, (prev = []) =>
         [...prev.filter((s) => s.snapshotDate !== created.snapshotDate), created].sort((a, b) =>

@@ -55,8 +55,7 @@ export const FormattedNumberInput = ({
 
   // While an invalid draft is pending, keep showing exactly what the user
   // typed — reverting to the old value made errors flash and disappear.
-  const displayValue =
-    isFocused || error ? draftValue : formatNumber(value, maxFractionDigits);
+  const displayValue = isFocused || error ? draftValue : formatNumber(value, maxFractionDigits);
 
   const commitValue = (rawValue: string) => {
     const cleaned = rawValue.replace(/,/g, '').trim();

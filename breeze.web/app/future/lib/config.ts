@@ -88,12 +88,7 @@ const liabilityAccountTypes = new Set<AccountType>([
 ]);
 // Payroll-deducted savings (contributions come out of a paycheck): 401k-style plans + HSA.
 // IRAs are excluded — they are not payroll-deducted.
-export const PAYROLL_SAVINGS_ACCOUNT_TYPES = new Set<AccountType>([
-  '401k',
-  '403b',
-  '457',
-  'hsa',
-]);
+export const PAYROLL_SAVINGS_ACCOUNT_TYPES = new Set<AccountType>(['401k', '403b', '457', 'hsa']);
 
 // Tax-advantaged accounts with IRS contribution limits (adds IRAs to the payroll set).
 export const TAX_ADVANTAGED_ACCOUNT_TYPES = new Set<AccountType>([

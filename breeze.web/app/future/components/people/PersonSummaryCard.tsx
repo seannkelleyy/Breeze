@@ -11,7 +11,6 @@ import type { TaxYearTables } from '../../types/tax';
 import { PayCadence, PlannerPerson } from '../../types/person';
 import type { PlannerAccount } from '../../types/account';
 
-
 const CADENCE_LABELS: Record<PayCadence, string> = {
   weekly: 'Every week',
   biweekly: 'Every 2 weeks',
@@ -121,4 +120,3 @@ export function PersonSummaryCard({
     />
   );
 }
-

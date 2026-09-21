@@ -41,11 +41,7 @@ import {
   getIrsLimitGroup,
   getPersonGroupAnnualContribution,
 } from '../../lib/plannerMath';
-import {
-  AccountType,
-  AccountRateProfile,
-  PlannerAccount,
-} from '../../types/account';
+import { AccountType, AccountRateProfile, PlannerAccount } from '../../types/account';
 import { TAX_ADVANTAGED_ACCOUNT_TYPES } from '../../lib/config';
 import { useAccountEditor } from './AccountEditorContext';
 import type { AssetFinanceDetails } from '../../types/finance';
@@ -98,7 +94,12 @@ export function AccountListItem({
   onEditDialogChange,
 }: AccountListItemProps) {
   const editor = useAccountEditor();
-  const { currencyCode, people, assetFinanceDetailsByAccountId, setPlannerAssetFinanceDetailsByAccountId } = editor;
+  const {
+    currencyCode,
+    people,
+    assetFinanceDetailsByAccountId,
+    setPlannerAssetFinanceDetailsByAccountId,
+  } = editor;
   const assetFinanceDetails = assetFinanceDetailsByAccountId[account.id];
   const {
     accountRateProfileOptions,
@@ -132,8 +133,9 @@ export function AccountListItem({
   const onDelete = editor.deleteAccount;
   const onUpdateAccount = (updater: (current: PlannerAccount) => PlannerAccount) =>
     editor.updateAccount(account.id, updater);
-  const onUpdateAssetFinanceDetails = (updater: (current: AssetFinanceDetails) => AssetFinanceDetails) =>
-    editor.updateAssetFinanceDetails(account.id, updater);
+  const onUpdateAssetFinanceDetails = (
+    updater: (current: AssetFinanceDetails) => AssetFinanceDetails,
+  ) => editor.updateAssetFinanceDetails(account.id, updater);
   const [editing, setEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 

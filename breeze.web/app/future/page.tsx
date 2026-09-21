@@ -45,11 +45,8 @@ function PlannerContent() {
   const { collapsedSections, toggleSection } = usePlannerUiState();
   const { data: plannerData } = useFetchPlanner();
 
-  const {
-    setPlannerAccounts,
-    setPlannerPeople,
-    setPlannerAssetFinanceDetailsByAccountId,
-  } = usePlannerState();
+  const { setPlannerAccounts, setPlannerPeople, setPlannerAssetFinanceDetailsByAccountId } =
+    usePlannerState();
   const { setInflationRate, setSafeWithdrawalRate, setCurrencyCode } = useCurrentUser();
 
   useEffect(() => {
@@ -146,7 +143,6 @@ function PlannerContent() {
         totalLiabilities={totalLiabilities}
         currencyCode={currencyCode}
       />
-
 
       <RetirementPlannerSection
         milestones={milestones}

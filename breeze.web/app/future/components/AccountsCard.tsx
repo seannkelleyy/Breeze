@@ -61,10 +61,7 @@ const AccountsCardInner = ({ collapsed }: { collapsed: boolean }) => {
   } = editor.data;
   const { assetFinanceDetailsByAccountId } = editor;
   const { typeGuards, helpers } = editor;
-  const {
-    isLiabilityAccountType,
-    isCombinedAssetType,
-  } = typeGuards;
+  const { isLiabilityAccountType, isCombinedAssetType } = typeGuards;
 
   // Calculate debt payments from liability accounts
   const totalPlannedMonthlyDebtPayments = useMemo(
