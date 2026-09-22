@@ -406,6 +406,17 @@ func (r *mutationResolver) AssignTransactionCategory(ctx context.Context, id str
 		return nil, r.mapErr(ctx, err)
 	}
 
+	// Realize the transaction in the budget: a categorized transaction gets a
+	// matching expense row (so plan-vs-actual reflects bank spending); clearing
+	// the category removes it.
+	userID, authErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if authErr != nil {
+		return nil, authErr
+	}
+	if syncErr := r.syncTransactionExpense(ctx, userID, transaction); syncErr != nil {
+		return nil, r.mapErr(ctx, syncErr)
+	}
+
 	return mapTransactionToModel(transaction), nil
 }
 

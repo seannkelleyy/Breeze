@@ -60,3 +60,10 @@ WHERE id = $1 AND deleted_at IS NULL;
 -- name: ListPlaidAccountIDsByConnectionID :many
 SELECT id FROM plaid_accounts
 WHERE plaid_connection_id = $1 AND deleted_at IS NULL;
+
+-- name: SetTransactionExpense :one
+UPDATE transactions
+SET expense_id = sqlc.arg('expense_id'),
+    updated_at = now()
+WHERE id = sqlc.arg('id') AND deleted_at IS NULL
+RETURNING *;

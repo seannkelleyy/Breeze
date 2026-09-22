@@ -1781,6 +1781,11 @@ table "transactions" {
     null = true
   }
 
+  column "expense_id" {
+    type = uuid
+    null = true
+  }
+
   column "pending" {
     type    = boolean
     null    = false
@@ -1823,6 +1828,12 @@ table "transactions" {
   foreign_key "fk_transactions_expense_category" {
     columns     = [column.expense_category_id]
     ref_columns = [table.expense_categories.column.id]
+    on_delete   = SET_NULL
+  }
+
+  foreign_key "fk_transactions_expense" {
+    columns     = [column.expense_id]
+    ref_columns = [table.expenses.column.id]
     on_delete   = SET_NULL
   }
 

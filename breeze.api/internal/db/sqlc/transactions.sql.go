@@ -18,7 +18,7 @@ UPDATE transactions
 SET expense_category_id = $1,
     updated_at = now()
 WHERE id = $2 AND deleted_at IS NULL
-RETURNING id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at
+RETURNING id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at, expense_id
 `
 
 type AssignTransactionCategoryParams struct {
@@ -42,6 +42,7 @@ func (q *Queries) AssignTransactionCategory(ctx context.Context, arg AssignTrans
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+		&i.ExpenseID,
 	)
 	return i, err
 }
@@ -58,7 +59,7 @@ INSERT INTO transactions (
     pending
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8
-) RETURNING id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at
+) RETURNING id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at, expense_id
 `
 
 type CreateTransactionParams struct {
@@ -97,12 +98,13 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+		&i.ExpenseID,
 	)
 	return i, err
 }
 
 const getTransaction = `-- name: GetTransaction :one
-SELECT id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at FROM transactions
+SELECT id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at, expense_id FROM transactions
 WHERE id = $1 AND deleted_at IS NULL
 `
 
@@ -122,6 +124,7 @@ func (q *Queries) GetTransaction(ctx context.Context, id uuid.UUID) (Transaction
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+		&i.ExpenseID,
 	)
 	return i, err
 }
@@ -152,7 +155,7 @@ func (q *Queries) ListPlaidAccountIDsByConnectionID(ctx context.Context, plaidCo
 }
 
 const listTransactionsByUserID = `-- name: ListTransactionsByUserID :many
-SELECT id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at FROM transactions
+SELECT id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at, expense_id FROM transactions
 WHERE user_id = $1
   AND deleted_at IS NULL
   AND date >= $2
@@ -188,6 +191,7 @@ func (q *Queries) ListTransactionsByUserID(ctx context.Context, arg ListTransact
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
+			&i.ExpenseID,
 		); err != nil {
 			return nil, err
 		}
@@ -197,6 +201,40 @@ func (q *Queries) ListTransactionsByUserID(ctx context.Context, arg ListTransact
 		return nil, err
 	}
 	return items, nil
+}
+
+const setTransactionExpense = `-- name: SetTransactionExpense :one
+UPDATE transactions
+SET expense_id = $1,
+    updated_at = now()
+WHERE id = $2 AND deleted_at IS NULL
+RETURNING id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at, expense_id
+`
+
+type SetTransactionExpenseParams struct {
+	ExpenseID pgtype.UUID `json:"expense_id"`
+	ID        uuid.UUID   `json:"id"`
+}
+
+func (q *Queries) SetTransactionExpense(ctx context.Context, arg SetTransactionExpenseParams) (Transaction, error) {
+	row := q.db.QueryRow(ctx, setTransactionExpense, arg.ExpenseID, arg.ID)
+	var i Transaction
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.PlaidAccountID,
+		&i.PlaidTransactionID,
+		&i.Date,
+		&i.Amount,
+		&i.Name,
+		&i.ExpenseCategoryID,
+		&i.Pending,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.ExpenseID,
+	)
+	return i, err
 }
 
 const softDeleteTransaction = `-- name: SoftDeleteTransaction :execrows
@@ -232,7 +270,7 @@ ON CONFLICT (plaid_transaction_id) WHERE deleted_at IS NULL DO UPDATE SET
     name = EXCLUDED.name,
     pending = EXCLUDED.pending,
     updated_at = now()
-RETURNING id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at
+RETURNING id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at, expense_id
 `
 
 type UpsertPlaidTransactionParams struct {
@@ -269,6 +307,7 @@ func (q *Queries) UpsertPlaidTransaction(ctx context.Context, arg UpsertPlaidTra
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+		&i.ExpenseID,
 	)
 	return i, err
 }

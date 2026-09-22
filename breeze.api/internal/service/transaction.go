@@ -26,6 +26,7 @@ type Transaction struct {
 	Amount             decimal.Decimal
 	Name               string
 	ExpenseCategoryID  *uuid.UUID
+	ExpenseID          *uuid.UUID
 	Pending            bool
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
@@ -39,7 +40,27 @@ type CreateTransactionInput struct {
 	ExpenseCategoryID *uuid.UUID
 }
 
+type transactionBudgetQuerier interface {
+	GetBudgetByDate(ctx context.Context, arg sqlc.GetBudgetByDateParams) (sqlc.Budget, error)
+	CreateBudget(ctx context.Context, arg sqlc.CreateBudgetParams) (sqlc.Budget, error)
+}
+
+// BudgetForMonth returns the budget containing the given date, creating an
+// empty one when the month has never been budgeted.
+func (s *TransactionService) BudgetForMonth(ctx context.Context, budgetSvc *BudgetService, userID uuid.UUID, date time.Time) (*Budget, error) {
+	monthStart := time.Date(date.Year(), date.Month(), 1, 0, 0, 0, 0, time.UTC)
+	if b, err := budgetSvc.GetByDate(ctx, userID, monthStart); err == nil {
+		return b, nil
+	} else if !errors.Is(err, ErrNotFound) {
+		return nil, fmt.Errorf("find budget: %w", err)
+	}
+	return budgetSvc.Create(ctx, &CreateBudgetInput{UserID: userID, Date: monthStart})
+}
+
+type SetTransactionExpenseParams = sqlc.SetTransactionExpenseParams
+
 type transactionQuerier interface {
+	SetTransactionExpense(ctx context.Context, arg SetTransactionExpenseParams) (sqlc.Transaction, error)
 	CreateTransaction(ctx context.Context, arg sqlc.CreateTransactionParams) (sqlc.Transaction, error)
 	UpsertPlaidTransaction(ctx context.Context, arg sqlc.UpsertPlaidTransactionParams) (sqlc.Transaction, error)
 	GetTransaction(ctx context.Context, id uuid.UUID) (sqlc.Transaction, error)
@@ -169,8 +190,25 @@ func mapTransactionRecord(row *sqlc.Transaction) *Transaction {
 		Amount:             row.Amount,
 		Name:               row.Name,
 		ExpenseCategoryID:  uuidFromPGUUID(row.ExpenseCategoryID),
+		ExpenseID:          uuidFromPGUUID(row.ExpenseID),
 		Pending:            row.Pending,
 		CreatedAt:          timestamptzToTime(row.CreatedAt),
 		UpdatedAt:          timestamptzToTime(row.UpdatedAt),
 	}
+}
+
+// SetTransactionExpense links (or unlinks, nil id) the expense that realizes
+// this transaction's spending in the budget.
+func (s *TransactionService) SetTransactionExpense(ctx context.Context, id uuid.UUID, expenseID *uuid.UUID) (*Transaction, error) {
+	row, err := s.queries.SetTransactionExpense(ctx, SetTransactionExpenseParams{
+		ID:        id,
+		ExpenseID: uuidToPGUUID(expenseID),
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("set transaction expense: %w", err)
+	}
+	return mapTransactionRecord(&row), nil
 }

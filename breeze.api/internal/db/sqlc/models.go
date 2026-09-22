@@ -770,6 +770,7 @@ type Transaction struct {
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	ExpenseID          pgtype.UUID        `json:"expense_id"`
 }
 
 type User struct {

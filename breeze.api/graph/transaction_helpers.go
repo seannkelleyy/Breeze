@@ -1,10 +1,15 @@
 package graph
 
 import (
+	"context"
+	"errors"
 	"time"
 
 	"breeze.api/graph/model"
+	"breeze.api/internal/db/sqlc"
 	"breeze.api/internal/service"
+	"github.com/google/uuid"
+	"github.com/govalues/decimal"
 )
 
 func mapTransactionToModel(t *service.Transaction) *model.Transaction {
@@ -36,4 +41,56 @@ func mapTransactionToModel(t *service.Transaction) *model.Transaction {
 		CreatedAt:          t.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:          t.UpdatedAt.Format(time.RFC3339),
 	}
+}
+
+// syncTransactionExpense mirrors a categorized transaction into its budget as
+// an expense row. Clearing the category deletes the realized expense.
+func (r *Resolver) syncTransactionExpense(ctx context.Context, userID uuid.UUID, tx *service.Transaction) error {
+	if tx.ExpenseCategoryID == nil {
+		if tx.ExpenseID != nil {
+			return r.ExpenseService.Delete(ctx, *tx.ExpenseID)
+		}
+		return nil
+	}
+
+	budget, err := r.TransactionService.BudgetForMonth(ctx, r.BudgetService, userID, tx.Date)
+	if err != nil {
+		return err
+	}
+
+	// Spend amount is the positive (money-out) magnitude.
+	amount := tx.Amount
+	if amount.IsNeg() {
+		var err error
+		if amount, err = amount.Mul(decimal.MustParse("-1")); err != nil {
+			return err
+		}
+	}
+
+	input := &service.CreateExpenseInput{
+		UserID:      userID,
+		BudgetID:    budget.ID,
+		Amount:      amount,
+		Date:        tx.Date,
+		Description: tx.Name,
+		SourceType:  sqlc.ExpenseSourceTypeMANUAL,
+		Splits: []service.ExpenseSplitInput{
+			{CategoryID: *tx.ExpenseCategoryID, Amount: amount},
+		},
+	}
+
+	if tx.ExpenseID != nil {
+		if err := r.ExpenseService.Delete(ctx, *tx.ExpenseID); err != nil && !errors.Is(err, service.ErrNotFound) {
+			return err
+		}
+	}
+
+	created, err := r.ExpenseService.Create(ctx, input)
+	if err != nil {
+		return err
+	}
+	if _, err := r.TransactionService.SetTransactionExpense(ctx, tx.ID, &created.ID); err != nil {
+		return err
+	}
+	return nil
 }

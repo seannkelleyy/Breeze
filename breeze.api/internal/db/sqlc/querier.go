@@ -82,6 +82,7 @@ type Querier interface {
 	ListTaxBracketsByYearAndFilingStatus(ctx context.Context, arg ListTaxBracketsByYearAndFilingStatusParams) ([]TaxBracket, error)
 	ListTransactionsByUserID(ctx context.Context, arg ListTransactionsByUserIDParams) ([]Transaction, error)
 	ListUsers(ctx context.Context) ([]User, error)
+	SetTransactionExpense(ctx context.Context, arg SetTransactionExpenseParams) (Transaction, error)
 	SoftDeleteAsset(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteBudget(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteExpense(ctx context.Context, id uuid.UUID) (int64, error)
