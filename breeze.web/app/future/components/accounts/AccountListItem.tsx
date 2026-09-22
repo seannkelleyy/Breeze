@@ -43,6 +43,7 @@ import {
 } from '../../lib/plannerMath';
 import { AccountType, AccountRateProfile, PlannerAccount } from '../../types/account';
 import { TAX_ADVANTAGED_ACCOUNT_TYPES } from '../../lib/config';
+import { InfoTip } from '@/components/common/InfoTip';
 import { useAccountEditor } from './AccountEditorContext';
 import type { AssetFinanceDetails } from '../../types/finance';
 import CombinedAssetLoanFields from './CombinedAssetLoanFields';
@@ -466,7 +467,7 @@ export function AccountListItem({
             {/* Tax treatment */}
             {!isLiability && TAX_ADVANTAGED_ACCOUNT_TYPES.has(account.accountType) && (
               <div className="space-y-1.5">
-                <Label className="text-xs">Tax Treatment</Label>
+                <Label className="text-xs inline-flex items-center gap-1">Tax Treatment <InfoTip text="Pre-tax lowers this year\u2019s taxable income; Roth (post-tax) grows tax-free and withdraws tax-free in retirement." /></Label>
                 <Select
                   value={account.taxTreatment ?? 'PRE_TAX'}
                   onValueChange={(v) => onUpdateAccount((c) => ({ ...c, taxTreatment: v }))}

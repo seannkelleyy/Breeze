@@ -1,6 +1,7 @@
 import { FormattedNumberInput } from '../../../../components/common/form/FormattedNumberInput';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { InfoTip } from '@/components/common/InfoTip';
 import {
   Select,
   SelectContent,
@@ -96,7 +97,7 @@ const InvestmentAccountFields = ({
       {!hidesContributionInputs && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-xs">Contribution Type</Label>
+            <Label className="text-xs">Contribution Type <InfoTip text="How often money enters this account: monthly amounts, % of salary, or yearly." /></Label>
             <Select
               value={account.contributionMode}
               onValueChange={(value) =>
@@ -150,7 +151,7 @@ const InvestmentAccountFields = ({
       {account.accountType === '401k' && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-xs">Match % of Contribution</Label>
+            <Label className="text-xs">Match % of Contribution <InfoTip text="Employer adds this % on top of what you contribute (e.g. 50% match on your first 6% of salary)." /></Label>
             <FormattedNumberInput
               value={account.employerMatchRate}
               onValueChange={(value) =>
@@ -160,7 +161,7 @@ const InvestmentAccountFields = ({
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs">Match Up To % of Salary</Label>
+            <Label className="text-xs">Match Up To % of Salary <InfoTip text="Employer match stops once your contribution reaches this share of your salary." /></Label>
             <FormattedNumberInput
               value={account.employerMatchMaxPercentOfSalary}
               onValueChange={(value) =>
