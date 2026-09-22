@@ -116,3 +116,52 @@ ON CONFLICT (account_type, tax_year) DO UPDATE SET
   catch_up_amount = EXCLUDED.catch_up_amount,
   family_annual_limit = EXCLUDED.family_annual_limit,
   super_catch_up_amount = EXCLUDED.super_catch_up_amount;
+
+INSERT INTO tax_brackets (filing_status, minimum_amount, maximum_amount, rate, year)
+VALUES
+  -- 2026 Single Brackets (Rev. Proc. 2025-32)
+  ('SINGLE', 0, 12400, 0.10, 2026),
+  ('SINGLE', 12400, 50400, 0.12, 2026),
+  ('SINGLE', 50400, 105700, 0.22, 2026),
+  ('SINGLE', 105700, 201775, 0.24, 2026),
+  ('SINGLE', 201775, 256225, 0.32, 2026),
+  ('SINGLE', 256225, 640600, 0.35, 2026),
+  ('SINGLE', 640600, NULL, 0.37, 2026),
+  -- 2026 Married Filing Jointly
+  ('MFJ', 0, 24800, 0.10, 2026),
+  ('MFJ', 24800, 100800, 0.12, 2026),
+  ('MFJ', 100800, 211400, 0.22, 2026),
+  ('MFJ', 211400, 403550, 0.24, 2026),
+  ('MFJ', 403550, 512450, 0.32, 2026),
+  ('MFJ', 512450, 768700, 0.35, 2026),
+  ('MFJ', 768700, NULL, 0.37, 2026),
+  -- 2026 Married Filing Separately
+  ('MFS', 0, 12400, 0.10, 2026),
+  ('MFS', 12400, 50400, 0.12, 2026),
+  ('MFS', 50400, 105700, 0.22, 2026),
+  ('MFS', 105700, 201775, 0.24, 2026),
+  ('MFS', 201775, 256225, 0.32, 2026),
+  ('MFS', 256225, 384350, 0.35, 2026),
+  ('MFS', 384350, NULL, 0.37, 2026),
+  -- 2026 Head of Household
+  ('HOH', 0, 17700, 0.10, 2026),
+  ('HOH', 17700, 67450, 0.12, 2026),
+  ('HOH', 67450, 105700, 0.22, 2026),
+  ('HOH', 105700, 201775, 0.24, 2026),
+  ('HOH', 201775, 256225, 0.32, 2026),
+  ('HOH', 256225, 640600, 0.35, 2026),
+  ('HOH', 640600, NULL, 0.37, 2026)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO standard_deductions (filing_status, amount, year)
+VALUES
+  ('SINGLE', 16100, 2026),
+  ('MFJ', 32200, 2026),
+  ('MFS', 16100, 2026),
+  ('HOH', 24150, 2026)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO fica_parameters (ss_wage_base, year)
+VALUES
+  (184500, 2026)
+ON CONFLICT DO NOTHING;
