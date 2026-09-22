@@ -66,10 +66,10 @@ type transactionQuerier interface {
 	SetTransactionExpense(ctx context.Context, arg SetTransactionExpenseParams) (sqlc.Transaction, error)
 	CreateTransaction(ctx context.Context, arg sqlc.CreateTransactionParams) (sqlc.Transaction, error)
 	UpsertPlaidTransaction(ctx context.Context, arg sqlc.UpsertPlaidTransactionParams) (sqlc.Transaction, error)
-	GetTransaction(ctx context.Context, id uuid.UUID) (sqlc.Transaction, error)
+	GetTransaction(ctx context.Context, arg sqlc.GetTransactionParams) (sqlc.Transaction, error)
 	ListTransactionsByUserID(ctx context.Context, arg sqlc.ListTransactionsByUserIDParams) ([]sqlc.Transaction, error)
 	AssignTransactionCategory(ctx context.Context, arg sqlc.AssignTransactionCategoryParams) (sqlc.Transaction, error)
-	SoftDeleteTransaction(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteTransaction(ctx context.Context, arg sqlc.SoftDeleteTransactionParams) (int64, error)
 }
 
 func (s *TransactionService) Create(ctx context.Context, input *CreateTransactionInput) (*Transaction, error) {
@@ -92,8 +92,12 @@ func (s *TransactionService) Create(ctx context.Context, input *CreateTransactio
 	return mapTransactionRecord(&row), nil
 }
 
-func (s *TransactionService) GetByID(ctx context.Context, id uuid.UUID) (*Transaction, error) {
-	row, err := s.queries.GetTransaction(ctx, id)
+// GetByID returns the transaction only when it belongs to userID.
+func (s *TransactionService) GetByID(ctx context.Context, userID, id uuid.UUID) (*Transaction, error) {
+	row, err := s.queries.GetTransaction(ctx, sqlc.GetTransactionParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
@@ -122,9 +126,10 @@ func (s *TransactionService) ListByUserID(ctx context.Context, userID uuid.UUID,
 	return transactions, nil
 }
 
-func (s *TransactionService) AssignCategory(ctx context.Context, id uuid.UUID, categoryID *uuid.UUID) (*Transaction, error) {
+func (s *TransactionService) AssignCategory(ctx context.Context, userID, id uuid.UUID, categoryID *uuid.UUID) (*Transaction, error) {
 	row, err := s.queries.AssignTransactionCategory(ctx, sqlc.AssignTransactionCategoryParams{
 		ID:                id,
+		UserID:            userID,
 		ExpenseCategoryID: uuidToPGUUID(categoryID),
 	})
 	if err != nil {
@@ -137,8 +142,11 @@ func (s *TransactionService) AssignCategory(ctx context.Context, id uuid.UUID, c
 	return mapTransactionRecord(&row), nil
 }
 
-func (s *TransactionService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeleteTransaction(ctx, id)
+func (s *TransactionService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeleteTransaction(ctx, sqlc.SoftDeleteTransactionParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete transaction: %w", err)
 	}
@@ -194,9 +202,10 @@ func mapTransactionRecord(row *sqlc.Transaction) *Transaction {
 
 // SetTransactionExpense links (or unlinks, nil id) the expense that realizes
 // this transaction's spending in the budget.
-func (s *TransactionService) SetTransactionExpense(ctx context.Context, id uuid.UUID, expenseID *uuid.UUID) (*Transaction, error) {
+func (s *TransactionService) SetTransactionExpense(ctx context.Context, userID, id uuid.UUID, expenseID *uuid.UUID) (*Transaction, error) {
 	row, err := s.queries.SetTransactionExpense(ctx, SetTransactionExpenseParams{
 		ID:        id,
+		UserID:    userID,
 		ExpenseID: uuidToPGUUID(expenseID),
 	})
 	if err != nil {

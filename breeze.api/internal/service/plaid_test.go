@@ -62,6 +62,10 @@ func (m *mockPlaidQuerier) ListActivePlaidConnections(ctx context.Context) ([]sq
 	return []sqlc.PlaidConnection{}, nil
 }
 
+func (m *mockPlaidQuerier) UpdateExpenseAmount(ctx context.Context, arg sqlc.UpdateExpenseAmountParams) error {
+	return nil
+}
+
 func (m *mockPlaidQuerier) UpsertPlaidTransaction(ctx context.Context, arg sqlc.UpsertPlaidTransactionParams) (sqlc.Transaction, error) {
 	return sqlc.Transaction{}, nil
 }

@@ -70,6 +70,7 @@ type plaidQuerier interface {
 	UnlinkLiabilityFromPlaidAccount(ctx context.Context, id uuid.UUID) error
 	GetAssetsByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetAssetsByPlaidAccountIDRow, error)
 	GetLiabilitiesByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetLiabilitiesByPlaidAccountIDRow, error)
+	UpdateExpenseAmount(ctx context.Context, arg sqlc.UpdateExpenseAmountParams) error
 }
 
 type plaidTxQuerier interface {
@@ -346,7 +347,7 @@ func (s *PlaidService) SyncTransactions(ctx context.Context, connectionID uuid.U
 			continue
 		}
 		externalID := t.ExternalID
-		if _, err := s.queries.UpsertPlaidTransaction(ctx, sqlc.UpsertPlaidTransactionParams{
+		tx, err := s.queries.UpsertPlaidTransaction(ctx, sqlc.UpsertPlaidTransactionParams{
 			UserID:             conn.UserID,
 			PlaidAccountID:     uuidToPGUUID(&localAccountID),
 			PlaidTransactionID: &externalID,
@@ -354,8 +355,27 @@ func (s *PlaidService) SyncTransactions(ctx context.Context, connectionID uuid.U
 			Amount:             t.Amount,
 			Name:               t.Name,
 			Pending:            t.Pending,
-		}); err != nil {
+		})
+		if err != nil {
 			return fmt.Errorf("upsert plaid transaction: %w", err)
+		}
+
+		// Keep a categorized transaction's realized expense in step with the
+		// corrected amount (banks retroactively adjust pending transactions).
+		if tx.ExpenseID.Valid {
+			expenseAmount := t.Amount
+			if expenseAmount.IsNeg() {
+				var negErr error
+				if expenseAmount, negErr = expenseAmount.Mul(decimal.MustParse("-1")); negErr != nil {
+					return negErr
+				}
+			}
+			if err := s.queries.UpdateExpenseAmount(ctx, sqlc.UpdateExpenseAmountParams{
+				ID:     uuid.UUID(tx.ExpenseID.Bytes),
+				Amount: expenseAmount,
+			}); err != nil {
+				return fmt.Errorf("update linked expense amount: %w", err)
+			}
 		}
 	}
 

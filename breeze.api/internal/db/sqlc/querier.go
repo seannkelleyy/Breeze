@@ -31,7 +31,7 @@ type Querier interface {
 	CreateTaxBracket(ctx context.Context, arg CreateTaxBracketParams) (TaxBracket, error)
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	DeleteNetWorthSnapshot(ctx context.Context, id uuid.UUID) error
+	DeleteNetWorthSnapshot(ctx context.Context, arg DeleteNetWorthSnapshotParams) error
 	GetAssetByID(ctx context.Context, id uuid.UUID) (GetAssetByIDRow, error)
 	GetAssetsByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]GetAssetsByPlaidAccountIDRow, error)
 	GetBudgetByDate(ctx context.Context, arg GetBudgetByDateParams) (Budget, error)
@@ -44,7 +44,7 @@ type Querier interface {
 	GetLatestTaxYear(ctx context.Context) (int32, error)
 	GetLiabilitiesByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]GetLiabilitiesByPlaidAccountIDRow, error)
 	GetLiabilityByID(ctx context.Context, id uuid.UUID) (GetLiabilityByIDRow, error)
-	GetNetWorthSnapshot(ctx context.Context, id uuid.UUID) (NetWorthSnapshot, error)
+	GetNetWorthSnapshot(ctx context.Context, arg GetNetWorthSnapshotParams) (NetWorthSnapshot, error)
 	GetNetWorthSnapshotByDate(ctx context.Context, arg GetNetWorthSnapshotByDateParams) (NetWorthSnapshot, error)
 	GetOrCreateUserByEmail(ctx context.Context, arg GetOrCreateUserByEmailParams) (User, error)
 	GetPlaidAccountsByConnectionID(ctx context.Context, plaidConnectionID uuid.UUID) ([]PlaidAccount, error)
@@ -52,7 +52,7 @@ type Querier interface {
 	GetRecurringExpenseByID(ctx context.Context, id uuid.UUID) (RecurringExpense, error)
 	GetRecurringIncomeByID(ctx context.Context, id uuid.UUID) (RecurringIncome, error)
 	GetTaxBracketByID(ctx context.Context, id uuid.UUID) (TaxBracket, error)
-	GetTransaction(ctx context.Context, id uuid.UUID) (Transaction, error)
+	GetTransaction(ctx context.Context, arg GetTransactionParams) (Transaction, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (User, error)
 	LinkAssetToPlaidAccount(ctx context.Context, arg LinkAssetToPlaidAccountParams) error
@@ -102,12 +102,13 @@ type Querier interface {
 	SoftDeleteRecurringExpense(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteRecurringIncome(ctx context.Context, id uuid.UUID) (int64, error)
 	SoftDeleteTaxBracket(ctx context.Context, id uuid.UUID) (int64, error)
-	SoftDeleteTransaction(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteTransaction(ctx context.Context, arg SoftDeleteTransactionParams) (int64, error)
 	UnlinkAssetFromPlaidAccount(ctx context.Context, id uuid.UUID) error
 	UnlinkLiabilityFromPlaidAccount(ctx context.Context, id uuid.UUID) error
 	UpdateAsset(ctx context.Context, arg UpdateAssetParams) (UpdateAssetRow, error)
 	UpdateBudget(ctx context.Context, arg UpdateBudgetParams) (Budget, error)
 	UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (Expense, error)
+	UpdateExpenseAmount(ctx context.Context, arg UpdateExpenseAmountParams) error
 	UpdateExpenseCategory(ctx context.Context, arg UpdateExpenseCategoryParams) (ExpenseCategory, error)
 	UpdateGoal(ctx context.Context, arg UpdateGoalParams) (Goal, error)
 	UpdateIncome(ctx context.Context, arg UpdateIncomeParams) (Income, error)

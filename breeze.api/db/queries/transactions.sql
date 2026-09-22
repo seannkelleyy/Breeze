@@ -35,7 +35,7 @@ RETURNING *;
 
 -- name: GetTransaction :one
 SELECT * FROM transactions
-WHERE id = $1 AND deleted_at IS NULL;
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL;
 
 -- name: ListTransactionsByUserID :many
 SELECT * FROM transactions
@@ -49,13 +49,13 @@ ORDER BY date DESC;
 UPDATE transactions
 SET expense_category_id = sqlc.arg('expense_category_id'),
     updated_at = now()
-WHERE id = sqlc.arg('id') AND deleted_at IS NULL
+WHERE id = sqlc.arg('id') AND user_id = sqlc.arg('user_id') AND deleted_at IS NULL
 RETURNING *;
 
 -- name: SoftDeleteTransaction :execrows
 UPDATE transactions
 SET deleted_at = now(), updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL;
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL;
 
 -- name: ListPlaidAccountIDsByConnectionID :many
 SELECT id FROM plaid_accounts
@@ -65,5 +65,5 @@ WHERE plaid_connection_id = $1 AND deleted_at IS NULL;
 UPDATE transactions
 SET expense_id = sqlc.arg('expense_id'),
     updated_at = now()
-WHERE id = sqlc.arg('id') AND deleted_at IS NULL
+WHERE id = sqlc.arg('id') AND user_id = sqlc.arg('user_id') AND deleted_at IS NULL
 RETURNING *;

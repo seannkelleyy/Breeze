@@ -102,21 +102,31 @@ func (q *Queries) CreateNetWorthSnapshotItem(ctx context.Context, arg CreateNetW
 const deleteNetWorthSnapshot = `-- name: DeleteNetWorthSnapshot :exec
 UPDATE net_worth_snapshots
 SET deleted_at = now(), updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
 `
 
-func (q *Queries) DeleteNetWorthSnapshot(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteNetWorthSnapshot, id)
+type DeleteNetWorthSnapshotParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) DeleteNetWorthSnapshot(ctx context.Context, arg DeleteNetWorthSnapshotParams) error {
+	_, err := q.db.Exec(ctx, deleteNetWorthSnapshot, arg.ID, arg.UserID)
 	return err
 }
 
 const getNetWorthSnapshot = `-- name: GetNetWorthSnapshot :one
 SELECT id, user_id, snapshot_date, total_assets, total_liabilities, net_worth, created_at, updated_at, deleted_at FROM net_worth_snapshots
-WHERE id = $1 AND deleted_at IS NULL
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
 `
 
-func (q *Queries) GetNetWorthSnapshot(ctx context.Context, id uuid.UUID) (NetWorthSnapshot, error) {
-	row := q.db.QueryRow(ctx, getNetWorthSnapshot, id)
+type GetNetWorthSnapshotParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) GetNetWorthSnapshot(ctx context.Context, arg GetNetWorthSnapshotParams) (NetWorthSnapshot, error) {
+	row := q.db.QueryRow(ctx, getNetWorthSnapshot, arg.ID, arg.UserID)
 	var i NetWorthSnapshot
 	err := row.Scan(
 		&i.ID,
@@ -248,16 +258,17 @@ func (q *Queries) SoftDeleteNetWorthSnapshotItems(ctx context.Context, snapshotI
 const updateNetWorthSnapshot = `-- name: UpdateNetWorthSnapshot :one
 UPDATE net_worth_snapshots
 SET 
-    total_assets = COALESCE($2, total_assets),
-    total_liabilities = COALESCE($3, total_liabilities),
-    net_worth = COALESCE($4, net_worth),
+    total_assets = COALESCE($3, total_assets),
+    total_liabilities = COALESCE($4, total_liabilities),
+    net_worth = COALESCE($5, net_worth),
     updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
 RETURNING id, user_id, snapshot_date, total_assets, total_liabilities, net_worth, created_at, updated_at, deleted_at
 `
 
 type UpdateNetWorthSnapshotParams struct {
 	ID               uuid.UUID      `json:"id"`
+	UserID           uuid.UUID      `json:"user_id"`
 	TotalAssets      pgtype.Numeric `json:"total_assets"`
 	TotalLiabilities pgtype.Numeric `json:"total_liabilities"`
 	NetWorth         pgtype.Numeric `json:"net_worth"`
@@ -266,6 +277,7 @@ type UpdateNetWorthSnapshotParams struct {
 func (q *Queries) UpdateNetWorthSnapshot(ctx context.Context, arg UpdateNetWorthSnapshotParams) (NetWorthSnapshot, error) {
 	row := q.db.QueryRow(ctx, updateNetWorthSnapshot,
 		arg.ID,
+		arg.UserID,
 		arg.TotalAssets,
 		arg.TotalLiabilities,
 		arg.NetWorth,

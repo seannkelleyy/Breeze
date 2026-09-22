@@ -144,3 +144,8 @@ SET deleted_at = now(),
 WHERE expense_id = $1
   AND deleted_at IS NULL;
 
+
+-- name: UpdateExpenseAmount :exec
+UPDATE expenses
+SET amount = $2, updated_at = now()
+WHERE id = $1 AND deleted_at IS NULL;

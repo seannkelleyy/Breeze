@@ -39,6 +39,10 @@ func (m *graphPlaidQuerierMock) ListActivePlaidConnections(ctx context.Context) 
 	return []sqlc.PlaidConnection{}, nil
 }
 
+func (m *graphPlaidQuerierMock) UpdateExpenseAmount(ctx context.Context, arg sqlc.UpdateExpenseAmountParams) error {
+	return nil
+}
+
 func (m *graphPlaidQuerierMock) UpsertPlaidTransaction(ctx context.Context, arg sqlc.UpsertPlaidTransactionParams) (sqlc.Transaction, error) {
 	return sqlc.Transaction{}, nil
 }

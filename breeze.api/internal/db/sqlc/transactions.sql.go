@@ -17,17 +17,18 @@ const assignTransactionCategory = `-- name: AssignTransactionCategory :one
 UPDATE transactions
 SET expense_category_id = $1,
     updated_at = now()
-WHERE id = $2 AND deleted_at IS NULL
+WHERE id = $2 AND user_id = $3 AND deleted_at IS NULL
 RETURNING id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at, expense_id
 `
 
 type AssignTransactionCategoryParams struct {
 	ExpenseCategoryID pgtype.UUID `json:"expense_category_id"`
 	ID                uuid.UUID   `json:"id"`
+	UserID            uuid.UUID   `json:"user_id"`
 }
 
 func (q *Queries) AssignTransactionCategory(ctx context.Context, arg AssignTransactionCategoryParams) (Transaction, error) {
-	row := q.db.QueryRow(ctx, assignTransactionCategory, arg.ExpenseCategoryID, arg.ID)
+	row := q.db.QueryRow(ctx, assignTransactionCategory, arg.ExpenseCategoryID, arg.ID, arg.UserID)
 	var i Transaction
 	err := row.Scan(
 		&i.ID,
@@ -105,11 +106,16 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 
 const getTransaction = `-- name: GetTransaction :one
 SELECT id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at, expense_id FROM transactions
-WHERE id = $1 AND deleted_at IS NULL
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
 `
 
-func (q *Queries) GetTransaction(ctx context.Context, id uuid.UUID) (Transaction, error) {
-	row := q.db.QueryRow(ctx, getTransaction, id)
+type GetTransactionParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) GetTransaction(ctx context.Context, arg GetTransactionParams) (Transaction, error) {
+	row := q.db.QueryRow(ctx, getTransaction, arg.ID, arg.UserID)
 	var i Transaction
 	err := row.Scan(
 		&i.ID,
@@ -207,17 +213,18 @@ const setTransactionExpense = `-- name: SetTransactionExpense :one
 UPDATE transactions
 SET expense_id = $1,
     updated_at = now()
-WHERE id = $2 AND deleted_at IS NULL
+WHERE id = $2 AND user_id = $3 AND deleted_at IS NULL
 RETURNING id, user_id, plaid_account_id, plaid_transaction_id, date, amount, name, expense_category_id, pending, created_at, updated_at, deleted_at, expense_id
 `
 
 type SetTransactionExpenseParams struct {
 	ExpenseID pgtype.UUID `json:"expense_id"`
 	ID        uuid.UUID   `json:"id"`
+	UserID    uuid.UUID   `json:"user_id"`
 }
 
 func (q *Queries) SetTransactionExpense(ctx context.Context, arg SetTransactionExpenseParams) (Transaction, error) {
-	row := q.db.QueryRow(ctx, setTransactionExpense, arg.ExpenseID, arg.ID)
+	row := q.db.QueryRow(ctx, setTransactionExpense, arg.ExpenseID, arg.ID, arg.UserID)
 	var i Transaction
 	err := row.Scan(
 		&i.ID,
@@ -240,11 +247,16 @@ func (q *Queries) SetTransactionExpense(ctx context.Context, arg SetTransactionE
 const softDeleteTransaction = `-- name: SoftDeleteTransaction :execrows
 UPDATE transactions
 SET deleted_at = now(), updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteTransaction(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteTransaction, id)
+type SoftDeleteTransactionParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeleteTransaction(ctx context.Context, arg SoftDeleteTransactionParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteTransaction, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}

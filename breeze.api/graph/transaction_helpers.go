@@ -89,7 +89,7 @@ func (r *Resolver) syncTransactionExpense(ctx context.Context, userID uuid.UUID,
 	if err != nil {
 		return err
 	}
-	if _, err := r.TransactionService.SetTransactionExpense(ctx, tx.ID, &created.ID); err != nil {
+	if _, err := r.TransactionService.SetTransactionExpense(ctx, userID, tx.ID, &created.ID); err != nil {
 		return err
 	}
 	return nil

@@ -66,11 +66,11 @@ type UpdateNetWorthSnapshotInput struct {
 
 type netWorthSnapshotQuerier interface {
 	CreateNetWorthSnapshot(ctx context.Context, arg sqlc.CreateNetWorthSnapshotParams) (sqlc.NetWorthSnapshot, error)
-	GetNetWorthSnapshot(ctx context.Context, id uuid.UUID) (sqlc.NetWorthSnapshot, error)
+	GetNetWorthSnapshot(ctx context.Context, arg sqlc.GetNetWorthSnapshotParams) (sqlc.NetWorthSnapshot, error)
 	GetNetWorthSnapshotByDate(ctx context.Context, arg sqlc.GetNetWorthSnapshotByDateParams) (sqlc.NetWorthSnapshot, error)
 	ListNetWorthSnapshots(ctx context.Context, userID uuid.UUID) ([]sqlc.NetWorthSnapshot, error)
 	UpdateNetWorthSnapshot(ctx context.Context, arg sqlc.UpdateNetWorthSnapshotParams) (sqlc.NetWorthSnapshot, error)
-	DeleteNetWorthSnapshot(ctx context.Context, id uuid.UUID) error
+	DeleteNetWorthSnapshot(ctx context.Context, arg sqlc.DeleteNetWorthSnapshotParams) error
 	CreateNetWorthSnapshotItem(ctx context.Context, arg sqlc.CreateNetWorthSnapshotItemParams) (sqlc.NetWorthSnapshotItem, error)
 	ListNetWorthSnapshotItemsBySnapshotID(ctx context.Context, snapshotID uuid.UUID) ([]sqlc.NetWorthSnapshotItem, error)
 	SoftDeleteNetWorthSnapshotItems(ctx context.Context, snapshotID uuid.UUID) (int64, error)
@@ -196,8 +196,11 @@ func (s *NetWorthSnapshotService) Create(ctx context.Context, input *CreateNetWo
 	return created, nil
 }
 
-func (s *NetWorthSnapshotService) Get(ctx context.Context, id uuid.UUID) (*NetWorthSnapshot, error) {
-	row, err := s.queries.GetNetWorthSnapshot(ctx, id)
+func (s *NetWorthSnapshotService) Get(ctx context.Context, userID, id uuid.UUID) (*NetWorthSnapshot, error) {
+	row, err := s.queries.GetNetWorthSnapshot(ctx, sqlc.GetNetWorthSnapshotParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
@@ -258,7 +261,7 @@ func (s *NetWorthSnapshotService) List(ctx context.Context, userID uuid.UUID) ([
 	return snapshots, nil
 }
 
-func (s *NetWorthSnapshotService) Update(ctx context.Context, input *UpdateNetWorthSnapshotInput) (*NetWorthSnapshot, error) {
+func (s *NetWorthSnapshotService) Update(ctx context.Context, userID uuid.UUID, input *UpdateNetWorthSnapshotInput) (*NetWorthSnapshot, error) {
 	// An item set replaces the stored breakdown and drives the totals.
 	if len(input.Items) > 0 {
 		assets, liabilities, netWorth, err := deriveTotals(input.Items)
@@ -294,6 +297,7 @@ func (s *NetWorthSnapshotService) Update(ctx context.Context, input *UpdateNetWo
 
 		_, err := q.UpdateNetWorthSnapshot(ctx, sqlc.UpdateNetWorthSnapshotParams{
 			ID:               input.ID,
+			UserID:           userID,
 			TotalAssets:      totalAssets,
 			TotalLiabilities: totalLiabilities,
 			NetWorth:         netWorth,
@@ -320,11 +324,14 @@ func (s *NetWorthSnapshotService) Update(ctx context.Context, input *UpdateNetWo
 		return nil, err
 	}
 
-	return s.Get(ctx, input.ID)
+	return s.Get(ctx, userID, input.ID)
 }
 
-func (s *NetWorthSnapshotService) Delete(ctx context.Context, id uuid.UUID) error {
-	err := s.queries.DeleteNetWorthSnapshot(ctx, id)
+func (s *NetWorthSnapshotService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	err := s.queries.DeleteNetWorthSnapshot(ctx, sqlc.DeleteNetWorthSnapshotParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete net worth snapshot: %w", err)
 	}

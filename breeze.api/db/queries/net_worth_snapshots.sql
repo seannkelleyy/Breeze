@@ -11,7 +11,7 @@ INSERT INTO net_worth_snapshots (
 
 -- name: GetNetWorthSnapshot :one
 SELECT * FROM net_worth_snapshots
-WHERE id = $1 AND deleted_at IS NULL;
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL;
 
 -- name: GetNetWorthSnapshotByDate :one
 SELECT * FROM net_worth_snapshots
@@ -29,13 +29,13 @@ SET
     total_liabilities = COALESCE(sqlc.narg('total_liabilities'), total_liabilities),
     net_worth = COALESCE(sqlc.narg('net_worth'), net_worth),
     updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
 RETURNING *;
 
 -- name: DeleteNetWorthSnapshot :exec
 UPDATE net_worth_snapshots
 SET deleted_at = now(), updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL;
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL;
 
 -- name: CreateNetWorthSnapshotItem :one
 INSERT INTO net_worth_snapshot_items (

@@ -387,6 +387,11 @@ func (r *mutationResolver) CreateTransaction(ctx context.Context, input model.Cr
 
 // AssignTransactionCategory is the resolver for the assignTransactionCategory field.
 func (r *mutationResolver) AssignTransactionCategory(ctx context.Context, id string, expenseCategoryID *string) (*model.Transaction, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return nil, err
+	}
+
 	parsedID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, fmt.Errorf("invalid transaction id: %w", err)
@@ -401,7 +406,7 @@ func (r *mutationResolver) AssignTransactionCategory(ctx context.Context, id str
 		categoryID = &parsed
 	}
 
-	transaction, err := r.TransactionService.AssignCategory(ctx, parsedID, categoryID)
+	transaction, err := r.TransactionService.AssignCategory(ctx, userID, parsedID, categoryID)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -409,10 +414,6 @@ func (r *mutationResolver) AssignTransactionCategory(ctx context.Context, id str
 	// Realize the transaction in the budget: a categorized transaction gets a
 	// matching expense row (so plan-vs-actual reflects bank spending); clearing
 	// the category removes it.
-	userID, authErr := resolveUserIDFromCtx(ctx, r.UserService)
-	if authErr != nil {
-		return nil, authErr
-	}
 	if syncErr := r.syncTransactionExpense(ctx, userID, transaction); syncErr != nil {
 		return nil, r.mapErr(ctx, syncErr)
 	}
@@ -422,12 +423,17 @@ func (r *mutationResolver) AssignTransactionCategory(ctx context.Context, id str
 
 // DeleteTransaction is the resolver for the deleteTransaction field.
 func (r *mutationResolver) DeleteTransaction(ctx context.Context, id string) (bool, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return false, err
+	}
+
 	parsedID, err := uuid.Parse(id)
 	if err != nil {
 		return false, fmt.Errorf("invalid transaction id: %w", err)
 	}
 
-	if err := r.TransactionService.Delete(ctx, parsedID); err != nil {
+	if err := r.TransactionService.Delete(ctx, userID, parsedID); err != nil {
 		return false, r.mapErr(ctx, err)
 	}
 	return true, nil
@@ -827,7 +833,12 @@ func (r *mutationResolver) UpdateNetWorthSnapshot(ctx context.Context, input mod
 		return nil, r.mapErr(ctx, err)
 	}
 
-	snapshot, err := r.NetWorthSnapshotService.Update(ctx, &svcInput)
+	snapshotUser, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+
+	snapshot, err := r.NetWorthSnapshotService.Update(ctx, snapshotUser, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -842,7 +853,11 @@ func (r *mutationResolver) DeleteNetWorthSnapshot(ctx context.Context, id string
 		return false, fmt.Errorf("invalid net worth snapshot id: %w", err)
 	}
 
-	err = r.NetWorthSnapshotService.Delete(ctx, parsedID)
+	snapshotUser, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.NetWorthSnapshotService.Delete(ctx, snapshotUser, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -1841,7 +1856,11 @@ func (r *queryResolver) NetWorthSnapshot(ctx context.Context, id string) (*model
 		return nil, fmt.Errorf("invalid net worth snapshot id: %w", err)
 	}
 
-	snapshot, err := r.NetWorthSnapshotService.Get(ctx, parsedID)
+	snapshotUser, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	snapshot, err := r.NetWorthSnapshotService.Get(ctx, snapshotUser, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil

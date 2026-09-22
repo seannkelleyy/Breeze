@@ -1,12 +1,7 @@
 'use client';
 import { Info } from 'lucide-react';
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 /**
  * Small info icon with a hover/focus tooltip — for explaining what a field
