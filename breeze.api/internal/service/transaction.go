@@ -40,9 +40,12 @@ type CreateTransactionInput struct {
 	ExpenseCategoryID *uuid.UUID
 }
 
-type transactionBudgetQuerier interface {
-	GetBudgetByDate(ctx context.Context, arg sqlc.GetBudgetByDateParams) (sqlc.Budget, error)
-	CreateBudget(ctx context.Context, arg sqlc.CreateBudgetParams) (sqlc.Budget, error)
+type TransactionService struct {
+	queries transactionQuerier
+}
+
+func NewTransactionService(queries transactionQuerier) *TransactionService {
+	return &TransactionService{queries: queries}
 }
 
 // BudgetForMonth returns the budget containing the given date, creating an
@@ -67,14 +70,6 @@ type transactionQuerier interface {
 	ListTransactionsByUserID(ctx context.Context, arg sqlc.ListTransactionsByUserIDParams) ([]sqlc.Transaction, error)
 	AssignTransactionCategory(ctx context.Context, arg sqlc.AssignTransactionCategoryParams) (sqlc.Transaction, error)
 	SoftDeleteTransaction(ctx context.Context, id uuid.UUID) (int64, error)
-}
-
-type TransactionService struct {
-	queries transactionQuerier
-}
-
-func NewTransactionService(queries transactionQuerier) *TransactionService {
-	return &TransactionService{queries: queries}
 }
 
 func (s *TransactionService) Create(ctx context.Context, input *CreateTransactionInput) (*Transaction, error) {

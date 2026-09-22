@@ -61,9 +61,9 @@ func (r *Resolver) syncTransactionExpense(ctx context.Context, userID uuid.UUID,
 	// Spend amount is the positive (money-out) magnitude.
 	amount := tx.Amount
 	if amount.IsNeg() {
-		var err error
-		if amount, err = amount.Mul(decimal.MustParse("-1")); err != nil {
-			return err
+		var negErr error
+		if amount, negErr = amount.Mul(decimal.MustParse("-1")); negErr != nil {
+			return negErr
 		}
 	}
 
@@ -80,8 +80,8 @@ func (r *Resolver) syncTransactionExpense(ctx context.Context, userID uuid.UUID,
 	}
 
 	if tx.ExpenseID != nil {
-		if err := r.ExpenseService.Delete(ctx, *tx.ExpenseID); err != nil && !errors.Is(err, service.ErrNotFound) {
-			return err
+		if delErr := r.ExpenseService.Delete(ctx, *tx.ExpenseID); delErr != nil && !errors.Is(delErr, service.ErrNotFound) {
+			return delErr
 		}
 	}
 
