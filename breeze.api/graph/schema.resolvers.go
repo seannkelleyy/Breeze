@@ -1144,6 +1144,9 @@ func (r *queryResolver) Asset(ctx context.Context, id string) (*model.Asset, err
 		return nil, r.mapErr(ctx, err)
 	}
 
+	if err := r.ensureOwned(ctx, asset.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
 	return mapAssetToModel(asset), nil
 }
 
@@ -1188,6 +1191,9 @@ func (r *queryResolver) Liability(ctx context.Context, id string) (*model.Liabil
 		return nil, r.mapErr(ctx, err)
 	}
 
+	if err := r.ensureOwned(ctx, liability.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
 	return mapLiabilityToModel(liability), nil
 }
 
@@ -1319,6 +1325,9 @@ func (r *queryResolver) Goal(ctx context.Context, id string) (*model.Goal, error
 		return nil, r.mapErr(ctx, err)
 	}
 
+	if err := r.ensureOwned(ctx, goal.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
 	return mapGoalToModel(goal), nil
 }
 
@@ -1501,6 +1510,9 @@ func (r *queryResolver) Expense(ctx context.Context, id string) (*model.Expense,
 		return nil, r.mapErr(ctx, err)
 	}
 
+	if err := r.ensureOwned(ctx, expense.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
 	return mapExpenseToModel(expense), nil
 }
 
@@ -1540,6 +1552,9 @@ func (r *queryResolver) Income(ctx context.Context, id string) (*model.Income, e
 		return nil, r.mapErr(ctx, err)
 	}
 
+	if err := r.ensureOwned(ctx, income.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
 	return mapIncomeToModel(income), nil
 }
 
@@ -1579,6 +1594,9 @@ func (r *queryResolver) RecurringIncome(ctx context.Context, id string) (*model.
 		return nil, r.mapErr(ctx, err)
 	}
 
+	if err := r.ensureOwned(ctx, income.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
 	return mapRecurringIncomeToModel(income), nil
 }
 
@@ -1623,6 +1641,9 @@ func (r *queryResolver) RecurringExpense(ctx context.Context, id string) (*model
 		return nil, r.mapErr(ctx, err)
 	}
 
+	if err := r.ensureOwned(ctx, expense.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
 	return mapRecurringExpenseToModel(expense), nil
 }
 

@@ -86,3 +86,17 @@ const (
 	errCodeValidation   = "VALIDATION_ERROR"
 	errCodeInternal     = "INTERNAL_ERROR"
 )
+
+// ensureOwned resolves the authenticated user and verifies they own the row
+// about to be read or mutated. Mismatches return ErrNotFound so foreign rows
+// are indistinguishable from missing ones.
+func (r *Resolver) ensureOwned(ctx context.Context, ownerID uuid.UUID) error {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return err
+	}
+	if ownerID != userID {
+		return service.ErrNotFound
+	}
+	return nil
+}
