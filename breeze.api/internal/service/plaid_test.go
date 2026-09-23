@@ -74,20 +74,20 @@ func (m *mockPlaidQuerier) SoftDeletePlaidConnection(ctx context.Context, id uui
 	return 1, nil
 }
 
-func (m *mockPlaidQuerier) LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) error {
-	return nil
+func (m *mockPlaidQuerier) LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) (int64, error) {
+	return 1, nil
 }
 
-func (m *mockPlaidQuerier) UnlinkAssetFromPlaidAccount(ctx context.Context, id uuid.UUID) error {
-	return nil
+func (m *mockPlaidQuerier) UnlinkAssetFromPlaidAccount(ctx context.Context, arg sqlc.UnlinkAssetFromPlaidAccountParams) (int64, error) {
+	return 1, nil
 }
 
-func (m *mockPlaidQuerier) LinkLiabilityToPlaidAccount(ctx context.Context, arg sqlc.LinkLiabilityToPlaidAccountParams) error {
-	return nil
+func (m *mockPlaidQuerier) LinkLiabilityToPlaidAccount(ctx context.Context, arg sqlc.LinkLiabilityToPlaidAccountParams) (int64, error) {
+	return 1, nil
 }
 
-func (m *mockPlaidQuerier) UnlinkLiabilityFromPlaidAccount(ctx context.Context, id uuid.UUID) error {
-	return nil
+func (m *mockPlaidQuerier) UnlinkLiabilityFromPlaidAccount(ctx context.Context, arg sqlc.UnlinkLiabilityFromPlaidAccountParams) (int64, error) {
+	return 1, nil
 }
 
 func (m *mockPlaidQuerier) GetAssetsByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetAssetsByPlaidAccountIDRow, error) {

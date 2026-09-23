@@ -178,12 +178,17 @@ const softDeleteBudget = `-- name: SoftDeleteBudget :execrows
 UPDATE budgets
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteBudget(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteBudget, id)
+type SoftDeleteBudgetParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeleteBudget(ctx context.Context, arg SoftDeleteBudgetParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteBudget, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -196,7 +201,7 @@ SET
   monthly_income = $2,
   monthly_expenses = $3,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $4
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -213,10 +218,16 @@ type UpdateBudgetParams struct {
 	ID              uuid.UUID       `json:"id"`
 	MonthlyIncome   decimal.Decimal `json:"monthly_income"`
 	MonthlyExpenses decimal.Decimal `json:"monthly_expenses"`
+	UserID          uuid.UUID       `json:"user_id"`
 }
 
 func (q *Queries) UpdateBudget(ctx context.Context, arg UpdateBudgetParams) (Budget, error) {
-	row := q.db.QueryRow(ctx, updateBudget, arg.ID, arg.MonthlyIncome, arg.MonthlyExpenses)
+	row := q.db.QueryRow(ctx, updateBudget,
+		arg.ID,
+		arg.MonthlyIncome,
+		arg.MonthlyExpenses,
+		arg.UserID,
+	)
 	var i Budget
 	err := row.Scan(
 		&i.ID,

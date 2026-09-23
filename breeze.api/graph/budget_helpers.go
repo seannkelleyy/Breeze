@@ -71,14 +71,14 @@ func updateBudgetInputFromModel(input *model.UpdateBudgetInput) (service.UpdateB
 
 // removeRecurringIncomesForBudget soft-deletes all incomes for a budget
 // that were generated from recurring templates.
-func removeRecurringIncomesForBudget(ctx context.Context, incomeSvc *service.IncomeService, budgetID uuid.UUID) error {
+func removeRecurringIncomesForBudget(ctx context.Context, incomeSvc *service.IncomeService, userID, budgetID uuid.UUID) error {
 	existingIncomes, err := incomeSvc.ListByBudgetID(ctx, budgetID)
 	if err != nil {
 		return err
 	}
 	for i := range existingIncomes {
 		if existingIncomes[i].SourceType == sqlc.IncomeSourceTypeRECURRINGTEMPLATE {
-			_ = incomeSvc.Delete(ctx, existingIncomes[i].ID)
+			_ = incomeSvc.Delete(ctx, userID, existingIncomes[i].ID)
 		}
 	}
 	return nil
@@ -90,6 +90,7 @@ func recalculateBudgetIncome(
 	ctx context.Context,
 	incomeSvc *service.IncomeService,
 	budgetSvc *service.BudgetService,
+	userID uuid.UUID,
 	budget *service.Budget,
 ) *service.Budget {
 	incomes, listErr := incomeSvc.ListByBudgetID(ctx, budget.ID)
@@ -104,7 +105,7 @@ func recalculateBudgetIncome(
 		slog.Info("recalculateBudgetIncome: income", "name", incomes[i].Name, "amount", incomes[i].Amount.String())
 	}
 	slog.Info("recalculateBudgetIncome: total", "total", total.String())
-	updated, updateErr := budgetSvc.Update(ctx, &service.UpdateBudgetInput{
+	updated, updateErr := budgetSvc.Update(ctx, userID, &service.UpdateBudgetInput{
 		ID:              budget.ID,
 		MonthlyIncome:   total,
 		MonthlyExpenses: budget.MonthlyExpenses,
@@ -147,7 +148,7 @@ func replacePayrollIncomesForBudget(
 	}
 	for i := range existingIncomes {
 		if existingIncomes[i].SourceType == sqlc.IncomeSourceTypePEOPLEPAYROLL {
-			_ = incomeSvc.Delete(ctx, existingIncomes[i].ID)
+			_ = incomeSvc.Delete(ctx, userID, existingIncomes[i].ID)
 		}
 	}
 

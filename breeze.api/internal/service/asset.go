@@ -82,7 +82,7 @@ type assetQuerier interface {
 	GetAssetByID(ctx context.Context, id uuid.UUID) (sqlc.GetAssetByIDRow, error)
 	ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListAssetsByUserIDRow, error)
 	UpdateAsset(ctx context.Context, arg sqlc.UpdateAssetParams) (sqlc.UpdateAssetRow, error)
-	SoftDeleteAsset(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteAsset(ctx context.Context, arg sqlc.SoftDeleteAssetParams) (int64, error)
 }
 
 type AssetService struct {
@@ -152,13 +152,14 @@ func (s *AssetService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]As
 	return assets, nil
 }
 
-func (s *AssetService) Update(ctx context.Context, input *UpdateAssetInput) (*Asset, error) {
+func (s *AssetService) Update(ctx context.Context, userID uuid.UUID, input *UpdateAssetInput) (*Asset, error) {
 	purchaseDate := pgtypeDateFromString(input.PurchaseDate)
 	purchasePrice := pgtypeNumericFromDecimal(input.PurchasePrice)
 	linkedLiabilityID := pgtypeUUIDFromPtr(input.LinkedLiabilityID)
 
 	row, err := s.queries.UpdateAsset(ctx, sqlc.UpdateAssetParams{
 		ID:                              input.ID,
+		UserID:                          userID,
 		Name:                            input.Name,
 		AssetType:                       input.AssetType,
 		CurrentValue:                    input.CurrentValue,
@@ -187,8 +188,11 @@ func (s *AssetService) Update(ctx context.Context, input *UpdateAssetInput) (*As
 	return &asset, nil
 }
 
-func (s *AssetService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeleteAsset(ctx, id)
+func (s *AssetService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeleteAsset(ctx, sqlc.SoftDeleteAssetParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete asset: %w", err)
 	}

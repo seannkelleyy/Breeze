@@ -353,12 +353,17 @@ const softDeleteIncome = `-- name: SoftDeleteIncome :execrows
 UPDATE income
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteIncome(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteIncome, id)
+type SoftDeleteIncomeParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeleteIncome(ctx context.Context, arg SoftDeleteIncomeParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteIncome, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -369,12 +374,17 @@ const softDeleteRecurringIncome = `-- name: SoftDeleteRecurringIncome :execrows
 UPDATE recurring_income
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteRecurringIncome(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteRecurringIncome, id)
+type SoftDeleteRecurringIncomeParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeleteRecurringIncome(ctx context.Context, arg SoftDeleteRecurringIncomeParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteRecurringIncome, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -393,7 +403,7 @@ SET
   generation_month = $8,
   person_id = $9,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $10
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -422,6 +432,7 @@ type UpdateIncomeParams struct {
 	SourceOccurrenceDate pgtype.Date      `json:"source_occurrence_date"`
 	GenerationMonth      pgtype.Date      `json:"generation_month"`
 	PersonID             pgtype.UUID      `json:"person_id"`
+	UserID               uuid.UUID        `json:"user_id"`
 }
 
 func (q *Queries) UpdateIncome(ctx context.Context, arg UpdateIncomeParams) (Income, error) {
@@ -435,6 +446,7 @@ func (q *Queries) UpdateIncome(ctx context.Context, arg UpdateIncomeParams) (Inc
 		arg.SourceOccurrenceDate,
 		arg.GenerationMonth,
 		arg.PersonID,
+		arg.UserID,
 	)
 	var i Income
 	err := row.Scan(
@@ -467,7 +479,7 @@ SET
   end_date = $7,
   person_id = $8,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $9
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -493,6 +505,7 @@ type UpdateRecurringIncomeParams struct {
 	StartDate          pgtype.Date        `json:"start_date"`
 	EndDate            pgtype.Date        `json:"end_date"`
 	PersonID           pgtype.UUID        `json:"person_id"`
+	UserID             uuid.UUID          `json:"user_id"`
 }
 
 func (q *Queries) UpdateRecurringIncome(ctx context.Context, arg UpdateRecurringIncomeParams) (RecurringIncome, error) {
@@ -505,6 +518,7 @@ func (q *Queries) UpdateRecurringIncome(ctx context.Context, arg UpdateRecurring
 		arg.StartDate,
 		arg.EndDate,
 		arg.PersonID,
+		arg.UserID,
 	)
 	var i RecurringIncome
 	err := row.Scan(

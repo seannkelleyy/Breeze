@@ -59,7 +59,7 @@ type incomeQuerier interface {
 	GetIncomeByID(ctx context.Context, id uuid.UUID) (sqlc.Income, error)
 	ListIncomeByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.Income, error)
 	UpdateIncome(ctx context.Context, arg sqlc.UpdateIncomeParams) (sqlc.Income, error)
-	SoftDeleteIncome(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteIncome(ctx context.Context, arg sqlc.SoftDeleteIncomeParams) (int64, error)
 }
 
 type IncomeService struct {
@@ -118,9 +118,10 @@ func (s *IncomeService) ListByBudgetID(ctx context.Context, budgetID uuid.UUID) 
 	return incomes, nil
 }
 
-func (s *IncomeService) Update(ctx context.Context, input *UpdateIncomeInput) (*Income, error) {
+func (s *IncomeService) Update(ctx context.Context, userID uuid.UUID, input *UpdateIncomeInput) (*Income, error) {
 	row, err := s.queries.UpdateIncome(ctx, sqlc.UpdateIncomeParams{
 		ID:                   input.ID,
+		UserID:               userID,
 		Name:                 input.Name,
 		Amount:               input.Amount,
 		Date:                 pgtype.Date{Time: input.Date, Valid: true},
@@ -141,8 +142,11 @@ func (s *IncomeService) Update(ctx context.Context, input *UpdateIncomeInput) (*
 	return &income, nil
 }
 
-func (s *IncomeService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeleteIncome(ctx, id)
+func (s *IncomeService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeleteIncome(ctx, sqlc.SoftDeleteIncomeParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete income: %w", err)
 	}

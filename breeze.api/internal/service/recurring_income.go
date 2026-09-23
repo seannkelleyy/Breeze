@@ -54,7 +54,7 @@ type recurringIncomeQuerier interface {
 	GetRecurringIncomeByID(ctx context.Context, id uuid.UUID) (sqlc.RecurringIncome, error)
 	ListRecurringIncomeByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.RecurringIncome, error)
 	UpdateRecurringIncome(ctx context.Context, arg sqlc.UpdateRecurringIncomeParams) (sqlc.RecurringIncome, error)
-	SoftDeleteRecurringIncome(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteRecurringIncome(ctx context.Context, arg sqlc.SoftDeleteRecurringIncomeParams) (int64, error)
 }
 
 type RecurringIncomeService struct {
@@ -111,9 +111,10 @@ func (s *RecurringIncomeService) ListByUserID(ctx context.Context, userID uuid.U
 	return incomes, nil
 }
 
-func (s *RecurringIncomeService) Update(ctx context.Context, input UpdateRecurringIncomeInput) (*RecurringIncome, error) {
+func (s *RecurringIncomeService) Update(ctx context.Context, userID uuid.UUID, input UpdateRecurringIncomeInput) (*RecurringIncome, error) {
 	row, err := s.queries.UpdateRecurringIncome(ctx, sqlc.UpdateRecurringIncomeParams{
 		ID:                 input.ID,
+		UserID:             userID,
 		Name:               input.Name,
 		Amount:             input.Amount,
 		RecurrenceInterval: input.RecurrenceInterval,
@@ -133,8 +134,11 @@ func (s *RecurringIncomeService) Update(ctx context.Context, input UpdateRecurri
 	return &income, nil
 }
 
-func (s *RecurringIncomeService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeleteRecurringIncome(ctx, id)
+func (s *RecurringIncomeService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeleteRecurringIncome(ctx, sqlc.SoftDeleteRecurringIncomeParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete recurring income: %w", err)
 	}

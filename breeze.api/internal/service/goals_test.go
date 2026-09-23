@@ -17,7 +17,7 @@ type mockGoalQuerier struct {
 	getGoalByIDFunc               func(context.Context, uuid.UUID) (sqlc.Goal, error)
 	listGoalsFunc                 func(context.Context, uuid.UUID) ([]sqlc.Goal, error)
 	updateGoalFunc                func(context.Context, sqlc.UpdateGoalParams) (sqlc.Goal, error)
-	softDeleteGoalFunc            func(context.Context, uuid.UUID) (int64, error)
+	softDeleteGoalFunc            func(context.Context, sqlc.SoftDeleteGoalParams) (int64, error)
 	listFinancialOrderStepsFunc   func(context.Context, uuid.UUID) ([]sqlc.Goal, error)
 	createFinancialOrderStepsFunc func(context.Context, uuid.UUID) ([]sqlc.Goal, error)
 }
@@ -50,9 +50,9 @@ func (m *mockGoalQuerier) UpdateGoal(ctx context.Context, arg sqlc.UpdateGoalPar
 	return sqlc.Goal{}, nil
 }
 
-func (m *mockGoalQuerier) SoftDeleteGoal(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockGoalQuerier) SoftDeleteGoal(ctx context.Context, arg sqlc.SoftDeleteGoalParams) (int64, error) {
 	if m.softDeleteGoalFunc != nil {
-		return m.softDeleteGoalFunc(ctx, id)
+		return m.softDeleteGoalFunc(ctx, arg)
 	}
 	return 0, nil
 }
@@ -198,7 +198,8 @@ func TestGoalService_Update(t *testing.T) {
 	}
 
 	svc := NewGoalService(mock)
-	result, err := svc.Update(ctx, &UpdateGoalInput{
+	userID := uuid.New()
+	result, err := svc.Update(ctx, userID, &UpdateGoalInput{
 		ID:          row.ID,
 		Description: row.Description,
 		IsCompleted: true,
@@ -215,26 +216,26 @@ func TestGoalService_Delete(t *testing.T) {
 
 	t.Run("deletes goal", func(t *testing.T) {
 		mock := &mockGoalQuerier{
-			softDeleteGoalFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-				assert.Equal(t, row.ID, id)
+			softDeleteGoalFunc: func(_ context.Context, arg sqlc.SoftDeleteGoalParams) (int64, error) {
+				assert.Equal(t, row.ID, arg.ID)
 				return 1, nil
 			},
 		}
 
 		svc := NewGoalService(mock)
-		err := svc.Delete(ctx, row.ID)
+		err := svc.Delete(ctx, uuid.New(), row.ID)
 		assert.NoError(t, err)
 	})
 
 	t.Run("returns not found", func(t *testing.T) {
 		mock := &mockGoalQuerier{
-			softDeleteGoalFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+			softDeleteGoalFunc: func(_ context.Context, arg sqlc.SoftDeleteGoalParams) (int64, error) {
 				return 0, nil
 			},
 		}
 
 		svc := NewGoalService(mock)
-		err := svc.Delete(ctx, row.ID)
+		err := svc.Delete(ctx, uuid.New(), row.ID)
 		assert.ErrorIs(t, err, ErrNotFound)
 	})
 }

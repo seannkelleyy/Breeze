@@ -16,7 +16,7 @@ import (
 type mockPlannerPersonQuerier struct {
 	upsertPlannerPersonFunc             func(context.Context, sqlc.UpsertPlannerPersonParams) (sqlc.PlannerPerson, error)
 	listPlannerPeopleByUserIDFunc       func(context.Context, uuid.UUID) ([]sqlc.PlannerPerson, error)
-	softDeletePlannerPersonFunc         func(context.Context, uuid.UUID) (int64, error)
+	softDeletePlannerPersonFunc         func(context.Context, sqlc.SoftDeletePlannerPersonParams) (int64, error)
 	softDeletePlannerPeopleByUserIDFunc func(context.Context, uuid.UUID) (int64, error)
 }
 
@@ -34,9 +34,9 @@ func (m *mockPlannerPersonQuerier) ListPlannerPeopleByUserID(ctx context.Context
 	return []sqlc.PlannerPerson{}, nil
 }
 
-func (m *mockPlannerPersonQuerier) SoftDeletePlannerPerson(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockPlannerPersonQuerier) SoftDeletePlannerPerson(ctx context.Context, arg sqlc.SoftDeletePlannerPersonParams) (int64, error) {
 	if m.softDeletePlannerPersonFunc != nil {
-		return m.softDeletePlannerPersonFunc(ctx, id)
+		return m.softDeletePlannerPersonFunc(ctx, arg)
 	}
 	return 0, nil
 }
@@ -218,14 +218,14 @@ func TestPlannerPersonService_Delete(t *testing.T) {
 	personID := uuid.New()
 
 	mock := &mockPlannerPersonQuerier{
-		softDeletePlannerPersonFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-			assert.Equal(t, personID, id)
+		softDeletePlannerPersonFunc: func(_ context.Context, arg sqlc.SoftDeletePlannerPersonParams) (int64, error) {
+			assert.Equal(t, personID, arg.ID)
 			return 1, nil
 		},
 	}
 
 	svc := NewPlannerPersonService(mock)
-	err := svc.Delete(ctx, personID)
+	err := svc.Delete(ctx, uuid.New(), personID)
 
 	assert.NoError(t, err)
 }
@@ -234,13 +234,13 @@ func TestPlannerPersonService_Delete_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	mock := &mockPlannerPersonQuerier{
-		softDeletePlannerPersonFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+		softDeletePlannerPersonFunc: func(_ context.Context, arg sqlc.SoftDeletePlannerPersonParams) (int64, error) {
 			return 0, nil
 		},
 	}
 
 	svc := NewPlannerPersonService(mock)
-	err := svc.Delete(ctx, uuid.New())
+	err := svc.Delete(ctx, uuid.New(), uuid.New())
 
 	assert.Error(t, err)
 	assert.Equal(t, ErrNotFound, err)
@@ -251,13 +251,13 @@ func TestPlannerPersonService_Delete_Error(t *testing.T) {
 	dbErr := errors.New("delete failed")
 
 	mock := &mockPlannerPersonQuerier{
-		softDeletePlannerPersonFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+		softDeletePlannerPersonFunc: func(_ context.Context, arg sqlc.SoftDeletePlannerPersonParams) (int64, error) {
 			return 0, dbErr
 		},
 	}
 
 	svc := NewPlannerPersonService(mock)
-	err := svc.Delete(ctx, uuid.New())
+	err := svc.Delete(ctx, uuid.New(), uuid.New())
 
 	assert.Error(t, err)
 	assert.ErrorIs(t, err, dbErr)

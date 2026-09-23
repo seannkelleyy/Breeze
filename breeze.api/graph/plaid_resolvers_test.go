@@ -6,11 +6,47 @@ import (
 	"time"
 
 	"breeze.api/internal/db/sqlc"
+	"breeze.api/internal/middleware"
 	"breeze.api/internal/service"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
+
+// graphUserQuerierMock satisfies service.userQuerier for resolver tests that
+// resolve the authenticated user from context. Only the identity lookup is
+// meaningful; the rest return zero values.
+type graphUserQuerierMock struct {
+	user sqlc.User
+}
+
+func (m *graphUserQuerierMock) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error) {
+	return m.user, nil
+}
+
+func (m *graphUserQuerierMock) GetUserByID(ctx context.Context, id uuid.UUID) (sqlc.User, error) {
+	return m.user, nil
+}
+
+func (m *graphUserQuerierMock) GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (sqlc.User, error) {
+	return m.user, nil
+}
+
+func (m *graphUserQuerierMock) GetOrCreateUserByEmail(ctx context.Context, arg sqlc.GetOrCreateUserByEmailParams) (sqlc.User, error) {
+	return m.user, nil
+}
+
+func (m *graphUserQuerierMock) ListUsers(ctx context.Context) ([]sqlc.User, error) {
+	return []sqlc.User{m.user}, nil
+}
+
+func (m *graphUserQuerierMock) UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.User, error) {
+	return m.user, nil
+}
+
+func (m *graphUserQuerierMock) UpdateUserSetup(ctx context.Context, arg sqlc.UpdateUserSetupParams) (sqlc.User, error) {
+	return m.user, nil
+}
 
 type graphPlaidQuerierMock struct {
 	createPlaidConnectionFunc          func(context.Context, sqlc.CreatePlaidConnectionParams) (sqlc.PlaidConnection, error)
@@ -79,20 +115,20 @@ func (m *graphPlaidQuerierMock) SoftDeletePlaidConnection(ctx context.Context, i
 	return 1, nil
 }
 
-func (m *graphPlaidQuerierMock) LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) error {
-	return nil
+func (m *graphPlaidQuerierMock) LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) (int64, error) {
+	return 1, nil
 }
 
-func (m *graphPlaidQuerierMock) UnlinkAssetFromPlaidAccount(ctx context.Context, id uuid.UUID) error {
-	return nil
+func (m *graphPlaidQuerierMock) UnlinkAssetFromPlaidAccount(ctx context.Context, arg sqlc.UnlinkAssetFromPlaidAccountParams) (int64, error) {
+	return 1, nil
 }
 
-func (m *graphPlaidQuerierMock) LinkLiabilityToPlaidAccount(ctx context.Context, arg sqlc.LinkLiabilityToPlaidAccountParams) error {
-	return nil
+func (m *graphPlaidQuerierMock) LinkLiabilityToPlaidAccount(ctx context.Context, arg sqlc.LinkLiabilityToPlaidAccountParams) (int64, error) {
+	return 1, nil
 }
 
-func (m *graphPlaidQuerierMock) UnlinkLiabilityFromPlaidAccount(ctx context.Context, id uuid.UUID) error {
-	return nil
+func (m *graphPlaidQuerierMock) UnlinkLiabilityFromPlaidAccount(ctx context.Context, arg sqlc.UnlinkLiabilityFromPlaidAccountParams) (int64, error) {
+	return 1, nil
 }
 
 func (m *graphPlaidQuerierMock) GetAssetsByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetAssetsByPlaidAccountIDRow, error) {
@@ -119,6 +155,7 @@ func TestPlaidMutationExchangeAndQueryResolvers(t *testing.T) {
 
 	userID := uuid.New()
 	connectionID := uuid.New()
+	const devIdentityID = "dev-identity-plaid-test"
 	storedConnection := sqlc.PlaidConnection{
 		ID:              connectionID,
 		UserID:          userID,
@@ -130,6 +167,11 @@ func TestPlaidMutationExchangeAndQueryResolvers(t *testing.T) {
 		CreatedAt:       pgtype.Timestamptz{Time: graphTime(), Valid: true},
 		UpdatedAt:       pgtype.Timestamptz{Time: graphTime(), Valid: true},
 	}
+
+	// The resolvers under test resolve the caller from the auth context and
+	// verify connection ownership, so run with an authenticated dev identity.
+	userMock := &graphUserQuerierMock{user: sqlc.User{ID: userID, IdentityProviderID: devIdentityID}}
+	ctx := middleware.WithDevUserID(context.Background(), devIdentityID)
 
 	var receivedCreate sqlc.CreatePlaidConnectionParams
 	connMock := &graphPlaidQuerierMock{
@@ -182,9 +224,9 @@ func TestPlaidMutationExchangeAndQueryResolvers(t *testing.T) {
 	}
 
 	svc := service.NewPlaidService(connMock, nil, service.NewDevPlaidClient())
-	resolver := &Resolver{PlaidService: svc}
+	resolver := &Resolver{PlaidService: svc, UserService: service.NewUserService(userMock)}
 
-	created, err := resolver.Mutation().ExchangePlaidPublicToken(context.Background(), userID.String(), "public_tok")
+	created, err := resolver.Mutation().ExchangePlaidPublicToken(ctx, userID.String(), "public_tok")
 	assert.NoError(t, err)
 	if assert.NotNil(t, created) {
 		assert.Equal(t, userID.String(), created.UserID)
@@ -198,27 +240,27 @@ func TestPlaidMutationExchangeAndQueryResolvers(t *testing.T) {
 	assert.Equal(t, "dev_access_public_tok", receivedCreate.AccessToken)
 	assert.Contains(t, receivedCreate.ItemID, "dev_item_")
 
-	ok, err := resolver.Mutation().SyncPlaidConnection(context.Background(), connectionID.String())
+	ok, err := resolver.Mutation().SyncPlaidConnection(ctx, connectionID.String())
 	assert.NoError(t, err)
 	assert.True(t, ok)
 
-	deleted, err := resolver.Mutation().DeletePlaidConnection(context.Background(), connectionID.String())
+	deleted, err := resolver.Mutation().DeletePlaidConnection(ctx, connectionID.String())
 	assert.NoError(t, err)
 	assert.True(t, deleted)
 
-	gotConnection, err := resolver.Query().PlaidConnection(context.Background(), connectionID.String())
+	gotConnection, err := resolver.Query().PlaidConnection(ctx, connectionID.String())
 	assert.NoError(t, err)
 	if assert.NotNil(t, gotConnection) {
 		assert.Equal(t, connectionID.String(), gotConnection.ID)
 	}
 
-	connections, err := resolver.Query().PlaidConnections(context.Background(), userID.String())
+	connections, err := resolver.Query().PlaidConnections(ctx, userID.String())
 	assert.NoError(t, err)
 	if assert.Len(t, connections, 1) {
 		assert.Equal(t, connectionID.String(), connections[0].ID)
 	}
 
-	accounts, err := resolver.Query().PlaidAccounts(context.Background(), connectionID.String())
+	accounts, err := resolver.Query().PlaidAccounts(ctx, connectionID.String())
 	assert.NoError(t, err)
 	if assert.Len(t, accounts, 1) {
 		assert.Equal(t, "dev-ext-1", accounts[0].ExternalID)

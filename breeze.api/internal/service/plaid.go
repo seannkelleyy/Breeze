@@ -64,10 +64,10 @@ type plaidQuerier interface {
 	GetPlaidAccountsByConnectionID(ctx context.Context, connectionID uuid.UUID) ([]sqlc.PlaidAccount, error)
 	SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error)
 	UpsertPlaidTransaction(ctx context.Context, arg sqlc.UpsertPlaidTransactionParams) (sqlc.Transaction, error)
-	LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) error
-	UnlinkAssetFromPlaidAccount(ctx context.Context, id uuid.UUID) error
-	LinkLiabilityToPlaidAccount(ctx context.Context, arg sqlc.LinkLiabilityToPlaidAccountParams) error
-	UnlinkLiabilityFromPlaidAccount(ctx context.Context, id uuid.UUID) error
+	LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) (int64, error)
+	UnlinkAssetFromPlaidAccount(ctx context.Context, arg sqlc.UnlinkAssetFromPlaidAccountParams) (int64, error)
+	LinkLiabilityToPlaidAccount(ctx context.Context, arg sqlc.LinkLiabilityToPlaidAccountParams) (int64, error)
+	UnlinkLiabilityFromPlaidAccount(ctx context.Context, arg sqlc.UnlinkLiabilityFromPlaidAccountParams) (int64, error)
 	GetAssetsByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetAssetsByPlaidAccountIDRow, error)
 	GetLiabilitiesByPlaidAccountID(ctx context.Context, plaidAccountID pgtype.UUID) ([]sqlc.GetLiabilitiesByPlaidAccountIDRow, error)
 	UpdateExpenseAmount(ctx context.Context, arg sqlc.UpdateExpenseAmountParams) error
@@ -116,30 +116,72 @@ func (s *PlaidService) CreateLinkToken(ctx context.Context, userID string) (stri
 	return token, nil
 }
 
-// LinkAssetToPlaidAccount links an asset to a Plaid account.
-func (s *PlaidService) LinkAssetToPlaidAccount(ctx context.Context, assetID, plaidAccountID uuid.UUID) error {
-	return s.queries.LinkAssetToPlaidAccount(ctx, sqlc.LinkAssetToPlaidAccountParams{
+// LinkAssetToPlaidAccount links one of userID's assets to one of userID's
+// Plaid accounts. A foreign asset, a foreign Plaid account, or both yield
+// ErrNotFound.
+func (s *PlaidService) LinkAssetToPlaidAccount(ctx context.Context, userID, assetID, plaidAccountID uuid.UUID) error {
+	rows, err := s.queries.LinkAssetToPlaidAccount(ctx, sqlc.LinkAssetToPlaidAccountParams{
 		ID:             assetID,
 		PlaidAccountID: pgtypeUUIDFromPtr(&plaidAccountID),
+		UserID:         userID,
 	})
+	if err != nil {
+		return fmt.Errorf("link asset to plaid account: %w", err)
+	}
+	if rows == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
-// UnlinkAssetFromPlaidAccount removes the Plaid account link from an asset.
-func (s *PlaidService) UnlinkAssetFromPlaidAccount(ctx context.Context, assetID uuid.UUID) error {
-	return s.queries.UnlinkAssetFromPlaidAccount(ctx, assetID)
+// UnlinkAssetFromPlaidAccount removes the Plaid account link from one of
+// userID's assets.
+func (s *PlaidService) UnlinkAssetFromPlaidAccount(ctx context.Context, userID, assetID uuid.UUID) error {
+	rows, err := s.queries.UnlinkAssetFromPlaidAccount(ctx, sqlc.UnlinkAssetFromPlaidAccountParams{
+		ID:     assetID,
+		UserID: userID,
+	})
+	if err != nil {
+		return fmt.Errorf("unlink asset from plaid account: %w", err)
+	}
+	if rows == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
-// LinkLiabilityToPlaidAccount links a liability to a Plaid account.
-func (s *PlaidService) LinkLiabilityToPlaidAccount(ctx context.Context, liabilityID, plaidAccountID uuid.UUID) error {
-	return s.queries.LinkLiabilityToPlaidAccount(ctx, sqlc.LinkLiabilityToPlaidAccountParams{
+// LinkLiabilityToPlaidAccount links one of userID's liabilities to one of
+// userID's Plaid accounts. A foreign liability, a foreign Plaid account, or
+// both yield ErrNotFound.
+func (s *PlaidService) LinkLiabilityToPlaidAccount(ctx context.Context, userID, liabilityID, plaidAccountID uuid.UUID) error {
+	rows, err := s.queries.LinkLiabilityToPlaidAccount(ctx, sqlc.LinkLiabilityToPlaidAccountParams{
 		ID:             liabilityID,
 		PlaidAccountID: pgtypeUUIDFromPtr(&plaidAccountID),
+		UserID:         userID,
 	})
+	if err != nil {
+		return fmt.Errorf("link liability to plaid account: %w", err)
+	}
+	if rows == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
-// UnlinkLiabilityFromPlaidAccount removes the Plaid account link from a liability.
-func (s *PlaidService) UnlinkLiabilityFromPlaidAccount(ctx context.Context, liabilityID uuid.UUID) error {
-	return s.queries.UnlinkLiabilityFromPlaidAccount(ctx, liabilityID)
+// UnlinkLiabilityFromPlaidAccount removes the Plaid account link from one of
+// userID's liabilities.
+func (s *PlaidService) UnlinkLiabilityFromPlaidAccount(ctx context.Context, userID, liabilityID uuid.UUID) error {
+	rows, err := s.queries.UnlinkLiabilityFromPlaidAccount(ctx, sqlc.UnlinkLiabilityFromPlaidAccountParams{
+		ID:     liabilityID,
+		UserID: userID,
+	})
+	if err != nil {
+		return fmt.Errorf("unlink liability from plaid account: %w", err)
+	}
+	if rows == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 // ExchangePublicToken exchanges the public token via the Plaid client and stores the resulting connection.

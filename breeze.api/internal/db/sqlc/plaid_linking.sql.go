@@ -91,40 +91,68 @@ func (q *Queries) GetLiabilitiesByPlaidAccountID(ctx context.Context, plaidAccou
 	return items, nil
 }
 
-const linkAssetToPlaidAccount = `-- name: LinkAssetToPlaidAccount :exec
+const linkAssetToPlaidAccount = `-- name: LinkAssetToPlaidAccount :execrows
 UPDATE assets
 SET plaid_account_id = $2,
     updated_at = now()
-WHERE id = $1
-  AND deleted_at IS NULL
+WHERE assets.id = $1
+  AND assets.user_id = $3
+  AND assets.deleted_at IS NULL
+  AND EXISTS (
+    SELECT 1
+    FROM plaid_accounts pa
+    JOIN plaid_connections pc ON pc.id = pa.plaid_connection_id
+    WHERE pa.id = $2
+      AND pc.user_id = $3
+      AND pa.deleted_at IS NULL
+      AND pc.deleted_at IS NULL
+  )
 `
 
 type LinkAssetToPlaidAccountParams struct {
 	ID             uuid.UUID   `json:"id"`
 	PlaidAccountID pgtype.UUID `json:"plaid_account_id"`
+	UserID         uuid.UUID   `json:"user_id"`
 }
 
-func (q *Queries) LinkAssetToPlaidAccount(ctx context.Context, arg LinkAssetToPlaidAccountParams) error {
-	_, err := q.db.Exec(ctx, linkAssetToPlaidAccount, arg.ID, arg.PlaidAccountID)
-	return err
+func (q *Queries) LinkAssetToPlaidAccount(ctx context.Context, arg LinkAssetToPlaidAccountParams) (int64, error) {
+	result, err := q.db.Exec(ctx, linkAssetToPlaidAccount, arg.ID, arg.PlaidAccountID, arg.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
-const linkLiabilityToPlaidAccount = `-- name: LinkLiabilityToPlaidAccount :exec
+const linkLiabilityToPlaidAccount = `-- name: LinkLiabilityToPlaidAccount :execrows
 UPDATE liabilities
 SET plaid_account_id = $2,
     updated_at = now()
-WHERE id = $1
-  AND deleted_at IS NULL
+WHERE liabilities.id = $1
+  AND liabilities.user_id = $3
+  AND liabilities.deleted_at IS NULL
+  AND EXISTS (
+    SELECT 1
+    FROM plaid_accounts pa
+    JOIN plaid_connections pc ON pc.id = pa.plaid_connection_id
+    WHERE pa.id = $2
+      AND pc.user_id = $3
+      AND pa.deleted_at IS NULL
+      AND pc.deleted_at IS NULL
+  )
 `
 
 type LinkLiabilityToPlaidAccountParams struct {
 	ID             uuid.UUID   `json:"id"`
 	PlaidAccountID pgtype.UUID `json:"plaid_account_id"`
+	UserID         uuid.UUID   `json:"user_id"`
 }
 
-func (q *Queries) LinkLiabilityToPlaidAccount(ctx context.Context, arg LinkLiabilityToPlaidAccountParams) error {
-	_, err := q.db.Exec(ctx, linkLiabilityToPlaidAccount, arg.ID, arg.PlaidAccountID)
-	return err
+func (q *Queries) LinkLiabilityToPlaidAccount(ctx context.Context, arg LinkLiabilityToPlaidAccountParams) (int64, error) {
+	result, err := q.db.Exec(ctx, linkLiabilityToPlaidAccount, arg.ID, arg.PlaidAccountID, arg.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const listPlaidAccountsByConnectionID = `-- name: ListPlaidAccountsByConnectionID :many
@@ -180,28 +208,46 @@ func (q *Queries) ListPlaidAccountsByConnectionID(ctx context.Context, plaidConn
 	return items, nil
 }
 
-const unlinkAssetFromPlaidAccount = `-- name: UnlinkAssetFromPlaidAccount :exec
+const unlinkAssetFromPlaidAccount = `-- name: UnlinkAssetFromPlaidAccount :execrows
 UPDATE assets
 SET plaid_account_id = NULL,
     updated_at = now()
 WHERE id = $1
+  AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) UnlinkAssetFromPlaidAccount(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, unlinkAssetFromPlaidAccount, id)
-	return err
+type UnlinkAssetFromPlaidAccountParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
 }
 
-const unlinkLiabilityFromPlaidAccount = `-- name: UnlinkLiabilityFromPlaidAccount :exec
+func (q *Queries) UnlinkAssetFromPlaidAccount(ctx context.Context, arg UnlinkAssetFromPlaidAccountParams) (int64, error) {
+	result, err := q.db.Exec(ctx, unlinkAssetFromPlaidAccount, arg.ID, arg.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const unlinkLiabilityFromPlaidAccount = `-- name: UnlinkLiabilityFromPlaidAccount :execrows
 UPDATE liabilities
 SET plaid_account_id = NULL,
     updated_at = now()
 WHERE id = $1
+  AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) UnlinkLiabilityFromPlaidAccount(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, unlinkLiabilityFromPlaidAccount, id)
-	return err
+type UnlinkLiabilityFromPlaidAccountParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) UnlinkLiabilityFromPlaidAccount(ctx context.Context, arg UnlinkLiabilityFromPlaidAccountParams) (int64, error) {
+	result, err := q.db.Exec(ctx, unlinkLiabilityFromPlaidAccount, arg.ID, arg.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

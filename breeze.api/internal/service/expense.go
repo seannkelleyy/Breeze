@@ -73,7 +73,7 @@ type expenseQuerier interface {
 	GetExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.Expense, error)
 	ListExpensesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.Expense, error)
 	UpdateExpense(ctx context.Context, arg sqlc.UpdateExpenseParams) (sqlc.Expense, error)
-	SoftDeleteExpense(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteExpense(ctx context.Context, arg sqlc.SoftDeleteExpenseParams) (int64, error)
 	SoftDeleteGeneratedExpensesByBudget(ctx context.Context, budgetID uuid.UUID) (int64, error)
 	CreateExpenseSplit(ctx context.Context, arg sqlc.CreateExpenseSplitParams) (sqlc.ExpenseSplit, error)
 	ListExpenseSplitsByExpenseIDs(ctx context.Context, expenseIDs []uuid.UUID) ([]sqlc.ExpenseSplit, error)
@@ -239,7 +239,7 @@ func (s *ExpenseService) ListByBudgetID(ctx context.Context, budgetID uuid.UUID)
 	return expenses, nil
 }
 
-func (s *ExpenseService) Update(ctx context.Context, input *UpdateExpenseInput) (*Expense, error) {
+func (s *ExpenseService) Update(ctx context.Context, userID uuid.UUID, input *UpdateExpenseInput) (*Expense, error) {
 	if err := validateExpenseSplits(input.Amount, input.Splits); err != nil {
 		return nil, err
 	}
@@ -250,9 +250,11 @@ func (s *ExpenseService) Update(ctx context.Context, input *UpdateExpenseInput) 
 	err := s.txRunner.Run(ctx, func(q expenseQuerier) error {
 		row, err := q.UpdateExpense(ctx, sqlc.UpdateExpenseParams{
 			ID:          input.ID,
+			UserID:      userID,
 			Amount:      input.Amount,
 			Date:        pgtype.Date{Time: input.Date, Valid: true},
 			Description: input.Description,
+			PersonID:    uuidToPGUUID(input.PersonID),
 		})
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
@@ -291,9 +293,12 @@ func (s *ExpenseService) Update(ctx context.Context, input *UpdateExpenseInput) 
 	return &expense, nil
 }
 
-func (s *ExpenseService) Delete(ctx context.Context, id uuid.UUID) error {
+func (s *ExpenseService) Delete(ctx context.Context, userID, id uuid.UUID) error {
 	err := s.txRunner.Run(ctx, func(q expenseQuerier) error {
-		rows, err := q.SoftDeleteExpense(ctx, id)
+		rows, err := q.SoftDeleteExpense(ctx, sqlc.SoftDeleteExpenseParams{
+			ID:     id,
+			UserID: userID,
+		})
 		if err != nil {
 			return fmt.Errorf("delete expense: %w", err)
 		}

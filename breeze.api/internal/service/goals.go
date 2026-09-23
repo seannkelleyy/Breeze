@@ -66,7 +66,7 @@ type goalQuerier interface {
 	GetGoalByID(ctx context.Context, id uuid.UUID) (sqlc.Goal, error)
 	ListGoalsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Goal, error)
 	UpdateGoal(ctx context.Context, arg sqlc.UpdateGoalParams) (sqlc.Goal, error)
-	SoftDeleteGoal(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteGoal(ctx context.Context, arg sqlc.SoftDeleteGoalParams) (int64, error)
 	ListFinancialOrderStepsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Goal, error)
 	CreateFinancialOrderSteps(ctx context.Context, userID uuid.UUID) ([]sqlc.Goal, error)
 }
@@ -193,7 +193,7 @@ func (s *GoalService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]Goa
 	return goals, nil
 }
 
-func (s *GoalService) Update(ctx context.Context, input *UpdateGoalInput) (*Goal, error) {
+func (s *GoalService) Update(ctx context.Context, userID uuid.UUID, input *UpdateGoalInput) (*Goal, error) {
 	targetAmount, err := decimalToPGNumeric(input.TargetAmount)
 	if err != nil {
 		return nil, fmt.Errorf("encode target amount: %w", err)
@@ -211,6 +211,7 @@ func (s *GoalService) Update(ctx context.Context, input *UpdateGoalInput) (*Goal
 
 	row, err := s.queries.UpdateGoal(ctx, sqlc.UpdateGoalParams{
 		ID:                   input.ID,
+		UserID:               userID,
 		Description:          input.Description,
 		IsCompleted:          input.IsCompleted,
 		TargetAmount:         targetAmount,
@@ -250,8 +251,11 @@ func (s *GoalService) Update(ctx context.Context, input *UpdateGoalInput) (*Goal
 	return &goal, nil
 }
 
-func (s *GoalService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeleteGoal(ctx, id)
+func (s *GoalService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeleteGoal(ctx, sqlc.SoftDeleteGoalParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete goal: %w", err)
 	}

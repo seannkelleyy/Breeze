@@ -18,7 +18,7 @@ type mockExpenseQuerier struct {
 	getExpenseByIDFunc                func(context.Context, uuid.UUID) (sqlc.Expense, error)
 	listExpensesByBudgetIDFunc        func(context.Context, uuid.UUID) ([]sqlc.Expense, error)
 	updateExpenseFunc                 func(context.Context, sqlc.UpdateExpenseParams) (sqlc.Expense, error)
-	softDeleteExpenseFunc             func(context.Context, uuid.UUID) (int64, error)
+	softDeleteExpenseFunc             func(context.Context, sqlc.SoftDeleteExpenseParams) (int64, error)
 	softDeleteGeneratedExpensesFunc   func(context.Context, uuid.UUID) (int64, error)
 	createExpenseSplitFunc            func(context.Context, sqlc.CreateExpenseSplitParams) (sqlc.ExpenseSplit, error)
 	listExpenseSplitsByExpenseIDsFunc func(context.Context, []uuid.UUID) ([]sqlc.ExpenseSplit, error)
@@ -53,9 +53,9 @@ func (m *mockExpenseQuerier) UpdateExpense(ctx context.Context, arg sqlc.UpdateE
 	return sqlc.Expense{}, nil
 }
 
-func (m *mockExpenseQuerier) SoftDeleteExpense(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockExpenseQuerier) SoftDeleteExpense(ctx context.Context, arg sqlc.SoftDeleteExpenseParams) (int64, error) {
 	if m.softDeleteExpenseFunc != nil {
-		return m.softDeleteExpenseFunc(ctx, id)
+		return m.softDeleteExpenseFunc(ctx, arg)
 	}
 	return 0, nil
 }
@@ -213,7 +213,7 @@ func TestExpenseService_Update_NotFound(t *testing.T) {
 	}
 
 	svc := expenseTestService(mock)
-	_, err := svc.Update(ctx, &UpdateExpenseInput{
+	_, err := svc.Update(ctx, uuid.New(), &UpdateExpenseInput{
 		ID:          uuid.New(),
 		Amount:      amount,
 		Date:        time.Now(),
@@ -227,12 +227,12 @@ func TestExpenseService_Delete_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	mock := &mockExpenseQuerier{
-		softDeleteExpenseFunc: func(_ context.Context, _ uuid.UUID) (int64, error) {
+		softDeleteExpenseFunc: func(_ context.Context, arg sqlc.SoftDeleteExpenseParams) (int64, error) {
 			return 0, nil
 		},
 	}
 
 	svc := expenseTestService(mock)
-	err := svc.Delete(ctx, uuid.New())
+	err := svc.Delete(ctx, uuid.New(), uuid.New())
 	assert.ErrorIs(t, err, ErrNotFound)
 }

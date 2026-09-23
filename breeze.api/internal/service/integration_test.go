@@ -196,7 +196,7 @@ func TestIntegration_GoalsWithFOO(t *testing.T) {
 		}
 		require.NotNil(t, firstFOO, "should find first FOO step")
 
-		updated, err := svc.Update(ctx, &UpdateGoalInput{
+		updated, err := svc.Update(ctx, userRow.ID, &UpdateGoalInput{
 			ID:          firstFOO.ID,
 			Description: firstFOO.Description,
 			IsCompleted: true,
@@ -291,7 +291,7 @@ func TestIntegration_AssetLiabilityLinking(t *testing.T) {
 		}
 		require.NotNil(t, homeAsset)
 
-		updated, err := assetSvc.Update(ctx, &UpdateAssetInput{
+		updated, err := assetSvc.Update(ctx, userRow.ID, &UpdateAssetInput{
 			ID:                              homeAsset.ID,
 			Name:                            homeAsset.Name,
 			AssetType:                       homeAsset.AssetType,
@@ -510,7 +510,7 @@ func TestIntegration_PlannerPersonLifecycle(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, persons, 2)
 
-		err = svc.Delete(ctx, persons[0].ID)
+		err = svc.Delete(ctx, userRow.ID, persons[0].ID)
 		require.NoError(t, err)
 
 		remaining, err := svc.ListByUserID(ctx, userRow.ID)
@@ -699,7 +699,7 @@ func TestIntegration_AssetReturnProfile(t *testing.T) {
 		assert.Equal(t, "stocks", *fetched.ReturnProfile)
 
 		// Update return profile
-		updated, err := svc.Update(ctx, &UpdateAssetInput{
+		updated, err := svc.Update(ctx, userRow.ID, &UpdateAssetInput{
 			ID:                              fetched.ID,
 			Name:                            fetched.Name,
 			AssetType:                       fetched.AssetType,
@@ -782,7 +782,7 @@ func TestIntegration_LiabilityCRUD(t *testing.T) {
 		require.Len(t, liabilities, 1)
 
 		liability := liabilities[0]
-		updated, err := svc.Update(ctx, &UpdateLiabilityInput{
+		updated, err := svc.Update(ctx, userRow.ID, &UpdateLiabilityInput{
 			ID:                 liability.ID,
 			Name:               liability.Name,
 			LiabilityType:      liability.LiabilityType,
@@ -832,7 +832,7 @@ func TestIntegration_LiabilityCRUD(t *testing.T) {
 		liabilities, err := svc.ListByUserID(ctx, userRow.ID)
 		require.NoError(t, err)
 
-		err = svc.Delete(ctx, liabilities[0].ID)
+		err = svc.Delete(ctx, userRow.ID, liabilities[0].ID)
 		require.NoError(t, err)
 
 		remaining, err := svc.ListByUserID(ctx, userRow.ID)

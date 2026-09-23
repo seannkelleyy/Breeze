@@ -67,7 +67,7 @@ type liabilityQuerier interface {
 	GetLiabilityByID(ctx context.Context, id uuid.UUID) (sqlc.GetLiabilityByIDRow, error)
 	ListLiabilitiesByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.ListLiabilitiesByUserIDRow, error)
 	UpdateLiability(ctx context.Context, arg sqlc.UpdateLiabilityParams) (sqlc.UpdateLiabilityRow, error)
-	SoftDeleteLiability(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteLiability(ctx context.Context, arg sqlc.SoftDeleteLiabilityParams) (int64, error)
 }
 
 type LiabilityService struct {
@@ -128,9 +128,10 @@ func (s *LiabilityService) ListByUserID(ctx context.Context, userID uuid.UUID) (
 	return liabilities, nil
 }
 
-func (s *LiabilityService) Update(ctx context.Context, input *UpdateLiabilityInput) (*Liability, error) {
+func (s *LiabilityService) Update(ctx context.Context, userID uuid.UUID, input *UpdateLiabilityInput) (*Liability, error) {
 	row, err := s.queries.UpdateLiability(ctx, sqlc.UpdateLiabilityParams{
 		ID:                 input.ID,
+		UserID:             userID,
 		Name:               input.Name,
 		LiabilityType:      input.LiabilityType,
 		CurrentBalance:     input.CurrentBalance,
@@ -154,8 +155,11 @@ func (s *LiabilityService) Update(ctx context.Context, input *UpdateLiabilityInp
 	return &liability, nil
 }
 
-func (s *LiabilityService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeleteLiability(ctx, id)
+func (s *LiabilityService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeleteLiability(ctx, sqlc.SoftDeleteLiabilityParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete liability: %w", err)
 	}

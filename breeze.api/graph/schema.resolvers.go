@@ -44,6 +44,14 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		return nil, r.mapErr(ctx, err)
 	}
 
+	// The authenticated caller may only update their own row; a client-supplied
+	// id is never trusted.
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	svcInput.ID = userID
+
 	user, err := r.UserService.Update(ctx, svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -79,7 +87,11 @@ func (r *mutationResolver) UpdateAsset(ctx context.Context, input model.UpdateAs
 		return nil, r.mapErr(ctx, err)
 	}
 
-	asset, err := r.AssetService.Update(ctx, &svcInput)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	asset, err := r.AssetService.Update(ctx, userID, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -94,7 +106,11 @@ func (r *mutationResolver) DeleteAsset(ctx context.Context, id string) (bool, er
 		return false, fmt.Errorf("invalid asset id: %w", err)
 	}
 
-	err = r.AssetService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.AssetService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -132,7 +148,11 @@ func (r *mutationResolver) UpdateLiability(ctx context.Context, input model.Upda
 		return nil, r.mapErr(ctx, err)
 	}
 
-	liability, err := r.LiabilityService.Update(ctx, &svcInput)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	liability, err := r.LiabilityService.Update(ctx, userID, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -147,7 +167,11 @@ func (r *mutationResolver) DeleteLiability(ctx context.Context, id string) (bool
 		return false, fmt.Errorf("invalid liability id: %w", err)
 	}
 
-	err = r.LiabilityService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.LiabilityService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -174,7 +198,7 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 	existing, lookupErr := r.BudgetService.GetByDate(ctx, svcInput.UserID, svcInput.Date)
 	if lookupErr == nil {
 		slog.Info("CreateBudget: updating existing budget", "budgetId", existing.ID.String(), "existingIncome", existing.MonthlyIncome.String())
-		budget, updateErr := r.BudgetService.Update(ctx, &service.UpdateBudgetInput{
+		budget, updateErr := r.BudgetService.Update(ctx, svcInput.UserID, &service.UpdateBudgetInput{
 			ID:              existing.ID,
 			MonthlyIncome:   svcInput.MonthlyIncome,
 			MonthlyExpenses: svcInput.MonthlyExpenses,
@@ -185,7 +209,7 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 		slog.Info("CreateBudget: after initial update", "monthlyIncome", budget.MonthlyIncome.String())
 
 		// Remove old recurring-generated incomes so regeneration is idempotent.
-		_ = removeRecurringIncomesForBudget(ctx, r.IncomeService, budget.ID)
+		_ = removeRecurringIncomesForBudget(ctx, r.IncomeService, svcInput.UserID, budget.ID)
 		if genErr := generateIncomesForBudget(ctx, r.RecurringIncomeService, r.IncomeService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
 			slog.Warn("failed to generate recurring incomes for budget", "error", genErr)
 		}
@@ -199,13 +223,13 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 		}
 
 		// Remove old recurring-generated expense categories so regeneration is idempotent.
-		_ = removeRecurringExpenseCategoriesForBudget(ctx, r.ExpenseCategoryService, r.ExpenseService, budget.ID)
+		_ = removeRecurringExpenseCategoriesForBudget(ctx, r.ExpenseCategoryService, r.ExpenseService, svcInput.UserID, budget.ID)
 		if genErr := generateExpenseCategoriesForBudget(ctx, r.RecurringExpenseService, r.ExpenseCategoryService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
 			slog.Warn("failed to generate recurring expense categories for budget", "error", genErr)
 		}
 
-		budget = recalculateBudgetIncome(ctx, r.IncomeService, r.BudgetService, budget)
-		budget = recalculateBudgetExpenses(ctx, r.ExpenseCategoryService, r.BudgetService, budget)
+		budget = recalculateBudgetIncome(ctx, r.IncomeService, r.BudgetService, svcInput.UserID, budget)
+		budget = recalculateBudgetExpenses(ctx, r.ExpenseCategoryService, r.BudgetService, svcInput.UserID, budget)
 		slog.Info("CreateBudget: final response", "monthlyIncome", budget.MonthlyIncome.String(), "monthlyExpenses", budget.MonthlyExpenses.String())
 		return mapBudgetToModel(budget), nil
 	}
@@ -233,8 +257,8 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 		slog.Warn("failed to generate recurring expense categories for new budget", "error", genErr)
 	}
 
-	budget = recalculateBudgetIncome(ctx, r.IncomeService, r.BudgetService, budget)
-	budget = recalculateBudgetExpenses(ctx, r.ExpenseCategoryService, r.BudgetService, budget)
+	budget = recalculateBudgetIncome(ctx, r.IncomeService, r.BudgetService, svcInput.UserID, budget)
+	budget = recalculateBudgetExpenses(ctx, r.ExpenseCategoryService, r.BudgetService, svcInput.UserID, budget)
 	return mapBudgetToModel(budget), nil
 }
 
@@ -245,7 +269,11 @@ func (r *mutationResolver) UpdateBudget(ctx context.Context, input model.UpdateB
 		return nil, r.mapErr(ctx, err)
 	}
 
-	budget, err := r.BudgetService.Update(ctx, &svcInput)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	budget, err := r.BudgetService.Update(ctx, userID, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -260,7 +288,11 @@ func (r *mutationResolver) DeleteBudget(ctx context.Context, id string) (bool, e
 		return false, fmt.Errorf("invalid budget id: %w", err)
 	}
 
-	err = r.BudgetService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.BudgetService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -299,7 +331,11 @@ func (r *mutationResolver) UpdateGoal(ctx context.Context, input model.UpdateGoa
 		return nil, r.mapErr(ctx, err)
 	}
 
-	goal, err := r.GoalService.Update(ctx, &svcInput)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	goal, err := r.GoalService.Update(ctx, userID, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -314,7 +350,11 @@ func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, err
 		return false, fmt.Errorf("invalid goal id: %w", err)
 	}
 
-	err = r.GoalService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.GoalService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -446,7 +486,11 @@ func (r *mutationResolver) UpdateExpenseCategory(ctx context.Context, input mode
 		return nil, r.mapErr(ctx, err)
 	}
 
-	category, err := r.ExpenseCategoryService.Update(ctx, &svcInput)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	category, err := r.ExpenseCategoryService.Update(ctx, userID, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -461,7 +505,11 @@ func (r *mutationResolver) DeleteExpenseCategory(ctx context.Context, id string)
 		return false, fmt.Errorf("invalid expense category id: %w", err)
 	}
 
-	err = r.ExpenseCategoryService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.ExpenseCategoryService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -499,7 +547,11 @@ func (r *mutationResolver) UpdateExpense(ctx context.Context, input model.Update
 		return nil, r.mapErr(ctx, err)
 	}
 
-	expense, err := r.ExpenseService.Update(ctx, &svcInput)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	expense, err := r.ExpenseService.Update(ctx, userID, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -514,7 +566,11 @@ func (r *mutationResolver) DeleteExpense(ctx context.Context, id string) (bool, 
 		return false, fmt.Errorf("invalid expense id: %w", err)
 	}
 
-	err = r.ExpenseService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.ExpenseService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -552,7 +608,11 @@ func (r *mutationResolver) UpdateIncome(ctx context.Context, input model.UpdateI
 		return nil, r.mapErr(ctx, err)
 	}
 
-	income, err := r.IncomeService.Update(ctx, &svcInput)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	income, err := r.IncomeService.Update(ctx, userID, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -567,7 +627,11 @@ func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, e
 		return false, fmt.Errorf("invalid income id: %w", err)
 	}
 
-	err = r.IncomeService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.IncomeService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -605,7 +669,11 @@ func (r *mutationResolver) UpdateRecurringIncome(ctx context.Context, input mode
 		return nil, r.mapErr(ctx, err)
 	}
 
-	income, err := r.RecurringIncomeService.Update(ctx, svcInput)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	income, err := r.RecurringIncomeService.Update(ctx, userID, svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -620,7 +688,11 @@ func (r *mutationResolver) DeleteRecurringIncome(ctx context.Context, id string)
 		return false, fmt.Errorf("invalid recurring income id: %w", err)
 	}
 
-	err = r.RecurringIncomeService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.RecurringIncomeService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -658,7 +730,11 @@ func (r *mutationResolver) UpdateRecurringExpense(ctx context.Context, input mod
 		return nil, r.mapErr(ctx, err)
 	}
 
-	expense, err := r.RecurringExpenseService.Update(ctx, &svcInput)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
+	}
+	expense, err := r.RecurringExpenseService.Update(ctx, userID, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -673,7 +749,11 @@ func (r *mutationResolver) DeleteRecurringExpense(ctx context.Context, id string
 		return false, fmt.Errorf("invalid recurring expense id: %w", err)
 	}
 
-	err = r.RecurringExpenseService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.RecurringExpenseService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -729,7 +809,11 @@ func (r *mutationResolver) DeletePaycheckDeduction(ctx context.Context, id strin
 		return false, fmt.Errorf("invalid paycheck deduction id: %w", err)
 	}
 
-	err = r.PaycheckDeductionService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.PaycheckDeductionService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -747,7 +831,11 @@ func (r *mutationResolver) DeletePlannerPerson(ctx context.Context, id string) (
 		return false, fmt.Errorf("invalid planner person id: %w", err)
 	}
 
-	err = r.PlannerPersonService.Delete(ctx, parsedID)
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	err = r.PlannerPersonService.Delete(ctx, userID, parsedID)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -904,6 +992,14 @@ func (r *mutationResolver) SyncPlaidConnection(ctx context.Context, id string) (
 	if err != nil {
 		return false, fmt.Errorf("invalid connection id: %w", err)
 	}
+	conn, err := r.PlaidService.GetByID(ctx, parsedID)
+	if err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+	if err := r.ensureOwned(ctx, conn.UserID); err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+
 	if err := r.PlaidService.SyncAccounts(ctx, parsedID); err != nil {
 		return false, r.mapErr(ctx, err)
 	}
@@ -921,6 +1017,17 @@ func (r *mutationResolver) DeletePlaidConnection(ctx context.Context, id string)
 	if err != nil {
 		return false, fmt.Errorf("invalid connection id: %w", err)
 	}
+	conn, connErr := r.PlaidService.GetByID(ctx, parsedID)
+	if connErr != nil {
+		if errors.Is(connErr, service.ErrNotFound) {
+			return false, nil
+		}
+		return false, r.mapErr(ctx, connErr)
+	}
+	if err := r.ensureOwned(ctx, conn.UserID); err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+
 	if err := r.PlaidService.Delete(ctx, parsedID); err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
@@ -940,7 +1047,11 @@ func (r *mutationResolver) LinkAssetToPlaidAccount(ctx context.Context, assetID 
 	if err != nil {
 		return false, fmt.Errorf("invalid plaid account id: %w", err)
 	}
-	if err := r.PlaidService.LinkAssetToPlaidAccount(ctx, parsedAssetID, parsedPlaidAccountID); err != nil {
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	if err := r.PlaidService.LinkAssetToPlaidAccount(ctx, userID, parsedAssetID, parsedPlaidAccountID); err != nil {
 		return false, r.mapErr(ctx, err)
 	}
 	return true, nil
@@ -952,7 +1063,11 @@ func (r *mutationResolver) UnlinkAssetFromPlaidAccount(ctx context.Context, asse
 	if err != nil {
 		return false, fmt.Errorf("invalid asset id: %w", err)
 	}
-	if err := r.PlaidService.UnlinkAssetFromPlaidAccount(ctx, parsedAssetID); err != nil {
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	if err := r.PlaidService.UnlinkAssetFromPlaidAccount(ctx, userID, parsedAssetID); err != nil {
 		return false, r.mapErr(ctx, err)
 	}
 	return true, nil
@@ -968,7 +1083,11 @@ func (r *mutationResolver) LinkLiabilityToPlaidAccount(ctx context.Context, liab
 	if err != nil {
 		return false, fmt.Errorf("invalid plaid account id: %w", err)
 	}
-	if err := r.PlaidService.LinkLiabilityToPlaidAccount(ctx, parsedLiabilityID, parsedPlaidAccountID); err != nil {
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	if err := r.PlaidService.LinkLiabilityToPlaidAccount(ctx, userID, parsedLiabilityID, parsedPlaidAccountID); err != nil {
 		return false, r.mapErr(ctx, err)
 	}
 	return true, nil
@@ -980,7 +1099,11 @@ func (r *mutationResolver) UnlinkLiabilityFromPlaidAccount(ctx context.Context, 
 	if err != nil {
 		return false, fmt.Errorf("invalid liability id: %w", err)
 	}
-	if err := r.PlaidService.UnlinkLiabilityFromPlaidAccount(ctx, parsedLiabilityID); err != nil {
+	userID, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	if err := r.PlaidService.UnlinkLiabilityFromPlaidAccount(ctx, userID, parsedLiabilityID); err != nil {
 		return false, r.mapErr(ctx, err)
 	}
 	return true, nil
@@ -1368,6 +1491,10 @@ func (r *queryResolver) PlaidConnection(ctx context.Context, id string) (*model.
 		if errors.Is(err, service.ErrNotFound) {
 			return nil, nil
 		}
+		return nil, r.mapErr(ctx, err)
+	}
+
+	if err := r.ensureOwned(ctx, conn.UserID); err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 	return mapPlaidConnectionToModel(conn), nil

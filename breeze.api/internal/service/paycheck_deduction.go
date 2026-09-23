@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"breeze.api/internal/db/sqlc"
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
+	"github.com/jackc/pgx/v5"
 )
 
 // PaycheckDeduction is a per-person paycheck withholding that has no account
@@ -41,7 +43,7 @@ type paycheckDeductionQuerier interface {
 	UpsertPaycheckDeduction(ctx context.Context, arg sqlc.UpsertPaycheckDeductionParams) (sqlc.PaycheckDeduction, error)
 	ListPaycheckDeductionsByPersonID(ctx context.Context, arg sqlc.ListPaycheckDeductionsByPersonIDParams) ([]sqlc.PaycheckDeduction, error)
 	ListPaycheckDeductionsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.PaycheckDeduction, error)
-	SoftDeletePaycheckDeduction(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeletePaycheckDeduction(ctx context.Context, arg sqlc.SoftDeletePaycheckDeductionParams) (int64, error)
 }
 
 type PaycheckDeductionService struct {
@@ -68,6 +70,9 @@ func (s *PaycheckDeductionService) Upsert(ctx context.Context, input *UpsertPayc
 		LinkedAccountID: uuidToPGUUID(input.LinkedAccountID),
 	})
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
 		return nil, fmt.Errorf("upsert paycheck deduction: %w", err)
 	}
 
@@ -106,8 +111,11 @@ func (s *PaycheckDeductionService) ListByUserID(ctx context.Context, userID uuid
 	return deductions, nil
 }
 
-func (s *PaycheckDeductionService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeletePaycheckDeduction(ctx, id)
+func (s *PaycheckDeductionService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeletePaycheckDeduction(ctx, sqlc.SoftDeletePaycheckDeductionParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete paycheck deduction: %w", err)
 	}

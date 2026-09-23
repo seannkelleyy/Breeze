@@ -18,7 +18,7 @@ type mockRecurringIncomeQuerier struct {
 	getRecurringIncomeByIDFunc    func(context.Context, uuid.UUID) (sqlc.RecurringIncome, error)
 	listRecurringIncomeFunc       func(context.Context, uuid.UUID) ([]sqlc.RecurringIncome, error)
 	updateRecurringIncomeFunc     func(context.Context, sqlc.UpdateRecurringIncomeParams) (sqlc.RecurringIncome, error)
-	softDeleteRecurringIncomeFunc func(context.Context, uuid.UUID) (int64, error)
+	softDeleteRecurringIncomeFunc func(context.Context, sqlc.SoftDeleteRecurringIncomeParams) (int64, error)
 }
 
 func (m *mockRecurringIncomeQuerier) CreateRecurringIncome(ctx context.Context, arg sqlc.CreateRecurringIncomeParams) (sqlc.RecurringIncome, error) {
@@ -49,9 +49,9 @@ func (m *mockRecurringIncomeQuerier) UpdateRecurringIncome(ctx context.Context, 
 	return sqlc.RecurringIncome{}, nil
 }
 
-func (m *mockRecurringIncomeQuerier) SoftDeleteRecurringIncome(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockRecurringIncomeQuerier) SoftDeleteRecurringIncome(ctx context.Context, arg sqlc.SoftDeleteRecurringIncomeParams) (int64, error) {
 	if m.softDeleteRecurringIncomeFunc != nil {
-		return m.softDeleteRecurringIncomeFunc(ctx, id)
+		return m.softDeleteRecurringIncomeFunc(ctx, arg)
 	}
 	return 0, nil
 }
@@ -231,7 +231,8 @@ func TestRecurringIncomeService_Update(t *testing.T) {
 	}
 
 	svc := NewRecurringIncomeService(mock)
-	result, err := svc.Update(ctx, UpdateRecurringIncomeInput{
+	userID := uuid.New()
+	result, err := svc.Update(ctx, userID, UpdateRecurringIncomeInput{
 		ID:                 row.ID,
 		Name:               row.Name,
 		Amount:             updatedAmount,
@@ -251,14 +252,14 @@ func TestRecurringIncomeService_Delete(t *testing.T) {
 	row := testRecurringIncomeRow()
 
 	mock := &mockRecurringIncomeQuerier{
-		softDeleteRecurringIncomeFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-			assert.Equal(t, row.ID, id)
+		softDeleteRecurringIncomeFunc: func(_ context.Context, arg sqlc.SoftDeleteRecurringIncomeParams) (int64, error) {
+			assert.Equal(t, row.ID, arg.ID)
 			return 1, nil
 		},
 	}
 
 	svc := NewRecurringIncomeService(mock)
-	err := svc.Delete(ctx, row.ID)
+	err := svc.Delete(ctx, uuid.New(), row.ID)
 	assert.NoError(t, err)
 }
 
@@ -267,12 +268,12 @@ func TestRecurringIncomeService_Delete_NotFound(t *testing.T) {
 	row := testRecurringIncomeRow()
 
 	mock := &mockRecurringIncomeQuerier{
-		softDeleteRecurringIncomeFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+		softDeleteRecurringIncomeFunc: func(_ context.Context, arg sqlc.SoftDeleteRecurringIncomeParams) (int64, error) {
 			return 0, nil
 		},
 	}
 
 	svc := NewRecurringIncomeService(mock)
-	err := svc.Delete(ctx, row.ID)
+	err := svc.Delete(ctx, uuid.New(), row.ID)
 	assert.ErrorIs(t, err, ErrNotFound)
 }

@@ -97,11 +97,16 @@ func (q *Queries) ListPaycheckDeductionsByUserID(ctx context.Context, userID uui
 const softDeletePaycheckDeduction = `-- name: SoftDeletePaycheckDeduction :execrows
 UPDATE paycheck_deductions
 SET deleted_at = now(), updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeletePaycheckDeduction(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeletePaycheckDeduction, id)
+type SoftDeletePaycheckDeductionParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeletePaycheckDeduction(ctx context.Context, arg SoftDeletePaycheckDeductionParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeletePaycheckDeduction, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -116,6 +121,7 @@ SET name = EXCLUDED.name,
     amount = EXCLUDED.amount,
     pretax = EXCLUDED.pretax,
     updated_at = now()
+WHERE paycheck_deductions.user_id = EXCLUDED.user_id
 RETURNING id, user_id, person_id, name, amount, pretax, kind, linked_account_id, created_at, updated_at, deleted_at
 `
 

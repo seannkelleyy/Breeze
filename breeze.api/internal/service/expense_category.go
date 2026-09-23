@@ -48,7 +48,7 @@ type expenseCategoryQuerier interface {
 	CreateExpenseCategory(ctx context.Context, arg sqlc.CreateExpenseCategoryParams) (sqlc.ExpenseCategory, error)
 	ListExpenseCategoriesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]sqlc.ExpenseCategory, error)
 	UpdateExpenseCategory(ctx context.Context, arg sqlc.UpdateExpenseCategoryParams) (sqlc.ExpenseCategory, error)
-	SoftDeleteExpenseCategory(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteExpenseCategory(ctx context.Context, arg sqlc.SoftDeleteExpenseCategoryParams) (int64, error)
 	SoftDeleteGeneratedCategoriesByBudget(ctx context.Context, budgetID uuid.UUID) (int64, error)
 }
 
@@ -93,9 +93,10 @@ func (s *ExpenseCategoryService) ListByBudgetID(ctx context.Context, budgetID uu
 	return categories, nil
 }
 
-func (s *ExpenseCategoryService) Update(ctx context.Context, input *UpdateExpenseCategoryInput) (*ExpenseCategory, error) {
+func (s *ExpenseCategoryService) Update(ctx context.Context, userID uuid.UUID, input *UpdateExpenseCategoryInput) (*ExpenseCategory, error) {
 	row, err := s.queries.UpdateExpenseCategory(ctx, sqlc.UpdateExpenseCategoryParams{
 		ID:           input.ID,
+		UserID:       userID,
 		Name:         input.Name,
 		Allocation:   input.Allocation,
 		CurrentSpend: input.CurrentSpend,
@@ -111,8 +112,11 @@ func (s *ExpenseCategoryService) Update(ctx context.Context, input *UpdateExpens
 	return &category, nil
 }
 
-func (s *ExpenseCategoryService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeleteExpenseCategory(ctx, id)
+func (s *ExpenseCategoryService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeleteExpenseCategory(ctx, sqlc.SoftDeleteExpenseCategoryParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete expense category: %w", err)
 	}

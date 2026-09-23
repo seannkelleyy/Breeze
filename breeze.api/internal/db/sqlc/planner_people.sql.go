@@ -75,11 +75,16 @@ func (q *Queries) SoftDeletePlannerPeopleByUserID(ctx context.Context, userID uu
 const softDeletePlannerPerson = `-- name: SoftDeletePlannerPerson :execrows
 UPDATE planner_people
 SET deleted_at = now(), updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeletePlannerPerson(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeletePlannerPerson, id)
+type SoftDeletePlannerPersonParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeletePlannerPerson(ctx context.Context, arg SoftDeletePlannerPersonParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeletePlannerPerson, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}

@@ -18,7 +18,7 @@ type mockIncomeQuerier struct {
 	getIncomeByIDFunc    func(context.Context, uuid.UUID) (sqlc.Income, error)
 	listIncomeFunc       func(context.Context, uuid.UUID) ([]sqlc.Income, error)
 	updateIncomeFunc     func(context.Context, sqlc.UpdateIncomeParams) (sqlc.Income, error)
-	softDeleteIncomeFunc func(context.Context, uuid.UUID) (int64, error)
+	softDeleteIncomeFunc func(context.Context, sqlc.SoftDeleteIncomeParams) (int64, error)
 }
 
 func (m *mockIncomeQuerier) CreateIncome(ctx context.Context, arg sqlc.CreateIncomeParams) (sqlc.Income, error) {
@@ -49,9 +49,9 @@ func (m *mockIncomeQuerier) UpdateIncome(ctx context.Context, arg sqlc.UpdateInc
 	return sqlc.Income{}, nil
 }
 
-func (m *mockIncomeQuerier) SoftDeleteIncome(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockIncomeQuerier) SoftDeleteIncome(ctx context.Context, arg sqlc.SoftDeleteIncomeParams) (int64, error) {
 	if m.softDeleteIncomeFunc != nil {
-		return m.softDeleteIncomeFunc(ctx, id)
+		return m.softDeleteIncomeFunc(ctx, arg)
 	}
 	return 0, nil
 }
@@ -245,7 +245,8 @@ func TestIncomeService_Update(t *testing.T) {
 	}
 
 	svc := NewIncomeService(mock)
-	result, err := svc.Update(ctx, &UpdateIncomeInput{
+	userID := uuid.New()
+	result, err := svc.Update(ctx, userID, &UpdateIncomeInput{
 		ID:                   row.ID,
 		Name:                 row.Name,
 		Amount:               updatedAmount,
@@ -266,14 +267,14 @@ func TestIncomeService_Delete(t *testing.T) {
 	row := testIncomeRow()
 
 	mock := &mockIncomeQuerier{
-		softDeleteIncomeFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-			assert.Equal(t, row.ID, id)
+		softDeleteIncomeFunc: func(_ context.Context, arg sqlc.SoftDeleteIncomeParams) (int64, error) {
+			assert.Equal(t, row.ID, arg.ID)
 			return 1, nil
 		},
 	}
 
 	svc := NewIncomeService(mock)
-	err := svc.Delete(ctx, row.ID)
+	err := svc.Delete(ctx, uuid.New(), row.ID)
 	assert.NoError(t, err)
 }
 
@@ -282,12 +283,12 @@ func TestIncomeService_Delete_NotFound(t *testing.T) {
 	row := testIncomeRow()
 
 	mock := &mockIncomeQuerier{
-		softDeleteIncomeFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+		softDeleteIncomeFunc: func(_ context.Context, arg sqlc.SoftDeleteIncomeParams) (int64, error) {
 			return 0, nil
 		},
 	}
 
 	svc := NewIncomeService(mock)
-	err := svc.Delete(ctx, row.ID)
+	err := svc.Delete(ctx, uuid.New(), row.ID)
 	assert.ErrorIs(t, err, ErrNotFound)
 }

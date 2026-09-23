@@ -19,7 +19,7 @@ type mockAssetQuerier struct {
 	getAssetByIDFunc       func(context.Context, uuid.UUID) (sqlc.GetAssetByIDRow, error)
 	listAssetsByUserIDFunc func(context.Context, uuid.UUID) ([]sqlc.ListAssetsByUserIDRow, error)
 	updateAssetFunc        func(context.Context, sqlc.UpdateAssetParams) (sqlc.UpdateAssetRow, error)
-	softDeleteAssetFunc    func(context.Context, uuid.UUID) (int64, error)
+	softDeleteAssetFunc    func(context.Context, sqlc.SoftDeleteAssetParams) (int64, error)
 }
 
 func (m *mockAssetQuerier) CreateAsset(ctx context.Context, params sqlc.CreateAssetParams) (sqlc.CreateAssetRow, error) {
@@ -50,9 +50,9 @@ func (m *mockAssetQuerier) UpdateAsset(ctx context.Context, params sqlc.UpdateAs
 	return sqlc.UpdateAssetRow{}, nil
 }
 
-func (m *mockAssetQuerier) SoftDeleteAsset(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockAssetQuerier) SoftDeleteAsset(ctx context.Context, arg sqlc.SoftDeleteAssetParams) (int64, error) {
 	if m.softDeleteAssetFunc != nil {
-		return m.softDeleteAssetFunc(ctx, id)
+		return m.softDeleteAssetFunc(ctx, arg)
 	}
 	return 0, nil
 }
@@ -259,7 +259,8 @@ func TestAssetService_Update(t *testing.T) {
 	}
 
 	svc := NewAssetService(mock)
-	result, err := svc.Update(ctx, &UpdateAssetInput{
+	userID := uuid.New()
+	result, err := svc.Update(ctx, userID, &UpdateAssetInput{
 		ID:           assetRow.ID,
 		Name:         "Brokerage Updated",
 		AssetType:    sqlc.AssetTypeBROKERAGE,
@@ -277,38 +278,38 @@ func TestAssetService_Delete(t *testing.T) {
 
 	t.Run("deletes asset", func(t *testing.T) {
 		mock := &mockAssetQuerier{
-			softDeleteAssetFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-				assert.Equal(t, assetRow.ID, id)
+			softDeleteAssetFunc: func(_ context.Context, arg sqlc.SoftDeleteAssetParams) (int64, error) {
+				assert.Equal(t, assetRow.ID, arg.ID)
 				return 1, nil
 			},
 		}
 
 		svc := NewAssetService(mock)
-		err := svc.Delete(ctx, assetRow.ID)
+		err := svc.Delete(ctx, uuid.New(), assetRow.ID)
 		assert.NoError(t, err)
 	})
 
 	t.Run("returns not found", func(t *testing.T) {
 		mock := &mockAssetQuerier{
-			softDeleteAssetFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+			softDeleteAssetFunc: func(_ context.Context, arg sqlc.SoftDeleteAssetParams) (int64, error) {
 				return 0, nil
 			},
 		}
 
 		svc := NewAssetService(mock)
-		err := svc.Delete(ctx, assetRow.ID)
+		err := svc.Delete(ctx, uuid.New(), assetRow.ID)
 		assert.ErrorIs(t, err, ErrNotFound)
 	})
 
 	t.Run("wraps db error", func(t *testing.T) {
 		mock := &mockAssetQuerier{
-			softDeleteAssetFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+			softDeleteAssetFunc: func(_ context.Context, arg sqlc.SoftDeleteAssetParams) (int64, error) {
 				return 0, errors.New("boom")
 			},
 		}
 
 		svc := NewAssetService(mock)
-		err := svc.Delete(ctx, assetRow.ID)
+		err := svc.Delete(ctx, uuid.New(), assetRow.ID)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "delete asset")
 	})

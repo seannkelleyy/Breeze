@@ -48,7 +48,7 @@ func mapTransactionToModel(t *service.Transaction) *model.Transaction {
 func (r *Resolver) syncTransactionExpense(ctx context.Context, userID uuid.UUID, tx *service.Transaction) error {
 	if tx.ExpenseCategoryID == nil {
 		if tx.ExpenseID != nil {
-			return r.ExpenseService.Delete(ctx, *tx.ExpenseID)
+			return r.ExpenseService.Delete(ctx, userID, *tx.ExpenseID)
 		}
 		return nil
 	}
@@ -80,7 +80,7 @@ func (r *Resolver) syncTransactionExpense(ctx context.Context, userID uuid.UUID,
 	}
 
 	if tx.ExpenseID != nil {
-		if delErr := r.ExpenseService.Delete(ctx, *tx.ExpenseID); delErr != nil && !errors.Is(delErr, service.ErrNotFound) {
+		if delErr := r.ExpenseService.Delete(ctx, userID, *tx.ExpenseID); delErr != nil && !errors.Is(delErr, service.ErrNotFound) {
 			return delErr
 		}
 	}

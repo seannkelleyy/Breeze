@@ -19,7 +19,7 @@ type mockBudgetQuerier struct {
 	getBudgetByDateFunc  func(context.Context, sqlc.GetBudgetByDateParams) (sqlc.Budget, error)
 	listBudgetsFunc      func(context.Context, uuid.UUID) ([]sqlc.Budget, error)
 	updateBudgetFunc     func(context.Context, sqlc.UpdateBudgetParams) (sqlc.Budget, error)
-	softDeleteBudgetFunc func(context.Context, uuid.UUID) (int64, error)
+	softDeleteBudgetFunc func(context.Context, sqlc.SoftDeleteBudgetParams) (int64, error)
 }
 
 func (m *mockBudgetQuerier) CreateBudget(ctx context.Context, arg sqlc.CreateBudgetParams) (sqlc.Budget, error) {
@@ -57,9 +57,9 @@ func (m *mockBudgetQuerier) UpdateBudget(ctx context.Context, arg sqlc.UpdateBud
 	return sqlc.Budget{}, nil
 }
 
-func (m *mockBudgetQuerier) SoftDeleteBudget(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockBudgetQuerier) SoftDeleteBudget(ctx context.Context, arg sqlc.SoftDeleteBudgetParams) (int64, error) {
 	if m.softDeleteBudgetFunc != nil {
-		return m.softDeleteBudgetFunc(ctx, id)
+		return m.softDeleteBudgetFunc(ctx, arg)
 	}
 	return 0, nil
 }
@@ -217,7 +217,8 @@ func TestBudgetService_Update(t *testing.T) {
 	}
 
 	svc := NewBudgetService(mock)
-	result, err := svc.Update(ctx, &UpdateBudgetInput{
+	userID := uuid.New()
+	result, err := svc.Update(ctx, userID, &UpdateBudgetInput{
 		ID:              row.ID,
 		MonthlyIncome:   row.MonthlyIncome,
 		MonthlyExpenses: updatedExpenses,
@@ -234,26 +235,26 @@ func TestBudgetService_Delete(t *testing.T) {
 
 	t.Run("deletes budget", func(t *testing.T) {
 		mock := &mockBudgetQuerier{
-			softDeleteBudgetFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-				assert.Equal(t, row.ID, id)
+			softDeleteBudgetFunc: func(_ context.Context, arg sqlc.SoftDeleteBudgetParams) (int64, error) {
+				assert.Equal(t, row.ID, arg.ID)
 				return 1, nil
 			},
 		}
 
 		svc := NewBudgetService(mock)
-		err := svc.Delete(ctx, row.ID)
+		err := svc.Delete(ctx, uuid.New(), row.ID)
 		assert.NoError(t, err)
 	})
 
 	t.Run("returns not found", func(t *testing.T) {
 		mock := &mockBudgetQuerier{
-			softDeleteBudgetFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+			softDeleteBudgetFunc: func(_ context.Context, arg sqlc.SoftDeleteBudgetParams) (int64, error) {
 				return 0, nil
 			},
 		}
 
 		svc := NewBudgetService(mock)
-		err := svc.Delete(ctx, row.ID)
+		err := svc.Delete(ctx, uuid.New(), row.ID)
 		assert.ErrorIs(t, err, ErrNotFound)
 	})
 }

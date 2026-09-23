@@ -176,12 +176,17 @@ const softDeleteRecurringExpense = `-- name: SoftDeleteRecurringExpense :execrow
 UPDATE recurring_expenses
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteRecurringExpense(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteRecurringExpense, id)
+type SoftDeleteRecurringExpenseParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeleteRecurringExpense(ctx context.Context, arg SoftDeleteRecurringExpenseParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteRecurringExpense, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -199,7 +204,7 @@ SET
   end_date = $7,
   person_id = $8,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $9
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -225,6 +230,7 @@ type UpdateRecurringExpenseParams struct {
 	StartDate          pgtype.Date        `json:"start_date"`
 	EndDate            pgtype.Date        `json:"end_date"`
 	PersonID           pgtype.UUID        `json:"person_id"`
+	UserID             uuid.UUID          `json:"user_id"`
 }
 
 func (q *Queries) UpdateRecurringExpense(ctx context.Context, arg UpdateRecurringExpenseParams) (RecurringExpense, error) {
@@ -237,6 +243,7 @@ func (q *Queries) UpdateRecurringExpense(ctx context.Context, arg UpdateRecurrin
 		arg.StartDate,
 		arg.EndDate,
 		arg.PersonID,
+		arg.UserID,
 	)
 	var i RecurringExpense
 	err := row.Scan(

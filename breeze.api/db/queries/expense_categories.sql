@@ -49,7 +49,7 @@ SET
   allocation = $3,
   current_spend = $4,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $5
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -69,7 +69,7 @@ RETURNING
 UPDATE expense_categories
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL;
 
 -- name: SoftDeleteGeneratedCategoriesByBudget :execrows

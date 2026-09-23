@@ -81,7 +81,7 @@ SET
   generation_month = $8,
   person_id = $9,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $10
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -103,7 +103,7 @@ RETURNING
 UPDATE income
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL;
 
 -- name: CreateRecurringIncome :one
@@ -180,7 +180,7 @@ SET
   end_date = $7,
   person_id = $8,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $9
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -200,5 +200,5 @@ RETURNING
 UPDATE recurring_income
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL;

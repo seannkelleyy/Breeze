@@ -136,12 +136,17 @@ const softDeleteExpenseCategory = `-- name: SoftDeleteExpenseCategory :execrows
 UPDATE expense_categories
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteExpenseCategory(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteExpenseCategory, id)
+type SoftDeleteExpenseCategoryParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeleteExpenseCategory(ctx context.Context, arg SoftDeleteExpenseCategoryParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteExpenseCategory, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -172,7 +177,7 @@ SET
   allocation = $3,
   current_spend = $4,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $5
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -194,6 +199,7 @@ type UpdateExpenseCategoryParams struct {
 	Name         string          `json:"name"`
 	Allocation   decimal.Decimal `json:"allocation"`
 	CurrentSpend decimal.Decimal `json:"current_spend"`
+	UserID       uuid.UUID       `json:"user_id"`
 }
 
 func (q *Queries) UpdateExpenseCategory(ctx context.Context, arg UpdateExpenseCategoryParams) (ExpenseCategory, error) {
@@ -202,6 +208,7 @@ func (q *Queries) UpdateExpenseCategory(ctx context.Context, arg UpdateExpenseCa
 		arg.Name,
 		arg.Allocation,
 		arg.CurrentSpend,
+		arg.UserID,
 	)
 	var i ExpenseCategory
 	err := row.Scan(

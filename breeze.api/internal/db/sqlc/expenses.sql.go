@@ -276,12 +276,17 @@ const softDeleteExpense = `-- name: SoftDeleteExpense :execrows
 UPDATE expenses
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteExpense(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteExpense, id)
+type SoftDeleteExpenseParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeleteExpense(ctx context.Context, arg SoftDeleteExpenseParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteExpense, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -329,7 +334,7 @@ SET
   description = $4,
   person_id = $5,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $6
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -353,6 +358,7 @@ type UpdateExpenseParams struct {
 	Date        pgtype.Date     `json:"date"`
 	Description string          `json:"description"`
 	PersonID    pgtype.UUID     `json:"person_id"`
+	UserID      uuid.UUID       `json:"user_id"`
 }
 
 func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (Expense, error) {
@@ -362,6 +368,7 @@ func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (E
 		arg.Date,
 		arg.Description,
 		arg.PersonID,
+		arg.UserID,
 	)
 	var i Expense
 	err := row.Scan(

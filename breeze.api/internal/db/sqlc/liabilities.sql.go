@@ -288,12 +288,17 @@ const softDeleteLiability = `-- name: SoftDeleteLiability :execrows
 UPDATE liabilities
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteLiability(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteLiability, id)
+type SoftDeleteLiabilityParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeleteLiability(ctx context.Context, arg SoftDeleteLiabilityParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteLiability, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -319,7 +324,7 @@ SET
     ELSE last_balance_updated_at
   END,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $13
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -355,6 +360,7 @@ type UpdateLiabilityParams struct {
 	ContributionMode   string          `json:"contribution_mode"`
 	ContributionValue  decimal.Decimal `json:"contribution_value"`
 	PersonIds          []uuid.UUID     `json:"person_ids"`
+	UserID             uuid.UUID       `json:"user_id"`
 }
 
 type UpdateLiabilityRow struct {
@@ -392,6 +398,7 @@ func (q *Queries) UpdateLiability(ctx context.Context, arg UpdateLiabilityParams
 		arg.ContributionMode,
 		arg.ContributionValue,
 		arg.PersonIds,
+		arg.UserID,
 	)
 	var i UpdateLiabilityRow
 	err := row.Scan(

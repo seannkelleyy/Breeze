@@ -54,7 +54,7 @@ type recurringExpenseQuerier interface {
 	GetRecurringExpenseByID(ctx context.Context, id uuid.UUID) (sqlc.RecurringExpense, error)
 	ListRecurringExpensesByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.RecurringExpense, error)
 	UpdateRecurringExpense(ctx context.Context, arg sqlc.UpdateRecurringExpenseParams) (sqlc.RecurringExpense, error)
-	SoftDeleteRecurringExpense(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteRecurringExpense(ctx context.Context, arg sqlc.SoftDeleteRecurringExpenseParams) (int64, error)
 }
 
 type RecurringExpenseService struct {
@@ -111,9 +111,10 @@ func (s *RecurringExpenseService) ListByUserID(ctx context.Context, userID uuid.
 	return expenses, nil
 }
 
-func (s *RecurringExpenseService) Update(ctx context.Context, input *UpdateRecurringExpenseInput) (*RecurringExpense, error) {
+func (s *RecurringExpenseService) Update(ctx context.Context, userID uuid.UUID, input *UpdateRecurringExpenseInput) (*RecurringExpense, error) {
 	row, err := s.queries.UpdateRecurringExpense(ctx, sqlc.UpdateRecurringExpenseParams{
 		ID:                 input.ID,
+		UserID:             userID,
 		Name:               input.Name,
 		Amount:             input.Amount,
 		RecurrenceInterval: input.RecurrenceInterval,
@@ -133,8 +134,11 @@ func (s *RecurringExpenseService) Update(ctx context.Context, input *UpdateRecur
 	return &expense, nil
 }
 
-func (s *RecurringExpenseService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeleteRecurringExpense(ctx, id)
+func (s *RecurringExpenseService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeleteRecurringExpense(ctx, sqlc.SoftDeleteRecurringExpenseParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete recurring expense: %w", err)
 	}

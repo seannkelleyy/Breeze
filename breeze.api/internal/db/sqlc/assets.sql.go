@@ -348,12 +348,17 @@ const softDeleteAsset = `-- name: SoftDeleteAsset :execrows
 UPDATE assets
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteAsset(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteAsset, id)
+type SoftDeleteAssetParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeleteAsset(ctx context.Context, arg SoftDeleteAssetParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteAsset, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -384,7 +389,7 @@ SET
     ELSE last_value_updated_at
   END,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $18
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -430,6 +435,7 @@ type UpdateAssetParams struct {
 	VehicleDepreciationProfile      *string         `json:"vehicle_depreciation_profile"`
 	LinkedLiabilityID               pgtype.UUID     `json:"linked_liability_id"`
 	TaxTreatment                    string          `json:"tax_treatment"`
+	UserID                          uuid.UUID       `json:"user_id"`
 }
 
 type UpdateAssetRow struct {
@@ -477,6 +483,7 @@ func (q *Queries) UpdateAsset(ctx context.Context, arg UpdateAssetParams) (Updat
 		arg.VehicleDepreciationProfile,
 		arg.LinkedLiabilityID,
 		arg.TaxTreatment,
+		arg.UserID,
 	)
 	var i UpdateAssetRow
 	err := row.Scan(

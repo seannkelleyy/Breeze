@@ -19,7 +19,7 @@ type mockRecurringExpenseQuerier struct {
 	getRecurringExpenseByIDFunc       func(context.Context, uuid.UUID) (sqlc.RecurringExpense, error)
 	listRecurringExpensesByUserIDFunc func(context.Context, uuid.UUID) ([]sqlc.RecurringExpense, error)
 	updateRecurringExpenseFunc        func(context.Context, sqlc.UpdateRecurringExpenseParams) (sqlc.RecurringExpense, error)
-	softDeleteRecurringExpenseFunc    func(context.Context, uuid.UUID) (int64, error)
+	softDeleteRecurringExpenseFunc    func(context.Context, sqlc.SoftDeleteRecurringExpenseParams) (int64, error)
 }
 
 func (m *mockRecurringExpenseQuerier) CreateRecurringExpense(ctx context.Context, arg sqlc.CreateRecurringExpenseParams) (sqlc.RecurringExpense, error) {
@@ -50,9 +50,9 @@ func (m *mockRecurringExpenseQuerier) UpdateRecurringExpense(ctx context.Context
 	return sqlc.RecurringExpense{}, nil
 }
 
-func (m *mockRecurringExpenseQuerier) SoftDeleteRecurringExpense(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockRecurringExpenseQuerier) SoftDeleteRecurringExpense(ctx context.Context, arg sqlc.SoftDeleteRecurringExpenseParams) (int64, error) {
 	if m.softDeleteRecurringExpenseFunc != nil {
-		return m.softDeleteRecurringExpenseFunc(ctx, id)
+		return m.softDeleteRecurringExpenseFunc(ctx, arg)
 	}
 	return 0, nil
 }
@@ -331,7 +331,7 @@ func TestRecurringExpenseService_Update(t *testing.T) {
 
 	svc := NewRecurringExpenseService(mock)
 	startDate := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
-	result, err := svc.Update(ctx, &UpdateRecurringExpenseInput{
+	result, err := svc.Update(ctx, uuid.New(), &UpdateRecurringExpenseInput{
 		ID:                 expected.ID,
 		Name:               expected.Name,
 		Amount:             expected.Amount,
@@ -357,7 +357,8 @@ func TestRecurringExpenseService_Update_NotFound(t *testing.T) {
 	}
 
 	svc := NewRecurringExpenseService(mock)
-	result, err := svc.Update(ctx, &UpdateRecurringExpenseInput{
+	userID := uuid.New()
+	result, err := svc.Update(ctx, userID, &UpdateRecurringExpenseInput{
 		ID:        uuid.New(),
 		Name:      "Test",
 		StartDate: time.Now(),
@@ -379,7 +380,8 @@ func TestRecurringExpenseService_Update_Error(t *testing.T) {
 	}
 
 	svc := NewRecurringExpenseService(mock)
-	result, err := svc.Update(ctx, &UpdateRecurringExpenseInput{
+	userID := uuid.New()
+	result, err := svc.Update(ctx, userID, &UpdateRecurringExpenseInput{
 		ID:        uuid.New(),
 		Name:      "Test",
 		StartDate: time.Now(),
@@ -395,14 +397,14 @@ func TestRecurringExpenseService_Delete(t *testing.T) {
 	expenseID := uuid.New()
 
 	mock := &mockRecurringExpenseQuerier{
-		softDeleteRecurringExpenseFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-			assert.Equal(t, expenseID, id)
+		softDeleteRecurringExpenseFunc: func(_ context.Context, arg sqlc.SoftDeleteRecurringExpenseParams) (int64, error) {
+			assert.Equal(t, expenseID, arg.ID)
 			return 1, nil
 		},
 	}
 
 	svc := NewRecurringExpenseService(mock)
-	err := svc.Delete(ctx, expenseID)
+	err := svc.Delete(ctx, uuid.New(), expenseID)
 
 	assert.NoError(t, err)
 }
@@ -411,13 +413,13 @@ func TestRecurringExpenseService_Delete_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	mock := &mockRecurringExpenseQuerier{
-		softDeleteRecurringExpenseFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+		softDeleteRecurringExpenseFunc: func(_ context.Context, arg sqlc.SoftDeleteRecurringExpenseParams) (int64, error) {
 			return 0, nil
 		},
 	}
 
 	svc := NewRecurringExpenseService(mock)
-	err := svc.Delete(ctx, uuid.New())
+	err := svc.Delete(ctx, uuid.New(), uuid.New())
 
 	assert.Error(t, err)
 	assert.Equal(t, ErrNotFound, err)
@@ -428,13 +430,13 @@ func TestRecurringExpenseService_Delete_Error(t *testing.T) {
 	dbErr := errors.New("delete failed")
 
 	mock := &mockRecurringExpenseQuerier{
-		softDeleteRecurringExpenseFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+		softDeleteRecurringExpenseFunc: func(_ context.Context, arg sqlc.SoftDeleteRecurringExpenseParams) (int64, error) {
 			return 0, dbErr
 		},
 	}
 
 	svc := NewRecurringExpenseService(mock)
-	err := svc.Delete(ctx, uuid.New())
+	err := svc.Delete(ctx, uuid.New(), uuid.New())
 
 	assert.Error(t, err)
 	assert.ErrorIs(t, err, dbErr)

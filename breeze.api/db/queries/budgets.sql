@@ -67,7 +67,7 @@ SET
   monthly_income = $2,
   monthly_expenses = $3,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $4
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -83,5 +83,5 @@ RETURNING
 UPDATE budgets
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL;

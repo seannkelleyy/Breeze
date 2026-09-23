@@ -42,7 +42,7 @@ type budgetQuerier interface {
 	GetBudgetByDate(ctx context.Context, arg sqlc.GetBudgetByDateParams) (sqlc.Budget, error)
 	ListBudgetsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.Budget, error)
 	UpdateBudget(ctx context.Context, arg sqlc.UpdateBudgetParams) (sqlc.Budget, error)
-	SoftDeleteBudget(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeleteBudget(ctx context.Context, arg sqlc.SoftDeleteBudgetParams) (int64, error)
 }
 
 type BudgetService struct {
@@ -111,9 +111,10 @@ func (s *BudgetService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]B
 	return budgets, nil
 }
 
-func (s *BudgetService) Update(ctx context.Context, input *UpdateBudgetInput) (*Budget, error) {
+func (s *BudgetService) Update(ctx context.Context, userID uuid.UUID, input *UpdateBudgetInput) (*Budget, error) {
 	row, err := s.queries.UpdateBudget(ctx, sqlc.UpdateBudgetParams{
 		ID:              input.ID,
+		UserID:          userID,
 		MonthlyIncome:   input.MonthlyIncome,
 		MonthlyExpenses: input.MonthlyExpenses,
 	})
@@ -128,8 +129,11 @@ func (s *BudgetService) Update(ctx context.Context, input *UpdateBudgetInput) (*
 	return &budget, nil
 }
 
-func (s *BudgetService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeleteBudget(ctx, id)
+func (s *BudgetService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeleteBudget(ctx, sqlc.SoftDeleteBudgetParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete budget: %w", err)
 	}

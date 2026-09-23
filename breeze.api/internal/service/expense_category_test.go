@@ -17,7 +17,7 @@ type mockExpenseCategoryQuerier struct {
 	createExpenseCategoryFunc                 func(context.Context, sqlc.CreateExpenseCategoryParams) (sqlc.ExpenseCategory, error)
 	listExpenseCategoriesFunc                 func(context.Context, uuid.UUID) ([]sqlc.ExpenseCategory, error)
 	updateExpenseCategoryFunc                 func(context.Context, sqlc.UpdateExpenseCategoryParams) (sqlc.ExpenseCategory, error)
-	softDeleteExpenseCategoryFunc             func(context.Context, uuid.UUID) (int64, error)
+	softDeleteExpenseCategoryFunc             func(context.Context, sqlc.SoftDeleteExpenseCategoryParams) (int64, error)
 	softDeleteGeneratedCategoriesByBudgetFunc func(context.Context, uuid.UUID) (int64, error)
 }
 
@@ -42,9 +42,9 @@ func (m *mockExpenseCategoryQuerier) UpdateExpenseCategory(ctx context.Context, 
 	return sqlc.ExpenseCategory{}, nil
 }
 
-func (m *mockExpenseCategoryQuerier) SoftDeleteExpenseCategory(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockExpenseCategoryQuerier) SoftDeleteExpenseCategory(ctx context.Context, arg sqlc.SoftDeleteExpenseCategoryParams) (int64, error) {
 	if m.softDeleteExpenseCategoryFunc != nil {
-		return m.softDeleteExpenseCategoryFunc(ctx, id)
+		return m.softDeleteExpenseCategoryFunc(ctx, arg)
 	}
 	return 0, nil
 }
@@ -163,7 +163,8 @@ func TestExpenseCategoryService_Update(t *testing.T) {
 	}
 
 	svc := NewExpenseCategoryService(mock)
-	result, err := svc.Update(ctx, &UpdateExpenseCategoryInput{
+	userID := uuid.New()
+	result, err := svc.Update(ctx, userID, &UpdateExpenseCategoryInput{
 		ID:           cat.ID,
 		Name:         "Updated Housing",
 		Allocation:   allocation,
@@ -186,7 +187,7 @@ func TestExpenseCategoryService_Update_NotFound(t *testing.T) {
 	}
 
 	svc := NewExpenseCategoryService(mock)
-	_, err := svc.Update(ctx, &UpdateExpenseCategoryInput{
+	_, err := svc.Update(ctx, uuid.New(), &UpdateExpenseCategoryInput{
 		ID:           uuid.New(),
 		Name:         "test",
 		Allocation:   allocation,
@@ -199,13 +200,13 @@ func TestExpenseCategoryService_Delete(t *testing.T) {
 	ctx := context.Background()
 
 	mock := &mockExpenseCategoryQuerier{
-		softDeleteExpenseCategoryFunc: func(_ context.Context, _ uuid.UUID) (int64, error) {
+		softDeleteExpenseCategoryFunc: func(_ context.Context, arg sqlc.SoftDeleteExpenseCategoryParams) (int64, error) {
 			return 1, nil
 		},
 	}
 
 	svc := NewExpenseCategoryService(mock)
-	err := svc.Delete(ctx, uuid.New())
+	err := svc.Delete(ctx, uuid.New(), uuid.New())
 	assert.NoError(t, err)
 }
 
@@ -213,12 +214,12 @@ func TestExpenseCategoryService_Delete_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	mock := &mockExpenseCategoryQuerier{
-		softDeleteExpenseCategoryFunc: func(_ context.Context, _ uuid.UUID) (int64, error) {
+		softDeleteExpenseCategoryFunc: func(_ context.Context, arg sqlc.SoftDeleteExpenseCategoryParams) (int64, error) {
 			return 0, nil
 		},
 	}
 
 	svc := NewExpenseCategoryService(mock)
-	err := svc.Delete(ctx, uuid.New())
+	err := svc.Delete(ctx, uuid.New(), uuid.New())
 	assert.ErrorIs(t, err, ErrNotFound)
 }

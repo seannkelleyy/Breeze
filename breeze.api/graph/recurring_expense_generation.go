@@ -63,7 +63,7 @@ func removeRecurringExpenseCategoriesForBudget(
 	ctx context.Context,
 	categorySvc *service.ExpenseCategoryService,
 	expenseSvc *service.ExpenseService,
-	budgetID uuid.UUID,
+	userID, budgetID uuid.UUID,
 ) error {
 	// Remove generated expenses first
 	existingExpenses, err := expenseSvc.ListByBudgetID(ctx, budgetID)
@@ -72,7 +72,7 @@ func removeRecurringExpenseCategoriesForBudget(
 	}
 	for i := range existingExpenses {
 		if existingExpenses[i].SourceType == sqlc.ExpenseSourceTypeRECURRINGTEMPLATE {
-			_ = expenseSvc.Delete(ctx, existingExpenses[i].ID)
+			_ = expenseSvc.Delete(ctx, userID, existingExpenses[i].ID)
 		}
 	}
 
@@ -83,7 +83,7 @@ func removeRecurringExpenseCategoriesForBudget(
 	}
 	for i := range existingCategories {
 		if existingCategories[i].SourceType == sqlc.ExpenseSourceTypeRECURRINGTEMPLATE {
-			_ = categorySvc.Delete(ctx, existingCategories[i].ID)
+			_ = categorySvc.Delete(ctx, userID, existingCategories[i].ID)
 		}
 	}
 	return nil
@@ -95,6 +95,7 @@ func recalculateBudgetExpenses(
 	ctx context.Context,
 	categorySvc *service.ExpenseCategoryService,
 	budgetSvc *service.BudgetService,
+	userID uuid.UUID,
 	budget *service.Budget,
 ) *service.Budget {
 	categories, listErr := categorySvc.ListByBudgetID(ctx, budget.ID)
@@ -106,7 +107,7 @@ func recalculateBudgetExpenses(
 	for i := range categories {
 		total, _ = total.Add(categories[i].Allocation)
 	}
-	updated, updateErr := budgetSvc.Update(ctx, &service.UpdateBudgetInput{
+	updated, updateErr := budgetSvc.Update(ctx, userID, &service.UpdateBudgetInput{
 		ID:              budget.ID,
 		MonthlyIncome:   budget.MonthlyIncome,
 		MonthlyExpenses: total,

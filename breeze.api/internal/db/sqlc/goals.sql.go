@@ -354,12 +354,17 @@ const softDeleteGoal = `-- name: SoftDeleteGoal :execrows
 UPDATE goals
 SET deleted_at = now(),
     updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
   AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeleteGoal(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeleteGoal, id)
+type SoftDeleteGoalParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeleteGoal(ctx context.Context, arg SoftDeleteGoalParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteGoal, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -381,7 +386,7 @@ SET
   is_financial_order_step = $11,
   financial_order_step = $12,
   updated_at = now()
-WHERE id = $1
+WHERE id = $1 AND user_id = $13
   AND deleted_at IS NULL
 RETURNING
   id,
@@ -415,6 +420,7 @@ type UpdateGoalParams struct {
 	ConnectedAccountIds  []uuid.UUID    `json:"connected_account_ids"`
 	IsFinancialOrderStep bool           `json:"is_financial_order_step"`
 	FinancialOrderStep   *int32         `json:"financial_order_step"`
+	UserID               uuid.UUID      `json:"user_id"`
 }
 
 func (q *Queries) UpdateGoal(ctx context.Context, arg UpdateGoalParams) (Goal, error) {
@@ -431,6 +437,7 @@ func (q *Queries) UpdateGoal(ctx context.Context, arg UpdateGoalParams) (Goal, e
 		arg.ConnectedAccountIds,
 		arg.IsFinancialOrderStep,
 		arg.FinancialOrderStep,
+		arg.UserID,
 	)
 	var i Goal
 	err := row.Scan(

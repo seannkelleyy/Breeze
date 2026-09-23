@@ -19,7 +19,7 @@ type mockLiabilityQuerier struct {
 	getLiabilityByIDFunc        func(context.Context, uuid.UUID) (sqlc.GetLiabilityByIDRow, error)
 	listLiabilitiesByUserIDFunc func(context.Context, uuid.UUID) ([]sqlc.ListLiabilitiesByUserIDRow, error)
 	updateLiabilityFunc         func(context.Context, sqlc.UpdateLiabilityParams) (sqlc.UpdateLiabilityRow, error)
-	softDeleteLiabilityFunc     func(context.Context, uuid.UUID) (int64, error)
+	softDeleteLiabilityFunc     func(context.Context, sqlc.SoftDeleteLiabilityParams) (int64, error)
 }
 
 func (m *mockLiabilityQuerier) CreateLiability(ctx context.Context, arg sqlc.CreateLiabilityParams) (sqlc.CreateLiabilityRow, error) {
@@ -50,9 +50,9 @@ func (m *mockLiabilityQuerier) UpdateLiability(ctx context.Context, arg sqlc.Upd
 	return sqlc.UpdateLiabilityRow{}, nil
 }
 
-func (m *mockLiabilityQuerier) SoftDeleteLiability(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockLiabilityQuerier) SoftDeleteLiability(ctx context.Context, arg sqlc.SoftDeleteLiabilityParams) (int64, error) {
 	if m.softDeleteLiabilityFunc != nil {
-		return m.softDeleteLiabilityFunc(ctx, id)
+		return m.softDeleteLiabilityFunc(ctx, arg)
 	}
 	return 0, nil
 }
@@ -284,7 +284,8 @@ func TestLiabilityService_Update(t *testing.T) {
 	}
 
 	svc := NewLiabilityService(mock)
-	result, err := svc.Update(ctx, &UpdateLiabilityInput{
+	userID := uuid.New()
+	result, err := svc.Update(ctx, userID, &UpdateLiabilityInput{
 		ID:                 row.ID,
 		Name:               "Mortgage Updated",
 		LiabilityType:      row.LiabilityType,
@@ -311,38 +312,38 @@ func TestLiabilityService_Delete(t *testing.T) {
 
 	t.Run("deletes liability", func(t *testing.T) {
 		mock := &mockLiabilityQuerier{
-			softDeleteLiabilityFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
-				assert.Equal(t, row.ID, id)
+			softDeleteLiabilityFunc: func(_ context.Context, arg sqlc.SoftDeleteLiabilityParams) (int64, error) {
+				assert.Equal(t, row.ID, arg.ID)
 				return 1, nil
 			},
 		}
 
 		svc := NewLiabilityService(mock)
-		err := svc.Delete(ctx, row.ID)
+		err := svc.Delete(ctx, uuid.New(), row.ID)
 		assert.NoError(t, err)
 	})
 
 	t.Run("returns not found", func(t *testing.T) {
 		mock := &mockLiabilityQuerier{
-			softDeleteLiabilityFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+			softDeleteLiabilityFunc: func(_ context.Context, arg sqlc.SoftDeleteLiabilityParams) (int64, error) {
 				return 0, nil
 			},
 		}
 
 		svc := NewLiabilityService(mock)
-		err := svc.Delete(ctx, row.ID)
+		err := svc.Delete(ctx, uuid.New(), row.ID)
 		assert.ErrorIs(t, err, ErrNotFound)
 	})
 
 	t.Run("wraps db error", func(t *testing.T) {
 		mock := &mockLiabilityQuerier{
-			softDeleteLiabilityFunc: func(ctx context.Context, id uuid.UUID) (int64, error) {
+			softDeleteLiabilityFunc: func(_ context.Context, arg sqlc.SoftDeleteLiabilityParams) (int64, error) {
 				return 0, errors.New("boom")
 			},
 		}
 
 		svc := NewLiabilityService(mock)
-		err := svc.Delete(ctx, row.ID)
+		err := svc.Delete(ctx, uuid.New(), row.ID)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "delete liability")
 	})

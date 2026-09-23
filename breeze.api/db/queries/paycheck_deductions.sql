@@ -6,6 +6,7 @@ SET name = EXCLUDED.name,
     amount = EXCLUDED.amount,
     pretax = EXCLUDED.pretax,
     updated_at = now()
+WHERE paycheck_deductions.user_id = EXCLUDED.user_id
 RETURNING id, user_id, person_id, name, amount, pretax, kind, linked_account_id, created_at, updated_at, deleted_at;
 
 -- name: ListPaycheckDeductionsByPersonID :many
@@ -21,4 +22,4 @@ ORDER BY created_at ASC;
 -- name: SoftDeletePaycheckDeduction :execrows
 UPDATE paycheck_deductions
 SET deleted_at = now(), updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL;
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL;

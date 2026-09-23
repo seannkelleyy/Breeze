@@ -198,23 +198,24 @@ Map service errors to GraphQL errors in a central `mapServiceError` function in 
 
 ## Authorization Pattern
 
-Always verify resource ownership in the service layer, not the resolver:
+Every per-user query — reads and writes alike — is scoped by `user_id` so a foreign row is indistinguishable from a missing one. Two layers, used together:
+
+1. **DB layer (primary, for writes).** Every by-id `UPDATE`/`DELETE` on a user-owned table filters `WHERE id = $N AND user_id = $M AND deleted_at IS NULL`. Use `:execrows` and map 0 rows to `ErrNotFound` in the service. Service methods take `userID` explicitly: `Update(ctx, userID, input)`, `Delete(ctx, userID, id)`. (For rows reachable only through a parent, scoping by the already-verified parent id — e.g. `SoftDeleteExpenseSplitsByExpenseID` — is sufficient.)
+
+2. **Resolver layer (guard for reads and connection-scoped entities).** By-id getters fetch, then verify via the `ensureOwned` helper in `graph/resolver.go`, which compares the row's `UserID` to the authenticated user and returns `ErrNotFound` on mismatch. Used for entity getters and for Plaid connections (whose sync path is also driven by a background job with no user context, so their queries stay unscoped).
 
 ```go
-func (s *BudgetService) GetBudget(ctx context.Context, userID, budgetID uuid.UUID) (*db.Budget, error) {
-    budget, err := s.db.GetBudget(ctx, budgetID)
-    if err != nil {
-        if errors.Is(err, pgx.ErrNoRows) {
-            return nil, ErrNotFound
-        }
-        return nil, fmt.Errorf("get budget: %w", err)
-    }
-    if budget.UserID != userID {
-        return nil, ErrUnauthorized // do not reveal existence to unauthorized user
-    }
-    return &budget, nil
+func (r *queryResolver) Asset(ctx context.Context, id string) (*model.Asset, error) {
+	asset, err := r.AssetService.GetByID(ctx, parsedID)
+	// ...
+	if err := r.ensureOwned(ctx, asset.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+	return mapAssetToModel(asset), nil
 }
 ```
+
+Do not trust client-supplied `userId`/`id` fields on mutations — always overwrite them with the resolved caller (`svcInput.UserID = userID` / `svcInput.ID = userID` in the resolver).
 
 ---
 
