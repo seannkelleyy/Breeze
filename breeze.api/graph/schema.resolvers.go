@@ -1028,7 +1028,7 @@ func (r *mutationResolver) DeletePlaidConnection(ctx context.Context, id string)
 		return false, r.mapErr(ctx, err)
 	}
 
-		svcUser, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	svcUser, userErr := resolveUserIDFromCtx(ctx, r.UserService)
 	if userErr != nil {
 		return false, userErr
 	}

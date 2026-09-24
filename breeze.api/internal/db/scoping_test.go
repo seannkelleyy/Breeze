@@ -35,26 +35,27 @@ var childTables = map[string]bool{
 // Statements whose ownership is enforced elsewhere:
 //   - GetPlaidConnectionByID: fetched by the river worker without user
 //     context, and by resolvers that guard with ensureOwned before use.
+//
 // Getter queries left unscoped at the SQL layer: their resolvers enforce
 // ownership with ensureOwned after the fetch, so foreign rows resolve to
 // not-found before any data is returned.
 var queryAllowlist = map[string]string{
-	"GetAssetByID":              "resolver: ensureOwned",
-	"GetLiabilityByID":          "resolver: ensureOwned",
-	"GetGoalByID":               "resolver: ensureOwned",
-	"GetBudgetByID":             "service-internal",
-	"GetExpenseByID":            "resolver: ensureOwned",
-	"GetIncomeByID":             "resolver: ensureOwned",
-	"GetRecurringIncomeByID":    "resolver: ensureOwned",
-	"GetRecurringExpenseByID":   "resolver: ensureOwned",
-	"GetPlaidConnectionByID":    "river worker + resolver: ensureOwned",
-	"UpdatePlaidConnection":     "internal sync of an owned connection",
+	"GetAssetByID":            "resolver: ensureOwned",
+	"GetLiabilityByID":        "resolver: ensureOwned",
+	"GetGoalByID":             "resolver: ensureOwned",
+	"GetBudgetByID":           "service-internal",
+	"GetExpenseByID":          "resolver: ensureOwned",
+	"GetIncomeByID":           "resolver: ensureOwned",
+	"GetRecurringIncomeByID":  "resolver: ensureOwned",
+	"GetRecurringExpenseByID": "resolver: ensureOwned",
+	"GetPlaidConnectionByID":  "river worker + resolver: ensureOwned",
+	"UpdatePlaidConnection":   "internal sync of an owned connection",
 }
 
 var (
-	stmtNameRe  = regexp.MustCompile(`-- name: (\w+) :(\w+)`)
-	tableRe     = regexp.MustCompile(`(?i)(?:FROM|UPDATE|INSERT INTO)\s+(\w+)`)
-	byIDRe      = regexp.MustCompile(`\bid = \$\d+\b|\bid = sqlc\.arg\b`)
+	stmtNameRe = regexp.MustCompile(`-- name: (\w+) :(\w+)`)
+	tableRe    = regexp.MustCompile(`(?i)(?:FROM|UPDATE|INSERT INTO)\s+(\w+)`)
+	byIDRe     = regexp.MustCompile(`\bid = \$\d+\b|\bid = sqlc\.arg\b`)
 )
 
 func TestUserOwnedQueriesScopeByID(t *testing.T) {
@@ -77,11 +78,11 @@ func TestUserOwnedQueriesScopeByID(t *testing.T) {
 		markerRe := regexp.MustCompile(`(?m)^-- name: `)
 		markers := markerRe.FindAllStringIndex(string(data), -1)
 		for i, loc := range markers {
-			end := len(string(data))
+			end := len(data)
 			if i+1 < len(markers) {
 				end = markers[i+1][0]
 			}
-			b := string(data)[loc[0]:end]
+			b := data[loc[0]:end]
 			m := stmtNameRe.FindStringSubmatch(b)
 			if m == nil {
 				continue
