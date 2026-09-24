@@ -83,7 +83,7 @@ func TestUserOwnedQueriesScopeByID(t *testing.T) {
 				end = markers[i+1][0]
 			}
 			b := data[loc[0]:end]
-			m := stmtNameRe.FindStringSubmatch(b)
+			m := stmtNameRe.FindStringSubmatch(string(b))
 			if m == nil {
 				continue
 			}
@@ -92,7 +92,7 @@ func TestUserOwnedQueriesScopeByID(t *testing.T) {
 				continue
 			}
 
-			tm := tableRe.FindStringSubmatch(b)
+			tm := tableRe.FindStringSubmatch(string(b))
 			if tm == nil {
 				continue
 			}
@@ -104,7 +104,7 @@ func TestUserOwnedQueriesScopeByID(t *testing.T) {
 				continue
 			}
 
-			where := whereClause(b)
+			where := whereClause(string(b))
 			if where == "" || !byIDRe.MatchString(where) {
 				continue // list-all / insert / keyed by a globally-unique column
 			}
