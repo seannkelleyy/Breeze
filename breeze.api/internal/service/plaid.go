@@ -62,7 +62,7 @@ type plaidQuerier interface {
 	ListPlaidConnectionsByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.PlaidConnection, error)
 	ListActivePlaidConnections(ctx context.Context) ([]sqlc.PlaidConnection, error)
 	GetPlaidAccountsByConnectionID(ctx context.Context, connectionID uuid.UUID) ([]sqlc.PlaidAccount, error)
-	SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeletePlaidConnection(ctx context.Context, arg sqlc.SoftDeletePlaidConnectionParams) (int64, error)
 	UpsertPlaidTransaction(ctx context.Context, arg sqlc.UpsertPlaidTransactionParams) (sqlc.Transaction, error)
 	LinkAssetToPlaidAccount(ctx context.Context, arg sqlc.LinkAssetToPlaidAccountParams) (int64, error)
 	UnlinkAssetFromPlaidAccount(ctx context.Context, arg sqlc.UnlinkAssetFromPlaidAccountParams) (int64, error)
@@ -213,8 +213,11 @@ func (s *PlaidService) ListByUserID(ctx context.Context, userID uuid.UUID) ([]sq
 	return rows, nil
 }
 
-func (s *PlaidService) Delete(ctx context.Context, id uuid.UUID) error {
-	rows, err := s.queries.SoftDeletePlaidConnection(ctx, id)
+func (s *PlaidService) Delete(ctx context.Context, userID, id uuid.UUID) error {
+	rows, err := s.queries.SoftDeletePlaidConnection(ctx, sqlc.SoftDeletePlaidConnectionParams{
+		ID:     id,
+		UserID: userID,
+	})
 	if err != nil {
 		return fmt.Errorf("delete plaid connection: %w", err)
 	}
@@ -414,6 +417,7 @@ func (s *PlaidService) SyncTransactions(ctx context.Context, connectionID uuid.U
 			}
 			if err := s.queries.UpdateExpenseAmount(ctx, sqlc.UpdateExpenseAmountParams{
 				ID:     uuid.UUID(tx.ExpenseID.Bytes),
+				UserID: conn.UserID,
 				Amount: expenseAmount,
 			}); err != nil {
 				return fmt.Errorf("update linked expense amount: %w", err)

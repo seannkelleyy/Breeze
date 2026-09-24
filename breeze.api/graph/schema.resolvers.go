@@ -1028,7 +1028,11 @@ func (r *mutationResolver) DeletePlaidConnection(ctx context.Context, id string)
 		return false, r.mapErr(ctx, err)
 	}
 
-	if err := r.PlaidService.Delete(ctx, parsedID); err != nil {
+		svcUser, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return false, userErr
+	}
+	if err := r.PlaidService.Delete(ctx, svcUser, parsedID); err != nil {
 		if errors.Is(err, service.ErrNotFound) {
 			return false, nil
 		}
@@ -1529,6 +1533,14 @@ func (r *queryResolver) PlaidAccounts(ctx context.Context, connectionID string) 
 	if err != nil {
 		return nil, fmt.Errorf("invalid connection id: %w", err)
 	}
+	conn, err := r.PlaidService.GetByID(ctx, parsedID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+	if err := r.ensureOwned(ctx, conn.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
 	rows, err := r.PlaidService.ListAccountsByConnectionID(ctx, parsedID)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1573,6 +1585,14 @@ func (r *queryResolver) ExpenseCategories(ctx context.Context, budgetID string) 
 	parsedBudgetID, err := uuid.Parse(budgetID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid budget id: %w", err)
+	}
+
+	budget, err := r.BudgetService.GetByID(ctx, parsedBudgetID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+	if err := r.ensureOwned(ctx, budget.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
 	}
 
 	categories, err := r.ExpenseCategoryService.ListByBudgetID(ctx, parsedBudgetID)
@@ -1650,6 +1670,14 @@ func (r *queryResolver) Expenses(ctx context.Context, budgetID string) ([]*model
 		return nil, fmt.Errorf("invalid budget id: %w", err)
 	}
 
+	budget, err := r.BudgetService.GetByID(ctx, parsedBudgetID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+	if err := r.ensureOwned(ctx, budget.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
 	expenses, err := r.ExpenseService.ListByBudgetID(ctx, parsedBudgetID)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1692,6 +1720,14 @@ func (r *queryResolver) Incomes(ctx context.Context, budgetID string) ([]*model.
 		return nil, fmt.Errorf("invalid budget id: %w", err)
 	}
 
+	budget, err := r.BudgetService.GetByID(ctx, parsedBudgetID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+	if err := r.ensureOwned(ctx, budget.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
 	incomes, err := r.IncomeService.ListByBudgetID(ctx, parsedBudgetID)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1729,17 +1765,12 @@ func (r *queryResolver) RecurringIncome(ctx context.Context, id string) (*model.
 
 // RecurringIncomes is the resolver for the recurringIncomes field.
 func (r *queryResolver) RecurringIncomes(ctx context.Context, userID string) ([]*model.RecurringIncome, error) {
-	parsedUserID, err := uuid.Parse(userID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user id: %w", err)
+	svcUser, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
 	}
 
-	// Resolve the authenticated user from context when available.
-	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
-		parsedUserID = resolvedID
-	}
-
-	incomes, err := r.RecurringIncomeService.ListByUserID(ctx, parsedUserID)
+	incomes, err := r.RecurringIncomeService.ListByUserID(ctx, svcUser)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -1776,17 +1807,12 @@ func (r *queryResolver) RecurringExpense(ctx context.Context, id string) (*model
 
 // RecurringExpenses is the resolver for the recurringExpenses field.
 func (r *queryResolver) RecurringExpenses(ctx context.Context, userID string) ([]*model.RecurringExpense, error) {
-	parsedUserID, err := uuid.Parse(userID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user id: %w", err)
+	svcUser, userErr := resolveUserIDFromCtx(ctx, r.UserService)
+	if userErr != nil {
+		return nil, userErr
 	}
 
-	// Resolve the authenticated user from context when available.
-	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
-		parsedUserID = resolvedID
-	}
-
-	expenses, err := r.RecurringExpenseService.ListByUserID(ctx, parsedUserID)
+	expenses, err := r.RecurringExpenseService.ListByUserID(ctx, svcUser)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}

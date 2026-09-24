@@ -111,7 +111,7 @@ func (m *graphPlaidQuerierMock) GetPlaidAccountsByConnectionID(ctx context.Conte
 	return []sqlc.PlaidAccount{}, nil
 }
 
-func (m *graphPlaidQuerierMock) SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *graphPlaidQuerierMock) SoftDeletePlaidConnection(ctx context.Context, arg sqlc.SoftDeletePlaidConnectionParams) (int64, error) {
 	return 1, nil
 }
 

@@ -70,7 +70,7 @@ func (m *mockPlaidQuerier) UpsertPlaidTransaction(ctx context.Context, arg sqlc.
 	return sqlc.Transaction{}, nil
 }
 
-func (m *mockPlaidQuerier) SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error) {
+func (m *mockPlaidQuerier) SoftDeletePlaidConnection(ctx context.Context, arg sqlc.SoftDeletePlaidConnectionParams) (int64, error) {
 	return 1, nil
 }
 

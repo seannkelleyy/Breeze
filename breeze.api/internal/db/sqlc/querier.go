@@ -96,7 +96,7 @@ type Querier interface {
 	SoftDeleteNetWorthSnapshotItems(ctx context.Context, snapshotID uuid.UUID) (int64, error)
 	SoftDeletePaycheckDeduction(ctx context.Context, arg SoftDeletePaycheckDeductionParams) (int64, error)
 	SoftDeletePlaidAccount(ctx context.Context, id uuid.UUID) (int64, error)
-	SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error)
+	SoftDeletePlaidConnection(ctx context.Context, arg SoftDeletePlaidConnectionParams) (int64, error)
 	SoftDeletePlannerPeopleByUserID(ctx context.Context, userID uuid.UUID) (int64, error)
 	SoftDeletePlannerPerson(ctx context.Context, arg SoftDeletePlannerPersonParams) (int64, error)
 	SoftDeleteRecurringExpense(ctx context.Context, arg SoftDeleteRecurringExpenseParams) (int64, error)

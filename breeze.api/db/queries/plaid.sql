@@ -27,7 +27,7 @@ WHERE id = $1 AND deleted_at IS NULL
 RETURNING id, user_id, environment, institution_id, institution_name, access_token, item_id, created_at, updated_at, deleted_at;
 
 -- name: SoftDeletePlaidConnection :execrows
-UPDATE plaid_connections SET deleted_at = now(), updated_at = now() WHERE id = $1 AND deleted_at IS NULL;
+UPDATE plaid_connections SET deleted_at = now(), updated_at = now() WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL;
 
 -- name: CreatePlaidAccount :one
 INSERT INTO plaid_accounts (

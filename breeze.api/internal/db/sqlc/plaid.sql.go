@@ -253,11 +253,16 @@ func (q *Queries) SoftDeletePlaidAccount(ctx context.Context, id uuid.UUID) (int
 }
 
 const softDeletePlaidConnection = `-- name: SoftDeletePlaidConnection :execrows
-UPDATE plaid_connections SET deleted_at = now(), updated_at = now() WHERE id = $1 AND deleted_at IS NULL
+UPDATE plaid_connections SET deleted_at = now(), updated_at = now() WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
 `
 
-func (q *Queries) SoftDeletePlaidConnection(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, softDeletePlaidConnection, id)
+type SoftDeletePlaidConnectionParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) SoftDeletePlaidConnection(ctx context.Context, arg SoftDeletePlaidConnectionParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeletePlaidConnection, arg.ID, arg.UserID)
 	if err != nil {
 		return 0, err
 	}

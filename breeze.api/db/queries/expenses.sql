@@ -148,4 +148,4 @@ WHERE expense_id = $1
 -- name: UpdateExpenseAmount :exec
 UPDATE expenses
 SET amount = $2, updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL;
+WHERE id = $1 AND user_id = $3 AND deleted_at IS NULL;

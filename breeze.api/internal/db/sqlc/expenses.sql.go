@@ -392,15 +392,16 @@ func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) (E
 const updateExpenseAmount = `-- name: UpdateExpenseAmount :exec
 UPDATE expenses
 SET amount = $2, updated_at = now()
-WHERE id = $1 AND deleted_at IS NULL
+WHERE id = $1 AND user_id = $3 AND deleted_at IS NULL
 `
 
 type UpdateExpenseAmountParams struct {
 	ID     uuid.UUID       `json:"id"`
 	Amount decimal.Decimal `json:"amount"`
+	UserID uuid.UUID       `json:"user_id"`
 }
 
 func (q *Queries) UpdateExpenseAmount(ctx context.Context, arg UpdateExpenseAmountParams) error {
-	_, err := q.db.Exec(ctx, updateExpenseAmount, arg.ID, arg.Amount)
+	_, err := q.db.Exec(ctx, updateExpenseAmount, arg.ID, arg.Amount, arg.UserID)
 	return err
 }
