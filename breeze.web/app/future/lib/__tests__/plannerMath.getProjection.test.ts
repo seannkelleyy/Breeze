@@ -269,6 +269,39 @@ describe('getProjection — post-retirement withdrawals', () => {
     // Year 2 (age 65→66): withdrawal = 12000 * 1.1^1
     expect(projectionRows[2].totalBalance).toBeCloseTo(100000 - 13200, 2);
   });
+
+  it('keeps withdrawals flat in real mode — today’s dollars do not inflate', () => {
+    // 10% nominal return with 10% inflation = 0% real rate: the balance only
+    // moves by withdrawals, so the withdrawal size is directly readable.
+    const { projectionRows } = call([account({ startingBalance: 100000, annualRate: 10 })], 63, 64, {
+      projectionEndAge: 66,
+      annualWithdrawal: 12000,
+      inflationRatePercent: 10,
+      useInflationAdjustedValues: true,
+    });
+
+    // Withdrawals start at 65 (the year after the target age) and stay flat.
+    expect(projectionRows[1].totalBalance).toBeCloseTo(100000, 2);
+    expect(projectionRows[2].totalBalance).toBeCloseTo(100000 - 12000, 2);
+    expect(projectionRows[3].totalBalance).toBeCloseTo(100000 - 24000, 2);
+  });
+
+  it('deflates deposits in real mode so nominal dollars land at today’s scale', () => {
+    const { projectionRows } = call(
+      [account({ startingBalance: 0, annualRate: 0, contributionValue: 1100 })],
+      30,
+      32,
+      {
+        projectionEndAge: 32,
+        inflationRatePercent: 10,
+        useInflationAdjustedValues: true,
+      },
+    );
+
+    // Year 1 deposits at face value; year 2 deposits deflated by 1/1.1.
+    expect(projectionRows[1].totalContributions).toBeCloseTo(13200, 2);
+    expect(projectionRows[2].totalContributions).toBeCloseTo(13200 + 13200 / 1.1, 2);
+  });
 });
 
 const makeDetails = (overrides: Partial<AssetFinanceDetails> = {}): AssetFinanceDetails => ({

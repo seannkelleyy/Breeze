@@ -159,12 +159,16 @@ export const getProjection = (
   let contributedTotal = 0;
   for (let year = 1; year <= years; year++) {
     const isPostRetirement = currentAge + year > targetAge;
+    // Nominal mode: withdrawals grow with inflation. Real mode: balances are
+    // already in today's dollars, so a constant lifestyle is a flat withdrawal —
+    // inflating it here would double-count inflation on the spending side.
+    const withdrawalInflator = useInflationAdjustedValues
+      ? 1
+      : (1 + inflationRatePercent / 100) ** (year - 1);
     const monthlyWithdrawal =
-      isPostRetirement && annualWithdrawal
-        ? (annualWithdrawal / 12) * (1 + inflationRatePercent / 100) ** (year - 1)
-        : 0;
+      isPostRetirement && annualWithdrawal ? (annualWithdrawal / 12) * withdrawalInflator : 0;
 
-    const projectedContributionPlanByAccount = isPostRetirement
+    let projectedContributionPlanByAccount = isPostRetirement
       ? accounts.map(() => ({ monthlyEmployeeContribution: 0, monthlyEmployerMatch: 0 }))
       : accounts.map((account) => {
           const ownerPersons = people.filter((p) => account.personIds.includes(p.id));
@@ -200,6 +204,15 @@ export const getProjection = (
             ),
           };
         });
+    if (useInflationAdjustedValues && !isPostRetirement) {
+      // Salaries, the IRS caps, and the match above are nominal dollars; deflate
+      // deposits so they land in today's-dollar balances at the same scale.
+      const depositDeflator = 1 / (1 + inflationRatePercent / 100) ** (year - 1);
+      projectedContributionPlanByAccount = projectedContributionPlanByAccount.map((plan) => ({
+        monthlyEmployeeContribution: plan.monthlyEmployeeContribution * depositDeflator,
+        monthlyEmployerMatch: plan.monthlyEmployerMatch * depositDeflator,
+      }));
+    }
     for (let month = 0; month < 12; month++) {
       for (let index = 0; index < accounts.length; index++) {
         const account = accounts[index];
