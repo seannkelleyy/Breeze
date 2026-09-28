@@ -30,6 +30,7 @@ If you are a person or an AI agent, start here first.
 ### Database
 
 - `db/01-schema-conventions.md`
+- `db/02-erd.md` — generated ER diagram (regenerate with `node scripts/gen-erd.mjs`)
 
 ### Product
 

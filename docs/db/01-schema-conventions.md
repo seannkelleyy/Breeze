@@ -6,6 +6,8 @@
 - **Atlas manages schema** — `schema.hcl` is the source of truth, migrations are generated never hand-written
 - **sqlc reads the same schema** — one file drives both Atlas and sqlc
 
+For the visual map of all tables and relationships, see [02-erd.md](02-erd.md) — regenerate it with `node scripts/gen-erd.mjs` whenever `schema.hcl` changes.
+
 ---
 
 ## Universal Table Conventions
