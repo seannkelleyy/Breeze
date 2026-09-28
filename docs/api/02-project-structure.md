@@ -20,7 +20,9 @@ breeze.api/
 ├── cmd/
 │   ├── api/                         # HTTP server entrypoint
 │   │   └── main.go
-│   └── river/                       # River job runner entrypoint
+│   ├── river/                       # River job runner entrypoint
+│   │   └── main.go
+│   └── seed/                        # Seed runner for deploys (applies db/seed/seed.sql)
 │       └── main.go
 │
 ├── internal/                        # private — not importable externally
@@ -76,9 +78,8 @@ breeze.api/
 │   │   ├── liabilities.sql
 │   │   └── retirement.sql
 │   └── migrations/                  # Atlas generated SQL — DO NOT edit manually
-│       ├── 20260401213128_*.sql
-│       ├── 20260611214200_*.sql
-│       ├── 20260627133813_*.sql
+│       ├── 20260921195212_baseline.sql
+│       ├── 20260922215603_add_transaction_expense_link.sql
 │       └── atlas.sum
 │
 ├── .env                             # Local dev environment
@@ -96,15 +97,18 @@ breeze.web/                          # Next.js 16 web app
 │   │   ├── components/              # UI components
 │   │   ├── hooks/                   # Domain hooks (TanStack Query)
 │   │   ├── lib/                     # Math, config, type mapping
-│   │   ├── services/                # API calls
+│   │   ├── providers/               # Future-module state providers
 │   │   └── types/                   # TypeScript types
 │   ├── accounts/                    # Accounts page (financial accounts)
 │   ├── people/                      # People page (household members)
 │   ├── goals/                       # Goals page (FOO checklist + goal CRUD)
 │   ├── preferences/                 # Preferences page (user settings)
 │   ├── budget/                      # Budget module
+│   ├── expenses/                    # Expense tracking UI
 │   ├── mortgage/                    # Mortgage calculator (amortization, refinance, loan compare)
 │   ├── plaid-connections/           # Plaid connect/sync UI
+│   ├── retirement-ladder/           # Retirement ladder calculator
+│   ├── tax-planning/                # Tax planning UI
 │   ├── layout.tsx
 │   └── page.tsx                     # Dashboard
 ├── components/

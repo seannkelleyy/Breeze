@@ -64,7 +64,6 @@ make dev            # start db (if needed) + migrate + gen + run
 make gen            # sqlc generate + gqlgen generate
 make migrate        # apply pending migrations
 make migrate-diff   # generate migration from schema.hcl changes
-make migrate-hash   # re-hash atlas.sum after manual changes
 make migrate-clean  # wipe database schema
 make migrate-lint   # lint latest migration for destructive changes
 make build          # go build -o bin/api ./cmd/api/...

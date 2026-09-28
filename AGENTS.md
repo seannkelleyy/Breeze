@@ -62,7 +62,7 @@ breeze/
 ### Enum Changes (PostgreSQL + Atlas)
 - Cannot use `ALTER TYPE ... ADD VALUE` in Atlas migrations (Atlas can't reorder values).
 - Use the **RENAME + CREATE NEW + MIGRATE + DROP OLD** pattern instead.
-- See migration `20260611214200_extend_asset_type_enum.sql` for a worked example.
+- A worked example exists in pre-squash git history (`extend_asset_type_enum`); current enum definitions live in the baseline migration `db/migrations/20260921195212_baseline.sql`.
 
 ### Asset Type System
 - `asset_type` enum: `CHECKING`, `EMERGENCY_FUND`, `BROKERAGE`, `_401K`, `_403B`, `_457`, `ROTH_IRA`, `TRADITIONAL_IRA`, `HSA`, `HOME`, `VEHICLE`, `OTHER`
@@ -150,7 +150,7 @@ cd breeze.web && npm run dev # Web only
 | `make gen` | sqlc generate + gqlgen generate |
 | `make migrate` | Apply pending migrations |
 | `make migrate-diff MIGRATION_NAME=x` | Generate migration from schema.hcl |
-| `make migrate-hash` | Re-hash atlas.sum after manual migration edits |
+| `make migrate-lint` | Lint the latest migration for destructive changes |
 | `make migrate-clean` | Wipe the database schema |
 | `make seed` | Apply seed data (tax brackets, etc.) |
 | `make test` | `go test ./...` |
@@ -225,7 +225,7 @@ Primary index: [`docs/README.md`](docs/README.md)
 | **Add a new GraphQL mutation** | `graph/schema.graphqls` → `make gen` → implement resolver stub → service method → sqlc query (if needed) → frontend mutation hook → UI save flow |
 | **Add a new table (full slice)** | Follow the [vertical slice playbook](docs/api/06-vertical-slice.md) |
 | **Fix an Atlas checksum error** | `cd breeze.api && export $(cat .env \| xargs) && atlas migrate hash --env local` |
-| **Add columns that already exist in the DB** | Migration must use `ADD COLUMN IF NOT EXISTS` with reasonable defaults — see `20260627133813_add_asset_liability_fields.sql` for an example |
+| **Add columns that already exist in the DB** | Migration must use `ADD COLUMN IF NOT EXISTS` with reasonable defaults so it can't fail on re-run |
 | **Rename a migration value** | Change the migration SQL directly, then re-hash. Do not write adapter code |
 
 ---

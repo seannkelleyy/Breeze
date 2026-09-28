@@ -14,7 +14,7 @@ Define the current, canonical stack for Breeze after the migration to Go + Graph
 
 | Concern | Tool |
 |---|---|
-| API language | Go 1.23+ |
+| API language | Go 1.26+ |
 | API transport | GraphQL (gqlgen) |
 | DB query layer | sqlc + pgx/v5 |
 | Schema + migrations | Atlas (`schema.hcl` + `db/migrations/`) |

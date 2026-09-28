@@ -2,7 +2,7 @@
 
 ## Overview
 
-Service tests use **handwritten mock structs** that implement the `sqlc.Querier` interface. No mockgen, no testcontainers, no database. Every test is a pure unit test.
+Service tests use **handwritten mock structs** that implement each service's narrow `Querier` interface. No mockgen, no testcontainers. Unit tests are pure; a separate `integration_test.go` exercises full lifecycles against a live Postgres when `DATABASE_URL` is set (skipped otherwise).
 
 ---
 
@@ -116,6 +116,28 @@ Decimal values always parse from string — never construct with a float literal
 
 ---
 
+## Pattern: Narrow Interface for Worker Tests
+
+Packages that take a concrete service (e.g. `internal/jobs` workers) declare a private
+interface holding only the methods they use, and take that interface in the constructor.
+`*service.PlaidService` satisfies it structurally — production callers don't change — and
+tests substitute a fake that records calls:
+
+```go
+type plaidSyncer interface {
+    ListByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.PlaidConnection, error)
+    SyncConnection(ctx context.Context, connectionID uuid.UUID) error
+}
+
+func NewPlaidSyncWorker(plaidService plaidSyncer) *PlaidSyncWorker { ... }
+```
+
+Apply this whenever a worker needs testing against a concrete dependency. Thin wrappers
+around an external client (e.g. `EnqueuePlaidSync`, which needs a live river client) stay
+untested — exercise them manually.
+
+---
+
 ## What Tests Cover
 
 Every service file has a corresponding `_test.go` file that tests:
@@ -133,5 +155,5 @@ Every service file has a corresponding `_test.go` file that tests:
 ## What Tests Don't Cover
 
 - **GraphQL layer** — resolvers are thin enough that unit tests add little value. Test them manually via GraphQL playground or curl.
-- **Integration tests** — no testcontainers or live DB tests. The mock-based approach is faster and sufficient for a pre-production codebase.
+- **sqlc queries** — no per-query integration tests; the live-DB integration tests in `integration_test.go` cover the important lifecycles end to end.
 - **Migration tests** — Atlas handles schema correctness. Trust the tool.

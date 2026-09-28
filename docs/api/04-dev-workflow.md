@@ -32,77 +32,28 @@ This runs the `dev` target which:
 
 ---
 
-## Makefile (actual — breeze.api/)
+## Makefile Targets (breeze.api/)
 
-```makefile
-# Run tests
-test:
-	go test ./...
+Authoritative source: the `Makefile` itself. Key targets:
 
-test-verbose:
-	go test -v ./...
-
-test-coverage:
-	go test -coverprofile=coverage.out ./...
-	go tool cover -html=coverage.out
-
-# Code generation
-gen:
-	go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate
-	go run github.com/99designs/gqlgen@v0.17.95 generate
-
-# Migrations
-migrate:
-	export $(shell cat .env | xargs) && atlas migrate apply --env local
-
-migrate-diff:
-	export $(shell cat .env | xargs) && atlas migrate diff $(MIGRATION_NAME) --env local
-
-migrate-clean:
-	export $(shell cat .env | xargs) && atlas schema clean --env local
-
-migrate-lint:
-	export $(shell cat .env | xargs) && atlas migrate lint --env local --latest 1
-
-# Apply seed data (tax brackets, etc.)
-seed:
-	export $(shell cat .env | xargs) && psql $$DATABASE_URL -f db/seed/seed.sql
-
-# Start PostgreSQL
-db-up:
-	docker compose -f ../compose.yaml up -d postgres
-
-# Run the API
-run:
-	go run ./cmd/api/...
-
-# Run River job runner
-river:
-	go run ./cmd/river/...
-
-# Build binary
-build:
-	go build -o bin/api ./cmd/api/...
-
-# Lint + format
-lint:
-	golangci-lint run ./...
-
-fmt:
-	go fmt ./...
-
-clean: lint fmt
-
-# All-in-one dev start
-dev:
-	@if ! docker ps --format '{{.Names}}' | grep -q 'breeze-postgres'; then \
-		docker compose -f ../compose.yaml up -d postgres; \
-		sleep 2; \
-	fi
-	make migrate
-	make gen
-	go run ./cmd/api/...
-```
+| Target | What it does |
+|---|---|
+| `make dev` | Start Postgres if needed → migrate → gen → run the API |
+| `make test` / `test-verbose` / `test-coverage` | Go test suite (plain / -v / coverage profile + HTML) |
+| `make gen` | sqlc generate, then gqlgen generate (order matters) |
+| `make migrate-diff MIGRATION_NAME=x` | Generate a migration from schema.hcl diffs |
+| `make migrate` | Apply pending migrations (Atlas, local env) |
+| `make migrate-deploy` | Apply migrations in deploy environments (Render/CI) |
+| `make migrate-lint` | Lint the latest migration (Atlas) |
+| `make migrate-clean` | Wipe the local database schema |
+| `make seed` | Apply `db/seed/seed.sql` via psql |
+| `make seed-deploy` | Apply seed data on deploy hosts (`go run ./cmd/seed`) |
+| `make run` / `make river` / `make build` | Run API / run River worker / build binary |
+| `make lint` / `make fmt` | golangci-lint / gofmt |
+| `make check` | fmt + tidy + gen, then vet, lint, test, build — full local CI gate |
+| `make tidy` / `make gen-tidy` | go mod tidy / codegen + tidy |
+| `make setup` | Install API tooling (golangci-lint, atlas) |
+| `make db-up` | Start the root `compose.yaml` Postgres |
 
 ---
 
@@ -207,7 +158,9 @@ volumes:
 
 ## Testing
 
-Service tests use **mocked `sqlc.Querier` interfaces** (not testcontainers). Tests live alongside the service file:
+Two layers, both in `internal/service/`:
+
+1. **Unit tests** — hand-written mock queriers (no database). Tests live alongside the service file:
 
 ```
 internal/service/
@@ -219,11 +172,15 @@ internal/service/
 └── ...
 ```
 
+2. **Integration tests** (`integration_test.go`) — run against a live Postgres via `DATABASE_URL`; they skip automatically when the variable is unset, so `make test` stays green without a database.
+
 Test patterns:
-- Mock the `sqlc.Querier` interface for each test
+- Mock the narrow querier interface for each test
 - Cover happy paths for Create, GetByID, List, Update, Delete
 - Cover not-found behavior (`ErrNotFound`) for read/update/delete paths
 - Cover decimal, UUID, nullable, and timestamp mapping behavior
-- Keep tests focused on service logic, not DB driver behavior
+- Keep unit tests focused on service logic, not DB driver behavior
+
+See [07 — Testing Patterns](07-testing.md) for the full mock structure.
 
 ---

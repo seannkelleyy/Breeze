@@ -65,6 +65,19 @@ The authenticated user is available via the `CurrentUserProvider` context wrappe
 const { user, userId } = useCurrentUser();  // access anywhere in tree
 ```
 
+### Testing Hooks That Call the API
+
+Service hooks (`lib/services/hooks/`) are tested with Vitest + Testing Library by mocking
+`useGraphql` and wrapping the hook in a `QueryClientProvider`. See
+`lib/services/hooks/__tests__/useTransactions.test.tsx` for the reference pattern:
+
+- `vi.hoisted` + `vi.mock('@/lib/services/useGraphql')` — replace the transport with a `vi.fn()`
+- A named `QueryWrapper` component supplies a fresh `QueryClient` (`retry: false`) per test
+- Drive mutations with `act(() => result.current.someMutation.mutate(...))`, then assert the
+  cache via `result.current.<data>` inside `waitFor`
+- Pure math stays in `lib/__tests__` / `app/*/lib/__tests__` — hook tests are only for
+  mapping, cache updates, and error semantics
+
 ### Data Fetching (TanStack React Query)
 
 GraphQL queries are defined as string constants and called via Axios, then wrapped in React Query hooks:
@@ -114,19 +127,20 @@ export function useCreateAsset() {
 ```
 breeze.web/
 ├── app/                    # Next.js App Router pages
-│   ├── planner/            # Planner module (accounts, projections, etc.)
-│   │   ├── components/     # Planner-specific components
-│   │   ├── hooks/          # Domain-specific hooks (usePlannerModel orchestrates model/ hooks)
-│   │   ├── lib/            # Planner modules: tax.ts, projection.ts, rates.ts, plannerMath.ts (contributions/IRS), config, constants, typeMapping
+│   ├── future/             # Future module (renamed from planner: accounts, projections, etc.)
+│   │   ├── components/     # Future-specific components
+│   │   ├── hooks/          # Domain-specific hooks (planner/ subdirectory holds model hooks)
+│   │   ├── lib/            # Future modules: tax.ts, projection.ts, rates.ts, plannerMath.ts (contributions/IRS), config, constants, typeMapping
 │   │   ├── providers/      # PlannerStateProvider — planner state (people, accounts, summary, targets)
-│   │   └── types/          # Planner domain types
+│   │   └── types/          # Future domain types
 │   ├── layout.tsx          # Root layout with Clerk + CurrentUserProvider
-│   └── page.tsx            # Home page (redirects to planner)
+│   └── page.tsx            # Dashboard
 ├── components/             # Shared UI components (shadcn)
 │   └── ui/                 # Button, Card, Input, Select, etc.
 ├── lib/
 │   ├── providers/          # Context providers (CurrentUserProvider)
-│   └── services/           # Shared transport (useGraphql.ts, useHttp.ts)
+│   ├── hooks/              # Shared hooks (useAutoSave, useTabParam)
+│   └── services/           # Shared transport (useGraphql.ts, useHttp.ts) + GraphQL queries
 └── package.json
 ```
 

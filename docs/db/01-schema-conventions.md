@@ -1,9 +1,8 @@
 # 01 — Database
 
-## PostgreSQL 16 on Neon
+## PostgreSQL on Render
 
-- **Neon serverless** — scales to zero at rest, near-zero idle cost
-- **Branch per environment** — main (prod), staging, dev — like git branches for your Postgres data
+- **Render managed Postgres** in production; local dev runs Postgres 16 via the root `compose.yaml`
 - **Atlas manages schema** — `schema.hcl` is the source of truth, migrations are generated never hand-written
 - **sqlc reads the same schema** — one file drives both Atlas and sqlc
 
@@ -720,51 +719,44 @@ table "contribution_limits" {
 }
 ```
 
-### scenario_overrides
+### fica_parameters
+
+Seed reference data — one row per tax year (Social Security wage base for FICA math).
 
 ```hcl
-table "scenario_overrides" {
-  column "id"                 { type = uuid          default = sql("gen_random_uuid()") }
-  column "scenario_profile_id" { type = uuid }
-  column "override_key"       { type = varchar(255) }
-  column "override_value"     { type = decimal(12,4) }
-  column "created_at"         { type = timestamptz    default = sql("now()") }
-  column "updated_at"         { type = timestamptz    default = sql("now()") }
-  column "deleted_at"         { type = timestamptz    null = true }
+table "fica_parameters" {
+  schema = schema.public
+
+  column "id"           { type = uuid          null = false  default = sql("gen_random_uuid()") }
+  column "year"         { type = int           null = false }
+  column "ss_wage_base" { type = numeric(12,2) null = false }
+  column "created_at"   { type = timestamptz   null = false  default = sql("now()") }
+  column "updated_at"   { type = timestamptz   null = false  default = sql("now()") }
+  column "deleted_at"   { type = timestamptz   null = true }
 
   primary_key { columns = [column.id] }
-  foreign_key "fk_scenario_overrides_profile" {
-    columns     = [column.scenario_profile_id]
-    ref_columns = [table.scenario_profiles.column.id]
-    on_delete   = CASCADE
-  }
-  index "idx_scenario_overrides_profile_id"     { columns = [column.scenario_profile_id] }
-  index "idx_scenario_overrides_profile_active" { columns = [column.scenario_profile_id, column.override_key]  where = "deleted_at IS NULL" }
+  index "idx_fica_parameters_year" { columns = [column.year] }
 }
 ```
 
-### scenario_results_cache
+### standard_deductions
+
+Seed reference data — IRS standard deduction per tax year per filing status.
 
 ```hcl
-table "scenario_results_cache" {
-  column "id"                     { type = uuid          default = sql("gen_random_uuid()") }
-  column "scenario_profile_id"    { type = uuid }
-  column "portfolio_at_retirement" { type = numeric(14,2) }
-  column "required_portfolio"     { type = numeric(14,2) }
-  column "projected_depletion_age" { type = int           null = true }
-  column "is_sustainable"         { type = boolean }
-  column "created_at"             { type = timestamptz    default = sql("now()") }
-  column "updated_at"             { type = timestamptz    default = sql("now()") }
-  column "deleted_at"             { type = timestamptz    null = true }
+table "standard_deductions" {
+  schema = schema.public
+
+  column "id"            { type = uuid            null = false  default = sql("gen_random_uuid()") }
+  column "year"          { type = int             null = false }
+  column "filing_status" { type = enum.filing_status null = false }
+  column "amount"        { type = numeric(12,2)   null = false }
+  column "created_at"    { type = timestamptz     null = false  default = sql("now()") }
+  column "updated_at"    { type = timestamptz     null = false  default = sql("now()") }
+  column "deleted_at"    { type = timestamptz     null = true }
 
   primary_key { columns = [column.id] }
-  foreign_key "fk_scenario_results_cache_profile" {
-    columns     = [column.scenario_profile_id]
-    ref_columns = [table.scenario_profiles.column.id]
-    on_delete   = CASCADE
-  }
-  index "idx_scenario_results_cache_profile_id"     { columns = [column.scenario_profile_id]  unique = true }
-  index "idx_scenario_results_cache_profile_active" { columns = [column.scenario_profile_id, column.created_at]  where = "deleted_at IS NULL" }
+  index "idx_standard_deductions_year_status" { columns = [column.year, column.filing_status] }
 }
 ```
 
