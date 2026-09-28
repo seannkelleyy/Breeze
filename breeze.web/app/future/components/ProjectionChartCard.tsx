@@ -14,6 +14,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import type { ChartConfig } from '@/components/ui/chart';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 
+// Keep in sync with the --chart-N definitions in app/globals.css.
+const CHART_COLOR_COUNT = 12;
+
 const AGGREGATE_SERIES = new Set(['totalBalance', 'investable', 'property']);
 
 export type ProjectionChartCardProps = {
@@ -124,7 +127,7 @@ const ProjectionChartCard = ({
     const accountName = accountNameMap[name];
     if (accountName) {
       const index = Object.keys(accountNameMap).findIndex((k) => k === name);
-      const colorVar = `--chart-${(index + 1) % 5}`;
+      const colorVar = `--chart-${(index + 1) % CHART_COLOR_COUNT}`;
       return (
         <span>
           <span style={{ color: `var(${colorVar})`, fontWeight: 500 }}>{accountName}</span>:{' '}
@@ -319,7 +322,7 @@ const ProjectionChartCard = ({
                     key={account.id}
                     type="monotone"
                     dataKey={`account-${index}`}
-                    stroke={'var(--chart-' + ((index + 1) % 5) + ')'}
+                    stroke={'var(--chart-' + ((index + 1) % CHART_COLOR_COUNT) + ')'}
                     strokeWidth={2}
                     dot={false}
                     yAxisId="left"
@@ -340,10 +343,10 @@ const ProjectionChartCard = ({
                 <span
                   className="inline-block h-2 w-6 rounded-sm"
                   style={{
-                    backgroundColor: 'var(--chart-' + ((index + 1) % 5) + ')',
+                    backgroundColor: 'var(--chart-' + ((index + 1) % CHART_COLOR_COUNT) + ')',
                   }}
                 />
-                <span style={{ color: 'var(--chart-' + ((index + 1) % 5) + ')' }}>
+                <span style={{ color: 'var(--chart-' + ((index + 1) % CHART_COLOR_COUNT) + ')' }}>
                   {account.name}
                 </span>
               </div>
