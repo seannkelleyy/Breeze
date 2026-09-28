@@ -82,11 +82,9 @@ describe('useTransactions', () => {
   });
 
   it('assignCategory updates the cached transaction in place', async () => {
-    requestMock
-      .mockResolvedValueOnce({ transactions: [transactionDto()] })
-      .mockResolvedValueOnce({
-        assignTransactionCategory: { id: 't1', expenseCategoryId: 'cat9' },
-      });
+    requestMock.mockResolvedValueOnce({ transactions: [transactionDto()] }).mockResolvedValueOnce({
+      assignTransactionCategory: { id: 't1', expenseCategoryId: 'cat9' },
+    });
 
     const { result } = renderHook(() => useTransactions('u1'), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.transactions).toHaveLength(1));
