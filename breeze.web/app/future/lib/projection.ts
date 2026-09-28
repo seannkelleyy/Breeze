@@ -44,6 +44,8 @@ export const getNetWorthStartingBalance = (a: PlannerAccount): number => {
  * home/vehicle rates included); liabilities are excluded since debts don't
  * grow toward the goal. Returns null when there is nothing to weight.
  */
+export type PortfolioRateScope = 'all' | 'investable' | 'property';
+
 export const getPortfolioAverageGrowthRate = (
   accounts: PlannerAccount[],
   assetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>,
@@ -51,14 +53,18 @@ export const getPortfolioAverageGrowthRate = (
   useInflationAdjustedValues: boolean,
   annualReturnAdjustmentPercent = 0,
   now = new Date(),
+  scope: PortfolioRateScope = 'all',
 ): number | null => {
   let weighted = 0;
   let totalWeight = 0;
   for (const account of accounts) {
     if (isLiabilityAccountType(account.accountType)) continue;
+    const isProperty = isCombinedAssetType(account.accountType);
+    if (scope === 'investable' && isProperty) continue;
+    if (scope === 'property' && !isProperty) continue;
     let weight: number;
     let baseRate: number;
-    if (isCombinedAssetType(account.accountType)) {
+    if (isProperty) {
       const details = assetFinanceDetailsByAccountId[account.id];
       if (!details) continue;
       const snapshot = getAssetFinanceSnapshot(details, now);

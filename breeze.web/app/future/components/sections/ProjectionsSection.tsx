@@ -38,7 +38,11 @@ interface ProjectionsSectionProps {
   setRetirementAge: (age: number) => void;
   marketAdjustment: number;
   setMarketAdjustment: (adjustment: number) => void;
-  portfolioAverageRate: number | null;
+  portfolioAverageRates: {
+    all: number | null;
+    investable: number | null;
+    property: number | null;
+  };
   collapses: SectionCollapse;
 }
 
@@ -61,7 +65,7 @@ export function ProjectionsSection({
   setRetirementAge,
   marketAdjustment,
   setMarketAdjustment,
-  portfolioAverageRate,
+  portfolioAverageRates,
   collapses,
 }: ProjectionsSectionProps) {
   const { accountBreakdown, onToggle } = collapses;
@@ -82,7 +86,7 @@ export function ProjectionsSection({
         setRetirementAge={setRetirementAge}
         marketAdjustment={marketAdjustment}
         setMarketAdjustment={setMarketAdjustment}
-        portfolioAverageRate={portfolioAverageRate}
+        portfolioAverageRates={portfolioAverageRates}
       />
       <ProjectionTables
         sections={{

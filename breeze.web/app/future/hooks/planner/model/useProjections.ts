@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
 
-import { getProjection, getPortfolioAverageGrowthRate } from '../../../lib/projection';
+import {
+  getPortfolioAverageGrowthRate,
+  getProjection,
+  type PortfolioRateScope,
+} from '../../../lib/projection';
 import type { AssetFinanceDetails } from '../../../types/finance';
 import type { IrsLimitConfig } from '../../../types/irs';
 import type { PlannerAccount } from '../../../types/account';
@@ -50,13 +54,21 @@ export function useProjections(
     ],
   );
 
-  const portfolioAverageRate = getPortfolioAverageGrowthRate(
-    accounts,
-    assetFinanceDetailsByAccountId,
-    inflationRate,
-    useInflationAdjustedValues,
-    annualReturnAdjustmentPercent,
-  );
+  const computeAverage = (scope: PortfolioRateScope) =>
+    getPortfolioAverageGrowthRate(
+      accounts,
+      assetFinanceDetailsByAccountId,
+      inflationRate,
+      useInflationAdjustedValues,
+      annualReturnAdjustmentPercent,
+      new Date(),
+      scope,
+    );
+  const portfolioAverageRates = {
+    all: computeAverage('all'),
+    investable: computeAverage('investable'),
+    property: computeAverage('property'),
+  };
 
   // Stats described as "at target age" must read the target-age row — not the
   // final row — so extending the chart past retirement doesn't change them.
@@ -68,5 +80,10 @@ export function useProjections(
     (_, index) => (targetRow?.[`account-${index}`] as number | undefined) ?? 0,
   );
 
-  return { projectionRows, finalBalances: targetAgeBalances, projectedNetWorthAtTargetAge, portfolioAverageRate };
+  return {
+    projectionRows,
+    finalBalances: targetAgeBalances,
+    projectedNetWorthAtTargetAge,
+    portfolioAverageRates,
+  };
 }

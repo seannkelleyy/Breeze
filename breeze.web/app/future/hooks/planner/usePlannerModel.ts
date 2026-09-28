@@ -104,7 +104,7 @@ const usePlannerModel = () => {
     allWithholdings,
   );
   const annualWithdrawal = monthlyExpenses * 12;
-  const { projectionRows, finalBalances, projectedNetWorthAtTargetAge, portfolioAverageRate } = useProjections(
+  const { projectionRows, finalBalances, projectedNetWorthAtTargetAge, portfolioAverageRates } = useProjections(
     filteredAccounts,
     effectiveHousehold,
     plannerAssetFinanceDetailsByAccountId,
@@ -198,7 +198,7 @@ const usePlannerModel = () => {
     setRetirementAgeOverride,
     marketAdjustment,
     setMarketAdjustment,
-    portfolioAverageRate,
+    portfolioAverageRates,
     totalStartingBalance: portfolio.totalStartingBalance,
     projectedNetWorthAtTargetAge,
     financialMathSnapshot,

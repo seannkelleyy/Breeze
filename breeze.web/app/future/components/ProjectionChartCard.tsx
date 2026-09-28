@@ -30,7 +30,11 @@ export type ProjectionChartCardProps = {
   setRetirementAge: (age: number) => void;
   marketAdjustment: number;
   setMarketAdjustment: (adjustment: number) => void;
-  portfolioAverageRate: number | null;
+  portfolioAverageRates: {
+    all: number | null;
+    investable: number | null;
+    property: number | null;
+  };
 };
 
 const ProjectionChartCard = ({
@@ -47,7 +51,7 @@ const ProjectionChartCard = ({
   setRetirementAge,
   marketAdjustment,
   setMarketAdjustment,
-  portfolioAverageRate,
+  portfolioAverageRates,
 }: ProjectionChartCardProps) => {
   const { currencyCode } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
@@ -197,16 +201,24 @@ const ProjectionChartCard = ({
               {marketAdjustment === 0 ? 'Base' : `${marketAdjustment}%/yr`}
             </span>
           </div>
-          {portfolioAverageRate !== null && (
-            <p className="-mt-2 mb-4 text-xs">
-              <span className="text-muted-foreground">Portfolio growth:</span>{' '}
-              <span className="font-medium">
-                {portfolioAverageRate >= 0 ? '' : ''}
-                {portfolioAverageRate.toFixed(2)}%/yr
-              </span>{' '}
-              <span className="text-muted-foreground">avg (balance-weighted)</span>
-            </p>
-          )}
+          {(() => {
+            const segments = [
+              { label: 'All', rate: portfolioAverageRates.all, visible: isVisible('totalBalance') },
+              { label: 'Investable', rate: portfolioAverageRates.investable, visible: isVisible('investable') },
+              { label: 'Property', rate: portfolioAverageRates.property, visible: isVisible('property') },
+            ].filter((seg) => seg.visible && seg.rate !== null);
+            if (segments.length === 0) return null;
+            return (
+              <p className="-mt-2 mb-4 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+                <span className="text-muted-foreground">Portfolio growth (balance-weighted):</span>
+                {segments.map((seg) => (
+                  <span key={seg.label} className="font-medium">
+                    {seg.label} {(seg.rate as number).toFixed(2)}%/yr
+                  </span>
+                ))}
+              </p>
+            );
+          })()}
           <div className="mb-4 flex items-center gap-3">
             <span className="text-muted-foreground text-xs">Projection range:</span>
             <input
