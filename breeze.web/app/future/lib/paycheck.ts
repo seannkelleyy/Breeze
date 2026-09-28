@@ -85,6 +85,15 @@ export function getPersonSavingsAccounts(
  * 457, HSA), split by tax treatment. IRAs are excluded — they are not
  * payroll-deducted.
  */
+/** Share (0–1) of an account's contribution that is pre-tax. A null share
+ * falls back to the binary tax treatment; 1–99 splits the contribution. */
+export function getPretaxShare(account: PlannerAccount): number {
+  if (account.pretaxSharePercent != null) {
+    return Math.min(100, Math.max(0, account.pretaxSharePercent)) / 100;
+  }
+  return isPretaxTreatment(account) ? 1 : 0;
+}
+
 export function getPersonSavingsSplit(
   person: PlannerPerson,
   accounts: PlannerAccount[],
@@ -92,8 +101,10 @@ export function getPersonSavingsSplit(
   let pretaxMonthly = 0;
   let rothMonthly = 0;
   for (const a of getPersonSavingsAccounts(person, accounts)) {
-    if (isPretaxTreatment(a)) pretaxMonthly += getEmployeeMonthlyContribution(a, [person]);
-    else rothMonthly += getEmployeeMonthlyContribution(a, [person]);
+    const monthly = getEmployeeMonthlyContribution(a, [person]);
+    const share = getPretaxShare(a);
+    pretaxMonthly += monthly * share;
+    rothMonthly += monthly * (1 - share);
   }
   return { pretaxMonthly, rothMonthly };
 }

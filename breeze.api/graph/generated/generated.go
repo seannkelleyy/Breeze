@@ -52,6 +52,7 @@ type ComplexityRoot struct {
 		Name                            func(childComplexity int) int
 		PersonIds                       func(childComplexity int) int
 		PlaidAccountID                  func(childComplexity int) int
+		PretaxSharePercent              func(childComplexity int) int
 		PurchaseDate                    func(childComplexity int) int
 		PurchasePrice                   func(childComplexity int) int
 		ReturnProfile                   func(childComplexity int) int
@@ -680,6 +681,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Asset.PlaidAccountID(childComplexity), true
+	case "Asset.pretaxSharePercent":
+		if e.ComplexityRoot.Asset.PretaxSharePercent == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Asset.PretaxSharePercent(childComplexity), true
 	case "Asset.purchaseDate":
 		if e.ComplexityRoot.Asset.PurchaseDate == nil {
 			break
@@ -3554,6 +3561,7 @@ type Asset {
   annualRate: String!
   returnProfile: String
   taxTreatment: String!
+  pretaxSharePercent: Int
   personIds: [ID!]!
   purchaseDate: String
   purchasePrice: String
@@ -4029,6 +4037,7 @@ input CreateAssetInput {
   annualRate: String!
   returnProfile: String
   taxTreatment: String!
+  pretaxSharePercent: Int
   purchaseDate: String
   purchasePrice: String
   homeGrowthProfile: String
@@ -4050,6 +4059,7 @@ input UpdateAssetInput {
   annualRate: String!
   returnProfile: String
   taxTreatment: String!
+  pretaxSharePercent: Int
   purchaseDate: String
   purchasePrice: String
   homeGrowthProfile: String
@@ -4185,6 +4195,8 @@ func (ec *executionContext) childFields_Asset(ctx context.Context, field graphql
 		return ec.fieldContext_Asset_returnProfile(ctx, field)
 	case "taxTreatment":
 		return ec.fieldContext_Asset_taxTreatment(ctx, field)
+	case "pretaxSharePercent":
+		return ec.fieldContext_Asset_pretaxSharePercent(ctx, field)
 	case "personIds":
 		return ec.fieldContext_Asset_personIds(ctx, field)
 	case "purchaseDate":
@@ -6667,6 +6679,29 @@ func (ec *executionContext) _Asset_taxTreatment(ctx context.Context, field graph
 }
 func (ec *executionContext) fieldContext_Asset_taxTreatment(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Asset", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Asset_pretaxSharePercent(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Asset_pretaxSharePercent(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PretaxSharePercent, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *int) graphql.Marshaler {
+			return ec.marshalOInt2ᚖint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Asset_pretaxSharePercent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Asset", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func (ec *executionContext) _Asset_personIds(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
@@ -17582,7 +17617,7 @@ func (ec *executionContext) unmarshalInputCreateAssetInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "name", "assetType", "currentValue", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate", "returnProfile", "taxTreatment", "purchaseDate", "purchasePrice", "homeGrowthProfile", "vehicleDepreciationProfile", "annualChangeRate", "linkedLiabilityId", "personIds"}
+	fieldsInOrder := [...]string{"userId", "name", "assetType", "currentValue", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate", "returnProfile", "taxTreatment", "pretaxSharePercent", "purchaseDate", "purchasePrice", "homeGrowthProfile", "vehicleDepreciationProfile", "annualChangeRate", "linkedLiabilityId", "personIds"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -17666,6 +17701,13 @@ func (ec *executionContext) unmarshalInputCreateAssetInput(ctx context.Context, 
 				return it, err
 			}
 			it.TaxTreatment = data
+		case "pretaxSharePercent":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pretaxSharePercent"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PretaxSharePercent = data
 		case "purchaseDate":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("purchaseDate"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
@@ -18804,7 +18846,7 @@ func (ec *executionContext) unmarshalInputUpdateAssetInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "assetType", "currentValue", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate", "returnProfile", "taxTreatment", "purchaseDate", "purchasePrice", "homeGrowthProfile", "vehicleDepreciationProfile", "annualChangeRate", "linkedLiabilityId", "personIds"}
+	fieldsInOrder := [...]string{"id", "name", "assetType", "currentValue", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate", "returnProfile", "taxTreatment", "pretaxSharePercent", "purchaseDate", "purchasePrice", "homeGrowthProfile", "vehicleDepreciationProfile", "annualChangeRate", "linkedLiabilityId", "personIds"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -18888,6 +18930,13 @@ func (ec *executionContext) unmarshalInputUpdateAssetInput(ctx context.Context, 
 				return it, err
 			}
 			it.TaxTreatment = data
+		case "pretaxSharePercent":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pretaxSharePercent"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PretaxSharePercent = data
 		case "purchaseDate":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("purchaseDate"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
@@ -20140,6 +20189,11 @@ func (ec *executionContext) _Asset(ctx context.Context, sel ast.SelectionSet, ob
 		case "taxTreatment":
 			out.Values[i] = ec._Asset_taxTreatment(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pretaxSharePercent":
+			out.Values[i] = ec._Asset_pretaxSharePercent(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
 		case "personIds":

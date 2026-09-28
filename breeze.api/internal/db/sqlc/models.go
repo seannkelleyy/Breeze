@@ -483,6 +483,7 @@ type Asset struct {
 	CreatedAt                       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                       pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt                       pgtype.Timestamptz `json:"deleted_at"`
+	PretaxSharePercent              *int32             `json:"pretax_share_percent"`
 }
 
 type Budget struct {

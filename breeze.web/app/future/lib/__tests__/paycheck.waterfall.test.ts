@@ -40,6 +40,7 @@ const makeAccount = (overrides: Partial<PlannerAccount> = {}): PlannerAccount =>
   annualRate: 7,
   returnProfile: null,
   taxTreatment: 'PRE_TAX',
+  pretaxSharePercent: null,
   purchaseDate: null,
   purchasePrice: null,
   homeGrowthProfile: null,
@@ -107,6 +108,33 @@ describe('computePersonWaterfall', () => {
       withSavings.grossMonthly - withSavings.taxesMonthly - 1000,
       6,
     );
+  });
+
+  it('splits a single 401(k) contribution by its pre-tax share', () => {
+    const person = makePerson();
+    const accounts = [
+      makeAccount({
+        contributionMode: 'monthly',
+        contributionValue: 1000,
+        taxTreatment: 'PRE_TAX',
+        pretaxSharePercent: 70,
+      }),
+    ];
+    const withSplit = wf(person, accounts);
+    const allPretax = wf(person, [
+      makeAccount({ contributionMode: 'monthly', contributionValue: 1000, taxTreatment: 'PRE_TAX' }),
+    ]);
+
+    expect(withSplit.pretaxSavingsMonthly).toBe(700);
+    expect(withSplit.savingsMonthly).toBe(1000);
+    // Only the pre-tax part lowers taxable income.
+    expect(withSplit.taxableMonthly).toBe(9000 + 300);
+    // Total take-home effect equals the same contribution fully pre-tax.
+    expect(withSplit.takeHomeMonthly).toBeCloseTo(
+      withSplit.grossMonthly - withSplit.taxesMonthly - 1000,
+      6,
+    );
+    expect(allPretax.pretaxSavingsMonthly).toBe(1000);
   });
 
   it('Roth contributions reduce take-home but not taxable income', () => {

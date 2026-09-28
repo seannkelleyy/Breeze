@@ -260,6 +260,7 @@ type Asset {
   annualRate: String!
   returnProfile: String
   taxTreatment: String!
+  pretaxSharePercent: Int
   personIds: [ID!]!
   purchaseDate: String
   purchasePrice: String
@@ -735,6 +736,7 @@ input CreateAssetInput {
   annualRate: String!
   returnProfile: String
   taxTreatment: String!
+  pretaxSharePercent: Int
   purchaseDate: String
   purchasePrice: String
   homeGrowthProfile: String
@@ -756,6 +758,7 @@ input UpdateAssetInput {
   annualRate: String!
   returnProfile: String
   taxTreatment: String!
+  pretaxSharePercent: Int
   purchaseDate: String
   purchasePrice: String
   homeGrowthProfile: String

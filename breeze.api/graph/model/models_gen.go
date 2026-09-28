@@ -22,6 +22,7 @@ type Asset struct {
 	AnnualRate                      string    `json:"annualRate"`
 	ReturnProfile                   *string   `json:"returnProfile,omitempty"`
 	TaxTreatment                    string    `json:"taxTreatment"`
+	PretaxSharePercent              *int      `json:"pretaxSharePercent,omitempty"`
 	PersonIds                       []string  `json:"personIds"`
 	PurchaseDate                    *string   `json:"purchaseDate,omitempty"`
 	PurchasePrice                   *string   `json:"purchasePrice,omitempty"`
@@ -69,6 +70,7 @@ type CreateAssetInput struct {
 	AnnualRate                      string    `json:"annualRate"`
 	ReturnProfile                   *string   `json:"returnProfile,omitempty"`
 	TaxTreatment                    string    `json:"taxTreatment"`
+	PretaxSharePercent              *int      `json:"pretaxSharePercent,omitempty"`
 	PurchaseDate                    *string   `json:"purchaseDate,omitempty"`
 	PurchasePrice                   *string   `json:"purchasePrice,omitempty"`
 	HomeGrowthProfile               *string   `json:"homeGrowthProfile,omitempty"`
@@ -515,6 +517,7 @@ type UpdateAssetInput struct {
 	AnnualRate                      string    `json:"annualRate"`
 	ReturnProfile                   *string   `json:"returnProfile,omitempty"`
 	TaxTreatment                    string    `json:"taxTreatment"`
+	PretaxSharePercent              *int      `json:"pretaxSharePercent,omitempty"`
 	PurchaseDate                    *string   `json:"purchaseDate,omitempty"`
 	PurchasePrice                   *string   `json:"purchasePrice,omitempty"`
 	HomeGrowthProfile               *string   `json:"homeGrowthProfile,omitempty"`

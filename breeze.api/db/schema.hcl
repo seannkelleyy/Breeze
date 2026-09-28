@@ -377,6 +377,10 @@ table "assets" {
     null    = false
     default = "PRE_TAX"
   }
+  column "pretax_share_percent" {
+    type = int
+    null = true
+  }
 
   column "current_value" {
     type = numeric(14,2)

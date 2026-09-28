@@ -77,6 +77,7 @@ func createAssetInputFromModel(input *model.CreateAssetInput) (service.CreateAss
 		AnnualRate:                      annualRate,
 		ReturnProfile:                   input.ReturnProfile,
 		TaxTreatment:                    input.TaxTreatment,
+		PretaxSharePercent:              intPtrToInt32Ptr(input.PretaxSharePercent),
 		PersonIDs:                       personIDs,
 		PurchaseDate:                    input.PurchaseDate,
 		PurchasePrice:                   purchasePrice,
@@ -152,6 +153,7 @@ func updateAssetInputFromModel(input *model.UpdateAssetInput) (service.UpdateAss
 		AnnualRate:                      annualRate,
 		ReturnProfile:                   input.ReturnProfile,
 		TaxTreatment:                    input.TaxTreatment,
+		PretaxSharePercent:              intPtrToInt32Ptr(input.PretaxSharePercent),
 		PersonIDs:                       personIDs,
 		PurchaseDate:                    input.PurchaseDate,
 		PurchasePrice:                   purchasePrice,
@@ -190,6 +192,7 @@ func mapAssetToModel(asset *service.Asset) *model.Asset {
 		AnnualRate:                      asset.AnnualRate.String(),
 		ReturnProfile:                   asset.ReturnProfile,
 		TaxTreatment:                    asset.TaxTreatment,
+		PretaxSharePercent:              int32PtrToIntPtr(asset.PretaxSharePercent),
 		PersonIds:                       uuidSliceToStringSlice(asset.PersonIDs),
 		PurchaseDate:                    asset.PurchaseDate,
 		PurchasePrice:                   p,
@@ -201,4 +204,20 @@ func mapAssetToModel(asset *service.Asset) *model.Asset {
 		CreatedAt:                       asset.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:                       asset.UpdatedAt.Format(time.RFC3339),
 	}
+}
+
+func intPtrToInt32Ptr(v *int) *int32 {
+	if v == nil {
+		return nil
+	}
+	n := int32(*v)
+	return &n
+}
+
+func int32PtrToIntPtr(v *int32) *int {
+	if v == nil {
+		return nil
+	}
+	n := int(*v)
+	return &n
 }

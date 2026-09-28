@@ -165,3 +165,18 @@ func pgtypeNumericToDecimal(n pgtype.Numeric) *decimal.Decimal {
 	}
 	return &parsed
 }
+
+// clampPercentPtr constrains an optional percentage to [0, 100].
+func clampPercentPtr(v *int32) *int32 {
+	if v == nil {
+		return nil
+	}
+	c := *v
+	if c < 0 {
+		c = 0
+	}
+	if c > 100 {
+		c = 100
+	}
+	return &c
+}

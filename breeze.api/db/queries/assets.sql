@@ -16,9 +16,10 @@ INSERT INTO assets (
   purchase_price,
   home_growth_profile,
   vehicle_depreciation_profile,
-  linked_liability_id
+  linked_liability_id,
+  pretax_share_percent
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 RETURNING
   id,
   user_id,
@@ -32,6 +33,7 @@ RETURNING
   annual_rate,
   return_profile,
   tax_treatment,
+  pretax_share_percent,
   person_ids,
   purchase_date,
   purchase_price,
@@ -58,6 +60,7 @@ SELECT
   annual_rate,
   return_profile,
   tax_treatment,
+  pretax_share_percent,
   person_ids,
   purchase_date,
   purchase_price,
@@ -88,6 +91,7 @@ SELECT
   annual_rate,
   return_profile,
   tax_treatment,
+  pretax_share_percent,
   person_ids,
   purchase_date,
   purchase_price,
@@ -123,6 +127,7 @@ SET
   home_growth_profile = $14,
   vehicle_depreciation_profile = $15,
   linked_liability_id = $16,
+  pretax_share_percent = $19,
   last_value_updated_at = CASE
     WHEN current_value IS DISTINCT FROM $4 THEN now()
     ELSE last_value_updated_at
@@ -143,6 +148,7 @@ RETURNING
   annual_rate,
   return_profile,
   tax_treatment,
+  pretax_share_percent,
   person_ids,
   purchase_date,
   purchase_price,

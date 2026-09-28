@@ -193,6 +193,7 @@ table "assets" {
   column "name"                                  { type = varchar(255) }
   column "asset_type"                            { type = enum.asset_type }
   column "tax_treatment"                         { type = text          default = "PRE_TAX" }
+  column "pretax_share_percent"                  { type = int           null = true }
   column "current_value"                         { type = numeric(14,2) }
   column "person_ids"                            { type = list(uuid)    default = sql("ARRAY[]::uuid[]") }
   column "contribution_mode"                     { type = varchar(32) }

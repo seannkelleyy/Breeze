@@ -43,7 +43,11 @@ import {
   getPersonGroupAnnualContribution,
 } from '../../lib/plannerMath';
 import { AccountType, AccountRateProfile, PlannerAccount } from '../../types/account';
-import { TAX_ADVANTAGED_ACCOUNT_TYPES, FIXED_TAX_TREATMENT } from '../../lib/config';
+import {
+  TAX_ADVANTAGED_ACCOUNT_TYPES,
+  FIXED_TAX_TREATMENT,
+  PAYROLL_SAVINGS_ACCOUNT_TYPES,
+} from '../../lib/config';
 import { InfoTip } from '@/components/common/InfoTip';
 import { useAccountEditor } from './AccountEditorContext';
 import type { AssetFinanceDetails } from '../../types/finance';
@@ -80,6 +84,21 @@ const TAX_TREATMENT_OPTIONS = [
 
 function defaultTaxTreatmentFor(accountType: string): string {
   return FIXED_TAX_TREATMENT[accountType as AccountType] ?? 'PRE_TAX';
+}
+
+/** 'Roth' (0%), 'Pre-tax' (100%) or 'Pre-tax 70%' for a split account. */
+export function taxTreatmentLabel(account: {
+  taxTreatment?: string;
+  pretaxSharePercent?: number | null;
+}): string {
+  const share =
+    account.pretaxSharePercent != null
+      ? Math.min(100, Math.max(0, account.pretaxSharePercent))
+      : null;
+  if (share === null) return account.taxTreatment === 'ROTH' ? 'Roth' : 'Pre-tax';
+  if (share === 0) return 'Roth';
+  if (share === 100) return 'Pre-tax';
+  return `Pre-tax ${share}%`;
 }
 
 export interface AccountListItemProps {
@@ -155,6 +174,7 @@ export function AccountListItem({
       account.annualRate,
       account.returnProfile,
       account.taxTreatment,
+      account.pretaxSharePercent,
       account.linkedLiabilityId,
       account.purchaseDate,
       account.purchasePrice,
@@ -373,10 +393,10 @@ export function AccountListItem({
               ))}
               {!isLiability && TAX_ADVANTAGED_ACCOUNT_TYPES.has(account.accountType) && (
                 <Badge
-                  variant={account.taxTreatment === 'ROTH' ? 'default' : 'secondary'}
+                  variant={taxTreatmentLabel(account) === 'Roth' ? 'default' : 'secondary'}
                   className="shrink-0 text-[10px]"
                 >
-                  {account.taxTreatment === 'ROTH' ? 'Roth' : 'Pre-tax'}
+                  {taxTreatmentLabel(account)}
                 </Badge>
               )}
               {isUsingIrsMaxContribution && (
@@ -477,10 +497,46 @@ export function AccountListItem({
               </div>
             </div>
 
-            {/* Tax treatment — hidden for types whose treatment is fixed (IRAs) */}
+            {/* Tax treatment — hidden for types whose treatment is fixed (IRAs).
+                Payroll accounts get a share slider: one contribution, split
+                between pre-tax and Roth sub-portions. */}
             {!isLiability &&
               TAX_ADVANTAGED_ACCOUNT_TYPES.has(account.accountType) &&
-              !FIXED_TAX_TREATMENT[account.accountType] && (
+              !FIXED_TAX_TREATMENT[account.accountType] &&
+              (PAYROLL_SAVINGS_ACCOUNT_TYPES.has(account.accountType) ? (
+                <div className="space-y-1.5">
+                  <Label className="inline-flex items-center gap-1 text-xs">
+                    Pre-tax share (%){' '}
+                    <InfoTip text="Split this account's contribution: the pre-tax part lowers this year's taxable income, the Roth part is post-tax and grows tax-free. Both deposit into the same account." />
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={account.pretaxSharePercent ?? (account.taxTreatment === 'ROTH' ? 0 : 100)}
+                      onChange={(e) =>
+                        onUpdateAccount((c) => ({
+                          ...c,
+                          pretaxSharePercent: Number(e.target.value),
+                        }))
+                      }
+                      className="accent-primary h-1.5 flex-1 cursor-pointer"
+                    />
+                    <span className="w-20 text-right text-xs font-medium">
+                      {account.pretaxSharePercent ?? (account.taxTreatment === 'ROTH' ? 0 : 100)}%
+                    </span>
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    {account.pretaxSharePercent ?? (account.taxTreatment === 'ROTH' ? 0 : 100)}%
+                    pre-tax ·{' '}
+                    {100 -
+                      (account.pretaxSharePercent ?? (account.taxTreatment === 'ROTH' ? 0 : 100))}
+                    % Roth — both deposit here; only the pre-tax part lowers taxable income.
+                  </p>
+                </div>
+              ) : (
                 <div className="space-y-1.5">
                   <Label className="inline-flex items-center gap-1 text-xs">
                     Tax Treatment{' '}
@@ -507,7 +563,7 @@ export function AccountListItem({
                       : 'Contributions reduce taxable income now; withdrawals are taxed.'}
                   </p>
                 </div>
-              )}
+              ))}
 
             {/* Type-specific fields */}
             {!isCombinedAsset ? (

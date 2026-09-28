@@ -25,6 +25,7 @@ type Asset struct {
 	AnnualRate                      decimal.Decimal
 	ReturnProfile                   *string
 	TaxTreatment                    string
+	PretaxSharePercent              *int32
 	PersonIDs                       []uuid.UUID
 	PurchaseDate                    *string
 	PurchasePrice                   *decimal.Decimal
@@ -49,6 +50,7 @@ type CreateAssetInput struct {
 	AnnualRate                      decimal.Decimal
 	ReturnProfile                   *string
 	TaxTreatment                    string
+	PretaxSharePercent              *int32
 	PersonIDs                       []uuid.UUID
 	PurchaseDate                    *string
 	PurchasePrice                   *decimal.Decimal
@@ -69,6 +71,7 @@ type UpdateAssetInput struct {
 	AnnualRate                      decimal.Decimal
 	ReturnProfile                   *string
 	TaxTreatment                    string
+	PretaxSharePercent              *int32
 	PersonIDs                       []uuid.UUID
 	PurchaseDate                    *string
 	PurchasePrice                   *decimal.Decimal
@@ -110,6 +113,7 @@ func (s *AssetService) Create(ctx context.Context, input *CreateAssetInput) (*As
 		AnnualRate:                      input.AnnualRate,
 		ReturnProfile:                   input.ReturnProfile,
 		TaxTreatment:                    input.TaxTreatment,
+		PretaxSharePercent:              clampPercentPtr(input.PretaxSharePercent),
 		PersonIds:                       input.PersonIDs,
 		PurchaseDate:                    purchaseDate,
 		PurchasePrice:                   purchasePrice,
@@ -170,6 +174,7 @@ func (s *AssetService) Update(ctx context.Context, userID uuid.UUID, input *Upda
 		AnnualRate:                      input.AnnualRate,
 		ReturnProfile:                   input.ReturnProfile,
 		TaxTreatment:                    input.TaxTreatment,
+		PretaxSharePercent:              clampPercentPtr(input.PretaxSharePercent),
 		PersonIds:                       input.PersonIDs,
 		PurchaseDate:                    purchaseDate,
 		PurchasePrice:                   purchasePrice,
@@ -217,6 +222,7 @@ func mapCreateAssetRow(row *sqlc.CreateAssetRow) Asset {
 		AnnualRate:                      row.AnnualRate,
 		ReturnProfile:                   row.ReturnProfile,
 		TaxTreatment:                    row.TaxTreatment,
+		PretaxSharePercent:              row.PretaxSharePercent,
 		PersonIDs:                       row.PersonIds,
 		PurchaseDate:                    pgtypeDateToString(row.PurchaseDate),
 		PurchasePrice:                   pgtypeNumericToDecimal(row.PurchasePrice),
@@ -245,6 +251,7 @@ func mapGetAssetByIDRow(row *sqlc.GetAssetByIDRow) Asset {
 		AnnualRate:                      row.AnnualRate,
 		ReturnProfile:                   row.ReturnProfile,
 		TaxTreatment:                    row.TaxTreatment,
+		PretaxSharePercent:              row.PretaxSharePercent,
 		PersonIDs:                       row.PersonIds,
 		PurchaseDate:                    pgtypeDateToString(row.PurchaseDate),
 		PurchasePrice:                   pgtypeNumericToDecimal(row.PurchasePrice),
@@ -273,6 +280,7 @@ func mapListAssetsByUserIDRow(row *sqlc.ListAssetsByUserIDRow) Asset {
 		AnnualRate:                      row.AnnualRate,
 		ReturnProfile:                   row.ReturnProfile,
 		TaxTreatment:                    row.TaxTreatment,
+		PretaxSharePercent:              row.PretaxSharePercent,
 		PersonIDs:                       row.PersonIds,
 		PurchaseDate:                    pgtypeDateToString(row.PurchaseDate),
 		PurchasePrice:                   pgtypeNumericToDecimal(row.PurchasePrice),
@@ -301,6 +309,7 @@ func mapUpdateAssetRow(row *sqlc.UpdateAssetRow) Asset {
 		AnnualRate:                      row.AnnualRate,
 		ReturnProfile:                   row.ReturnProfile,
 		TaxTreatment:                    row.TaxTreatment,
+		PretaxSharePercent:              row.PretaxSharePercent,
 		PersonIDs:                       row.PersonIds,
 		PurchaseDate:                    pgtypeDateToString(row.PurchaseDate),
 		PurchasePrice:                   pgtypeNumericToDecimal(row.PurchasePrice),

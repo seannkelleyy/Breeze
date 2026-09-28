@@ -46,6 +46,7 @@ export type PlannerAccount = {
   annualRate: number;
   returnProfile: AccountRateProfile | null;
   taxTreatment?: string;
+  pretaxSharePercent?: number | null;
   purchaseDate: string | null;
   purchasePrice: number | null;
   homeGrowthProfile: string | null;
@@ -70,6 +71,7 @@ export interface PlannerAccountDto {
   annualRate: number;
   returnProfile: string | null;
   taxTreatment: string;
+  pretaxSharePercent: number | null;
   purchaseDate?: string | null;
   purchasePrice?: number | null;
   currentValue?: number | null;

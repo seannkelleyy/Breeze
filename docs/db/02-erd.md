@@ -66,6 +66,7 @@ erDiagram
         "varchar(255)" name
         asset_type asset_type
         text tax_treatment
+        int pretax_share_percent
         "numeric(14,2)" current_value
         "sql("uuid[]")" person_ids
         "varchar(32)" contribution_mode

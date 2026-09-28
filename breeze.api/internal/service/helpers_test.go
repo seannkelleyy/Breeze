@@ -321,3 +321,27 @@ func TestTimestamptzToTimePtr(t *testing.T) {
 		}
 	})
 }
+
+func TestClampPercentPtr(t *testing.T) {
+	t.Run("nil stays nil", func(t *testing.T) {
+		if clampPercentPtr(nil) != nil {
+			t.Fatal("expected nil for nil input")
+		}
+	})
+	t.Run("clamps to 0 and 100", func(t *testing.T) {
+		low := int32(-5)
+		if got := clampPercentPtr(&low); *got != 0 {
+			t.Fatalf("expected 0, got %d", *got)
+		}
+		high := int32(150)
+		if got := clampPercentPtr(&high); *got != 100 {
+			t.Fatalf("expected 100, got %d", *got)
+		}
+	})
+	t.Run("keeps in-range values", func(t *testing.T) {
+		v := int32(70)
+		if got := clampPercentPtr(&v); *got != 70 {
+			t.Fatalf("expected 70, got %d", *got)
+		}
+	})
+}

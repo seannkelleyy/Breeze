@@ -31,9 +31,10 @@ INSERT INTO assets (
   purchase_price,
   home_growth_profile,
   vehicle_depreciation_profile,
-  linked_liability_id
+  linked_liability_id,
+  pretax_share_percent
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 RETURNING
   id,
   user_id,
@@ -47,6 +48,7 @@ RETURNING
   annual_rate,
   return_profile,
   tax_treatment,
+  pretax_share_percent,
   person_ids,
   purchase_date,
   purchase_price,
@@ -78,6 +80,7 @@ type CreateAssetParams struct {
 	HomeGrowthProfile               *string         `json:"home_growth_profile"`
 	VehicleDepreciationProfile      *string         `json:"vehicle_depreciation_profile"`
 	LinkedLiabilityID               pgtype.UUID     `json:"linked_liability_id"`
+	PretaxSharePercent              *int32          `json:"pretax_share_percent"`
 }
 
 type CreateAssetRow struct {
@@ -93,6 +96,7 @@ type CreateAssetRow struct {
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
 	ReturnProfile                   *string            `json:"return_profile"`
 	TaxTreatment                    string             `json:"tax_treatment"`
+	PretaxSharePercent              *int32             `json:"pretax_share_percent"`
 	PersonIds                       []uuid.UUID        `json:"person_ids"`
 	PurchaseDate                    pgtype.Date        `json:"purchase_date"`
 	PurchasePrice                   pgtype.Numeric     `json:"purchase_price"`
@@ -125,6 +129,7 @@ func (q *Queries) CreateAsset(ctx context.Context, arg CreateAssetParams) (Creat
 		arg.HomeGrowthProfile,
 		arg.VehicleDepreciationProfile,
 		arg.LinkedLiabilityID,
+		arg.PretaxSharePercent,
 	)
 	var i CreateAssetRow
 	err := row.Scan(
@@ -140,6 +145,7 @@ func (q *Queries) CreateAsset(ctx context.Context, arg CreateAssetParams) (Creat
 		&i.AnnualRate,
 		&i.ReturnProfile,
 		&i.TaxTreatment,
+		&i.PretaxSharePercent,
 		&i.PersonIds,
 		&i.PurchaseDate,
 		&i.PurchasePrice,
@@ -169,6 +175,7 @@ SELECT
   annual_rate,
   return_profile,
   tax_treatment,
+  pretax_share_percent,
   person_ids,
   purchase_date,
   purchase_price,
@@ -199,6 +206,7 @@ type GetAssetByIDRow struct {
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
 	ReturnProfile                   *string            `json:"return_profile"`
 	TaxTreatment                    string             `json:"tax_treatment"`
+	PretaxSharePercent              *int32             `json:"pretax_share_percent"`
 	PersonIds                       []uuid.UUID        `json:"person_ids"`
 	PurchaseDate                    pgtype.Date        `json:"purchase_date"`
 	PurchasePrice                   pgtype.Numeric     `json:"purchase_price"`
@@ -228,6 +236,7 @@ func (q *Queries) GetAssetByID(ctx context.Context, id uuid.UUID) (GetAssetByIDR
 		&i.AnnualRate,
 		&i.ReturnProfile,
 		&i.TaxTreatment,
+		&i.PretaxSharePercent,
 		&i.PersonIds,
 		&i.PurchaseDate,
 		&i.PurchasePrice,
@@ -257,6 +266,7 @@ SELECT
   annual_rate,
   return_profile,
   tax_treatment,
+  pretax_share_percent,
   person_ids,
   purchase_date,
   purchase_price,
@@ -287,6 +297,7 @@ type ListAssetsByUserIDRow struct {
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
 	ReturnProfile                   *string            `json:"return_profile"`
 	TaxTreatment                    string             `json:"tax_treatment"`
+	PretaxSharePercent              *int32             `json:"pretax_share_percent"`
 	PersonIds                       []uuid.UUID        `json:"person_ids"`
 	PurchaseDate                    pgtype.Date        `json:"purchase_date"`
 	PurchasePrice                   pgtype.Numeric     `json:"purchase_price"`
@@ -322,6 +333,7 @@ func (q *Queries) ListAssetsByUserID(ctx context.Context, userID uuid.UUID) ([]L
 			&i.AnnualRate,
 			&i.ReturnProfile,
 			&i.TaxTreatment,
+			&i.PretaxSharePercent,
 			&i.PersonIds,
 			&i.PurchaseDate,
 			&i.PurchasePrice,
@@ -384,6 +396,7 @@ SET
   home_growth_profile = $14,
   vehicle_depreciation_profile = $15,
   linked_liability_id = $16,
+  pretax_share_percent = $19,
   last_value_updated_at = CASE
     WHEN current_value IS DISTINCT FROM $4 THEN now()
     ELSE last_value_updated_at
@@ -404,6 +417,7 @@ RETURNING
   annual_rate,
   return_profile,
   tax_treatment,
+  pretax_share_percent,
   person_ids,
   purchase_date,
   purchase_price,
@@ -436,6 +450,7 @@ type UpdateAssetParams struct {
 	LinkedLiabilityID               pgtype.UUID     `json:"linked_liability_id"`
 	TaxTreatment                    string          `json:"tax_treatment"`
 	UserID                          uuid.UUID       `json:"user_id"`
+	PretaxSharePercent              *int32          `json:"pretax_share_percent"`
 }
 
 type UpdateAssetRow struct {
@@ -451,6 +466,7 @@ type UpdateAssetRow struct {
 	AnnualRate                      decimal.Decimal    `json:"annual_rate"`
 	ReturnProfile                   *string            `json:"return_profile"`
 	TaxTreatment                    string             `json:"tax_treatment"`
+	PretaxSharePercent              *int32             `json:"pretax_share_percent"`
 	PersonIds                       []uuid.UUID        `json:"person_ids"`
 	PurchaseDate                    pgtype.Date        `json:"purchase_date"`
 	PurchasePrice                   pgtype.Numeric     `json:"purchase_price"`
@@ -484,6 +500,7 @@ func (q *Queries) UpdateAsset(ctx context.Context, arg UpdateAssetParams) (Updat
 		arg.LinkedLiabilityID,
 		arg.TaxTreatment,
 		arg.UserID,
+		arg.PretaxSharePercent,
 	)
 	var i UpdateAssetRow
 	err := row.Scan(
@@ -499,6 +516,7 @@ func (q *Queries) UpdateAsset(ctx context.Context, arg UpdateAssetParams) (Updat
 		&i.AnnualRate,
 		&i.ReturnProfile,
 		&i.TaxTreatment,
+		&i.PretaxSharePercent,
 		&i.PersonIds,
 		&i.PurchaseDate,
 		&i.PurchasePrice,
