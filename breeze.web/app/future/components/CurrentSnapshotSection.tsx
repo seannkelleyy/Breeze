@@ -1,4 +1,5 @@
 'use client';
+import { InfoTip } from '@/components/common/InfoTip';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -143,26 +144,37 @@ export function CurrentSnapshotSection({
               {payroll ? (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Gross</span>
+                    <span className="text-muted-foreground">
+                      Gross{' '}
+                      <InfoTip text="Household salaries and bonuses before any deductions. Employer match is not here — it never passes through your paycheck." />
+                    </span>
                     <span className="font-medium">{fc(payroll.grossMonthly)}/mo</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">− Pre-tax savings (401k, HSA)</span>
+                    <span className="text-muted-foreground">
+                      − Pre-tax savings (401k, HSA){' '}
+                      <InfoTip text="Your 401(k)/HSA employee contributions. Only the pre-tax share lowers taxable income; the full amount is invested. Employer match is not included." />
+                    </span>
                     <span>{fc(payroll.pretaxSavingsMonthly)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">− Pre-tax withholdings</span>
+                    <span className="text-muted-foreground">
+                      − Pre-tax withholdings{' '}
+                      <InfoTip text="Non-account payroll deductions like insurance and FSA — add them in the People page editor. Account contributions are the line above." />
+                    </span>
                     <span>{fc(payroll.pretaxWithholdingsMonthly)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
-                      Taxes (est. {(payroll.effectiveRate * 100).toFixed(1)}% effective)
+                      Taxes (est. {(payroll.effectiveRate * 100).toFixed(1)}% effective){' '}
+                      <InfoTip text="Estimated from current-year federal brackets on taxable income (gross minus pre-tax savings and withholdings). State/local taxes are not modeled." />
                     </span>
                     <span>{fc(payroll.taxesMonthly)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
-                      − Roth savings · post-tax withholdings
+                      − Roth savings · post-tax withholdings{' '}
+                      <InfoTip text="Roth 401(k)/403(b) contributions (taxed now, grow tax-free) plus post-tax payroll deductions." />
                     </span>
                     <span>
                       {fc(payroll.rothSavingsMonthly + payroll.posttaxWithholdingsMonthly)}
@@ -170,7 +182,10 @@ export function CurrentSnapshotSection({
                   </div>
                   <div className="border-t pt-1">
                     <div className="flex items-center justify-between text-sm font-medium">
-                      <span className="text-success">Take-home</span>
+                      <span className="inline-flex items-center gap-1 text-success">
+                        Take-home
+                        <InfoTip text="What lands in the bank: gross minus taxes, savings, and withholdings. Employer match is not here — it goes straight to the 401(k) without touching your paycheck." />
+                      </span>
                       <span className="text-success">{fc(payroll.takeHomeMonthly)}/mo</span>
                     </div>
                   </div>
@@ -197,7 +212,10 @@ export function CurrentSnapshotSection({
               )}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Savings rate (of gross income)</span>
+                  <span className="text-muted-foreground">
+                    Savings rate (of gross income){' '}
+                    <InfoTip text="(Employee contributions + employer match + loan payments) ÷ gross. Match and loan principal count as saving; loan payments include interest." />
+                  </span>
                   <span className="text-success font-medium">{savingsRateOfGross.toFixed(1)}%</span>
                 </div>
                 <Progress
