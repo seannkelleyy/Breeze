@@ -111,6 +111,7 @@ function PlannerContent() {
     setRetirementAgeOverride,
     marketAdjustment,
     setMarketAdjustment,
+    portfolioAverageRate,
   } = usePlannerModel();
 
   if (!clerkLoaded || !isLoaded || !userId) {
@@ -162,6 +163,7 @@ function PlannerContent() {
         setRetirementAge={setRetirementAgeOverride}
         marketAdjustment={marketAdjustment}
         setMarketAdjustment={setMarketAdjustment}
+        portfolioAverageRate={portfolioAverageRate}
         chartConfig={dynamicChartConfig}
         projectionRows={projectionRows}
         accounts={accounts}

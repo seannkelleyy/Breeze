@@ -36,6 +36,59 @@ export const getNetWorthStartingBalance = (a: PlannerAccount): number => {
   if (isLiabilityAccountType(a.accountType)) return -clamp(a.startingBalance);
   return clamp(a.startingBalance);
 };
+
+/**
+ * Balance-weighted average growth rate across the projected assets — the rate
+ * the portfolio is "actually" earning once the market adjustment is applied.
+ * Mirrors the per-account rates the projection engine applies (profile-based
+ * home/vehicle rates included); liabilities are excluded since debts don't
+ * grow toward the goal. Returns null when there is nothing to weight.
+ */
+export const getPortfolioAverageGrowthRate = (
+  accounts: PlannerAccount[],
+  assetFinanceDetailsByAccountId: Record<string, AssetFinanceDetails>,
+  inflationRatePercent: number,
+  useInflationAdjustedValues: boolean,
+  annualReturnAdjustmentPercent = 0,
+  now = new Date(),
+): number | null => {
+  let weighted = 0;
+  let totalWeight = 0;
+  for (const account of accounts) {
+    if (isLiabilityAccountType(account.accountType)) continue;
+    let weight: number;
+    let baseRate: number;
+    if (isCombinedAssetType(account.accountType)) {
+      const details = assetFinanceDetailsByAccountId[account.id];
+      if (!details) continue;
+      const snapshot = getAssetFinanceSnapshot(details, now);
+      weight = snapshot.equity;
+      // Mirror the engine exactly: the market adjustment reaches liquid
+      // accounts and custom-rate homes only — profile-based homes keep their
+      // profile constant and vehicles keep their depreciation schedule.
+      baseRate =
+        account.accountType === 'vehicle'
+          ? -getVehicleAnnualDepreciationRate(
+              details.vehicleDepreciationProfile,
+              snapshot.monthsSincePurchase / 12,
+              details.annualChangeRate,
+            )
+          : getHomeAnnualGrowthRate(
+              details.homeGrowthProfile,
+              details.annualChangeRate + annualReturnAdjustmentPercent,
+            );
+    } else {
+      weight = clamp(account.startingBalance);
+      baseRate = account.annualRate + annualReturnAdjustmentPercent;
+    }
+    if (weight <= 0) continue;
+    weighted +=
+      weight *
+      getEffectiveAnnualRatePercent(baseRate, inflationRatePercent, useInflationAdjustedValues);
+    totalWeight += weight;
+  }
+  return totalWeight > 0 ? weighted / totalWeight : null;
+};
 const getMonthsBetween = (from: Date, to: Date): number => {
   const monthDelta =
     (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());

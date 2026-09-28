@@ -3,7 +3,7 @@ import type { PlannerAccount } from '../../types/account';
 import type { PlannerPerson } from '../../types/person';
 import type { AssetFinanceDetails } from '../../types/finance';
 import { PLANNER_DEFAULT_IRS_LIMITS } from '../constants';
-import { getProjection } from '../projection';
+import { getPortfolioAverageGrowthRate, getProjection } from '../projection';
 
 const person: PlannerPerson = {
   id: 'p1',
@@ -579,5 +579,58 @@ describe('market adjustment (stress test)', () => {
       baseRun.projectionRows[1]['account-0'],
       6,
     );
+  });
+});
+
+describe('getPortfolioAverageGrowthRate', () => {
+  it('balance-weights the rates of liquid accounts', () => {
+    const accounts = [
+      account({ id: 'big', startingBalance: 400000, annualRate: 3 }),
+      account({ id: 'small', startingBalance: 100000, annualRate: 7 }),
+    ];
+    const avg = getPortfolioAverageGrowthRate(accounts, {}, 0, false);
+    expect(avg).toBeCloseTo((400000 * 3 + 100000 * 7) / 500000, 6);
+  });
+
+  it('applies the market adjustment to liquid accounts', () => {
+    const accounts = [account({ startingBalance: 100000, annualRate: 7 })];
+    const avg = getPortfolioAverageGrowthRate(accounts, {}, 0, false, -2);
+    expect(avg).toBeCloseTo(5, 6);
+  });
+
+  it('excludes liabilities and zero-balance accounts', () => {
+    const accounts = [
+      account({ startingBalance: 100000, annualRate: 7 }),
+      account({ accountType: 'mortgage', startingBalance: 300000, annualRate: 6 }),
+      account({ startingBalance: 0, annualRate: 25 }),
+    ];
+    const avg = getPortfolioAverageGrowthRate(accounts, {}, 0, false);
+    expect(avg).toBeCloseTo(7, 6);
+  });
+
+  it('returns null when nothing has weight', () => {
+    expect(getPortfolioAverageGrowthRate([], {}, 0, false)).toBeNull();
+    expect(
+      getPortfolioAverageGrowthRate([account({ startingBalance: 0, annualRate: 5 })], {}, 0, false),
+    ).toBeNull();
+  });
+
+  it('deflates rates in real mode', () => {
+    const accounts = [account({ startingBalance: 100000, annualRate: 11 })];
+    const avg = getPortfolioAverageGrowthRate(accounts, {}, 10, true);
+    expect(avg).toBeCloseTo((1.11 / 1.1 - 1) * 100, 6);
+  });
+
+  it('mirrors the engine for profile homes — adjustment does not reach named profiles', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 15));
+    const home = account({ accountType: 'home', startingBalance: 400000, annualRate: 4 });
+    const details = makeDetails({ currentValue: 450000, purchasePrice: 400000 });
+    // The default named profile's constant wins over the passed rate, so the
+    // adjustment cannot move it — same as the projection engine.
+    const base = getPortfolioAverageGrowthRate([home], { a1: details }, 0, false, 0);
+    const stressed = getPortfolioAverageGrowthRate([home], { a1: details }, 0, false, -5);
+    expect(base).toBeCloseTo(stressed as number, 6);
+    vi.useRealTimers();
   });
 });

@@ -30,6 +30,7 @@ export type ProjectionChartCardProps = {
   setRetirementAge: (age: number) => void;
   marketAdjustment: number;
   setMarketAdjustment: (adjustment: number) => void;
+  portfolioAverageRate: number | null;
 };
 
 const ProjectionChartCard = ({
@@ -46,6 +47,7 @@ const ProjectionChartCard = ({
   setRetirementAge,
   marketAdjustment,
   setMarketAdjustment,
+  portfolioAverageRate,
 }: ProjectionChartCardProps) => {
   const { currencyCode } = useCurrentUser();
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
@@ -195,6 +197,16 @@ const ProjectionChartCard = ({
               {marketAdjustment === 0 ? 'Base' : `${marketAdjustment}%/yr`}
             </span>
           </div>
+          {portfolioAverageRate !== null && (
+            <p className="-mt-2 mb-4 text-xs">
+              <span className="text-muted-foreground">Portfolio growth:</span>{' '}
+              <span className="font-medium">
+                {portfolioAverageRate >= 0 ? '' : ''}
+                {portfolioAverageRate.toFixed(2)}%/yr
+              </span>{' '}
+              <span className="text-muted-foreground">avg (balance-weighted)</span>
+            </p>
+          )}
           <div className="mb-4 flex items-center gap-3">
             <span className="text-muted-foreground text-xs">Projection range:</span>
             <input
