@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"breeze.api/internal/service"
+	"breeze.api/internal/db/sqlc"
 	"github.com/google/uuid"
 	"github.com/riverqueue/river"
 )
@@ -24,12 +24,20 @@ type PlaidSyncAllArgs struct{}
 
 func (PlaidSyncAllArgs) Kind() string { return "plaid_sync_all" }
 
-type PlaidSyncWorker struct {
-	river.WorkerDefaults[PlaidSyncArgs]
-	plaidService *service.PlaidService
+// plaidSyncer is the slice of the Plaid service the workers depend on.
+// *service.PlaidService satisfies it; tests substitute a fake.
+type plaidSyncer interface {
+	ListByUserID(ctx context.Context, userID uuid.UUID) ([]sqlc.PlaidConnection, error)
+	ListAllConnections(ctx context.Context) ([]sqlc.PlaidConnection, error)
+	SyncConnection(ctx context.Context, connectionID uuid.UUID) error
 }
 
-func NewPlaidSyncWorker(plaidService *service.PlaidService) *PlaidSyncWorker {
+type PlaidSyncWorker struct {
+	river.WorkerDefaults[PlaidSyncArgs]
+	plaidService plaidSyncer
+}
+
+func NewPlaidSyncWorker(plaidService plaidSyncer) *PlaidSyncWorker {
 	return &PlaidSyncWorker{plaidService: plaidService}
 }
 
@@ -53,10 +61,10 @@ func (w *PlaidSyncWorker) Work(ctx context.Context, job *river.Job[PlaidSyncArgs
 
 type PlaidSyncAllWorker struct {
 	river.WorkerDefaults[PlaidSyncAllArgs]
-	plaidService *service.PlaidService
+	plaidService plaidSyncer
 }
 
-func NewPlaidSyncAllWorker(plaidService *service.PlaidService) *PlaidSyncAllWorker {
+func NewPlaidSyncAllWorker(plaidService plaidSyncer) *PlaidSyncAllWorker {
 	return &PlaidSyncAllWorker{plaidService: plaidService}
 }
 

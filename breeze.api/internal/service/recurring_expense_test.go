@@ -441,3 +441,56 @@ func TestRecurringExpenseService_Delete_Error(t *testing.T) {
 	assert.Error(t, err)
 	assert.ErrorIs(t, err, dbErr)
 }
+
+func TestRecurringExpense_MonthlyAmount(t *testing.T) {
+	amount := mustDecimal("100.00")
+
+	t.Run("weekly annualizes at 52 and divides by 12", func(t *testing.T) {
+		e := RecurringExpense{Amount: amount, RecurrenceInterval: sqlc.RecurrenceIntervalWEEKLY}
+		assert.True(t, e.MonthlyAmount().Equal(mustDecimal("433.33")), "100.00 weekly = 5200.00 yearly = 433.33 monthly")
+	})
+
+	t.Run("biweekly annualizes at 26 and rounds half-up", func(t *testing.T) {
+		e := RecurringExpense{Amount: amount, RecurrenceInterval: sqlc.RecurrenceIntervalBIWEEKLY}
+		assert.True(t, e.MonthlyAmount().Equal(mustDecimal("216.67")), "2600.00 yearly = 216.666... rounds up to 216.67")
+	})
+
+	t.Run("quarterly annualizes at 4", func(t *testing.T) {
+		e := RecurringExpense{Amount: amount, RecurrenceInterval: sqlc.RecurrenceIntervalQUARTERLY}
+		assert.True(t, e.MonthlyAmount().Equal(mustDecimal("33.33")), "400.00 yearly = 33.33 monthly")
+	})
+
+	t.Run("monthly maps directly", func(t *testing.T) {
+		e := RecurringExpense{Amount: amount, RecurrenceInterval: sqlc.RecurrenceIntervalMONTHLY}
+		assert.True(t, e.MonthlyAmount().Equal(amount))
+	})
+
+	t.Run("yearly maps directly", func(t *testing.T) {
+		e := RecurringExpense{Amount: amount, RecurrenceInterval: sqlc.RecurrenceIntervalYEARLY}
+		assert.True(t, e.MonthlyAmount().Equal(amount))
+	})
+}
+
+func TestRecurringExpense_RecurringIncome(t *testing.T) {
+	end := time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC)
+	personID := uuid.New()
+	paydayDay := int32(15)
+	e := RecurringExpense{
+		ID:                 uuid.New(),
+		UserID:             uuid.New(),
+		Name:               "Rent",
+		Amount:             mustDecimal("1500.00"),
+		RecurrenceInterval: sqlc.RecurrenceIntervalMONTHLY,
+		PaydayDayOfMonth:   &paydayDay,
+		StartDate:          time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+		EndDate:            &end,
+		PersonID:           &personID,
+	}
+
+	income := e.RecurringIncome()
+	assert.Equal(t, e.ID, income.ID)
+	assert.Equal(t, e.StartDate, income.StartDate)
+	assert.Equal(t, e.EndDate, income.EndDate)
+	assert.Equal(t, e.RecurrenceInterval, income.RecurrenceInterval)
+	assert.Equal(t, e.PaydayDayOfMonth, income.PaydayDayOfMonth)
+}
