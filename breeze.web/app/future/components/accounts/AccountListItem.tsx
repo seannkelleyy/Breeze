@@ -38,6 +38,7 @@ import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import {
   getAgeFromBirthday,
   getEmployeeMonthlyContribution,
+  getEmployerMatchMonthlyFromAnnual,
   getIrsLimitGroup,
   getPersonGroupAnnualContribution,
 } from '../../lib/plannerMath';
@@ -197,7 +198,6 @@ export function AccountListItem({
 
   const employeeMonthly = getEmployeeMonthlyContribution(account, people);
   const employeeAnnual = employeeMonthly * 12;
-
   const ownerPersons = people.filter((p) => account.personIds?.includes(p.id));
   const ownerPerson =
     ownerPersons.length > 0
@@ -207,6 +207,14 @@ export function AccountListItem({
       : people[0];
   const ownerAge = getAgeFromBirthday(ownerPerson?.birthday ?? '');
   const suggestedLimit = getSuggestedAnnualLimitForAccount(account.accountType, ownerAge);
+
+  // Presentational only — the IRS math above deliberately counts employee
+  // deferrals alone, since the match never counts against the limit.
+  const employerMatchMonthly = getEmployerMatchMonthlyFromAnnual(
+    account,
+    ownerPerson?.annualSalary ?? 0,
+    employeeAnnual,
+  );
 
   // IRS limits apply per person across all same-group accounts (401k + 403b
   // share the deferral limit), so maxed/over is judged on the group total.
@@ -387,6 +395,11 @@ export function AccountListItem({
             </div>
             {/* Row 3: contributions, payments, rate */}
             <p className="text-muted-foreground mt-0.5 text-xs">{infoLine}</p>
+            {employerMatchMonthly > 0 && (
+              <p className="text-muted-foreground mt-0.5 text-xs">
+                incl. {formatCurrency(employerMatchMonthly)}/mo employer match
+              </p>
+            )}
             {account.updatedAt && (
               <p className="text-muted-foreground mt-0.5 text-[10px]">
                 Updated {formatTimeAgo(account.updatedAt)}
