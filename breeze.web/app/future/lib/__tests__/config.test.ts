@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  resolveTaxTreatment,
   isLiabilityAccountType,
   isNonContributingAccountType,
   isDepreciatingAssetType,
@@ -90,5 +91,24 @@ describe('accountTypesWithoutIrsLimits', () => {
     expect(accountTypesWithoutIrsLimits.has('hsa')).toBe(false);
     expect(accountTypesWithoutIrsLimits.has('403b')).toBe(false);
     expect(accountTypesWithoutIrsLimits.has('457')).toBe(false);
+  });
+});
+
+describe('resolveTaxTreatment', () => {
+  it('forces ROTH for Roth IRA regardless of stored value', () => {
+    expect(resolveTaxTreatment('roth-ira', 'PRE_TAX')).toBe('ROTH');
+    expect(resolveTaxTreatment('roth-ira', null)).toBe('ROTH');
+    expect(resolveTaxTreatment('roth-ira')).toBe('ROTH');
+  });
+
+  it('forces PRE_TAX for Traditional IRA regardless of stored value', () => {
+    expect(resolveTaxTreatment('traditional-ira', 'ROTH')).toBe('PRE_TAX');
+    expect(resolveTaxTreatment('traditional-ira', null)).toBe('PRE_TAX');
+  });
+
+  it('passes the stored value through for choosable types', () => {
+    expect(resolveTaxTreatment('401k', 'ROTH')).toBe('ROTH');
+    expect(resolveTaxTreatment('401k', null)).toBe('PRE_TAX');
+    expect(resolveTaxTreatment('hsa', 'ROTH')).toBe('ROTH');
   });
 });

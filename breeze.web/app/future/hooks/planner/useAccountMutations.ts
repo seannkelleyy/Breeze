@@ -11,6 +11,7 @@ import {
 import useGraphql from '@/lib/services/useGraphql';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { accountTypeToApiAssetType, accountTypeToApiLiabilityType } from '../../lib/typeMapping';
+import { resolveTaxTreatment } from '../../lib/config';
 import { AccountType, PlannerAccount } from '../../types/account';
 
 interface UseAccountMutationsParams {
@@ -66,7 +67,7 @@ export function useAccountMutations({
           ).toString(),
           annualRate: (account.annualRate / 100).toString(),
           returnProfile: account.returnProfile ?? null,
-          taxTreatment: account.taxTreatment ?? 'PRE_TAX',
+          taxTreatment: resolveTaxTreatment(account.accountType, account.taxTreatment),
           personIds: account.personIds,
           purchaseDate: account.purchaseDate ?? null,
           purchasePrice: account.purchasePrice?.toString() ?? null,
@@ -99,7 +100,7 @@ export function useAccountMutations({
           ).toString(),
           annualRate: (account.annualRate / 100).toString(),
           returnProfile: account.returnProfile ?? null,
-          taxTreatment: account.taxTreatment ?? 'PRE_TAX',
+          taxTreatment: resolveTaxTreatment(account.accountType, account.taxTreatment),
           personIds: account.personIds,
           purchaseDate: account.purchaseDate ?? null,
           purchasePrice: account.purchasePrice?.toString() ?? null,

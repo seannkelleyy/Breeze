@@ -100,6 +100,18 @@ export const TAX_ADVANTAGED_ACCOUNT_TYPES = new Set<AccountType>([
   'hsa',
 ]);
 
+// Account types whose tax treatment is dictated by the type itself — the
+// editor hides the treatment selector for these.
+export const FIXED_TAX_TREATMENT: Partial<Record<AccountType, string>> = {
+  'roth-ira': 'ROTH',
+  'traditional-ira': 'PRE_TAX',
+};
+
+// The effective tax treatment: fixed types always win over the stored value,
+// so a Roth IRA behaves as Roth even if the API returned nothing (or PRE_TAX).
+export const resolveTaxTreatment = (accountType: AccountType, stored?: string | null): string =>
+  FIXED_TAX_TREATMENT[accountType] ?? stored ?? 'PRE_TAX';
+
 const nonContributingAssetAccountTypes = new Set<AccountType>(['home', 'vehicle']);
 const depreciatingAssetAccountTypes = new Set<AccountType>(['vehicle']);
 

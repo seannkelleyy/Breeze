@@ -42,7 +42,7 @@ import {
   getPersonGroupAnnualContribution,
 } from '../../lib/plannerMath';
 import { AccountType, AccountRateProfile, PlannerAccount } from '../../types/account';
-import { TAX_ADVANTAGED_ACCOUNT_TYPES } from '../../lib/config';
+import { TAX_ADVANTAGED_ACCOUNT_TYPES, FIXED_TAX_TREATMENT } from '../../lib/config';
 import { InfoTip } from '@/components/common/InfoTip';
 import { useAccountEditor } from './AccountEditorContext';
 import type { AssetFinanceDetails } from '../../types/finance';
@@ -78,7 +78,7 @@ const TAX_TREATMENT_OPTIONS = [
 ] as const;
 
 function defaultTaxTreatmentFor(accountType: string): string {
-  return accountType === 'roth-ira' ? 'ROTH' : 'PRE_TAX';
+  return FIXED_TAX_TREATMENT[accountType as AccountType] ?? 'PRE_TAX';
 }
 
 export interface AccountListItemProps {
@@ -464,35 +464,37 @@ export function AccountListItem({
               </div>
             </div>
 
-            {/* Tax treatment */}
-            {!isLiability && TAX_ADVANTAGED_ACCOUNT_TYPES.has(account.accountType) && (
-              <div className="space-y-1.5">
-                <Label className="inline-flex items-center gap-1 text-xs">
-                  Tax Treatment{' '}
-                  <InfoTip text="Pre-tax lowers this year\u2019s taxable income; Roth (post-tax) grows tax-free and withdraws tax-free in retirement." />
-                </Label>
-                <Select
-                  value={account.taxTreatment ?? 'PRE_TAX'}
-                  onValueChange={(v) => onUpdateAccount((c) => ({ ...c, taxTreatment: v }))}
-                >
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TAX_TREATMENT_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        {o.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-muted-foreground text-xs">
-                  {account.taxTreatment === 'ROTH'
-                    ? 'Contributions are post-tax; qualified withdrawals are tax-free.'
-                    : 'Contributions reduce taxable income now; withdrawals are taxed.'}
-                </p>
-              </div>
-            )}
+            {/* Tax treatment — hidden for types whose treatment is fixed (IRAs) */}
+            {!isLiability &&
+              TAX_ADVANTAGED_ACCOUNT_TYPES.has(account.accountType) &&
+              !FIXED_TAX_TREATMENT[account.accountType] && (
+                <div className="space-y-1.5">
+                  <Label className="inline-flex items-center gap-1 text-xs">
+                    Tax Treatment{' '}
+                    <InfoTip text="Pre-tax lowers this year\u2019s taxable income; Roth (post-tax) grows tax-free and withdraws tax-free in retirement." />
+                  </Label>
+                  <Select
+                    value={account.taxTreatment ?? 'PRE_TAX'}
+                    onValueChange={(v) => onUpdateAccount((c) => ({ ...c, taxTreatment: v }))}
+                  >
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TAX_TREATMENT_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-muted-foreground text-xs">
+                    {account.taxTreatment === 'ROTH'
+                      ? 'Contributions are post-tax; qualified withdrawals are tax-free.'
+                      : 'Contributions reduce taxable income now; withdrawals are taxed.'}
+                  </p>
+                </div>
+              )}
 
             {/* Type-specific fields */}
             {!isCombinedAsset ? (

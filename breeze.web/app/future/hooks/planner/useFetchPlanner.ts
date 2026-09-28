@@ -8,6 +8,7 @@ import { PlannerAccount } from '../../types/account';
 import type { ApiAssetType, ApiLiabilityType } from '../../types/apiAsset';
 import { PayCadence, PlannerPerson } from '../../types/person';
 import { apiAssetTypeToAccountType, apiLiabilityTypeToAccountType } from '../../lib/typeMapping';
+import { resolveTaxTreatment } from '../../lib/config';
 
 interface MeResponse {
   me: {
@@ -147,29 +148,32 @@ const useFetchPlanner = () => {
       }));
 
       // Map API assets and liabilities into the planner's local account format
-      const mappedAssets: PlannerAccount[] = assets.map((a) => ({
-        id: a.id,
-        name: a.name,
-        personIds: a.personIds,
-        accountType: apiAssetTypeToAccountType(a.assetType as ApiAssetType),
-        contributionMode: (a.contributionMode || 'monthly') as PlannerAccount['contributionMode'],
-        contributionValue: Number(a.contributionValue) || 0,
-        employerMatchRate: (Number(a.employerMatchRate) || 0) * 100,
-        employerMatchMaxPercentOfSalary: (Number(a.employerMatchMaxPercentOfSalary) || 0) * 100,
-        startingBalance: Number(a.currentValue) || 0,
-        annualRate: (Number(a.annualRate) || 0) * 100,
-        returnProfile: a.returnProfile as PlannerAccount['returnProfile'] | null,
-        taxTreatment: a.taxTreatment || 'PRE_TAX',
-        purchaseDate: a.purchaseDate ?? null,
-        purchasePrice: a.purchasePrice ? Number(a.purchasePrice) : null,
-        homeGrowthProfile: a.homeGrowthProfile ?? null,
-        vehicleDepreciationProfile: a.vehicleDepreciationProfile ?? null,
-        linkedLiabilityId: a.linkedLiabilityId ?? null,
-        plaidAccountId: a.plaidAccountId ?? null,
-        lastValueUpdatedAt: a.lastValueUpdatedAt ?? null,
-        createdAt: a.createdAt,
-        updatedAt: a.updatedAt,
-      }));
+      const mappedAssets: PlannerAccount[] = assets.map((a) => {
+        const accountType = apiAssetTypeToAccountType(a.assetType as ApiAssetType);
+        return {
+          id: a.id,
+          name: a.name,
+          personIds: a.personIds,
+          accountType,
+          contributionMode: (a.contributionMode || 'monthly') as PlannerAccount['contributionMode'],
+          contributionValue: Number(a.contributionValue) || 0,
+          employerMatchRate: (Number(a.employerMatchRate) || 0) * 100,
+          employerMatchMaxPercentOfSalary: (Number(a.employerMatchMaxPercentOfSalary) || 0) * 100,
+          startingBalance: Number(a.currentValue) || 0,
+          annualRate: (Number(a.annualRate) || 0) * 100,
+          returnProfile: a.returnProfile as PlannerAccount['returnProfile'] | null,
+          taxTreatment: resolveTaxTreatment(accountType, a.taxTreatment),
+          purchaseDate: a.purchaseDate ?? null,
+          purchasePrice: a.purchasePrice ? Number(a.purchasePrice) : null,
+          homeGrowthProfile: a.homeGrowthProfile ?? null,
+          vehicleDepreciationProfile: a.vehicleDepreciationProfile ?? null,
+          linkedLiabilityId: a.linkedLiabilityId ?? null,
+          plaidAccountId: a.plaidAccountId ?? null,
+          lastValueUpdatedAt: a.lastValueUpdatedAt ?? null,
+          createdAt: a.createdAt,
+          updatedAt: a.updatedAt,
+        };
+      });
 
       const mappedLiabilities: PlannerAccount[] = liabilities.map((l) => ({
         id: l.id,
