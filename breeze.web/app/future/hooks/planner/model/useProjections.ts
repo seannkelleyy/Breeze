@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 
-import * as plannerConstants from '../../../lib/constants';
 import { getProjection } from '../../../lib/projection';
 import type { AssetFinanceDetails } from '../../../types/finance';
 import type { IrsLimitConfig } from '../../../types/irs';
@@ -27,7 +26,9 @@ export function useProjections(
         household.people,
         assetFinanceDetailsByAccountId,
         irsLimits,
-        plannerConstants.PLANNER_DEFAULT_IRS_LIMIT_GROWTH_RATE,
+        // IRS limits are statutory nominal dollars — grow them at the user's
+        // inflation assumption instead of a hardcoded rate.
+        inflationRate,
         inflationRate,
         useInflationAdjustedValues,
         projectionEndAge,
