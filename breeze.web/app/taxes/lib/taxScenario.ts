@@ -129,3 +129,43 @@ export function buildBracketLadder(
     };
   });
 }
+
+export interface ScenarioColumnRow {
+  name: string;
+  preTax: number;
+  deduction: number;
+  totalTax: number;
+  effectiveRate: number;
+  /** Income taxed at each bracket rate, keyed by percent (b10, b12, …). */
+  [segment: string]: number | string;
+}
+
+/** Shape two scenarios into stacked-column rows: one row per scenario, one
+ * segment per bracket rate present in either (union, ascending). Bracket
+ * tax amounts ride along as `b{pct}Tax` for tooltips. */
+export function buildScenarioColumns(
+  baseline: TaxScenario,
+  current: TaxScenario,
+): { rates: number[]; rows: ScenarioColumnRow[] } {
+  const rates = [
+    ...new Set([...baseline.slices, ...current.slices].map((s) => s.rate)),
+  ].sort((a, b) => a - b);
+
+  const toRow = (scenario: TaxScenario): ScenarioColumnRow => {
+    const row: ScenarioColumnRow = {
+      name: scenario.label,
+      preTax: scenario.pretaxReductions,
+      deduction: scenario.deduction,
+      totalTax: scenario.totalTax,
+      effectiveRate: scenario.effectiveRate,
+    };
+    for (const rate of rates) {
+      const slice = scenario.slices.find((s) => s.rate === rate);
+      row[`b${rate * 100}`] = slice?.taxedAmount ?? 0;
+      row[`b${rate * 100}Tax`] = slice?.tax ?? 0;
+    }
+    return row;
+  };
+
+  return { rates, rows: [toRow(baseline), toRow(current)] };
+}

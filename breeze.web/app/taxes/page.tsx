@@ -10,9 +10,8 @@ import { usePaycheckDeductions } from '../future/hooks/planner/usePaycheckDeduct
 import useTaxYear from '../future/hooks/planner/useTaxYear';
 import { computeHouseholdWaterfall } from '../future/lib/paycheck';
 import { computeTaxScenario, householdPretaxReductions } from './lib/taxScenario';
-import { BracketBar } from './components/BracketBar';
+import { TaxScenarioColumns } from './components/TaxScenarioColumns';
 import { WealthByTreatmentBar } from './components/WealthByTreatmentBar';
-import { BracketLadder } from './components/BracketLadder';
 import { buildBracketLadder } from './lib/taxScenario';
 import { getWealthByTaxTreatment } from './lib/wealthByTaxTreatment';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,7 +64,7 @@ export default function TaxesPage() {
     );
   }
 
-  const loading = !scenario || !waterfall;
+  const loading = !scenario || !waterfall || !taxTables;
 
   return (
     <div className="space-y-6">
@@ -122,20 +121,12 @@ export default function TaxesPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <p className="text-sm font-medium">Without tax-advantaged accounts</p>
-                <BracketBar scenario={baseline} />
-              </div>
-              <div className="space-y-3 border-t pt-4">
-                <p className="text-sm font-medium">Your setup today</p>
-                <BracketBar scenario={current} />
-                {taxTables && (
-                  <BracketLadder
-                    rows={buildBracketLadder(current.taxableIncome, taxTables.brackets)}
-                    currencyCode={currencyCode}
-                  />
-                )}
-              </div>
+              <TaxScenarioColumns
+                baseline={baseline}
+                current={current}
+                brackets={taxTables.brackets}
+                currencyCode={currencyCode}
+              />
               <div className="grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-3">
                 <div>
                   <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
