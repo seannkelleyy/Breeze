@@ -11,6 +11,8 @@ import useTaxYear from '../future/hooks/planner/useTaxYear';
 import { computeHouseholdWaterfall } from '../future/lib/paycheck';
 import { computeTaxScenario, householdPretaxReductions } from './lib/taxScenario';
 import { BracketBar } from './components/BracketBar';
+import { WealthByTreatmentBar } from './components/WealthByTreatmentBar';
+import { getWealthByTaxTreatment } from './lib/wealthByTaxTreatment';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -51,6 +53,7 @@ export default function TaxesPage() {
     };
   }, [plannerPeople, plannerAccounts, withholdings, taxTables, deductionType]);
   const { waterfall, baseline, current } = scenario ?? {};
+  const wealth = useMemo(() => getWealthByTaxTreatment(plannerAccounts), [plannerAccounts]);
 
   if (!isLoaded || !isSignedIn) {
     return (
@@ -192,6 +195,23 @@ export default function TaxesPage() {
                 affect your taxes. Roth contributions are also absent: they&apos;re taxed now and
                 grow tax-free.
               </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Wealth by tax treatment</CardTitle>
+              <CardDescription>
+                Where your investment wealth sits today — the map you&apos;ll use to plan
+                retirement withdrawals.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WealthByTreatmentBar
+                buckets={wealth.buckets}
+                totalInvestment={wealth.totalInvestment}
+                currencyCode={currencyCode}
+              />
             </CardContent>
           </Card>
         </>
