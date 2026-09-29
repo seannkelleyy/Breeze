@@ -46,6 +46,7 @@ npm run test       # Vitest
 - `app/goals/` — financial goals and Financial Order of Operations checklist
 - `app/preferences/` — user settings and defaults
 - `app/budget/` — budgeting workflow and dialogs
+- `app/taxes/` — federal bracket visualization with pre-tax scenario comparison
 - `app/plaid-connections/` — Plaid connect/sync UI
 - `components/ui/` — shared shadcn components
 - `components/common/setup/` — setup wizard (auto-shows on first login)

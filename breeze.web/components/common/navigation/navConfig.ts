@@ -9,6 +9,7 @@ import {
   Wallet,
   Calculator,
   Link2,
+  Percent,
 } from 'lucide-react';
 
 export type RouteNavItem = {
@@ -77,5 +78,11 @@ export const secondaryNavItems: ReadonlyArray<RouteNavItem> = [
     to: '/plaid-connections',
     title: 'Plaid Connections',
     icon: Link2,
+  },
+  {
+    label: 'Taxes',
+    to: '/taxes',
+    title: 'Taxes',
+    icon: Percent,
   },
 ];
