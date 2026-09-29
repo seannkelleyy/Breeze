@@ -12,6 +12,13 @@ import { computeHouseholdWaterfall } from '../future/lib/paycheck';
 import { computeTaxScenario, householdPretaxReductions } from './lib/taxScenario';
 import { BracketBar } from './components/BracketBar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { formatCurrencyWithCode } from '@/lib/utils';
 import { InfoTip } from '@/components/common/InfoTip';
 
@@ -21,7 +28,7 @@ export default function TaxesPage() {
   usePlannerHydration();
   const { plannerPeople, plannerAccounts } = usePlannerState();
   const { deductions: withholdings } = usePaycheckDeductions(null);
-  const { filingStatus, deductionType } = useCurrentUser();
+  const { filingStatus, updateFilingStatus, deductionType } = useCurrentUser();
   const taxTables = useTaxYear(filingStatus);
 
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
@@ -71,6 +78,20 @@ export default function TaxesPage() {
                 : 'Single'}{' '}
           · {deductionType === 'ITEMIZED' ? 'itemized' : 'standard'} deduction.
         </p>
+        <div className="mt-3 flex items-center gap-2">
+          <span className="text-muted-foreground text-xs">Filing status:</span>
+          <Select value={filingStatus} onValueChange={updateFilingStatus}>
+            <SelectTrigger className="h-8 w-56 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="SINGLE">Single</SelectItem>
+              <SelectItem value="MFJ">Married filing jointly</SelectItem>
+              <SelectItem value="MFS">Married filing separately</SelectItem>
+              <SelectItem value="HOH">Head of household</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {(loading || !baseline || !current) ? (

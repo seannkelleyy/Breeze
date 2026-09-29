@@ -26,6 +26,10 @@ export default function PreferencesPage() {
     updateReturnDisplayMode,
     inflationRate,
     updateInflationRate,
+    filingStatus,
+    updateFilingStatus,
+    deductionType,
+    updateDeductionType,
     safeWithdrawalRate,
     updateSafeWithdrawalRate,
     monthlyExpenses,
@@ -103,6 +107,45 @@ export default function PreferencesPage() {
                 onValueChange={updateSafeWithdrawalRate}
                 maxFractionDigits={2}
               />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Tax Filing</CardTitle>
+          <CardDescription>
+            Drives the bracket ladder on the Taxes page and every paycheck tax estimate.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label>Filing Status</Label>
+              <Select value={filingStatus} onValueChange={updateFilingStatus}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SINGLE">Single</SelectItem>
+                  <SelectItem value="MFJ">Married filing jointly</SelectItem>
+                  <SelectItem value="MFS">Married filing separately</SelectItem>
+                  <SelectItem value="HOH">Head of household</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Deduction Type</Label>
+              <Select value={deductionType} onValueChange={updateDeductionType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="STANDARD">Standard</SelectItem>
+                  <SelectItem value="ITEMIZED">Itemized</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>

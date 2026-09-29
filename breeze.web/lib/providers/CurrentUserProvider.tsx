@@ -111,6 +111,8 @@ export interface CurrentUserContextValue {
   updateSafeWithdrawalRate: (nextSafeWithdrawalRate: number) => void;
   filingStatus: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH';
   deductionType: 'STANDARD' | 'ITEMIZED';
+  updateFilingStatus: (next: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH') => void;
+  updateDeductionType: (next: 'STANDARD' | 'ITEMIZED') => void;
   budgetEnabled: boolean;
   setBudgetEnabled: Dispatch<SetStateAction<boolean>>;
   monthlyExpenses: number | null;
@@ -142,6 +144,8 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     returnDisplayMode?: 'real' | 'nominal';
     inflationRate?: number;
     safeWithdrawalRate?: number;
+    filingStatus?: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH';
+    deductionType?: 'STANDARD' | 'ITEMIZED';
   }>({});
   const [currencyCode, setCurrencyCode] = useState('USD');
   const [returnDisplayMode, setReturnDisplayMode] = useState<'real' | 'nominal'>(
@@ -170,6 +174,8 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       nextReturnDisplayMode: 'real' | 'nominal',
       nextInflationRate: number,
       nextSafeWithdrawalRate: number,
+      nextFilingStatus?: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH',
+      nextDeductionType?: 'STANDARD' | 'ITEMIZED',
     ) => {
       if (!isLoaded || !isSignedIn || !resolvedUserId) {
         return;
@@ -184,10 +190,10 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
           safeWithdrawalRate: (nextSafeWithdrawalRate / 100).toFixed(4),
           currencyType: nextCurrencyCode,
           inflationRate: (nextInflationRate / 100).toFixed(4),
-          deductionType,
+          deductionType: nextDeductionType ?? deductionType,
           deductionAmount,
           maxTaxBracketId,
-          filingStatus,
+          filingStatus: nextFilingStatus ?? filingStatus,
           payoffStrategy,
         };
 
@@ -288,6 +294,43 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       );
     },
     [persistPreferences, currencyCode, returnDisplayMode, inflationRate, resolvedUserId],
+  );
+
+  const updateFilingStatus = useCallback(
+    (next: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH') => {
+      setFilingStatus(next);
+      if (!resolvedUserId) {
+        pendingPrefsRef.current.filingStatus = next;
+        return;
+      }
+      void persistPreferences(
+        currencyCode,
+        returnDisplayMode,
+        inflationRate,
+        safeWithdrawalRate,
+        next,
+      );
+    },
+    [persistPreferences, currencyCode, returnDisplayMode, inflationRate, safeWithdrawalRate, resolvedUserId],
+  );
+
+  const updateDeductionType = useCallback(
+    (next: 'STANDARD' | 'ITEMIZED') => {
+      setDeductionType(next);
+      if (!resolvedUserId) {
+        pendingPrefsRef.current.deductionType = next;
+        return;
+      }
+      void persistPreferences(
+        currencyCode,
+        returnDisplayMode,
+        inflationRate,
+        safeWithdrawalRate,
+        undefined,
+        next,
+      );
+    },
+    [persistPreferences, currencyCode, returnDisplayMode, inflationRate, safeWithdrawalRate, resolvedUserId],
   );
 
   const updateUserSetup = useCallback(
@@ -488,6 +531,8 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     safeWithdrawalRate,
     setSafeWithdrawalRate: hydrateSafeWithdrawalRate,
     updateSafeWithdrawalRate,
+    updateFilingStatus,
+    updateDeductionType,
     filingStatus,
     deductionType,
     budgetEnabled,
