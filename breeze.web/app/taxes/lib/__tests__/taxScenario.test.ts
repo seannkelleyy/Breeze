@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeTaxScenario, householdPretaxReductions } from '../taxScenario';
+import { buildBracketLadder, computeTaxScenario, householdPretaxReductions } from '../taxScenario';
 import type { TaxYearTables, TaxBracketRow } from '../../../future/types/tax';
 import type { PersonWaterfall } from '../../../future/lib/paycheck';
 
@@ -66,5 +66,33 @@ describe('householdPretaxReductions', () => {
       pretaxWithholdingsMonthly: 250,
     } as PersonWaterfall;
     expect(householdPretaxReductions(wf)).toBe(27000);
+  });
+});
+
+describe('buildBracketLadder', () => {
+  const ladder = (taxable: number) => buildBracketLadder(taxable, brackets);
+
+  it('marks past brackets filled, the active one current with room, and future ones ahead', () => {
+    // 83,900 taxable: 10% and 12% fully filled, 22% active with room to 24%.
+    const rows = ladder(83900);
+    expect(rows[0].status).toBe('filled');
+    expect(rows[1].status).toBe('filled');
+    expect(rows[2].status).toBe('current');
+    expect(rows[2].used).toBeCloseTo(83900 - 50400, 6);
+    expect(rows[2].remainingToNext).toBeCloseTo(105700 - 83900, 6);
+    expect(rows[3].status).toBe('ahead');
+    expect(rows[3].distanceToEnter).toBeCloseTo(105700 - 83900, 6);
+  });
+
+  it('sums used across the ladder to the taxable income', () => {
+    const rows = ladder(83900);
+    expect(rows.reduce((sum, r) => sum + r.used, 0)).toBeCloseTo(83900, 6);
+  });
+
+  it('shows the top bracket as current with no next threshold', () => {
+    const rows = ladder(700000);
+    expect(rows[rows.length - 1].status).toBe('current');
+    expect(rows[rows.length - 1].remainingToNext).toBeNull();
+    expect(rows.every((r) => r.status !== 'ahead')).toBe(true);
   });
 });

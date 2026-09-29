@@ -15,7 +15,7 @@ const RATE_COLORS: Record<number, { bg: string; text: string }> = {
   0.35: { bg: 'oklch(0.62 0.19 25)', text: 'white' },
   0.37: { bg: 'oklch(0.55 0.21 15)', text: 'white' },
 };
-const rateColor = (rate: number) =>
+export const rateColor = (rate: number) =>
   RATE_COLORS[rate] ?? {
     bg: `oklch(0.7 0.15 ${(rate * 1000) % 360})`,
     text: 'white',

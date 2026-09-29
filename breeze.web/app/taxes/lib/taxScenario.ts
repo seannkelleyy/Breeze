@@ -4,7 +4,7 @@
  * owed per bracket, plus FICA, so the UI can draw one bar per scenario.
  * Tables are injected (TaxYearTables) — sourced from the API's taxYearData query.
  */
-import type { TaxYearTables } from '../../future/types/tax';
+import type { TaxBracketRow, TaxYearTables } from '../../future/types/tax';
 import type { PersonWaterfall } from '../../future/lib/paycheck';
 
 export interface BracketSlice {
@@ -88,4 +88,44 @@ export function computeTaxScenario(
  * (pre-tax share only) plus pre-tax withholdings, from the payroll waterfall. */
 export function householdPretaxReductions(waterfall: PersonWaterfall): number {
   return (waterfall.pretaxSavingsMonthly + waterfall.pretaxWithholdingsMonthly) * 12;
+}
+
+export interface BracketLadderRow {
+  rate: number;
+  minimum: number;
+  maximum: number | null;
+  /** Taxable income inside this bracket. */
+  used: number;
+  /** Tax owed on the used portion. */
+  tax: number;
+  status: 'filled' | 'current' | 'ahead';
+  /** For the current bracket: room left before the next rate applies. */
+  remainingToNext: number | null;
+  /** For future brackets: extra income needed to enter. */
+  distanceToEnter: number | null;
+}
+
+/** Full bracket ladder against a taxable income: every bracket's range, how
+ * much of it is filled, and the distance to each threshold. */
+export function buildBracketLadder(
+  taxableIncome: number,
+  brackets: TaxBracketRow[],
+): BracketLadderRow[] {
+  return brackets.map((bracket) => {
+    const width = bracket.maximum === null ? Infinity : bracket.maximum - bracket.minimum;
+    const used = Math.max(0, Math.min(taxableIncome - bracket.minimum, width));
+    const filled = Number.isFinite(width) && used >= width - 1e-9;
+    const current = !filled && used > 0;
+    const ahead = used <= 0;
+    return {
+      rate: bracket.rate,
+      minimum: bracket.minimum,
+      maximum: bracket.maximum,
+      used,
+      tax: used * bracket.rate,
+      status: filled ? 'filled' : current ? 'current' : 'ahead',
+      remainingToNext: current && Number.isFinite(width) ? width - used : null,
+      distanceToEnter: ahead ? Math.max(0, bracket.minimum - taxableIncome) : null,
+    };
+  });
 }
