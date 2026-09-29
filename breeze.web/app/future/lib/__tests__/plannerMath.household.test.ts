@@ -5,6 +5,7 @@ import {
   getAgeFromBirthday,
   getPersonsAnnualIncome,
   getPlannerHouseholdSnapshot,
+  getLiabilityPrincipalMonthly,
   getTotalMonthlyForAccount,
   getPlannerContributionTotals,
 } from '../plannerMath';
@@ -223,5 +224,44 @@ describe('getPlannerContributionTotals', () => {
     expect(totals.totalPlannedMonthlyEmployee).toBe(0);
     expect(totals.totalPlannedMonthlyMatch).toBe(0);
     expect(totals.totalPlannedMonthlyInvestment).toBe(0);
+  });
+});
+
+describe('liability principal in contribution totals', () => {
+  it('counts only the principal portion of loan payments', () => {
+    const loan = makeAccount({
+      accountType: 'mortgage',
+      contributionMode: 'monthly',
+      contributionValue: 789,
+      startingBalance: 114000,
+      annualRate: 6,
+      employerMatchRate: 0,
+    });
+    const { totalPlannedMonthlyEmployee, totalPlannedMonthlyInvestment } =
+      getPlannerContributionTotals([loan], []);
+
+    // Interest = 114000 * 6% / 12 = 570 → principal = 789 - 570 = 219.
+    expect(totalPlannedMonthlyEmployee).toBeCloseTo(219, 2);
+    expect(totalPlannedMonthlyInvestment).toBeCloseTo(219, 2);
+  });
+
+  it('floors at zero when interest exceeds the payment', () => {
+    const loan = makeAccount({
+      accountType: 'mortgage',
+      contributionMode: 'monthly',
+      contributionValue: 100,
+      startingBalance: 114000,
+      annualRate: 6,
+      employerMatchRate: 0,
+    });
+    const { totalPlannedMonthlyInvestment } = getPlannerContributionTotals([loan], []);
+    expect(totalPlannedMonthlyInvestment).toBe(0);
+  });
+
+  it('getLiabilityPrincipalMonthly keeps assets untouched', () => {
+    const brokerage = makeAccount({ accountType: 'brokerage', contributionValue: 300 });
+    // Assets still count their full contribution — the principal rule is loans only.
+    const { totalPlannedMonthlyInvestment } = getPlannerContributionTotals([brokerage], []);
+    expect(totalPlannedMonthlyInvestment).toBe(300);
   });
 });

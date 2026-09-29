@@ -46,8 +46,13 @@ export const getPlannerContributionTotals = (
     tm = 0,
     ti = 0;
   for (const a of accounts) {
-    const e = getEmployeeMonthlyContribution(a, people);
-    const m = getEmployerMatchMonthly(a, people);
+    // Liabilities contribute their principal paydown only — interest is a
+    // cost, not saving — and can carry no employer match.
+    const isLiability = plannerConfig.isLiabilityAccountType(a.accountType);
+    const e = isLiability
+      ? getLiabilityPrincipalMonthly(a)
+      : getEmployeeMonthlyContribution(a, people);
+    const m = isLiability ? 0 : getEmployerMatchMonthly(a, people);
     te += e;
     tm += m;
     ti += e + m;
@@ -202,6 +207,13 @@ export const getEmployeeMonthlyContribution = (
   if (a.contributionMode === 'biweekly') return clamp((a.contributionValue * 26) / 12);
   if (a.contributionMode === 'weekly') return clamp((a.contributionValue * 52) / 12);
   return clamp(a.contributionValue);
+};
+/** Monthly principal portion of a loan payment: payment minus this month's
+ * interest on the current balance. Interest is a cost, not saving. */
+export const getLiabilityPrincipalMonthly = (a: PlannerAccount): number => {
+  const payment = getEmployeeMonthlyContribution(a, []);
+  const interest = (clamp(a.startingBalance) * clamp(a.annualRate)) / 100 / 12;
+  return Math.max(0, payment - interest);
 };
 export const getEmployerMatchMonthly = (a: PlannerAccount, people: PlannerPerson[]): number => {
   const inc = getPersonsAnnualIncome(a.personIds, people);

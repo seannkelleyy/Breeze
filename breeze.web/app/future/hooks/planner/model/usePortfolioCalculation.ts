@@ -20,6 +20,9 @@ export function usePortfolioCalculation(
   household: Household,
   inflationRate: number,
   useInflationAdjustedValues: boolean,
+  /** Principal paydown of liabilities excluded from `accounts` (linked loans).
+   * Their payments build equity, so they count toward the savings rate. */
+  linkedDebtPrincipalMonthly = 0,
 ): Portfolio {
   const totalStartingBalance = useMemo(
     () =>
@@ -71,10 +74,15 @@ export function usePortfolioCalculation(
     [accounts, assetFinanceDetailsByAccountId],
   );
 
-  const { totalPlannedMonthlyEmployee, totalPlannedMonthlyInvestment } = useMemo(
-    () => getPlannerContributionTotals(accounts, household.people),
-    [accounts, household.people],
-  );
+  const { totalPlannedMonthlyEmployee, totalPlannedMonthlyInvestment: investedFromAccounts } =
+    useMemo(() => getPlannerContributionTotals(accounts, household.people), [
+      accounts,
+      household.people,
+    ]);
+  // Linked liabilities are excluded from `accounts` (their balance already
+  // lives in the parent asset's equity) — add their principal back in so the
+  // savings rate credits the paydown.
+  const totalPlannedMonthlyInvestment = investedFromAccounts + linkedDebtPrincipalMonthly;
 
   const weightedAnnualRate = useMemo(() => {
     const totalWeight = accounts.reduce(

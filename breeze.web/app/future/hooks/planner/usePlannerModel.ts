@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import * as plannerConfig from '../../lib/config';
+import { getLiabilityPrincipalMonthly } from '../../lib/plannerMath';
 import { usePlannerState } from '../../providers/PlannerStateProvider';
 import {
   getRecurringExpensesMonthlyTotal,
@@ -75,12 +76,23 @@ const usePlannerModel = () => {
     return plannerAccounts.filter((a) => !linkedIds.has(a.id));
   }, [plannerAccounts]);
 
+  // Principal paydown across ALL liabilities — including ones linked to a
+  // home/vehicle, which filteredAccounts excludes because their balance
+  // already rides in the parent asset's equity.
+  const debtPrincipalMonthly = useMemo(
+    () =>
+      plannerAccounts
+        .filter((a) => plannerConfig.isLiabilityAccountType(a.accountType))
+        .reduce((sum, a) => sum + getLiabilityPrincipalMonthly(a), 0),
+    [plannerAccounts],
+  );
   const portfolio = usePortfolioCalculation(
     filteredAccounts,
     plannerAssetFinanceDetailsByAccountId,
     household,
     inflationRate,
     useInflationAdjustedValues,
+    debtPrincipalMonthly,
   );
   const targets = useRetirementTargets(
     effectiveHousehold,

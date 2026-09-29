@@ -1,5 +1,6 @@
 'use client';
 import { InfoTip } from '@/components/common/InfoTip';
+import { getLiabilityPrincipalMonthly } from '../lib/plannerMath';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -35,6 +36,9 @@ export function CurrentSnapshotSection({
 }: CurrentSnapshotSectionProps) {
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
   const payroll = snapshot.payroll ?? null;
+  const debtPrincipalMonthly = accounts
+    .filter((a) => isLiabilityAccountType(a.accountType))
+    .reduce((sum, a) => sum + getLiabilityPrincipalMonthly(a), 0);
   const monthlyIncome = snapshot.grossIncome / 12;
   const monthlySavings = totalPlannedMonthlyInvestment;
   const yearlySavingsPlanned = monthlySavings * 12;
@@ -189,6 +193,15 @@ export function CurrentSnapshotSection({
                       <span className="text-success">{fc(payroll.takeHomeMonthly)}/mo</span>
                     </div>
                   </div>
+                  {debtPrincipalMonthly > 0 && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        − Debt principal paydown{' '}
+                        <InfoTip text="The principal portion of your loan payments. It builds equity, so it counts toward the savings rate; interest is excluded." />
+                      </span>
+                      <span>{fc(debtPrincipalMonthly)}</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">
                       Free after expenses ({fc(snapshot.monthlyExpenses)}/mo)
@@ -214,7 +227,7 @@ export function CurrentSnapshotSection({
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">
                     Savings rate (of gross income){' '}
-                    <InfoTip text="(Employee contributions + employer match + loan payments) ÷ gross. Match and loan principal count as saving; loan payments include interest." />
+                    <InfoTip text="(Employee contributions + employer match + loan principal) ÷ gross. Loan interest is excluded — it is a cost, not saving." />
                   </span>
                   <span className="text-success font-medium">{savingsRateOfGross.toFixed(1)}%</span>
                 </div>
