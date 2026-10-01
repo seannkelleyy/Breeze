@@ -130,42 +130,57 @@ export function buildBracketLadder(
   });
 }
 
-export interface ScenarioColumnRow {
-  name: string;
-  preTax: number;
-  deduction: number;
-  totalTax: number;
-  effectiveRate: number;
-  /** Income taxed at each bracket rate, keyed by percent (b10, b12, …). */
-  [segment: string]: number | string;
+export interface BracketBandSection {
+  kind: 'shielded' | 'bracket';
+  label: string;
+  rate?: number;
+  /** The bracket's full income span (band height is proportional to this). */
+  span: number;
+  /** Taxable income inside the band. */
+  used: number;
+  /** used ÷ span (0–1) — how full the band renders. */
+  fillPct: number;
+  minimum?: number;
+  maximum?: number | null;
 }
 
-/** Shape two scenarios into stacked-column rows: one row per scenario, one
- * segment per bracket rate present in either (union, ascending). Bracket
- * tax amounts ride along as `b{pct}Tax` for tooltips. */
-export function buildScenarioColumns(
-  baseline: TaxScenario,
-  current: TaxScenario,
-): { rates: number[]; rows: ScenarioColumnRow[] } {
-  const rates = [
-    ...new Set([...baseline.slices, ...current.slices].map((s) => s.rate)),
-  ].sort((a, b) => a - b);
+/** Fixed ladder bands for one scenario: a shielded (pre-tax + deduction)
+ * section plus one band per finite-width bracket. Bands exist for EVERY
+ * bracket — empty ones render hollow — so both scenario bars show the same
+ * sections, and each band's fill shows how far up the income climbs. */
+export function buildBracketBands(
+  scenario: TaxScenario,
+  brackets: TaxBracketRow[],
+): BracketBandSection[] {
+  const sections: BracketBandSection[] = [];
+  const shielded = scenario.pretaxReductions + scenario.deduction;
+  if (shielded > 0) {
+    sections.push({
+      kind: 'shielded',
+      label: 'Pre-tax + deduction',
+      span: shielded,
+      used: shielded,
+      fillPct: 1,
+    });
+  }
 
-  const toRow = (scenario: TaxScenario): ScenarioColumnRow => {
-    const row: ScenarioColumnRow = {
-      name: scenario.label,
-      preTax: scenario.pretaxReductions,
-      deduction: scenario.deduction,
-      totalTax: scenario.totalTax,
-      effectiveRate: scenario.effectiveRate,
-    };
-    for (const rate of rates) {
-      const slice = scenario.slices.find((s) => s.rate === rate);
-      row[`b${rate * 100}`] = slice?.taxedAmount ?? 0;
-      row[`b${rate * 100}Tax`] = slice?.tax ?? 0;
-    }
-    return row;
-  };
-
-  return { rates, rows: [toRow(baseline), toRow(current)] };
+  for (const bracket of brackets) {
+    if (bracket.maximum === null) continue; // infinite top bracket has no drawable band
+    const span = bracket.maximum - bracket.minimum;
+    const used = Math.min(
+      Math.max(0, scenario.taxableIncome - bracket.minimum),
+      span,
+    );
+    sections.push({
+      kind: 'bracket',
+      label: `${(bracket.rate * 100).toFixed(0)}% bracket`,
+      rate: bracket.rate,
+      span,
+      used,
+      fillPct: span > 0 ? used / span : 0,
+      minimum: bracket.minimum,
+      maximum: bracket.maximum,
+    });
+  }
+  return sections;
 }

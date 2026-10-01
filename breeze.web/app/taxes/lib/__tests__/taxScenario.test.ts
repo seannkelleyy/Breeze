@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildBracketLadder, buildScenarioColumns, computeTaxScenario, householdPretaxReductions } from '../taxScenario';
+import { buildBracketBands, buildBracketLadder, computeTaxScenario, householdPretaxReductions } from '../taxScenario';
 import type { TaxYearTables, TaxBracketRow } from '../../../future/types/tax';
 import type { PersonWaterfall } from '../../../future/lib/paycheck';
 
@@ -97,21 +97,3 @@ describe('buildBracketLadder', () => {
   });
 });
 
-describe('buildScenarioColumns', () => {
-  it('unions bracket rates across scenarios and maps slices to segment keys', () => {
-    const base = computeTaxScenario('base', 100000, 0, tables, 'STANDARD');
-    const curr = computeTaxScenario('current', 100000, 35000, tables, 'STANDARD');
-    const { rates, rows } = buildScenarioColumns(base, curr);
-
-    expect(rates).toEqual([0.1, 0.12, 0.22]);
-    expect(rows).toHaveLength(2);
-    expect(rows[0].name).toBe('base');
-    expect(rows[0]['b10']).toBeCloseTo(12400, 6);
-    expect(rows[0]['b12']).toBeCloseTo(38000, 6);
-    expect(rows[0]['b22']).toBeCloseTo(83900 - 50400, 6);
-    // Current drops into 12%: no 22% income, but the segment exists as zero.
-    expect(rows[1]['b22']).toBe(0);
-    expect(rows[1]['b12Tax']).toBeCloseTo(Number(rows[1]['b12']) * 0.12, 6);
-    expect(rows[1].preTax).toBe(35000);
-  });
-});
