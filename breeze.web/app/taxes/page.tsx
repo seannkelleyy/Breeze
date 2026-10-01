@@ -11,8 +11,9 @@ import useTaxYear from '../future/hooks/planner/useTaxYear';
 import { computeHouseholdWaterfall } from '../future/lib/paycheck';
 import { computeTaxScenario, householdPretaxReductions } from './lib/taxScenario';
 import { TaxScenarioColumns } from './components/TaxScenarioColumns';
-import { WealthByTreatmentBar } from './components/WealthByTreatmentBar';
+import { BracketLadder } from './components/BracketLadder';
 import { buildBracketLadder } from './lib/taxScenario';
+import { WealthByTreatmentBar } from './components/WealthByTreatmentBar';
 import { getWealthByTaxTreatment } from './lib/wealthByTaxTreatment';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -125,6 +126,10 @@ export default function TaxesPage() {
                 baseline={baseline}
                 current={current}
                 brackets={taxTables.brackets}
+                currencyCode={currencyCode}
+              />
+              <BracketLadder
+                rows={buildBracketLadder(current.taxableIncome, taxTables.brackets)}
                 currencyCode={currencyCode}
               />
               <div className="grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-3">
