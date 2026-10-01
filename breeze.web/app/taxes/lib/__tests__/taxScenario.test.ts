@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildBracketBands, buildBracketLadder, computeTaxScenario, householdPretaxReductions } from '../taxScenario';
+import { buildBracketLadder, computeTaxScenario, householdPretaxReductions } from '../taxScenario';
 import type { TaxYearTables, TaxBracketRow } from '../../../future/types/tax';
 import type { PersonWaterfall } from '../../../future/lib/paycheck';
 
