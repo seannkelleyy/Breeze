@@ -2,7 +2,7 @@ module breeze.api
 
 go 1.26.1
 
-require github.com/jackc/pgx/v5 v5.10.0
+require github.com/jackc/pgx/v5 v5.11.0
 
 require (
 	github.com/99designs/gqlgen v0.17.95
