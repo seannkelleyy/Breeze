@@ -41,6 +41,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           working-directory: breeze.api
+          version: v2.14.0
       - name: Test
         run: go test ./... -count=1
 
