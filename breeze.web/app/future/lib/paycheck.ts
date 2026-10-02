@@ -5,6 +5,7 @@ import { PAYROLL_SAVINGS_ACCOUNT_TYPES } from './config';
 import { getEffectiveTaxRate } from './tax';
 import {
   getEmployeeMonthlyContribution,
+  getPersonBonusPerYear,
   getPaychecksPerYear,
   getPersonPaydaysForMonth,
 } from './plannerMath';
@@ -120,7 +121,9 @@ export function computePersonWaterfall(
     person.payType === 'hourly'
       ? person.hourlyRate * person.expectedHoursPerWeek * 52
       : person.annualSalary;
-  const grossMonthly = baseAnnual / 12;
+  // Gross includes the full yearly bonus, averaged monthly — one canonical
+  // household income everywhere (matches getTotalAnnualIncome).
+  const grossMonthly = (baseAnnual + getPersonBonusPerYear(person)) / 12;
 
   const { pretaxMonthly: pretaxSavingsMonthly, rothMonthly: rothSavingsMonthly } =
     getPersonSavingsSplit(person, accounts);

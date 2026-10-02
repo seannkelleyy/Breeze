@@ -36,8 +36,24 @@ export const getPersonsAnnualIncome = (personIds: string[], people: PlannerPerso
     return sum + (p?.annualSalary ?? 0);
   }, 0);
 };
+export const getPersonBaseAnnualIncome = (person: PlannerPerson): number =>
+  person.payType === 'hourly'
+    ? person.hourlyRate * person.expectedHoursPerWeek * 52
+    : person.annualSalary;
+export const getPersonBonusPerYear = (person: PlannerPerson): number => {
+  if (person.annualBonus <= 0) return 0;
+  const perYear =
+    person.bonusFrequency === 'quarterly' ? 4 : person.bonusFrequency === 'monthly' ? 12 : 1;
+  return person.bonusMode === 'salary-percent'
+    ? (getPersonBaseAnnualIncome(person) * person.annualBonus * perYear) / 100
+    : person.annualBonus;
+};
+
+/** CANONICAL annual income: salary/base pay plus the full yearly bonus,
+ * whatever its mode (dollars or percent-of-base) or frequency. Every
+ * household-income view must use this — no other income math. */
 export const getTotalAnnualIncome = (p: PlannerPerson | undefined): number =>
-  p ? p.annualSalary + (p.bonusMode === 'dollars' ? p.annualBonus : 0) : 0;
+  p ? p.annualSalary + getPersonBonusPerYear(p) : 0;
 export const getPlannerContributionTotals = (
   accounts: PlannerAccount[],
   people: PlannerPerson[],
@@ -239,19 +255,7 @@ export const getPaychecksPerYear = (cadence: PayCadence): number => {
   }
 };
 
-export const getPersonBaseAnnualIncome = (person: PlannerPerson): number =>
-  person.payType === 'hourly'
-    ? person.hourlyRate * person.expectedHoursPerWeek * 52
-    : person.annualSalary;
 
-export const getPersonBonusPerYear = (person: PlannerPerson): number => {
-  if (person.annualBonus <= 0) return 0;
-  const perYear =
-    person.bonusFrequency === 'quarterly' ? 4 : person.bonusFrequency === 'monthly' ? 12 : 1;
-  return person.bonusMode === 'salary-percent'
-    ? (getPersonBaseAnnualIncome(person) * person.annualBonus * perYear) / 100
-    : person.annualBonus;
-};
 
 export const getPersonTotalIncome = (person: PlannerPerson): number =>
   getPersonBaseAnnualIncome(person) + getPersonBonusPerYear(person);

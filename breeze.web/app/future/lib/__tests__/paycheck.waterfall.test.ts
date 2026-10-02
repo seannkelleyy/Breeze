@@ -76,6 +76,18 @@ describe('computePersonWaterfall', () => {
     expect(result.grossMonthly).toBe(10000);
   });
 
+  it('includes the full yearly bonus in gross, averaged monthly', () => {
+    const person = makePerson({
+      annualSalary: 120000,
+      bonusMode: 'salary-percent',
+      bonusFrequency: 'annual',
+      annualBonus: 10,
+    });
+    const { grossMonthly } = wf(person, []);
+    // (120,000 + 12,000) / 12 — one canonical gross everywhere.
+    expect(grossMonthly).toBe(11000);
+  });
+
   it('computes gross monthly from hourly pay', () => {
     const result = wf(makePerson({ payType: 'hourly', hourlyRate: 50, expectedHoursPerWeek: 40 }));
     // 50 * 40 * 52 / 12

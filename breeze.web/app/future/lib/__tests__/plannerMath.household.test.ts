@@ -142,7 +142,7 @@ describe('getPersonsAnnualIncome', () => {
 });
 
 describe('getPlannerHouseholdSnapshot', () => {
-  it('sums total annual income across the household including dollar bonuses', () => {
+  it('sums total annual income across the household including every bonus mode', () => {
     const people = [
       makePerson({
         annualSalary: 120000,
@@ -159,9 +159,9 @@ describe('getPlannerHouseholdSnapshot', () => {
       }),
     ];
     const snapshot = getPlannerHouseholdSnapshot(people);
-    // salary-percent bonuses are excluded from total income
-    expect(snapshot.householdIncome).toBe(205000);
-    expect(snapshot.annualHouseholdIncome).toBe(205000);
+    // 120,000 + 5,000 (dollars) + 80,000 + 8,000 (10% of 80,000, salary-percent)
+    expect(snapshot.householdIncome).toBe(213000);
+    expect(snapshot.annualHouseholdIncome).toBe(213000);
     expect(snapshot.people).toBe(people);
   });
 

@@ -71,14 +71,14 @@ describe('getTotalAnnualIncome', () => {
     expect(getTotalAnnualIncome(person)).toBe(125000);
   });
 
-  it('excludes salary-percent bonus from total', () => {
+  it('includes salary-percent bonuses in total', () => {
     const person = makePerson({
       annualSalary: 120000,
       bonusFrequency: 'annual' as const,
       annualBonus: 10,
       bonusMode: 'salary-percent',
     });
-    expect(getTotalAnnualIncome(person)).toBe(120000);
+    expect(getTotalAnnualIncome(person)).toBe(132000);
   });
 
   it('handles zero salary', () => {
