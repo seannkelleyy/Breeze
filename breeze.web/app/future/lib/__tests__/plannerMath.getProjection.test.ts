@@ -621,16 +621,17 @@ describe('getPortfolioAverageGrowthRate', () => {
     expect(avg).toBeCloseTo((1.11 / 1.1 - 1) * 100, 6);
   });
 
-  it('mirrors the engine for profile homes — adjustment does not reach named profiles', () => {
+  it('mirrors the engine — the adjustment shifts profile homes too', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 0, 15));
     const home = account({ accountType: 'home', startingBalance: 400000, annualRate: 4 });
     const details = makeDetails({ currentValue: 450000, purchasePrice: 400000 });
-    // The default named profile's constant wins over the passed rate, so the
-    // adjustment cannot move it — same as the projection engine.
+    // The default named profile is 'medium' (4%/yr): the -5 adjustment lands
+    // on top of the profile constant, exactly like the projection engine.
     const base = getPortfolioAverageGrowthRate([home], { a1: details }, 0, false, 0);
     const stressed = getPortfolioAverageGrowthRate([home], { a1: details }, 0, false, -5);
-    expect(base).toBeCloseTo(stressed as number, 6);
+    expect(base).toBeCloseTo(4, 6);
+    expect(stressed).toBeCloseTo(-1, 6);
     vi.useRealTimers();
   });
 });

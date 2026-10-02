@@ -69,20 +69,18 @@ export const getPortfolioAverageGrowthRate = (
       if (!details) continue;
       const snapshot = getAssetFinanceSnapshot(details, now);
       weight = snapshot.equity;
-      // Mirror the engine exactly: the market adjustment reaches liquid
-      // accounts and custom-rate homes only — profile-based homes keep their
-      // profile constant and vehicles keep their depreciation schedule.
+      // Mirror the engine exactly: the market adjustment shifts every
+      // asset's return — liquid accounts, profile homes (added after profile
+      // resolution), and vehicles alike.
       baseRate =
         account.accountType === 'vehicle'
           ? -getVehicleAnnualDepreciationRate(
               details.vehicleDepreciationProfile,
               snapshot.monthsSincePurchase / 12,
               details.annualChangeRate,
-            )
-          : getHomeAnnualGrowthRate(
-              details.homeGrowthProfile,
-              details.annualChangeRate + annualReturnAdjustmentPercent,
-            );
+            ) + annualReturnAdjustmentPercent
+          : getHomeAnnualGrowthRate(details.homeGrowthProfile, details.annualChangeRate) +
+            annualReturnAdjustmentPercent;
     } else {
       weight = clamp(account.startingBalance);
       baseRate = account.annualRate + annualReturnAdjustmentPercent;
@@ -191,6 +189,7 @@ export const getProjection = (
       accountType: account.accountType,
       assetValue: snapshot.assetValue,
       assetAnnualRate: details.annualChangeRate + annualReturnAdjustmentPercent,
+      annualChangeRate: details.annualChangeRate,
       homeGrowthProfile:
         details.homeGrowthProfile ?? plannerConstants.PLANNER_DEFAULT_HOME_GROWTH_PROFILE,
       vehicleDepreciationProfile: details.vehicleDepreciationProfile,
@@ -285,16 +284,15 @@ export const getProjection = (
               afState.vehicleCustomAnnualRate,
             );
             const effRate = getEffectiveAnnualRatePercent(
-              -annualDepRate,
+              -annualDepRate + annualReturnAdjustmentPercent,
               inflationRatePercent,
               useInflationAdjustedValues,
             );
             afState.assetValue *= 1 + effRate / 100 / 12;
           } else {
-            const annualHomeRate = getHomeAnnualGrowthRate(
-              afState.homeGrowthProfile,
-              afState.assetAnnualRate,
-            );
+            const annualHomeRate =
+              getHomeAnnualGrowthRate(afState.homeGrowthProfile, afState.annualChangeRate) +
+              annualReturnAdjustmentPercent;
             const effRate = getEffectiveAnnualRatePercent(
               annualHomeRate,
               inflationRatePercent,
