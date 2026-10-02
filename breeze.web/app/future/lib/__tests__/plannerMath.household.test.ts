@@ -5,7 +5,6 @@ import {
   getAgeFromBirthday,
   getPersonsAnnualIncome,
   getPlannerHouseholdSnapshot,
-  getLiabilityPrincipalMonthly,
   getTotalMonthlyForAccount,
   getPlannerContributionTotals,
 } from '../plannerMath';

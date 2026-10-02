@@ -27,11 +27,11 @@ func NewTaxPlanningService(queries taxBracketQuerier) *TaxPlanningService {
 }
 
 // EstimateForYear returns a marginal tax estimate for the given inputs.
-// - year: tax year to use for brackets and the standard deduction
-// - filingStatus: filing status for bracket lookup
-// - income: gross income (use decimal for monetary precision)
-// - deductionAmount: itemized deduction to subtract (nil => the seeded
-//   standard deduction for the year and filing status)
+//   - year: tax year to use for brackets and the standard deduction
+//   - filingStatus: filing status for bracket lookup
+//   - income: gross income (use decimal for monetary precision)
+//   - deductionAmount: itemized deduction to subtract (nil => the seeded
+//     standard deduction for the year and filing status)
 func (s *TaxPlanningService) EstimateForYear(ctx context.Context, year int32, filingStatus sqlc.FilingStatus, income decimal.Decimal, deductionAmount *pgtype.Numeric) (*TaxEstimate, error) {
 	if income.IsNeg() {
 		return nil, fmt.Errorf("income must be non-negative")

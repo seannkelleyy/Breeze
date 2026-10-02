@@ -51,7 +51,6 @@ const AccountsCardInner = ({ collapsed }: { collapsed: boolean }) => {
   const editor = useAccountEditor();
   const {
     accounts: plannerAccounts,
-    people,
     isIrsAccountsLoading,
     isIrsAccountsError,
     totalPlannedMonthlyEmployee,
