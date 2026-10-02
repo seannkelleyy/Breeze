@@ -1,5 +1,7 @@
 # 04 — Development Workflow
 
+CI (GitHub Actions, `.github/workflows/ci.yml`) runs on every push and PR: API lint + full tests (against a Postgres service with migrations applied — integration tests included), and the web typecheck/lint/test/build gate.
+
 ## The Core Loop
 
 ```
