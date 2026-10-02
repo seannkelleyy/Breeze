@@ -114,35 +114,3 @@ export const buildAmortization = (
   };
 };
 
-export const loanPaidDownPercent = (originalAmount: number, currentBalance: number): number => {
-  if (originalAmount <= 0) return 0;
-  return ((originalAmount - currentBalance) / originalAmount) * 100;
-};
-
-export const computeRefinanceNpv = (
-  currentMonthlyPayment: number,
-  currentRemainingMonths: number,
-  currentInterestRate: number,
-  newMonthlyPayment: number,
-  newRemainingMonths: number,
-  closingCosts: number,
-  discountRatePercent: number,
-): number => {
-  const monthlyDiscountRate = discountRatePercent / 100 / 12;
-  let npv = 0;
-  const maxMonths = Math.max(currentRemainingMonths, newRemainingMonths);
-
-  for (let month = 1; month <= maxMonths; month++) {
-    const discountFactor = 1 / (1 + monthlyDiscountRate) ** month;
-    const currentCost = month <= currentRemainingMonths ? currentMonthlyPayment : 0;
-    const newCost = month <= newRemainingMonths ? newMonthlyPayment : 0;
-    npv += (currentCost - newCost) * discountFactor;
-  }
-
-  return npv - closingCosts;
-};
-
-export const computeBreakEvenMonths = (closingCosts: number, monthlySavings: number): number => {
-  if (monthlySavings <= 0) return Infinity;
-  return Math.ceil(closingCosts / monthlySavings);
-};

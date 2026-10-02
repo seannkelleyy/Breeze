@@ -94,36 +94,33 @@ instead of reusing the first.
 
 ## Known inconsistencies
 
-### 🐛 Bugs (wrong numbers displayed)
+### 🐛 Bugs — ALL FIXED 2026-10-02
 
-1. **Debt-principal double count in `totalPlannedMonthlyInvestment`.**
-   `usePlannerModel.ts` passes principal of **all** liabilities as `linkedDebtPrincipalMonthly` into `usePortfolioCalculation`, which adds it on top of `investedFromAccounts` that already contains unlinked liability principal. Unlinked loans are counted twice — inflating the Savings tile, both savings rates, "Planned Monthly", `monthlyGap`, and `savingsRateGap`. (`usePlannerModel.ts:82-95` vs `usePortfolioCalculation.ts:77-85` + `plannerMath.ts:67-71`.)
-2. **Tax-planning page shows effective/marginal rates 100× too small.**
-   The API returns fractions (0.1695) and the page renders `0.17%` instead of `16.96%`. Also "Total Income" is mislabeled — it displays *taxable* income — and STANDARD sends a $0 deduction. (`TaxForm.tsx:53`, `TaxResults.tsx:44-45`, `tax_planning.go:134-141`.)
-3. **Goal progress adds connected liabilities.**
-   `goals/page.tsx:351-353` sums connected accounts' balances without checking the account is an asset — a connected loan would *increase* progress.
-4. **Accounts footer not additive.**
-   "Personal contributions" already includes liability principal, "Debt payments" shows it again (at full payment), and "Total" switches formula depending on whether `plannerSummary` is populated (`usePlannerAccounts.ts:92-93`). The four lines cannot be summed as displayed.
+1. ✅ **FIXED — debt-principal double count.** `usePlannerModel` now passes only *linked* liability principal into `usePortfolioCalculation`; `getPlannerContributionTotals` reports unlinked principal as a separate `totalPlannedMonthlyDebtPrincipal` field.
+2. ✅ **FIXED — tax-planning page rates.** Rates are now ×100 on display; "Total Income" relabeled "Taxable Income"; STANDARD applies the seeded standard deduction server-side (nil deduction on the wire).
+3. ✅ **FIXED — goal progress** filters out connected liabilities.
+4. ✅ **FIXED — Accounts footer is additive**: "Personal contributions" (investment accounts only) + "Employer match" + "Debt principal paydown" = "Total".
 
 ### ⚠️ Inconsistent duplicates (same concept, different formulas)
 
 - **I-1 Income**: `getTotalAnnualIncome` (canonical, salary-blind for hourly) vs `getPersonTotalIncome` (hourly-aware, People page) vs `PersonSummaryCard`'s local salary-only copy. Hourly households see three different "income" numbers.
 - **I-2 FICA basis**: waterfall applies FICA to *post-reduction* income (pre-tax contributions save FICA); the Taxes page applies it to *full gross* — so the Taxes page overstates FICA for anyone with pre-tax elections, and its "Tax saved" figure is federal-only while the Future waterfall's tax line responds to both.
 - **I-3 "Effective rate" has five meanings**: (a) Taxes page `(federal+fica on gross)/gross`; (b) per-person waterfall `(federal on (taxable − deduction) + fica)/taxable` — which also subtracts the standard deduction from already-reduced income; (c) household `Σtaxes/Σgross`; (d) HouseholdPayPanel recomputes inline; (e) tax-planning API `federal/taxable`, no FICA.
-- **I-4 Employer match, four ways**: account card (oldest owner's salary, no IRS cap), footer/breakdown totals (Σ all owners' salaries, monthly basis), projection engine (first owner, grown salary, IRS-capped contribution). Multi-owner households see different match numbers for the same account.
-- **I-5 Debt figures**: full payment (Accounts footer) vs principal-only (savings rate, waterfall) vs the double count in bug 1.
-- **I-6 "Monthly expenses"**: budget headline = Σ allocations (planned); Future snapshot = recurring-template total; Dashboard setup = profile field. Three sources, no single definition.
+- **I-4 Employer match — PARTIALLY RESOLVED 2026-10-02**: the account card and footer/breakdown totals both use `getEmployerMatchMonthly` (Σ owners' salaries, monthly basis, 401(k)-only). The projection engine still uses the first owner's grown, IRS-capped salary (intentional: multi-year growth).
+- **I-5 Debt figures — RESOLVED 2026-10-02**: both surfaces now show principal only, labeled 'Debt principal paydown'.
+- **I-6 "Monthly expenses"**: budget headline = Σ allocations (planned); Future snapshot = recurring-template total; Dashboard setup = profile field. Three sources, no single definition. **(Also fixed 2026-10-02: salary-percent liabilities now resolve their payment against owner income — `getLiabilityPrincipalMonthly` takes `people`.)**
 - **I-7 Savings rate caps**: one display caps at 100%, another (same card) doesn't.
 - **I-8 Net worth**: Dashboard = full value − loans; Future = equity for combined assets, 0 for detail-less home/vehicle; Taxes wealth map excludes property entirely; goal progress sums raw `startingBalance`.
-- **I-9 Real-mode rate conversion** applies the Fisher deflation to liability APR too (a loan's stated rate displayed as a real rate).
+- **I-9 Real-mode rate conversion — FIXED 2026-10-02**: liability APR is never inflation-deflated.
 - **I-10 IRS owner-age**: oldest owner (cards) vs max age (tables) vs first owner aged +growth (projections) — catch-up eligibility can differ per view.
 - **I-11 Mortgage/retirement-ladder conventions**: closing costs financed *and* counted upfront; 720-month simulation cap; ladder applies no standard deduction, no growth, and a 59 (not 59½) penalty threshold.
-- **I-12 Currency**: Budget tables and the Taxes bracket ladder hardcode `'USD'`; headlines use the user's currency.
+- **I-12 Currency — FIXED 2026-10-02**: Budget tables and the bracket ladder use the user's currency.
 - **I-13 Bonus percent-mode storage**: the modal stores annual-equivalent, the canonical annualizer multiplies by frequency again — quarterly/monthly *percent* bonuses are inflated 4×/12× (dollars mode is consistent).
 
-### 🗑️ Dead code (computed or defined, never shown)
+### 🗑️ Dead code
 
-`getPersonPaycheckAmount`, `getYearsUntilGoalEstimate`, `FIREVariantCard`, `computeRefinanceNpv`, `computeBreakEvenMonths`, `loanPaidDownPercent` (lib copy), `PLANNER_SAFE_WITHDRAWAL_RATE_SUGGESTIONS`, `currentSavingsRateEmployee` (computed + synced, never rendered), snapshot fields `yearlySavings`/`netIncome`/`emergencyFund3/6/12Months`, BudgetProvider `totalSpent`, retirement ladder `earlyWithdrawalPenalty` (fetched, never rendered).
+Removed 2026-10-02: `getPersonPaycheckAmount`, `getYearsUntilGoalEstimate`, `FIREVariantCard`, `computeRefinanceNpv`, `computeBreakEvenMonths`, `loanPaidDownPercent` (lib copy), `PLANNER_SAFE_WITHDRAWAL_RATE_SUGGESTIONS`, BudgetProvider `totalSpent`.
+Still present (deliberate or harmless): `currentSavingsRateEmployee` (computed + synced, never rendered), snapshot fields `yearlySavings`/`netIncome`/`emergencyFund3/6/12Months`, retirement ladder `earlyWithdrawalPenalty` (fetched, never rendered).
 
 ---
 

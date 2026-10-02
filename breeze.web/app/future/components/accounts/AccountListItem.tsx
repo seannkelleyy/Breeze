@@ -38,7 +38,7 @@ import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import {
   getAgeFromBirthday,
   getEmployeeMonthlyContribution,
-  getEmployerMatchMonthlyFromAnnual,
+  getEmployerMatchMonthly,
   getIrsLimitGroup,
   getPersonGroupAnnualContribution,
 } from '../../lib/plannerMath';
@@ -230,11 +230,9 @@ export function AccountListItem({
 
   // Presentational only — the IRS math above deliberately counts employee
   // deferrals alone, since the match never counts against the limit.
-  const employerMatchMonthly = getEmployerMatchMonthlyFromAnnual(
-    account,
-    ownerPerson?.annualSalary ?? 0,
-    employeeAnnual,
-  );
+  // Canonical match: all owners' salaries, monthly basis — identical to the
+  // footer totals and the projection's monthly-basis match.
+  const employerMatchMonthly = getEmployerMatchMonthly(account, people);
 
   // IRS limits apply per person across all same-group accounts (401k + 403b
   // share the deferral limit), so maxed/over is judged on the group total.

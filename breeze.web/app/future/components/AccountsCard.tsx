@@ -4,7 +4,6 @@ import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { getEmployeeMonthlyContribution } from '../lib/plannerMath';
 import { formatCurrencyWithCode } from '@/lib/utils';
 import { AccountListItem } from './accounts/AccountListItem';
 import { AccountEditorProvider, useAccountEditor } from './accounts/AccountEditorContext';
@@ -57,20 +56,13 @@ const AccountsCardInner = ({ collapsed }: { collapsed: boolean }) => {
     isIrsAccountsError,
     totalPlannedMonthlyEmployee,
     totalPlannedMonthlyMatch,
+    totalPlannedMonthlyDebtPrincipal,
     totalPlannedMonthlyInvestment,
   } = editor.data;
   const { assetFinanceDetailsByAccountId } = editor;
   const { typeGuards, helpers } = editor;
   const { isLiabilityAccountType, isCombinedAssetType } = typeGuards;
 
-  // Calculate debt payments from liability accounts
-  const totalPlannedMonthlyDebtPayments = useMemo(
-    () =>
-      plannerAccounts
-        .filter((a) => isLiabilityAccountType(a.accountType))
-        .reduce((sum, a) => sum + getEmployeeMonthlyContribution(a, people), 0),
-    [plannerAccounts, people, isLiabilityAccountType],
-  );
   const { getSuggestedAnnualLimitForAccount } = helpers;
   const { addAccount, addLiability } = editor;
 
@@ -171,8 +163,8 @@ const AccountsCardInner = ({ collapsed }: { collapsed: boolean }) => {
                 {formatCurrency(totalPlannedMonthlyMatch * 12)}/yr)
               </p>
               <p>
-                Debt payments: {formatCurrency(totalPlannedMonthlyDebtPayments)}/mo (
-                {formatCurrency(totalPlannedMonthlyDebtPayments * 12)}/yr)
+                Debt principal paydown: {formatCurrency(totalPlannedMonthlyDebtPrincipal)}/mo (
+                {formatCurrency(totalPlannedMonthlyDebtPrincipal * 12)}/yr)
               </p>
               <p className="text-foreground font-medium">
                 Total: {formatCurrency(totalPlannedMonthlyInvestment)}/mo (

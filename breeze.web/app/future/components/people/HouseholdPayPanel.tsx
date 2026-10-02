@@ -48,6 +48,7 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
       bonusMonthly: bonusIncome,
       baseMonthly: totalIncome / 12 - bonusIncome,
       taxesMonthly: wf.taxesMonthly,
+      effectiveRate: wf.effectiveRate,
       savingsMonthly: wf.savingsMonthly,
       withholdingsMonthly: wf.pretaxWithholdingsMonthly + wf.posttaxWithholdingsMonthly,
       takeHomeMonthly: wf.takeHomeMonthly,
@@ -64,7 +65,7 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
       <Operator>−</Operator>
       <Term
         value={fc(totals.taxesMonthly)}
-        label={`Taxes (est. ${((totals.taxesMonthly / (totals.totalIncome / 12)) * 100 || 0).toFixed(0)}% effective)`}
+        label={`Taxes (est. ${(totals.effectiveRate * 100 || 0).toFixed(0)}% effective)`}
       />
       <Operator>−</Operator>
       <Term value={fc(totals.savingsMonthly)} label="Savings (401k, HSA)" />

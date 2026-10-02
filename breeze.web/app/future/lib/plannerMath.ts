@@ -60,15 +60,21 @@ export const getPlannerContributionTotals = (
 ) => {
   let te = 0,
     tm = 0,
+    td = 0,
     ti = 0;
   for (const a of accounts) {
     // Liabilities contribute their principal paydown only — interest is a
-    // cost, not saving — and can carry no employer match.
+    // cost, not saving — and can carry no employer match. Reported
+    // separately so "personal contributions" means investment contributions.
     const isLiability = plannerConfig.isLiabilityAccountType(a.accountType);
-    const e = isLiability
-      ? getLiabilityPrincipalMonthly(a)
-      : getEmployeeMonthlyContribution(a, people);
-    const m = isLiability ? 0 : getEmployerMatchMonthly(a, people);
+    if (isLiability) {
+      const principal = getLiabilityPrincipalMonthly(a, people);
+      td += principal;
+      ti += principal;
+      continue;
+    }
+    const e = getEmployeeMonthlyContribution(a, people);
+    const m = getEmployerMatchMonthly(a, people);
     te += e;
     tm += m;
     ti += e + m;
@@ -76,6 +82,7 @@ export const getPlannerContributionTotals = (
   return {
     totalPlannedMonthlyEmployee: te,
     totalPlannedMonthlyMatch: tm,
+    totalPlannedMonthlyDebtPrincipal: td,
     totalPlannedMonthlyInvestment: ti,
   };
 };
@@ -191,24 +198,6 @@ export const getMonthlyContribution = (
   if (Math.abs(compoundFactor - 1) < 1e-10) return Math.max(0, (target - start) / months);
   return Math.max(0, ((target - start * compoundFactor) * monthlyRate) / (compoundFactor - 1));
 };
-export const getYearsUntilGoalEstimate = (
-  target: number,
-  cur: number,
-  contrib: number,
-  rate: number,
-): number => {
-  if (target <= 0) return 0;
-  if (contrib <= 0) return 999;
-  const monthlyRate = rate / 100 / 12;
-  const monthlyContrib = contrib;
-  if (Math.abs(monthlyRate) < 1e-10) return Math.ceil((target - cur) / (monthlyContrib * 12));
-  const denominator = monthlyContrib + monthlyRate * cur;
-  if (Math.abs(denominator) < 1e-10) return 999;
-  const numerator = monthlyContrib + monthlyRate * target;
-  if (Math.abs(numerator) < 1e-10) return 999;
-  const n = Math.log(numerator / denominator) / Math.log(1 + monthlyRate);
-  return Math.max(0, Math.ceil(n / 12));
-};
 export const getAnnualIncomeWithGrowth = (b: number, g: number, y: number): number =>
   b * (1 + g / 100) ** y;
 export const getEmployeeMonthlyContribution = (
@@ -226,8 +215,11 @@ export const getEmployeeMonthlyContribution = (
 };
 /** Monthly principal portion of a loan payment: payment minus this month's
  * interest on the current balance. Interest is a cost, not saving. */
-export const getLiabilityPrincipalMonthly = (a: PlannerAccount): number => {
-  const payment = getEmployeeMonthlyContribution(a, []);
+export const getLiabilityPrincipalMonthly = (
+  a: PlannerAccount,
+  people: PlannerPerson[],
+): number => {
+  const payment = getEmployeeMonthlyContribution(a, people);
   const interest = (clamp(a.startingBalance) * clamp(a.annualRate)) / 100 / 12;
   return Math.max(0, payment - interest);
 };
@@ -260,8 +252,6 @@ export const getPaychecksPerYear = (cadence: PayCadence): number => {
 export const getPersonTotalIncome = (person: PlannerPerson): number =>
   getPersonBaseAnnualIncome(person) + getPersonBonusPerYear(person);
 
-export const getPersonPaycheckAmount = (person: PlannerPerson): number =>
-  getPersonBaseAnnualIncome(person) / getPaychecksPerYear(person.payCadence);
 
 // Weekday helpers: stored payDay uses 1 = Monday … 7 = Sunday.
 const mondayBasedWeekday = (date: Date): number => ((date.getDay() + 6) % 7) + 1;

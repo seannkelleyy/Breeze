@@ -228,7 +228,7 @@ describe('getPlannerContributionTotals', () => {
 });
 
 describe('liability principal in contribution totals', () => {
-  it('counts only the principal portion of loan payments', () => {
+  it('reports loan principal separately from employee contributions', () => {
     const loan = makeAccount({
       accountType: 'mortgage',
       contributionMode: 'monthly',
@@ -237,11 +237,12 @@ describe('liability principal in contribution totals', () => {
       annualRate: 6,
       employerMatchRate: 0,
     });
-    const { totalPlannedMonthlyEmployee, totalPlannedMonthlyInvestment } =
+    const { totalPlannedMonthlyEmployee, totalPlannedMonthlyDebtPrincipal, totalPlannedMonthlyInvestment } =
       getPlannerContributionTotals([loan], []);
 
     // Interest = 114000 * 6% / 12 = 570 → principal = 789 - 570 = 219.
-    expect(totalPlannedMonthlyEmployee).toBeCloseTo(219, 2);
+    expect(totalPlannedMonthlyEmployee).toBe(0);
+    expect(totalPlannedMonthlyDebtPrincipal).toBeCloseTo(219, 2);
     expect(totalPlannedMonthlyInvestment).toBeCloseTo(219, 2);
   });
 

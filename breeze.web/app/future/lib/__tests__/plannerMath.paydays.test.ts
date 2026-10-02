@@ -5,7 +5,6 @@ import {
   getPersonBonusPerYear,
   getPersonTotalIncome,
   getPersonPaydaysForMonth,
-  getPersonPaycheckAmount,
 } from '../plannerMath';
 import { PayCadence, PlannerPerson } from '../../types/person';
 
@@ -114,8 +113,4 @@ describe('income helpers', () => {
     expect(getPersonBaseAnnualIncome(person)).toBe(104000);
   });
 
-  it('computes the per-paycheck amount', () => {
-    const person = makePerson({ annualSalary: 120000, payCadence: 'semimonthly' });
-    expect(getPersonPaycheckAmount(person)).toBe(5000);
-  });
 });

@@ -83,7 +83,7 @@ const usePlannerModel = () => {
     () =>
       plannerAccounts
         .filter((a) => plannerConfig.isLiabilityAccountType(a.accountType))
-        .reduce((sum, a) => sum + getLiabilityPrincipalMonthly(a), 0),
+        .reduce((sum, a) => sum + getLiabilityPrincipalMonthly(a, plannerPeople), 0),
     [plannerAccounts],
   );
   const portfolio = usePortfolioCalculation(
@@ -210,6 +210,7 @@ const usePlannerModel = () => {
     setRetirementAgeOverride,
     marketAdjustment,
     setMarketAdjustment,
+    householdPeople: household.people,
     portfolioAverageRates,
     totalStartingBalance: portfolio.totalStartingBalance,
     projectedNetWorthAtTargetAge,

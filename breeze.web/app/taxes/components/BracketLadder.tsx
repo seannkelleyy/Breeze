@@ -3,7 +3,6 @@ import { formatCurrencyWithCode } from '@/lib/utils';
 import { InfoTip } from '@/components/common/InfoTip';
 import type { BracketLadderRow } from '../lib/taxScenario';
 
-const fc = (v: number) => formatCurrencyWithCode(v, 'USD');
 
 const rateColor = (rate: number): { bg: string; text: string } => ({
   bg: `oklch(0.75 0.15 ${(rate * 1000) % 360})`,
@@ -17,7 +16,7 @@ export function BracketLadder({
   rows: BracketLadderRow[];
   currencyCode: string;
 }) {
-  const fmt = (v: number) => fc(v);
+  const fmt = (v: number) => formatCurrencyWithCode(v, currencyCode);
   const rangeLabel = (row: BracketLadderRow) =>
     row.maximum === null
       ? `${fmt(row.minimum)}+`
@@ -32,10 +31,10 @@ export function BracketLadder({
         <div className="space-y-1 pb-2">
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">
-              {(currentRow.rate * 100).toFixed(0)}% bracket — {fc(currentRow.used)} so far
+              {(currentRow.rate * 100).toFixed(0)}% bracket — {fmt(currentRow.used)} so far
             </span>
             <span className="font-medium">
-              {fc(currentRow.remainingToNext ?? 0)} until{' '}
+              {fmt(currentRow.remainingToNext ?? 0)} until{' '}
               {((nextRow?.rate ?? 0) * 100).toFixed(0)}%
             </span>
           </div>

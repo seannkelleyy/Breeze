@@ -1,6 +1,7 @@
 'use client';
 import { InfoTip } from '@/components/common/InfoTip';
 import { getLiabilityPrincipalMonthly } from '../lib/plannerMath';
+import type { PlannerPerson } from '../types/person';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -19,6 +20,7 @@ interface CurrentSnapshotSectionProps {
   currentSavingsRate: number;
   totalAssets: number;
   totalLiabilities: number;
+  people: PlannerPerson[];
   currencyCode: string;
 }
 
@@ -32,13 +34,14 @@ export function CurrentSnapshotSection({
   currentSavingsRate,
   totalAssets,
   totalLiabilities,
+  people,
   currencyCode,
 }: CurrentSnapshotSectionProps) {
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
   const payroll = snapshot.payroll ?? null;
   const debtPrincipalMonthly = accounts
     .filter((a) => isLiabilityAccountType(a.accountType))
-    .reduce((sum, a) => sum + getLiabilityPrincipalMonthly(a), 0);
+    .reduce((sum, a) => sum + getLiabilityPrincipalMonthly(a, people), 0);
   const monthlyIncome = snapshot.grossIncome / 12;
   const monthlySavings = totalPlannedMonthlyInvestment;
   const yearlySavingsPlanned = monthlySavings * 12;
