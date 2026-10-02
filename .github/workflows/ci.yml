@@ -38,7 +38,7 @@ jobs:
       - name: Apply migrations (schema for integration tests)
         run: atlas migrate apply --dir file://db/migrations --url "$DATABASE_URL"
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
           working-directory: breeze.api
           version: v2.14.0
