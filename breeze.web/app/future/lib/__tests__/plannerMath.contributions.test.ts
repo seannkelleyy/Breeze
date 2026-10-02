@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getTotalAnnualIncome,
   getEmployeeMonthlyContribution,
   getEmployerMatchMonthly,
   getEmployerMatchMonthlyFromAnnual,
   getSuggestedAnnualLimit,
   getIrsLimitKeyFromApiType,
 } from '../plannerMath';
+import { getTotalAnnualIncome } from '@/lib/calc/income';
 import { PLANNER_DEFAULT_IRS_LIMITS } from '../constants';
 import type { PlannerAccount } from '../../types/account';
 import type { PlannerPerson } from '../../types/person';

@@ -3,11 +3,11 @@ import {
   clamp,
   toIsoDate,
   getAgeFromBirthday,
-  getPersonsAnnualIncome,
   getPlannerHouseholdSnapshot,
   getTotalMonthlyForAccount,
   getPlannerContributionTotals,
 } from '../plannerMath';
+import { getPersonsAnnualIncome } from '@/lib/calc/income';
 import type { PlannerAccount } from '../../types/account';
 import type { PlannerPerson } from '../../types/person';
 

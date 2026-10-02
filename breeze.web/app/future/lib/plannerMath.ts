@@ -8,6 +8,7 @@ import type { AccountType, PlannerAccount } from '../types/account';
 import type { IrsLimitConfig, IrsLimitKey } from '../types/irs';
 import type { PayCadence, PlannerPerson } from '../types/person';
 import * as plannerConfig from './config';
+import { getPersonsAnnualIncome, getTotalAnnualIncome } from '@/lib/calc/income';
 import * as plannerConstants from './constants';
 
 const { isNonContributingAccountType } = plannerConfig;
@@ -29,31 +30,6 @@ export const toIsoDate = (d: Date): string =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 export const getTotalMonthlyForAccount = (a: PlannerAccount, people: PlannerPerson[]): number =>
   getEmployeeMonthlyContribution(a, people) + getEmployerMatchMonthly(a, people);
-export const getPersonsAnnualIncome = (personIds: string[], people: PlannerPerson[]): number => {
-  if (personIds.length === 0) return people[0]?.annualSalary ?? 0;
-  return personIds.reduce((sum, id) => {
-    const p = people.find((p) => p.id === id);
-    return sum + (p?.annualSalary ?? 0);
-  }, 0);
-};
-export const getPersonBaseAnnualIncome = (person: PlannerPerson): number =>
-  person.payType === 'hourly'
-    ? person.hourlyRate * person.expectedHoursPerWeek * 52
-    : person.annualSalary;
-export const getPersonBonusPerYear = (person: PlannerPerson): number => {
-  if (person.annualBonus <= 0) return 0;
-  const perYear =
-    person.bonusFrequency === 'quarterly' ? 4 : person.bonusFrequency === 'monthly' ? 12 : 1;
-  return person.bonusMode === 'salary-percent'
-    ? (getPersonBaseAnnualIncome(person) * person.annualBonus * perYear) / 100
-    : person.annualBonus;
-};
-
-/** CANONICAL annual income: salary/base pay plus the full yearly bonus,
- * whatever its mode (dollars or percent-of-base) or frequency. Every
- * household-income view must use this — no other income math. */
-export const getTotalAnnualIncome = (p: PlannerPerson | undefined): number =>
-  p ? p.annualSalary + getPersonBonusPerYear(p) : 0;
 export const getPlannerContributionTotals = (
   accounts: PlannerAccount[],
   people: PlannerPerson[],
@@ -248,9 +224,6 @@ export const getPaychecksPerYear = (cadence: PayCadence): number => {
 };
 
 
-
-export const getPersonTotalIncome = (person: PlannerPerson): number =>
-  getPersonBaseAnnualIncome(person) + getPersonBonusPerYear(person);
 
 
 // Weekday helpers: stored payDay uses 1 = Monday … 7 = Sunday.

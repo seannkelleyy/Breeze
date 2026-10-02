@@ -5,10 +5,10 @@ import { PAYROLL_SAVINGS_ACCOUNT_TYPES } from './config';
 import { getEffectiveTaxRate } from './tax';
 import {
   getEmployeeMonthlyContribution,
-  getPersonBonusPerYear,
   getPaychecksPerYear,
   getPersonPaydaysForMonth,
 } from './plannerMath';
+import { getPersonBonusPerYear } from '@/lib/calc/income';
 
 /**
  * Monthly income waterfall for one person:

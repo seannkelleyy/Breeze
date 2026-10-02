@@ -2,6 +2,7 @@
 import { UserRound } from 'lucide-react';
 import { DataCard } from '@/components/common/DataCard';
 import { formatCurrencyWithCode } from '@/lib/utils';
+import { getPersonBonusPerYear, getPersonTotalIncome } from '@/lib/calc/income';
 import {
   computePersonWaterfall,
   getPersonSavingsAccounts,
@@ -63,12 +64,10 @@ export function PersonSummaryCard({
   const perYear =
     BONUS_FREQUENCY_OPTIONS.find((o) => o.value === (person.bonusFrequency ?? 'annual'))?.perYear ??
     1;
-  const bonusDollars =
-    person.bonusMode === 'salary-percent'
-      ? Math.round((person.annualSalary * person.annualBonus * perYear) / 100)
-      : person.annualBonus;
-  // Total income includes both fixed and percentage bonuses.
-  const totalIncome = person.annualSalary + bonusDollars;
+  // Canonical income family — no local bonus math (storage contract:
+  // annualBonus is the annual-equivalent in both modes).
+  const bonusDollars = getPersonBonusPerYear(person);
+  const totalIncome = getPersonTotalIncome(person);
 
   const basePay =
     person.payType === 'hourly'
@@ -80,7 +79,7 @@ export function PersonSummaryCard({
     if (person.bonusMode === 'salary-percent') {
       bonusLine =
         perYear > 1
-          ? `Bonus: ${person.annualBonus}% of salary × ${perYear}/yr (${fc(bonusDollars)})`
+          ? `Bonus: ${(person.annualBonus / perYear).toFixed(2)}% of salary × ${perYear}/yr (${fc(bonusDollars)})`
           : `Bonus: ${person.annualBonus}% of salary (${fc(bonusDollars)})`;
     } else if (perYear > 1) {
       bonusLine = `Bonus: ${fc(person.annualBonus / perYear)} × ${perYear}/yr (${fc(bonusDollars)})`;

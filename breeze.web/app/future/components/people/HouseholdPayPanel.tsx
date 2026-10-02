@@ -5,11 +5,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn, formatCurrencyWithCode } from '@/lib/utils';
 import {
-  getPersonBonusPerYear,
   getPersonPaydaysForMonth,
-  getPersonTotalIncome,
   getPaychecksPerYear,
 } from '../../lib/plannerMath';
+import { getPersonBonusPerYear, getPersonTotalIncome } from '@/lib/calc/income';
 import { computeHouseholdWaterfall, computePersonWaterfall } from '../../lib/paycheck';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useTaxYear from '../../hooks/planner/useTaxYear';

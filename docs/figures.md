@@ -103,7 +103,7 @@ instead of reusing the first.
 
 ### ⚠️ Inconsistent duplicates (same concept, different formulas)
 
-- **I-1 Income**: `getTotalAnnualIncome` (canonical, salary-blind for hourly) vs `getPersonTotalIncome` (hourly-aware, People page) vs `PersonSummaryCard`'s local salary-only copy. Hourly households see three different "income" numbers.
+- **I-1 Income — PARTIALLY FIXED 2026-10-02**: PersonSummaryCard now uses the canonical `getPersonTotalIncome` (hourly-aware). Remaining split: `getTotalAnnualIncome` (snapshot/household denominator) is still salary-based — hourly households need it switched to the hourly-aware base.
 - **I-2 FICA basis**: waterfall applies FICA to *post-reduction* income (pre-tax contributions save FICA); the Taxes page applies it to *full gross* — so the Taxes page overstates FICA for anyone with pre-tax elections, and its "Tax saved" figure is federal-only while the Future waterfall's tax line responds to both.
 - **I-3 "Effective rate" has five meanings**: (a) Taxes page `(federal+fica on gross)/gross`; (b) per-person waterfall `(federal on (taxable − deduction) + fica)/taxable` — which also subtracts the standard deduction from already-reduced income; (c) household `Σtaxes/Σgross`; (d) HouseholdPayPanel recomputes inline; (e) tax-planning API `federal/taxable`, no FICA.
 - **I-4 Employer match — PARTIALLY RESOLVED 2026-10-02**: the account card and footer/breakdown totals both use `getEmployerMatchMonthly` (Σ owners' salaries, monthly basis, 401(k)-only). The projection engine still uses the first owner's grown, IRS-capped salary (intentional: multi-year growth).
@@ -115,7 +115,7 @@ instead of reusing the first.
 - **I-10 IRS owner-age**: oldest owner (cards) vs max age (tables) vs first owner aged +growth (projections) — catch-up eligibility can differ per view.
 - **I-11 Mortgage/retirement-ladder conventions**: closing costs financed *and* counted upfront; 720-month simulation cap; ladder applies no standard deduction, no growth, and a 59 (not 59½) penalty threshold.
 - **I-12 Currency — FIXED 2026-10-02**: Budget tables and the bracket ladder use the user's currency.
-- **I-13 Bonus percent-mode storage**: the modal stores annual-equivalent, the canonical annualizer multiplies by frequency again — quarterly/monthly *percent* bonuses are inflated 4×/12× (dollars mode is consistent).
+- **I-13 Bonus percent-mode storage — FIXED 2026-10-02**: the income family now lives in `breeze.web/lib/calc/income.ts` (pure, no React) with the storage contract pinned by tests: `annualBonus` is the annual-equivalent in BOTH modes; frequency never rescales totals. PersonSummaryCard uses the canonical functions (also fixes its hourly blindness).
 
 ### 🗑️ Dead code
 

@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import {
   getPaychecksPerYear,
+  getPersonPaydaysForMonth,
+} from '../plannerMath';
+import {
   getPersonBaseAnnualIncome,
   getPersonBonusPerYear,
   getPersonTotalIncome,
-  getPersonPaydaysForMonth,
-} from '../plannerMath';
+} from '@/lib/calc/income';
 import { PayCadence, PlannerPerson } from '../../types/person';
 
 const makePerson = (overrides: Partial<PlannerPerson> = {}): PlannerPerson => ({
@@ -96,16 +98,17 @@ describe('income helpers', () => {
     expect(getPersonTotalIncome(person)).toBe(130000);
   });
 
-  it('normalizes percent bonuses by frequency', () => {
+  it('treats the stored percent bonus as the annual total regardless of frequency', () => {
     const person = makePerson({
       annualSalary: 120000,
       bonusMode: 'salary-percent',
       annualBonus: 10,
       bonusFrequency: 'quarterly',
     });
-    // 10% of salary, 4 times a year = 40% of salary
-    expect(getPersonBonusPerYear(person)).toBe(48000);
-    expect(getPersonTotalIncome(person)).toBe(168000);
+    // Storage contract: annualBonus is the annual-equivalent — 10 means 10%
+    // of salary for the YEAR, so frequency never rescales the total.
+    expect(getPersonBonusPerYear(person)).toBe(12000);
+    expect(getPersonTotalIncome(person)).toBe(132000);
   });
 
   it('computes hourly base income as rate × hours × 52', () => {

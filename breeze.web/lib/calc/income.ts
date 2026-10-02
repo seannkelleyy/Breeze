@@ -1,0 +1,43 @@
+/**
+ * Canonical income family — the only place annual income is defined.
+ * Every displayed income figure must flow through these functions.
+ *
+ * Storage contract (PlannerPerson.annualBonus): the ANNUAL-EQUIVALENT — the
+ * yearly total in both modes. Dollars mode stores dollars per year; percent
+ * mode stores the total percent of base pay per year. Frequency affects only
+ * per-occurrence display and payday-calendar timing, never totals.
+ */
+import type { PlannerPerson } from '@/app/future/types/person';
+
+export const getPersonBaseAnnualIncome = (person: PlannerPerson): number =>
+  person.payType === 'hourly'
+    ? person.hourlyRate * person.expectedHoursPerWeek * 52
+    : person.annualSalary;
+
+export const getPersonBonusPerYear = (person: PlannerPerson): number => {
+  if (person.annualBonus <= 0) return 0;
+  return person.bonusMode === 'salary-percent'
+    ? (getPersonBaseAnnualIncome(person) * person.annualBonus) / 100
+    : person.annualBonus;
+};
+
+/** Total annual income: hourly-aware base plus the full yearly bonus. */
+export const getPersonTotalIncome = (person: PlannerPerson): number =>
+  getPersonBaseAnnualIncome(person) + getPersonBonusPerYear(person);
+
+/**
+ * Canonical person income for household totals. Note: salary-based (hourly
+ * workers should use getPersonTotalIncome) — retained for the snapshot path.
+ */
+export const getTotalAnnualIncome = (p: PlannerPerson | undefined): number =>
+  p ? p.annualSalary + getPersonBonusPerYear(p) : 0;
+
+/** Sum of the given persons' salaries — contribution/match math only
+ * (deliberately bonus-free: deferrals are a percentage of pay, not bonuses). */
+export const getPersonsAnnualIncome = (personIds: string[], people: PlannerPerson[]): number => {
+  if (personIds.length === 0) return people[0]?.annualSalary ?? 0;
+  return personIds.reduce((sum, id) => {
+    const p = people.find((p) => p.id === id);
+    return sum + (p?.annualSalary ?? 0);
+  }, 0);
+};
