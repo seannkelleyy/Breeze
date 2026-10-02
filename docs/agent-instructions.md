@@ -12,7 +12,7 @@ This is a **personal finance planner** monorepo with a Go API and Next.js web ap
 
 | Concern | Tool |
 |---|---|
-| Language | Go 1.23+ |
+| Language | Go 1.26+ |
 | GraphQL | gqlgen |
 | DB queries | sqlc + pgx/v5 |
 | Schema/migrations | Atlas (`schema.hcl` → `db/migrations/`) |
