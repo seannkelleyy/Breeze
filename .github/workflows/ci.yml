@@ -30,7 +30,7 @@ jobs:
       DATABASE_URL: postgres://postgres:breeze@localhost:5432/postgres?sslmode=disable
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: breeze.api/go.mod
           cache-dependency-path: breeze.api/go.sum
