@@ -29,7 +29,7 @@ jobs:
     env:
       DATABASE_URL: postgres://postgres:breeze@localhost:5432/postgres?sslmode=disable
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v5
         with:
           go-version-file: breeze.api/go.mod
@@ -51,7 +51,7 @@ jobs:
       run:
         working-directory: breeze.web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 22
