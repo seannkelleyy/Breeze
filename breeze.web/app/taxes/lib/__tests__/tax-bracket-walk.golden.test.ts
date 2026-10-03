@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { getFederalTax } from '@/app/future/lib/tax';
 import type { TaxBracketRow } from '@/app/future/types/tax';
 
@@ -11,7 +12,7 @@ import type { TaxBracketRow } from '@/app/future/types/tax';
  * Fixture: tests/fixtures/tax-bracket-walk.json (repo root).
  */
 const fixture = JSON.parse(
-  readFileSync(join(process.cwd(), '..', 'tests', 'fixtures', 'tax-bracket-walk.json'), 'utf8'),
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', '..', 'tests', 'fixtures', 'tax-bracket-walk.json'), 'utf8'),
 ) as {
   brackets: TaxBracketRow[];
   cases: { name: string; taxableIncome: number; expectedTax: number }[];

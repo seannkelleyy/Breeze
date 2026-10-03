@@ -9,6 +9,9 @@ import {
   getPersonPaydaysForMonth,
 } from './plannerMath';
 import { getPersonBonusPerYear } from '@/lib/calc/income';
+import { WITHHOLDING_KIND_OPTIONS } from '@/lib/calc/payrollWages';
+
+export { WITHHOLDING_KIND_OPTIONS };
 
 /**
  * Monthly income waterfall for one person:
@@ -33,13 +36,6 @@ export interface PaycheckWithholding {
   /** Optional account the withheld money flows into (e.g. an HSA). */
   linkedAccountId: string | null;
 }
-
-export const WITHHOLDING_KIND_OPTIONS = [
-  { value: 'INSURANCE', label: 'Insurance' },
-  { value: 'FSA', label: 'FSA' },
-  { value: 'HSA', label: 'HSA' },
-  { value: 'OTHER', label: 'Other' },
-] as const;
 
 export interface PersonWaterfall {
   grossMonthly: number;
