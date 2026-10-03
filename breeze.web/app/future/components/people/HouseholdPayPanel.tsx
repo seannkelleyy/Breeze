@@ -52,7 +52,7 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
       withholdingsMonthly: wf.pretaxWithholdingsMonthly + wf.posttaxWithholdingsMonthly,
       takeHomeMonthly: wf.takeHomeMonthly,
     };
-  }, [people, accounts, withholdings, taxTables, deductionType]);
+  }, [people, accounts, withholdings, taxTables, deductionType, filingStatus]);
 
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-5">

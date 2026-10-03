@@ -70,7 +70,7 @@ export default function TaxesPage() {
         ADDITIONAL_MEDICARE_THRESHOLDS[filingStatus] ?? Number.POSITIVE_INFINITY,
       ),
     };
-  }, [plannerPeople, plannerAccounts, withholdings, taxTables, deductionType]);
+  }, [plannerPeople, plannerAccounts, withholdings, taxTables, deductionType, filingStatus]);
   const { waterfall, baseline, current } = scenario ?? {};
   const wealth = useMemo(() => getWealthByTaxTreatment(plannerAccounts), [plannerAccounts]);
 

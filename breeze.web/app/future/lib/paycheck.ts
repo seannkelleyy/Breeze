@@ -249,18 +249,25 @@ export function getMonthPayrollIncomes(
   month: number, // 1-based
   filingStatus: string = 'SINGLE',
 ): PayrollIncomeItem[] {
+  // Household Additional Medicare first: it depends on COMBINED FICA wages,
+  // so it must be computed before the per-person rows, then apportioned by
+  // each person's share of household FICA wages.
+  const waterfalls = people.map((p) =>
+    computePersonWaterfall(p, accounts, withholdings, taxTables, deductionType),
+  );
+  const householdFicaWages = waterfalls.reduce((s, wf) => s + wf.ficaWagesAnnual, 0);
+  const threshold = ADDITIONAL_MEDICARE_THRESHOLDS[filingStatus] ?? 200000;
+  const additionalMedicareAnnual = Math.max(0, householdFicaWages - threshold) * 0.009;
+
   const items: PayrollIncomeItem[] = [];
-  for (const person of people) {
-    const waterfall = computePersonWaterfall(
-      person,
-      accounts,
-      withholdings,
-      taxTables,
-      deductionType,
-    );
+  waterfalls.forEach((waterfall, index) => {
+    const person = people[index];
     const checksPerYear = getPaychecksPerYear(person.payCadence);
-    if (checksPerYear <= 0) continue;
-    const netPerCheck = Math.round((waterfall.takeHomeAnnual / checksPerYear) * 100) / 100;
+    if (checksPerYear <= 0) return;
+    const ficaShare = householdFicaWages > 0 ? waterfall.ficaWagesAnnual / householdFicaWages : 0;
+    const personAdditional = additionalMedicareAnnual * ficaShare;
+    const netPerCheck =
+      Math.round(((waterfall.takeHomeAnnual - personAdditional) / checksPerYear) * 100) / 100;
 
     for (const payday of getPersonPaydaysForMonth(person, year, month - 1)) {
       const pad = (n: number) => String(n).padStart(2, '0');
@@ -271,7 +278,7 @@ export function getMonthPayrollIncomes(
         date: `${payday.getFullYear()}-${pad(payday.getMonth() + 1)}-${pad(payday.getDate())}`,
       });
     }
-  }
+  });
   return items;
 }
 
