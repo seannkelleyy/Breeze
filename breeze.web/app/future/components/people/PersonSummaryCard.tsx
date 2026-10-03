@@ -2,7 +2,11 @@
 import { UserRound } from 'lucide-react';
 import { DataCard } from '@/components/common/DataCard';
 import { formatCurrencyWithCode } from '@/lib/utils';
-import { getPersonBonusPerYear, getPersonTotalIncome } from '@/lib/calc/income';
+import {
+  getPersonBonusPerYear,
+  getPersonTotalIncome,
+  isHourlyIncomeIncomplete,
+} from '@/lib/calc/income';
 import {
   computePersonWaterfall,
   getPersonSavingsAccounts,
@@ -69,8 +73,10 @@ export function PersonSummaryCard({
   const bonusDollars = getPersonBonusPerYear(person);
   const totalIncome = getPersonTotalIncome(person);
 
-  const basePay =
-    person.payType === 'hourly'
+  const hourlyIncomplete = isHourlyIncomeIncomplete(person);
+  const basePay = hourlyIncomplete
+    ? 'Add expected hours to estimate pay'
+    : person.payType === 'hourly'
       ? `${fc(person.hourlyRate)}/hr × ${person.expectedHoursPerWeek} hrs/wk`
       : fc(person.annualSalary);
 

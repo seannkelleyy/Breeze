@@ -69,3 +69,12 @@ export function accountWageTreatment(account: WageTreatmentAccount): WageTreatme
   const fica = account.accountType === 'hsa' && isPretaxPortion;
   return { incomeTax: isPretaxPortion, fica };
 }
+
+/** Additional Medicare Tax (0.9%) thresholds by filing status — statutory,
+ * not indexed. Applied at the HOUSEHOLD level on combined FICA wages. */
+export const ADDITIONAL_MEDICARE_THRESHOLDS: Record<string, number> = {
+  SINGLE: 200000,
+  MFJ: 250000,
+  MFS: 125000,
+  HOH: 200000,
+};

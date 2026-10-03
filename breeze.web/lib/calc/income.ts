@@ -29,6 +29,12 @@ export const getPersonTotalIncome = (person: PlannerPerson | undefined): number 
   return getPersonBaseAnnualIncome(person) + getPersonBonusPerYear(person);
 };
 
+/** Hourly person with no expected hours entered: income is unknowable (not
+ * zero) — the UI should prompt for hours instead of showing $0. */
+export function isHourlyIncomeIncomplete(person: PlannerPerson): boolean {
+  return person.payType === 'hourly' && person.expectedHoursPerWeek <= 0;
+}
+
 /** Sum of the given persons' salaries — contribution/match math only
  * (deliberately bonus-free: deferrals are a percentage of pay, not bonuses). */
 export const getPersonsAnnualIncome = (personIds: string[], people: PlannerPerson[]): number => {

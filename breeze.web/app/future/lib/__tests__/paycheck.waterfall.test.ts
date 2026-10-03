@@ -240,7 +240,10 @@ describe('computePersonWaterfall', () => {
     const withholdings = [makeWithholding({ amount: 5000, pretax: true })];
     const result = wf(person, accounts, withholdings);
     expect(result.taxableMonthly).toBe(0);
-    expect(result.taxesMonthly).toBe(0);
+    // FICA never had a deduction to begin with (the 401(k) is FICA-taxable),
+    // but the §125 pretax withholding still reduced FICA wages: 10,000 −
+    // 5,000 = 5,000 × 7.65% = 382.50. Zero income tax, real FICA.
+    expect(result.taxesMonthly).toBeCloseTo(382.5, 2);
   });
 
   it('supports salary-percent savings contributions', () => {
