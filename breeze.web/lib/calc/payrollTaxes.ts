@@ -43,6 +43,33 @@ export interface PayrollTaxResult {
   effectiveRate: number;
 }
 
+export interface FicaBreakdown {
+  socialSecurityTax: number;
+  medicareTax: number;
+  additionalMedicareTax: number;
+  total: number;
+}
+
+/** FICA over the FICA wage base: SS 6.2% capped at the wage base, Medicare
+ * 1.45% on all FICA wages, Additional Medicare Tax 0.9% above the
+ * filing-status threshold. The single FICA implementation — both the
+ * waterfall and the Taxes page use this. */
+export function computeFicaTax(
+  ficaWages: number,
+  ssWageBase: number,
+  additionalMedicareThreshold: number,
+): FicaBreakdown {
+  const socialSecurityTax = Math.min(ficaWages, ssWageBase) * 0.062;
+  const medicareTax = ficaWages * 0.0145;
+  const additionalMedicareTax = Math.max(0, ficaWages - additionalMedicareThreshold) * 0.009;
+  return {
+    socialSecurityTax,
+    medicareTax,
+    additionalMedicareTax,
+    total: socialSecurityTax + medicareTax + additionalMedicareTax,
+  };
+}
+
 /** Federal income tax over a bracket ladder. */
 export function walkFederalBrackets(taxableIncome: number, brackets: TaxBracket[]): number {
   let tax = 0;
@@ -61,11 +88,8 @@ export function computePayrollTaxes(input: PayrollTaxInput): PayrollTaxResult {
   const taxable = Math.max(0, incomeTaxWages - input.standardDeduction);
   const federalTax = walkFederalBrackets(taxable, input.brackets);
 
-  const socialSecurityTax = Math.min(ficaWages, input.ssWageBase) * 0.062;
-  const medicareTax = ficaWages * 0.0145;
-  const additionalMedicareTax =
-    Math.max(0, ficaWages - input.additionalMedicareThreshold) * 0.009;
-  const ficaTax = socialSecurityTax + medicareTax + additionalMedicareTax;
+  const { socialSecurityTax, medicareTax, additionalMedicareTax, total: ficaTax } =
+    computeFicaTax(ficaWages, input.ssWageBase, input.additionalMedicareThreshold);
 
   const totalTax = federalTax + ficaTax;
   return {

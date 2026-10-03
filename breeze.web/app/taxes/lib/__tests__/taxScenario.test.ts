@@ -17,7 +17,7 @@ const tables: TaxYearTables = { year: 2026, brackets, standardDeduction: 16100, 
 
 describe('computeTaxScenario', () => {
   it('walks the brackets and sums slices to the taxable income', () => {
-    const s = computeTaxScenario('base', 100000, 0, tables, 'STANDARD');
+    const s = computeTaxScenario('base', 100000, 0, 0, tables, 'STANDARD');
     expect(s.deduction).toBe(16100);
     expect(s.taxableIncome).toBe(83900);
     const sliceSum = s.slices.reduce((sum, x) => sum + x.taxedAmount, 0);
@@ -28,7 +28,7 @@ describe('computeTaxScenario', () => {
   });
 
   it('includes FICA on full gross in the total', () => {
-    const s = computeTaxScenario('base', 100000, 0, tables, 'STANDARD');
+    const s = computeTaxScenario('base', 100000, 0, 0, tables, 'STANDARD');
     const fica = Math.min(100000, 184500) * 0.062 + 100000 * 0.0145;
     expect(s.ficaTax).toBeCloseTo(fica, 6);
     expect(s.totalTax).toBeCloseTo(s.federalTax + fica, 6);
@@ -36,8 +36,8 @@ describe('computeTaxScenario', () => {
   });
 
   it('pre-tax reductions lower taxable income and can drop a bracket', () => {
-    const base = computeTaxScenario('base', 100000, 0, tables, 'STANDARD');
-    const reduced = computeTaxScenario('current', 100000, 35000, tables, 'STANDARD');
+    const base = computeTaxScenario('base', 100000, 0, 0, tables, 'STANDARD');
+    const reduced = computeTaxScenario('current', 100000, 35000, 0, tables, 'STANDARD');
     expect(reduced.taxableIncome).toBe(base.taxableIncome - 35000);
     // 48,900 taxable drops from the 22% bracket into 12%.
     expect(reduced.marginalRate).toBe(0.12);
@@ -45,7 +45,7 @@ describe('computeTaxScenario', () => {
   });
 
   it('floors taxable income at zero when reductions exceed gross', () => {
-    const s = computeTaxScenario('maxed', 60000, 80000, tables, 'STANDARD');
+    const s = computeTaxScenario('maxed', 60000, 80000, 0, tables, 'STANDARD');
     expect(s.taxableIncome).toBe(0);
     expect(s.federalTax).toBe(0);
     expect(s.slices).toEqual([]);
@@ -53,19 +53,47 @@ describe('computeTaxScenario', () => {
   });
 
   it('uses no deduction when filing itemized', () => {
-    const s = computeTaxScenario('itemized', 100000, 0, tables, 'ITEMIZED');
+    const s = computeTaxScenario('itemized', 100000, 0, 0, tables, 'ITEMIZED');
     expect(s.deduction).toBe(0);
     expect(s.taxableIncome).toBe(100000);
+  });
+
+  it('FICA shrinks only by §125 reductions — 401(k) does not touch it', () => {
+    const none = computeTaxScenario('none', 100000, 0, 0, tables, 'STANDARD', 200000);
+    const hsa = computeTaxScenario('hsa', 100000, 0, 5000, tables, 'STANDARD', 200000);
+    const deferral = computeTaxScenario('deferral', 100000, 0, 0, tables, 'STANDARD', 200000);
+
+    expect(hsa.ficaTax).toBeCloseTo(none.ficaTax - 5000 * 0.0765, 2);
+    expect(deferral.ficaTax).toBeCloseTo(none.ficaTax, 2); // 401(k) is FICA-taxable
+  });
+
+  it('additional Medicare applies above the threshold on FICA wages', () => {
+    const under = computeTaxScenario('under', 250000, 0, 0, tables, 'STANDARD', 200000);
+    // 250k is still ABOVE the 200k threshold — the additional applies here too.
+    expect(under.ficaTax).toBeCloseTo(
+      Math.min(250000, 184500) * 0.062 + 250000 * 0.0145 + 50000 * 0.009,
+      2,
+    );
+    const over = computeTaxScenario('over', 300000, 0, 0, tables, 'STANDARD', 200000);
+    expect(over.ficaTax).toBeCloseTo(
+      Math.min(300000, 184500) * 0.062 + 300000 * 0.0145 + (300000 - 200000) * 0.009,
+      2,
+    );
   });
 });
 
 describe('householdPretaxReductions', () => {
-  it('annualizes pre-tax savings and withholdings from the waterfall', () => {
+  it('annualizes pre-tax reductions and splits them by wage base', () => {
     const wf = {
       pretaxSavingsMonthly: 2000,
       pretaxWithholdingsMonthly: 250,
+      ficaExemptMonthly: 750, // HSA/§125 share
     } as PersonWaterfall;
-    expect(householdPretaxReductions(wf)).toBe(27000);
+    const split = householdPretaxReductions(wf);
+    // §125 share: 750 × 12 — reduces BOTH bases.
+    expect(split.ficaExempt).toBe(9000);
+    // Income-tax-only: (2000 + 250 − 750) × 12 — traditional deferrals + OTHER.
+    expect(split.incomeTax).toBe(18000);
   });
 });
 

@@ -55,6 +55,7 @@ export interface PersonWaterfall {
   /** Post-tax withholdings. */
   posttaxWithholdingsMonthly: number;
   taxableMonthly: number;
+  ficaExemptMonthly: number;
   ficaWagesAnnual: number;
   incomeTaxWagesAnnual: number;
   effectiveRate: number;
@@ -213,6 +214,7 @@ export function computePersonWaterfall(
     pretaxWithholdingsMonthly,
     posttaxWithholdingsMonthly,
     taxableMonthly: incomeTaxWagesMonthly,
+    ficaExemptMonthly,
     ficaWagesAnnual,
     incomeTaxWagesAnnual,
     effectiveRate,
@@ -294,6 +296,7 @@ export function computeHouseholdWaterfall(
     pretaxWithholdingsMonthly: 0,
     posttaxWithholdingsMonthly: 0,
     taxableMonthly: 0,
+    ficaExemptMonthly: 0,
     ficaWagesAnnual: 0,
     incomeTaxWagesAnnual: 0,
     effectiveRate: 0,
@@ -312,6 +315,7 @@ export function computeHouseholdWaterfall(
     sum.pretaxWithholdingsMonthly += wf.pretaxWithholdingsMonthly;
     sum.posttaxWithholdingsMonthly += wf.posttaxWithholdingsMonthly;
     sum.taxableMonthly += wf.taxableMonthly;
+    sum.ficaExemptMonthly += wf.ficaExemptMonthly;
     sum.ficaWagesAnnual += wf.ficaWagesAnnual;
     sum.incomeTaxWagesAnnual += wf.incomeTaxWagesAnnual;
     sum.taxesMonthly += wf.taxesMonthly;

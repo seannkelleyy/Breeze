@@ -5,6 +5,7 @@
  * Tables are injected (TaxYearTables) — sourced from the API's taxYearData query.
  */
 import type { TaxBracketRow, TaxYearTables } from '../../future/types/tax';
+import { computeFicaTax } from '@/lib/calc/payrollTaxes';
 import type { PersonWaterfall } from '../../future/lib/paycheck';
 
 export interface BracketSlice {
@@ -43,12 +44,26 @@ const deductionFor = (tables: TaxYearTables, deductionType: string): number =>
 export function computeTaxScenario(
   label: string,
   grossIncome: number,
-  pretaxReductions: number,
+  incomeTaxReductions: number,
+  ficaReductions: number,
   tables: TaxYearTables,
   deductionType: string,
+  additionalMedicareThreshold = Number.POSITIVE_INFINITY,
 ): TaxScenario {
   const deduction = deductionFor(tables, deductionType);
-  const taxableIncome = Math.max(0, grossIncome - pretaxReductions - deduction);
+  const taxableIncome = Math.max(
+    0,
+    grossIncome - incomeTaxReductions - ficaReductions - deduction,
+  );
+  // FICA wages shrink only by §125 items (HSA, premiums, FSA) — traditional
+  // 401(k)/457 deferrals are FICA-taxable. SS capped at the wage base,
+  // +0.9% Additional Medicare above the filing-status threshold.
+  const ficaWages = Math.max(0, grossIncome - ficaReductions);
+  const { total: ficaTax } = computeFicaTax(
+    ficaWages,
+    tables.ssWageBase,
+    additionalMedicareThreshold,
+  );
 
   const slices: BracketSlice[] = [];
   let federalTax = 0;
@@ -64,15 +79,12 @@ export function computeTaxScenario(
     slices.push({ rate: bracket.rate, taxedAmount, tax, minimum: bracket.minimum, maximum: bracket.maximum });
   }
 
-  // FICA applies to full gross — consistent with the app's waterfall convention.
-  const ficaTax =
-    Math.min(grossIncome, tables.ssWageBase) * 0.062 + grossIncome * 0.0145;
   const totalTax = federalTax + ficaTax;
 
   return {
     label,
     grossIncome,
-    pretaxReductions,
+    pretaxReductions: incomeTaxReductions + ficaReductions,
     deduction,
     taxableIncome,
     slices,
@@ -86,8 +98,13 @@ export function computeTaxScenario(
 
 /** Annual pre-tax reductions for the household: 401(k)/HSA contributions
  * (pre-tax share only) plus pre-tax withholdings, from the payroll waterfall. */
-export function householdPretaxReductions(waterfall: PersonWaterfall): number {
-  return (waterfall.pretaxSavingsMonthly + waterfall.pretaxWithholdingsMonthly) * 12;
+export function householdPretaxReductions(waterfall: PersonWaterfall): {
+  incomeTax: number;
+  ficaExempt: number;
+} {
+  const ficaExempt = waterfall.ficaExemptMonthly * 12;
+  const total = (waterfall.pretaxSavingsMonthly + waterfall.pretaxWithholdingsMonthly) * 12;
+  return { incomeTax: total - ficaExempt, ficaExempt };
 }
 
 export interface BracketLadderRow {

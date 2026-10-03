@@ -10,6 +10,7 @@ import { usePaycheckDeductions } from '../future/hooks/planner/usePaycheckDeduct
 import useTaxYear from '../future/hooks/planner/useTaxYear';
 import { computeHouseholdWaterfall } from '../future/lib/paycheck';
 import { computeTaxScenario, householdPretaxReductions } from './lib/taxScenario';
+import { ADDITIONAL_MEDICARE_THRESHOLDS } from '@/lib/calc/payrollWages';
 import { TaxScenarioColumns } from './components/TaxScenarioColumns';
 import { BracketLadder } from './components/BracketLadder';
 import { buildBracketLadder } from './lib/taxScenario';
@@ -50,8 +51,24 @@ export default function TaxesPage() {
     const reductions = householdPretaxReductions(waterfall);
     return {
       waterfall,
-      baseline: computeTaxScenario('Without tax-advantaged accounts', grossIncome, 0, taxTables, deductionType),
-      current: computeTaxScenario('Your setup today', grossIncome, reductions, taxTables, deductionType),
+      baseline: computeTaxScenario(
+        'Without tax-advantaged accounts',
+        grossIncome,
+        0,
+        0,
+        taxTables,
+        deductionType,
+        ADDITIONAL_MEDICARE_THRESHOLDS[filingStatus] ?? Number.POSITIVE_INFINITY,
+      ),
+      current: computeTaxScenario(
+        'Your setup today',
+        grossIncome,
+        reductions.incomeTax,
+        reductions.ficaExempt,
+        taxTables,
+        deductionType,
+        ADDITIONAL_MEDICARE_THRESHOLDS[filingStatus] ?? Number.POSITIVE_INFINITY,
+      ),
     };
   }, [plannerPeople, plannerAccounts, withholdings, taxTables, deductionType]);
   const { waterfall, baseline, current } = scenario ?? {};
