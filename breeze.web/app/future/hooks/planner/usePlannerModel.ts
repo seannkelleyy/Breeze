@@ -110,6 +110,7 @@ const usePlannerModel = () => {
     plannerPeople,
     filteredAccounts,
     allWithholdings,
+    filingStatus,
   );
   const annualWithdrawal = monthlyExpenses * 12;
   const { projectionRows, finalBalances, projectedNetWorthAtTargetAge, portfolioAverageRates } = useProjections(

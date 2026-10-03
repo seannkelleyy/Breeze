@@ -39,7 +39,7 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
   const taxTables = useTaxYear(filingStatus);
 
   const totals = useMemo(() => {
-    const wf = computeHouseholdWaterfall(people, accounts, withholdings, taxTables, deductionType);
+    const wf = computeHouseholdWaterfall(people, accounts, withholdings, taxTables, deductionType, filingStatus);
     const totalIncome = people.reduce((sum, p) => sum + getPersonTotalIncome(p), 0);
     const bonusIncome = people.reduce((sum, p) => sum + getPersonBonusPerYear(p) / 12, 0);
     return {

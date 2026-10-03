@@ -225,8 +225,6 @@ export function computePersonWaterfall(
   };
 }
 
-const NEUTRAL_NET_FACTOR = 0.8;
-
 export interface PayrollIncomeItem {
   personId: string;
   name: string;
@@ -249,6 +247,7 @@ export function getMonthPayrollIncomes(
   deductionType: string,
   year: number,
   month: number, // 1-based
+  filingStatus: string = 'SINGLE',
 ): PayrollIncomeItem[] {
   const items: PayrollIncomeItem[] = [];
   for (const person of people) {
@@ -287,6 +286,7 @@ export function computeHouseholdWaterfall(
   withholdings: PaycheckWithholding[],
   taxTables: TaxYearTables | null,
   deductionType: string,
+  filingStatus: string = 'SINGLE',
 ): PersonWaterfall {
   const sum: PersonWaterfall = {
     grossMonthly: 0,
@@ -329,7 +329,7 @@ export function computeHouseholdWaterfall(
   // combined FICA wages above the filing-status threshold ($200k single/HOH,
   // $250k MFJ, $125k MFS — statutory, not indexed). Per-person waterfalls
   // never see it; the household step adds it to taxes and take-home.
-  const threshold = ADDITIONAL_MEDICARE_THRESHOLDS[deductionType] ?? 200000;
+  const threshold = ADDITIONAL_MEDICARE_THRESHOLDS[filingStatus] ?? 200000;
   const additionalMedicareMonthly =
     Math.max(0, sum.ficaWagesAnnual - threshold) * 0.009 / 12;
   if (additionalMedicareMonthly > 0) {
