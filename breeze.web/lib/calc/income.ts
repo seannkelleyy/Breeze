@@ -21,16 +21,13 @@ export const getPersonBonusPerYear = (person: PlannerPerson): number => {
     : person.annualBonus;
 };
 
-/** Total annual income: hourly-aware base plus the full yearly bonus. */
-export const getPersonTotalIncome = (person: PlannerPerson): number =>
-  getPersonBaseAnnualIncome(person) + getPersonBonusPerYear(person);
-
-/**
- * Canonical person income for household totals. Note: salary-based (hourly
- * workers should use getPersonTotalIncome) — retained for the snapshot path.
- */
-export const getTotalAnnualIncome = (p: PlannerPerson | undefined): number =>
-  p ? p.annualSalary + getPersonBonusPerYear(p) : 0;
+/** CANONICAL person annual income: hourly-aware base (hours × 52; missing
+ * hours = zero income) plus the full yearly bonus. The single reading —
+ * there is no other total-income function. Undefined-tolerant. */
+export const getPersonTotalIncome = (person: PlannerPerson | undefined): number => {
+  if (!person) return 0;
+  return getPersonBaseAnnualIncome(person) + getPersonBonusPerYear(person);
+};
 
 /** Sum of the given persons' salaries — contribution/match math only
  * (deliberately bonus-free: deferrals are a percentage of pay, not bonuses). */

@@ -8,7 +8,7 @@ import type { AccountType, PlannerAccount } from '../types/account';
 import type { IrsLimitConfig, IrsLimitKey } from '../types/irs';
 import type { PayCadence, PlannerPerson } from '../types/person';
 import * as plannerConfig from './config';
-import { getPersonsAnnualIncome, getTotalAnnualIncome } from '@/lib/calc/income';
+import { getPersonTotalIncome, getPersonsAnnualIncome } from '@/lib/calc/income';
 import * as plannerConstants from './constants';
 
 const { isNonContributingAccountType } = plannerConfig;
@@ -64,7 +64,7 @@ export const getPlannerContributionTotals = (
 };
 export const getPlannerHouseholdSnapshot = (people: PlannerPerson[]) => {
   const bd = people[0]?.birthday ?? '';
-  const hi = people.reduce((sum, p) => sum + getTotalAnnualIncome(p), 0);
+  const hi = people.reduce((sum, p) => sum + getPersonTotalIncome(p), 0);
   const ca = getAgeFromBirthday(bd);
   return {
     people,

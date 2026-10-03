@@ -3,7 +3,6 @@ import {
   getPersonBaseAnnualIncome,
   getPersonBonusPerYear,
   getPersonTotalIncome,
-  getTotalAnnualIncome,
   getPersonsAnnualIncome,
 } from '../income';
 import type { PlannerPerson } from '@/app/future/types/person';
@@ -54,12 +53,6 @@ describe('lib/calc/income — storage contract: annualBonus is the annual-equiva
     expect(getPersonTotalIncome(p)).toBe(114400);
   });
 
-  it('getTotalAnnualIncome stays salary-based for the snapshot path', () => {
-    const p = person({ payType: 'hourly', hourlyRate: 50, expectedHoursPerWeek: 40 });
-    // Reads annualSalary (120000), not the hourly base (104000) — hourly
-    // households must use getPersonTotalIncome instead.
-    expect(getTotalAnnualIncome(p)).toBe(120000);
-  });
 
   it('getPersonsAnnualIncome sums owner salaries only, falling back to people[0]', () => {
     const a = person({ id: 'a', annualSalary: 90000 });
