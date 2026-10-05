@@ -43,6 +43,30 @@ export interface PayrollTaxResult {
   effectiveRate: number;
 }
 
+/** Employer withholding rule: 0.9% on ONE person's FICA wages above $200,000,
+ * regardless of filing status. This is what actual paychecks reflect. */
+export const ADDITIONAL_MEDICARE_WITHHOLDING_THRESHOLD = 200000;
+
+/** Employer-withheld Additional Medicare Tax for one person. */
+export function additionalMedicareWithheld(ficaWages: number): number {
+  return Math.max(0, ficaWages - ADDITIONAL_MEDICARE_WITHHOLDING_THRESHOLD) * 0.009;
+}
+
+/** Additional Medicare Tax OWED on the return: 0.9% on COMBINED household
+ * FICA wages above the filing-status threshold ($250k MFJ, $125k MFS,
+ * $200k single/HOH — statutory, frozen since 2013). Settled at tax time or
+ * through extra W-4 withholding. */
+export function additionalMedicareOwed(ficaWages: number, filingStatus: string): number {
+  const thresholds: Record<string, number> = {
+    MFJ: 250000,
+    MFS: 125000,
+    SINGLE: 200000,
+    HOH: 200000,
+  };
+  const threshold = thresholds[filingStatus] ?? 200000;
+  return Math.max(0, ficaWages - threshold) * 0.009;
+}
+
 export interface FicaBreakdown {
   socialSecurityTax: number;
   medicareTax: number;

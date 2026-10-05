@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { computePersonWaterfall, getPersonSavingsSplit } from '../paycheck';
+import {
+  computeHouseholdWaterfall,
+  computePersonWaterfall,
+  getMonthPayrollIncomes,
+  getPersonSavingsSplit,
+} from '../paycheck';
+import { additionalMedicareOwed } from '@/lib/calc/payrollTaxes';
 import type { PaycheckWithholding } from '../paycheck';
 import { PlannerPerson } from '../../types/person';
 import { PlannerAccount } from '../../types/account';
@@ -272,7 +278,6 @@ describe('getPersonSavingsSplit', () => {
   });
 });
 
-import { getMonthPayrollIncomes, computeHouseholdWaterfall } from '../paycheck';
 
 describe('getMonthPayrollIncomes', () => {
   it('creates one row per payday with the net per-check amount', () => {
@@ -331,5 +336,52 @@ describe('computeHouseholdWaterfall', () => {
     expect(total.pretaxWithholdingsMonthly).toBe(200);
     expect(total.takeHomeMonthly).toBeGreaterThan(0);
     expect(total.effectiveRate).toBeCloseTo(total.taxesMonthly / total.grossMonthly, 6);
+  });
+});
+
+describe('Additional Medicare — withheld vs owed', () => {
+  it('dual-$150k MFJ household: nothing withheld, $450 owed on the return', () => {
+    // Neither spouse crosses the $200k withholding threshold, so paychecks
+    // mirror reality — no extra withholding. The RETURN still owes 0.9% on
+    // combined FICA wages over the $250k MFJ threshold: (300k − 250k) × 0.9%.
+    const sean = makePerson({ id: 'sean', annualSalary: 150000, annualBonus: 0 });
+    const aalissia = makePerson({ id: 'aalissia', annualSalary: 150000, annualBonus: 0 });
+    const household = computeHouseholdWaterfall(
+      [sean, aalissia],
+      [],
+      [],
+      SINGLE_2025_TABLES,
+      'STANDARD',
+      'MFJ',
+    );
+
+    expect(household.additionalMedicareWithheldAnnual).toBe(0);
+    expect(household.additionalMedicareOwedAnnual).toBeCloseTo(450, 6);
+    // Invariant: take-home = gross − taxes, and household taxes include the
+    // $450 additional Medicare owed (withheld was zero).
+    expect(household.takeHomeAnnual).toBeCloseTo(
+      household.grossMonthly * 12 - household.taxesMonthly * 12,
+      2,
+    );
+    // Behavioral check: the same household taxed with the SINGLE threshold
+    // ($200k) takes home exactly $450 less — the wider MFJ threshold is
+    // worth that much in additional-Medicare relief.
+    const asSingle = computeHouseholdWaterfall(
+      [sean, aalissia],
+      [],
+      [],
+      SINGLE_2025_TABLES,
+      'STANDARD',
+      'SINGLE',
+    );
+    expect(asSingle.takeHomeAnnual).toBeCloseTo(household.takeHomeAnnual - 450, 2);
+  });
+
+  it('single $250k wage: withheld equals owed for SINGLE filers', () => {
+    const person = makePerson({ annualSalary: 250000, annualBonus: 0 });
+    const wf = computePersonWaterfall(person, [], [], SINGLE_2025_TABLES, 'STANDARD');
+    const owed = additionalMedicareOwed(wf.ficaWagesAnnual, 'SINGLE');
+    // (250k − 200k) × 0.9% — what the employer withheld matches the return.
+    expect(wf.additionalMedicareWithheldAnnual).toBeCloseTo(owed, 6);
   });
 });

@@ -4,11 +4,14 @@ import type { TaxYearTables } from '../types/tax';
 import { PAYROLL_SAVINGS_ACCOUNT_TYPES } from './config';
 import { getFicaTax, getFederalTax } from './tax';
 import {
-  ADDITIONAL_MEDICARE_THRESHOLDS,
   FICA_EXEMPT_ACCOUNT_TYPES,
   withholdingTreatmentFor,
   WITHHOLDING_KIND_OPTIONS,
 } from '@/lib/calc/payrollWages';
+import {
+  additionalMedicareOwed,
+  additionalMedicareWithheld,
+} from '@/lib/calc/payrollTaxes';
 import {
   getEmployeeMonthlyContribution,
   getPaychecksPerYear,
@@ -58,6 +61,13 @@ export interface PersonWaterfall {
   ficaExemptMonthly: number;
   ficaWagesAnnual: number;
   incomeTaxWagesAnnual: number;
+  /** Employer-withheld 0.9% Additional Medicare (this person's wages over
+   * $200k) — mirrors the actual paycheck. */
+  additionalMedicareWithheldAnnual: number;
+  /** 0.9% owed on the return: combined household FICA wages over the
+   * filing-status threshold. Present only on the HOUSEHOLD waterfall — a
+   * single-person waterfall can't know it. */
+  additionalMedicareOwedAnnual?: number;
   effectiveRate: number;
   taxesMonthly: number;
   /** Gross minus taxes. */
@@ -197,7 +207,10 @@ export function computePersonWaterfall(
     ? getFederalTax(incomeTaxWagesAnnual, taxTables.brackets)
     : 0;
   const ficaTaxAnnual = getFicaTax(ficaWagesAnnual, taxTables?.ssWageBase ?? 184500);
-  const taxesAnnual = federalTaxAnnual + ficaTaxAnnual;
+  // Employer withholding rule: 0.9% on THIS person's FICA wages above $200k,
+  // regardless of filing status. Mirrors the actual paycheck.
+  const additionalMedicareWithheldAnnual = additionalMedicareWithheld(ficaWagesAnnual);
+  const taxesAnnual = federalTaxAnnual + ficaTaxAnnual + additionalMedicareWithheldAnnual;
   const effectiveRate = grossMonthly > 0 ? taxesAnnual / (grossMonthly * 12) : 0;
   const taxesMonthly = taxesAnnual / 12;
 
@@ -217,6 +230,7 @@ export function computePersonWaterfall(
     ficaExemptMonthly,
     ficaWagesAnnual,
     incomeTaxWagesAnnual,
+    additionalMedicareWithheldAnnual,
     effectiveRate,
     taxesMonthly,
     netAfterTaxesMonthly,
@@ -249,25 +263,19 @@ export function getMonthPayrollIncomes(
   month: number, // 1-based
   filingStatus: string = 'SINGLE',
 ): PayrollIncomeItem[] {
-  // Household Additional Medicare first: it depends on COMBINED FICA wages,
-  // so it must be computed before the per-person rows, then apportioned by
-  // each person's share of household FICA wages.
-  const waterfalls = people.map((p) =>
-    computePersonWaterfall(p, accounts, withholdings, taxTables, deductionType),
-  );
-  const householdFicaWages = waterfalls.reduce((s, wf) => s + wf.ficaWagesAnnual, 0);
-  const threshold = ADDITIONAL_MEDICARE_THRESHOLDS[filingStatus] ?? 200000;
-  const additionalMedicareAnnual = Math.max(0, householdFicaWages - threshold) * 0.009;
-
   const items: PayrollIncomeItem[] = [];
-  waterfalls.forEach((waterfall, index) => {
-    const person = people[index];
+  for (const person of people) {
+    const waterfall = computePersonWaterfall(
+      person,
+      accounts,
+      withholdings,
+      taxTables,
+      deductionType,
+    );
     const checksPerYear = getPaychecksPerYear(person.payCadence);
-    if (checksPerYear <= 0) return;
-    const ficaShare = householdFicaWages > 0 ? waterfall.ficaWagesAnnual / householdFicaWages : 0;
-    const personAdditional = additionalMedicareAnnual * ficaShare;
+    if (checksPerYear <= 0) continue;
     const netPerCheck =
-      Math.round(((waterfall.takeHomeAnnual - personAdditional) / checksPerYear) * 100) / 100;
+      Math.round((waterfall.takeHomeAnnual / checksPerYear) * 100) / 100;
 
     for (const payday of getPersonPaydaysForMonth(person, year, month - 1)) {
       const pad = (n: number) => String(n).padStart(2, '0');
@@ -278,7 +286,7 @@ export function getMonthPayrollIncomes(
         date: `${payday.getFullYear()}-${pad(payday.getMonth() + 1)}-${pad(payday.getDate())}`,
       });
     }
-  });
+  }
   return items;
 }
 
@@ -306,6 +314,8 @@ export function computeHouseholdWaterfall(
     ficaExemptMonthly: 0,
     ficaWagesAnnual: 0,
     incomeTaxWagesAnnual: 0,
+    additionalMedicareWithheldAnnual: 0,
+    additionalMedicareOwedAnnual: 0,
     effectiveRate: 0,
     taxesMonthly: 0,
     netAfterTaxesMonthly: 0,
@@ -325,6 +335,7 @@ export function computeHouseholdWaterfall(
     sum.ficaExemptMonthly += wf.ficaExemptMonthly;
     sum.ficaWagesAnnual += wf.ficaWagesAnnual;
     sum.incomeTaxWagesAnnual += wf.incomeTaxWagesAnnual;
+    sum.additionalMedicareWithheldAnnual += wf.additionalMedicareWithheldAnnual;
     sum.taxesMonthly += wf.taxesMonthly;
     sum.netAfterTaxesMonthly += wf.netAfterTaxesMonthly;
     sum.takeHomeMonthly += wf.takeHomeMonthly;
@@ -332,18 +343,31 @@ export function computeHouseholdWaterfall(
   }
   sum.effectiveRate = sum.grossMonthly > 0 ? sum.taxesMonthly / sum.grossMonthly : 0;
 
-  // Additional Medicare Tax (0.9%) is a HOUSEHOLD-level check: it applies to
-  // combined FICA wages above the filing-status threshold ($200k single/HOH,
-  // $250k MFJ, $125k MFS — statutory, not indexed). Per-person waterfalls
-  // never see it; the household step adds it to taxes and take-home.
-  const threshold = ADDITIONAL_MEDICARE_THRESHOLDS[filingStatus] ?? 200000;
-  const additionalMedicareMonthly =
-    Math.max(0, sum.ficaWagesAnnual - threshold) * 0.009 / 12;
-  if (additionalMedicareMonthly > 0) {
-    sum.taxesMonthly += additionalMedicareMonthly;
-    sum.takeHomeMonthly -= additionalMedicareMonthly;
-    sum.takeHomeAnnual -= additionalMedicareMonthly * 12;
+  // Additional Medicare Tax, withheld-vs-owed (two different rules):
+  // - WITHHELD: employer withholds 0.9% on ONE person's wages above $200k,
+  //   regardless of filing status — already inside each person's taxes.
+  // - OWED: 0.9% on COMBINED household FICA wages above the filing-status
+  //   threshold ($200k single/HOH, $250k MFJ, $125k MFS — statutory, not
+  //   indexed). Only the shortfall between owed and withheld is extra tax;
+  //   it lands on the return or through extra W-4 withholding.
+  const additionalMedicareWithheldAnnual = sum.additionalMedicareWithheldAnnual;
+  const additionalMedicareOwedAnnual = additionalMedicareOwed(
+    sum.ficaWagesAnnual,
+    filingStatus,
+  );
+  const additionalMedicareDue = Math.max(
+    0,
+    additionalMedicareOwedAnnual - additionalMedicareWithheldAnnual,
+  );
+  if (additionalMedicareDue > 0) {
+    const dueMonthly = additionalMedicareDue / 12;
+    sum.taxesMonthly += dueMonthly;
+    sum.netAfterTaxesMonthly -= dueMonthly;
+    sum.takeHomeMonthly -= dueMonthly;
+    sum.takeHomeAnnual -= additionalMedicareDue;
     sum.effectiveRate = sum.grossMonthly > 0 ? sum.taxesMonthly / sum.grossMonthly : 0;
   }
+  sum.additionalMedicareWithheldAnnual = additionalMedicareWithheldAnnual;
+  sum.additionalMedicareOwedAnnual = additionalMedicareOwedAnnual;
   return sum;
 }
