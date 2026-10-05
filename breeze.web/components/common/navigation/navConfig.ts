@@ -19,70 +19,113 @@ export type RouteNavItem = {
   icon: LucideIcon;
 };
 
-/** Core routes — the desktop nav bar and the mobile bottom tab bar. */
+export type NavGroup = {
+  label: string;
+  title: string;
+  icon: LucideIcon;
+  items: RouteNavItem[];
+};
+
+// ── Individual routes (defined once, referenced everywhere) ──
+
+const dashboard: RouteNavItem = {
+  label: 'Dashboard',
+  to: '/',
+  title: 'Dashboard',
+  icon: LayoutDashboard,
+};
+const people: RouteNavItem = {
+  label: 'People',
+  to: '/people',
+  title: 'People',
+  icon: UserRound,
+};
+const accounts: RouteNavItem = {
+  label: 'Accounts',
+  to: '/accounts',
+  title: 'Accounts',
+  icon: Users,
+};
+const expenses: RouteNavItem = {
+  label: 'Expenses',
+  to: '/expenses',
+  title: 'Expenses',
+  icon: Receipt,
+};
+const future: RouteNavItem = {
+  label: 'Future',
+  to: '/future',
+  title: 'Future',
+  icon: TrendingUp,
+};
+const goals: RouteNavItem = {
+  label: 'Goals',
+  to: '/goals',
+  title: 'Goals',
+  icon: Target,
+};
+const budget: RouteNavItem = {
+  label: 'Budget',
+  to: '/budget',
+  title: 'Budget',
+  icon: Wallet,
+};
+const mortgage: RouteNavItem = {
+  label: 'Mortgage',
+  to: '/mortgage',
+  title: 'Mortgage Calculator',
+  icon: Calculator,
+};
+const connections: RouteNavItem = {
+  label: 'Connections',
+  to: '/plaid-connections',
+  title: 'Plaid Connections',
+  icon: Link2,
+};
+const taxes: RouteNavItem = {
+  label: 'Taxes',
+  to: '/taxes',
+  title: 'Taxes',
+  icon: Percent,
+};
+
+// ── Mobile bottom tab bar: core categories ──
+
 export const routeNavItems: ReadonlyArray<RouteNavItem> = [
-  {
-    label: 'Dashboard',
-    to: '/',
-    title: 'Dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    label: 'People',
-    to: '/people',
-    title: 'People',
-    icon: UserRound,
-  },
-  {
-    label: 'Accounts',
-    to: '/accounts',
-    title: 'Accounts',
-    icon: Users,
-  },
-  {
-    label: 'Expenses',
-    to: '/expenses',
-    title: 'Expenses',
-    icon: Receipt,
-  },
-  {
-    label: 'Future',
-    to: '/future',
-    title: 'Future',
-    icon: TrendingUp,
-  },
-  {
-    label: 'Goals',
-    to: '/goals',
-    title: 'Goals',
-    icon: Target,
-  },
+  dashboard,
+  people,
+  accounts,
+  expenses,
+  future,
+  goals,
 ];
 
-/** Secondary routes — desktop nav bar only (former Tools dropdown contents). */
+// ── Secondary routes: reached via the mobile "More" menu ──
+
 export const secondaryNavItems: ReadonlyArray<RouteNavItem> = [
+  budget,
+  mortgage,
+  connections,
+  taxes,
+];
+
+// ── Desktop nav bar: standalone links + grouped dropdowns ──
+
+/** Standalone desktop links, in order. */
+export const standaloneNavItems: ReadonlyArray<RouteNavItem> = [dashboard, people];
+
+/** Grouped desktop dropdowns, in order. */
+export const navGroups: ReadonlyArray<NavGroup> = [
   {
-    label: 'Budget',
-    to: '/budget',
-    title: 'Budget',
+    label: 'Money',
+    title: 'Accounts, spending, budgets, and bank connections',
     icon: Wallet,
+    items: [accounts, expenses, budget, connections],
   },
   {
-    label: 'Mortgage',
-    to: '/mortgage',
-    title: 'Mortgage Calculator',
-    icon: Calculator,
-  },
-  {
-    label: 'Connections',
-    to: '/plaid-connections',
-    title: 'Plaid Connections',
-    icon: Link2,
-  },
-  {
-    label: 'Taxes',
-    to: '/taxes',
-    title: 'Taxes',
-    icon: Percent,
+    label: 'Plan',
+    title: 'Projections, goals, and taxes',
+    icon: TrendingUp,
+    items: [future, goals, taxes, mortgage],
   },
 ];

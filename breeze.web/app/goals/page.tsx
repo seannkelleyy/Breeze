@@ -13,6 +13,7 @@ import { usePlannerState } from '@/app/future/providers/PlannerStateProvider';
 import { usePlannerHydration } from '@/app/future/hooks/usePlannerHydration';
 import { Progress } from '@/components/ui/progress';
 import { formatCurrencyWithCode } from '@/lib/utils';
+import { isLiabilityAccountType } from '../future/lib/config';
 import useGoalsApi from './hooks/useGoalsApi';
 import { Goal, GOAL_CATEGORIES } from './types/goal';
 import type { PlannerAccount } from '@/app/future/types/account';
@@ -348,8 +349,10 @@ function GoalProgressRow({ goal, accounts }: { goal: Goal; accounts: PlannerAcco
   const connected = goal.connectedAccountIds ?? [];
   if (!(target > 0) || connected.length === 0) return null;
 
+  // Only asset balances count toward a goal — a connected liability would
+  // otherwise *increase* progress.
   const saved = accounts
-    .filter((a) => connected.includes(a.id))
+    .filter((a) => connected.includes(a.id) && !isLiabilityAccountType(a.accountType))
     .reduce((sum, a) => sum + (a.startingBalance || 0), 0);
   const percent = Math.min(100, (saved / target) * 100);
 

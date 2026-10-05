@@ -111,6 +111,7 @@ function PlannerContent() {
     setRetirementAgeOverride,
     marketAdjustment,
     setMarketAdjustment,
+    householdPeople,
     portfolioAverageRates,
   } = usePlannerModel();
 
@@ -142,6 +143,7 @@ function PlannerContent() {
         currentSavingsRate={currentSavingsRate}
         totalAssets={totalAssets}
         totalLiabilities={totalLiabilities}
+        people={householdPeople}
         currencyCode={currencyCode}
       />
 

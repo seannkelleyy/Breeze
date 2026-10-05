@@ -1,15 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getTotalAnnualIncome,
   getEmployeeMonthlyContribution,
   getEmployerMatchMonthly,
   getEmployerMatchMonthlyFromAnnual,
   getSuggestedAnnualLimit,
   getIrsLimitKeyFromApiType,
 } from '../plannerMath';
+import { getPersonTotalIncome } from '@/lib/calc/income';
+import type { PlannerPerson } from '../../types/person';
 import { PLANNER_DEFAULT_IRS_LIMITS } from '../constants';
 import type { PlannerAccount } from '../../types/account';
-import type { PlannerPerson } from '../../types/person';
 
 const makeAccount = (overrides: Partial<PlannerAccount> = {}): PlannerAccount => ({
   id: 'test-id',
@@ -56,9 +56,9 @@ const makePerson = (overrides: Partial<PlannerPerson> = {}): PlannerPerson => ({
   ...overrides,
 });
 
-describe('getTotalAnnualIncome', () => {
+describe('getPersonTotalIncome', () => {
   it('returns 0 for undefined person', () => {
-    expect(getTotalAnnualIncome(undefined)).toBe(0);
+    expect(getPersonTotalIncome(undefined as unknown as PlannerPerson)).toBe(0);
   });
 
   it('adds salary and dollar bonus', () => {
@@ -68,17 +68,17 @@ describe('getTotalAnnualIncome', () => {
       annualBonus: 5000,
       bonusMode: 'dollars',
     });
-    expect(getTotalAnnualIncome(person)).toBe(125000);
+    expect(getPersonTotalIncome(person)).toBe(125000);
   });
 
-  it('excludes salary-percent bonus from total', () => {
+  it('includes salary-percent bonuses in total', () => {
     const person = makePerson({
       annualSalary: 120000,
       bonusFrequency: 'annual' as const,
       annualBonus: 10,
       bonusMode: 'salary-percent',
     });
-    expect(getTotalAnnualIncome(person)).toBe(120000);
+    expect(getPersonTotalIncome(person)).toBe(132000);
   });
 
   it('handles zero salary', () => {
@@ -87,7 +87,7 @@ describe('getTotalAnnualIncome', () => {
       bonusFrequency: 'annual' as const,
       annualBonus: 0,
     });
-    expect(getTotalAnnualIncome(person)).toBe(0);
+    expect(getPersonTotalIncome(person)).toBe(0);
   });
 });
 

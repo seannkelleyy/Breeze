@@ -27,18 +27,30 @@ func NewTaxPlanningService(queries taxBracketQuerier) *TaxPlanningService {
 }
 
 // EstimateForYear returns a marginal tax estimate for the given inputs.
-// - year: tax year to use for brackets
-// - filingStatus: filing status for bracket lookup
-// - income: gross income (use decimal for monetary precision)
-// - deductionAmount: deduction to subtract from income (nil => 0)
+//   - year: tax year to use for brackets and the standard deduction
+//   - filingStatus: filing status for bracket lookup
+//   - income: gross income (use decimal for monetary precision)
+//   - deductionAmount: itemized deduction to subtract (nil => the seeded
+//     standard deduction for the year and filing status)
 func (s *TaxPlanningService) EstimateForYear(ctx context.Context, year int32, filingStatus sqlc.FilingStatus, income decimal.Decimal, deductionAmount *pgtype.Numeric) (*TaxEstimate, error) {
 	if income.IsNeg() {
 		return nil, fmt.Errorf("income must be non-negative")
 	}
 
-	// decode deduction amount
+	// deduction: provided amount = itemized; nil = the seeded standard deduction
 	var deduction decimal.Decimal
-	if deductionAmount != nil && deductionAmount.Valid {
+	if deductionAmount == nil || !deductionAmount.Valid {
+		rows, err := s.queries.ListStandardDeductionsByYear(ctx, year)
+		if err != nil {
+			return nil, fmt.Errorf("list standard deductions: %w", err)
+		}
+		for _, row := range rows {
+			if row.FilingStatus == filingStatus {
+				deduction = row.Amount
+				break
+			}
+		}
+	} else {
 		raw, err := deductionAmount.Value()
 		if err != nil {
 			return nil, fmt.Errorf("decode deduction amount: %w", err)

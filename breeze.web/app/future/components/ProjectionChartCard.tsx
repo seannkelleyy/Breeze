@@ -207,8 +207,16 @@ const ProjectionChartCard = ({
           {(() => {
             const segments = [
               { label: 'All', rate: portfolioAverageRates.all, visible: isVisible('totalBalance') },
-              { label: 'Investable', rate: portfolioAverageRates.investable, visible: isVisible('investable') },
-              { label: 'Property', rate: portfolioAverageRates.property, visible: isVisible('property') },
+              {
+                label: 'Investable',
+                rate: portfolioAverageRates.investable,
+                visible: isVisible('investable'),
+              },
+              {
+                label: 'Property',
+                rate: portfolioAverageRates.property,
+                visible: isVisible('property'),
+              },
             ].filter((seg) => seg.visible && seg.rate !== null);
             if (segments.length === 0) return null;
             return (
