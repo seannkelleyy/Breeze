@@ -18,6 +18,7 @@ export function useFinancialMathSnapshot(
   people: PlannerPerson[],
   accounts: PlannerAccount[],
   withholdings: PaycheckWithholding[],
+  filingStatus: string,
 ) {
   return useMemo(
     () =>
@@ -32,7 +33,14 @@ export function useFinancialMathSnapshot(
           deductionType,
         },
         taxTables,
-        computeHouseholdWaterfall(people, accounts, withholdings, taxTables, deductionType),
+        computeHouseholdWaterfall(
+          people,
+          accounts,
+          withholdings,
+          taxTables,
+          deductionType,
+          filingStatus,
+        ),
       ),
     [
       monthlyExpenses,
@@ -45,6 +53,7 @@ export function useFinancialMathSnapshot(
       people,
       accounts,
       withholdings,
+      filingStatus,
     ],
   );
 }

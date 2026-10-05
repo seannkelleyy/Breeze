@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import dayjs, { Dayjs } from 'dayjs';
 
@@ -37,11 +37,6 @@ const BudgetDataProvider: React.FC<BudgetProviderProps> = ({ children }) => {
     enabled: !!budget?.id,
   });
 
-  const totalSpent = useMemo(
-    () => categories.reduce((sum, category) => sum + (Number(category.currentSpend) || 0), 0),
-    [categories],
-  );
-
   const getBudgetForDate = useCallback(async (year: number, month: number) => {
     setBudgetDate(dayjs().year(year).month(month));
     return { status: 200 };
@@ -51,7 +46,6 @@ const BudgetDataProvider: React.FC<BudgetProviderProps> = ({ children }) => {
     <BudgetContext.Provider
       value={{
         budget: budget ?? null,
-        totalSpent,
         incomes,
         categories,
         expenses,

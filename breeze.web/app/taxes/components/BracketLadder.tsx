@@ -3,8 +3,6 @@ import { formatCurrencyWithCode } from '@/lib/utils';
 import { InfoTip } from '@/components/common/InfoTip';
 import type { BracketLadderRow } from '../lib/taxScenario';
 
-const fc = (v: number) => formatCurrencyWithCode(v, 'USD');
-
 const rateColor = (rate: number): { bg: string; text: string } => ({
   bg: `oklch(0.75 0.15 ${(rate * 1000) % 360})`,
   text: 'oklch(0.25 0.05 60)',
@@ -17,11 +15,9 @@ export function BracketLadder({
   rows: BracketLadderRow[];
   currencyCode: string;
 }) {
-  const fmt = (v: number) => fc(v);
+  const fmt = (v: number) => formatCurrencyWithCode(v, currencyCode);
   const rangeLabel = (row: BracketLadderRow) =>
-    row.maximum === null
-      ? `${fmt(row.minimum)}+`
-      : `${fmt(row.minimum)} – ${fmt(row.maximum)}`;
+    row.maximum === null ? `${fmt(row.minimum)}+` : `${fmt(row.minimum)} – ${fmt(row.maximum)}`;
 
   const currentRow = rows.find((r) => r.status === 'current');
   const nextRow = rows.find((r) => r.status === 'ahead');
@@ -32,11 +28,11 @@ export function BracketLadder({
         <div className="space-y-1 pb-2">
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">
-              {(currentRow.rate * 100).toFixed(0)}% bracket — {fc(currentRow.used)} so far
+              {(currentRow.rate * 100).toFixed(0)}% bracket — {fmt(currentRow.used)} so far
             </span>
             <span className="font-medium">
-              {fc(currentRow.remainingToNext ?? 0)} until{' '}
-              {((nextRow?.rate ?? 0) * 100).toFixed(0)}%
+              {fmt(currentRow.remainingToNext ?? 0)} until {((nextRow?.rate ?? 0) * 100).toFixed(0)}
+              %
             </span>
           </div>
           <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
@@ -50,7 +46,7 @@ export function BracketLadder({
           </div>
         </div>
       )}
-      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-1 text-xs">
         Bracket ladder
         <InfoTip text="Every federal bracket for your filing status, your taxable income's progress through it, and how much income remains before each higher rate begins." />
       </div>
@@ -69,10 +65,7 @@ export function BracketLadder({
               const { bg, text } = rateColor(row.rate);
               const isCurrent = row.status === 'current';
               return (
-                <tr
-                  key={row.rate}
-                  className={isCurrent ? 'bg-primary/5 font-medium' : 'border-t'}
-                >
+                <tr key={row.rate} className={isCurrent ? 'bg-primary/5 font-medium' : 'border-t'}>
                   <td className="px-3 py-1.5">
                     <span
                       className="inline-flex items-center gap-1.5"
@@ -85,7 +78,7 @@ export function BracketLadder({
                       {(row.rate * 100).toFixed(0)}%
                     </span>
                   </td>
-                  <td className="px-3 py-1.5 text-muted-foreground">{rangeLabel(row)}</td>
+                  <td className="text-muted-foreground px-3 py-1.5">{rangeLabel(row)}</td>
                   <td className="px-3 py-1.5">
                     {row.status === 'filled' && (
                       <span className="text-muted-foreground">

@@ -16,7 +16,8 @@ import (
 
 // mockTaxBracketQuerier for resolver testing
 type mockBracketQuerier struct {
-	listFunc func(context.Context, sqlc.ListTaxBracketsByYearAndFilingStatusParams) ([]sqlc.TaxBracket, error)
+	listFunc                         func(context.Context, sqlc.ListTaxBracketsByYearAndFilingStatusParams) ([]sqlc.TaxBracket, error)
+	listStandardDeductionsByYearFunc func(ctx context.Context, year int32) ([]sqlc.StandardDeduction, error)
 }
 
 func (m *mockBracketQuerier) ListTaxBracketsByYearAndFilingStatus(ctx context.Context, arg sqlc.ListTaxBracketsByYearAndFilingStatusParams) ([]sqlc.TaxBracket, error) { //nolint:gocritic // interface impl
@@ -144,4 +145,11 @@ func TestQueryResolver_EstimateTaxesForYear(t *testing.T) {
 		assert.Nil(t, result)
 		assert.Contains(t, err.Error(), "parse deduction")
 	})
+}
+
+func (m *mockBracketQuerier) ListStandardDeductionsByYear(ctx context.Context, year int32) ([]sqlc.StandardDeduction, error) {
+	if m.listStandardDeductionsByYearFunc != nil {
+		return m.listStandardDeductionsByYearFunc(ctx, year)
+	}
+	return []sqlc.StandardDeduction{}, nil
 }

@@ -118,6 +118,7 @@ breeze.web/                          # Next.js 16 web app
 │       ├── setup/                   # Setup wizard
 │       └── ...
 ├── lib/
+│   ├── calc/                        # Pure domain math (income, payroll taxes) — no React
 │   ├── providers/                   # Context providers (CurrentUserProvider)
 │   ├── hooks/                       # Shared hooks (useAutoSave, useTabParam)
 │   └── services/                    # Shared transport + GraphQL queries

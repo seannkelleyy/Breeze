@@ -18,7 +18,7 @@ export interface TaxFormInputs {
   filingStatus: string;
   income: number;
   deductionType: 'STANDARD' | 'ITEMIZED';
-  deductionAmount: number;
+  deductionAmount: number | null;
 }
 
 interface TaxFormProps {
@@ -50,7 +50,9 @@ export const TaxForm = ({ onCalculate, isLoading = false }: TaxFormProps) => {
       filingStatus,
       income,
       deductionType,
-      deductionAmount: deductionType === 'ITEMIZED' ? deductionAmount : 0,
+      // STANDARD: omit the deduction so the API applies the seeded standard
+      // deduction for the year and filing status.
+      deductionAmount: deductionType === 'ITEMIZED' ? deductionAmount : null,
     });
   };
 

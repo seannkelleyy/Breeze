@@ -65,7 +65,10 @@ const usePlannerAccounts = () => {
 
   // ─── Rate helpers ─────────────────────────────────────────
   const getDisplayedRateForAccount = (account: PlannerAccount) =>
-    getDisplayedRatePercent(account, inflationRate, useInflationAdjustedValues);
+    // A loan's stated APR is nominal by definition — never deflate it.
+    plannerConfig.isLiabilityAccountType(account.accountType)
+      ? account.annualRate
+      : getDisplayedRatePercent(account, inflationRate, useInflationAdjustedValues);
   const getStoredAnnualRateForInput = (account: PlannerAccount, value: number) =>
     getStoredAnnualRateFromInput(account, value, inflationRate, useInflationAdjustedValues);
   const getRateProfileFromAnnualRate = (annualRate: number): AccountRateProfile =>
@@ -84,6 +87,7 @@ const usePlannerAccounts = () => {
   const {
     totalPlannedMonthlyEmployee,
     totalPlannedMonthlyMatch,
+    totalPlannedMonthlyDebtPrincipal,
     totalPlannedMonthlyInvestment: computedTotal,
   } = useMemo(
     () => getPlannerContributionTotals(plannerAccounts, people),
@@ -203,6 +207,7 @@ const usePlannerAccounts = () => {
       isIrsAccountsError,
       totalPlannedMonthlyEmployee,
       totalPlannedMonthlyMatch,
+      totalPlannedMonthlyDebtPrincipal,
       totalPlannedMonthlyInvestment,
     },
     // Options (read-only config passthroughs)

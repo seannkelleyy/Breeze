@@ -14,7 +14,7 @@ export interface CalculateTaxEstimateInput {
   year: number;
   filingStatus: string;
   income: string;
-  deduction?: string;
+  deduction?: string | null;
 }
 
 export const useTaxEstimate = (

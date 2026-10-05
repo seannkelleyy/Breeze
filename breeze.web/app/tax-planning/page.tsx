@@ -18,7 +18,7 @@ const TaxPlanning = () => {
       year: inputs.year,
       filingStatus: inputs.filingStatus,
       income: inputs.income.toString(),
-      deduction: inputs.deductionAmount.toString(),
+      deduction: inputs.deductionAmount == null ? null : inputs.deductionAmount.toString(),
     });
   };
 
