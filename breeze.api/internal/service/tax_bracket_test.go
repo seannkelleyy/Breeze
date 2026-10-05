@@ -20,6 +20,7 @@ type mockTaxBracketQuerier struct {
 	listTaxBracketsByYearAndFilingStatusFunc func(context.Context, sqlc.ListTaxBracketsByYearAndFilingStatusParams) ([]sqlc.TaxBracket, error)
 	updateTaxBracketFunc                     func(context.Context, sqlc.UpdateTaxBracketParams) (sqlc.TaxBracket, error)
 	softDeleteTaxBracketFunc                 func(context.Context, uuid.UUID) (int64, error)
+	listStandardDeductionsByYearFunc         func(context.Context, int32) ([]sqlc.StandardDeduction, error)
 }
 
 func (m *mockTaxBracketQuerier) CreateTaxBracket(ctx context.Context, arg sqlc.CreateTaxBracketParams) (sqlc.TaxBracket, error) {
@@ -41,6 +42,13 @@ func (m *mockTaxBracketQuerier) ListTaxBracketsByYearAndFilingStatus(ctx context
 		return m.listTaxBracketsByYearAndFilingStatusFunc(ctx, arg)
 	}
 	return []sqlc.TaxBracket{}, nil
+}
+
+func (m *mockTaxBracketQuerier) ListStandardDeductionsByYear(ctx context.Context, year int32) ([]sqlc.StandardDeduction, error) {
+	if m.listStandardDeductionsByYearFunc != nil {
+		return m.listStandardDeductionsByYearFunc(ctx, year)
+	}
+	return []sqlc.StandardDeduction{}, nil
 }
 
 func (m *mockTaxBracketQuerier) UpdateTaxBracket(ctx context.Context, arg sqlc.UpdateTaxBracketParams) (sqlc.TaxBracket, error) {

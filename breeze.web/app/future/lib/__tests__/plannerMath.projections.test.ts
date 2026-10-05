@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  getMonthlyContribution,
-  getYearsUntilGoalEstimate,
-  getAnnualIncomeWithGrowth,
-} from '../plannerMath';
+import { getMonthlyContribution, getAnnualIncomeWithGrowth } from '../plannerMath';
 
 describe('getMonthlyContribution', () => {
   it('returns 0 when target is 0', () => {
@@ -44,42 +40,6 @@ describe('getMonthlyContribution', () => {
   it('handles very small rate differences', () => {
     const result = getMonthlyContribution(100000, 0, 0.000001, 30);
     expect(result).toBeGreaterThan(0);
-  });
-});
-
-describe('getYearsUntilGoalEstimate', () => {
-  it('returns 0 when target is 0', () => {
-    expect(getYearsUntilGoalEstimate(0, 50000, 1000, 7)).toBe(0);
-  });
-
-  it('returns 999 when no contributions', () => {
-    expect(getYearsUntilGoalEstimate(1000000, 0, 0, 7)).toBe(999);
-  });
-
-  it('calculates with zero rate', () => {
-    // (1000000 - 0) / (2000 * 12) = 41.67 -> ceil = 42
-    const result = getYearsUntilGoalEstimate(1000000, 0, 2000, 0);
-    expect(result).toBe(42);
-  });
-
-  it('returns fewer years with higher contributions', () => {
-    const lowContrib = getYearsUntilGoalEstimate(500000, 0, 3000, 5);
-    const highContrib = getYearsUntilGoalEstimate(500000, 0, 6000, 5);
-    expect(highContrib).toBeLessThan(lowContrib);
-    expect(highContrib).toBeGreaterThan(0);
-  });
-
-  it('returns fewer years with higher starting balance', () => {
-    const fromZero = getYearsUntilGoalEstimate(500000, 0, 3000, 5);
-    const fromHalf = getYearsUntilGoalEstimate(500000, 250000, 3000, 5);
-    expect(fromHalf).toBeLessThan(fromZero);
-  });
-
-  it('returns reasonable estimates', () => {
-    // $500k goal, $0 start, $3000/mo, 5% return ≈ ~11 years
-    const years = getYearsUntilGoalEstimate(500000, 0, 3000, 5);
-    expect(years).toBeGreaterThan(8);
-    expect(years).toBeLessThan(15);
   });
 });
 

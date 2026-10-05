@@ -116,6 +116,18 @@ Decimal values always parse from string — never construct with a float literal
 
 ---
 
+## Pattern: Cross-Language Golden Fixtures
+
+When the same math exists in TypeScript and Go (federal bracket walk, payroll
+taxes), both implementations are tested against one shared JSON fixture in
+`tests/fixtures/` (repo root). Each suite loads the same inputs and asserts the
+same expected outputs — drift fails CI in both languages. See
+`tax-bracket-walk.golden.test.ts` (web) and `bracket_walk_golden_test.go` (API).
+Resolve fixture paths from the test file via `import.meta.url` (TS) /
+`filepath.Join` from the package dir (Go) — `process.cwd()` is not stable.
+
+---
+
 ## Pattern: Narrow Interface for Worker Tests
 
 Packages that take a concrete service (e.g. `internal/jobs` workers) declare a private

@@ -3,12 +3,11 @@ import {
   clamp,
   toIsoDate,
   getAgeFromBirthday,
-  getPersonsAnnualIncome,
   getPlannerHouseholdSnapshot,
-  getLiabilityPrincipalMonthly,
   getTotalMonthlyForAccount,
   getPlannerContributionTotals,
 } from '../plannerMath';
+import { getPersonsAnnualIncome } from '@/lib/calc/income';
 import type { PlannerAccount } from '../../types/account';
 import type { PlannerPerson } from '../../types/person';
 
@@ -142,7 +141,7 @@ describe('getPersonsAnnualIncome', () => {
 });
 
 describe('getPlannerHouseholdSnapshot', () => {
-  it('sums total annual income across the household including dollar bonuses', () => {
+  it('sums total annual income across the household including every bonus mode', () => {
     const people = [
       makePerson({
         annualSalary: 120000,
@@ -159,9 +158,9 @@ describe('getPlannerHouseholdSnapshot', () => {
       }),
     ];
     const snapshot = getPlannerHouseholdSnapshot(people);
-    // salary-percent bonuses are excluded from total income
-    expect(snapshot.householdIncome).toBe(205000);
-    expect(snapshot.annualHouseholdIncome).toBe(205000);
+    // 120,000 + 5,000 (dollars) + 80,000 + 8,000 (10% of 80,000, salary-percent)
+    expect(snapshot.householdIncome).toBe(213000);
+    expect(snapshot.annualHouseholdIncome).toBe(213000);
     expect(snapshot.people).toBe(people);
   });
 
@@ -228,7 +227,7 @@ describe('getPlannerContributionTotals', () => {
 });
 
 describe('liability principal in contribution totals', () => {
-  it('counts only the principal portion of loan payments', () => {
+  it('reports loan principal separately from employee contributions', () => {
     const loan = makeAccount({
       accountType: 'mortgage',
       contributionMode: 'monthly',
@@ -237,11 +236,15 @@ describe('liability principal in contribution totals', () => {
       annualRate: 6,
       employerMatchRate: 0,
     });
-    const { totalPlannedMonthlyEmployee, totalPlannedMonthlyInvestment } =
-      getPlannerContributionTotals([loan], []);
+    const {
+      totalPlannedMonthlyEmployee,
+      totalPlannedMonthlyDebtPrincipal,
+      totalPlannedMonthlyInvestment,
+    } = getPlannerContributionTotals([loan], []);
 
     // Interest = 114000 * 6% / 12 = 570 → principal = 789 - 570 = 219.
-    expect(totalPlannedMonthlyEmployee).toBeCloseTo(219, 2);
+    expect(totalPlannedMonthlyEmployee).toBe(0);
+    expect(totalPlannedMonthlyDebtPrincipal).toBeCloseTo(219, 2);
     expect(totalPlannedMonthlyInvestment).toBeCloseTo(219, 2);
   });
 

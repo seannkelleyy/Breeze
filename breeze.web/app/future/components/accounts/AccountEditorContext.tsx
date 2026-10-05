@@ -54,6 +54,7 @@ function useAccountEditorState() {
     isIrsAccountsError,
     totalPlannedMonthlyEmployee,
     totalPlannedMonthlyMatch,
+    totalPlannedMonthlyDebtPrincipal,
     totalPlannedMonthlyInvestment,
   } = data;
   const accountMutations = useAccountMutations({ userId, updateAccount, removeAccount });
@@ -178,6 +179,7 @@ function useAccountEditorState() {
       isIrsAccountsError,
       totalPlannedMonthlyEmployee,
       totalPlannedMonthlyMatch,
+      totalPlannedMonthlyDebtPrincipal,
       totalPlannedMonthlyInvestment,
     },
     accounts: plannerAccounts,

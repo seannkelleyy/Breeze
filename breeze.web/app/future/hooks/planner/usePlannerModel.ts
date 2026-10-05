@@ -67,32 +67,28 @@ const usePlannerModel = () => {
 
   // Exclude linked liabilities from calculations — their data is already
   // incorporated into the parent asset's equity via getAssetFinanceSnapshot.
-  const filteredAccounts = useMemo(() => {
+  const { filteredAccounts, linkedDebtPrincipalMonthly } = useMemo(() => {
+    // Linked liabilities are excluded from the working set — their balance
+    // already rides in the parent asset's equity — but their principal
+    // paydown is reported separately so the savings rate still credits it.
     const linkedIds = new Set(
       plannerAccounts
         .filter((a) => isCombinedAssetType(a.accountType) && a.linkedLiabilityId)
         .map((a) => a.linkedLiabilityId!),
     );
-    return plannerAccounts.filter((a) => !linkedIds.has(a.id));
-  }, [plannerAccounts]);
-
-  // Principal paydown across ALL liabilities — including ones linked to a
-  // home/vehicle, which filteredAccounts excludes because their balance
-  // already rides in the parent asset's equity.
-  const debtPrincipalMonthly = useMemo(
-    () =>
-      plannerAccounts
-        .filter((a) => plannerConfig.isLiabilityAccountType(a.accountType))
-        .reduce((sum, a) => sum + getLiabilityPrincipalMonthly(a), 0),
-    [plannerAccounts],
-  );
+    const filtered = plannerAccounts.filter((a) => !linkedIds.has(a.id));
+    const linkedPrincipal = plannerAccounts
+      .filter((a) => linkedIds.has(a.id))
+      .reduce((sum, a) => sum + getLiabilityPrincipalMonthly(a, plannerPeople), 0);
+    return { filteredAccounts: filtered, linkedDebtPrincipalMonthly: linkedPrincipal };
+  }, [plannerAccounts, plannerPeople]);
   const portfolio = usePortfolioCalculation(
     filteredAccounts,
     plannerAssetFinanceDetailsByAccountId,
     household,
     inflationRate,
     useInflationAdjustedValues,
-    debtPrincipalMonthly,
+    linkedDebtPrincipalMonthly,
   );
   const targets = useRetirementTargets(
     effectiveHousehold,
@@ -114,19 +110,21 @@ const usePlannerModel = () => {
     plannerPeople,
     filteredAccounts,
     allWithholdings,
+    filingStatus,
   );
   const annualWithdrawal = monthlyExpenses * 12;
-  const { projectionRows, finalBalances, projectedNetWorthAtTargetAge, portfolioAverageRates } = useProjections(
-    filteredAccounts,
-    effectiveHousehold,
-    plannerAssetFinanceDetailsByAccountId,
-    irsLimits,
-    inflationRate,
-    useInflationAdjustedValues,
-    projectionEndAge,
-    annualWithdrawal,
-    marketAdjustment,
-  );
+  const { projectionRows, finalBalances, projectedNetWorthAtTargetAge, portfolioAverageRates } =
+    useProjections(
+      filteredAccounts,
+      effectiveHousehold,
+      plannerAssetFinanceDetailsByAccountId,
+      irsLimits,
+      inflationRate,
+      useInflationAdjustedValues,
+      projectionEndAge,
+      annualWithdrawal,
+      marketAdjustment,
+    );
   const financialFreedomAge = useFinancialFreedomAge(
     projectionRows,
     targets.financialFreedomTarget,
@@ -210,6 +208,7 @@ const usePlannerModel = () => {
     setRetirementAgeOverride,
     marketAdjustment,
     setMarketAdjustment,
+    householdPeople: household.people,
     portfolioAverageRates,
     totalStartingBalance: portfolio.totalStartingBalance,
     projectedNetWorthAtTargetAge,

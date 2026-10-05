@@ -1,0 +1,122 @@
+{
+  "$comment": "Golden fixtures for the payroll tax split (lib/calc/payrollTaxes.ts). Inputs: gross, income-tax-only reductions (traditional 401k/457), both-base reductions (\u00a7125 HSA/premiums/FSA). FICA hand-checked: SS 6.2% to the wage base, Medicare 1.45% all wages, +0.9% over the threshold; traditional 401k does NOT reduce FICA wages.",
+  "inputs": {
+    "standardDeduction": 16100,
+    "ssWageBase": 184500,
+    "additionalMedicareThreshold": 200000
+  },
+  "brackets": [
+    {
+      "rate": 0.1,
+      "minimum": 0,
+      "maximum": 11600
+    },
+    {
+      "rate": 0.12,
+      "minimum": 11600,
+      "maximum": 47150
+    },
+    {
+      "rate": 0.22,
+      "minimum": 47150,
+      "maximum": 100525
+    },
+    {
+      "rate": 0.24,
+      "minimum": 100525,
+      "maximum": 191950
+    },
+    {
+      "rate": 0.32,
+      "minimum": 191950,
+      "maximum": 243725
+    },
+    {
+      "rate": 0.35,
+      "minimum": 243725,
+      "maximum": 609350
+    },
+    {
+      "rate": 0.37,
+      "minimum": 609350,
+      "maximum": null
+    }
+  ],
+  "cases": [
+    {
+      "name": "401k only \u2014 FICA on full gross",
+      "grossIncome": 100000,
+      "incomeTaxReductions": 20000,
+      "ficaReductions": 0,
+      "incomeTaxWages": 80000,
+      "ficaWages": 100000,
+      "federalTax": 9111.0,
+      "socialSecurityTax": 6200.0,
+      "medicareTax": 1450.0,
+      "additionalMedicareTax": 0.0,
+      "ficaTax": 7650.0,
+      "totalTax": 16761.0,
+      "effectiveRate": 0.16761
+    },
+    {
+      "name": "HSA only \u2014 cafeteria plan reduces both bases",
+      "grossIncome": 100000,
+      "incomeTaxReductions": 5000,
+      "ficaReductions": 5000,
+      "incomeTaxWages": 95000,
+      "ficaWages": 95000,
+      "federalTax": 12411.0,
+      "socialSecurityTax": 5890.0,
+      "medicareTax": 1377.5,
+      "additionalMedicareTax": 0.0,
+      "ficaTax": 7267.5,
+      "totalTax": 19678.5,
+      "effectiveRate": 0.196785
+    },
+    {
+      "name": "401k + HSA",
+      "grossIncome": 100000,
+      "incomeTaxReductions": 25000,
+      "ficaReductions": 5000,
+      "incomeTaxWages": 75000,
+      "ficaWages": 95000,
+      "federalTax": 8011.0,
+      "socialSecurityTax": 5890.0,
+      "medicareTax": 1377.5,
+      "additionalMedicareTax": 0.0,
+      "ficaTax": 7267.5,
+      "totalTax": 15278.5,
+      "effectiveRate": 0.152785
+    },
+    {
+      "name": "401k + HSA crossing the additional Medicare threshold",
+      "grossIncome": 260000,
+      "incomeTaxReductions": 45000,
+      "ficaReductions": 5000,
+      "incomeTaxWages": 215000,
+      "ficaWages": 255000,
+      "federalTax": 41334.5,
+      "socialSecurityTax": 11439.0,
+      "medicareTax": 3697.5,
+      "additionalMedicareTax": 495.0,
+      "ficaTax": 15631.5,
+      "totalTax": 56966.0,
+      "effectiveRate": 0.2191
+    },
+    {
+      "name": "no reductions",
+      "grossIncome": 100000,
+      "incomeTaxReductions": 0,
+      "ficaReductions": 0,
+      "incomeTaxWages": 100000,
+      "ficaWages": 100000,
+      "federalTax": 13511.0,
+      "socialSecurityTax": 6200.0,
+      "medicareTax": 1450.0,
+      "additionalMedicareTax": 0.0,
+      "ficaTax": 7650.0,
+      "totalTax": 21161.0,
+      "effectiveRate": 0.21161
+    }
+  ]
+}

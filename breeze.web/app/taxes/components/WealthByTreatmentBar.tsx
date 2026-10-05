@@ -68,17 +68,16 @@ export function WealthByTreatmentBar({
                     </span>
                   </span>
                 </div>
-                <div className="pl-4 text-[11px] text-muted-foreground">
-                  {bucket.accounts
-                    .map((a) => `${a.name} ${fc(a.amount)}`)
-                    .join(' · ')}
+                <div className="text-muted-foreground pl-4 text-[11px]">
+                  {bucket.accounts.map((a) => `${a.name} ${fc(a.amount)}`).join(' · ')}
                 </div>
               </div>
             );
           })}
         <div className="border-t pt-2 text-xs">
-          <span className="inline-flex items-center gap-1 text-muted-foreground">
-            Total investment wealth <InfoTip text="Investment accounts only — home and vehicle equity are excluded, since you don't draw retirement income from them. Split accounts (e.g. a 70/30 401(k)) contribute to both buckets by their share." />
+          <span className="text-muted-foreground inline-flex items-center gap-1">
+            Total investment wealth{' '}
+            <InfoTip text="Investment accounts only — home and vehicle equity are excluded, since you don't draw retirement income from them. Split accounts (e.g. a 70/30 401(k)) contribute to both buckets by their share." />
           </span>
           <span className="float-right font-medium">{fc(totalInvestment)}</span>
         </div>

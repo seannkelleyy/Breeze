@@ -7,7 +7,6 @@ import { Income } from '../types/income';
 
 export interface BudgetContextType {
   budget: Budget | null;
-  totalSpent: number;
   incomes: Income[];
   categories: Category[];
   expenses: Expense[];

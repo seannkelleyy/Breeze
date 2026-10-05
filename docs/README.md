@@ -27,6 +27,10 @@ If you are a person or an AI agent, start here first.
 - `ui/01-stack.md`
 - `ui/ui-slice-api-checklist.md`
 
+### Figures Reference
+
+- `figures.md` — every user-facing number, its formula, where it's shown, and known inconsistencies. Update when changing any displayed calculation.
+
 ### Database
 
 - `db/01-schema-conventions.md`

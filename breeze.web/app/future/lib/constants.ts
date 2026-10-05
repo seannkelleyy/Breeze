@@ -23,13 +23,6 @@ export const PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE = 4;
 export const PLANNER_DEFAULT_LONGEVITY_AGE = 95;
 export const PLANNER_AUTOSAVE_DEBOUNCE_MS = 1200;
 
-export const PLANNER_SAFE_WITHDRAWAL_RATE_SUGGESTIONS = [
-  { minimumRetirementYears: 40, rate: 3.25 },
-  { minimumRetirementYears: 30, rate: 3.5 },
-  { minimumRetirementYears: 20, rate: 4.0 },
-  { minimumRetirementYears: 0, rate: 4.5 },
-] as const;
-
 export const PLANNER_DEFAULT_DESIRED_INVESTMENT_AMOUNT = 1_500_000;
 export const PLANNER_DEFAULT_INFLATION_RATE = 2.5;
 export const PLANNER_RETIREMENT_METHOD_OPTIONS = [

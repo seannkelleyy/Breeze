@@ -44,6 +44,7 @@ type taxBracketQuerier interface {
 	CreateTaxBracket(ctx context.Context, arg sqlc.CreateTaxBracketParams) (sqlc.TaxBracket, error)
 	GetTaxBracketByID(ctx context.Context, id uuid.UUID) (sqlc.TaxBracket, error)
 	ListTaxBracketsByYearAndFilingStatus(ctx context.Context, arg sqlc.ListTaxBracketsByYearAndFilingStatusParams) ([]sqlc.TaxBracket, error)
+	ListStandardDeductionsByYear(ctx context.Context, year int32) ([]sqlc.StandardDeduction, error)
 	UpdateTaxBracket(ctx context.Context, arg sqlc.UpdateTaxBracketParams) (sqlc.TaxBracket, error)
 	SoftDeleteTaxBracket(ctx context.Context, id uuid.UUID) (int64, error)
 }

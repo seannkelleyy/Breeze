@@ -75,10 +75,10 @@ export function usePortfolioCalculation(
   );
 
   const { totalPlannedMonthlyEmployee, totalPlannedMonthlyInvestment: investedFromAccounts } =
-    useMemo(() => getPlannerContributionTotals(accounts, household.people), [
-      accounts,
-      household.people,
-    ]);
+    useMemo(
+      () => getPlannerContributionTotals(accounts, household.people),
+      [accounts, household.people],
+    );
   // Linked liabilities are excluded from `accounts` (their balance already
   // lives in the parent asset's equity) — add their principal back in so the
   // savings rate credits the paydown.
