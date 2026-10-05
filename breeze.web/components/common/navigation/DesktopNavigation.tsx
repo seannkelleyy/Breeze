@@ -63,13 +63,13 @@ export const DesktopNavigation = () => {
                 {group.label}
                 <ChevronDown className="h-3 w-3 opacity-60" />
               </MenubarTrigger>
-              <MenubarContent>
+              <MenubarContent className="space-y-1 p-1.5">
                 {group.items.map((item) => (
                   <MenubarItem asChild key={item.label}>
                     <Link
                       href={item.to}
                       title={item.title}
-                      className="flex items-center gap-2 text-sm"
+                      className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm"
                     >
                       <item.icon className="h-4 w-4" />
                       {item.label}
