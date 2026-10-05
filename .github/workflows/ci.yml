@@ -8,7 +8,7 @@ on:
 jobs:
   api:
     name: API — lint & test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16-alpine
@@ -29,8 +29,8 @@ jobs:
     env:
       DATABASE_URL: postgres://postgres:breeze@localhost:5432/postgres?sslmode=disable
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: breeze.api/go.mod
           cache-dependency-path: breeze.api/go.sum
@@ -38,21 +38,22 @@ jobs:
       - name: Apply migrations (schema for integration tests)
         run: atlas migrate apply --dir file://db/migrations --url "$DATABASE_URL"
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
           working-directory: breeze.api
+          version: v2.14.0
       - name: Test
         run: go test ./... -count=1
 
   web:
     name: Web — typecheck, lint, test, build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: breeze.web
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -69,4 +70,4 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:8080
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ci_placeholder
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_YXB0LW1vbmtmaXNoLTcxLmNsZXJrLmFjY291bnRzLmRldiQ

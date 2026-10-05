@@ -18,9 +18,10 @@ const formatCurrency = (value: string | number) => {
   }).format(num);
 };
 
+// The API returns rates as fractions (0.1695 = 16.95%).
 const formatPercent = (value: string | number) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
-  return `${num.toFixed(2)}%`;
+  return `${(num * 100).toFixed(2)}%`;
 };
 
 export const TaxResults = ({ estimate, isLoading = false }: TaxResultsProps) => {
@@ -39,7 +40,7 @@ export const TaxResults = ({ estimate, isLoading = false }: TaxResultsProps) => 
   }
 
   const results = [
-    { label: 'Total Income', value: estimate.taxableIncome, type: 'currency' },
+    { label: 'Taxable Income', value: estimate.taxableIncome, type: 'currency' },
     { label: 'Tax Owed', value: estimate.taxOwed, type: 'currency' },
     { label: 'Effective Tax Rate', value: estimate.effectiveRate, type: 'percent' },
     { label: 'Marginal Tax Rate', value: estimate.marginalRate, type: 'percent' },

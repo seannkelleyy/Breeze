@@ -38,6 +38,14 @@ npm run check      # typecheck + lint + build
 npm run test       # Vitest
 ```
 
+### Navigation
+
+The nav bar is grouped: `components/common/navigation/navConfig.ts` is the
+single source of truth — `routeNavItems` feeds the mobile bottom tab bar,
+`navGroups` renders the desktop dropdowns (Money, Plan), and
+`secondaryNavItems` surfaces under the mobile "More" menu. Add new routes
+there; the components render from config.
+
 ### Module Entry Points
 
 - `app/future/` — financial projections, retirement math, Coast FIRE (renamed from planner)
@@ -65,6 +73,15 @@ The authenticated user is available via the `CurrentUserProvider` context wrappe
 // lib/providers/CurrentUserProvider.tsx
 const { user, userId } = useCurrentUser();  // access anywhere in tree
 ```
+
+### Pure Domain Library (lib/calc)
+
+Reusable financial math lives in `breeze.web/lib/calc/` — plain TypeScript, no
+React, no I/O, unit-tested directly. Income definitions (`income.ts`), payroll
+wage-base treatment and FICA (`payrollWages.ts`, `payrollTaxes.ts`). Components
+and hooks import from it; never re-derive these figures locally. Golden
+fixtures in `tests/fixtures/` (repo root) pin the federal bracket walk and
+payroll tax split, shared with the Go suite so implementations can't drift.
 
 ### Testing Hooks That Call the API
 
