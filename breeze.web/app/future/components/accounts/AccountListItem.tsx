@@ -513,7 +513,9 @@ export function AccountListItem({
                       min={0}
                       max={100}
                       step={5}
-                      value={account.pretaxSharePercent ?? (account.taxTreatment === 'ROTH' ? 0 : 100)}
+                      value={
+                        account.pretaxSharePercent ?? (account.taxTreatment === 'ROTH' ? 0 : 100)
+                      }
                       onChange={(e) =>
                         onUpdateAccount((c) => ({
                           ...c,

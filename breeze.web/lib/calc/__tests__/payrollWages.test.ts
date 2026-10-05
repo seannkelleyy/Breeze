@@ -28,7 +28,11 @@ describe('withholding wage treatment — every kind has explicit flags', () => {
 describe('accountWageTreatment', () => {
   it('traditional 401(k): reduces income-tax wages, not FICA', () => {
     expect(
-      accountWageTreatment({ accountType: '401k', taxTreatment: 'PRE_TAX', pretaxSharePercent: 100 }),
+      accountWageTreatment({
+        accountType: '401k',
+        taxTreatment: 'PRE_TAX',
+        pretaxSharePercent: 100,
+      }),
     ).toEqual({ incomeTax: true, fica: false });
   });
 

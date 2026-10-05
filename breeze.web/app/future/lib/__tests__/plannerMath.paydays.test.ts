@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  getPaychecksPerYear,
-  getPersonPaydaysForMonth,
-} from '../plannerMath';
+import { getPaychecksPerYear, getPersonPaydaysForMonth } from '../plannerMath';
 import {
   getPersonBaseAnnualIncome,
   getPersonBonusPerYear,
@@ -115,5 +112,4 @@ describe('income helpers', () => {
     const person = makePerson({ payType: 'hourly', hourlyRate: 50, expectedHoursPerWeek: 40 });
     expect(getPersonBaseAnnualIncome(person)).toBe(104000);
   });
-
 });

@@ -140,7 +140,11 @@ describe('computePersonWaterfall', () => {
     ];
     const withSplit = wf(person, accounts);
     const allPretax = wf(person, [
-      makeAccount({ contributionMode: 'monthly', contributionValue: 1000, taxTreatment: 'PRE_TAX' }),
+      makeAccount({
+        contributionMode: 'monthly',
+        contributionValue: 1000,
+        taxTreatment: 'PRE_TAX',
+      }),
     ]);
 
     expect(withSplit.pretaxSavingsMonthly).toBe(700);
@@ -277,7 +281,6 @@ describe('getPersonSavingsSplit', () => {
     expect(split.rothMonthly).toBe(200);
   });
 });
-
 
 describe('getMonthPayrollIncomes', () => {
   it('creates one row per payday with the net per-check amount', () => {

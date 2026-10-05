@@ -8,10 +8,7 @@ import {
   withholdingTreatmentFor,
   WITHHOLDING_KIND_OPTIONS,
 } from '@/lib/calc/payrollWages';
-import {
-  additionalMedicareOwed,
-  additionalMedicareWithheld,
-} from '@/lib/calc/payrollTaxes';
+import { additionalMedicareOwed, additionalMedicareWithheld } from '@/lib/calc/payrollTaxes';
 import {
   getEmployeeMonthlyContribution,
   getPaychecksPerYear,
@@ -124,7 +121,6 @@ export function getPersonSavingsSplit(
   return { pretaxMonthly, rothMonthly };
 }
 
-
 /**
  * Splits one person's paycheck reductions by wage base:
  * - incomeTaxOnly: traditional deferrals + pretax withholdings without a
@@ -197,15 +193,16 @@ export function computePersonWaterfall(
   );
   const incomeTaxWagesAnnual = Math.max(
     0,
-    grossMonthly * 12 - incomeTaxOnlyMonthly * 12 - ficaExemptMonthly * 12 - standardDeductionAnnual,
+    grossMonthly * 12 -
+      incomeTaxOnlyMonthly * 12 -
+      ficaExemptMonthly * 12 -
+      standardDeductionAnnual,
   );
   const ficaWagesMonthly = Math.max(0, grossMonthly - ficaExemptMonthly);
   const ficaWagesAnnual = ficaWagesMonthly * 12;
   // getFederalTax walks the bracket ladder (0.22 = 22%); FICA is computed
   // per its own wage base — deferrals do not reduce it.
-  const federalTaxAnnual = taxTables
-    ? getFederalTax(incomeTaxWagesAnnual, taxTables.brackets)
-    : 0;
+  const federalTaxAnnual = taxTables ? getFederalTax(incomeTaxWagesAnnual, taxTables.brackets) : 0;
   const ficaTaxAnnual = getFicaTax(ficaWagesAnnual, taxTables?.ssWageBase ?? 184500);
   // Employer withholding rule: 0.9% on THIS person's FICA wages above $200k,
   // regardless of filing status. Mirrors the actual paycheck.
@@ -218,7 +215,10 @@ export function computePersonWaterfall(
   // Savings and post-tax withholdings leave the paycheck before it hits the bank.
   const takeHomeMonthly = netAfterTaxesMonthly - savingsMonthly - posttaxWithholdingsMonthly;
 
-  const incomeTaxWagesMonthly = Math.max(0, grossMonthly - incomeTaxOnlyMonthly - ficaExemptMonthly);
+  const incomeTaxWagesMonthly = Math.max(
+    0,
+    grossMonthly - incomeTaxOnlyMonthly - ficaExemptMonthly,
+  );
   return {
     grossMonthly,
     savingsMonthly,
@@ -261,7 +261,6 @@ export function getMonthPayrollIncomes(
   deductionType: string,
   year: number,
   month: number, // 1-based
-  filingStatus: string = 'SINGLE',
 ): PayrollIncomeItem[] {
   const items: PayrollIncomeItem[] = [];
   for (const person of people) {
@@ -274,8 +273,7 @@ export function getMonthPayrollIncomes(
     );
     const checksPerYear = getPaychecksPerYear(person.payCadence);
     if (checksPerYear <= 0) continue;
-    const netPerCheck =
-      Math.round((waterfall.takeHomeAnnual / checksPerYear) * 100) / 100;
+    const netPerCheck = Math.round((waterfall.takeHomeAnnual / checksPerYear) * 100) / 100;
 
     for (const payday of getPersonPaydaysForMonth(person, year, month - 1)) {
       const pad = (n: number) => String(n).padStart(2, '0');
@@ -351,10 +349,7 @@ export function computeHouseholdWaterfall(
   //   indexed). Only the shortfall between owed and withheld is extra tax;
   //   it lands on the return or through extra W-4 withholding.
   const additionalMedicareWithheldAnnual = sum.additionalMedicareWithheldAnnual;
-  const additionalMedicareOwedAnnual = additionalMedicareOwed(
-    sum.ficaWagesAnnual,
-    filingStatus,
-  );
+  const additionalMedicareOwedAnnual = additionalMedicareOwed(sum.ficaWagesAnnual, filingStatus);
   const additionalMedicareDue = Math.max(
     0,
     additionalMedicareOwedAnnual - additionalMedicareWithheldAnnual,

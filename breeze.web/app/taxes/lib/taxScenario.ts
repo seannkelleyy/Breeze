@@ -51,10 +51,7 @@ export function computeTaxScenario(
   additionalMedicareThreshold = Number.POSITIVE_INFINITY,
 ): TaxScenario {
   const deduction = deductionFor(tables, deductionType);
-  const taxableIncome = Math.max(
-    0,
-    grossIncome - incomeTaxReductions - ficaReductions - deduction,
-  );
+  const taxableIncome = Math.max(0, grossIncome - incomeTaxReductions - ficaReductions - deduction);
   // FICA wages shrink only by §125 items (HSA, premiums, FSA) — traditional
   // 401(k)/457 deferrals are FICA-taxable. SS capped at the wage base,
   // +0.9% Additional Medicare above the filing-status threshold.
@@ -70,13 +67,20 @@ export function computeTaxScenario(
   let marginalRate = tables.brackets[0]?.rate ?? 0;
   for (const bracket of tables.brackets) {
     if (taxableIncome <= bracket.minimum) break;
-    const upper = bracket.maximum === null ? taxableIncome : Math.min(taxableIncome, bracket.maximum);
+    const upper =
+      bracket.maximum === null ? taxableIncome : Math.min(taxableIncome, bracket.maximum);
     const taxedAmount = upper - bracket.minimum;
     if (taxedAmount <= 0) continue;
     const tax = taxedAmount * bracket.rate;
     federalTax += tax;
     marginalRate = bracket.rate;
-    slices.push({ rate: bracket.rate, taxedAmount, tax, minimum: bracket.minimum, maximum: bracket.maximum });
+    slices.push({
+      rate: bracket.rate,
+      taxedAmount,
+      tax,
+      minimum: bracket.minimum,
+      maximum: bracket.maximum,
+    });
   }
 
   const totalTax = federalTax + ficaTax;

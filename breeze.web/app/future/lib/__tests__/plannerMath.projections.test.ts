@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  getMonthlyContribution,
-  getAnnualIncomeWithGrowth,
-} from '../plannerMath';
+import { getMonthlyContribution, getAnnualIncomeWithGrowth } from '../plannerMath';
 
 describe('getMonthlyContribution', () => {
   it('returns 0 when target is 0', () => {

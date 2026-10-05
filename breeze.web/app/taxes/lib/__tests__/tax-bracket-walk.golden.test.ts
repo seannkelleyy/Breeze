@@ -12,16 +12,32 @@ import type { TaxBracketRow } from '@/app/future/types/tax';
  * Fixture: tests/fixtures/tax-bracket-walk.json (repo root).
  */
 const fixture = JSON.parse(
-  readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', '..', 'tests', 'fixtures', 'tax-bracket-walk.json'), 'utf8'),
+  readFileSync(
+    join(
+      dirname(fileURLToPath(import.meta.url)),
+      '..',
+      '..',
+      '..',
+      '..',
+      '..',
+      'tests',
+      'fixtures',
+      'tax-bracket-walk.json',
+    ),
+    'utf8',
+  ),
 ) as {
   brackets: TaxBracketRow[];
   cases: { name: string; taxableIncome: number; expectedTax: number }[];
 };
 
 describe('federal bracket walk — golden fixtures (shared with Go)', () => {
-  it.each(fixture.cases)('$name: $taxableIncome → $expectedTax', ({ taxableIncome, expectedTax }) => {
-    expect(getFederalTax(taxableIncome, fixture.brackets)).toBeCloseTo(expectedTax, 2);
-  });
+  it.each(fixture.cases)(
+    '$name: $taxableIncome → $expectedTax',
+    ({ taxableIncome, expectedTax }) => {
+      expect(getFederalTax(taxableIncome, fixture.brackets)).toBeCloseTo(expectedTax, 2);
+    },
+  );
 
   it('uses every fixture bracket in ascending rate order', () => {
     const rates = fixture.brackets.map((b) => b.rate);

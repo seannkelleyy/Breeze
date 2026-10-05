@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  clamp,
-  calculateMonthlyPayment,
-  buildAmortization,
-} from '../amortization';
+import { clamp, calculateMonthlyPayment, buildAmortization } from '../amortization';
 
 describe('clamp', () => {
   it('returns the value when above min', () => {
@@ -132,4 +128,3 @@ describe('buildAmortization', () => {
     expect(summary.rows.length).toBeLessThanOrEqual(12);
   });
 });
-

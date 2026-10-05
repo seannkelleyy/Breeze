@@ -4,10 +4,7 @@ import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn, formatCurrencyWithCode } from '@/lib/utils';
-import {
-  getPersonPaydaysForMonth,
-  getPaychecksPerYear,
-} from '../../lib/plannerMath';
+import { getPersonPaydaysForMonth, getPaychecksPerYear } from '../../lib/plannerMath';
 import { getPersonBonusPerYear, getPersonTotalIncome } from '@/lib/calc/income';
 import { computeHouseholdWaterfall, computePersonWaterfall } from '../../lib/paycheck';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
@@ -39,7 +36,14 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
   const taxTables = useTaxYear(filingStatus);
 
   const totals = useMemo(() => {
-    const wf = computeHouseholdWaterfall(people, accounts, withholdings, taxTables, deductionType, filingStatus);
+    const wf = computeHouseholdWaterfall(
+      people,
+      accounts,
+      withholdings,
+      taxTables,
+      deductionType,
+      filingStatus,
+    );
     const totalIncome = people.reduce((sum, p) => sum + getPersonTotalIncome(p), 0);
     const bonusIncome = people.reduce((sum, p) => sum + getPersonBonusPerYear(p) / 12, 0);
     return {

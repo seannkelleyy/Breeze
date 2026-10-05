@@ -53,7 +53,6 @@ describe('lib/calc/income — storage contract: annualBonus is the annual-equiva
     expect(getPersonTotalIncome(p)).toBe(114400);
   });
 
-
   it('getPersonsAnnualIncome sums owner salaries only, falling back to people[0]', () => {
     const a = person({ id: 'a', annualSalary: 90000 });
     const b = person({ id: 'b', annualSalary: 60000 });

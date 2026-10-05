@@ -164,7 +164,7 @@ const useFetchPlanner = () => {
           annualRate: (Number(a.annualRate) || 0) * 100,
           returnProfile: a.returnProfile as PlannerAccount['returnProfile'] | null,
           taxTreatment: resolveTaxTreatment(accountType, a.taxTreatment),
-        pretaxSharePercent: a.pretaxSharePercent ?? null,
+          pretaxSharePercent: a.pretaxSharePercent ?? null,
           purchaseDate: a.purchaseDate ?? null,
           purchasePrice: a.purchasePrice ? Number(a.purchasePrice) : null,
           homeGrowthProfile: a.homeGrowthProfile ?? null,

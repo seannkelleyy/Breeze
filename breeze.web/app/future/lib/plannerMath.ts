@@ -223,9 +223,6 @@ export const getPaychecksPerYear = (cadence: PayCadence): number => {
   }
 };
 
-
-
-
 // Weekday helpers: stored payDay uses 1 = Monday … 7 = Sunday.
 const mondayBasedWeekday = (date: Date): number => ((date.getDay() + 6) % 7) + 1;
 

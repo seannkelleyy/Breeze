@@ -236,8 +236,11 @@ describe('liability principal in contribution totals', () => {
       annualRate: 6,
       employerMatchRate: 0,
     });
-    const { totalPlannedMonthlyEmployee, totalPlannedMonthlyDebtPrincipal, totalPlannedMonthlyInvestment } =
-      getPlannerContributionTotals([loan], []);
+    const {
+      totalPlannedMonthlyEmployee,
+      totalPlannedMonthlyDebtPrincipal,
+      totalPlannedMonthlyInvestment,
+    } = getPlannerContributionTotals([loan], []);
 
     // Interest = 114000 * 6% / 12 = 570 → principal = 789 - 570 = 219.
     expect(totalPlannedMonthlyEmployee).toBe(0);

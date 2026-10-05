@@ -11,10 +11,7 @@ import {
 } from 'recharts';
 import { formatCurrencyWithCode } from '@/lib/utils';
 import { InfoTip } from '@/components/common/InfoTip';
-import {
-  buildBracketLadder,
-  type TaxScenario,
-} from '../lib/taxScenario';
+import { buildBracketLadder, type TaxScenario } from '../lib/taxScenario';
 
 export function TaxScenarioColumns({
   baseline,
@@ -124,8 +121,8 @@ export function TaxScenarioColumns({
           You&apos;re in the{' '}
           <span className="font-medium">{(currentRow.rate * 100).toFixed(0)}% bracket</span> —{' '}
           {fc(currentRow.used)} fills it,{' '}
-          <span className="font-medium">{fc(currentRow.remainingToNext ?? 0)}</span> more before
-          the {(nextRow?.rate ?? 0) * 100}% rate applies.
+          <span className="font-medium">{fc(currentRow.remainingToNext ?? 0)}</span> more before the{' '}
+          {(nextRow?.rate ?? 0) * 100}% rate applies.
           <InfoTip text="Every dollar of additional gross income above that line is taxed at the next rate; every additional pre-tax dollar is saved at the current one." />
         </p>
       )}

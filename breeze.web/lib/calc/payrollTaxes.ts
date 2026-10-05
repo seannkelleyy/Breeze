@@ -99,7 +99,8 @@ export function walkFederalBrackets(taxableIncome: number, brackets: TaxBracket[
   let tax = 0;
   for (const bracket of brackets) {
     if (taxableIncome <= bracket.minimum) break;
-    const upper = bracket.maximum === null ? taxableIncome : Math.min(taxableIncome, bracket.maximum);
+    const upper =
+      bracket.maximum === null ? taxableIncome : Math.min(taxableIncome, bracket.maximum);
     tax += (upper - bracket.minimum) * bracket.rate;
   }
   return tax;
@@ -112,8 +113,12 @@ export function computePayrollTaxes(input: PayrollTaxInput): PayrollTaxResult {
   const taxable = Math.max(0, incomeTaxWages - input.standardDeduction);
   const federalTax = walkFederalBrackets(taxable, input.brackets);
 
-  const { socialSecurityTax, medicareTax, additionalMedicareTax, total: ficaTax } =
-    computeFicaTax(ficaWages, input.ssWageBase, input.additionalMedicareThreshold);
+  const {
+    socialSecurityTax,
+    medicareTax,
+    additionalMedicareTax,
+    total: ficaTax,
+  } = computeFicaTax(ficaWages, input.ssWageBase, input.additionalMedicareThreshold);
 
   const totalTax = federalTax + ficaTax;
   return {

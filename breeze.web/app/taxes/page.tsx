@@ -89,8 +89,8 @@ export default function TaxesPage() {
       <div>
         <h1 className="text-2xl font-semibold">Taxes</h1>
         <p className="text-muted-foreground text-sm">
-          Where your household income lands in the federal bracket ladder — and what your
-          pre-tax choices do about it. {taxTables ? `${taxTables.year} brackets · ` : ''}
+          Where your household income lands in the federal bracket ladder — and what your pre-tax
+          choices do about it. {taxTables ? `${taxTables.year} brackets · ` : ''}
           {filingStatus === 'MFJ'
             ? 'Married filing jointly'
             : filingStatus === 'MFS'
@@ -116,9 +116,9 @@ export default function TaxesPage() {
         </div>
       </div>
 
-      {(loading || !baseline || !current) ? (
+      {loading || !baseline || !current ? (
         <Card>
-          <CardContent className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+          <CardContent className="text-muted-foreground flex items-center gap-2 py-8 text-sm">
             {plannerPeople.length === 0 ? (
               <>Add household members on the People page to model your taxes.</>
             ) : (
@@ -134,8 +134,8 @@ export default function TaxesPage() {
             <CardHeader>
               <CardTitle>The pre-tax effect</CardTitle>
               <CardDescription>
-                Same income, two worlds: with and without the tax-advantaged moves you make
-                during the year.
+                Same income, two worlds: with and without the tax-advantaged moves you make during
+                the year.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -154,7 +154,7 @@ export default function TaxesPage() {
                   <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                     Tax saved per year
                   </p>
-                  <p className="text-lg font-semibold text-success">
+                  <p className="text-success text-lg font-semibold">
                     {fc(baseline.totalTax - current.totalTax)}
                   </p>
                 </div>
@@ -191,9 +191,7 @@ export default function TaxesPage() {
                   Pre-tax 401(k) / HSA contributions
                   <InfoTip text="Only the pre-tax share of your contributions counts here — Roth portions are taxed now. Includes your household's split elections." />
                 </span>
-                <span className="font-medium">
-                  {fc(waterfall.pretaxSavingsMonthly * 12)}/yr
-                </span>
+                <span className="font-medium">{fc(waterfall.pretaxSavingsMonthly * 12)}/yr</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1">
@@ -223,8 +221,8 @@ export default function TaxesPage() {
             <CardHeader>
               <CardTitle>Wealth by tax treatment</CardTitle>
               <CardDescription>
-                Where your investment wealth sits today — the map you&apos;ll use to plan
-                retirement withdrawals.
+                Where your investment wealth sits today — the map you&apos;ll use to plan retirement
+                withdrawals.
               </CardDescription>
             </CardHeader>
             <CardContent>

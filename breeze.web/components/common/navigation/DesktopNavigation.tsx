@@ -7,12 +7,7 @@ import {
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import { NavRouteItem } from './NavItems';
-import {
-  navGroups,
-  routeNavItems,
-  standaloneNavItems,
-  type RouteNavItem,
-} from './navConfig';
+import { navGroups, routeNavItems, standaloneNavItems, type RouteNavItem } from './navConfig';
 import { UserMenu } from '../auth/UserMenu';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';

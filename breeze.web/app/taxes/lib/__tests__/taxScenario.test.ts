@@ -13,7 +13,12 @@ const brackets: TaxBracketRow[] = [
   { minimum: 256225, maximum: 640600, rate: 0.35 },
   { minimum: 640600, maximum: null, rate: 0.37 },
 ];
-const tables: TaxYearTables = { year: 2026, brackets, standardDeduction: 16100, ssWageBase: 184500 };
+const tables: TaxYearTables = {
+  year: 2026,
+  brackets,
+  standardDeduction: 16100,
+  ssWageBase: 184500,
+};
 
 describe('computeTaxScenario', () => {
   it('walks the brackets and sums slices to the taxable income', () => {
@@ -124,4 +129,3 @@ describe('buildBracketLadder', () => {
     expect(rows.every((r) => r.status !== 'ahead')).toBe(true);
   });
 });
-

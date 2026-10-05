@@ -189,7 +189,7 @@ export function CurrentSnapshotSection({
                   </div>
                   <div className="border-t pt-1">
                     <div className="flex items-center justify-between text-sm font-medium">
-                      <span className="inline-flex items-center gap-1 text-success">
+                      <span className="text-success inline-flex items-center gap-1">
                         Take-home
                         <InfoTip text="What lands in the bank: gross minus taxes, savings, and withholdings. Employer match is not here — it goes straight to the 401(k) without touching your paycheck." />
                       </span>

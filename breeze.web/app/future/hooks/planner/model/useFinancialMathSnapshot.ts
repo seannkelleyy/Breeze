@@ -33,7 +33,14 @@ export function useFinancialMathSnapshot(
           deductionType,
         },
         taxTables,
-        computeHouseholdWaterfall(people, accounts, withholdings, taxTables, deductionType, filingStatus),
+        computeHouseholdWaterfall(
+          people,
+          accounts,
+          withholdings,
+          taxTables,
+          deductionType,
+          filingStatus,
+        ),
       ),
     [
       monthlyExpenses,

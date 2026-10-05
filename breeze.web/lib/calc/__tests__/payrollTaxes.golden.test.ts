@@ -12,7 +12,19 @@ import { computePayrollTaxes } from '../payrollTaxes';
  * includes the SS wage-base cap and the 0.9% additional Medicare tax.
  */
 const fixture = JSON.parse(
-  readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', 'tests', 'fixtures', 'payroll-taxes.json'), 'utf8'),
+  readFileSync(
+    join(
+      dirname(fileURLToPath(import.meta.url)),
+      '..',
+      '..',
+      '..',
+      '..',
+      'tests',
+      'fixtures',
+      'payroll-taxes.json',
+    ),
+    'utf8',
+  ),
 ) as {
   inputs: { standardDeduction: number; ssWageBase: number; additionalMedicareThreshold: number };
   brackets: { rate: number; minimum: number; maximum: number | null }[];

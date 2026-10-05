@@ -113,17 +113,18 @@ const usePlannerModel = () => {
     filingStatus,
   );
   const annualWithdrawal = monthlyExpenses * 12;
-  const { projectionRows, finalBalances, projectedNetWorthAtTargetAge, portfolioAverageRates } = useProjections(
-    filteredAccounts,
-    effectiveHousehold,
-    plannerAssetFinanceDetailsByAccountId,
-    irsLimits,
-    inflationRate,
-    useInflationAdjustedValues,
-    projectionEndAge,
-    annualWithdrawal,
-    marketAdjustment,
-  );
+  const { projectionRows, finalBalances, projectedNetWorthAtTargetAge, portfolioAverageRates } =
+    useProjections(
+      filteredAccounts,
+      effectiveHousehold,
+      plannerAssetFinanceDetailsByAccountId,
+      irsLimits,
+      inflationRate,
+      useInflationAdjustedValues,
+      projectionEndAge,
+      annualWithdrawal,
+      marketAdjustment,
+    );
   const financialFreedomAge = useFinancialFreedomAge(
     projectionRows,
     targets.financialFreedomTarget,

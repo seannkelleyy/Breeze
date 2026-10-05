@@ -104,7 +104,6 @@ const BudgetContent = () => {
         deductionType,
         currentYear,
         currentMonth + 1,
-        filingStatus,
       );
       await regenerateBudgetMonth(currentYear, currentMonth + 1, payrollIncomes);
       await Promise.all([refetchBudget(), refetchIncomes(), refetchCategories()]);
