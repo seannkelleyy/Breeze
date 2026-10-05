@@ -28,8 +28,10 @@ const account = (overrides: Partial<PlannerAccount> = {}): PlannerAccount => ({
   ...overrides,
 });
 
-const bucketOf = (result: ReturnType<typeof getWealthByTaxTreatment>, key: 'pretax' | 'roth' | 'taxable') =>
-  result.buckets.find((b) => b.key === key)!;
+const bucketOf = (
+  result: ReturnType<typeof getWealthByTaxTreatment>,
+  key: 'pretax' | 'roth' | 'taxable',
+) => result.buckets.find((b) => b.key === key)!;
 
 describe('getWealthByTaxTreatment', () => {
   it('splits a 70/30 account into both buckets proportionally', () => {
@@ -70,10 +72,20 @@ describe('getWealthByTaxTreatment', () => {
 
   it('records which accounts feed each bucket', () => {
     const result = getWealthByTaxTreatment([
-      account({ id: 'x1', name: 'Sean 401k', accountType: '401k', startingBalance: 100000, pretaxSharePercent: 70 }),
+      account({
+        id: 'x1',
+        name: 'Sean 401k',
+        accountType: '401k',
+        startingBalance: 100000,
+        pretaxSharePercent: 70,
+      }),
     ]);
     expect(bucketOf(result, 'pretax').accounts).toHaveLength(1);
-    expect(bucketOf(result, 'pretax').accounts[0]).toMatchObject({ id: 'x1', name: 'Sean 401k', amount: 70000 });
+    expect(bucketOf(result, 'pretax').accounts[0]).toMatchObject({
+      id: 'x1',
+      name: 'Sean 401k',
+      amount: 70000,
+    });
     expect(bucketOf(result, 'roth').accounts[0]).toMatchObject({ id: 'x1', amount: 30000 });
   });
 

@@ -6,7 +6,11 @@
  * proportionally, using the same share as the paycheck waterfall.
  */
 import type { PlannerAccount } from '../../future/types/account';
-import { isCombinedAssetType, isLiabilityAccountType, TAX_ADVANTAGED_ACCOUNT_TYPES } from '../../future/lib/config';
+import {
+  isCombinedAssetType,
+  isLiabilityAccountType,
+  TAX_ADVANTAGED_ACCOUNT_TYPES,
+} from '../../future/lib/config';
 import { getPretaxShare } from '../../future/lib/paycheck';
 
 export type WealthBucketKey = 'pretax' | 'roth' | 'taxable';
@@ -52,15 +56,30 @@ export function getWealthByTaxTreatment(accounts: PlannerAccount[]): WealthByTre
       const roth = balance - pretax;
       if (pretax > 0) {
         totals.pretax += pretax;
-        byBucket.pretax.push({ id: account.id, name: account.name, personIds: account.personIds, amount: pretax });
+        byBucket.pretax.push({
+          id: account.id,
+          name: account.name,
+          personIds: account.personIds,
+          amount: pretax,
+        });
       }
       if (roth > 0) {
         totals.roth += roth;
-        byBucket.roth.push({ id: account.id, name: account.name, personIds: account.personIds, amount: roth });
+        byBucket.roth.push({
+          id: account.id,
+          name: account.name,
+          personIds: account.personIds,
+          amount: roth,
+        });
       }
     } else {
       totals.taxable += balance;
-      byBucket.taxable.push({ id: account.id, name: account.name, personIds: account.personIds, amount: balance });
+      byBucket.taxable.push({
+        id: account.id,
+        name: account.name,
+        personIds: account.personIds,
+        amount: balance,
+      });
     }
   }
 

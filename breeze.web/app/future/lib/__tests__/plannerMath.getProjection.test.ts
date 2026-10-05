@@ -273,12 +273,17 @@ describe('getProjection — post-retirement withdrawals', () => {
   it('keeps withdrawals flat in real mode — today’s dollars do not inflate', () => {
     // 10% nominal return with 10% inflation = 0% real rate: the balance only
     // moves by withdrawals, so the withdrawal size is directly readable.
-    const { projectionRows } = call([account({ startingBalance: 100000, annualRate: 10 })], 63, 64, {
-      projectionEndAge: 66,
-      annualWithdrawal: 12000,
-      inflationRatePercent: 10,
-      useInflationAdjustedValues: true,
-    });
+    const { projectionRows } = call(
+      [account({ startingBalance: 100000, annualRate: 10 })],
+      63,
+      64,
+      {
+        projectionEndAge: 66,
+        annualWithdrawal: 12000,
+        inflationRatePercent: 10,
+        useInflationAdjustedValues: true,
+      },
+    );
 
     // Withdrawals start at 65 (the year after the target age) and stay flat.
     expect(projectionRows[1].totalBalance).toBeCloseTo(100000, 2);

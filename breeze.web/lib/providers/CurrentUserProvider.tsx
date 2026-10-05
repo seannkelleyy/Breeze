@@ -311,7 +311,14 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         next,
       );
     },
-    [persistPreferences, currencyCode, returnDisplayMode, inflationRate, safeWithdrawalRate, resolvedUserId],
+    [
+      persistPreferences,
+      currencyCode,
+      returnDisplayMode,
+      inflationRate,
+      safeWithdrawalRate,
+      resolvedUserId,
+    ],
   );
 
   const updateDeductionType = useCallback(
@@ -330,7 +337,14 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         next,
       );
     },
-    [persistPreferences, currencyCode, returnDisplayMode, inflationRate, safeWithdrawalRate, resolvedUserId],
+    [
+      persistPreferences,
+      currencyCode,
+      returnDisplayMode,
+      inflationRate,
+      safeWithdrawalRate,
+      resolvedUserId,
+    ],
   );
 
   const updateUserSetup = useCallback(

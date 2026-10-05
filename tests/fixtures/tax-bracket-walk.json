@@ -1,0 +1,87 @@
+{
+  "$comment": "Golden fixtures for the federal bracket walk. Shared by the TS suite (breeze.web) and the Go suite (breeze.api/internal/service) so the implementations cannot drift. Taxable income \u2192 federal tax, no deductions, no FICA.",
+  "brackets": [
+    {
+      "rate": 0.1,
+      "minimum": 0,
+      "maximum": 11600
+    },
+    {
+      "rate": 0.12,
+      "minimum": 11600,
+      "maximum": 47150
+    },
+    {
+      "rate": 0.22,
+      "minimum": 47150,
+      "maximum": 100525
+    },
+    {
+      "rate": 0.24,
+      "minimum": 100525,
+      "maximum": 191950
+    },
+    {
+      "rate": 0.32,
+      "minimum": 191950,
+      "maximum": 243725
+    },
+    {
+      "rate": 0.35,
+      "minimum": 243725,
+      "maximum": 609350
+    },
+    {
+      "rate": 0.37,
+      "minimum": 609350,
+      "maximum": null
+    }
+  ],
+  "cases": [
+    {
+      "name": "zero income",
+      "taxableIncome": 0,
+      "expectedTax": 0.0
+    },
+    {
+      "name": "exactly at the 10/12 boundary",
+      "taxableIncome": 11600,
+      "expectedTax": 1160.0
+    },
+    {
+      "name": "mid 12% bracket",
+      "taxableIncome": 30000,
+      "expectedTax": 3368.0
+    },
+    {
+      "name": "exactly at the 12/22 boundary",
+      "taxableIncome": 47150,
+      "expectedTax": 5426.0
+    },
+    {
+      "name": "mid 22% bracket",
+      "taxableIncome": 80000,
+      "expectedTax": 12653.0
+    },
+    {
+      "name": "exactly at a bracket boundary (22/24)",
+      "taxableIncome": 100525,
+      "expectedTax": 17168.5
+    },
+    {
+      "name": "mid 24% bracket",
+      "taxableIncome": 150000,
+      "expectedTax": 29042.5
+    },
+    {
+      "name": "high earner crossing 32%",
+      "taxableIncome": 200000,
+      "expectedTax": 41686.5
+    },
+    {
+      "name": "top bracket",
+      "taxableIncome": 750000,
+      "expectedTax": 235687.75
+    }
+  ]
+}

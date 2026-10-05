@@ -4,12 +4,8 @@ import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn, formatCurrencyWithCode } from '@/lib/utils';
-import {
-  getPersonBonusPerYear,
-  getPersonPaydaysForMonth,
-  getPersonTotalIncome,
-  getPaychecksPerYear,
-} from '../../lib/plannerMath';
+import { getPersonPaydaysForMonth, getPaychecksPerYear } from '../../lib/plannerMath';
+import { getPersonBonusPerYear, getPersonTotalIncome } from '@/lib/calc/income';
 import { computeHouseholdWaterfall, computePersonWaterfall } from '../../lib/paycheck';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useTaxYear from '../../hooks/planner/useTaxYear';
@@ -40,7 +36,14 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
   const taxTables = useTaxYear(filingStatus);
 
   const totals = useMemo(() => {
-    const wf = computeHouseholdWaterfall(people, accounts, withholdings, taxTables, deductionType);
+    const wf = computeHouseholdWaterfall(
+      people,
+      accounts,
+      withholdings,
+      taxTables,
+      deductionType,
+      filingStatus,
+    );
     const totalIncome = people.reduce((sum, p) => sum + getPersonTotalIncome(p), 0);
     const bonusIncome = people.reduce((sum, p) => sum + getPersonBonusPerYear(p) / 12, 0);
     return {
@@ -48,11 +51,12 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
       bonusMonthly: bonusIncome,
       baseMonthly: totalIncome / 12 - bonusIncome,
       taxesMonthly: wf.taxesMonthly,
+      effectiveRate: wf.effectiveRate,
       savingsMonthly: wf.savingsMonthly,
       withholdingsMonthly: wf.pretaxWithholdingsMonthly + wf.posttaxWithholdingsMonthly,
       takeHomeMonthly: wf.takeHomeMonthly,
     };
-  }, [people, accounts, withholdings, taxTables, deductionType]);
+  }, [people, accounts, withholdings, taxTables, deductionType, filingStatus]);
 
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-5">
@@ -64,7 +68,7 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
       <Operator>−</Operator>
       <Term
         value={fc(totals.taxesMonthly)}
-        label={`Taxes (est. ${((totals.taxesMonthly / (totals.totalIncome / 12)) * 100 || 0).toFixed(0)}% effective)`}
+        label={`Taxes (est. ${(totals.effectiveRate * 100 || 0).toFixed(0)}% effective)`}
       />
       <Operator>−</Operator>
       <Term value={fc(totals.savingsMonthly)} label="Savings (401k, HSA)" />

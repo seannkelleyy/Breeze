@@ -212,3 +212,44 @@ func TestEstimateForYear_NoDeduction(t *testing.T) {
 	assert.Equal(t, 0, est.TaxableIncome.Cmp(decimal.MustParse("8000.00")))
 	assert.Equal(t, 0, est.TaxOwed.Cmp(decimal.MustParse("1200.00"))) // 8000 * 0.15
 }
+
+func TestEstimateForYear_StandardDeductionAppliedWhenDeductionNil(t *testing.T) {
+	ctx := context.Background()
+	b0 := sqlc.TaxBracket{
+		ID:            uuid.New(),
+		Year:          2025,
+		FilingStatus:  sqlc.FilingStatusSINGLE,
+		MinimumAmount: decimal.MustParse("0.00"),
+		MaximumAmount: mkNumeric("20000.00"),
+		Rate:          decimal.MustParse("0.10"),
+		CreatedAt:     pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true},
+	}
+
+	mock := &mockTaxBracketQuerier{
+		listTaxBracketsByYearAndFilingStatusFunc: func(ctx context.Context, arg sqlc.ListTaxBracketsByYearAndFilingStatusParams) ([]sqlc.TaxBracket, error) {
+			return []sqlc.TaxBracket{b0}, nil
+		},
+		listStandardDeductionsByYearFunc: func(ctx context.Context, year int32) ([]sqlc.StandardDeduction, error) {
+			return []sqlc.StandardDeduction{
+				{
+					Year:         2025,
+					FilingStatus: sqlc.FilingStatusSINGLE,
+					Amount:       decimal.MustParse("5000.00"),
+					CreatedAt:    pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true},
+				},
+			}, nil
+		},
+	}
+	svc := NewTaxPlanningService(mock)
+
+	// income 25,000, no itemized deduction given → standard 5,000 applies
+	est, err := svc.EstimateForYear(ctx, 2025, sqlc.FilingStatusSINGLE, decimal.MustParse("25000.00"), nil)
+	assert.NoError(t, err)
+	assert.NotNil(t, est)
+
+	expTaxable := decimal.MustParse("20000.00")
+	assert.Equal(t, 0, est.TaxableIncome.Cmp(expTaxable))
+	// 20,000 fully inside the 10% bracket
+	expTax := decimal.MustParse("2000.00")
+	assert.Equal(t, 0, est.TaxOwed.Cmp(expTax))
+}
