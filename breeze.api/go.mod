@@ -11,7 +11,7 @@ require (
 	github.com/govalues/decimal v0.1.36
 	github.com/joho/godotenv v1.5.1
 	github.com/pashagolub/pgxmock/v4 v4.9.0
-	github.com/vektah/gqlparser/v2 v2.5.58
+	github.com/vektah/gqlparser/v2 v2.5.60
 	golang.org/x/time v0.15.0
 )
 
