@@ -74,6 +74,20 @@ The authenticated user is available via the `CurrentUserProvider` context wrappe
 const { user, userId } = useCurrentUser();  // access anywhere in tree
 ```
 
+Pages that read or write user data wrap their content in the `RequireAuth` guard
+(`components/common/auth/RequireAuth.tsx`). While the signed-in user resolves it
+shows a spinner; if Clerk confirms the visitor is signed out it redirects to the
+homepage (the sign-in screen) and the children never mount. Public calculator
+pages (`/mortgage`, `/retirement-ladder`, `/tax-planning`) skip the guard. The
+nav mirrors this: routes opt into signed-out visibility with `isPublic` in
+`navConfig.ts`, and both navs filter through `visibleNavItems`/`visibleNavGroups`.
+
+```tsx
+<RequireAuth>
+  <AccountsContent />
+</RequireAuth>
+```
+
 ### Pure Domain Library (lib/calc)
 
 Reusable financial math lives in `breeze.web/lib/calc/` — plain TypeScript, no

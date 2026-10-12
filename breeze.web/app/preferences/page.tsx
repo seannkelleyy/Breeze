@@ -1,6 +1,4 @@
 'use client';
-import { useUser } from '@clerk/clerk-react';
-import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -12,14 +10,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
+import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { PLANNER_RETURN_DISPLAY_MODE_OPTIONS } from '@/app/future/lib/constants';
 
 export default function PreferencesPage() {
-  const { isLoaded: clerkLoaded } = useUser();
+  return (
+    <RequireAuth>
+      <PreferencesContent />
+    </RequireAuth>
+  );
+}
+
+function PreferencesContent() {
   const {
-    userId,
-    isLoaded,
     currencyCode,
     updateCurrencyCode,
     returnDisplayMode,
@@ -36,14 +40,6 @@ export default function PreferencesPage() {
     setMonthlyExpenses,
     updateUserSetup,
   } = useCurrentUser();
-
-  if (!clerkLoaded || !isLoaded || !userId) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="text-info mx-auto h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 pt-16 pb-6 sm:px-6 lg:px-8">

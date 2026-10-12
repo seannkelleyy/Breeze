@@ -24,6 +24,7 @@ import { usePlannerState } from '../future/providers/PlannerStateProvider';
 import { usePaycheckDeductions } from '../future/hooks/planner/usePaycheckDeductions';
 import useTaxYear from '../future/hooks/planner/useTaxYear';
 import { useTabParam } from '@/lib/hooks/useTabParam';
+import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { formatCurrencyWithCode } from '@/lib/utils';
 
@@ -38,7 +39,9 @@ export default function BudgetPage() {
         </div>
       }
     >
-      <BudgetContent />
+      <RequireAuth>
+        <BudgetContent />
+      </RequireAuth>
     </Suspense>
   );
 }

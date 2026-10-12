@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Receipt } from 'lucide-react';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { PageHeader } from '@/components/common/PageHeader';
 import {
   useRecurringTemplates,
@@ -14,6 +15,14 @@ import { TransactionsCard } from './components/TransactionsCard';
 import { RecurringExpenseList } from './components/RecurringExpenseList';
 
 export default function ExpensesPage() {
+  return (
+    <RequireAuth>
+      <ExpensesContent />
+    </RequireAuth>
+  );
+}
+
+function ExpensesContent() {
   const { userId, isLoaded, currencyCode } = useCurrentUser();
   const {
     getRecurringExpenseTemplates,

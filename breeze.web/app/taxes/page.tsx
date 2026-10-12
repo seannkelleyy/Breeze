@@ -1,8 +1,8 @@
 'use client';
 import { useMemo } from 'react';
-import { useUser } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 
+import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerHydration } from '../future/hooks/usePlannerHydration';
 import { usePlannerState } from '../future/providers/PlannerStateProvider';
@@ -28,7 +28,14 @@ import { formatCurrencyWithCode } from '@/lib/utils';
 import { InfoTip } from '@/components/common/InfoTip';
 
 export default function TaxesPage() {
-  const { isLoaded, isSignedIn } = useUser();
+  return (
+    <RequireAuth>
+      <TaxesContent />
+    </RequireAuth>
+  );
+}
+
+function TaxesContent() {
   const { currencyCode } = useCurrentUser();
   usePlannerHydration();
   const { plannerPeople, plannerAccounts } = usePlannerState();
@@ -73,14 +80,6 @@ export default function TaxesPage() {
   }, [plannerPeople, plannerAccounts, withholdings, taxTables, deductionType, filingStatus]);
   const { waterfall, baseline, current } = scenario ?? {};
   const wealth = useMemo(() => getWealthByTaxTreatment(plannerAccounts), [plannerAccounts]);
-
-  if (!isLoaded || !isSignedIn) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin" />
-      </div>
-    );
-  }
 
   const loading = !scenario || !waterfall || !taxTables;
 

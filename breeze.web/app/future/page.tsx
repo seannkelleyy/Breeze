@@ -1,8 +1,8 @@
 'use client';
 import { Suspense, useEffect, useRef } from 'react';
-import { useUser } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 import { usePlannerModel, useFetchPlanner } from './hooks/planner/index';
+import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from './providers/PlannerStateProvider';
 import { usePlannerUiState } from './hooks/usePlannerUiState';
@@ -22,14 +22,15 @@ export default function PlannerPage() {
         </div>
       }
     >
-      <PlannerContent />
+      <RequireAuth>
+        <PlannerContent />
+      </RequireAuth>
     </Suspense>
   );
 }
 
 function PlannerContent() {
-  const { isLoaded: clerkLoaded } = useUser();
-  const { userId, isLoaded, currencyCode } = useCurrentUser();
+  const { userId, currencyCode } = useCurrentUser();
   const { data: connections } = usePlaidConnections(userId);
   const { mutate: syncConnection } = useSyncPlaidConnection();
   const hasSyncedRef = useRef(false);
@@ -114,17 +115,6 @@ function PlannerContent() {
     householdPeople,
     portfolioAverageRates,
   } = usePlannerModel();
-
-  if (!clerkLoaded || !isLoaded || !userId) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="space-y-2 text-center">
-          <Loader2 className="text-info mx-auto h-8 w-8 animate-spin" />
-          <p className="text-muted-foreground">Loading your planner...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 pt-16 pb-6 sm:px-6 lg:px-8">

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, LinkIcon, RotateCw, Trash2, Loader2 } from 'lucide-react';
 import { PlaidLinkButton } from './components/PlaidLinkButton';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import useGraphql from '@/lib/services/useGraphql';
 import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/lib/services/queries/assets';
 import {
@@ -119,6 +120,14 @@ const ConnectionAccounts = ({ connectionId }: { connectionId: string }) => {
 };
 
 const PlaidConnections = () => {
+  return (
+    <RequireAuth>
+      <PlaidConnectionsContent />
+    </RequireAuth>
+  );
+};
+
+const PlaidConnectionsContent = () => {
   const { userId } = useCurrentUser();
   const { data: connections, isLoading } = usePlaidConnections(userId);
   const { mutate: syncConnection, isPending: isSyncing } = useSyncPlaidConnection();

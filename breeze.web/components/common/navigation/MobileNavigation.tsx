@@ -2,7 +2,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { routeNavItems, secondaryNavItems } from './navConfig';
+import { routeNavItems, secondaryNavItems, visibleNavItems } from './navConfig';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { UserMenu } from '../auth/UserMenu';
 import Image from 'next/image';
 import {
@@ -15,10 +16,13 @@ import { MoreHorizontal } from 'lucide-react';
 
 export const MobileNavigation = () => {
   const pathname = usePathname();
+  // Render the full nav until Clerk resolves; the filter settles in one pass.
+  const { isLoaded, isSignedIn } = useCurrentUser();
+  const signedIn = !isLoaded || isSignedIn;
 
   // Bottom tab bar shows the core categories; the rest live under "More".
-  const tabs = routeNavItems;
-  const more = secondaryNavItems;
+  const tabs = visibleNavItems(routeNavItems, signedIn);
+  const more = visibleNavItems(secondaryNavItems, signedIn);
 
   const isActive = (to: string) => (to === '/' ? pathname === '/' : pathname.startsWith(to));
 

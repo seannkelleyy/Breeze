@@ -1,8 +1,7 @@
 'use client';
 import { Suspense } from 'react';
-import { useUser } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
-import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { usePlannerUiState } from '../future/hooks/usePlannerUiState';
 
 import { PeopleSection } from '../future/components/sections';
@@ -17,32 +16,19 @@ export default function PeoplePage() {
         </div>
       }
     >
-      <PeopleContent />
+      <RequireAuth>
+        <PeopleContent />
+      </RequireAuth>
     </Suspense>
   );
 }
 
 function PeopleContent() {
-  const { isLoaded: clerkLoaded } = useUser();
-  const { userId, isLoaded } = useCurrentUser();
-
   // Manage local UI state
   const { collapsedSections } = usePlannerUiState();
 
   // Load planner data from API on mount and hydrate state
   usePlannerHydration();
-
-  // Show loading state while user data loads
-  if (!clerkLoaded || !isLoaded || !userId) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="space-y-2 text-center">
-          <Loader2 className="text-info mx-auto h-8 w-8 animate-spin" />
-          <p className="text-muted-foreground">Loading your people...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 pt-16 pb-6 sm:px-6 lg:px-8">

@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { useUser } from '@clerk/clerk-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Circle, ListChecks, Loader2, Plus, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from '@/app/future/providers/PlannerStateProvider';
 import { usePlannerHydration } from '@/app/future/hooks/usePlannerHydration';
@@ -24,13 +24,14 @@ const GOALS_QUERY_KEY = ['goals'];
 export default function GoalsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 pt-16 pb-6 sm:px-6 lg:px-8">
-      <GoalsContent />
+      <RequireAuth>
+        <GoalsContent />
+      </RequireAuth>
     </div>
   );
 }
 
 function GoalsContent() {
-  const { isLoaded: clerkLoaded } = useUser();
   const { userId, isLoaded } = useCurrentUser();
   const { plannerAccounts, plannerSummary } = usePlannerState();
   const queryClient = useQueryClient();
@@ -114,14 +115,6 @@ function GoalsContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completionStatus, footSteps]);
-
-  if (!clerkLoaded || !isLoaded || !userId) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="text-info mx-auto h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   if (isLoading || isCreatingSteps) {
     return (

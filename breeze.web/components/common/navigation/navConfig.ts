@@ -17,6 +17,8 @@ export type RouteNavItem = {
   to: string;
   title: string;
   icon: LucideIcon;
+  /** Reachable without signing in; kept in the nav for signed-out visitors. */
+  isPublic?: boolean;
 };
 
 export type NavGroup = {
@@ -33,6 +35,7 @@ const dashboard: RouteNavItem = {
   to: '/',
   title: 'Dashboard',
   icon: LayoutDashboard,
+  isPublic: true,
 };
 const people: RouteNavItem = {
   label: 'People',
@@ -75,6 +78,7 @@ const mortgage: RouteNavItem = {
   to: '/mortgage',
   title: 'Mortgage Calculator',
   icon: Calculator,
+  isPublic: true,
 };
 const connections: RouteNavItem = {
   label: 'Connections',
@@ -129,3 +133,20 @@ export const navGroups: ReadonlyArray<NavGroup> = [
     items: [future, goals, taxes, mortgage],
   },
 ];
+
+// ── Signed-out visibility ──
+// Every page that reads or writes user data is gated by <RequireAuth>; the nav
+// mirrors that by keeping only isPublic routes for signed-out visitors.
+
+export const visibleNavItems = (
+  items: ReadonlyArray<RouteNavItem>,
+  isSignedIn: boolean,
+): ReadonlyArray<RouteNavItem> => (isSignedIn ? items : items.filter((item) => item.isPublic));
+
+export const visibleNavGroups = (
+  groups: ReadonlyArray<NavGroup>,
+  isSignedIn: boolean,
+): ReadonlyArray<NavGroup> =>
+  groups
+    .map((group) => ({ ...group, items: [...visibleNavItems(group.items, isSignedIn)] }))
+    .filter((group) => group.items.length > 0);

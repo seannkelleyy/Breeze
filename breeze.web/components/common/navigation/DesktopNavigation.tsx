@@ -7,7 +7,15 @@ import {
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import { NavRouteItem } from './NavItems';
-import { navGroups, routeNavItems, standaloneNavItems, type RouteNavItem } from './navConfig';
+import {
+  navGroups,
+  routeNavItems,
+  standaloneNavItems,
+  visibleNavGroups,
+  visibleNavItems,
+  type RouteNavItem,
+} from './navConfig';
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { UserMenu } from '../auth/UserMenu';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -21,6 +29,9 @@ const isGroupActive = (pathname: string, items: RouteNavItem[]) =>
 
 export const DesktopNavigation = () => {
   const pathname = usePathname();
+  // Render the full nav until Clerk resolves; the filter settles in one pass.
+  const { isLoaded, isSignedIn } = useCurrentUser();
+  const signedIn = !isLoaded || isSignedIn;
 
   return (
     <Menubar
@@ -34,7 +45,7 @@ export const DesktopNavigation = () => {
 
       {/* CENTER: standalone links + grouped dropdowns */}
       <div className="z-10 flex items-center gap-1">
-        {standaloneNavItems.map((item) => (
+        {visibleNavItems(standaloneNavItems, signedIn).map((item) => (
           <NavRouteItem
             key={item.label}
             label={item.label}
@@ -43,7 +54,7 @@ export const DesktopNavigation = () => {
             icon={item.icon}
           />
         ))}
-        {navGroups.map((group) => {
+        {visibleNavGroups(navGroups, signedIn).map((group) => {
           const active = isGroupActive(pathname, group.items);
           return (
             <MenubarMenu key={group.label}>
