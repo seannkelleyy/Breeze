@@ -2,9 +2,10 @@
 
 ## Next Up
 
-1. **Debt payoff module** — the last unbuilt pillar. Avalanche/snowball strategy engine, payoff timeline, interest-saved comparison, page. Schema is ready: `liabilities.payoff_priority`, `liabilities.target_extra_payment`, and `users.payoff_strategy` exist unused.
-2. **Pre-launch switchovers** — see [production-checklist.md](deployment/production-checklist.md): Clerk production instance, Plaid production approval, and rotation of the exposed credentials (old Clerk `sk_test_` key + old Azure SQL password in public git history; Render DB password from chat).
-3. **Feature backlog** — People mobile layout (#18), dashboard blank scroll (#1), saved retirement scenarios, Roth conversion tracking + HSA receipt ladder, employer match vesting (#27), recurring-expense detection (#29), FOO auto-derivation from financial state, partial Intl.NumberFormat sweep.
+1. **Retirement drawdown** — agreed 2026-10-03 to come before debt payoff: HSA receipt ladder (qualified-expense tracking) and Roth conversion tracking, the unbuilt half of "Roth ladder + HSA ladder"; the `/retirement-ladder` calculator models access already, tracking is not built.
+2. **Debt payoff module** — the last unbuilt pillar. Avalanche/snowball strategy engine, payoff timeline, interest-saved comparison, page. Schema is ready: `liabilities.payoff_priority`, `liabilities.target_extra_payment`, and `users.payoff_strategy` exist unused.
+3. **Pre-launch switchovers** — see [production-checklist.md](deployment/production-checklist.md): Clerk production instance, Plaid production approval, and rotation of the exposed credentials (old Clerk `sk_test_` key + old Azure SQL password in public git history; Render DB password from chat).
+4. **Feature backlog** — People mobile layout (#18), dashboard blank scroll (#1), saved retirement scenarios, employer match vesting (#27), recurring-expense detection (#29), FOO auto-derivation from financial state, partial Intl.NumberFormat sweep.
 
 ## Deployment
 
