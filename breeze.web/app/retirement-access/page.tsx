@@ -2,16 +2,19 @@
 
 import { Suspense, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Line } from 'recharts';
 import {
   ArrowLeftRight,
   Banknote,
   CheckCircle2,
+  Clock,
   KeyRound,
   Loader2,
   Plus,
   Receipt,
   Trash2,
 } from 'lucide-react';
+import type { ChartConfig } from '@/components/ui/chart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +23,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
+import BreezeLineChart from '@/components/common/charts/BreezeLineChart';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import { GET_ASSETS_BY_USER } from '@/lib/services/queries/assets';
@@ -45,6 +49,11 @@ const formatDate = (value: string) => {
   if (Number.isNaN(parsed.getTime())) return value;
   return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
+
+// Conversions move pre-tax retirement money into a Roth; nothing else is a
+// legal from/to pair in this model.
+const CONVERSION_FROM_TYPES = new Set(['TRADITIONAL_IRA', '_401K', '_403B', '_457']);
+const CONVERSION_TO_TYPES = new Set(['ROTH_IRA']);
 
 export default function RetirementAccessPage() {
   return (
@@ -120,9 +129,7 @@ function RetirementAccessContent() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Reimbursed so far</CardDescription>
-            <CardTitle className="text-2xl">
-              {fc(num(access.hsaSummary.totalReimbursed))}
-            </CardTitle>
+            <CardTitle className="text-2xl">{fc(num(access.hsaSummary.totalReimbursed))}</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-xs">
             Tax-free withdrawals you have already taken.
@@ -130,13 +137,100 @@ function RetirementAccessContent() {
         </Card>
       </div>
 
+      <AccessTimelineCard
+        buckets={access.rothBuckets}
+        hsaAvailable={num(access.hsaSummary.availableToReimburse)}
+        fc={fc}
+      />
+
       <HsaLadderCard receipts={access.hsaReceipts} />
       <ReimbursementsCard reimbursements={access.hsaReimbursements} />
-      <RothConversionsCard
-        conversions={access.rothConversions}
-        buckets={access.rothBuckets}
-      />
+      <RothConversionsCard conversions={access.rothConversions} buckets={access.rothBuckets} />
     </div>
+  );
+}
+
+const timelineChartConfig = {
+  roth: { label: 'Penalty-free Roth principal', color: 'var(--chart-1)' },
+  hsa: { label: 'HSA receipts (available now)', color: 'var(--chart-2)' },
+} satisfies ChartConfig;
+
+// When money becomes reachable: HSA receipt balance is spendable today, while
+// converted Roth principal steps up each January 1 a bucket clears its
+// five-year clock.
+function AccessTimelineCard({
+  buckets,
+  hsaAvailable,
+  fc,
+}: {
+  buckets: RothConversionBucket[];
+  hsaAvailable: number;
+  fc: (v: number) => string;
+}) {
+  const chartData = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const unlockYears = buckets.map((b) => Number(b.availableOn.slice(0, 4)));
+    const lastYear = Math.max(currentYear, ...unlockYears);
+
+    const rows: Array<{ year: string; roth: number; hsa: number }> = [];
+    for (let year = currentYear; year <= lastYear; year++) {
+      const roth = buckets
+        .filter((b) => Number(b.availableOn.slice(0, 4)) <= year)
+        .reduce((sum, b) => sum + Number(b.amount), 0);
+      rows.push({ year: String(year), roth, hsa: hsaAvailable });
+    }
+    return rows;
+  }, [buckets, hsaAvailable]);
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="h-4 w-4" /> When your money unlocks
+        </CardTitle>
+        <CardDescription>
+          HSA receipts are reimburseable today; each Roth conversion step becomes penalty-free five
+          years after its tax year (earnings still follow the age-59½ rules).
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <BreezeLineChart
+          config={timelineChartConfig}
+          className="h-[220px] w-full"
+          data={chartData}
+          xAxisDataKey="year"
+          margin={{ top: 8, right: 16, bottom: 8, left: 0 }}
+          leftAxis={{
+            dataKey: 'roth',
+            yAxisId: 'left',
+            tickFormatter: (value: number) => {
+              if (Math.abs(value) >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+              if (Math.abs(value) >= 1000) return `${(value / 1000).toFixed(0)}k`;
+              return `${value}`;
+            },
+          }}
+          tooltipFormatter={(value: number, name: string) => `${fc(value)} — ${name}`}
+        >
+          <Line
+            type="stepAfter"
+            dataKey="roth"
+            stroke="var(--color-roth)"
+            strokeWidth={2}
+            dot={false}
+            yAxisId="left"
+          />
+          <Line
+            type="monotone"
+            dataKey="hsa"
+            stroke="var(--color-hsa)"
+            strokeWidth={2}
+            strokeDasharray="6 4"
+            dot={false}
+            yAxisId="left"
+          />
+        </BreezeLineChart>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -330,7 +424,11 @@ function ReimbursementsCard({ reimbursements }: { reimbursements: HsaReimburseme
           </div>
           <div className="space-y-1">
             <Label>Note (optional)</Label>
-            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="2024 receipts" />
+            <Input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="2024 receipts"
+            />
           </div>
           <Button onClick={() => void handleAdd()} disabled={isCreating}>
             <Plus className="mr-1 h-4 w-4" /> Record
@@ -354,9 +452,7 @@ function ReimbursementsCard({ reimbursements }: { reimbursements: HsaReimburseme
                       {formatDate(reimbursement.reimbursedOn)}
                     </p>
                     {reimbursement.note && (
-                      <p className="text-muted-foreground truncate text-xs">
-                        {reimbursement.note}
-                      </p>
+                      <p className="text-muted-foreground truncate text-xs">{reimbursement.note}</p>
                     )}
                   </div>
                   <Button
@@ -391,14 +487,16 @@ function RothConversionsCard({
   const { data: assets } = useQuery({
     queryKey: ['retirement-access-accounts', userId],
     queryFn: async () => {
-      const resp = await request<{ assets: Array<{ id: string; name: string }> }>(
-        GET_ASSETS_BY_USER,
-        { userId },
-      );
+      const resp = await request<{
+        assets: Array<{ id: string; name: string; assetType: string }>;
+      }>(GET_ASSETS_BY_USER, { userId });
       return resp.assets ?? [];
     },
     enabled: !!userId,
   });
+
+  const fromAccounts = (assets ?? []).filter((a) => CONVERSION_FROM_TYPES.has(a.assetType));
+  const toAccounts = (assets ?? []).filter((a) => CONVERSION_TO_TYPES.has(a.assetType));
 
   const [convertedOn, setConvertedOn] = useState(today());
   const [amount, setAmount] = useState(0);
@@ -479,14 +577,14 @@ function RothConversionsCard({
             <FormattedNumberInput value={amount} onValueChange={setAmount} maxFractionDigits={2} />
           </div>
           <div className="space-y-1">
-            <Label>From (optional)</Label>
+            <Label>From (pre-tax)</Label>
             <select
               value={fromAssetId}
               onChange={(e) => setFromAssetId(e.target.value)}
               className="border-input bg-background h-9 w-full rounded-md border px-2 text-sm"
             >
               <option value="">—</option>
-              {(assets ?? []).map((asset) => (
+              {fromAccounts.map((asset) => (
                 <option key={asset.id} value={asset.id}>
                   {asset.name}
                 </option>
@@ -494,14 +592,14 @@ function RothConversionsCard({
             </select>
           </div>
           <div className="space-y-1">
-            <Label>To Roth (optional)</Label>
+            <Label>To Roth</Label>
             <select
               value={toAssetId}
               onChange={(e) => setToAssetId(e.target.value)}
               className="border-input bg-background h-9 w-full rounded-md border px-2 text-sm"
             >
               <option value="">—</option>
-              {(assets ?? []).map((asset) => (
+              {toAccounts.map((asset) => (
                 <option key={asset.id} value={asset.id}>
                   {asset.name}
                 </option>
@@ -517,6 +615,12 @@ function RothConversionsCard({
           </Button>
         </div>
         {error && <p className="text-destructive text-sm">{error}</p>}
+        {fromAccounts.length === 0 && toAccounts.length === 0 && (
+          <p className="text-muted-foreground text-sm">
+            No eligible accounts yet — conversions need a pre-tax source (Traditional IRA or
+            401(k)/403(b)/457) and a Roth IRA destination. Add them on the Accounts page.
+          </p>
+        )}
 
         {conversions.length > 0 && (
           <div className="space-y-1">
