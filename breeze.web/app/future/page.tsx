@@ -11,6 +11,7 @@ import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hook
 import { ProjectionsSection } from './components/sections';
 import { CurrentSnapshotSection } from './components/CurrentSnapshotSection';
 import { RetirementPlannerSection } from './components/RetirementPlannerSection';
+import RetirementIncomeSection from './components/RetirementIncomeSection';
 import { getDefaultAssetFinanceDetailsForAccount } from './lib/projection';
 
 export default function PlannerPage() {
@@ -94,6 +95,7 @@ function PlannerContent() {
     accounts,
     currentAge,
     targetAge,
+    monthlyExpenses,
     financialMathSnapshot,
     projectionRows,
     accountBreakdownRows,
@@ -166,6 +168,15 @@ function PlannerContent() {
           accountBreakdown: collapsedSections['accountBreakdown'],
           onToggle: toggleSection,
         }}
+      />
+
+      <RetirementIncomeSection
+        accounts={accounts}
+        currentAge={currentAge}
+        targetAge={targetAge}
+        projectionEndAge={projectionEndAge}
+        monthlyExpenses={monthlyExpenses}
+        marketAdjustment={marketAdjustment}
       />
     </div>
   );

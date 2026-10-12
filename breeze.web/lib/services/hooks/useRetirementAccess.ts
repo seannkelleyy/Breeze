@@ -171,10 +171,9 @@ export const useCreateRothConversion = () => {
 
   return useMutation({
     mutationFn: async (input: CreateRothConversionValues) => {
-      const resp = await request<{ createRothConversion: RothConversion }>(
-        CREATE_ROTH_CONVERSION,
-        { input } as unknown as Record<string, unknown>,
-      );
+      const resp = await request<{ createRothConversion: RothConversion }>(CREATE_ROTH_CONVERSION, {
+        input,
+      } as unknown as Record<string, unknown>);
       return resp.createRothConversion;
     },
     onSuccess: invalidate,

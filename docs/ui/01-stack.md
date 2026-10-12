@@ -88,6 +88,15 @@ nav mirrors this: routes opt into signed-out visibility with `isPublic` in
 </RequireAuth>
 ```
 
+### Retirement Income Planner (app/future/lib)
+
+Retirement withdrawal sequencing lives in `breeze.web/app/future/lib/retirementIncome.ts` —
+a pure function that funds each retirement year in tax order (HSA receipts up to the saved-receipt
+balance, taxable, pre-tax, five-year-clock Roth conversions, remaining Roth) and flags 10%
+penalty exposure on pre-59½ draws. It consumes the retirement-access ledger (receipt balance +
+conversion buckets) and mirrors the projection engine's growth/inflation conventions. Rendered
+on /future by `RetirementIncomeSection`.
+
 ### Pure Domain Library (lib/calc)
 
 Reusable financial math lives in `breeze.web/lib/calc/` — plain TypeScript, no
