@@ -10,6 +10,7 @@ import {
   useRecurringExpenseTemplates,
 } from '@/app/budget/hooks/recurring/recurringTemplateServices';
 import useIrsLimits from './useIrsLimits';
+import { useRetirementAccess } from '@/lib/services/hooks/useRetirementAccess';
 import useTaxYear from './useTaxYear';
 import usePaycheckDeductions from './usePaycheckDeductions';
 import { useHouseholdCalculation } from './model/useHouseholdCalculation';
@@ -28,7 +29,7 @@ const usePlannerModel = () => {
   // Default to a full-life projection so the post-retirement drawdown phase
   // (contributions stop, inflation-adjusted withdrawals begin) is visible.
   const [projectionEndAge, setProjectionEndAge] = useState<number>(95);
-  const { returnDisplayMode, inflationRate, safeWithdrawalRate, filingStatus, deductionType } =
+  const { returnDisplayMode, inflationRate, safeWithdrawalRate, filingStatus, deductionType, userId } =
     useCurrentUser();
   const {
     plannerDesiredInvestmentAmount,
@@ -39,6 +40,19 @@ const usePlannerModel = () => {
     setPlannerSummary,
   } = usePlannerState();
   const { data: recurringExpenseTemplates } = useRecurringExpenseTemplates();
+  // The retirement-access ledger (saved HSA receipts + conversion clocks) turns
+  // the projection's drawdown from proportional into tax-ordered sequencing.
+  const { data: retirementAccess } = useRetirementAccess(userId);
+  const withdrawalPlan = useMemo(
+    () => ({
+      hsaReceiptBalance: Number(retirementAccess?.hsaSummary.availableToReimburse ?? 0) || 0,
+      conversionBuckets: (retirementAccess?.rothBuckets ?? []).map((b) => ({
+        availableOn: b.availableOn,
+        amount: Number(b.amount),
+      })),
+    }),
+    [retirementAccess],
+  );
   const { irsLimits } = useIrsLimits();
   const taxTables = useTaxYear(filingStatus);
   const { deductions: allWithholdings } = usePaycheckDeductions(null);
@@ -113,8 +127,13 @@ const usePlannerModel = () => {
     filingStatus,
   );
   const annualWithdrawal = monthlyExpenses * 12;
-  const { projectionRows, finalBalances, projectedNetWorthAtTargetAge, portfolioAverageRates } =
-    useProjections(
+  const {
+    projectionRows,
+    withdrawalRows,
+    finalBalances,
+    projectedNetWorthAtTargetAge,
+    portfolioAverageRates,
+  } = useProjections(
       filteredAccounts,
       effectiveHousehold,
       plannerAssetFinanceDetailsByAccountId,
@@ -124,6 +143,7 @@ const usePlannerModel = () => {
       projectionEndAge,
       annualWithdrawal,
       marketAdjustment,
+      withdrawalPlan,
     );
   const financialFreedomAge = useFinancialFreedomAge(
     projectionRows,
@@ -214,6 +234,7 @@ const usePlannerModel = () => {
     projectedNetWorthAtTargetAge,
     financialMathSnapshot,
     projectionRows,
+    withdrawalRows,
     accountBreakdownRows,
     dynamicChartConfig,
     fireTargets: targets.fireTargets,

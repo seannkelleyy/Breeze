@@ -44,12 +44,12 @@ instead of reusing the first.
 | Net Worth / Assets / Liabilities | Current Snapshot | equity-based for combined assets ⚠️ I-8 |
 | Progress to target | Current Snapshot | `totalStartingBalance ÷ projectedNetWorthAtTargetAge` ✅ |
 | Wealth by tax treatment | Taxes page | pre-tax/Roth/taxable via `getPretaxShare`, property+liabilities excluded ✅ |
-| Retirement income plan (per-year source split) | Retirement Income page | `buildRetirementIncomePlan` — sequences expenses HSA receipts (≤ receipt balance) → taxable → pre-tax → clocked Roth conversions → remaining Roth; yearly growth at effective rates, withdrawals start the year after retirement age ✅ |
-| Penalty exposure | Retirement Income page | Σ 10% of pre-tax + unclocked-Roth draws in years the primary is under 59½ ✅ |
-| First unfunded year | Retirement Income page | first plan age with `shortfall > 0` ("None" when covered through the projection end) ✅ |
-| Portfolio left at 95 | Retirement Income page | taxable + pre-tax + Roth balances at the projection end age ✅ |
+| Retirement income plan (per-year source split) | Future page | `getProjection` with a `withdrawalPlan` — post-retirement withdrawals sequence HSA receipts (≤ receipt balance) → taxable → pre-tax → clocked Roth conversions → remaining Roth, monthly, from live balances ✅ |
+| Penalty exposure | Future page | Σ 10% of pre-tax + unclocked-Roth draws in years the primary is under 59½ ✅ |
+| First unfunded year | Future page | first sequenced row with `shortfall > 0` ("None" when covered through the projection end) ✅ |
+| Portfolio left at 95 | Future page | `spendableBalance` of the last sequenced row — taxable + pre-tax + Roth + HSA accounts (property is never a spending source) ✅ |
 
-## Retirement income page
+## Retirement income page (ledger)
 
 | Figure | Shown | Formula |
 |---|---|---|

@@ -4,6 +4,7 @@ import type { PlannerPerson } from '../../types/person';
 import type { AssetFinanceDetails } from '../../types/finance';
 import { PLANNER_DEFAULT_IRS_LIMITS } from '../constants';
 import { getPortfolioAverageGrowthRate, getProjection } from '../projection';
+import type { WithdrawalPlanInput } from '../../types/projection';
 
 const person: PlannerPerson = {
   id: 'p1',
@@ -62,6 +63,7 @@ const call = (
     annualWithdrawal?: number;
     annualIrsLimitGrowthRate?: number;
     annualReturnAdjustmentPercent?: number;
+    withdrawalPlan?: WithdrawalPlanInput;
   } = {},
 ) =>
   getProjection(
@@ -77,6 +79,7 @@ const call = (
     options.projectionEndAge,
     options.annualWithdrawal,
     options.annualReturnAdjustmentPercent,
+    options.withdrawalPlan,
   );
 
 describe('getProjection', () => {
@@ -638,5 +641,146 @@ describe('getPortfolioAverageGrowthRate', () => {
     expect(base).toBeCloseTo(4, 6);
     expect(stressed).toBeCloseTo(-1, 6);
     vi.useRealTimers();
+  });
+});
+
+
+describe('getProjection sequenced withdrawals', () => {
+  const ladderAccounts = () => [
+    account({ id: 'hsa', accountType: 'hsa', startingBalance: 1000 }),
+    account({ id: 'brokerage', accountType: 'brokerage', startingBalance: 4000 }),
+    account({ id: 'trad', accountType: 'traditional-ira', startingBalance: 4000 }),
+    account({ id: 'roth', accountType: 'roth-ira', startingBalance: 4000 }),
+  ];
+
+  // Ages 61-65 accumulate; withdrawals begin the year after the retirement
+  // age (age 66 = calendar year 2027).
+  const callLadder = (
+    overrides: Partial<WithdrawalPlanInput> = {},
+    accounts = ladderAccounts(),
+  ) =>
+    call(accounts, 60, 65, {
+      projectionEndAge: 68,
+      annualWithdrawal: 5000,
+      withdrawalPlan: {
+        hsaReceiptBalance: 1000,
+        conversionBuckets: [],
+        currentYear: 2026,
+        ...overrides,
+      },
+    });
+
+  it('sequences HSA receipts, then taxable, then pre-tax, then Roth', () => {
+    const { withdrawalRows } = callLadder();
+
+    expect(withdrawalRows).toHaveLength(3);
+    const [first, second, third] = withdrawalRows!;
+
+    expect(first!.age).toBe(66);
+    expect(first!.hsaReceipts).toBeCloseTo(1000, 6);
+    expect(first!.taxable).toBeCloseTo(4000, 6);
+    expect(first!.pretax).toBe(0);
+    expect(first!.shortfall).toBe(0);
+
+    expect(second!.taxable).toBeCloseTo(0, 8);
+    expect(second!.pretax).toBeCloseTo(4000, 6);
+    expect(second!.rothOther).toBeCloseTo(1000, 6);
+
+    // Pre-tax is spent by year three; the remaining Roth covers the rest and
+    // the last 2000 goes unfunded.
+    expect(third!.pretax).toBeCloseTo(0, 8);
+    expect(third!.rothOther).toBeCloseTo(3000, 6);
+    expect(third!.shortfall).toBeCloseTo(2000, 6);
+  });
+
+  it('draws nothing from property or liabilities', () => {
+    const accounts = [
+      ...ladderAccounts(),
+      account({ id: 'home', accountType: 'home', startingBalance: 500000 }),
+      account({ id: 'mortgage', accountType: 'mortgage', startingBalance: 100000 }),
+    ];
+    const { withdrawalRows, projectionRows } = callLadder({}, accounts);
+
+    for (const row of withdrawalRows ?? []) {
+      expect(row.hsaReceipts + row.taxable + row.pretax + row.rothClocked + row.rothOther).toBeLessThanOrEqual(5000 + 1);
+    }
+    // Home and mortgage balances ride untouched through the drawdown years
+    // (0% growth): the last row keeps their starting values.
+    const last = projectionRows[projectionRows.length - 1];
+    expect(last['account-4']).toBeCloseTo(500000, 6);
+    expect(last['account-5']).toBeCloseTo(-100000, 6);
+  });
+
+  it('flags 10% penalty exposure only before 59½', () => {
+    // Retire at 58: rows at ages 59-60 are penalized, 60+ rows are not.
+    const accounts = [account({ accountType: 'traditional-ira', startingBalance: 100000 })];
+    const { withdrawalRows } = call(accounts, 50, 58, {
+      projectionEndAge: 61,
+      annualWithdrawal: 10000,
+      withdrawalPlan: { hsaReceiptBalance: 0, conversionBuckets: [] },
+    });
+
+    const byAge = Object.fromEntries((withdrawalRows ?? []).map((r) => [r.age, r]));
+    expect(byAge[59]!.penaltyExposure).toBeCloseTo((byAge[59]!.pretax) * 0.1, 6);
+    expect(byAge[60]!.penaltyExposure).toBe(0);
+    expect(byAge[61]!.penaltyExposure).toBe(0);
+  });
+
+  it('uses clocked conversions only from their unlock year, before unclocked Roth', () => {
+    const accounts = [account({ accountType: 'roth-ira', startingBalance: 20000 })];
+    const { withdrawalRows } = call(accounts, 65, 65, {
+      projectionEndAge: 69,
+      annualWithdrawal: 2000,
+      withdrawalPlan: {
+        hsaReceiptBalance: 0,
+        conversionBuckets: [{ availableOn: '2030-01-01', amount: 3000 }],
+        currentYear: 2026,
+      },
+    });
+
+    const byYear = Object.fromEntries((withdrawalRows ?? []).map((r) => [r.year, r]));
+    expect(byYear[2027]!.rothClocked).toBe(0);
+    expect(byYear[2027]!.rothOther).toBeCloseTo(2000, 6);
+    expect(byYear[2030]!.rothClocked).toBeCloseTo(2000, 6);
+    expect(byYear[2030]!.rothOther).toBe(0);
+  });
+
+  it('caps HSA receipts by the receipt pool and records its remaining balance', () => {
+    const accounts = [
+      account({ accountType: 'hsa', startingBalance: 200 }),
+      account({ accountType: 'brokerage', startingBalance: 50000 }),
+    ];
+    const { withdrawalRows } = call(accounts, 65, 65, {
+      projectionEndAge: 67,
+      annualWithdrawal: 400,
+      withdrawalPlan: { hsaReceiptBalance: 500, conversionBuckets: [] },
+    });
+
+    const first = withdrawalRows![0];
+    expect(first.hsaReceipts).toBeCloseTo(200, 6);
+    expect(first.receiptBalance).toBeCloseTo(300, 6);
+    // Later years get nothing from the HSA — the pool is spent.
+    expect(withdrawalRows![1].hsaReceipts).toBe(0);
+  });
+
+  it('records a shortfall when every source runs dry', () => {
+    const accounts = [account({ accountType: 'brokerage', startingBalance: 1000 })];
+    const { withdrawalRows } = call(accounts, 65, 65, {
+      projectionEndAge: 67,
+      annualWithdrawal: 5000,
+      withdrawalPlan: { hsaReceiptBalance: 0, conversionBuckets: [] },
+    });
+
+    expect(withdrawalRows![0]!.taxable).toBeCloseTo(1000, 6);
+    expect(withdrawalRows![0]!.shortfall).toBeCloseTo(4000, 6);
+    expect(withdrawalRows![1]!.shortfall).toBeCloseTo(5000, 6);
+  });
+
+  it('omits withdrawalRows when no withdrawal plan is supplied', () => {
+    const { withdrawalRows } = call(ladderAccounts(), 60, 65, {
+      projectionEndAge: 68,
+      annualWithdrawal: 5000,
+    });
+    expect(withdrawalRows).toBeUndefined();
   });
 });

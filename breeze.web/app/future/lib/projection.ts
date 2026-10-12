@@ -27,9 +27,43 @@ import type {
 } from '../types/finance';
 import type { IrsLimitConfig } from '../types/irs';
 import type { PlannerPerson } from '../types/person';
-import type { ProjectionRow } from '../types/projection';
+import type { ProjectionRow, WithdrawalPlanInput, WithdrawalRow } from '../types/projection';
 
 const { isCombinedAssetType, isLiabilityAccountType } = plannerConfig;
+
+// ─── Sequenced drawdown ───────────────────────────────────
+// Post-retirement spending follows the tax order real withdrawals follow:
+// HSA receipts (capped by the saved-receipt balance), taxable, pre-tax,
+// clocked Roth conversions, remaining Roth. Pre-59½ pre-tax or unclocked
+// Roth draws flag 10% penalty exposure. Property and liabilities are never
+// spending sources.
+
+const PENALTY_RATE_BEFORE_AGE = 0.1;
+const PENALTY_FREE_AGE = 59.5;
+
+const TAXABLE_SOURCE_TYPES = new Set<AccountType>(['brokerage', 'checking', 'emergency-fund', 'other']);
+const PRETAX_SOURCE_TYPES = new Set<AccountType>(['traditional-ira', '401k', '403b', '457']);
+
+type SourceGroups = {
+  taxable: number[];
+  pretax: number[];
+  roth: number[];
+  hsa: number[];
+};
+
+const classifySources = (accounts: PlannerAccount[]): SourceGroups => {
+  const groups: SourceGroups = { taxable: [], pretax: [], roth: [], hsa: [] };
+  accounts.forEach((account, index) => {
+    if (isCombinedAssetType(account.accountType) || isLiabilityAccountType(account.accountType)) {
+      return;
+    }
+    if (TAXABLE_SOURCE_TYPES.has(account.accountType)) groups.taxable.push(index);
+    else if (PRETAX_SOURCE_TYPES.has(account.accountType)) groups.pretax.push(index);
+    else if (account.accountType === 'roth-ira') groups.roth.push(index);
+    else if (account.accountType === 'hsa') groups.hsa.push(index);
+  });
+  return groups;
+};
 
 export const getNetWorthStartingBalance = (a: PlannerAccount): number => {
   if (a.accountType === 'home' || a.accountType === 'vehicle') return 0;
@@ -168,7 +202,9 @@ export const getProjection = (
   annualWithdrawal?: number,
   /** Market stress test: shifts every asset's return by this many %/yr (negative = bad markets). */
   annualReturnAdjustmentPercent = 0,
-): { projectionRows: ProjectionRow[]; finalBalances: number[] } => {
+  /** Ledger facts (receipt balance, conversion clocks) that sequence the drawdown. */
+  withdrawalPlan?: WithdrawalPlanInput,
+): { projectionRows: ProjectionRow[]; finalBalances: number[]; withdrawalRows?: WithdrawalRow[] } => {
   const endAge = projectionEndAge ?? targetAge;
   const years = Math.max(0, endAge - currentAge);
   const now = new Date();
@@ -215,6 +251,16 @@ export const getProjection = (
     },
   ];
   let contributedTotal = 0;
+
+  // Sequenced-drawdown state: active only when the retirement-access ledger
+  // facts are supplied. Otherwise the drawdown stays proportional.
+  const sourceGroups = withdrawalPlan ? classifySources(accounts) : null;
+  const firstCalendarYear = withdrawalPlan?.currentYear ?? new Date().getFullYear();
+  let receiptPool = withdrawalPlan ? clamp(withdrawalPlan.hsaReceiptBalance) : 0;
+  let clockedUsed = 0;
+  let withdrawalAccumulator: WithdrawalRow | null = null;
+  const withdrawalRows: WithdrawalRow[] = [];
+
   for (let year = 1; year <= years; year++) {
     const isPostRetirement = currentAge + year > targetAge;
     // Nominal mode: withdrawals grow with inflation. Real mode: balances are
@@ -225,6 +271,23 @@ export const getProjection = (
       : (1 + inflationRatePercent / 100) ** (year - 1);
     const monthlyWithdrawal =
       isPostRetirement && annualWithdrawal ? (annualWithdrawal / 12) * withdrawalInflator : 0;
+
+    if (withdrawalPlan && isPostRetirement) {
+      withdrawalAccumulator = {
+        age: currentAge + year,
+        year: firstCalendarYear + year,
+        expense: annualWithdrawal ? annualWithdrawal * withdrawalInflator : 0,
+        hsaReceipts: 0,
+        taxable: 0,
+        pretax: 0,
+        rothClocked: 0,
+        rothOther: 0,
+        shortfall: 0,
+        penaltyExposure: 0,
+        spendableBalance: 0,
+        receiptBalance: 0,
+      };
+    }
 
     let projectedContributionPlanByAccount = isPostRetirement
       ? accounts.map(() => ({ monthlyEmployeeContribution: 0, monthlyEmployerMatch: 0 }))
@@ -272,6 +335,75 @@ export const getProjection = (
       }));
     }
     for (let month = 0; month < 12; month++) {
+      // Sequenced drawdown: split this month's spending across sources in tax
+      // order. Without ledger facts the drawdown stays proportional.
+      let monthTakeByIndex: number[] | null = null;
+      if (withdrawalPlan && sourceGroups && isPostRetirement && monthlyWithdrawal > 0) {
+        const acc = withdrawalAccumulator;
+        const takes = accounts.map(() => 0);
+        const groupBalance = (idxs: number[]) => idxs.reduce((sum, i) => sum + balances[i], 0);
+        const takeFrom = (idxs: number[], amount: number): number => {
+          const total = groupBalance(idxs);
+          const take = Math.min(amount, total);
+          if (take <= 0) return 0;
+          for (const i of idxs) {
+            // Split only — the account loop below applies the withdrawal after
+            // each account's growth, exactly like the proportional path.
+            takes[i] += take * (balances[i] / total);
+          }
+          return take;
+        };
+
+        let need = monthlyWithdrawal;
+
+        // 1. HSA receipts — tax-free at any age, capped by the receipt pool
+        // and the HSA account itself.
+        const hsaTake = takeFrom(sourceGroups.hsa, Math.min(need, receiptPool));
+        receiptPool -= hsaTake;
+        if (acc) acc.hsaReceipts += hsaTake;
+        need -= hsaTake;
+
+        // 2. Taxable accounts.
+        const taxableTake = takeFrom(sourceGroups.taxable, need);
+        if (acc) acc.taxable += taxableTake;
+        need -= taxableTake;
+
+        // 3. Pre-tax — penalized before 59½.
+        const pretaxTake = takeFrom(sourceGroups.pretax, need);
+        if (pretaxTake > 0 && currentAge + year < PENALTY_FREE_AGE && acc) {
+          acc.penaltyExposure += pretaxTake * PENALTY_RATE_BEFORE_AGE;
+        }
+        if (acc) acc.pretax += pretaxTake;
+        need -= pretaxTake;
+
+        // 4. Clocked conversions — penalty-free once five years have passed.
+        const calendarYear = firstCalendarYear + year;
+        const clockedAvailable =
+          (withdrawalPlan.conversionBuckets ?? []).reduce(
+            (sum, b) =>
+              Number(b.availableOn.slice(0, 4)) <= calendarYear ? sum + clamp(b.amount) : sum,
+            0,
+          ) - clockedUsed;
+        const rothClockedTake = takeFrom(
+          sourceGroups.roth,
+          Math.min(need, Math.max(0, clockedAvailable)),
+        );
+        clockedUsed += rothClockedTake;
+        if (acc) acc.rothClocked += rothClockedTake;
+        need -= rothClockedTake;
+
+        // 5. Remaining Roth — before 59½ this is the earnings/basis mix.
+        const rothOtherTake = takeFrom(sourceGroups.roth, need);
+        if (rothOtherTake > 0 && currentAge + year < PENALTY_FREE_AGE && acc) {
+          acc.penaltyExposure += rothOtherTake * PENALTY_RATE_BEFORE_AGE;
+        }
+        if (acc) acc.rothOther += rothOtherTake;
+        need -= rothOtherTake;
+
+        if (acc) acc.shortfall += Math.max(0, need);
+        monthTakeByIndex = takes;
+      }
+
       for (let index = 0; index < accounts.length; index++) {
         const account = accounts[index];
         const afState = assetFinanceRuntimeState[index];
@@ -324,16 +456,39 @@ export const getProjection = (
         balances[index] = balances[index] * (1 + monthlyRate) + contrib;
 
         if (isPostRetirement && monthlyWithdrawal > 0) {
-          const totalBalance = balances.reduce((sum, b) => sum + b, 0);
-          if (totalBalance > 0) {
-            const accountShare = balances[index] / totalBalance;
-            const withdrawal = monthlyWithdrawal * accountShare;
-            balances[index] = Math.max(0, balances[index] - withdrawal);
+          const takes = monthTakeByIndex;
+          if (takes) {
+            const withdrawal = takes[index];
+            if (withdrawal > 0) {
+              balances[index] = Math.max(0, balances[index] - withdrawal);
+            }
+          } else {
+            const totalBalance = balances.reduce((sum, b) => sum + b, 0);
+            if (totalBalance > 0) {
+              const accountShare = balances[index] / totalBalance;
+              const withdrawal = monthlyWithdrawal * accountShare;
+              balances[index] = Math.max(0, balances[index] - withdrawal);
+            }
           }
         }
 
         contributedTotal += contrib;
       }
+    }
+    if (withdrawalAccumulator && sourceGroups) {
+      const spendableIdxs = [
+        ...sourceGroups.taxable,
+        ...sourceGroups.pretax,
+        ...sourceGroups.roth,
+        ...sourceGroups.hsa,
+      ];
+      withdrawalAccumulator.spendableBalance = spendableIdxs.reduce(
+        (sum, i) => sum + balances[i],
+        0,
+      );
+      withdrawalAccumulator.receiptBalance = receiptPool;
+      withdrawalRows.push(withdrawalAccumulator);
+      withdrawalAccumulator = null;
     }
     projectionRows.push({
       age: currentAge + year,
@@ -345,7 +500,9 @@ export const getProjection = (
       ),
     });
   }
-  return { projectionRows, finalBalances: balances };
+  return withdrawalPlan
+    ? { projectionRows, finalBalances: balances, withdrawalRows }
+    : { projectionRows, finalBalances: balances };
 };
 
 export const getDefaultAssetFinanceDetailsForAccount = (

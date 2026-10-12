@@ -8,6 +8,7 @@ import {
 import type { AssetFinanceDetails } from '../../../types/finance';
 import type { IrsLimitConfig } from '../../../types/irs';
 import type { PlannerAccount } from '../../../types/account';
+import type { WithdrawalPlanInput } from '../../../types/projection';
 import type { Household } from './types';
 
 export function useProjections(
@@ -20,8 +21,9 @@ export function useProjections(
   projectionEndAge?: number,
   annualWithdrawal?: number,
   annualReturnAdjustmentPercent = 0,
+  withdrawalPlan?: WithdrawalPlanInput,
 ) {
-  const { projectionRows } = useMemo(
+  const { projectionRows, withdrawalRows } = useMemo(
     () =>
       getProjection(
         accounts,
@@ -38,6 +40,7 @@ export function useProjections(
         projectionEndAge,
         annualWithdrawal,
         annualReturnAdjustmentPercent,
+        withdrawalPlan,
       ),
     [
       accounts,
@@ -51,6 +54,7 @@ export function useProjections(
       projectionEndAge,
       annualWithdrawal,
       annualReturnAdjustmentPercent,
+      withdrawalPlan,
     ],
   );
 
@@ -82,6 +86,7 @@ export function useProjections(
 
   return {
     projectionRows,
+    withdrawalRows,
     finalBalances: targetAgeBalances,
     projectedNetWorthAtTargetAge,
     portfolioAverageRates,

@@ -11,6 +11,7 @@ import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hook
 import { ProjectionsSection } from './components/sections';
 import { CurrentSnapshotSection } from './components/CurrentSnapshotSection';
 import { RetirementPlannerSection } from './components/RetirementPlannerSection';
+import RetirementIncomeSection from './components/RetirementIncomeSection';
 import { getDefaultAssetFinanceDetailsForAccount } from './lib/projection';
 
 export default function PlannerPage() {
@@ -96,6 +97,7 @@ function PlannerContent() {
     targetAge,
     financialMathSnapshot,
     projectionRows,
+    withdrawalRows,
     accountBreakdownRows,
     dynamicChartConfig,
     milestones,
@@ -167,6 +169,8 @@ function PlannerContent() {
           onToggle: toggleSection,
         }}
       />
+
+      <RetirementIncomeSection rows={withdrawalRows ?? []} projectionEndAge={projectionEndAge} />
     </div>
   );
 }

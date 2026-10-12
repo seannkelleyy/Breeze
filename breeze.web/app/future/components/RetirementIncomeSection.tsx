@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import {
   Bar,
   BarChart,
@@ -14,18 +13,12 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock } from 'lucide-react';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { useRetirementAccess } from '@/lib/services/hooks/useRetirementAccess';
-import { buildRetirementIncomePlan } from '../../future/lib/retirementIncome';
-import type { PlannerAccount } from '../../future/types/account';
+import type { WithdrawalRow } from '../types/projection';
 import { formatCurrencyWithCode } from '@/lib/utils';
 
 type RetirementIncomeSectionProps = {
-  accounts: PlannerAccount[];
-  currentAge: number;
-  targetAge: number;
+  rows: WithdrawalRow[];
   projectionEndAge: number;
-  monthlyExpenses: number;
-  marketAdjustment: number;
 };
 
 const series = [
@@ -38,58 +31,25 @@ const series = [
 ] as const;
 
 /**
- * Income plan: sequences retirement spending through the accounts in tax
- * order — HSA receipts, taxable, pre-tax, clocked Roth conversions, remaining
- * Roth — using the saved HSA receipt balance and conversion clock from the
- * ledger above. This is the order the dollars actually come out, versus the
- * Future page's proportional-withdrawal projection.
+ * Income plan: renders the projection engine's sequenced withdrawals — the
+ * post-retirement drawdown in tax order (HSA receipts, taxable, pre-tax,
+ * clocked Roth conversions, remaining Roth) — as a stacked chart with penalty
+ * exposure, first unfunded year, and what's left at the end.
  */
-const IncomePlanSection = ({
-  accounts,
-  currentAge,
-  targetAge,
-  projectionEndAge,
-  monthlyExpenses,
-  marketAdjustment,
-}: RetirementIncomeSectionProps) => {
-  const { userId, currencyCode, inflationRate, returnDisplayMode } = useCurrentUser();
-  const { data: access } = useRetirementAccess(userId);
+const RetirementIncomeSection = ({ rows, projectionEndAge }: RetirementIncomeSectionProps) => {
+  const { currencyCode } = useCurrentUser();
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
 
-  const plan = useMemo(() => {
-    if (currentAge <= 0) return null;
-    return buildRetirementIncomePlan({
-      accounts,
-      currentAge,
-      retirementAge: targetAge,
-      endAge: projectionEndAge,
-      annualExpenses: monthlyExpenses * 12,
-      inflationRatePercent: inflationRate,
-      useInflationAdjustedValues: returnDisplayMode === 'real',
-      marketAdjustmentPercent: marketAdjustment,
-      hsaReceiptBalance: access?.hsaSummary.availableToReimburse
-        ? Number(access.hsaSummary.availableToReimburse)
-        : 0,
-      conversionBuckets: (access?.rothBuckets ?? []).map((b) => ({
-        availableOn: b.availableOn,
-        amount: Number(b.amount),
-      })),
-    });
-  }, [
-    accounts,
-    currentAge,
-    targetAge,
-    projectionEndAge,
-    monthlyExpenses,
-    inflationRate,
-    returnDisplayMode,
-    marketAdjustment,
-    access,
-  ]);
-
-  if (!plan || plan.rows.length === 0) {
+  if (rows.length === 0) {
     return null;
   }
+
+  const plan = {
+    rows,
+    totalPenaltyExposure: rows.reduce((sum, r) => sum + r.penaltyExposure, 0),
+    firstShortfallAge: rows.find((r) => r.shortfall > 0)?.age ?? null,
+    endingPortfolioBalance: rows[rows.length - 1]?.spendableBalance ?? 0,
+  };
 
   const compact = (v: number) => {
     if (Math.abs(v) >= 1000000) return `${(v / 1000000).toFixed(1)}M`;
@@ -186,4 +146,4 @@ const IncomePlanSection = ({
   );
 };
 
-export default IncomePlanSection;
+export default RetirementIncomeSection;

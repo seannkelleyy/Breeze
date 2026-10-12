@@ -24,7 +24,6 @@ import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
 import BreezeLineChart from '@/components/common/charts/BreezeLineChart';
-import IncomePlanSection from './components/IncomePlanSection';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import { GET_ASSETS_BY_USER } from '@/lib/services/queries/assets';
@@ -41,8 +40,6 @@ import {
   type RothConversion,
   type RothConversionBucket,
 } from '@/lib/services/hooks/useRetirementAccess';
-import { usePlannerHydration } from '../future/hooks/usePlannerHydration';
-import { usePlannerModel } from '../future/hooks/planner';
 import { formatCurrencyWithCode } from '@/lib/utils';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -77,16 +74,6 @@ export default function RetirementIncomePage() {
 function RetirementIncomeContent() {
   const { userId, currencyCode } = useCurrentUser();
   const { data: access, isLoading } = useRetirementAccess(userId);
-  // The plan reads the same planner inputs the Future page projects with.
-  usePlannerHydration();
-  const {
-    accounts,
-    currentAge,
-    targetAge,
-    projectionEndAge,
-    monthlyExpenses,
-    marketAdjustment,
-  } = usePlannerModel();
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
   const num = (v: string) => {
     const parsed = Number(v);
@@ -99,7 +86,7 @@ function RetirementIncomeContent() {
         <PageHeader
           icon={KeyRound}
           title="Retirement Income"
-          subtitle="Turn savings into spendable income — the receipt ladder, the conversion clock, and the year-by-year plan."
+          subtitle="Record HSA receipts and Roth conversions — the facts that drive the withdrawal plan on the Future page."
         />
         <Card>
           <CardContent className="text-muted-foreground flex items-center justify-center py-12">
@@ -115,7 +102,7 @@ function RetirementIncomeContent() {
       <PageHeader
         icon={KeyRound}
         title="Retirement Income"
-        subtitle="Turn savings into spendable income — the receipt ladder, the conversion clock, and the year-by-year plan."
+        subtitle="Record HSA receipts and Roth conversions — the facts that drive the withdrawal plan on the Future page."
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -149,15 +136,6 @@ function RetirementIncomeContent() {
           </CardContent>
         </Card>
       </div>
-
-      <IncomePlanSection
-        accounts={accounts}
-        currentAge={currentAge}
-        targetAge={targetAge}
-        projectionEndAge={projectionEndAge}
-        monthlyExpenses={monthlyExpenses}
-        marketAdjustment={marketAdjustment}
-      />
 
       <AccessTimelineCard
         buckets={access.rothBuckets}
