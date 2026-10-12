@@ -18,20 +18,11 @@ export type AccountType =
   | 'other';
 
 export type LiabilityType =
-  | 'student-loan'
-  | 'credit-card'
-  | 'personal-loan'
-  | 'auto-loan'
-  | 'mortgage';
+  'student-loan' | 'credit-card' | 'personal-loan' | 'auto-loan' | 'mortgage';
 
 export type ContributionMode = 'monthly' | 'yearly' | 'salary-percent' | 'biweekly' | 'weekly';
 export type AccountRateProfile =
-  | 'none'
-  | 'money-market'
-  | 'bonds'
-  | 'stock-bond-mix'
-  | 'stocks'
-  | 'custom';
+  'none' | 'money-market' | 'bonds' | 'stock-bond-mix' | 'stocks' | 'custom';
 
 export type PlannerAccount = {
   id: string;

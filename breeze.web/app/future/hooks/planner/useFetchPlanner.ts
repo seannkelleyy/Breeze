@@ -127,8 +127,7 @@ const useFetchPlanner = () => {
         retirementAge: p.retirementAge,
         annualSalary: Number(p.annualSalary),
         bonusMode: (p.bonusMode === 'salary-percent' ? 'salary-percent' : 'dollars') as
-          | 'dollars'
-          | 'salary-percent',
+          'dollars' | 'salary-percent',
         bonusFrequency: (['annual', 'quarterly', 'monthly'].includes(p.bonusFrequency)
           ? p.bonusFrequency
           : 'annual') as 'annual' | 'quarterly' | 'monthly',
@@ -136,9 +135,7 @@ const useFetchPlanner = () => {
         incomeGrowthRate: Number(p.incomeGrowthRate),
         isPrimary: index === 0,
         payType: (((p as Record<string, unknown>).payType as string) || 'salary') as
-          | 'salary'
-          | 'hourly'
-          | 'commission',
+          'salary' | 'hourly' | 'commission',
         payDay: ((p as Record<string, unknown>).payDay as number) ?? 1,
         payCadence: (((p as Record<string, unknown>).payCadence as string) ||
           'biweekly') as PayCadence,
@@ -208,8 +205,7 @@ const useFetchPlanner = () => {
         safeWithdrawalRate: me ? Number(me.safeWithdrawalRate) * 100 : 4,
         currencyCode: me?.currencyType || 'USD',
         returnDisplayMode: (me?.returnType === 'NOMINAL' ? 'nominal' : 'real') as
-          | 'real'
-          | 'nominal',
+          'real' | 'nominal',
       };
     },
     enabled: typeof window !== 'undefined' && !!userId,

@@ -13,9 +13,4 @@ export type ApiAssetType =
   | 'OTHER';
 
 export type ApiLiabilityType =
-  | 'MORTGAGE'
-  | 'CREDIT_CARD'
-  | 'STUDENT_LOAN'
-  | 'AUTO_LOAN'
-  | 'PERSONAL_LOAN'
-  | 'OTHER';
+  'MORTGAGE' | 'CREDIT_CARD' | 'STUDENT_LOAN' | 'AUTO_LOAN' | 'PERSONAL_LOAN' | 'OTHER';
