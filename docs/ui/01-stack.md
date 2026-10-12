@@ -90,12 +90,12 @@ nav mirrors this: routes opt into signed-out visibility with `isPublic` in
 
 ### Retirement Income Planner (app/future/lib)
 
-Retirement withdrawal sequencing lives in `breeze.web/app/future/lib/retirementIncome.ts` —
+Retirement withdrawal sequencing lives in `breeze.web/app/future/lib/retirementIncome.ts` (rendered by `app/retirement-income/components/IncomePlanSection.tsx`) —
 a pure function that funds each retirement year in tax order (HSA receipts up to the saved-receipt
 balance, taxable, pre-tax, five-year-clock Roth conversions, remaining Roth) and flags 10%
 penalty exposure on pre-59½ draws. It consumes the retirement-access ledger (receipt balance +
-conversion buckets) and mirrors the projection engine's growth/inflation conventions. Rendered
-on /future by `RetirementIncomeSection`.
+conversion buckets) and mirrors the projection engine's growth/inflation conventions. The ledger,
+the unlock timeline, and the plan are combined on the /retirement-income page.
 
 ### Pure Domain Library (lib/calc)
 

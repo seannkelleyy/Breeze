@@ -27,7 +27,7 @@
 1. ~~Balance sheet — assets, liabilities, net worth over time~~ — SHIPPED
 2. ~~Budget — monthly envelope budgeting, categories, expense splits~~ — SHIPPED
 3. ~~Account projections — retirement account growth, IRS limits, IsMaxed~~ — DONE: FIRE planner equation card, per-person Maxed Out badge, per-person IRS aggregation (see #40)
-4. Retirement scenarios — FI number, FIRE progress, what-if modeling — MOSTLY DONE: FI number, FIRE progress, retirement-age + market-adjustment what-ifs shipped; income sequencing plan on /future (HSA receipts → taxable → pre-tax → clocked Roth, 59½ penalty flags); saved scenarios dropped deliberately (may revisit); next: bracket-aware pre-tax withdrawals
+4. Retirement scenarios — FI number, FIRE progress, what-if modeling — MOSTLY DONE: FI number, FIRE progress, retirement-age + market-adjustment what-ifs shipped; combined retirement income page (HSA receipt ladder, conversion clock, and per-year income sequencing: HSA receipts → taxable → pre-tax → clocked Roth, 59½ penalty flags); saved scenarios dropped deliberately (may revisit); next: bracket-aware pre-tax withdrawals
 5. ~~Plaid integration — auto-sync transactions~~ — SHIPPED in sandbox (production pending — see Deployment)
 6. ~~Tax planning — form checklist, estimate~~ — SHIPPED
 7. ~~Roth ladder + HSA ladder~~ — SHIPPED: `/retirement-ladder` calculator (5-year rule, early-access modeling) + `/retirement-access` tracking (HSA receipt ladder with reimbursement balance guard, Roth conversion log with 5-year-clock buckets)

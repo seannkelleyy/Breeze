@@ -15,8 +15,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Clock } from 'lucide-react';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { useRetirementAccess } from '@/lib/services/hooks/useRetirementAccess';
-import { buildRetirementIncomePlan } from '../lib/retirementIncome';
-import type { PlannerAccount } from '../types/account';
+import { buildRetirementIncomePlan } from '../../future/lib/retirementIncome';
+import type { PlannerAccount } from '../../future/types/account';
 import { formatCurrencyWithCode } from '@/lib/utils';
 
 type RetirementIncomeSectionProps = {
@@ -38,13 +38,13 @@ const series = [
 ] as const;
 
 /**
- * Retirement income plan: sequences retirement spending through the accounts
- * in tax order — HSA receipts, taxable, pre-tax, clocked Roth conversions,
- * remaining Roth — using the saved HSA receipt balance and conversion clock
- * from the retirement-access ledger. Complements the proportional-withdrawal
- * projection above with the order the dollars actually come out.
+ * Income plan: sequences retirement spending through the accounts in tax
+ * order — HSA receipts, taxable, pre-tax, clocked Roth conversions, remaining
+ * Roth — using the saved HSA receipt balance and conversion clock from the
+ * ledger above. This is the order the dollars actually come out, versus the
+ * Future page's proportional-withdrawal projection.
  */
-const RetirementIncomeSection = ({
+const IncomePlanSection = ({
   accounts,
   currentAge,
   targetAge,
@@ -186,4 +186,4 @@ const RetirementIncomeSection = ({
   );
 };
 
-export default RetirementIncomeSection;
+export default IncomePlanSection;

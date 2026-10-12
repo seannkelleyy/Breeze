@@ -93,10 +93,10 @@ const taxes: RouteNavItem = {
   title: 'Taxes',
   icon: Percent,
 };
-const retirementAccess: RouteNavItem = {
-  label: 'Retirement Access',
-  to: '/retirement-access',
-  title: 'HSA receipt ladder and Roth conversion clock',
+const retirementIncome: RouteNavItem = {
+  label: 'Retirement Income',
+  to: '/retirement-income',
+  title: 'HSA ladder, Roth conversions, and the withdrawal plan',
   icon: KeyRound,
 };
 
@@ -137,7 +137,7 @@ export const navGroups: ReadonlyArray<NavGroup> = [
     label: 'Plan',
     title: 'Projections, goals, and taxes',
     icon: TrendingUp,
-    items: [future, goals, taxes, retirementAccess, mortgage],
+    items: [future, goals, taxes, retirementIncome, mortgage],
   },
 ];
 
