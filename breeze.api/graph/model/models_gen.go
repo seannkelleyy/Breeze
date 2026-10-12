@@ -121,6 +121,18 @@ type CreateGoalInput struct {
 	FinancialOrderStep   *int     `json:"financialOrderStep,omitempty"`
 }
 
+type CreateHsaReceiptInput struct {
+	IncurredOn  string `json:"incurredOn"`
+	Description string `json:"description"`
+	Amount      string `json:"amount"`
+}
+
+type CreateHsaReimbursementInput struct {
+	ReimbursedOn string  `json:"reimbursedOn"`
+	Amount       string  `json:"amount"`
+	Note         *string `json:"note,omitempty"`
+}
+
 type CreateIncomeInput struct {
 	UserID               string           `json:"userId"`
 	BudgetID             string           `json:"budgetId"`
@@ -178,6 +190,14 @@ type CreateRecurringIncomeInput struct {
 	StartDate          string             `json:"startDate"`
 	EndDate            *string            `json:"endDate,omitempty"`
 	PersonID           *string            `json:"personId,omitempty"`
+}
+
+type CreateRothConversionInput struct {
+	ConvertedOn string  `json:"convertedOn"`
+	Amount      string  `json:"amount"`
+	FromAssetID *string `json:"fromAssetId,omitempty"`
+	ToAssetID   *string `json:"toAssetId,omitempty"`
+	Note        *string `json:"note,omitempty"`
 }
 
 type CreateTaxBracketInput struct {
@@ -276,6 +296,32 @@ type Goal struct {
 type Health struct {
 	Status    string `json:"status"`
 	Timestamp string `json:"timestamp"`
+}
+
+type HsaLadderSummary struct {
+	TotalReceipts        string `json:"totalReceipts"`
+	TotalReimbursed      string `json:"totalReimbursed"`
+	AvailableToReimburse string `json:"availableToReimburse"`
+}
+
+type HsaReceipt struct {
+	ID          string `json:"id"`
+	UserID      string `json:"userId"`
+	IncurredOn  string `json:"incurredOn"`
+	Description string `json:"description"`
+	Amount      string `json:"amount"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+type HsaReimbursement struct {
+	ID           string `json:"id"`
+	UserID       string `json:"userId"`
+	ReimbursedOn string `json:"reimbursedOn"`
+	Amount       string `json:"amount"`
+	Note         string `json:"note"`
+	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
 }
 
 type Income struct {
@@ -455,6 +501,14 @@ type RecurringIncome struct {
 	UpdatedAt          string             `json:"updatedAt"`
 }
 
+type RetirementAccess struct {
+	HsaReceipts       []*HsaReceipt           `json:"hsaReceipts"`
+	HsaReimbursements []*HsaReimbursement     `json:"hsaReimbursements"`
+	HsaSummary        *HsaLadderSummary       `json:"hsaSummary"`
+	RothConversions   []*RothConversion       `json:"rothConversions"`
+	RothBuckets       []*RothConversionBucket `json:"rothBuckets"`
+}
+
 type RetirementLadderProjection struct {
 	InitialBalance        string        `json:"initialBalance"`
 	AnnualExpenses        string        `json:"annualExpenses"`
@@ -464,6 +518,25 @@ type RetirementLadderProjection struct {
 	ProjectedSteps        []*LadderStep `json:"projectedSteps"`
 	IsSustainable         bool          `json:"isSustainable"`
 	ProjectedDepletionAge *int          `json:"projectedDepletionAge,omitempty"`
+}
+
+type RothConversion struct {
+	ID          string  `json:"id"`
+	UserID      string  `json:"userId"`
+	ConvertedOn string  `json:"convertedOn"`
+	Amount      string  `json:"amount"`
+	FromAssetID *string `json:"fromAssetId,omitempty"`
+	ToAssetID   *string `json:"toAssetId,omitempty"`
+	Note        string  `json:"note"`
+	CreatedAt   string  `json:"createdAt"`
+	UpdatedAt   string  `json:"updatedAt"`
+}
+
+type RothConversionBucket struct {
+	Year        int    `json:"year"`
+	Amount      string `json:"amount"`
+	AvailableOn string `json:"availableOn"`
+	Accessible  bool   `json:"accessible"`
 }
 
 type TaxBracket struct {

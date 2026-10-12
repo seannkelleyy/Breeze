@@ -10,6 +10,7 @@ import {
   Calculator,
   Link2,
   Percent,
+  KeyRound,
 } from 'lucide-react';
 
 export type RouteNavItem = {
@@ -92,6 +93,12 @@ const taxes: RouteNavItem = {
   title: 'Taxes',
   icon: Percent,
 };
+const retirementAccess: RouteNavItem = {
+  label: 'Retirement Access',
+  to: '/retirement-access',
+  title: 'HSA receipt ladder and Roth conversion clock',
+  icon: KeyRound,
+};
 
 // ── Mobile bottom tab bar: core categories ──
 
@@ -130,7 +137,7 @@ export const navGroups: ReadonlyArray<NavGroup> = [
     label: 'Plan',
     title: 'Projections, goals, and taxes',
     icon: TrendingUp,
-    items: [future, goals, taxes, mortgage],
+    items: [future, goals, taxes, retirementAccess, mortgage],
   },
 ];
 

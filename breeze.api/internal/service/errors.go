@@ -9,4 +9,5 @@ var (
 	ErrNoSplits               = errors.New("expense must have at least one split")
 	ErrSplitAmountNonPositive = errors.New("split amount must be positive")
 	ErrInvalidScenarioInput   = errors.New("invalid scenario input")
+	ErrInsufficientHsaBalance = errors.New("reimbursement exceeds saved HSA receipts")
 )

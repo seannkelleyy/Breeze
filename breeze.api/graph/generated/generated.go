@@ -148,6 +148,32 @@ type ComplexityRoot struct {
 		Timestamp func(childComplexity int) int
 	}
 
+	HsaLadderSummary struct {
+		AvailableToReimburse func(childComplexity int) int
+		TotalReceipts        func(childComplexity int) int
+		TotalReimbursed      func(childComplexity int) int
+	}
+
+	HsaReceipt struct {
+		Amount      func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		IncurredOn  func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+		UserID      func(childComplexity int) int
+	}
+
+	HsaReimbursement struct {
+		Amount       func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Note         func(childComplexity int) int
+		ReimbursedOn func(childComplexity int) int
+		UpdatedAt    func(childComplexity int) int
+		UserID       func(childComplexity int) int
+	}
+
 	Income struct {
 		Amount               func(childComplexity int) int
 		BudgetID             func(childComplexity int) int
@@ -204,11 +230,14 @@ type ComplexityRoot struct {
 		CreateExpenseCategory           func(childComplexity int, input model.CreateExpenseCategoryInput) int
 		CreateFinancialOrderSteps       func(childComplexity int) int
 		CreateGoal                      func(childComplexity int, input model.CreateGoalInput) int
+		CreateHsaReceipt                func(childComplexity int, input model.CreateHsaReceiptInput) int
+		CreateHsaReimbursement          func(childComplexity int, input model.CreateHsaReimbursementInput) int
 		CreateIncome                    func(childComplexity int, input model.CreateIncomeInput) int
 		CreateLiability                 func(childComplexity int, input model.CreateLiabilityInput) int
 		CreateNetWorthSnapshot          func(childComplexity int, input model.CreateNetWorthSnapshotInput) int
 		CreateRecurringExpense          func(childComplexity int, input model.CreateRecurringExpenseInput) int
 		CreateRecurringIncome           func(childComplexity int, input model.CreateRecurringIncomeInput) int
+		CreateRothConversion            func(childComplexity int, input model.CreateRothConversionInput) int
 		CreateTaxBracket                func(childComplexity int, input model.CreateTaxBracketInput) int
 		CreateTransaction               func(childComplexity int, input model.CreateTransactionInput) int
 		CreateUser                      func(childComplexity int, input model.CreateUserInput) int
@@ -217,6 +246,8 @@ type ComplexityRoot struct {
 		DeleteExpense                   func(childComplexity int, id string) int
 		DeleteExpenseCategory           func(childComplexity int, id string) int
 		DeleteGoal                      func(childComplexity int, id string) int
+		DeleteHsaReceipt                func(childComplexity int, id string) int
+		DeleteHsaReimbursement          func(childComplexity int, id string) int
 		DeleteIncome                    func(childComplexity int, id string) int
 		DeleteLiability                 func(childComplexity int, id string) int
 		DeleteNetWorthSnapshot          func(childComplexity int, id string) int
@@ -225,6 +256,7 @@ type ComplexityRoot struct {
 		DeletePlannerPerson             func(childComplexity int, id string) int
 		DeleteRecurringExpense          func(childComplexity int, id string) int
 		DeleteRecurringIncome           func(childComplexity int, id string) int
+		DeleteRothConversion            func(childComplexity int, id string) int
 		DeleteTaxBracket                func(childComplexity int, id string) int
 		DeleteTransaction               func(childComplexity int, id string) int
 		ExchangePlaidPublicToken        func(childComplexity int, userID string, publicToken string) int
@@ -365,6 +397,7 @@ type ComplexityRoot struct {
 		RecurringExpenses         func(childComplexity int, userID string) int
 		RecurringIncome           func(childComplexity int, id string) int
 		RecurringIncomes          func(childComplexity int, userID string) int
+		RetirementAccess          func(childComplexity int, userID string) int
 		TaxBracket                func(childComplexity int, id string) int
 		TaxBrackets               func(childComplexity int, year int, filingStatus model.FilingStatus) int
 		TaxYearData               func(childComplexity int, year *int, filingStatus model.FilingStatus) int
@@ -401,6 +434,14 @@ type ComplexityRoot struct {
 		UserID             func(childComplexity int) int
 	}
 
+	RetirementAccess struct {
+		HsaReceipts       func(childComplexity int) int
+		HsaReimbursements func(childComplexity int) int
+		HsaSummary        func(childComplexity int) int
+		RothBuckets       func(childComplexity int) int
+		RothConversions   func(childComplexity int) int
+	}
+
 	RetirementLadderProjection struct {
 		AnnualExpenses        func(childComplexity int) int
 		CurrentAge            func(childComplexity int) int
@@ -410,6 +451,25 @@ type ComplexityRoot struct {
 		IsSustainable         func(childComplexity int) int
 		ProjectedDepletionAge func(childComplexity int) int
 		ProjectedSteps        func(childComplexity int) int
+	}
+
+	RothConversion struct {
+		Amount      func(childComplexity int) int
+		ConvertedOn func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		FromAssetID func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Note        func(childComplexity int) int
+		ToAssetID   func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+		UserID      func(childComplexity int) int
+	}
+
+	RothConversionBucket struct {
+		Accessible  func(childComplexity int) int
+		Amount      func(childComplexity int) int
+		AvailableOn func(childComplexity int) int
+		Year        func(childComplexity int) int
 	}
 
 	TaxBracket struct {
@@ -530,6 +590,12 @@ type MutationResolver interface {
 	UnlinkLiabilityFromPlaidAccount(ctx context.Context, liabilityID string) (bool, error)
 	UpdateUserSetup(ctx context.Context, input model.UpdateUserSetupInput) (*model.User, error)
 	CreateFinancialOrderSteps(ctx context.Context) ([]*model.Goal, error)
+	CreateHsaReceipt(ctx context.Context, input model.CreateHsaReceiptInput) (*model.HsaReceipt, error)
+	DeleteHsaReceipt(ctx context.Context, id string) (bool, error)
+	CreateHsaReimbursement(ctx context.Context, input model.CreateHsaReimbursementInput) (*model.HsaReimbursement, error)
+	DeleteHsaReimbursement(ctx context.Context, id string) (bool, error)
+	CreateRothConversion(ctx context.Context, input model.CreateRothConversionInput) (*model.RothConversion, error)
+	DeleteRothConversion(ctx context.Context, id string) (bool, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (*model.Health, error)
@@ -571,6 +637,7 @@ type QueryResolver interface {
 	NetWorthSnapshot(ctx context.Context, id string) (*model.NetWorthSnapshot, error)
 	NetWorthSnapshotByDate(ctx context.Context, userID string, date string) (*model.NetWorthSnapshot, error)
 	NetWorthSnapshots(ctx context.Context, userID string) ([]*model.NetWorthSnapshot, error)
+	RetirementAccess(ctx context.Context, userID string) (*model.RetirementAccess, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -1127,6 +1194,111 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Health.Timestamp(childComplexity), true
 
+	case "HsaLadderSummary.availableToReimburse":
+		if e.ComplexityRoot.HsaLadderSummary.AvailableToReimburse == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaLadderSummary.AvailableToReimburse(childComplexity), true
+	case "HsaLadderSummary.totalReceipts":
+		if e.ComplexityRoot.HsaLadderSummary.TotalReceipts == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaLadderSummary.TotalReceipts(childComplexity), true
+	case "HsaLadderSummary.totalReimbursed":
+		if e.ComplexityRoot.HsaLadderSummary.TotalReimbursed == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaLadderSummary.TotalReimbursed(childComplexity), true
+
+	case "HsaReceipt.amount":
+		if e.ComplexityRoot.HsaReceipt.Amount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReceipt.Amount(childComplexity), true
+	case "HsaReceipt.createdAt":
+		if e.ComplexityRoot.HsaReceipt.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReceipt.CreatedAt(childComplexity), true
+	case "HsaReceipt.description":
+		if e.ComplexityRoot.HsaReceipt.Description == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReceipt.Description(childComplexity), true
+	case "HsaReceipt.id":
+		if e.ComplexityRoot.HsaReceipt.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReceipt.ID(childComplexity), true
+	case "HsaReceipt.incurredOn":
+		if e.ComplexityRoot.HsaReceipt.IncurredOn == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReceipt.IncurredOn(childComplexity), true
+	case "HsaReceipt.updatedAt":
+		if e.ComplexityRoot.HsaReceipt.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReceipt.UpdatedAt(childComplexity), true
+	case "HsaReceipt.userId":
+		if e.ComplexityRoot.HsaReceipt.UserID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReceipt.UserID(childComplexity), true
+
+	case "HsaReimbursement.amount":
+		if e.ComplexityRoot.HsaReimbursement.Amount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReimbursement.Amount(childComplexity), true
+	case "HsaReimbursement.createdAt":
+		if e.ComplexityRoot.HsaReimbursement.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReimbursement.CreatedAt(childComplexity), true
+	case "HsaReimbursement.id":
+		if e.ComplexityRoot.HsaReimbursement.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReimbursement.ID(childComplexity), true
+	case "HsaReimbursement.note":
+		if e.ComplexityRoot.HsaReimbursement.Note == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReimbursement.Note(childComplexity), true
+	case "HsaReimbursement.reimbursedOn":
+		if e.ComplexityRoot.HsaReimbursement.ReimbursedOn == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReimbursement.ReimbursedOn(childComplexity), true
+	case "HsaReimbursement.updatedAt":
+		if e.ComplexityRoot.HsaReimbursement.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReimbursement.UpdatedAt(childComplexity), true
+	case "HsaReimbursement.userId":
+		if e.ComplexityRoot.HsaReimbursement.UserID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.HsaReimbursement.UserID(childComplexity), true
+
 	case "Income.amount":
 		if e.ComplexityRoot.Income.Amount == nil {
 			break
@@ -1436,6 +1608,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CreateGoal(childComplexity, args["input"].(model.CreateGoalInput)), true
+	case "Mutation.createHsaReceipt":
+		if e.ComplexityRoot.Mutation.CreateHsaReceipt == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createHsaReceipt_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateHsaReceipt(childComplexity, args["input"].(model.CreateHsaReceiptInput)), true
+	case "Mutation.createHsaReimbursement":
+		if e.ComplexityRoot.Mutation.CreateHsaReimbursement == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createHsaReimbursement_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateHsaReimbursement(childComplexity, args["input"].(model.CreateHsaReimbursementInput)), true
 	case "Mutation.createIncome":
 		if e.ComplexityRoot.Mutation.CreateIncome == nil {
 			break
@@ -1491,6 +1685,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CreateRecurringIncome(childComplexity, args["input"].(model.CreateRecurringIncomeInput)), true
+	case "Mutation.createRothConversion":
+		if e.ComplexityRoot.Mutation.CreateRothConversion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createRothConversion_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateRothConversion(childComplexity, args["input"].(model.CreateRothConversionInput)), true
 	case "Mutation.createTaxBracket":
 		if e.ComplexityRoot.Mutation.CreateTaxBracket == nil {
 			break
@@ -1579,6 +1784,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DeleteGoal(childComplexity, args["id"].(string)), true
+	case "Mutation.deleteHsaReceipt":
+		if e.ComplexityRoot.Mutation.DeleteHsaReceipt == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteHsaReceipt_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteHsaReceipt(childComplexity, args["id"].(string)), true
+	case "Mutation.deleteHsaReimbursement":
+		if e.ComplexityRoot.Mutation.DeleteHsaReimbursement == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteHsaReimbursement_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteHsaReimbursement(childComplexity, args["id"].(string)), true
 	case "Mutation.deleteIncome":
 		if e.ComplexityRoot.Mutation.DeleteIncome == nil {
 			break
@@ -1667,6 +1894,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DeleteRecurringIncome(childComplexity, args["id"].(string)), true
+	case "Mutation.deleteRothConversion":
+		if e.ComplexityRoot.Mutation.DeleteRothConversion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteRothConversion_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteRothConversion(childComplexity, args["id"].(string)), true
 	case "Mutation.deleteTaxBracket":
 		if e.ComplexityRoot.Mutation.DeleteTaxBracket == nil {
 			break
@@ -2659,6 +2897,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.RecurringIncomes(childComplexity, args["userId"].(string)), true
+	case "Query.retirementAccess":
+		if e.ComplexityRoot.Query.RetirementAccess == nil {
+			break
+		}
+
+		args, err := ec.field_Query_retirementAccess_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.RetirementAccess(childComplexity, args["userId"].(string)), true
 	case "Query.taxBracket":
 		if e.ComplexityRoot.Query.TaxBracket == nil {
 			break
@@ -2855,6 +3104,37 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.RecurringIncome.UserID(childComplexity), true
 
+	case "RetirementAccess.hsaReceipts":
+		if e.ComplexityRoot.RetirementAccess.HsaReceipts == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementAccess.HsaReceipts(childComplexity), true
+	case "RetirementAccess.hsaReimbursements":
+		if e.ComplexityRoot.RetirementAccess.HsaReimbursements == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementAccess.HsaReimbursements(childComplexity), true
+	case "RetirementAccess.hsaSummary":
+		if e.ComplexityRoot.RetirementAccess.HsaSummary == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementAccess.HsaSummary(childComplexity), true
+	case "RetirementAccess.rothBuckets":
+		if e.ComplexityRoot.RetirementAccess.RothBuckets == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementAccess.RothBuckets(childComplexity), true
+	case "RetirementAccess.rothConversions":
+		if e.ComplexityRoot.RetirementAccess.RothConversions == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RetirementAccess.RothConversions(childComplexity), true
+
 	case "RetirementLadderProjection.annualExpenses":
 		if e.ComplexityRoot.RetirementLadderProjection.AnnualExpenses == nil {
 			break
@@ -2903,6 +3183,86 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.RetirementLadderProjection.ProjectedSteps(childComplexity), true
+
+	case "RothConversion.amount":
+		if e.ComplexityRoot.RothConversion.Amount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversion.Amount(childComplexity), true
+	case "RothConversion.convertedOn":
+		if e.ComplexityRoot.RothConversion.ConvertedOn == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversion.ConvertedOn(childComplexity), true
+	case "RothConversion.createdAt":
+		if e.ComplexityRoot.RothConversion.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversion.CreatedAt(childComplexity), true
+	case "RothConversion.fromAssetId":
+		if e.ComplexityRoot.RothConversion.FromAssetID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversion.FromAssetID(childComplexity), true
+	case "RothConversion.id":
+		if e.ComplexityRoot.RothConversion.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversion.ID(childComplexity), true
+	case "RothConversion.note":
+		if e.ComplexityRoot.RothConversion.Note == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversion.Note(childComplexity), true
+	case "RothConversion.toAssetId":
+		if e.ComplexityRoot.RothConversion.ToAssetID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversion.ToAssetID(childComplexity), true
+	case "RothConversion.updatedAt":
+		if e.ComplexityRoot.RothConversion.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversion.UpdatedAt(childComplexity), true
+	case "RothConversion.userId":
+		if e.ComplexityRoot.RothConversion.UserID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversion.UserID(childComplexity), true
+
+	case "RothConversionBucket.accessible":
+		if e.ComplexityRoot.RothConversionBucket.Accessible == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversionBucket.Accessible(childComplexity), true
+	case "RothConversionBucket.amount":
+		if e.ComplexityRoot.RothConversionBucket.Amount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversionBucket.Amount(childComplexity), true
+	case "RothConversionBucket.availableOn":
+		if e.ComplexityRoot.RothConversionBucket.AvailableOn == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversionBucket.AvailableOn(childComplexity), true
+	case "RothConversionBucket.year":
+		if e.ComplexityRoot.RothConversionBucket.Year == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RothConversionBucket.Year(childComplexity), true
 
 	case "TaxBracket.createdAt":
 		if e.ComplexityRoot.TaxBracket.CreatedAt == nil {
@@ -3198,11 +3558,14 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateExpenseCategoryInput,
 		ec.unmarshalInputCreateExpenseInput,
 		ec.unmarshalInputCreateGoalInput,
+		ec.unmarshalInputCreateHsaReceiptInput,
+		ec.unmarshalInputCreateHsaReimbursementInput,
 		ec.unmarshalInputCreateIncomeInput,
 		ec.unmarshalInputCreateLiabilityInput,
 		ec.unmarshalInputCreateNetWorthSnapshotInput,
 		ec.unmarshalInputCreateRecurringExpenseInput,
 		ec.unmarshalInputCreateRecurringIncomeInput,
+		ec.unmarshalInputCreateRothConversionInput,
 		ec.unmarshalInputCreateTaxBracketInput,
 		ec.unmarshalInputCreateTransactionInput,
 		ec.unmarshalInputCreateUserInput,
@@ -3339,6 +3702,7 @@ var sources = []*ast.Source{
   netWorthSnapshot(id: ID!): NetWorthSnapshot
   netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
   netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
+  retirementAccess(userId: ID!): RetirementAccess!
 }
 
 type Mutation {
@@ -3393,6 +3757,12 @@ type Mutation {
   unlinkLiabilityFromPlaidAccount(liabilityId: ID!): Boolean!
   updateUserSetup(input: UpdateUserSetupInput!): User!
   createFinancialOrderSteps: [Goal!]!
+  createHsaReceipt(input: CreateHsaReceiptInput!): HsaReceipt!
+  deleteHsaReceipt(id: ID!): Boolean!
+  createHsaReimbursement(input: CreateHsaReimbursementInput!): HsaReimbursement!
+  deleteHsaReimbursement(id: ID!): Boolean!
+  createRothConversion(input: CreateRothConversionInput!): RothConversion!
+  deleteRothConversion(id: ID!): Boolean!
 }
 
 type Health {
@@ -4110,6 +4480,85 @@ input CreateTransactionInput {
   expenseCategoryId: ID
 }
 
+# HSA receipt ladder: qualified medical expenses paid out of pocket are saved
+# as receipts and can be reimbursed tax-free in any later year. The summary's
+# availableToReimburse is total receipts minus reimbursements already taken.
+type HsaReceipt {
+  id: ID!
+  userId: ID!
+  incurredOn: String!
+  description: String!
+  amount: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateHsaReceiptInput {
+  incurredOn: String!
+  description: String!
+  amount: String!
+}
+
+type HsaReimbursement {
+  id: ID!
+  userId: ID!
+  reimbursedOn: String!
+  amount: String!
+  note: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateHsaReimbursementInput {
+  reimbursedOn: String!
+  amount: String!
+  note: String
+}
+
+type HsaLadderSummary {
+  totalReceipts: String!
+  totalReimbursed: String!
+  availableToReimburse: String!
+}
+
+# Roth conversions are bucketed by tax year: converted principal becomes
+# penalty-free once five years have passed since January 1 of the conversion
+# year (earnings remain subject to the usual age-59½ rules).
+type RothConversion {
+  id: ID!
+  userId: ID!
+  convertedOn: String!
+  amount: String!
+  fromAssetId: ID
+  toAssetId: ID
+  note: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateRothConversionInput {
+  convertedOn: String!
+  amount: String!
+  fromAssetId: ID
+  toAssetId: ID
+  note: String
+}
+
+type RothConversionBucket {
+  year: Int!
+  amount: String!
+  availableOn: String!
+  accessible: Boolean!
+}
+
+type RetirementAccess {
+  hsaReceipts: [HsaReceipt!]!
+  hsaReimbursements: [HsaReimbursement!]!
+  hsaSummary: HsaLadderSummary!
+  rothConversions: [RothConversion!]!
+  rothBuckets: [RothConversionBucket!]!
+}
+
 type NetWorthSnapshot {
   id: ID!
   userId: ID!
@@ -4391,6 +4840,58 @@ func (ec *executionContext) childFields_Health(ctx context.Context, field graphq
 		return ec.fieldContext_Health_timestamp(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Health", field.Name)
+}
+
+func (ec *executionContext) childFields_HsaLadderSummary(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalReceipts":
+		return ec.fieldContext_HsaLadderSummary_totalReceipts(ctx, field)
+	case "totalReimbursed":
+		return ec.fieldContext_HsaLadderSummary_totalReimbursed(ctx, field)
+	case "availableToReimburse":
+		return ec.fieldContext_HsaLadderSummary_availableToReimburse(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HsaLadderSummary", field.Name)
+}
+
+func (ec *executionContext) childFields_HsaReceipt(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_HsaReceipt_id(ctx, field)
+	case "userId":
+		return ec.fieldContext_HsaReceipt_userId(ctx, field)
+	case "incurredOn":
+		return ec.fieldContext_HsaReceipt_incurredOn(ctx, field)
+	case "description":
+		return ec.fieldContext_HsaReceipt_description(ctx, field)
+	case "amount":
+		return ec.fieldContext_HsaReceipt_amount(ctx, field)
+	case "createdAt":
+		return ec.fieldContext_HsaReceipt_createdAt(ctx, field)
+	case "updatedAt":
+		return ec.fieldContext_HsaReceipt_updatedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HsaReceipt", field.Name)
+}
+
+func (ec *executionContext) childFields_HsaReimbursement(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_HsaReimbursement_id(ctx, field)
+	case "userId":
+		return ec.fieldContext_HsaReimbursement_userId(ctx, field)
+	case "reimbursedOn":
+		return ec.fieldContext_HsaReimbursement_reimbursedOn(ctx, field)
+	case "amount":
+		return ec.fieldContext_HsaReimbursement_amount(ctx, field)
+	case "note":
+		return ec.fieldContext_HsaReimbursement_note(ctx, field)
+	case "createdAt":
+		return ec.fieldContext_HsaReimbursement_createdAt(ctx, field)
+	case "updatedAt":
+		return ec.fieldContext_HsaReimbursement_updatedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HsaReimbursement", field.Name)
 }
 
 func (ec *executionContext) childFields_Income(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -4707,6 +5208,22 @@ func (ec *executionContext) childFields_RecurringIncome(ctx context.Context, fie
 	return nil, fmt.Errorf("no field named %q was found under type RecurringIncome", field.Name)
 }
 
+func (ec *executionContext) childFields_RetirementAccess(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "hsaReceipts":
+		return ec.fieldContext_RetirementAccess_hsaReceipts(ctx, field)
+	case "hsaReimbursements":
+		return ec.fieldContext_RetirementAccess_hsaReimbursements(ctx, field)
+	case "hsaSummary":
+		return ec.fieldContext_RetirementAccess_hsaSummary(ctx, field)
+	case "rothConversions":
+		return ec.fieldContext_RetirementAccess_rothConversions(ctx, field)
+	case "rothBuckets":
+		return ec.fieldContext_RetirementAccess_rothBuckets(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type RetirementAccess", field.Name)
+}
+
 func (ec *executionContext) childFields_RetirementLadderProjection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "initialBalance":
@@ -4727,6 +5244,44 @@ func (ec *executionContext) childFields_RetirementLadderProjection(ctx context.C
 		return ec.fieldContext_RetirementLadderProjection_projectedDepletionAge(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type RetirementLadderProjection", field.Name)
+}
+
+func (ec *executionContext) childFields_RothConversion(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_RothConversion_id(ctx, field)
+	case "userId":
+		return ec.fieldContext_RothConversion_userId(ctx, field)
+	case "convertedOn":
+		return ec.fieldContext_RothConversion_convertedOn(ctx, field)
+	case "amount":
+		return ec.fieldContext_RothConversion_amount(ctx, field)
+	case "fromAssetId":
+		return ec.fieldContext_RothConversion_fromAssetId(ctx, field)
+	case "toAssetId":
+		return ec.fieldContext_RothConversion_toAssetId(ctx, field)
+	case "note":
+		return ec.fieldContext_RothConversion_note(ctx, field)
+	case "createdAt":
+		return ec.fieldContext_RothConversion_createdAt(ctx, field)
+	case "updatedAt":
+		return ec.fieldContext_RothConversion_updatedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type RothConversion", field.Name)
+}
+
+func (ec *executionContext) childFields_RothConversionBucket(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "year":
+		return ec.fieldContext_RothConversionBucket_year(ctx, field)
+	case "amount":
+		return ec.fieldContext_RothConversionBucket_amount(ctx, field)
+	case "availableOn":
+		return ec.fieldContext_RothConversionBucket_availableOn(ctx, field)
+	case "accessible":
+		return ec.fieldContext_RothConversionBucket_accessible(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type RothConversionBucket", field.Name)
 }
 
 func (ec *executionContext) childFields_TaxBracket(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -5059,6 +5614,34 @@ func (ec *executionContext) field_Mutation_createGoal_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createHsaReceipt_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (model.CreateHsaReceiptInput, error) {
+			return ec.unmarshalNCreateHsaReceiptInput2breezeᚗapiᚋgraphᚋmodelᚐCreateHsaReceiptInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createHsaReimbursement_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (model.CreateHsaReimbursementInput, error) {
+			return ec.unmarshalNCreateHsaReimbursementInput2breezeᚗapiᚋgraphᚋmodelᚐCreateHsaReimbursementInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createIncome_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -5121,6 +5704,20 @@ func (ec *executionContext) field_Mutation_createRecurringIncome_args(ctx contex
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (model.CreateRecurringIncomeInput, error) {
 			return ec.unmarshalNCreateRecurringIncomeInput2breezeᚗapiᚋgraphᚋmodelᚐCreateRecurringIncomeInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createRothConversion_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (model.CreateRothConversionInput, error) {
+			return ec.unmarshalNCreateRothConversionInput2breezeᚗapiᚋgraphᚋmodelᚐCreateRothConversionInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -5241,6 +5838,34 @@ func (ec *executionContext) field_Mutation_deleteGoal_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteHsaReceipt_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteHsaReimbursement_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteIncome_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -5340,6 +5965,20 @@ func (ec *executionContext) field_Mutation_deleteRecurringExpense_args(ctx conte
 }
 
 func (ec *executionContext) field_Mutation_deleteRecurringIncome_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteRothConversion_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
@@ -6230,6 +6869,20 @@ func (ec *executionContext) field_Query_recurringIncome_args(ctx context.Context
 }
 
 func (ec *executionContext) field_Query_recurringIncomes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["userId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_retirementAccess_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
@@ -8436,6 +9089,397 @@ func (ec *executionContext) _Health_timestamp(ctx context.Context, field graphql
 }
 func (ec *executionContext) fieldContext_Health_timestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Health", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaLadderSummary_totalReceipts(ctx context.Context, field graphql.CollectedField, obj *model.HsaLadderSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaLadderSummary_totalReceipts(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.TotalReceipts, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaLadderSummary_totalReceipts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaLadderSummary", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaLadderSummary_totalReimbursed(ctx context.Context, field graphql.CollectedField, obj *model.HsaLadderSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaLadderSummary_totalReimbursed(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.TotalReimbursed, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaLadderSummary_totalReimbursed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaLadderSummary", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaLadderSummary_availableToReimburse(ctx context.Context, field graphql.CollectedField, obj *model.HsaLadderSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaLadderSummary_availableToReimburse(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.AvailableToReimburse, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaLadderSummary_availableToReimburse(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaLadderSummary", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReceipt_id(ctx context.Context, field graphql.CollectedField, obj *model.HsaReceipt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReceipt_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReceipt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReceipt", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReceipt_userId(ctx context.Context, field graphql.CollectedField, obj *model.HsaReceipt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReceipt_userId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReceipt_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReceipt", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReceipt_incurredOn(ctx context.Context, field graphql.CollectedField, obj *model.HsaReceipt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReceipt_incurredOn(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.IncurredOn, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReceipt_incurredOn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReceipt", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReceipt_description(ctx context.Context, field graphql.CollectedField, obj *model.HsaReceipt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReceipt_description(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Description, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReceipt_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReceipt", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReceipt_amount(ctx context.Context, field graphql.CollectedField, obj *model.HsaReceipt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReceipt_amount(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Amount, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReceipt_amount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReceipt", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReceipt_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.HsaReceipt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReceipt_createdAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReceipt_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReceipt", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReceipt_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.HsaReceipt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReceipt_updatedAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReceipt_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReceipt", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReimbursement_id(ctx context.Context, field graphql.CollectedField, obj *model.HsaReimbursement) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReimbursement_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReimbursement_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReimbursement", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReimbursement_userId(ctx context.Context, field graphql.CollectedField, obj *model.HsaReimbursement) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReimbursement_userId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReimbursement_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReimbursement", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReimbursement_reimbursedOn(ctx context.Context, field graphql.CollectedField, obj *model.HsaReimbursement) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReimbursement_reimbursedOn(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ReimbursedOn, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReimbursement_reimbursedOn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReimbursement", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReimbursement_amount(ctx context.Context, field graphql.CollectedField, obj *model.HsaReimbursement) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReimbursement_amount(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Amount, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReimbursement_amount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReimbursement", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReimbursement_note(ctx context.Context, field graphql.CollectedField, obj *model.HsaReimbursement) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReimbursement_note(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Note, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReimbursement_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReimbursement", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReimbursement_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.HsaReimbursement) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReimbursement_createdAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReimbursement_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReimbursement", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _HsaReimbursement_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.HsaReimbursement) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_HsaReimbursement_updatedAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_HsaReimbursement_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("HsaReimbursement", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Income_id(ctx context.Context, field graphql.CollectedField, obj *model.Income) (ret graphql.Marshaler) {
@@ -11563,6 +12607,270 @@ func (ec *executionContext) fieldContext_Mutation_createFinancialOrderSteps(_ co
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_Goal(ctx, field)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createHsaReceipt(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_createHsaReceipt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().CreateHsaReceipt(ctx, fc.Args["input"].(model.CreateHsaReceiptInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.HsaReceipt) graphql.Marshaler {
+			return ec.marshalNHsaReceipt2ᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaReceipt(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_createHsaReceipt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_HsaReceipt(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createHsaReceipt_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteHsaReceipt(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_deleteHsaReceipt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DeleteHsaReceipt(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_deleteHsaReceipt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteHsaReceipt_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createHsaReimbursement(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_createHsaReimbursement(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().CreateHsaReimbursement(ctx, fc.Args["input"].(model.CreateHsaReimbursementInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.HsaReimbursement) graphql.Marshaler {
+			return ec.marshalNHsaReimbursement2ᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaReimbursement(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_createHsaReimbursement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_HsaReimbursement(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createHsaReimbursement_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteHsaReimbursement(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_deleteHsaReimbursement(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DeleteHsaReimbursement(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_deleteHsaReimbursement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteHsaReimbursement_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createRothConversion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_createRothConversion(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().CreateRothConversion(ctx, fc.Args["input"].(model.CreateRothConversionInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.RothConversion) graphql.Marshaler {
+			return ec.marshalNRothConversion2ᚖbreezeᚗapiᚋgraphᚋmodelᚐRothConversion(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_createRothConversion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RothConversion(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createRothConversion_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteRothConversion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_deleteRothConversion(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DeleteRothConversion(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_deleteRothConversion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteRothConversion_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -14705,6 +16013,50 @@ func (ec *executionContext) fieldContext_Query_netWorthSnapshots(ctx context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_retirementAccess(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_retirementAccess(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().RetirementAccess(ctx, fc.Args["userId"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.RetirementAccess) graphql.Marshaler {
+			return ec.marshalNRetirementAccess2ᚖbreezeᚗapiᚋgraphᚋmodelᚐRetirementAccess(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_retirementAccess(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RetirementAccess(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_retirementAccess_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -15287,6 +16639,166 @@ func (ec *executionContext) fieldContext_RecurringIncome_updatedAt(_ context.Con
 	return graphql.NewScalarFieldContext("RecurringIncome", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
+func (ec *executionContext) _RetirementAccess_hsaReceipts(ctx context.Context, field graphql.CollectedField, obj *model.RetirementAccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RetirementAccess_hsaReceipts(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.HsaReceipts, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.HsaReceipt) graphql.Marshaler {
+			return ec.marshalNHsaReceipt2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaReceiptᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RetirementAccess_hsaReceipts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementAccess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_HsaReceipt(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementAccess_hsaReimbursements(ctx context.Context, field graphql.CollectedField, obj *model.RetirementAccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RetirementAccess_hsaReimbursements(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.HsaReimbursements, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.HsaReimbursement) graphql.Marshaler {
+			return ec.marshalNHsaReimbursement2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaReimbursementᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RetirementAccess_hsaReimbursements(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementAccess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_HsaReimbursement(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementAccess_hsaSummary(ctx context.Context, field graphql.CollectedField, obj *model.RetirementAccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RetirementAccess_hsaSummary(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.HsaSummary, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.HsaLadderSummary) graphql.Marshaler {
+			return ec.marshalNHsaLadderSummary2ᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaLadderSummary(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RetirementAccess_hsaSummary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementAccess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_HsaLadderSummary(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementAccess_rothConversions(ctx context.Context, field graphql.CollectedField, obj *model.RetirementAccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RetirementAccess_rothConversions(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.RothConversions, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.RothConversion) graphql.Marshaler {
+			return ec.marshalNRothConversion2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐRothConversionᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RetirementAccess_rothConversions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementAccess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RothConversion(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RetirementAccess_rothBuckets(ctx context.Context, field graphql.CollectedField, obj *model.RetirementAccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RetirementAccess_rothBuckets(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.RothBuckets, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.RothConversionBucket) graphql.Marshaler {
+			return ec.marshalNRothConversionBucket2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐRothConversionBucketᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RetirementAccess_rothBuckets(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RetirementAccess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RothConversionBucket(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _RetirementLadderProjection_initialBalance(ctx context.Context, field graphql.CollectedField, obj *model.RetirementLadderProjection) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -15478,6 +16990,305 @@ func (ec *executionContext) _RetirementLadderProjection_projectedDepletionAge(ct
 }
 func (ec *executionContext) fieldContext_RetirementLadderProjection_projectedDepletionAge(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("RetirementLadderProjection", field, false, false, errors.New("field of type Int does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversion_id(ctx context.Context, field graphql.CollectedField, obj *model.RothConversion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversion_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversion_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversion", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversion_userId(ctx context.Context, field graphql.CollectedField, obj *model.RothConversion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversion_userId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversion_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversion", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversion_convertedOn(ctx context.Context, field graphql.CollectedField, obj *model.RothConversion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversion_convertedOn(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ConvertedOn, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversion_convertedOn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversion", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversion_amount(ctx context.Context, field graphql.CollectedField, obj *model.RothConversion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversion_amount(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Amount, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversion_amount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversion", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversion_fromAssetId(ctx context.Context, field graphql.CollectedField, obj *model.RothConversion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversion_fromAssetId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.FromAssetID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOID2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversion_fromAssetId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversion", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversion_toAssetId(ctx context.Context, field graphql.CollectedField, obj *model.RothConversion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversion_toAssetId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ToAssetID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOID2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversion_toAssetId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversion", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversion_note(ctx context.Context, field graphql.CollectedField, obj *model.RothConversion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversion_note(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Note, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversion_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversion", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversion_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.RothConversion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversion_createdAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversion_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversion", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversion_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.RothConversion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversion_updatedAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversion_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversion", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversionBucket_year(ctx context.Context, field graphql.CollectedField, obj *model.RothConversionBucket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversionBucket_year(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Year, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversionBucket_year(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversionBucket", field, false, false, errors.New("field of type Int does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversionBucket_amount(ctx context.Context, field graphql.CollectedField, obj *model.RothConversionBucket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversionBucket_amount(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Amount, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversionBucket_amount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversionBucket", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversionBucket_availableOn(ctx context.Context, field graphql.CollectedField, obj *model.RothConversionBucket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversionBucket_availableOn(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.AvailableOn, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversionBucket_availableOn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversionBucket", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RothConversionBucket_accessible(ctx context.Context, field graphql.CollectedField, obj *model.RothConversionBucket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RothConversionBucket_accessible(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Accessible, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RothConversionBucket_accessible(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RothConversionBucket", field, false, false, errors.New("field of type Boolean does not have child fields"))
 }
 
 func (ec *executionContext) _TaxBracket_id(ctx context.Context, field graphql.CollectedField, obj *model.TaxBracket) (ret graphql.Marshaler) {
@@ -18057,6 +19868,94 @@ func (ec *executionContext) unmarshalInputCreateGoalInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCreateHsaReceiptInput(ctx context.Context, obj any) (model.CreateHsaReceiptInput, error) {
+	var it model.CreateHsaReceiptInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"incurredOn", "description", "amount"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "incurredOn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("incurredOn"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IncurredOn = data
+		case "description":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Description = data
+		case "amount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Amount = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateHsaReimbursementInput(ctx context.Context, obj any) (model.CreateHsaReimbursementInput, error) {
+	var it model.CreateHsaReimbursementInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"reimbursedOn", "amount", "note"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "reimbursedOn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reimbursedOn"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ReimbursedOn = data
+		case "amount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Amount = data
+		case "note":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("note"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Note = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateIncomeInput(ctx context.Context, obj any) (model.CreateIncomeInput, error) {
 	var it model.CreateIncomeInput
 	if obj == nil {
@@ -18475,6 +20374,64 @@ func (ec *executionContext) unmarshalInputCreateRecurringIncomeInput(ctx context
 				return it, err
 			}
 			it.PersonID = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateRothConversionInput(ctx context.Context, obj any) (model.CreateRothConversionInput, error) {
+	var it model.CreateRothConversionInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"convertedOn", "amount", "fromAssetId", "toAssetId", "note"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "convertedOn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("convertedOn"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ConvertedOn = data
+		case "amount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Amount = data
+		case "fromAssetId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fromAssetId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FromAssetID = data
+		case "toAssetId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("toAssetId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ToAssetID = data
+		case "note":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("note"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Note = data
 		}
 	}
 	return it, nil
@@ -20823,6 +22780,190 @@ func (ec *executionContext) _Health(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var hsaLadderSummaryImplementors = []string{"HsaLadderSummary"}
+
+func (ec *executionContext) _HsaLadderSummary(ctx context.Context, sel ast.SelectionSet, obj *model.HsaLadderSummary) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, hsaLadderSummaryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("HsaLadderSummary")
+		case "totalReceipts":
+			out.Values[i] = ec._HsaLadderSummary_totalReceipts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalReimbursed":
+			out.Values[i] = ec._HsaLadderSummary_totalReimbursed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "availableToReimburse":
+			out.Values[i] = ec._HsaLadderSummary_availableToReimburse(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
+var hsaReceiptImplementors = []string{"HsaReceipt"}
+
+func (ec *executionContext) _HsaReceipt(ctx context.Context, sel ast.SelectionSet, obj *model.HsaReceipt) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, hsaReceiptImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("HsaReceipt")
+		case "id":
+			out.Values[i] = ec._HsaReceipt_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._HsaReceipt_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "incurredOn":
+			out.Values[i] = ec._HsaReceipt_incurredOn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "description":
+			out.Values[i] = ec._HsaReceipt_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "amount":
+			out.Values[i] = ec._HsaReceipt_amount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._HsaReceipt_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._HsaReceipt_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
+var hsaReimbursementImplementors = []string{"HsaReimbursement"}
+
+func (ec *executionContext) _HsaReimbursement(ctx context.Context, sel ast.SelectionSet, obj *model.HsaReimbursement) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, hsaReimbursementImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("HsaReimbursement")
+		case "id":
+			out.Values[i] = ec._HsaReimbursement_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._HsaReimbursement_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "reimbursedOn":
+			out.Values[i] = ec._HsaReimbursement_reimbursedOn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "amount":
+			out.Values[i] = ec._HsaReimbursement_amount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "note":
+			out.Values[i] = ec._HsaReimbursement_note(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._HsaReimbursement_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._HsaReimbursement_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
 var incomeImplementors = []string{"Income"}
 
 func (ec *executionContext) _Income(ctx context.Context, sel ast.SelectionSet, obj *model.Income) graphql.Marshaler {
@@ -21490,6 +23631,48 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "createFinancialOrderSteps":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createFinancialOrderSteps(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createHsaReceipt":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createHsaReceipt(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteHsaReceipt":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteHsaReceipt(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createHsaReimbursement":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createHsaReimbursement(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteHsaReimbursement":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteHsaReimbursement(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createRothConversion":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createRothConversion(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteRothConversion":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteRothConversion(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -22906,6 +25089,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "retirementAccess":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_retirementAccess(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -23117,6 +25322,64 @@ func (ec *executionContext) _RecurringIncome(ctx context.Context, sel ast.Select
 	return out
 }
 
+var retirementAccessImplementors = []string{"RetirementAccess"}
+
+func (ec *executionContext) _RetirementAccess(ctx context.Context, sel ast.SelectionSet, obj *model.RetirementAccess) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, retirementAccessImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RetirementAccess")
+		case "hsaReceipts":
+			out.Values[i] = ec._RetirementAccess_hsaReceipts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hsaReimbursements":
+			out.Values[i] = ec._RetirementAccess_hsaReimbursements(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hsaSummary":
+			out.Values[i] = ec._RetirementAccess_hsaSummary(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "rothConversions":
+			out.Values[i] = ec._RetirementAccess_rothConversions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "rothBuckets":
+			out.Values[i] = ec._RetirementAccess_rothBuckets(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
 var retirementLadderProjectionImplementors = []string{"RetirementLadderProjection"}
 
 func (ec *executionContext) _RetirementLadderProjection(ctx context.Context, sel ast.SelectionSet, obj *model.RetirementLadderProjection) graphql.Marshaler {
@@ -23167,6 +25430,137 @@ func (ec *executionContext) _RetirementLadderProjection(ctx context.Context, sel
 		case "projectedDepletionAge":
 			out.Values[i] = ec._RetirementLadderProjection_projectedDepletionAge(ctx, field, obj)
 			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
+var rothConversionImplementors = []string{"RothConversion"}
+
+func (ec *executionContext) _RothConversion(ctx context.Context, sel ast.SelectionSet, obj *model.RothConversion) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, rothConversionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RothConversion")
+		case "id":
+			out.Values[i] = ec._RothConversion_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._RothConversion_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "convertedOn":
+			out.Values[i] = ec._RothConversion_convertedOn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "amount":
+			out.Values[i] = ec._RothConversion_amount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "fromAssetId":
+			out.Values[i] = ec._RothConversion_fromAssetId(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "toAssetId":
+			out.Values[i] = ec._RothConversion_toAssetId(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "note":
+			out.Values[i] = ec._RothConversion_note(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._RothConversion_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._RothConversion_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
+var rothConversionBucketImplementors = []string{"RothConversionBucket"}
+
+func (ec *executionContext) _RothConversionBucket(ctx context.Context, sel ast.SelectionSet, obj *model.RothConversionBucket) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, rothConversionBucketImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RothConversionBucket")
+		case "year":
+			out.Values[i] = ec._RothConversionBucket_year(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "amount":
+			out.Values[i] = ec._RothConversionBucket_amount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "availableOn":
+			out.Values[i] = ec._RothConversionBucket_availableOn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "accessible":
+			out.Values[i] = ec._RothConversionBucket_accessible(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		default:
@@ -24106,6 +26500,16 @@ func (ec *executionContext) unmarshalNCreateGoalInput2breezeᚗapiᚋgraphᚋmod
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreateHsaReceiptInput2breezeᚗapiᚋgraphᚋmodelᚐCreateHsaReceiptInput(ctx context.Context, v any) (model.CreateHsaReceiptInput, error) {
+	res, err := ec.unmarshalInputCreateHsaReceiptInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCreateHsaReimbursementInput2breezeᚗapiᚋgraphᚋmodelᚐCreateHsaReimbursementInput(ctx context.Context, v any) (model.CreateHsaReimbursementInput, error) {
+	res, err := ec.unmarshalInputCreateHsaReimbursementInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateIncomeInput2breezeᚗapiᚋgraphᚋmodelᚐCreateIncomeInput(ctx context.Context, v any) (model.CreateIncomeInput, error) {
 	res, err := ec.unmarshalInputCreateIncomeInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -24128,6 +26532,11 @@ func (ec *executionContext) unmarshalNCreateRecurringExpenseInput2breezeᚗapi�
 
 func (ec *executionContext) unmarshalNCreateRecurringIncomeInput2breezeᚗapiᚋgraphᚋmodelᚐCreateRecurringIncomeInput(ctx context.Context, v any) (model.CreateRecurringIncomeInput, error) {
 	res, err := ec.unmarshalInputCreateRecurringIncomeInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCreateRothConversionInput2breezeᚗapiᚋgraphᚋmodelᚐCreateRothConversionInput(ctx context.Context, v any) (model.CreateRothConversionInput, error) {
+	res, err := ec.unmarshalInputCreateRothConversionInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -24307,6 +26716,68 @@ func (ec *executionContext) marshalNHealth2ᚖbreezeᚗapiᚋgraphᚋmodelᚐHea
 		return graphql.Null
 	}
 	return ec._Health(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNHsaLadderSummary2ᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaLadderSummary(ctx context.Context, sel ast.SelectionSet, v *model.HsaLadderSummary) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._HsaLadderSummary(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNHsaReceipt2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaReceiptᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HsaReceipt) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNHsaReceipt2ᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaReceipt(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNHsaReceipt2ᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaReceipt(ctx context.Context, sel ast.SelectionSet, v *model.HsaReceipt) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._HsaReceipt(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNHsaReimbursement2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaReimbursementᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HsaReimbursement) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNHsaReimbursement2ᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaReimbursement(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNHsaReimbursement2ᚖbreezeᚗapiᚋgraphᚋmodelᚐHsaReimbursement(ctx context.Context, sel ast.SelectionSet, v *model.HsaReimbursement) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._HsaReimbursement(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
@@ -24706,6 +27177,16 @@ func (ec *executionContext) marshalNRecurringIncome2ᚖbreezeᚗapiᚋgraphᚋmo
 	return ec._RecurringIncome(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNRetirementAccess2ᚖbreezeᚗapiᚋgraphᚋmodelᚐRetirementAccess(ctx context.Context, sel ast.SelectionSet, v *model.RetirementAccess) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._RetirementAccess(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNRetirementAccountType2breezeᚗapiᚋgraphᚋmodelᚐRetirementAccountType(ctx context.Context, v any) (model.RetirementAccountType, error) {
 	var res model.RetirementAccountType
 	err := res.UnmarshalGQL(v)
@@ -24724,6 +27205,58 @@ func (ec *executionContext) unmarshalNReturnType2breezeᚗapiᚋgraphᚋmodelᚐ
 
 func (ec *executionContext) marshalNReturnType2breezeᚗapiᚋgraphᚋmodelᚐReturnType(ctx context.Context, sel ast.SelectionSet, v model.ReturnType) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNRothConversion2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐRothConversionᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.RothConversion) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNRothConversion2ᚖbreezeᚗapiᚋgraphᚋmodelᚐRothConversion(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNRothConversion2ᚖbreezeᚗapiᚋgraphᚋmodelᚐRothConversion(ctx context.Context, sel ast.SelectionSet, v *model.RothConversion) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._RothConversion(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNRothConversionBucket2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐRothConversionBucketᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.RothConversionBucket) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNRothConversionBucket2ᚖbreezeᚗapiᚋgraphᚋmodelᚐRothConversionBucket(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNRothConversionBucket2ᚖbreezeᚗapiᚋgraphᚋmodelᚐRothConversionBucket(ctx context.Context, sel ast.SelectionSet, v *model.RothConversionBucket) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._RothConversionBucket(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {

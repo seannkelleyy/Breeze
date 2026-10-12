@@ -38,6 +38,7 @@ type Query {
   netWorthSnapshot(id: ID!): NetWorthSnapshot
   netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
   netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
+  retirementAccess(userId: ID!): RetirementAccess!
 }
 
 type Mutation {
@@ -92,6 +93,12 @@ type Mutation {
   unlinkLiabilityFromPlaidAccount(liabilityId: ID!): Boolean!
   updateUserSetup(input: UpdateUserSetupInput!): User!
   createFinancialOrderSteps: [Goal!]!
+  createHsaReceipt(input: CreateHsaReceiptInput!): HsaReceipt!
+  deleteHsaReceipt(id: ID!): Boolean!
+  createHsaReimbursement(input: CreateHsaReimbursementInput!): HsaReimbursement!
+  deleteHsaReimbursement(id: ID!): Boolean!
+  createRothConversion(input: CreateRothConversionInput!): RothConversion!
+  deleteRothConversion(id: ID!): Boolean!
 }
 
 type Health {
@@ -807,6 +814,85 @@ input CreateTransactionInput {
   amount: String!
   name: String!
   expenseCategoryId: ID
+}
+
+# HSA receipt ladder: qualified medical expenses paid out of pocket are saved
+# as receipts and can be reimbursed tax-free in any later year. The summary's
+# availableToReimburse is total receipts minus reimbursements already taken.
+type HsaReceipt {
+  id: ID!
+  userId: ID!
+  incurredOn: String!
+  description: String!
+  amount: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateHsaReceiptInput {
+  incurredOn: String!
+  description: String!
+  amount: String!
+}
+
+type HsaReimbursement {
+  id: ID!
+  userId: ID!
+  reimbursedOn: String!
+  amount: String!
+  note: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateHsaReimbursementInput {
+  reimbursedOn: String!
+  amount: String!
+  note: String
+}
+
+type HsaLadderSummary {
+  totalReceipts: String!
+  totalReimbursed: String!
+  availableToReimburse: String!
+}
+
+# Roth conversions are bucketed by tax year: converted principal becomes
+# penalty-free once five years have passed since January 1 of the conversion
+# year (earnings remain subject to the usual age-59½ rules).
+type RothConversion {
+  id: ID!
+  userId: ID!
+  convertedOn: String!
+  amount: String!
+  fromAssetId: ID
+  toAssetId: ID
+  note: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateRothConversionInput {
+  convertedOn: String!
+  amount: String!
+  fromAssetId: ID
+  toAssetId: ID
+  note: String
+}
+
+type RothConversionBucket {
+  year: Int!
+  amount: String!
+  availableOn: String!
+  accessible: Boolean!
+}
+
+type RetirementAccess {
+  hsaReceipts: [HsaReceipt!]!
+  hsaReimbursements: [HsaReimbursement!]!
+  hsaSummary: HsaLadderSummary!
+  rothConversions: [RothConversion!]!
+  rothBuckets: [RothConversionBucket!]!
 }
 
 type NetWorthSnapshot {

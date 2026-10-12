@@ -33,6 +33,7 @@ type Resolver struct {
 	RetirementLadderService  *service.RetirementLadderService
 	NetWorthSnapshotService  *service.NetWorthSnapshotService
 	TransactionService       *service.TransactionService
+	RetirementAccessService  *service.RetirementAccessService
 }
 
 // resolveUserIDFromCtx extracts the authenticated user's internal UUID from
@@ -67,7 +68,8 @@ func (r *Resolver) mapErr(ctx context.Context, err error) error {
 	case errors.Is(err, service.ErrSplitMismatch),
 		errors.Is(err, service.ErrNoSplits),
 		errors.Is(err, service.ErrSplitAmountNonPositive),
-		errors.Is(err, service.ErrInvalidScenarioInput):
+		errors.Is(err, service.ErrInvalidScenarioInput),
+		errors.Is(err, service.ErrInsufficientHsaBalance):
 		code = errCodeValidation
 	}
 

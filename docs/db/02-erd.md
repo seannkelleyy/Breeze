@@ -1,6 +1,6 @@
 # 02 — Entity-Relationship Diagram
 
-Generated ERD of all 22 tables. **Do not edit by hand** — regenerate after any `schema.hcl` change:
+Generated ERD of all 25 tables. **Do not edit by hand** — regenerate after any `schema.hcl` change:
 
 ```bash
 node scripts/gen-erd.mjs
@@ -326,6 +326,38 @@ erDiagram
         timestamptz updated_at
         timestamptz deleted_at
     }
+    hsa_receipts {
+        uuid id PK
+        uuid user_id FK
+        date incurred_on
+        text description
+        "numeric(12,2)" amount
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+    }
+    hsa_reimbursements {
+        uuid id PK
+        uuid user_id FK
+        date reimbursed_on
+        "numeric(12,2)" amount
+        text note
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+    }
+    roth_conversions {
+        uuid id PK
+        uuid user_id FK
+        date converted_on
+        "numeric(12,2)" amount
+        uuid from_asset_id FK
+        uuid to_asset_id FK
+        text note
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+    }
     tax_brackets ||--o{ users : "max_tax_bracket_id"
     users ||--o{ assets : "user_id"
     liabilities ||--o{ assets : "linked_liability_id"
@@ -362,6 +394,11 @@ erDiagram
     assets ||--o{ paycheck_deductions : "linked_account_id"
     users ||--o{ recurring_expenses : "user_id"
     planner_people ||--o{ recurring_expenses : "person_id"
+    users ||--o{ hsa_receipts : "user_id"
+    users ||--o{ hsa_reimbursements : "user_id"
+    users ||--o{ roth_conversions : "user_id"
+    assets ||--o{ roth_conversions : "from_asset_id"
+    assets ||--o{ roth_conversions : "to_asset_id"
 ```
 
 ## Enums

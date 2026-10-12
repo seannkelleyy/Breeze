@@ -692,6 +692,81 @@ table "net_worth_snapshots" {
 }
 ```
 
+### hsa_receipts
+
+Qualified medical expenses paid out of pocket and saved for later tax-free
+reimbursement — the receipt-ladder strategy. The API derives
+`availableToReimburse` (receipts minus reimbursements) server-side and rejects
+reimbursements above it.
+
+```hcl
+table "hsa_receipts" {
+  column "id"          { type = uuid         default = sql("gen_random_uuid()") }
+  column "user_id"     { type = uuid }
+  column "incurred_on" { type = date }
+  column "description" { type = text }
+  column "amount"      { type = numeric(12,2) }
+  column "created_at"  { type = timestamptz  default = sql("now()") }
+  column "updated_at"  { type = timestamptz  default = sql("now()") }
+  column "deleted_at"  { type = timestamptz  null = true }
+
+  primary_key { columns = [column.id] }
+  foreign_key "fk_hsa_receipts_user" { columns = [column.user_id] ref_columns = [table.users.column.id] on_delete = CASCADE }
+  index "idx_hsa_receipts_user_active" { columns = [column.user_id]  where = "deleted_at IS NULL" }
+  check "hsa_receipts_amount_positive" { expr = "amount > 0" }
+}
+```
+
+### hsa_reimbursements
+
+Tax-free HSA withdrawals taken against saved receipts.
+
+```hcl
+table "hsa_reimbursements" {
+  column "id"            { type = uuid         default = sql("gen_random_uuid()") }
+  column "user_id"       { type = uuid }
+  column "reimbursed_on" { type = date }
+  column "amount"        { type = numeric(12,2) }
+  column "note"          { type = text         default = "" }
+  column "created_at"    { type = timestamptz  default = sql("now()") }
+  column "updated_at"    { type = timestamptz  default = sql("now()") }
+  column "deleted_at"    { type = timestamptz  null = true }
+
+  primary_key { columns = [column.id] }
+  foreign_key "fk_hsa_reimbursements_user" { columns = [column.user_id] ref_columns = [table.users.column.id] on_delete = CASCADE }
+  index "idx_hsa_reimbursements_user_active" { columns = [column.user_id]  where = "deleted_at IS NULL" }
+  check "hsa_reimbursements_amount_positive" { expr = "amount > 0" }
+}
+```
+
+### roth_conversions
+
+Traditional → Roth conversions tracked against the five-year clock: converted
+principal becomes penalty-free on January 1 of the year five years after
+conversion. Asset links are optional and SET_NULL on account deletion.
+
+```hcl
+table "roth_conversions" {
+  column "id"            { type = uuid         default = sql("gen_random_uuid()") }
+  column "user_id"       { type = uuid }
+  column "converted_on"  { type = date }
+  column "amount"        { type = numeric(12,2) }
+  column "from_asset_id" { type = uuid         null = true }
+  column "to_asset_id"   { type = uuid         null = true }
+  column "note"          { type = text         default = "" }
+  column "created_at"    { type = timestamptz  default = sql("now()") }
+  column "updated_at"    { type = timestamptz  default = sql("now()") }
+  column "deleted_at"    { type = timestamptz  null = true }
+
+  primary_key { columns = [column.id] }
+  foreign_key "fk_roth_conversions_user"       { columns = [column.user_id]       ref_columns = [table.users.column.id]  on_delete = CASCADE }
+  foreign_key "fk_roth_conversions_from_asset" { columns = [column.from_asset_id] ref_columns = [table.assets.column.id] on_delete = SET_NULL }
+  foreign_key "fk_roth_conversions_to_asset"   { columns = [column.to_asset_id]   ref_columns = [table.assets.column.id] on_delete = SET_NULL }
+  index "idx_roth_conversions_user_active" { columns = [column.user_id]  where = "deleted_at IS NULL" }
+  check "roth_conversions_amount_positive" { expr = "amount > 0" }
+}
+```
+
 ### contribution_limits
 
 Reference data — IRS annual contribution limits per account type per tax year,

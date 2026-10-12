@@ -2195,3 +2195,225 @@ table "recurring_expenses" {
     expr = "payday_day_of_month IS NULL OR (payday_day_of_month >= 1 AND payday_day_of_month <= 31)"
   }
 }
+
+table "hsa_receipts" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "incurred_on" {
+    type = date
+    null = false
+  }
+
+  column "description" {
+    type = text
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_hsa_receipts_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_hsa_receipts_user_active" {
+    columns = [column.user_id]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "hsa_receipts_amount_positive" {
+    expr = "amount > 0"
+  }
+}
+
+table "hsa_reimbursements" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "reimbursed_on" {
+    type = date
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "note" {
+    type    = text
+    null    = false
+    default = ""
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_hsa_reimbursements_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  index "idx_hsa_reimbursements_user_active" {
+    columns = [column.user_id]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "hsa_reimbursements_amount_positive" {
+    expr = "amount > 0"
+  }
+}
+
+table "roth_conversions" {
+  schema = schema.public
+
+  column "id" {
+    type    = uuid
+    null    = false
+    default = sql("gen_random_uuid()")
+  }
+
+  column "user_id" {
+    type = uuid
+    null = false
+  }
+
+  column "converted_on" {
+    type = date
+    null = false
+  }
+
+  column "amount" {
+    type = numeric(12,2)
+    null = false
+  }
+
+  column "from_asset_id" {
+    type = uuid
+    null = true
+  }
+
+  column "to_asset_id" {
+    type = uuid
+    null = true
+  }
+
+  column "note" {
+    type    = text
+    null    = false
+    default = ""
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "updated_at" {
+    type    = timestamptz
+    null    = false
+    default = sql("now()")
+  }
+
+  column "deleted_at" {
+    type = timestamptz
+    null = true
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  foreign_key "fk_roth_conversions_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_delete   = CASCADE
+  }
+
+  foreign_key "fk_roth_conversions_from_asset" {
+    columns     = [column.from_asset_id]
+    ref_columns = [table.assets.column.id]
+    on_delete   = SET_NULL
+  }
+
+  foreign_key "fk_roth_conversions_to_asset" {
+    columns     = [column.to_asset_id]
+    ref_columns = [table.assets.column.id]
+    on_delete   = SET_NULL
+  }
+
+  index "idx_roth_conversions_user_active" {
+    columns = [column.user_id]
+    where   = "deleted_at IS NULL"
+  }
+
+  check "roth_conversions_amount_positive" {
+    expr = "amount > 0"
+  }
+}

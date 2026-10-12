@@ -581,6 +581,28 @@ type Goal struct {
 	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type HsaReceipt struct {
+	ID          uuid.UUID          `json:"id"`
+	UserID      uuid.UUID          `json:"user_id"`
+	IncurredOn  pgtype.Date        `json:"incurred_on"`
+	Description string             `json:"description"`
+	Amount      decimal.Decimal    `json:"amount"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type HsaReimbursement struct {
+	ID           uuid.UUID          `json:"id"`
+	UserID       uuid.UUID          `json:"user_id"`
+	ReimbursedOn pgtype.Date        `json:"reimbursed_on"`
+	Amount       decimal.Decimal    `json:"amount"`
+	Note         string             `json:"note"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type Income struct {
 	ID                   uuid.UUID          `json:"id"`
 	UserID               uuid.UUID          `json:"user_id"`
@@ -734,6 +756,19 @@ type RecurringIncome struct {
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type RothConversion struct {
+	ID          uuid.UUID          `json:"id"`
+	UserID      uuid.UUID          `json:"user_id"`
+	ConvertedOn pgtype.Date        `json:"converted_on"`
+	Amount      decimal.Decimal    `json:"amount"`
+	FromAssetID pgtype.UUID        `json:"from_asset_id"`
+	ToAssetID   pgtype.UUID        `json:"to_asset_id"`
+	Note        string             `json:"note"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type StandardDeduction struct {

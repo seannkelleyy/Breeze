@@ -84,6 +84,7 @@ func main() {
 	retirementLadderService := service.NewRetirementLadderService(queries)
 	netWorthSnapshotService := service.NewNetWorthSnapshotService(queries, pool)
 	transactionService := service.NewTransactionService(queries)
+	retirementAccessService := service.NewRetirementAccessService(queries)
 	// Plaid client/service (dev-mode when local and no credentials)
 	var plaidClient service.PlaidClient
 	if cfg.IsLocalEnv() && (cfg.PlaidClientID == "" || cfg.PlaidSecret == "") {
@@ -120,6 +121,7 @@ func main() {
 		RetirementLadderService:  retirementLadderService,
 		NetWorthSnapshotService:  netWorthSnapshotService,
 		TransactionService:       transactionService,
+		RetirementAccessService:  retirementAccessService,
 	}
 	srv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 

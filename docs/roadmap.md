@@ -2,8 +2,7 @@
 
 ## Next Up
 
-1. **Retirement drawdown** — agreed 2026-10-03 to come before debt payoff: HSA receipt ladder (qualified-expense tracking) and Roth conversion tracking, the unbuilt half of "Roth ladder + HSA ladder"; the `/retirement-ladder` calculator models access already, tracking is not built.
-2. **Debt payoff module** — the last unbuilt pillar. Avalanche/snowball strategy engine, payoff timeline, interest-saved comparison, page. Schema is ready: `liabilities.payoff_priority`, `liabilities.target_extra_payment`, and `users.payoff_strategy` exist unused.
+1. **Debt payoff module** — the last unbuilt pillar. Avalanche/snowball strategy engine, payoff timeline, interest-saved comparison, page. Schema is ready: `liabilities.payoff_priority`, `liabilities.target_extra_payment`, and `users.payoff_strategy` exist unused.
 3. **Pre-launch switchovers** — see [production-checklist.md](deployment/production-checklist.md): Clerk production instance, Plaid production approval, and rotation of the exposed credentials (old Clerk `sk_test_` key + old Azure SQL password in public git history; Render DB password from chat).
 4. **Feature backlog** — People mobile layout (#18), dashboard blank scroll (#1), saved retirement scenarios, employer match vesting (#27), recurring-expense detection (#29), FOO auto-derivation from financial state, partial Intl.NumberFormat sweep.
 
@@ -31,7 +30,7 @@
 4. Retirement scenarios — FI number, FIRE progress, what-if modeling — MOSTLY DONE: FI number, FIRE progress, retirement-age + market-adjustment what-ifs shipped; saved scenarios dropped deliberately (may revisit)
 5. ~~Plaid integration — auto-sync transactions~~ — SHIPPED in sandbox (production pending — see Deployment)
 6. ~~Tax planning — form checklist, estimate~~ — SHIPPED
-7. Roth ladder + HSA ladder — PARTIAL: Roth access/conversion ladder calculator at `/retirement-ladder` (5-year rule, early-access modeling); HSA receipt ladder + conversion tracking not started
+7. ~~Roth ladder + HSA ladder~~ — SHIPPED: `/retirement-ladder` calculator (5-year rule, early-access modeling) + `/retirement-access` tracking (HSA receipt ladder with reimbursement balance guard, Roth conversion log with 5-year-clock buckets)
 
 ## Sean's notices
 

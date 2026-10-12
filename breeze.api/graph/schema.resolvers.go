@@ -1190,6 +1190,171 @@ func (r *mutationResolver) CreateFinancialOrderSteps(ctx context.Context) ([]*mo
 	return result, nil
 }
 
+// CreateHsaReceipt is the resolver for the createHsaReceipt field.
+func (r *mutationResolver) CreateHsaReceipt(ctx context.Context, input model.CreateHsaReceiptInput) (*model.HsaReceipt, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return nil, err
+	}
+
+	incurredOn, err := parseDate(input.IncurredOn)
+	if err != nil {
+		return nil, fmt.Errorf("invalid incurred date: %w", err)
+	}
+
+	amount, err := decimal.Parse(input.Amount)
+	if err != nil {
+		return nil, fmt.Errorf("invalid amount: %w", err)
+	}
+
+	receipt, err := r.RetirementAccessService.CreateReceipt(ctx, &service.CreateHsaReceiptInput{
+		UserID:      userID,
+		IncurredOn:  incurredOn,
+		Description: input.Description,
+		Amount:      amount,
+	})
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	return mapHsaReceiptToModel(receipt), nil
+}
+
+// DeleteHsaReceipt is the resolver for the deleteHsaReceipt field.
+func (r *mutationResolver) DeleteHsaReceipt(ctx context.Context, id string) (bool, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return false, err
+	}
+
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid receipt id: %w", err)
+	}
+
+	if err := r.RetirementAccessService.DeleteReceipt(ctx, userID, parsedID); err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+	return true, nil
+}
+
+// CreateHsaReimbursement is the resolver for the createHsaReimbursement field.
+func (r *mutationResolver) CreateHsaReimbursement(ctx context.Context, input model.CreateHsaReimbursementInput) (*model.HsaReimbursement, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return nil, err
+	}
+
+	reimbursedOn, err := parseDate(input.ReimbursedOn)
+	if err != nil {
+		return nil, fmt.Errorf("invalid reimbursement date: %w", err)
+	}
+
+	amount, err := decimal.Parse(input.Amount)
+	if err != nil {
+		return nil, fmt.Errorf("invalid amount: %w", err)
+	}
+
+	note := ""
+	if input.Note != nil {
+		note = *input.Note
+	}
+
+	reimbursement, err := r.RetirementAccessService.CreateReimbursement(ctx, &service.CreateHsaReimbursementInput{
+		UserID:       userID,
+		ReimbursedOn: reimbursedOn,
+		Amount:       amount,
+		Note:         note,
+	})
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	return mapHsaReimbursementToModel(reimbursement), nil
+}
+
+// DeleteHsaReimbursement is the resolver for the deleteHsaReimbursement field.
+func (r *mutationResolver) DeleteHsaReimbursement(ctx context.Context, id string) (bool, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return false, err
+	}
+
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid reimbursement id: %w", err)
+	}
+
+	if err := r.RetirementAccessService.DeleteReimbursement(ctx, userID, parsedID); err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+	return true, nil
+}
+
+// CreateRothConversion is the resolver for the createRothConversion field.
+func (r *mutationResolver) CreateRothConversion(ctx context.Context, input model.CreateRothConversionInput) (*model.RothConversion, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return nil, err
+	}
+
+	convertedOn, err := parseDate(input.ConvertedOn)
+	if err != nil {
+		return nil, fmt.Errorf("invalid conversion date: %w", err)
+	}
+
+	amount, err := decimal.Parse(input.Amount)
+	if err != nil {
+		return nil, fmt.Errorf("invalid amount: %w", err)
+	}
+
+	fromAssetID, err := optionalAssetID(input.FromAssetID)
+	if err != nil {
+		return nil, err
+	}
+	toAssetID, err := optionalAssetID(input.ToAssetID)
+	if err != nil {
+		return nil, err
+	}
+
+	note := ""
+	if input.Note != nil {
+		note = *input.Note
+	}
+
+	conversion, err := r.RetirementAccessService.CreateConversion(ctx, &service.CreateRothConversionInput{
+		UserID:      userID,
+		ConvertedOn: convertedOn,
+		Amount:      amount,
+		FromAssetID: fromAssetID,
+		ToAssetID:   toAssetID,
+		Note:        note,
+	})
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	return mapRothConversionToModel(conversion), nil
+}
+
+// DeleteRothConversion is the resolver for the deleteRothConversion field.
+func (r *mutationResolver) DeleteRothConversion(ctx context.Context, id string) (bool, error) {
+	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+	if err != nil {
+		return false, err
+	}
+
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid conversion id: %w", err)
+	}
+
+	if err := r.RetirementAccessService.DeleteConversion(ctx, userID, parsedID); err != nil {
+		return false, r.mapErr(ctx, err)
+	}
+	return true, nil
+}
+
 // Health is the resolver for the health field.
 func (r *queryResolver) Health(ctx context.Context) (*model.Health, error) {
 	health, err := r.HealthService.Get(ctx)
@@ -2097,6 +2262,26 @@ func (r *queryResolver) NetWorthSnapshots(ctx context.Context, userID string) ([
 	}
 
 	return out, nil
+}
+
+// RetirementAccess is the resolver for the retirementAccess field.
+func (r *queryResolver) RetirementAccess(ctx context.Context, userID string) (*model.RetirementAccess, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	// The authenticated user's own data always wins over the argument.
+	if resolvedID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
+		parsedUserID = resolvedID
+	}
+
+	access, err := r.RetirementAccessService.Access(ctx, parsedUserID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	return mapRetirementAccessToModel(access), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
