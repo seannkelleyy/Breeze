@@ -24,6 +24,7 @@ import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
 import BreezeLineChart from '@/components/common/charts/BreezeLineChart';
+import ConversionSuggestionsCard from './components/ConversionSuggestionsCard';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import { GET_ASSETS_BY_USER } from '@/lib/services/queries/assets';
@@ -145,6 +146,8 @@ function RetirementIncomeContent() {
 
       <HsaLadderCard receipts={access.hsaReceipts} />
       <ReimbursementsCard reimbursements={access.hsaReimbursements} />
+      <ConversionSuggestionsCard />
+
       <RothConversionsCard conversions={access.rothConversions} buckets={access.rothBuckets} />
     </div>
   );

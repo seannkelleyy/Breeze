@@ -102,3 +102,105 @@ export const getFinancialMathSnapshot = (
     payroll: waterfall,
   };
 };
+
+// ─── Bracket-fill Roth conversion suggestions ─────────────
+
+export interface ConversionSuggestionInput {
+  currentYear: number;
+  /** Primary's age in the current year. */
+  currentAge: number;
+  /** Salary stops after this age — the conversion window opens up. */
+  retirementAge: number;
+  /** Household other taxable income while working (today's dollars). */
+  annualSalary: number;
+  /** Current-year federal brackets and standard deduction. */
+  brackets: TaxBracketRow[];
+  standardDeduction: number;
+  /** Pre-tax dollars available to convert. */
+  pretaxBalance: number;
+  /** Fill brackets up to and including this marginal rate (e.g. 0.12). */
+  targetRate: number;
+  /** How many years to suggest for (default 15). */
+  years?: number;
+}
+
+export interface ConversionSuggestionRow {
+  year: number;
+  age: number;
+  /** Other taxable income already filling the brackets that year. */
+  otherTaxableIncome: number;
+  /** Suggested Traditional → Roth conversion for the year. */
+  conversion: number;
+  /** Marginal bracket rate after the conversion. */
+  marginalRate: number;
+  /** Federal tax on other income + the conversion (after standard deduction). */
+  federalTax: number;
+}
+
+// Filling "the 12% bracket" means staying at or below its ceiling — so the
+// target rate must match a bracket exactly, and the top (uncapped) bracket
+// has no ceiling to fill.
+const bracketCeilingForRate = (brackets: TaxBracketRow[], targetRate: number): number | null => {
+  const target = brackets.find((bracket) => Math.abs(bracket.rate - targetRate) < 1e-9);
+  return target && target.maximum !== null ? target.maximum : null;
+};
+
+const rateAtTaxableIncome = (brackets: TaxBracketRow[], taxableIncome: number): number => {
+  let rate = brackets[0]?.rate ?? 0;
+  for (const bracket of brackets) {
+    if (taxableIncome > bracket.minimum) rate = bracket.rate;
+    if (bracket.maximum !== null && taxableIncome <= bracket.maximum) break;
+  }
+  return rate;
+};
+
+/**
+ * How much to convert from pre-tax to Roth each year to fill (but not leave)
+ * the target tax bracket: `ceiling − standard deduction − other income`,
+ * capped by the pre-tax balance and never negative. Years with no headroom —
+ * working years whose salary already reaches the ceiling — suggest nothing.
+ * Uses today's brackets for future years and assumes no other retirement
+ * income besides the conversions themselves.
+ */
+export const buildConversionSuggestions = (
+  input: ConversionSuggestionInput,
+): ConversionSuggestionRow[] => {
+  const {
+    currentYear,
+    currentAge,
+    retirementAge,
+    annualSalary,
+    brackets,
+    standardDeduction,
+    pretaxBalance,
+    targetRate,
+    years = 15,
+  } = input;
+
+  const ceiling = bracketCeilingForRate(brackets, targetRate);
+  if (ceiling === null || brackets.length === 0) return [];
+
+  // The ceiling caps taxable income, so gross conversion headroom is
+  // ceiling + standard deduction − other gross income.
+  const grossCeiling = ceiling + standardDeduction;
+  let remaining = Math.max(0, pretaxBalance);
+
+  const rows: ConversionSuggestionRow[] = [];
+  for (let offset = 0; offset < years; offset++) {
+    const age = currentAge + offset;
+    const other = age <= retirementAge ? annualSalary : 0;
+    const conversion = Math.max(0, Math.min(grossCeiling - other, remaining));
+    remaining -= conversion;
+
+    const taxableIncome = Math.max(0, other + conversion - standardDeduction);
+    rows.push({
+      year: currentYear + offset,
+      age,
+      otherTaxableIncome: other,
+      conversion,
+      marginalRate: rateAtTaxableIncome(brackets, taxableIncome),
+      federalTax: getFederalTax(taxableIncome, brackets),
+    });
+  }
+  return rows;
+};

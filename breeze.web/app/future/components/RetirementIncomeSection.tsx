@@ -24,7 +24,7 @@ type RetirementIncomeSectionProps = {
 const series = [
   { key: 'hsaReceipts', label: 'HSA receipts', color: 'var(--chart-2)' },
   { key: 'taxable', label: 'Taxable', color: 'var(--chart-1)' },
-  { key: 'pretax', label: 'Pre-tax', color: 'var(--chart-3)' },
+  { key: 'pretax', label: 'Pre-tax', color: 'var(--chart-7)' },
   { key: 'rothClocked', label: 'Roth (clock cleared)', color: 'var(--chart-4)' },
   { key: 'rothOther', label: 'Roth (other)', color: 'var(--chart-5)' },
   { key: 'shortfall', label: 'Shortfall', color: 'var(--destructive)' },
