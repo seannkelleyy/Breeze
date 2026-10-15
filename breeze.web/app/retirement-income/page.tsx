@@ -146,7 +146,7 @@ function RetirementIncomeContent() {
 
       <HsaLadderCard receipts={access.hsaReceipts} />
       <ReimbursementsCard reimbursements={access.hsaReimbursements} />
-      <ConversionSuggestionsCard />
+      <ConversionSuggestionsCard conversions={access.rothConversions} />
 
       <RothConversionsCard conversions={access.rothConversions} buckets={access.rothBuckets} />
     </div>

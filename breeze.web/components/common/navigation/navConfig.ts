@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
   LayoutDashboard,
+  TrendingDown,
   TrendingUp,
   Users,
   Target,
@@ -93,6 +94,12 @@ const taxes: RouteNavItem = {
   title: 'Taxes',
   icon: Percent,
 };
+const debts: RouteNavItem = {
+  label: 'Debts',
+  to: '/debts',
+  title: 'Payoff strategy, order, and timeline',
+  icon: TrendingDown,
+};
 const retirementIncome: RouteNavItem = {
   label: 'Retirement Income',
   to: '/retirement-income',
@@ -131,7 +138,7 @@ export const navGroups: ReadonlyArray<NavGroup> = [
     label: 'Money',
     title: 'Accounts, spending, budgets, and bank connections',
     icon: Wallet,
-    items: [accounts, expenses, budget, connections],
+    items: [accounts, expenses, budget, connections, debts],
   },
   {
     label: 'Plan',

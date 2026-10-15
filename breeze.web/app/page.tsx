@@ -185,7 +185,7 @@ function DashboardContent() {
 
   if (!isSignedIn || !isLoaded) {
     return (
-      <section className="flex h-screen w-screen flex-col items-center justify-center">
+      <section className="flex min-h-svh w-full flex-col items-center justify-center">
         <div className="flex h-full flex-col items-center justify-center gap-2">
           <h1 className="w-full text-left text-5xl font-medium">Breeze</h1>
           <p className="w-full text-center">The personal financial planner</p>

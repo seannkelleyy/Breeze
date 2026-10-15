@@ -437,9 +437,9 @@ export function AccountListItem({
               <Pencil className="size-3.5" />
             </Button>
             <Button
-              variant="destructive"
+              variant="ghost"
               size="icon"
-              className="size-8 cursor-pointer"
+              className="text-destructive hover:text-destructive size-8 cursor-pointer"
               onClick={() => setShowDeleteConfirm(true)}
               disabled={isLastAccount}
             >

@@ -3,8 +3,8 @@
 ## Next Up
 
 1. **Debt payoff module** — the last unbuilt pillar. Avalanche/snowball strategy engine, payoff timeline, interest-saved comparison, page. Schema is ready: `liabilities.payoff_priority`, `liabilities.target_extra_payment`, and `users.payoff_strategy` exist unused.
-3. **Pre-launch switchovers** — see [production-checklist.md](deployment/production-checklist.md): Clerk production instance, Plaid production approval, and rotation of the exposed credentials (old Clerk `sk_test_` key + old Azure SQL password in public git history; Render DB password from chat).
-4. **Feature backlog** — People mobile layout (#18), dashboard blank scroll (#1), saved retirement scenarios, employer match vesting (#27), recurring-expense detection (#29), FOO auto-derivation from financial state, partial Intl.NumberFormat sweep.
+2. **Pre-launch switchovers** — see [production-checklist.md](deployment/production-checklist.md): Clerk production instance, Plaid production approval, and rotation of the exposed credentials (old Clerk `sk_test_` key + old Azure SQL password in public git history; Render DB password from chat).
+3. **Feature backlog** — saved retirement scenarios, employer match vesting (#27), recurring-expense detection (#29), FOO auto-derivation from financial state, partial Intl.NumberFormat sweep.
 
 ## Deployment
 
@@ -27,7 +27,7 @@
 1. ~~Balance sheet — assets, liabilities, net worth over time~~ — SHIPPED
 2. ~~Budget — monthly envelope budgeting, categories, expense splits~~ — SHIPPED
 3. ~~Account projections — retirement account growth, IRS limits, IsMaxed~~ — DONE: FIRE planner equation card, per-person Maxed Out badge, per-person IRS aggregation (see #40)
-4. Retirement scenarios — FI number, FIRE progress, what-if modeling — MOSTLY DONE: FI number, FIRE progress, retirement-age + market-adjustment what-ifs shipped; combined retirement income page (HSA receipt ladder, conversion clock, and per-year income sequencing: HSA receipts → taxable → pre-tax → clocked Roth, 59½ penalty flags); saved scenarios dropped deliberately (may revisit); next: bracket-aware pre-tax withdrawals
+4. Retirement scenarios — FI number, FIRE progress, what-if modeling — MOSTLY DONE: FI number, FIRE progress, retirement-age + market-adjustment what-ifs shipped; combined retirement income page (HSA receipt ladder, conversion clock, and per-year income sequencing: HSA receipts → taxable → pre-tax → clocked Roth, 59½ penalty flags); saved scenarios dropped deliberately (may revisit); next: convert-then-draw in the sequencer + bracket-aware pre-tax withdrawals
 5. ~~Plaid integration — auto-sync transactions~~ — SHIPPED in sandbox (production pending — see Deployment)
 6. ~~Tax planning — form checklist, estimate~~ — SHIPPED
 7. ~~Roth ladder + HSA ladder~~ — SHIPPED: `/retirement-ladder` calculator (5-year rule, early-access modeling) + `/retirement-access` tracking (HSA receipt ladder with reimbursement balance guard, Roth conversion log with 5-year-clock buckets)
@@ -38,6 +38,22 @@
 2. ~~I created some accounts while signed in with clerk via github. then my wife created an account via clerk and apple and she saw my accounts. This is in hosted env.~~ (fixed — all resolvers now enforce authenticated userId via `resolveUserIDFromCtx`)
 
 ---
+
+## Recently Completed
+
+- **Debt payoff module** (October 2026): `/debts` — avalanche/snowball waterfall engine
+  (`lib/calc/debtPayoff.ts`), strategy persisted to `users.payoff_strategy`, extra-payment
+  control, payoff order + balance timeline, interest/months saved vs a rolled-minimums
+  baseline. **Income planner phase 2** (partial): suggested-vs-actual conversions in the
+  bracket-fill table.
+
+## Recently Completed
+
+- **Debt payoff module** (October 2026): `/debts` — avalanche/snowball waterfall engine
+  (`lib/calc/debtPayoff.ts`), strategy persisted to `users.payoff_strategy`, extra-payment
+  control, payoff order + balance timeline, interest/months saved vs a rolled-minimums
+  baseline. **Income planner phase 2** (partial): suggested-vs-actual conversions in the
+  bracket-fill table.
 
 ## Recently Completed (September 2026 waves)
 
@@ -55,10 +71,10 @@ Condensed changelog — details in git history.
 
 | # | Page | Task | Priority | Notes |
 |---|------|------|----------|-------|
-| 1 | Dashboard | Remove redundant vertical scroll for blank space under cards | High | |
+| 1 | Dashboard | ~~Remove redundant vertical scroll for blank space under cards~~ — DONE: signed-out hero was h-screen inside the padded layout, forcing overflow; now min-h-svh w-full | High | |
 | 2 | Accounts | ~~Hide the card header caret — same annoyance as People~~ — DONE: compact cards have no caret; pencil opens the editor | High | |
 | 3 | Accounts | Delete icon should have no red background, add confirmation dialog | High | Confirmation dialog done (ConfirmDialog); red `destructive` background still present |
-| 4 | Accounts | Fix missing pointer cursor on buttons | Medium | |
+| 4 | Accounts | ~~Fix missing pointer cursor on buttons~~ — DONE: Button base has cursor-pointer; SelectTrigger added | Medium | |
 | 5 | Accounts | ~~Add info icons (tooltips) for fields~~ — DONE: `InfoTip` wired into the account editors (Contribution Type, Match %, Match Up To %, Tax Treatment) | Medium | |
 | 6 | Accounts | ~~Show purple badge for owners~~ — DONE: filled when selected, bordered when unselected | Low | |
 | 7 | Accounts | ~~Fix error messages on invalid input (chars in number fields)~~ — DONE: invalid drafts persist in `FormattedNumberInput` | High | |
@@ -77,7 +93,7 @@ Condensed changelog — details in git history.
 | # | Page | Task | Priority | Notes |
 |---|------|------|----------|-------|
 | 17 | People | ~~Edit/add via modal~~ — DONE: PersonFormModal | Medium | |
-| 18 | People | Mobile view of cards needs improvement | Medium | |
+| 18 | People | ~~Mobile view of cards needs improvement~~ — STALE: PeopleCard grid already collapses to one column on mobile | Medium | |
 | 19 | Accounts | ~~Weekly/biweekly contribution options~~ — DONE: contribution modes on assets | Medium | |
 | 20 | Accounts | ~~Show yearly total contributions~~ — DONE: Monthly total on ExpensesSummaryCard | Medium | |
 | 21 | Dashboard | Allow clicking assets/liabilities for quick view | Medium | |

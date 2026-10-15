@@ -110,6 +110,8 @@ export interface CurrentUserContextValue {
   setSafeWithdrawalRate: (nextSafeWithdrawalRate: number) => void;
   updateSafeWithdrawalRate: (nextSafeWithdrawalRate: number) => void;
   filingStatus: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH';
+  payoffStrategy: 'AVALANCHE' | 'SNOWBALL';
+  updatePayoffStrategy: (next: 'AVALANCHE' | 'SNOWBALL') => void;
   deductionType: 'STANDARD' | 'ITEMIZED';
   updateFilingStatus: (next: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH') => void;
   updateDeductionType: (next: 'STANDARD' | 'ITEMIZED') => void;
@@ -146,6 +148,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     safeWithdrawalRate?: number;
     filingStatus?: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH';
     deductionType?: 'STANDARD' | 'ITEMIZED';
+    payoffStrategy?: 'AVALANCHE' | 'SNOWBALL';
   }>({});
   const [currencyCode, setCurrencyCode] = useState('USD');
   const [returnDisplayMode, setReturnDisplayMode] = useState<'real' | 'nominal'>(
@@ -176,6 +179,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       nextSafeWithdrawalRate: number,
       nextFilingStatus?: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH',
       nextDeductionType?: 'STANDARD' | 'ITEMIZED',
+      nextPayoffStrategy?: 'AVALANCHE' | 'SNOWBALL',
     ) => {
       if (!isLoaded || !isSignedIn || !resolvedUserId) {
         return;
@@ -194,7 +198,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
           deductionAmount,
           maxTaxBracketId,
           filingStatus: nextFilingStatus ?? filingStatus,
-          payoffStrategy,
+          payoffStrategy: nextPayoffStrategy ?? payoffStrategy,
         };
 
         await request<{ updateUser: { id: string } }, { input: typeof input }>(
@@ -308,6 +312,33 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         returnDisplayMode,
         inflationRate,
         safeWithdrawalRate,
+        next,
+      );
+    },
+    [
+      persistPreferences,
+      currencyCode,
+      returnDisplayMode,
+      inflationRate,
+      safeWithdrawalRate,
+      resolvedUserId,
+    ],
+  );
+
+  const updatePayoffStrategy = useCallback(
+    (next: 'AVALANCHE' | 'SNOWBALL') => {
+      setPayoffStrategy(next);
+      if (!resolvedUserId) {
+        pendingPrefsRef.current.payoffStrategy = next;
+        return;
+      }
+      void persistPreferences(
+        currencyCode,
+        returnDisplayMode,
+        inflationRate,
+        safeWithdrawalRate,
+        undefined,
+        undefined,
         next,
       );
     },
@@ -546,6 +577,8 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     setSafeWithdrawalRate: hydrateSafeWithdrawalRate,
     updateSafeWithdrawalRate,
     updateFilingStatus,
+    payoffStrategy,
+    updatePayoffStrategy,
     updateDeductionType,
     filingStatus,
     deductionType,

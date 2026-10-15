@@ -18,6 +18,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Lightbulb } from 'lucide-react';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+import type { RothConversion } from '@/lib/services/hooks/useRetirementAccess';
 import { usePlannerHydration } from '../../future/hooks/usePlannerHydration';
 import { usePlannerModel } from '../../future/hooks/planner';
 import useTaxYear from '../../future/hooks/planner/useTaxYear';
@@ -32,7 +33,7 @@ const pct = (rate: number) => `${Math.round(rate * 100)}%`;
  * ceiling. Headroom opens up in retirement when the salary disappears; while
  * working, the salary usually already fills past the low brackets.
  */
-const ConversionSuggestionsCard = () => {
+const ConversionSuggestionsCard = ({ conversions }: { conversions: RothConversion[] }) => {
   const { filingStatus, currencyCode } = useCurrentUser();
   const taxTables = useTaxYear(filingStatus);
   usePlannerHydration();
@@ -53,6 +54,15 @@ const ConversionSuggestionsCard = () => {
     () => householdPeople.reduce((sum, p) => sum + Math.max(0, p.annualSalary), 0),
     [householdPeople],
   );
+
+  const convertedByYear = useMemo(() => {
+    const totals = new Map<number, number>();
+    for (const conversion of conversions) {
+      const year = Number(conversion.convertedOn.slice(0, 4));
+      totals.set(year, (totals.get(year) ?? 0) + Number(conversion.amount));
+    }
+    return totals;
+  }, [conversions]);
 
   const rows = useMemo(() => {
     if (!taxTables || currentAge <= 0) return [];
@@ -120,6 +130,7 @@ const ConversionSuggestionsCard = () => {
                   <th className="py-2 pr-3 font-medium">Age</th>
                   <th className="py-2 pr-3 font-medium">Other income</th>
                   <th className="py-2 pr-3 font-medium">Convert up to</th>
+                  <th className="py-2 pr-3 font-medium">Converted</th>
                   <th className="py-2 pr-3 font-medium">Bracket</th>
                   <th className="py-2 font-medium">Est. federal tax</th>
                 </tr>
@@ -132,6 +143,11 @@ const ConversionSuggestionsCard = () => {
                     <td className="py-2 pr-3">{fc(row.otherTaxableIncome)}</td>
                     <td className="py-2 pr-3 font-medium">
                       {row.conversion > 0 ? fc(row.conversion) : '—'}
+                    </td>
+                    <td className="py-2 pr-3">
+                      {(convertedByYear.get(row.year) ?? 0) > 0
+                        ? fc(convertedByYear.get(row.year) ?? 0)
+                        : '—'}
                     </td>
                     <td className="py-2 pr-3">{pct(row.marginalRate)}</td>
                     <td className="py-2">{fc(row.federalTax)}</td>
