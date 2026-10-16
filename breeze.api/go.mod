@@ -1,6 +1,11 @@
 module breeze.api
 
-go 1.27.2
+go 1.26.1
+
+// Patched stdlib (net/http, tls advisories fixed in 1.27.2). Render builders
+// may not carry 1.27.2 yet and ignore the toolchain line under GOTOOLCHAIN=local,
+// so the go directive stays at the version Render can build with.
+toolchain go1.27.2
 
 require (
 	github.com/99designs/gqlgen v0.17.95
