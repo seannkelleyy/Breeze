@@ -68,11 +68,15 @@ const BudgetContent = () => {
 
   useEffect(() => {
     getBudgetForDate(currentYear, currentMonth);
-    setRegenerateMessage('');
-    setConfirmRegenerate(false);
   }, [currentMonth, currentYear, getBudgetForDate]);
 
+  const resetMonthActions = () => {
+    setRegenerateMessage('');
+    setConfirmRegenerate(false);
+  };
+
   const getNextBudget = () => {
+    resetMonthActions();
     if (currentMonth === 11) {
       setCurrentMonth(0);
       setCurrentYear(currentYear + 1);
@@ -82,6 +86,7 @@ const BudgetContent = () => {
   };
 
   const getPreviousBudget = () => {
+    resetMonthActions();
     if (currentMonth === 0) {
       setCurrentMonth(11);
       setCurrentYear(currentYear - 1);

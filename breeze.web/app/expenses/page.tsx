@@ -35,15 +35,15 @@ function ExpensesContent() {
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    if (!userId) return;
-    setLoading(true);
+    // loading starts true; the first setState lands after the await so the
+    // initial fetch doesn't cascade renders from the mount effect.
     try {
       const data = await getRecurringExpenseTemplates();
       setTemplates(data);
     } finally {
       setLoading(false);
     }
-  }, [userId, getRecurringExpenseTemplates]);
+  }, [getRecurringExpenseTemplates]);
 
   useEffect(() => {
     if (isLoaded && userId) load();
