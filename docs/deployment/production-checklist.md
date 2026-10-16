@@ -29,3 +29,12 @@ Before real users: create the Clerk production instance and get Plaid production
 Optional hardening: squash public history to drop the pre-Go (.NET) era entirely — viable pre-production with a single developer, but rotation alone already closes every live exposure.
 
 - `ALLOWED_ORIGIN` on the API must exactly match the web URL.
+
+## Go version (Render)
+
+`breeze.api/go.mod` carries `go 1.26.1` + `toolchain go1.27.2`: local dev and
+CI build with the patched 1.27.2 stdlib (11 net/http/tls advisories), while
+Render's builder compiles with its supported 1.26.x — the `toolchain` line is
+ignored under `GOTOOLCHAIN=local`. When Render's Go runtime offers 1.27.2+,
+move the `go` directive up so production gets the patched stdlib too. Verify
+with `govulncheck ./...` after upgrading.
