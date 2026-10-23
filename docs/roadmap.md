@@ -4,7 +4,7 @@
 
 1. **Debt payoff module** — the last unbuilt pillar. Avalanche/snowball strategy engine, payoff timeline, interest-saved comparison, page. Schema is ready: `liabilities.payoff_priority`, `liabilities.target_extra_payment`, and `users.payoff_strategy` exist unused.
 2. **Pre-launch switchovers** — see [production-checklist.md](deployment/production-checklist.md): Clerk production instance, Plaid production approval, and rotation of the exposed credentials (old Clerk `sk_test_` key + old Azure SQL password in public git history; Render DB password from chat).
-3. **Feature backlog** — saved retirement scenarios, employer match vesting (#27), recurring-expense detection (#29), FOO auto-derivation from financial state, partial Intl.NumberFormat sweep.
+3. **Feature backlog** — saved retirement scenarios, employer match vesting (#27), recurring-expense detection (#29), FOO auto-derivation from financial state, partial Intl.NumberFormat sweep, conscious spending plan budgeting mode, tax filing-season checklist expansion, investment-income crossover milestone (from [Sean's notes](seans-notes.md); drawdown ordering and Roth/HSA planning are partially built — see Product #4/#7).
 
 ## Deployment
 

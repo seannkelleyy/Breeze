@@ -12,14 +12,14 @@ This is not a budget app. It is a **personal finance planner** — the single pl
 
 | Module | Description |
 |---|---|
-| Today | Monthly budget, spending by category/tag, cash flow |
+| Today | Monthly budget, spending by category/tag, cash flow; conscious spending plan structure (fixed costs, savings, investments, guilt-free spending) |
 | Balance Sheet | Assets with projections, liabilities with payoff plans, net worth over time |
 | Retirement | Account projections, IRS contribution tracking, safe withdrawal modeling |
 | Debt | Payoff strategy (avalanche/snowball), payoff timeline, interest saved |
-| Planning | Goals, what-if scenarios, tax estimate, FIRE number tracking |
+| Planning | Goals, what-if scenarios, tax estimate, FIRE number tracking, crossover milestone (the year investment returns exceed earned income) |
 | Plaid Integration | Auto-sync transactions, account discovery, balance updates |
-| Tax Planning | Form checklist, estimated refund/owed, effective and marginal rates |
-| Early Retirement | Roth conversion ladder, HSA receipt ladder, SEPP (Rule 72t), scenario modeling |
+| Tax Planning | Filing-season help: form checklist, document gathering, estimated refund/owed, effective and marginal rates. Estimates only — never files on the user's behalf |
+| Early Retirement | Roth conversion ladder with tax-bracket scheduling, HSA receipt ladder, HSA+Roth contribution planning, account drawdown ordering (which accounts to use first), SEPP (Rule 72t), scenario modeling |
 
 ---
 
@@ -59,7 +59,7 @@ This app owns the whole picture. Key differentiators:
 
 ## What This App Is Not
 
-- Not a tax filing tool — estimates only, always recommend a CPA
+- Not a tax filing tool — checklists, document gathering, and estimates only; never files on the user's behalf. Always recommend a CPA
 - Not a financial advisor — projections are informational, not advice
 - Not a replacement for a CPA for SEPP (Rule 72t) calculations — always recommend professional advice before starting
 - Not a public-facing app requiring SEO — entirely auth-gated
