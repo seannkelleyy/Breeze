@@ -8,7 +8,7 @@ go 1.26.1
 toolchain go1.27.2
 
 require (
-	github.com/99designs/gqlgen v0.17.95
+	github.com/99designs/gqlgen v0.17.97
 	github.com/clerk/clerk-sdk-go/v2 v2.7.0
 	github.com/getsentry/sentry-go v0.50.0
 	github.com/google/uuid v1.6.0
