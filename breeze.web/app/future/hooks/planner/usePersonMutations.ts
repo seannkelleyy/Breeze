@@ -50,5 +50,3 @@ export function usePersonMutations(userId: string) {
 
   return { upsertPersonMutation, deletePersonMutation, isSaving: upsertPersonMutation.isPending };
 }
-
-export default usePersonMutations;

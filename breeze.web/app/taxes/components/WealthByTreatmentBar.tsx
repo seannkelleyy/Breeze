@@ -86,4 +86,3 @@ export function WealthByTreatmentBar({
   );
 }
 
-export default WealthByTreatmentBar;

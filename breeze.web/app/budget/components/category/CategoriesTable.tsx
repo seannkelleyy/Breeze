@@ -184,4 +184,3 @@ export const CategoriesTable = () => {
   );
 };
 
-export default CategoriesTable;

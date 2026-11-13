@@ -87,7 +87,7 @@ function defaultTaxTreatmentFor(accountType: string): string {
 }
 
 /** 'Roth' (0%), 'Pre-tax' (100%) or 'Pre-tax 70%' for a split account. */
-export function taxTreatmentLabel(account: {
+function taxTreatmentLabel(account: {
   taxTreatment?: string;
   pretaxSharePercent?: number | null;
 }): string {
@@ -719,4 +719,3 @@ export function AccountListItem({
   );
 }
 
-export default AccountListItem;

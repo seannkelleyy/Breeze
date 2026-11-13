@@ -2,7 +2,7 @@ import { createMutationHook } from '../createMutationHook';
 import { useIncomes } from './index';
 import { Income } from '../../types/income';
 
-export interface PostIncomeMutationProps {
+interface PostIncomeMutationProps {
   budgetId: string;
   userId: string;
   income: Omit<Income, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'sourceType'>;

@@ -17,12 +17,8 @@ export const isMoneyGreaterThanOrEqualWithTolerance = (
   rightAmount: number,
   tolerance = IRS_MAX_CONTRIBUTION_MATCH_TOLERANCE,
 ) => leftAmount - rightAmount >= -tolerance;
-
-export const PLANNER_SAFE_WITHDRAWAL_RATE_MIN = 0.1;
 export const PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE = 4;
 export const PLANNER_DEFAULT_LONGEVITY_AGE = 95;
-export const PLANNER_AUTOSAVE_DEBOUNCE_MS = 1200;
-
 export const PLANNER_DEFAULT_DESIRED_INVESTMENT_AMOUNT = 1_500_000;
 export const PLANNER_DEFAULT_INFLATION_RATE = 2.5;
 export const PLANNER_RETIREMENT_METHOD_OPTIONS = [

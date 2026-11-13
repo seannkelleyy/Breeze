@@ -21,7 +21,7 @@ import { FormattedNumberInput } from '@/components/common/form/FormattedNumberIn
 import { useNetWorthSnapshots } from '@/lib/services/hooks/useNetWorthSnapshots';
 import { cn } from '@/lib/utils';
 
-export interface NetWorthAccountOption {
+interface NetWorthAccountOption {
   name: string;
   value: number;
   kind: 'ASSET' | 'LIABILITY';
@@ -369,4 +369,3 @@ function AddSnapshotDialog({
   );
 }
 
-export default NetWorthHistoryCard;

@@ -178,4 +178,3 @@ export function TransactionsCard({ userId, currencyCode }: TransactionsCardProps
   );
 }
 
-export default TransactionsCard;

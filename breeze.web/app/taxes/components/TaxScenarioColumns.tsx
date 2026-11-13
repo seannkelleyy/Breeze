@@ -130,4 +130,3 @@ export function TaxScenarioColumns({
   );
 }
 
-export default TaxScenarioColumns;

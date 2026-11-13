@@ -12,7 +12,7 @@ import {
 import useIrsLimits from './useIrsLimits';
 import { useRetirementAccess } from '@/lib/services/hooks/useRetirementAccess';
 import useTaxYear from './useTaxYear';
-import usePaycheckDeductions from './usePaycheckDeductions';
+import { usePaycheckDeductions } from './usePaycheckDeductions';
 import { useHouseholdCalculation } from './model/useHouseholdCalculation';
 import { usePortfolioCalculation } from './model/usePortfolioCalculation';
 import { useRetirementTargets } from './model/useRetirementTargets';

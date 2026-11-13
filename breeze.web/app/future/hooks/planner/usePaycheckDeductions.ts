@@ -169,5 +169,3 @@ export const usePaycheckDeductions = (personId?: string | null) => {
     deleteDeduction,
   };
 };
-
-export default usePaycheckDeductions;

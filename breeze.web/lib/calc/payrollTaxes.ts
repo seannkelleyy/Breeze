@@ -13,7 +13,7 @@
  */
 
 /** Structural bracket row — mirrors the API's taxYearData brackets. */
-export interface TaxBracket {
+interface TaxBracket {
   rate: number;
   minimum: number;
   maximum: number | null;
@@ -45,7 +45,7 @@ export interface PayrollTaxResult {
 
 /** Employer withholding rule: 0.9% on ONE person's FICA wages above $200,000,
  * regardless of filing status. This is what actual paychecks reflect. */
-export const ADDITIONAL_MEDICARE_WITHHOLDING_THRESHOLD = 200000;
+const ADDITIONAL_MEDICARE_WITHHOLDING_THRESHOLD = 200000;
 
 /** Employer-withheld Additional Medicare Tax for one person. */
 export function additionalMedicareWithheld(ficaWages: number): number {
@@ -95,7 +95,7 @@ export function computeFicaTax(
 }
 
 /** Federal income tax over a bracket ladder. */
-export function walkFederalBrackets(taxableIncome: number, brackets: TaxBracket[]): number {
+function walkFederalBrackets(taxableIncome: number, brackets: TaxBracket[]): number {
   let tax = 0;
   for (const bracket of brackets) {
     if (taxableIncome <= bracket.minimum) break;

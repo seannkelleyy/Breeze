@@ -13,9 +13,9 @@ import {
 } from '../../future/lib/config';
 import { getPretaxShare } from '../../future/lib/paycheck';
 
-export type WealthBucketKey = 'pretax' | 'roth' | 'taxable';
+type WealthBucketKey = 'pretax' | 'roth' | 'taxable';
 
-export interface WealthBucketAccount {
+interface WealthBucketAccount {
   id: string;
   name: string;
   personIds: string[];

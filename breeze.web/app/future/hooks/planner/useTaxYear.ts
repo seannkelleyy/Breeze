@@ -25,7 +25,7 @@ interface TaxYearDataResponse {
  * Returns null while loading — the data is static reference data, so it is
  * fetched once and cached for the session.
  */
-export function useTaxYear(filingStatus: string): TaxYearTables | null {
+function useTaxYear(filingStatus: string): TaxYearTables | null {
   const { request } = useGraphql();
 
   const { data } = useQuery({

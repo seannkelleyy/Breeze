@@ -1,5 +1,5 @@
-export type BonusMode = 'dollars' | 'salary-percent';
-export type BonusFrequency = 'annual' | 'quarterly' | 'monthly';
+type BonusMode = 'dollars' | 'salary-percent';
+type BonusFrequency = 'annual' | 'quarterly' | 'monthly';
 export type PayType = 'salary' | 'hourly' | 'commission';
 export type PayCadence = 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
 
@@ -22,19 +22,3 @@ export type PlannerPerson = {
   createdAt: string;
   updatedAt: string;
 };
-
-export interface PlannerPersonDto {
-  name: string;
-  birthday: string;
-  retirementAge: number;
-  annualSalary: number;
-  bonusMode: string;
-  bonusFrequency: string;
-  annualBonus: number;
-  incomeGrowthRate: number;
-  payType: string;
-  payDay: number;
-  payCadence: string;
-  hourlyRate: number;
-  expectedHoursPerWeek: number;
-}

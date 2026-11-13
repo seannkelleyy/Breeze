@@ -4,11 +4,6 @@ export const GET_BUDGET_BY_DATE = `query GetBudgetByDate($userId: ID!, $date: St
 export const CREATE_BUDGET = `mutation CreateBudget($input: CreateBudgetInput!) {
   createBudget(input: $input) { id userId date monthlyIncome monthlyExpenses createdAt updatedAt }
 }`;
-export const UPDATE_BUDGET = `mutation UpdateBudget($input: UpdateBudgetInput!) {
-  updateBudget(input: $input) { id userId date monthlyIncome monthlyExpenses createdAt updatedAt }
-}`;
-export const DELETE_BUDGET = `mutation DeleteBudget($id: ID!) { deleteBudget(id: $id) }`;
-
 export const GET_CATEGORIES = `query GetCategories($budgetId: ID!) {
   expenseCategories(budgetId: $budgetId) { id userId budgetId name allocation currentSpend sourceType sourceTemplateId generationMonth createdAt updatedAt }
 }`;

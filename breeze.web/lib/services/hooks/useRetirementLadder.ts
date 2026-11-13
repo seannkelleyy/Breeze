@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { CALCULATE_RETIREMENT_LADDER } from '../queries/retirementLadder';
 import useGraphql from '../useGraphql';
 
-export interface LadderStep {
+interface LadderStep {
   year: number;
   age: number;
   withdrawalAmount: string;

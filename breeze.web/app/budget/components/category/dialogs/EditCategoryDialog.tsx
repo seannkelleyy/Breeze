@@ -88,4 +88,3 @@ export const EditCategoryDialog = ({ existingCategory, children }: EditCategoryD
   );
 };
 
-export default EditCategoryDialog;

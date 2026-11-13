@@ -9,7 +9,7 @@ vi.mock('@/lib/services/useGraphql', () => ({
   default: () => ({ request: requestMock }),
 }));
 
-import useTransactions, { type BankTransaction } from '../useTransactions';
+import { useTransactions, type BankTransaction } from '../useTransactions';
 
 const transactionDto = (overrides: Record<string, unknown> = {}) => ({
   id: 't1',

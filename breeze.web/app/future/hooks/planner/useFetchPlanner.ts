@@ -83,7 +83,7 @@ interface LiabilitiesResponse {
   }>;
 }
 
-export interface PlannerLoadResult {
+interface PlannerLoadResult {
   people: PlannerPerson[];
   accounts: PlannerAccount[];
   inflationRate: number;

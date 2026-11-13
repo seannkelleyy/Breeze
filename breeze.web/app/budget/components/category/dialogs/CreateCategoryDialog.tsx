@@ -74,4 +74,3 @@ export const CreateCategoryDialog = () => {
   );
 };
 
-export default CreateCategoryDialog;

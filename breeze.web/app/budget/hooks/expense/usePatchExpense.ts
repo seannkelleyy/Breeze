@@ -2,7 +2,7 @@ import { createMutationHook } from '../createMutationHook';
 import { useExpenses } from './index';
 import { Expense } from '../../types/expense';
 
-export interface PatchExpenseMutationProps {
+interface PatchExpenseMutationProps {
   expense: Expense;
 }
 

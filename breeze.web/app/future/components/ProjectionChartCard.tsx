@@ -19,7 +19,7 @@ const CHART_COLOR_COUNT = 12;
 
 const AGGREGATE_SERIES = new Set(['totalBalance', 'investable', 'property']);
 
-export type ProjectionChartCardProps = {
+type ProjectionChartCardProps = {
   collapsed: boolean;
   toggleControl: ReactNode;
   currentAge: number;

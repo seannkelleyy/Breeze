@@ -29,13 +29,13 @@ type AccountBreakdownRow = {
   projectedValue: number;
 };
 
-export type ProjectionTablesContextValue = {
+type ProjectionTablesContextValue = {
   data: {
     accountBreakdownRows: AccountBreakdownRow[];
   };
 };
 
-export type ProjectionTablesProps = ProjectionTablesContextValue & {
+type ProjectionTablesProps = ProjectionTablesContextValue & {
   sections: {
     accountBreakdownCollapsed: boolean;
     accountBreakdownToggleControl: ReactNode;

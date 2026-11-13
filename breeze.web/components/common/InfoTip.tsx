@@ -26,4 +26,3 @@ export function InfoTip({ text }: { text: string }) {
   );
 }
 
-export default InfoTip;

@@ -113,4 +113,3 @@ export function BracketLadder({
   );
 }
 
-export default BracketLadder;

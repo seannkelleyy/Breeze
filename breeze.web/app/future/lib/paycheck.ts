@@ -129,7 +129,7 @@ export function getPersonSavingsSplit(
  *   insurance/FSA withholdings — reduce BOTH bases.
  * Roth contributions reduce neither (returned implicitly as the remainder).
  */
-export function splitWageReductions(
+function splitWageReductions(
   person: PlannerPerson,
   accounts: PlannerAccount[],
   withholdings: PaycheckWithholding[],

@@ -2,7 +2,7 @@ import { createMutationHook } from '../createMutationHook';
 import { useIncomes } from './index';
 import { Income } from '../../types/income';
 
-export interface PatchIncomeMutationProps {
+interface PatchIncomeMutationProps {
   income: Income;
 }
 

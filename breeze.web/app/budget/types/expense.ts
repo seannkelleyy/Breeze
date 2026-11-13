@@ -1,6 +1,6 @@
 import z from 'zod';
 
-export interface ExpenseSplit {
+interface ExpenseSplit {
   id?: string;
   categoryId: string;
   amount: string;

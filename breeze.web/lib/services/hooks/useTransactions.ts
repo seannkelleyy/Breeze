@@ -99,5 +99,3 @@ export const useTransactions = (userId?: string | null, months = 6) => {
     removeTransaction,
   };
 };
-
-export default useTransactions;

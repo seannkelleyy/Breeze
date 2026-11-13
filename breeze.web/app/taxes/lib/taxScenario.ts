@@ -8,7 +8,7 @@ import type { TaxBracketRow, TaxYearTables } from '../../future/types/tax';
 import { computeFicaTax } from '@/lib/calc/payrollTaxes';
 import type { PersonWaterfall } from '../../future/lib/paycheck';
 
-export interface BracketSlice {
+interface BracketSlice {
   /** Marginal rate as a fraction (0.22 = 22%). */
   rate: number;
   /** Income taxed at this rate. */

@@ -39,7 +39,7 @@ export interface RecurringExpenseTemplate {
   updatedAt: string;
 }
 
-export function getRecurringExpenseMonthlyAmount(
+function getRecurringExpenseMonthlyAmount(
   template: Pick<RecurringExpenseTemplate, 'amount' | 'recurrenceInterval'>,
 ): number {
   const amount = Number(template.amount) || 0;

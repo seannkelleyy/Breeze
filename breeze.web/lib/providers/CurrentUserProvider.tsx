@@ -92,7 +92,7 @@ const getBackendUserID = (user: ReturnType<typeof useUser>['user']): string => {
   return DEV_USER_ID;
 };
 
-export interface CurrentUserContextValue {
+interface CurrentUserContextValue {
   user: ReturnType<typeof useUser>['user'];
   userId: string;
   isLoaded: boolean;
@@ -131,7 +131,7 @@ export interface CurrentUserContextValue {
   }) => Promise<void>;
 }
 
-export const CurrentUserContext = createContext<CurrentUserContextValue | null>(null);
+const CurrentUserContext = createContext<CurrentUserContextValue | null>(null);
 
 type CurrentUserProviderProps = {
   children: ReactNode;

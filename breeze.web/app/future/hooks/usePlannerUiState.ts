@@ -16,4 +16,3 @@ export function usePlannerUiState() {
   return { collapsedSections, toggleSection };
 }
 
-export default usePlannerUiState;

@@ -49,26 +49,3 @@ export type PlannerAccount = {
   createdAt: string;
   updatedAt: string;
 };
-
-export interface PlannerAccountDto {
-  name: string;
-  personIds: string[];
-  accountType: string;
-  contributionMode: 'monthly' | 'yearly' | 'salary-percent';
-  contributionValue: number;
-  employerMatchRate: number;
-  employerMatchMaxPercentOfSalary: number;
-  startingBalance: number;
-  annualRate: number;
-  returnProfile: string | null;
-  taxTreatment: string;
-  pretaxSharePercent: number | null;
-  purchaseDate?: string | null;
-  purchasePrice?: number | null;
-  currentValue?: number | null;
-  annualChangeRate?: number | null;
-  homeGrowthProfile?: string | null;
-  vehicleDepreciationProfile?: string | null;
-  linkedLiabilityId?: string | null;
-  originalLoanAmount?: number | null;
-}

@@ -101,4 +101,3 @@ export function ProjectionsSection({
   );
 }
 
-export default ProjectionsSection;

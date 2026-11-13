@@ -26,7 +26,7 @@ export type AssetFinanceSnapshot = {
   remainingLoanMonths: number;
 };
 
-export type FinancialMathScenario = {
+type FinancialMathScenario = {
   label: string;
   spendMultiplier: number;
   yearlySpend: number;

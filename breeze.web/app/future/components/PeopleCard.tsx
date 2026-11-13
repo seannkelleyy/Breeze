@@ -13,7 +13,7 @@ import { PlannerPerson } from '../types/person';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 
-export interface PeopleCardProps {
+interface PeopleCardProps {
   collapsed: boolean;
 }
 

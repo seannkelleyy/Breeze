@@ -31,7 +31,7 @@ export interface HsaReimbursement {
   updatedAt: string;
 }
 
-export interface HsaLadderSummary {
+interface HsaLadderSummary {
   totalReceipts: string;
   totalReimbursed: string;
   availableToReimburse: string;
@@ -64,7 +64,7 @@ export interface RetirementAccess {
   rothBuckets: RothConversionBucket[];
 }
 
-export const RETIREMENT_ACCESS_KEY = ['retirement-access'];
+const RETIREMENT_ACCESS_KEY = ['retirement-access'];
 
 export const useRetirementAccess = (userId?: string) => {
   const { request } = useGraphql();

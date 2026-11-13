@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatTimeAgo } from '@/lib/utils';
 
-export interface DataCardBadge {
+interface DataCardBadge {
   label: string;
   variant?: 'default' | 'secondary' | 'destructive' | 'outline';
 }

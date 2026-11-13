@@ -10,7 +10,7 @@
  * actually looks like.
  */
 
-export type PayoffStrategy = 'AVALANCHE' | 'SNOWBALL';
+type PayoffStrategy = 'AVALANCHE' | 'SNOWBALL';
 
 export interface DebtPayoffDebt {
   id: string;
@@ -31,7 +31,7 @@ export interface DebtPayoffInput {
   maxMonths?: number;
 }
 
-export interface DebtPayoffDebtResult {
+interface DebtPayoffDebtResult {
   id: string;
   name: string;
   /** 1-based month the debt hits zero; null if it never does. */

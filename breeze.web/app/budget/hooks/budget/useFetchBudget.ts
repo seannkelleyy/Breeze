@@ -39,4 +39,3 @@ export const useFetchBudget = ({ date }: FetchBudgetProps) => {
   });
 };
 
-export default useFetchBudget;

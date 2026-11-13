@@ -1,4 +1,4 @@
-export interface AmortizationRow {
+interface AmortizationRow {
   period: number;
   date: string;
   payment: number;
@@ -24,7 +24,7 @@ const monthDateFormatter = new Intl.DateTimeFormat('en-US', {
 export const clamp = (value: number, min = 0): number =>
   Number.isFinite(value) ? Math.max(min, value) : min;
 
-export const addMonths = (date: Date, months: number): Date => {
+const addMonths = (date: Date, months: number): Date => {
   const next = new Date(date);
   next.setMonth(next.getMonth() + months);
   return next;

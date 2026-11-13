@@ -2,7 +2,7 @@ import { createMutationHook } from '../createMutationHook';
 import { useExpenses } from './index';
 import { Expense } from '../../types/expense';
 
-export interface PostExpenseMutationProps {
+interface PostExpenseMutationProps {
   budgetId: string;
   userId: string;
   expense: Omit<Expense, 'id' | 'userId' | 'budgetId' | 'createdAt' | 'updatedAt'>;

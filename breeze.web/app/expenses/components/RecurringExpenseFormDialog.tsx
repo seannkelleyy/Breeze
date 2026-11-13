@@ -27,7 +27,7 @@ function toDateInputValue(dateStr: string | null | undefined): string {
   return dateStr.slice(0, 10);
 }
 
-export function makeDefaultRecurringExpenseTemplate(
+function makeDefaultRecurringExpenseTemplate(
   today: string,
 ): Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'> {
   return {
@@ -47,7 +47,7 @@ interface RecurringExpenseTemplateErrors {
   endDate?: string;
 }
 
-export function validateRecurringExpenseTemplate(
+function validateRecurringExpenseTemplate(
   template: Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
 ): RecurringExpenseTemplateErrors {
   const errors: RecurringExpenseTemplateErrors = {};

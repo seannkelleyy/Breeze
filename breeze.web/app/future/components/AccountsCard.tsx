@@ -9,7 +9,7 @@ import { AccountListItem } from './accounts/AccountListItem';
 import { AccountEditorProvider, useAccountEditor } from './accounts/AccountEditorContext';
 import type { PlannerAccount, AccountType } from '../types/account';
 
-export interface AccountsCardProps {
+interface AccountsCardProps {
   collapsed: boolean;
 }
 

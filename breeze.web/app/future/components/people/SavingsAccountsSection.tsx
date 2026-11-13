@@ -106,4 +106,3 @@ function SavingsAccountsSectionInner({ person }: SavingsAccountsSectionProps) {
   );
 }
 
-export default SavingsAccountsSection;

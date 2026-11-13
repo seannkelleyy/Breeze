@@ -2,7 +2,7 @@ import { createMutationHook } from '../createMutationHook';
 import { useCategories } from './index';
 import { Category } from '../../types/category';
 
-export interface PatchCategoryMutationProps {
+interface PatchCategoryMutationProps {
   category: Category;
 }
 

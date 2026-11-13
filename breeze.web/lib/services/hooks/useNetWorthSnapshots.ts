@@ -8,7 +8,7 @@ import {
   GET_NET_WORTH_SNAPSHOTS,
 } from '@/lib/services/queries/planning';
 
-export interface NetWorthSnapshotItem {
+interface NetWorthSnapshotItem {
   id: string;
   snapshotId: string;
   accountId: string | null;
@@ -29,7 +29,7 @@ export interface NetWorthSnapshot {
   updatedAt: string;
 }
 
-export interface SnapshotItemInput {
+interface SnapshotItemInput {
   accountId?: string | null;
   label: string;
   amount: number;
@@ -145,4 +145,3 @@ export const useNetWorthSnapshots = (userId?: string | null) => {
   return { snapshots: data ?? [], isLoading, isError, createSnapshot, deleteSnapshot };
 };
 
-export default useNetWorthSnapshots;

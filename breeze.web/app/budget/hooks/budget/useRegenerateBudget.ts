@@ -48,4 +48,3 @@ export const useRegenerateBudget = () => {
   return { regenerateBudgetMonth };
 };
 
-export default useRegenerateBudget;
