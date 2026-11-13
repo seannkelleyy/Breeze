@@ -8,7 +8,7 @@ import { usePlannerState } from './providers/PlannerStateProvider';
 import { usePlannerUiState } from './hooks/usePlannerUiState';
 import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
 
-import { ProjectionsSection } from './components/sections';
+import { ProjectionsSection } from './components/ProjectionsSection';
 import { CurrentSnapshotSection } from './components/CurrentSnapshotSection';
 import { RetirementPlannerSection } from './components/RetirementPlannerSection';
 import RetirementIncomeSection from './components/RetirementIncomeSection';

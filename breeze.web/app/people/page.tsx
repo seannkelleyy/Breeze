@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { usePlannerUiState } from '../future/hooks/usePlannerUiState';
 
-import { PeopleSection } from '../future/components/sections';
+import PeopleCard from '../future/components/PeopleCard';
 import { usePlannerHydration } from '../future/hooks/usePlannerHydration';
 
 export default function PeoplePage() {
@@ -40,7 +40,7 @@ function PeopleContent() {
 
       {/* Configuration Sections */}
       <div className="space-y-6">
-        <PeopleSection isCollapsed={collapsedSections['people']} />
+        <PeopleCard collapsed={collapsedSections['people']} />
       </div>
     </div>
   );

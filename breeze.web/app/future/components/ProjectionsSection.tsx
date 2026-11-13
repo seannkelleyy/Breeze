@@ -1,10 +1,10 @@
 'use client';
-import ProjectionChartCard from '../ProjectionChartCard';
-import ProjectionTables from '../ProjectionTables';
+import ProjectionChartCard from './ProjectionChartCard';
+import ProjectionTables from './ProjectionTables';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { ChartConfig } from '@/components/ui/chart';
-import type { ProjectionRow } from '../../types/projection';
+import type { ProjectionRow } from '../types/projection';
 
 type SectionCollapse = {
   accountBreakdown: boolean;

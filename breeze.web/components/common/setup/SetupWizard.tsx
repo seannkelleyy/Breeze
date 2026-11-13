@@ -17,7 +17,8 @@ import { FormattedNumberInput } from '@/components/common/form/FormattedNumberIn
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerUiState } from '@/app/future/hooks/usePlannerUiState';
 import { usePlannerHydration } from '@/app/future/hooks/usePlannerHydration';
-import { PeopleSection, AccountsSection } from '@/app/future/components/sections';
+import AccountsCard from '@/app/future/components/AccountsCard';
+import PeopleCard from '@/app/future/components/PeopleCard';
 
 const STEPS = ['Welcome', 'People', 'Accounts', 'Expenses', 'Goals', 'Disclaimer'] as const;
 
@@ -109,7 +110,7 @@ export const SetupWizard = () => {
                 Add the people in your financial plan (spouse, partner, or yourself).
               </DialogDescription>
             </DialogHeader>
-            <PeopleSection isCollapsed={collapsedSections['people']} />
+            <PeopleCard collapsed={collapsedSections['people']} />
             <div className="flex justify-between pt-2">
               <Button variant="ghost" onClick={back}>
                 <ArrowLeft className="h-4 w-4" /> Back
@@ -129,7 +130,7 @@ export const SetupWizard = () => {
                 Add your financial accounts or link them with Plaid.
               </DialogDescription>
             </DialogHeader>
-            <AccountsSection isCollapsed={collapsedSections['accounts']} />
+            <AccountsCard collapsed={collapsedSections['accounts']} />
             <div className="flex justify-between pt-2">
               <Button variant="ghost" onClick={back}>
                 <ArrowLeft className="h-4 w-4" /> Back
