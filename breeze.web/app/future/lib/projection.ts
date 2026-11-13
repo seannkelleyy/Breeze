@@ -41,7 +41,12 @@ const { isCombinedAssetType, isLiabilityAccountType } = plannerConfig;
 const PENALTY_RATE_BEFORE_AGE = 0.1;
 const PENALTY_FREE_AGE = 59.5;
 
-const TAXABLE_SOURCE_TYPES = new Set<AccountType>(['brokerage', 'checking', 'emergency-fund', 'other']);
+const TAXABLE_SOURCE_TYPES = new Set<AccountType>([
+  'brokerage',
+  'checking',
+  'emergency-fund',
+  'other',
+]);
 const PRETAX_SOURCE_TYPES = new Set<AccountType>(['traditional-ira', '401k', '403b', '457']);
 
 type SourceGroups = {
@@ -204,7 +209,11 @@ export const getProjection = (
   annualReturnAdjustmentPercent = 0,
   /** Ledger facts (receipt balance, conversion clocks) that sequence the drawdown. */
   withdrawalPlan?: WithdrawalPlanInput,
-): { projectionRows: ProjectionRow[]; finalBalances: number[]; withdrawalRows?: WithdrawalRow[] } => {
+): {
+  projectionRows: ProjectionRow[];
+  finalBalances: number[];
+  withdrawalRows?: WithdrawalRow[];
+} => {
   const endAge = projectionEndAge ?? targetAge;
   const years = Math.max(0, endAge - currentAge);
   const now = new Date();

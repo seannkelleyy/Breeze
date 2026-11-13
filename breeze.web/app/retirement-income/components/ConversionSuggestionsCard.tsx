@@ -1,13 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -96,9 +90,9 @@ const ConversionSuggestionsCard = ({ conversions }: { conversions: RothConversio
         </CardTitle>
         <CardDescription>
           Fill — but never leave — the chosen bracket: convert the headroom between your other
-          income and the bracket ceiling. Years where your salary already passes the ceiling
-          suggest nothing. Today&apos;s brackets, applied forward; retirement plan draws on the
-          Future page will use some of this headroom.
+          income and the bracket ceiling. Years where your salary already passes the ceiling suggest
+          nothing. Today&apos;s brackets, applied forward; retirement plan draws on the Future page
+          will use some of this headroom.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -117,7 +111,8 @@ const ConversionSuggestionsCard = ({ conversions }: { conversions: RothConversio
             </SelectContent>
           </Select>
           <span className="text-muted-foreground text-sm">
-            of {filingStatus === 'MFJ' ? 'married filing jointly' : filingStatus.toLowerCase()} income
+            of {filingStatus === 'MFJ' ? 'married filing jointly' : filingStatus.toLowerCase()}{' '}
+            income
           </span>
         </div>
 

@@ -6,8 +6,8 @@ import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerUiState } from '../future/hooks/usePlannerUiState';
 import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
 
-import { AccountsSection } from '../future/components/sections';
 import { usePlannerHydration } from '../future/hooks/usePlannerHydration';
+import AccountsCard from '../future/components/AccountsCard';
 
 export default function AccountsPage() {
   return (
@@ -56,7 +56,7 @@ function AccountsContent() {
 
       {/* Configuration Sections */}
       <div className="space-y-6">
-        <AccountsSection isCollapsed={collapsedSections['accounts']} />
+        <AccountsCard collapsed={collapsedSections['accounts']} />
       </div>
     </div>
   );

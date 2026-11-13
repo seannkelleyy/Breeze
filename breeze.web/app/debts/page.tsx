@@ -128,10 +128,7 @@ function DebtsContent() {
     return plan.timeline.filter((_, i) => i % step === 0 || i === plan.timeline.length - 1);
   }, [plan.timeline]);
 
-  const nameById = useMemo(
-    () => Object.fromEntries(debts.map((d) => [d.id, d.name])),
-    [debts],
-  );
+  const nameById = useMemo(() => Object.fromEntries(debts.map((d) => [d.id, d.name])), [debts]);
 
   if (isLoading) {
     return (
@@ -171,17 +168,13 @@ function DebtsContent() {
               <Label>Strategy</Label>
               <Select
                 value={payoffStrategy}
-                onValueChange={(v) =>
-                  updatePayoffStrategy(v as 'AVALANCHE' | 'SNOWBALL')
-                }
+                onValueChange={(v) => updatePayoffStrategy(v as 'AVALANCHE' | 'SNOWBALL')}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="AVALANCHE">
-                    Avalanche — highest interest rate first
-                  </SelectItem>
+                  <SelectItem value="AVALANCHE">Avalanche — highest interest rate first</SelectItem>
                   <SelectItem value="SNOWBALL">Snowball — smallest balance first</SelectItem>
                 </SelectContent>
               </Select>

@@ -65,8 +65,8 @@ const RetirementIncomeSection = ({ rows, projectionEndAge }: RetirementIncomeSec
         </CardTitle>
         <CardDescription>
           Which dollars fund each retirement year: HSA receipts first (tax-free at any age), then
-          taxable, pre-tax, and Roth conversions once their five-year clock clears. Draws before
-          59½ from pre-tax or unclocked Roth money flag 10% penalty exposure; federal income tax on
+          taxable, pre-tax, and Roth conversions once their five-year clock clears. Draws before 59½
+          from pre-tax or unclocked Roth money flag 10% penalty exposure; federal income tax on
           pre-tax draws is not modeled yet.
         </CardDescription>
       </CardHeader>
@@ -76,7 +76,13 @@ const RetirementIncomeSection = ({ rows, projectionEndAge }: RetirementIncomeSec
             <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
               Penalty exposure
             </p>
-            <p className={plan.totalPenaltyExposure > 0 ? 'text-warning text-lg font-semibold' : 'text-lg font-semibold'}>
+            <p
+              className={
+                plan.totalPenaltyExposure > 0
+                  ? 'text-warning text-lg font-semibold'
+                  : 'text-lg font-semibold'
+              }
+            >
               {fc(plan.totalPenaltyExposure)}
             </p>
           </div>

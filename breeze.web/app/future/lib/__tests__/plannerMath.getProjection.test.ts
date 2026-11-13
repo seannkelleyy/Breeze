@@ -644,7 +644,6 @@ describe('getPortfolioAverageGrowthRate', () => {
   });
 });
 
-
 describe('getProjection sequenced withdrawals', () => {
   const ladderAccounts = () => [
     account({ id: 'hsa', accountType: 'hsa', startingBalance: 1000 }),
@@ -655,10 +654,7 @@ describe('getProjection sequenced withdrawals', () => {
 
   // Ages 61-65 accumulate; withdrawals begin the year after the retirement
   // age (age 66 = calendar year 2027).
-  const callLadder = (
-    overrides: Partial<WithdrawalPlanInput> = {},
-    accounts = ladderAccounts(),
-  ) =>
+  const callLadder = (overrides: Partial<WithdrawalPlanInput> = {}, accounts = ladderAccounts()) =>
     call(accounts, 60, 65, {
       projectionEndAge: 68,
       annualWithdrawal: 5000,
@@ -702,7 +698,9 @@ describe('getProjection sequenced withdrawals', () => {
     const { withdrawalRows, projectionRows } = callLadder({}, accounts);
 
     for (const row of withdrawalRows ?? []) {
-      expect(row.hsaReceipts + row.taxable + row.pretax + row.rothClocked + row.rothOther).toBeLessThanOrEqual(5000 + 1);
+      expect(
+        row.hsaReceipts + row.taxable + row.pretax + row.rothClocked + row.rothOther,
+      ).toBeLessThanOrEqual(5000 + 1);
     }
     // Home and mortgage balances ride untouched through the drawdown years
     // (0% growth): the last row keeps their starting values.
@@ -721,7 +719,7 @@ describe('getProjection sequenced withdrawals', () => {
     });
 
     const byAge = Object.fromEntries((withdrawalRows ?? []).map((r) => [r.age, r]));
-    expect(byAge[59]!.penaltyExposure).toBeCloseTo((byAge[59]!.pretax) * 0.1, 6);
+    expect(byAge[59]!.penaltyExposure).toBeCloseTo(byAge[59]!.pretax * 0.1, 6);
     expect(byAge[60]!.penaltyExposure).toBe(0);
     expect(byAge[61]!.penaltyExposure).toBe(0);
   });

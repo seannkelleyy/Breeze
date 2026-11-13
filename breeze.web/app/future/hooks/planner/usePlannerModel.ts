@@ -29,8 +29,14 @@ const usePlannerModel = () => {
   // Default to a full-life projection so the post-retirement drawdown phase
   // (contributions stop, inflation-adjusted withdrawals begin) is visible.
   const [projectionEndAge, setProjectionEndAge] = useState<number>(95);
-  const { returnDisplayMode, inflationRate, safeWithdrawalRate, filingStatus, deductionType, userId } =
-    useCurrentUser();
+  const {
+    returnDisplayMode,
+    inflationRate,
+    safeWithdrawalRate,
+    filingStatus,
+    deductionType,
+    userId,
+  } = useCurrentUser();
   const {
     plannerDesiredInvestmentAmount,
     plannerRetirementMethod,
@@ -134,17 +140,17 @@ const usePlannerModel = () => {
     projectedNetWorthAtTargetAge,
     portfolioAverageRates,
   } = useProjections(
-      filteredAccounts,
-      effectiveHousehold,
-      plannerAssetFinanceDetailsByAccountId,
-      irsLimits,
-      inflationRate,
-      useInflationAdjustedValues,
-      projectionEndAge,
-      annualWithdrawal,
-      marketAdjustment,
-      withdrawalPlan,
-    );
+    filteredAccounts,
+    effectiveHousehold,
+    plannerAssetFinanceDetailsByAccountId,
+    irsLimits,
+    inflationRate,
+    useInflationAdjustedValues,
+    projectionEndAge,
+    annualWithdrawal,
+    marketAdjustment,
+    withdrawalPlan,
+  );
   const financialFreedomAge = useFinancialFreedomAge(
     projectionRows,
     targets.financialFreedomTarget,

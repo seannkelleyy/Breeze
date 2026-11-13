@@ -50,3 +50,6 @@ pnpm-debug.log*
 .continue/
 .DS_Store
 .env
+
+# direnv
+.envrc

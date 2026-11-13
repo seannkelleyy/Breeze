@@ -12,10 +12,7 @@ const debt = (
 describe('buildDebtPayoffPlan', () => {
   it('pays the highest-rate debt first under avalanche', () => {
     const plan = buildDebtPayoffPlan({
-      debts: [
-        debt('car', 10000, 6, 300),
-        debt('card', 5000, 22, 150),
-      ],
+      debts: [debt('car', 10000, 6, 300), debt('card', 5000, 22, 150)],
       extraMonthlyPayment: 0,
       strategy: 'AVALANCHE',
     });
@@ -25,10 +22,7 @@ describe('buildDebtPayoffPlan', () => {
 
   it('pays the smallest balance first under snowball', () => {
     const plan = buildDebtPayoffPlan({
-      debts: [
-        debt('car', 10000, 6, 300),
-        debt('card', 5000, 22, 150),
-      ],
+      debts: [debt('car', 10000, 6, 300), debt('card', 5000, 22, 150)],
       extraMonthlyPayment: 0,
       strategy: 'SNOWBALL',
     });
@@ -37,11 +31,12 @@ describe('buildDebtPayoffPlan', () => {
   });
 
   it('avalanche and snowball differ when the smaller debt has the lower rate', () => {
-    const debts = [
-      debt('big-high-rate', 10000, 20, 250),
-      debt('small-low-rate', 1000, 5, 50),
-    ];
-    const avalanche = buildDebtPayoffPlan({ debts, extraMonthlyPayment: 500, strategy: 'AVALANCHE' });
+    const debts = [debt('big-high-rate', 10000, 20, 250), debt('small-low-rate', 1000, 5, 50)];
+    const avalanche = buildDebtPayoffPlan({
+      debts,
+      extraMonthlyPayment: 500,
+      strategy: 'AVALANCHE',
+    });
     const snowball = buildDebtPayoffPlan({ debts, extraMonthlyPayment: 500, strategy: 'SNOWBALL' });
 
     expect(avalanche.order[0]).toBe('big-high-rate');
@@ -83,10 +78,7 @@ describe('buildDebtPayoffPlan', () => {
 
   it('extra payments save interest and months versus minimums-only', () => {
     const plan = buildDebtPayoffPlan({
-      debts: [
-        debt('card', 5000, 22, 150),
-        debt('car', 10000, 6, 300),
-      ],
+      debts: [debt('card', 5000, 22, 150), debt('car', 10000, 6, 300)],
       extraMonthlyPayment: 400,
       strategy: 'AVALANCHE',
     });

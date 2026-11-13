@@ -33,4 +33,3 @@ export type WithdrawalRow = {
   spendableBalance: number;
   receiptBalance: number;
 };
-
