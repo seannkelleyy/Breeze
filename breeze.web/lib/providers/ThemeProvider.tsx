@@ -1,7 +1,7 @@
 'use client';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, JSX, useContext, useEffect, useState } from 'react';
 
-type Theme = 'dark' | 'light' | 'system';
+type Theme = 'Dark' | 'Light' | 'System';
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -15,13 +15,13 @@ type ThemeProviderState = {
 };
 
 const initialState: ThemeProviderState = {
-  theme: 'system',
+  theme: 'System',
   setTheme: () => null,
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
-/** ThemeProvider component to manage and provide theme state (light, dark, system) to the application.
+/** ThemeProvider component to manage and provide theme state (Light, Dark, System) to the application.
  * Enables access to theme state and updater function via context.
  * @param {React.ReactNode} children - Child components that will have access to the theme context.
  * @param {Theme} defaultTheme - Optional default theme to initialize the provider with.
@@ -31,48 +31,53 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export const ThemeProvider = ({
   children,
   storageKey = 'breeze-ui-theme',
-  ...props
-}: ThemeProviderProps) => {
+  defaultTheme = 'System',
+}: ThemeProviderProps): JSX.Element => {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === 'undefined') {
-      // SSR: default to 'light' or a safe fallback
-      return 'light';
+      // SSR: render with the default; the real class is applied after mount.
+      return defaultTheme;
     }
-    const storedTheme = localStorage.getItem(storageKey) as Theme;
-    if (storedTheme) return storedTheme;
-
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
-    return systemTheme;
+    const storedTheme = localStorage.getItem(storageKey) as Theme | null;
+    return storedTheme ?? defaultTheme;
   });
 
+  // Theme classes on <html> must be lowercase to match the CSS (.dark/.light).
   useEffect(() => {
     const root = window.document.documentElement;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
 
-    root.classList.remove('light', 'dark');
+    const apply = () => {
+      root.classList.remove('light', 'dark');
 
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-      root.classList.add(systemTheme);
+      if (theme === 'System') {
+        root.classList.add(media.matches ? 'dark' : 'light');
+        return;
+      }
+
+      root.classList.add(theme.toLowerCase());
+    };
+
+    apply();
+
+    // Follow live OS theme changes while on 'System'.
+    if (theme !== 'System') {
       return;
     }
-
-    root.classList.add(theme);
+    media.addEventListener('change', apply);
+    return () => media.removeEventListener('change', apply);
   }, [theme]);
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    setTheme: (next: Theme) => {
+      localStorage.setItem(storageKey, next);
+      setTheme(next);
     },
   };
 
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
+    <ThemeProviderContext.Provider value={value}>
       {children}
     </ThemeProviderContext.Provider>
   );

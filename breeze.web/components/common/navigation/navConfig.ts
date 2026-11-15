@@ -12,6 +12,9 @@ import {
   Link2,
   Percent,
   KeyRound,
+  Mountain,
+  ClipboardList,
+  Hammer,
 } from 'lucide-react';
 
 export type RouteNavItem = {
@@ -106,6 +109,18 @@ const retirementIncome: RouteNavItem = {
   title: 'HSA ladder, Roth conversions, and the withdrawal plan',
   icon: KeyRound,
 };
+const retirementLadder: RouteNavItem = {
+  label: 'Ladder',
+  to: '/retirement-ladder',
+  title: 'Year-by-year withdrawal ladder with taxes and penalties',
+  icon: Mountain,
+};
+const taxPlanning: RouteNavItem = {
+  label: 'Tax Estimator',
+  to: '/tax-planning',
+  title: 'What-if tax estimate with arbitrary income and itemized deductions',
+  icon: ClipboardList,
+};
 
 // ── Mobile bottom tab bar: core categories ──
 
@@ -125,6 +140,7 @@ export const secondaryNavItems: ReadonlyArray<RouteNavItem> = [
   mortgage,
   connections,
   taxes,
+  retirementLadder,
 ];
 
 // ── Desktop nav bar: standalone links + grouped dropdowns ──
@@ -144,7 +160,13 @@ export const navGroups: ReadonlyArray<NavGroup> = [
     label: 'Plan',
     title: 'Projections, goals, and taxes',
     icon: TrendingUp,
-    items: [future, goals, taxes, retirementIncome, mortgage],
+    items: [future, goals, taxes, mortgage],
+  },
+  {
+    label: 'Beta',
+    title: 'Currently WIP',
+    icon: Hammer,
+    items: [retirementIncome, retirementLadder, taxPlanning],
   },
 ];
 

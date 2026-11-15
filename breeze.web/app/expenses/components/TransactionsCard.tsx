@@ -177,4 +177,3 @@ export function TransactionsCard({ userId, currencyCode }: TransactionsCardProps
     </Card>
   );
 }
-

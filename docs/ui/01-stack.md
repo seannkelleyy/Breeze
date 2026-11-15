@@ -52,7 +52,6 @@ there; the components render from config.
 - `app/accounts/` — financial accounts management
 - `app/people/` — household members
 - `app/goals/` — financial goals and Financial Order of Operations checklist
-- `app/preferences/` — user settings and defaults
 - `app/budget/` — budgeting workflow and dialogs
 - `app/taxes/` — federal bracket visualization with pre-tax scenario comparison
 - `app/plaid-connections/` — Plaid connect/sync UI

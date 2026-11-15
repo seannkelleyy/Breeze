@@ -1,6 +1,6 @@
 'use client';
 import { useUser, useClerk } from '@clerk/clerk-react';
-import { Moon, Sun, Settings, LogOut } from 'lucide-react';
+import { Moon, Sun, Settings, LogOut, PcCase } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
+import { Button } from '@/components/ui/button';
 import { PLANNER_RETURN_DISPLAY_MODE_OPTIONS } from '@/app/future/lib/constants';
 import { useState } from 'react';
 import Image from 'next/image';
@@ -33,10 +34,32 @@ import Image from 'next/image';
 export function UserMenu() {
   const { user } = useUser();
   const { signOut } = useClerk();
-  const { setTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
   const [showPreferences, setShowPreferences] = useState(false);
 
   const initials = user?.firstName?.[0] ?? user?.emailAddresses?.[0]?.emailAddress?.[0] ?? '?';
+
+  const getThemeIcon = (theme: string) => {
+    switch (theme) {
+      case 'Light':
+        return <Sun className='mr-2 size-4'/>;
+      case 'Dark':
+        return <Moon className='mr-2 size-4'/>;
+      default:
+        return <PcCase className='mr-2 size-4'/>;
+    }
+  }
+
+  const getNextTheme = (currentTheme: string) => {
+    switch (currentTheme) {
+      case 'Light':
+        return 'Dark';
+      case 'Dark':
+        return 'System';
+      default:
+        return 'Light';
+    }
+  };
 
   return (
     <>
@@ -58,7 +81,7 @@ export function UserMenu() {
             )}
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuContent align="end" className="w-48" key={theme}>
           <div className="px-2 py-1.5">
             <p className="text-sm font-medium">{user?.firstName ?? 'User'}</p>
             <p className="text-muted-foreground text-xs">
@@ -71,17 +94,14 @@ export function UserMenu() {
             Preferences
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setTheme('light')}>
-            <Sun className="mr-2 size-4" />
-            Light
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('dark')}>
-            <Moon className="mr-2 size-4" />
-            Dark
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('system')}>
-            <span className="mr-2 size-4 text-center text-xs">A</span>
-            System
+          <DropdownMenuItem
+            onSelect={(event) => {
+              event.preventDefault();
+              setTheme(getNextTheme(theme));
+            }}
+          >
+            {getThemeIcon(theme)}
+            {theme.charAt(0).toUpperCase() + theme.slice(1)}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => signOut()}>
@@ -113,6 +133,14 @@ function PreferencesDialog({
     updateInflationRate,
     safeWithdrawalRate,
     updateSafeWithdrawalRate,
+    filingStatus,
+    updateFilingStatus,
+    deductionType,
+    updateDeductionType,
+    monthlyExpenses,
+    setMonthlyExpenses,
+    budgetEnabled,
+    updateUserSetup,
   } = useCurrentUser();
 
   return (
@@ -174,6 +202,51 @@ function PreferencesDialog({
               />
             </div>
           </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label>Filing Status</Label>
+              <Select value={filingStatus} onValueChange={updateFilingStatus}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SINGLE">Single</SelectItem>
+                  <SelectItem value="MFJ">Married filing jointly</SelectItem>
+                  <SelectItem value="MFS">Married filing separately</SelectItem>
+                  <SelectItem value="HOH">Head of household</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Deduction Type</Label>
+              <Select value={deductionType} onValueChange={updateDeductionType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="STANDARD">Standard</SelectItem>
+                  <SelectItem value="ITEMIZED">Itemized</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label>Monthly Expenses</Label>
+            <FormattedNumberInput
+              value={monthlyExpenses ?? 0}
+              onValueChange={(next) => {
+                setMonthlyExpenses(next);
+                void updateUserSetup({ monthlyExpenses: String(next) });
+              }}
+              maxFractionDigits={2}
+            />
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => void updateUserSetup({ budgetEnabled: !budgetEnabled })}
+          >
+            {budgetEnabled ? 'Disable Budget' : 'Enable Budget'}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

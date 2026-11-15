@@ -183,4 +183,3 @@ export const CategoriesTable = () => {
     </section>
   );
 };
-

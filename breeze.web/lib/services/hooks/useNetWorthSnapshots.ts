@@ -144,4 +144,3 @@ export const useNetWorthSnapshots = (userId?: string | null) => {
 
   return { snapshots: data ?? [], isLoading, isError, createSnapshot, deleteSnapshot };
 };
-

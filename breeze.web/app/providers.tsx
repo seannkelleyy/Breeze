@@ -16,7 +16,7 @@ const Providers = ({ children }: ProvidersProps) => {
   return (
     <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ''}>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="system">
+        <ThemeProvider defaultTheme="System">
           <PlannerStateProvider>
             <CurrentUserProvider>
               {children}

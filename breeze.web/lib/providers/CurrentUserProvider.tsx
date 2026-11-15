@@ -388,6 +388,13 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       if (!isLoaded || !isSignedIn || !resolvedUserId) {
         return;
       }
+      // Optimistic local state; kept on failure so future writes are allowed.
+      if (input.budgetEnabled !== undefined) {
+        setBudgetEnabled(input.budgetEnabled);
+      }
+      if (input.monthlyExpenses !== undefined) {
+        setMonthlyExpenses(Number(input.monthlyExpenses));
+      }
       try {
         await request<{ updateUserSetup: { id: string } }, { input: Record<string, unknown> }>(
           UPDATE_USER_SETUP_MUTATION,

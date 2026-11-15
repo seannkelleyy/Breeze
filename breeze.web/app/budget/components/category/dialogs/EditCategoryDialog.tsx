@@ -87,4 +87,3 @@ export const EditCategoryDialog = ({ existingCategory, children }: EditCategoryD
     />
   );
 };
-

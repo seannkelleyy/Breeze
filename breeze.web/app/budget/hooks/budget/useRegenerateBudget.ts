@@ -47,4 +47,3 @@ export const useRegenerateBudget = () => {
 
   return { regenerateBudgetMonth };
 };
-

@@ -38,4 +38,3 @@ export const useFetchBudget = ({ date }: FetchBudgetProps) => {
     },
   });
 };
-

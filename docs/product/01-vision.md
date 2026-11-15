@@ -79,3 +79,31 @@ Don't start with the budget. Start with what makes this different:
 7. **Roth ladder + HSA ladder** — advanced FIRE features.
 
 A user who enters their home value, car, retirement accounts, and mortgage on day one has already invested enough that they'll come back. Start there.
+
+## Build Status (Nov 2026)
+
+The build order above is **complete**. Verified end-to-end (DB tables + GraphQL resolvers + UI) per module:
+
+| # | Module | Status |
+|---|---|---|
+| 1 | Balance sheet | Done — all 12 asset / 6 liability types, net worth snapshots + dashboard history |
+| 2 | Budget | Done — categories, expenses with splits, incomes, recurring templates that regenerate months |
+| 3 | Account projections | Done — growth model, IRS limits with maxed-out detection, Coast FIRE |
+| 4 | Retirement scenarios | Partial — FI number, FIRE progress, what-if knobs done; no side-by-side scenario comparison |
+| 5 | Plaid integration | Done — link, connection sync, transactions with category assignment; sync is mutation-triggered, no scheduled job |
+| 6 | Tax planning | Partial — estimate with effective/marginal rates done; form checklist and refund/withholding reconciliation absent |
+| 7 | Roth + HSA ladders | Mostly done — ladder calculator, bracket-filling suggestions, HSA receipts/reimbursements, drawdown ordering; SEPP (Rule 72t) absent |
+
+Shipped beyond the original build order: mortgage analyzer, debt payoff planner, dashboard, tax estimator.
+
+All routes are reachable from the nav (`navConfig.ts` is the source of truth); `/retirement-ladder` and `/tax-planning` were previously orphaned and have been wired in. User preferences live in the `UserMenu` preferences dialog (`components/common/auth/UserMenu.tsx`).
+
+**Remaining gaps (candidate backlog):**
+1. Tax form checklist (no table/resolver/UI anywhere)
+2. Estimated refund/owed with withholding reconciliation (`TaxEstimate` has `taxOwed` only)
+3. Side-by-side what-if scenario comparison (retire age, SWR) — `FinancialMathScenario` type exists but unused
+4. SEPP / Rule 72(t) — no code anywhere
+5. Auto net-worth snapshots (currently manual only; could capture on Plaid sync)
+6. Scheduled Plaid sync job (currently manual + once-per-session page-load auto-sync)
+7. Crossover point (year investment returns exceed earned income) — zero code
+8. Minor: multi-split expense editing (UI edits first split only), household-level "who isn't maxing" roll-up

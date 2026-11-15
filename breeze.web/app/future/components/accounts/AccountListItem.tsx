@@ -718,4 +718,3 @@ export function AccountListItem({
     </>
   );
 }
-

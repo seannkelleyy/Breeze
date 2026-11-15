@@ -25,4 +25,3 @@ export function InfoTip({ text }: { text: string }) {
     </TooltipProvider>
   );
 }
-

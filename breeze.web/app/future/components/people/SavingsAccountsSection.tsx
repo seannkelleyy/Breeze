@@ -105,4 +105,3 @@ function SavingsAccountsSectionInner({ person }: SavingsAccountsSectionProps) {
     </div>
   );
 }
-

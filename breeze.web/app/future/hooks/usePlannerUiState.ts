@@ -15,4 +15,3 @@ export function usePlannerUiState() {
 
   return { collapsedSections, toggleSection };
 }
-

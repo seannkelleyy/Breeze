@@ -100,4 +100,3 @@ export function ProjectionsSection({
     </div>
   );
 }
-
