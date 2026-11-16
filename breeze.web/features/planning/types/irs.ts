@@ -1,0 +1,12 @@
+export type IrsLimitKey = '401k' | '403b' | '457' | 'roth-ira' | 'traditional-ira' | 'hsa';
+
+type IrsLimitRule = {
+  baseAnnualLimit: number;
+  familyAnnualLimit?: number;
+  catchUpAmount: number;
+  catchUpAge: number;
+  /** Ages 60–63 super catch-up (replaces the regular catch-up). 0 = none. */
+  superCatchUpAmount?: number;
+};
+
+export type IrsLimitConfig = Record<IrsLimitKey, IrsLimitRule>;

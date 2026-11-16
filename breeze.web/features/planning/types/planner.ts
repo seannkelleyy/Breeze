@@ -1,0 +1,22 @@
+export type PlannerSummary = {
+  monthlyNeededForDesiredTarget: number;
+  requiredMonthlyTargetLabel: string;
+  annualHouseholdIncome: number;
+  currentSavingsRateEmployeePercent: number;
+  currentSavingsRateTotalPercent: number;
+  requiredSavingsRatePercent: number;
+  savingsRateGapPercent: number;
+  weightedAnnualRate: number;
+  yearsToGoal: number;
+  monthlyGapToGoal: number;
+  isMonthlyGapPositive: boolean;
+  totalStartingBalance: number;
+  totalAssets: number;
+  totalLiabilities: number;
+  targetAge: number;
+  projectedNetWorthAtTargetAge: number;
+  totalPlannedMonthlyInvestment: number;
+  annualNeedAtRetirement: number;
+  financialFreedomTarget: number;
+  monthlyNeededForFreedomTarget: number;
+};

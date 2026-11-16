@@ -1,0 +1,167 @@
+'use client';
+
+import {
+  CREATE_ASSET,
+  CREATE_LIABILITY,
+  DELETE_ASSET,
+  DELETE_LIABILITY,
+  UPDATE_ASSET,
+  UPDATE_LIABILITY,
+} from '@/features/assets/asset.operations';
+import useGraphql from '@/lib/services/useGraphql';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { accountTypeToApiAssetType, accountTypeToApiLiabilityType } from '../../../../features/planning/lib/typeMapping';
+import { resolveTaxTreatment } from '../../../../features/planning/lib/config';
+import { AccountType, PlannerAccount } from '../../../../features/planning/types/account';
+import type { AssetType } from '@/lib/gql/graphql';
+
+interface UseAccountMutationsParams {
+  userId: string;
+  updateAccount: (id: string, updater: (current: PlannerAccount) => PlannerAccount) => void;
+  removeAccount: (id: string) => void;
+}
+
+function mapAccountTypeToApiType(accountType: string): AssetType {
+  return (accountTypeToApiAssetType(accountType as AccountType) ?? 'OTHER') as AssetType;
+}
+
+function buildLiabilityInput(account: PlannerAccount, liabilityUserId: string) {
+  return {
+    userId: liabilityUserId,
+    name: account.name,
+    liabilityType: accountTypeToApiLiabilityType(account.accountType),
+    currentBalance: account.startingBalance.toString(),
+    originalLoanAmount: account.originalLoanAmount?.toString() ?? null,
+    interestRate: (account.annualRate / 100).toFixed(4),
+    minimumPayment: account.contributionValue?.toString() || '0',
+    targetExtraPayment: '0',
+    payoffPriority: 0,
+    contributionMode: account.contributionMode,
+    contributionValue: account.contributionValue?.toString() || '0',
+    personIds: account.personIds,
+  };
+}
+
+export function useAccountMutations({
+  userId,
+  updateAccount,
+  removeAccount,
+}: UseAccountMutationsParams) {
+  const { request } = useGraphql();
+  const queryClient = useQueryClient();
+
+  const invalidatePlanner = () => queryClient.invalidateQueries({ queryKey: ['planner', userId] });
+
+  const createAssetMutation = useMutation({
+    mutationFn: async (account: PlannerAccount) => {
+      const response = await request(CREATE_ASSET, {
+        input: {
+          userId,
+          name: account.name,
+          assetType: mapAccountTypeToApiType(account.accountType),
+          currentValue: account.startingBalance.toString(),
+          contributionMode: account.contributionMode,
+          contributionValue: account.contributionValue.toString(),
+          employerMatchRate: (account.employerMatchRate / 100).toString(),
+          employerMatchMaxPercentOfSalary: (
+            account.employerMatchMaxPercentOfSalary / 100
+          ).toString(),
+          annualRate: (account.annualRate / 100).toString(),
+          returnProfile: account.returnProfile ?? null,
+          taxTreatment: resolveTaxTreatment(account.accountType, account.taxTreatment),
+          pretaxSharePercent: account.pretaxSharePercent,
+          personIds: account.personIds,
+          purchaseDate: account.purchaseDate ?? null,
+          purchasePrice: account.purchasePrice?.toString() ?? null,
+          homeGrowthProfile: account.homeGrowthProfile ?? null,
+          vehicleDepreciationProfile: account.vehicleDepreciationProfile ?? null,
+          linkedLiabilityId: account.linkedLiabilityId ?? null,
+        },
+      });
+      updateAccount(account.id, (current) => ({
+        ...current,
+        id: (response as { createAsset: { id: string } }).createAsset.id,
+      }));
+      return response;
+    },
+  });
+
+  const updateAssetMutation = useMutation({
+    mutationFn: async (account: PlannerAccount) => {
+      await request(UPDATE_ASSET, {
+        input: {
+          id: account.id,
+          name: account.name,
+          assetType: mapAccountTypeToApiType(account.accountType),
+          currentValue: account.startingBalance.toString(),
+          contributionMode: account.contributionMode,
+          contributionValue: account.contributionValue.toString(),
+          employerMatchRate: (account.employerMatchRate / 100).toString(),
+          employerMatchMaxPercentOfSalary: (
+            account.employerMatchMaxPercentOfSalary / 100
+          ).toString(),
+          annualRate: (account.annualRate / 100).toString(),
+          returnProfile: account.returnProfile ?? null,
+          taxTreatment: resolveTaxTreatment(account.accountType, account.taxTreatment),
+          pretaxSharePercent: account.pretaxSharePercent,
+          personIds: account.personIds,
+          purchaseDate: account.purchaseDate ?? null,
+          purchasePrice: account.purchasePrice?.toString() ?? null,
+          homeGrowthProfile: account.homeGrowthProfile ?? null,
+          vehicleDepreciationProfile: account.vehicleDepreciationProfile ?? null,
+          linkedLiabilityId: account.linkedLiabilityId ?? null,
+        },
+      });
+    },
+  });
+
+  const deleteAssetMutation = useMutation({
+    mutationFn: async (accountId: string) => {
+      await request(DELETE_ASSET, { id: accountId });
+    },
+    onSuccess: (_, accountId) => {
+      removeAccount(accountId);
+    },
+  });
+
+  const createLiabilityMutation = useMutation({
+    mutationFn: async (account: PlannerAccount) => {
+      const response = await request(CREATE_LIABILITY, {
+        input: buildLiabilityInput(account, userId),
+      });
+      updateAccount(account.id, (current) => ({
+        ...current,
+        id: (response as { createLiability: { id: string } }).createLiability.id,
+      }));
+      return response;
+    },
+  });
+
+  const updateLiabilityMutation = useMutation({
+    mutationFn: async (account: PlannerAccount) => {
+      const input = buildLiabilityInput(account, userId);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { userId: _drop, ...fields } = input;
+      await request(UPDATE_LIABILITY, { input: { id: account.id, ...fields } });
+    },
+  });
+
+  const deleteLiabilityMutation = useMutation({
+    mutationFn: async (accountId: string) => {
+      await request(DELETE_LIABILITY, { id: accountId });
+    },
+    onSuccess: (_, accountId) => {
+      removeAccount(accountId);
+    },
+  });
+
+  return {
+    createAssetMutation,
+    updateAssetMutation,
+    deleteAssetMutation,
+    createLiabilityMutation,
+    updateLiabilityMutation,
+    deleteLiabilityMutation,
+    invalidatePlanner,
+  };
+}
