@@ -1,5 +1,5 @@
 ---
-applyTo: "breeze.web/app/future/hooks/planner/**"
+applyTo: "breeze.web/features/planning/hooks/planner/**"
 ---
 
 # Web UI — Hooks Instructions
@@ -76,7 +76,7 @@ export function usePlannerAccounts() {
 ## File Structure
 
 ```
-app/future/hooks/
+features/planning/hooks/
 ├── planner/
 │   ├── usePlannerAccounts.ts    # Merges assets + liabilities into PlannerAccount[] (data/options/typeGuards/helpers/actions)
 │   ├── usePlannerModel.ts       # Orchestrator over model/ hooks (household, portfolio, targets, projections)

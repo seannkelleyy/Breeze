@@ -2,11 +2,8 @@
 
 import Link from 'next/link';
 import { Suspense, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import useGraphql from '@/lib/services/useGraphql';
-import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/lib/services/queries/assets';
-import useGoalsApi from '@/app/goals/hooks/useGoalsApi';
+import { useDashboardSummary } from './_hooks/useDashboardSummary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -29,6 +26,7 @@ import {
   LinkIcon,
 } from 'lucide-react';
 import { NetWorthHistoryCard } from '@/components/common/NetWorthHistoryCard';
+import { useConnectionsDialog } from '@/components/common/connections/ConnectionsDialogProvider';
 
 const quickLinks = [
   {
@@ -61,12 +59,6 @@ const quickLinks = [
     icon: Home,
     description: 'Analyze amortization, refinance choices, and extra payment strategies.',
   },
-  {
-    label: 'Plaid Connections',
-    href: '/plaid-connections',
-    icon: LinkIcon,
-    description: 'Connect bank accounts and sync balances automatically.',
-  },
 ];
 
 export default function DashboardPage() {
@@ -94,85 +86,8 @@ function DashboardContent() {
     disclaimerAccepted,
     currencyCode,
   } = useCurrentUser();
-  const { request } = useGraphql();
-  const { getGoals } = useGoalsApi();
-
-  const { data } = useQuery({
-    queryKey: ['dashboard-summary', userId],
-    queryFn: async () => {
-      const [assetsResp, liabilitiesResp, goalsResp] = await Promise.all([
-        request<{
-          assets: Array<{ id: string; name: string; assetType: string; currentValue: string }>;
-        }>(GET_ASSETS_BY_USER, { userId }),
-        request<{
-          liabilities: Array<{
-            id: string;
-            name: string;
-            liabilityType: string;
-            currentBalance: string;
-          }>;
-        }>(GET_LIABILITIES_BY_USER, { userId }),
-        getGoals(),
-      ]);
-
-      const assets = assetsResp?.assets ?? [];
-      const liabilities = liabilitiesResp?.liabilities ?? [];
-      const goals = goalsResp ?? [];
-
-      const totalAssets = assets.reduce((sum, a) => sum + (Number(a.currentValue) || 0), 0);
-      const totalLiabilities = liabilities.reduce(
-        (sum, l) => sum + (Number(l.currentBalance) || 0),
-        0,
-      );
-      const netWorth = totalAssets - totalLiabilities;
-
-      const assetsByType = new Map<string, number>();
-      for (const asset of assets) {
-        const type = asset.assetType;
-        assetsByType.set(type, (assetsByType.get(type) ?? 0) + (Number(asset.currentValue) || 0));
-      }
-
-      const liabilitiesByType = new Map<string, number>();
-      for (const liability of liabilities) {
-        const type = liability.liabilityType;
-        liabilitiesByType.set(
-          type,
-          (liabilitiesByType.get(type) ?? 0) + (Number(liability.currentBalance) || 0),
-        );
-      }
-
-      const footSteps = goals
-        .filter((g) => g.isFinancialOrderStep)
-        .sort((a, b) => (a.financialOrderStep ?? 0) - (b.financialOrderStep ?? 0));
-      const completedSteps = footSteps.filter((g) => g.isCompleted).length;
-
-      const regularGoals = goals.filter((g) => !g.isFinancialOrderStep);
-      const completedGoals = regularGoals.filter((g) => g.isCompleted).length;
-
-      return {
-        totalAssets,
-        totalLiabilities,
-        netWorth,
-        assets: assets.map((a) => ({ name: a.name, value: Number(a.currentValue) || 0 })),
-        liabilities: liabilities.map((l) => ({
-          name: l.name,
-          value: Number(l.currentBalance) || 0,
-        })),
-        assetCount: assets.length,
-        liabilityCount: liabilities.length,
-        assetsByType: Object.fromEntries(assetsByType),
-        liabilitiesByType: Object.fromEntries(liabilitiesByType),
-        footSteps,
-        completedSteps,
-        totalSteps: footSteps.length,
-        regularGoals,
-        completedGoals,
-        totalGoals: regularGoals.length,
-      };
-    },
-    enabled: isSignedIn && !!userId,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { openConnections } = useConnectionsDialog();
+  const { data } = useDashboardSummary();
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('en-US', {
@@ -491,6 +406,25 @@ function DashboardContent() {
             </Card>
           </Link>
         ))}
+        <button type="button" onClick={openConnections} className="cursor-pointer text-left">
+          <Card className="hover:bg-accent h-full transition-colors">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
+                  <LinkIcon className="size-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Plaid Connections</CardTitle>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                Connect bank accounts and sync balances automatically.
+              </CardDescription>
+            </CardContent>
+          </Card>
+        </button>
       </div>
     </div>
   );

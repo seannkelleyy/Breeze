@@ -15,12 +15,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PlannerToolsCard } from './components/PlannerToolsCard';
+import { PlannerToolsCard } from '@/features/mortgage/components/PlannerToolsCard';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
-import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/lib/services/queries/assets';
-import { PLANNER_HOME_GROWTH_PROFILE_RATES } from '@/app/future/lib/constants';
+import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/features/assets/asset.operations';
+import { PLANNER_HOME_GROWTH_PROFILE_RATES } from '@/features/planning/lib/constants';
 import { Home } from 'lucide-react';
 
 const clamp = (value: number, min = 0) => (Number.isFinite(value) ? Math.max(min, value) : min);
@@ -77,27 +77,8 @@ const MortgageTools = () => {
     queryKey: ['mortgage-pairs', userId],
     queryFn: async () => {
       const [assetsResp, liabilitiesResp] = await Promise.all([
-        request<{
-          assets: Array<{
-            id: string;
-            name: string;
-            assetType: string;
-            currentValue: string;
-            homeGrowthProfile: string | null;
-            linkedLiabilityId: string | null;
-          }>;
-        }>(GET_ASSETS_BY_USER, { userId }),
-        request<{
-          liabilities: Array<{
-            id: string;
-            name: string;
-            liabilityType: string;
-            currentBalance: string;
-            originalLoanAmount: string | null;
-            interestRate: string;
-            minimumPayment: string;
-          }>;
-        }>(GET_LIABILITIES_BY_USER, { userId }),
+        request(GET_ASSETS_BY_USER, { userId }),
+        request(GET_LIABILITIES_BY_USER, { userId }),
       ]);
 
       const assets = (assetsResp?.assets ?? []).filter((a) => a.assetType === 'HOME');

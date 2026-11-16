@@ -1,18 +1,18 @@
 'use client';
 import { Suspense, useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
-import { usePlannerModel, useFetchPlanner } from './hooks/planner/index';
+import { usePlannerModel, useFetchPlanner } from '@/features/planning/hooks/planner/index';
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { usePlannerState } from './providers/PlannerStateProvider';
-import { usePlannerUiState } from './hooks/usePlannerUiState';
-import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
+import { usePlannerState } from '@/features/planning/providers/PlannerStateProvider';
+import { usePlannerUiState } from '@/features/planning/hooks/usePlannerUiState';
+import { usePlaidConnections, useSyncPlaidConnection } from '@/features/connections/hooks/usePlaid';
 
-import { ProjectionsSection } from './components/ProjectionsSection';
-import { CurrentSnapshotSection } from './components/CurrentSnapshotSection';
-import { RetirementPlannerSection } from './components/RetirementPlannerSection';
-import RetirementIncomeSection from './components/RetirementIncomeSection';
-import { getDefaultAssetFinanceDetailsForAccount } from './lib/projection';
+import { ProjectionsSection } from '@/features/planning/components/ProjectionsSection';
+import { CurrentSnapshotSection } from '@/features/planning/components/CurrentSnapshotSection';
+import { RetirementPlannerSection } from '@/features/planning/components/RetirementPlannerSection';
+import RetirementIncomeSection from '@/features/planning/components/RetirementIncomeSection';
+import { getDefaultAssetFinanceDetailsForAccount } from '@/features/planning/lib/projection';
 
 export default function PlannerPage() {
   return (

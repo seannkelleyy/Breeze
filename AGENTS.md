@@ -68,7 +68,7 @@ breeze/
 - `asset_type` enum: `CHECKING`, `EMERGENCY_FUND`, `BROKERAGE`, `_401K`, `_403B`, `_457`, `ROTH_IRA`, `TRADITIONAL_IRA`, `HSA`, `HOME`, `VEHICLE`, `OTHER`
 - Numeric-prefixed values use underscore prefix (`_401K`, `_403B`, `_457`) since PostgreSQL/GraphQL enums can't start with digits.
 - Liability types (`STUDENT_LOAN`, `CREDIT_CARD`, `PERSONAL_LOAN`, `AUTO_LOAN`, `MORTGAGE`, `OTHER`) live in the separate `liability_type` enum.
-- Frontend mapping: `breeze.web/app/future/lib/typeMapping.ts` handles `AccountType <-> ApiAssetType` translation.
+- Frontend mapping: `breeze.web/features/planning/lib/typeMapping.ts` handles `AccountType <-> ApiAssetType` translation.
 
 ### Auth
 - Clerk SDK is imported **only** in `breeze.api/internal/middleware/auth.go`.
@@ -209,8 +209,8 @@ Primary index: [`docs/README.md`](docs/README.md)
 | [`resolvers.instructions.md`](docs/api/resolvers.instructions.md) | `graph/**` | Resolver patterns, error mapping, DataLoaders |
 | [`schema.instructions.md`](docs/api/schema.instructions.md) | `db/**` | Atlas schema conventions, sqlc query rules |
 | [`services.instructions.md`](docs/api/services.instructions.md) | `internal/service/**` | Service structure, transactions, auth, projections |
-| [`hooks.instructions.md`](docs/ui/hooks.instructions.md) | `app/future/hooks/planner/**` | React Query hook conventions in planner module |
-| [`components.instructions.md`](docs/ui/components.instructions.md) | `app/future/components/**` | Planner component conventions and UI patterns |
+| [`hooks.instructions.md`](docs/ui/hooks.instructions.md) | `features/planning/hooks/planner/**` | React Query hook conventions in planner module |
+| [`components.instructions.md`](docs/ui/components.instructions.md) | `features/planning/components/**` | Planner component conventions and UI patterns |
 | [`budget.instructions.md`](docs/ui/budget.instructions.md) | `app/budget/**` | Budget module hook/provider/component conventions |
 
 ---
@@ -221,7 +221,7 @@ Primary index: [`docs/README.md`](docs/README.md)
 |---|---|
 | **Add a field to an existing table** | `schema.hcl` → `make migrate-diff` → `db/queries/*.sql` → `make gen` → service struct → GraphQL schema → resolver helper → frontend types → frontend component → `node scripts/gen-erd.mjs` |
 | **Add a new enum value** | `schema.hcl` → migration (RENAME + CREATE NEW + MIGRATE + DROP OLD) → `make migrate` → `make gen` → frontend `typeMapping.ts` → frontend component → `node scripts/gen-erd.mjs` |
-| **Add a new GraphQL query** | `graph/schema.graphqls` → `make gen` → implement resolver stub in `graph/schema.resolvers.go` → helper in `graph/*_helpers.go` → frontend query definition → TanStack Query hook |
+| **Add a new GraphQL query** | `graph/schema.graphqls` → `make gen` → implement resolver stub in `graph/schema.resolvers.go` → helper in `graph/*_helpers.go` → frontend document in `lib/services/queries/*.ts` + `npm run codegen` → TanStack Query hook |
 | **Add a new GraphQL mutation** | `graph/schema.graphqls` → `make gen` → implement resolver stub → service method → sqlc query (if needed) → frontend mutation hook → UI save flow |
 | **Add a new table (full slice)** | Follow the [vertical slice playbook](docs/api/06-vertical-slice.md) |
 | **Fix an Atlas checksum error** | `cd breeze.api && export $(cat .env \| xargs) && atlas migrate hash --env local` |

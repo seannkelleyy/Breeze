@@ -4,18 +4,18 @@ import { Loader2 } from 'lucide-react';
 
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { usePlannerHydration } from '../future/hooks/usePlannerHydration';
-import { usePlannerState } from '../future/providers/PlannerStateProvider';
-import { usePaycheckDeductions } from '../future/hooks/planner/usePaycheckDeductions';
-import useTaxYear from '../future/hooks/planner/useTaxYear';
-import { computeHouseholdWaterfall } from '../future/lib/paycheck';
-import { computeTaxScenario, householdPretaxReductions } from './lib/taxScenario';
+import { usePlannerHydration } from '../../features/planning/hooks/usePlannerHydration';
+import { usePlannerState } from '../../features/planning/providers/PlannerStateProvider';
+import { usePaycheckDeductions } from '../../features/planning/hooks/planner/usePaycheckDeductions';
+import useTaxYear from '../../features/planning/hooks/planner/useTaxYear';
+import { computeHouseholdWaterfall } from '../../features/planning/lib/paycheck';
+import { computeTaxScenario, householdPretaxReductions } from '@/features/taxes/lib/taxScenario';
 import { ADDITIONAL_MEDICARE_THRESHOLDS } from '@/lib/calc/payrollWages';
-import { TaxScenarioColumns } from './components/TaxScenarioColumns';
-import { BracketLadder } from './components/BracketLadder';
-import { buildBracketLadder } from './lib/taxScenario';
-import { WealthByTreatmentBar } from './components/WealthByTreatmentBar';
-import { getWealthByTaxTreatment } from './lib/wealthByTaxTreatment';
+import { TaxScenarioColumns } from '@/features/taxes/components/TaxScenarioColumns';
+import { BracketLadder } from '@/features/taxes/components/BracketLadder';
+import { buildBracketLadder } from '@/features/taxes/lib/taxScenario';
+import { WealthByTreatmentBar } from '@/features/taxes/components/WealthByTreatmentBar';
+import { getWealthByTaxTreatment } from '@/features/taxes/lib/wealthByTaxTreatment';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,

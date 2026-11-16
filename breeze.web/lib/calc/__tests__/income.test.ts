@@ -5,7 +5,7 @@ import {
   getPersonTotalIncome,
   getPersonsAnnualIncome,
 } from '../income';
-import type { PlannerPerson } from '@/app/future/types/person';
+import type { PlannerPerson } from '@/features/planning/types/person';
 
 const person = (overrides: Partial<PlannerPerson> = {}): PlannerPerson => ({
   id: 'p1',

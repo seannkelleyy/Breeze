@@ -93,20 +93,13 @@ breeze.api/
 
 breeze.web/                          # Next.js 16 web app
 ├── app/
-│   ├── future/                      # Future module (renamed from planner)
-│   │   ├── components/              # UI components
-│   │   ├── hooks/                   # Domain hooks (TanStack Query)
-│   │   ├── lib/                     # Math, config, type mapping
-│   │   ├── providers/               # Future-module state providers
-│   │   └── types/                   # TypeScript types
+│   ├── future/                      # /future route entry point
 │   ├── accounts/                    # Accounts page (financial accounts)
 │   ├── people/                      # People page (household members)
 │   ├── goals/                       # Goals page (FOO checklist + goal CRUD)
-│   ├── preferences/                 # Preferences page (user settings)
 │   ├── budget/                      # Budget module
 │   ├── expenses/                    # Expense tracking UI
 │   ├── mortgage/                    # Mortgage calculator (amortization, refinance, loan compare)
-│   ├── plaid-connections/           # Plaid connect/sync UI
 │   ├── retirement-ladder/           # Retirement ladder calculator
 │   ├── tax-planning/                # Tax planning UI
 │   ├── layout.tsx
@@ -116,12 +109,28 @@ breeze.web/                          # Next.js 16 web app
 │   └── common/
 │       ├── navigation/              # Desktop + mobile nav
 │       ├── setup/                   # Setup wizard
+│       ├── connections/             # Bank connections dialog + Plaid Link button
 │       └── ...
+├── features/                        # Reusable domain features, independent of route ownership
+│   ├── expenses/                     # Expense/transaction documents, types, hooks, and UI
+│   ├── income/                       # Income documents, types, hooks, and UI
+│   ├── categories/                   # Category documents, types, hooks, and UI
+│   ├── budget/                       # Budget operations, hooks, types, and context
+│   ├── recurring/                    # Recurring operations, hooks, and UI
+│   ├── goals/                        # Goal operations, API hook, types, and domain logic
+│   ├── assets/                       # Asset/liability operations
+│   ├── connections/                  # Plaid operations and hooks
+│   ├── planning/                     # Planner UI/state/types/math/hooks and operations
+│   ├── mortgage/                     # Mortgage calculations and UI
+│   ├── retirement-access/            # Retirement-access operations, hook, and UI
+│   ├── retirement-ladder/            # Retirement-ladder operation and hook
+│   └── taxes/                        # Tax operations, hooks, logic, and UI
 ├── lib/
-│   ├── calc/                        # Pure domain math (income, payroll taxes) — no React
-│   ├── providers/                   # Context providers (CurrentUserProvider)
-│   ├── hooks/                       # Shared hooks (useAutoSave, useTabParam)
-│   └── services/                    # Shared transport + GraphQL queries
+│   ├── calc/                         # Pure domain math (income, payroll taxes) — no React
+│   ├── gql/                          # GraphQL Codegen output — do not edit manually
+│   ├── providers/                    # Context providers (CurrentUserProvider)
+│   ├── hooks/                        # Shared hooks (useAutoSave, useTabParam)
+│   └── services/                     # Shared GraphQL transport (useGraphql)
 └── package.json
 ```
 
@@ -132,8 +141,13 @@ breeze.web/                          # Next.js 16 web app
 - DB schema/migration/query work goes in `breeze.api/db/`.
 - Service logic goes in `breeze.api/internal/service/`.
 - GraphQL contract and resolver mapping go in `breeze.api/graph/`.
-- Route-specific UI logic goes in `breeze.web/app/<route>/`.
+- `breeze.web/app/` owns route structure and route composition; route-only UI may stay beside its route.
+- Reusable domain code (operations, fragments, feature types, hooks, and feature UI) belongs in `breeze.web/features/<feature>/`, not under another route's `app/` folder.
 - Shared web primitives go in `breeze.web/components/` and `breeze.web/lib/`.
+- GraphQL operation documents are owned by domain folders in `breeze.web/features/<feature>/`; generated documents/types remain in `lib/gql/`, and transport remains in `lib/services/`.
+- Domain code that is reusable across routes belongs in `features/<feature>/`; route pages and page composition stay in `app/`.
+- Budget now owns its context/provider and data hooks under `features/budget/`; its route page/layout stay in `app/budget/`. Expenses, recurring, income, categories, goals, taxes, and mortgage also own their reusable UI/domain code in feature folders.
+- `features/planning/` owns the planner module's UI, state, types, calculations, hooks, and GraphQL operations; `app/future/page.tsx` is only the route entry point.
 
 ## Generated Code — Never Edit These Three
 

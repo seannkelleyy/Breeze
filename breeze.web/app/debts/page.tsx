@@ -1,7 +1,6 @@
 'use client';
 
 import { Suspense, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Line } from 'recharts';
 import { Loader2, TrendingDown } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,9 +18,7 @@ import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
 import BreezeLineChart from '@/components/common/charts/BreezeLineChart';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import useGraphql from '@/lib/services/useGraphql';
-import { GET_LIABILITIES_BY_USER } from '@/lib/services/queries/assets';
-import { buildDebtPayoffPlan, type DebtPayoffDebt } from '@/lib/calc/debtPayoff';
+import { useDebtPayoffPlan } from '@/features/debts/hooks/useDebtPayoffPlan';
 import { formatCurrencyWithCode } from '@/lib/utils';
 
 const LINE_PALETTE = [
@@ -37,16 +34,6 @@ const LINE_PALETTE = [
   'var(--chart-10)',
   'var(--chart-11)',
 ];
-
-interface LiabilityRow {
-  id: string;
-  name: string;
-  liabilityType: string;
-  currentBalance: string;
-  interestRate: string;
-  minimumPayment: string;
-  payoffPriority: number;
-}
 
 const debtFreeDate = (months: number | null): string => {
   if (months === null) return 'Never at this rate';
@@ -72,47 +59,11 @@ export default function DebtsPage() {
 }
 
 function DebtsContent() {
-  const { userId, currencyCode, payoffStrategy, updatePayoffStrategy } = useCurrentUser();
-  const { request } = useGraphql();
+  const { currencyCode, payoffStrategy, updatePayoffStrategy } = useCurrentUser();
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
 
-  const { data: liabilities, isLoading } = useQuery({
-    queryKey: ['debts-payoff', userId],
-    queryFn: async () => {
-      const resp = await request<{ liabilities: LiabilityRow[] }>(GET_LIABILITIES_BY_USER, {
-        userId,
-      });
-      return resp.liabilities ?? [];
-    },
-    enabled: !!userId,
-  });
-
   const [extraPayment, setExtraPayment] = useState(0);
-
-  const debts: DebtPayoffDebt[] = useMemo(
-    () =>
-      (liabilities ?? [])
-        .map((l) => ({
-          id: l.id,
-          name: l.name,
-          liabilityType: l.liabilityType,
-          balance: Number(l.currentBalance),
-          annualRatePercent: Number(l.interestRate) * 100,
-          minimumPayment: Number(l.minimumPayment),
-        }))
-        .filter((d) => d.balance > 0),
-    [liabilities],
-  );
-
-  const plan = useMemo(
-    () =>
-      buildDebtPayoffPlan({
-        debts,
-        extraMonthlyPayment: extraPayment,
-        strategy: payoffStrategy,
-      }),
-    [debts, extraPayment, payoffStrategy],
-  );
+  const { debts, plan, isLoading } = useDebtPayoffPlan(extraPayment);
 
   const chartConfig = useMemo(() => {
     const config: ChartConfig = {};

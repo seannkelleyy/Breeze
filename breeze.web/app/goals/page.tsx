@@ -9,15 +9,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { usePlannerState } from '@/app/future/providers/PlannerStateProvider';
-import { usePlannerHydration } from '@/app/future/hooks/usePlannerHydration';
+import { usePlannerState } from '@/features/planning/providers/PlannerStateProvider';
+import { usePlannerHydration } from '@/features/planning/hooks/usePlannerHydration';
 import { Progress } from '@/components/ui/progress';
 import { formatCurrencyWithCode } from '@/lib/utils';
-import { isLiabilityAccountType } from '../future/lib/config';
-import useGoalsApi from './hooks/useGoalsApi';
-import { Goal, GOAL_CATEGORIES } from './types/goal';
-import type { PlannerAccount } from '@/app/future/types/account';
-import { computeFooStepCompletion } from './lib/fooCompletion';
+import { isLiabilityAccountType } from '../../features/planning/lib/config';
+import useGoalsApi from '@/features/goals/hooks/useGoalsApi';
+import { Goal, GOAL_CATEGORIES } from '@/features/goals/types';
+import type { PlannerAccount } from '@/features/planning/types/account';
+import { computeFooStepCompletion } from '@/features/goals/lib/fooCompletion';
 
 const GOALS_QUERY_KEY = ['goals'];
 

@@ -1,5 +1,5 @@
 ---
-applyTo: "breeze.web/app/future/components/**"
+applyTo: "breeze.web/features/planning/components/**"
 ---
 
 # Web UI — Component Instructions
@@ -111,4 +111,4 @@ components/
 - **Account updates** go through `onUpdateAccount` callback (functional updater pattern).
 - **Collapse state** is tracked by `collapsedAccountIds` keyed by account ID.
 - **Currency formatting** uses `formatCurrencyWithCode(value, currencyCode)` from `@/lib/utils` (accepts optional `{ maximumFractionDigits }`). **Relative time** uses `formatTimeAgo` from the same module.
-- **API enum translation** (frontend AccountType ↔ backend ApiAssetType/ApiLiabilityType) lives in `app/future/lib/typeMapping.ts` — never duplicate these switch maps in hooks.
+- **API enum translation** (frontend AccountType ↔ backend ApiAssetType/ApiLiabilityType) lives in `features/planning/lib/typeMapping.ts` — never duplicate these switch maps in hooks.

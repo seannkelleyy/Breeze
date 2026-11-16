@@ -7,7 +7,7 @@
  * mode stores the total percent of base pay per year. Frequency affects only
  * per-occurrence display and payday-calendar timing, never totals.
  */
-import type { PlannerPerson } from '@/app/future/types/person';
+import type { PlannerPerson } from '@/features/planning/types/person';
 
 export const getPersonBaseAnnualIncome = (person: PlannerPerson): number =>
   person.payType === 'hourly'

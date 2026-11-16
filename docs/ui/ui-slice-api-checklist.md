@@ -11,24 +11,23 @@ Goal:
 ## Architecture Pattern
 
 1. Shared transport layer
-- Use lib/services/useHttp.ts for authenticated HTTP transport.
-- Use lib/services/useGraphql.ts for GraphQL request/response handling.
+- Use lib/services/useGraphql.ts for authenticated GraphQL transport and request/response handling.
 
 2. Shared API-user bootstrap
 - Use `lib/providers/CurrentUserProvider.tsx` as the source of authenticated user context.
 - Do not duplicate user bootstrap logic inside domain hooks.
 
 3. Domain API service hook
-- Create app/<module>/hooks/<slice>/use<Slice>Api.ts.
-- Keep only slice operations in this file (queries/mutations for that slice).
+- Create features/<domain>/hooks/use<Domain>Api.ts.
+- Keep only domain operations in this file (queries/mutations for that domain).
 
 4. React Query hooks
-- Add useFetch<Slice>.ts, useCreate<Slice>.ts, useUpdate<Slice>.ts, useDelete<Slice>.ts.
-- Use stable query keys like ['api-<slice>', userId].
+- Add useFetch<Domain>.ts, useCreate<Domain>.ts, useUpdate<Domain>.ts, useDelete<Domain>.ts.
+- Use stable query keys like ['api-<domain>', userId].
 - Invalidate that key on successful mutations.
 
 5. Domain types
-- Add API wire types in app/<module>/types/<slice>.ts.
+- Add API wire types in features/<domain>/types.ts.
 - Keep money/rate fields as string in API types.
 
 6. UI integration
@@ -39,7 +38,7 @@ Goal:
 ## Implementation Checklist
 
 - [ ] Confirm backend GraphQL operations exist and are reachable via POST /query
-- [ ] Add or reuse types in app/<module>/types/<slice>.ts
+- [ ] Add or reuse types in features/<domain>/types.ts
 - [ ] Add/extend use<Slice>Api.ts with slice-only operations
 - [ ] Add fetch hook with useQuery and stable queryKey
 - [ ] Add mutation hooks with useMutation and query invalidation
@@ -53,21 +52,22 @@ Goal:
 
 ## Naming Conventions
 
-- use<Slice>Api.ts: domain API service
-- useFetch<Slice>.ts: read/list query hook
-- useCreate<Slice>.ts: create mutation hook
-- useUpdate<Slice>.ts: update mutation hook
-- useDelete<Slice>.ts: delete mutation hook
-- api<slice>.ts or <slice>.ts in types: wire contracts
+- use<Domain>Api.ts: domain API service
+- useFetch<Domain>.ts: read/list query hook
+- useCreate<Domain>.ts: create mutation hook
+- useUpdate<Domain>.ts: update mutation hook
+- useDelete<Domain>.ts: delete mutation hook
+- <domain>.operations.ts / <domain>.queries.ts / <domain>.mutations.ts: GraphQL documents
+- types.ts in features/<domain>: wire contracts
 
-## Example (Assets)
+## Example (Planning)
 
 Reference implementation:
 
-- app/future/hooks/planner/useFetchPlanner.ts
-- app/future/hooks/planner/usePlannerAccounts.ts
-- app/future/hooks/planner/useAccountMutations.ts
-- app/future/components/AccountsCard.tsx
+- features/planning/hooks/planner/useFetchPlanner.ts
+- features/planning/hooks/planner/usePlannerAccounts.ts
+- features/planning/hooks/planner/useAccountMutations.ts
+- features/planning/components/AccountsCard.tsx
 - lib/services/useGraphql.ts
 - lib/providers/CurrentUserProvider.tsx
 

@@ -48,19 +48,46 @@ there; the components render from config.
 
 ### Module Entry Points
 
-- `app/future/` — financial projections, retirement math, Coast FIRE (renamed from planner)
-- `app/accounts/` — financial accounts management
-- `app/people/` — household members
-- `app/goals/` — financial goals and Financial Order of Operations checklist
-- `app/budget/` — budgeting workflow and dialogs
-- `app/taxes/` — federal bracket visualization with pre-tax scenario comparison
-- `app/plaid-connections/` — Plaid connect/sync UI
+- `app/future/` — route entry point for the planner slice (projections, retirement math, Coast FIRE live in `features/planning/`)
+- `app/accounts/` — accounts route (feature code in `features/planning/` and `features/connections/`)
+- `app/people/` — household members route (feature code in `features/planning/`)
+- `app/goals/` — goals route (feature code in `features/goals/`)
+- `app/budget/` — budget route (feature code in `features/budget/`, `features/categories/`, `features/income/`, `features/expenses/`, `features/recurring/`)
+- `app/taxes/` — taxes route (feature code in `features/taxes/`)
+- `app/mortgage/`, `app/debts/`, `app/retirement-income/`, `app/retirement-ladder/`, `app/tax-planning/`, `app/expenses/` — route entry points composing `features/mortgage/`, `features/debts/`, `features/retirement-access/`, `features/retirement-ladder/`, `features/taxes/`, `features/expenses/`/`features/recurring/`
 - `components/ui/` — shared shadcn components
 - `components/common/setup/` — setup wizard (auto-shows on first login)
+- `components/common/connections/` — bank connections dialog (opens from user menu, dashboard, empty states) + Plaid Link button
 
 ---
 
 ## Architecture Patterns
+
+### Feature Code vs. App Router
+
+`app/` owns URL structure and route composition. Keep reusable domain code out of route folders so other routes and pure libraries do not depend on an unrelated page module. Shared domain code belongs under `features/<feature>/`; route-only components may remain beside their route (or in a private `_components/` folder), and route-only data hooks may live in a private `_hooks/` folder (for example `app/_hooks/useDashboardSummary.ts`).
+
+A feature owns the code that changes together: GraphQL fragments and operations, generated-type aliases, form schemas and input mappers, and eventually its hooks/components. Use Codegen operation result types for API response shapes, fragment-derived types for reusable feature entities, generated schema input types for GraphQL variables, and separate form types where UI state differs from the API input. Pure functions in `lib/calc/` should accept minimal structural types such as `Pick<Expense, 'amount'>`, not depend on GraphQL-generated fragments.
+
+Domain code lives under `features/<domain>/`; `app/` contains route entry points and route composition. The planner module is owned by `features/planning/`, while `app/future/page.tsx` is its route entry point. Shared GraphQL transport and generated documents/types remain in `lib/services/` and `lib/gql/`.
+
+```text
+features/
+├── expenses/                    # transaction/expense documents, hooks, UI, and types
+├── income/                      # income documents, hooks, UI, and types
+├── categories/                  # category documents, hooks, UI, and types
+├── budget/                      # budget operations, hooks, types, and context
+├── recurring/                   # recurring operations, hooks, and expense UI
+├── goals/                       # goal operations, API hook, types, logic, and UI
+├── assets/                      # asset/liability operations
+├── connections/                 # Plaid operations and hooks
+├── debts/                       # debt payoff hook over liabilities
+├── planning/                    # planner/paycheck/net-worth operations and hooks
+├── mortgage/                    # mortgage calculator logic, hooks, and UI
+├── retirement-access/           # conversion-ledger operations, hook, and UI
+├── retirement-ladder/            # projection operation, hook, and UI
+└── taxes/                       # tax operations, hooks, logic, and UI
+```
 
 ### Auth Flow (Clerk, client-side)
 
@@ -90,7 +117,7 @@ nav mirrors this: routes opt into signed-out visibility with `isPublic` in
 ### Retirement Income Planner (projection engine)
 
 Retirement withdrawal sequencing lives inside the projection engine:
-`getProjection` (`breeze.web/app/future/lib/projection.ts`) takes an optional
+`getProjection` (`breeze.web/features/planning/lib/projection.ts`) takes an optional
 `withdrawalPlan` (saved HSA receipt balance + Roth conversion clocks from the
 retirement-access ledger) and sequences post-retirement withdrawals in tax
 order — HSA receipts, taxable, pre-tax, clocked Roth, remaining Roth —
@@ -110,37 +137,61 @@ payroll tax split, shared with the Go suite so implementations can't drift.
 
 ### Testing Hooks That Call the API
 
-Service hooks (`lib/services/hooks/`) are tested with Vitest + Testing Library by mocking
+Service hooks (`features/*/hooks/`) are tested with Vitest + Testing Library by mocking
 `useGraphql` and wrapping the hook in a `QueryClientProvider`. See
-`lib/services/hooks/__tests__/useTransactions.test.tsx` for the reference pattern:
+`features/expenses/hooks/__tests__/useTransactions.test.tsx` for the reference pattern:
 
 - `vi.hoisted` + `vi.mock('@/lib/services/useGraphql')` — replace the transport with a `vi.fn()`
 - A named `QueryWrapper` component supplies a fresh `QueryClient` (`retry: false`) per test
 - Drive mutations with `act(() => result.current.someMutation.mutate(...))`, then assert the
   cache via `result.current.<data>` inside `waitFor`
-- Pure math stays in `lib/__tests__` / `app/*/lib/__tests__` — hook tests are only for
+- Pure math stays in `lib/__tests__` / `features/*/lib/__tests__` — hook tests are only for
   mapping, cache updates, and error semantics
+- When one hook issues several documents, route the mock with `print(document)` (for example
+  `if (print(doc).includes('createIncome')) …`) instead of call ordering, so tests survive
+  refactors
+- Provider hooks are tested by mocking `usePlannerState` / `useCurrentUser` setters and asserting
+  the payload mapping; `PlannerStateProvider` itself gets a `renderHook(..., { wrapper })` test
+  for defaults and the missing-provider error
+
+### Testing UI Components
+
+Components are tested with Testing Library and mocked boundaries rather than a full provider tree:
+mock `@/features/budget/providers` (`useBudgetContext`), the entity mutation hook
+(`usePostExpense`), and any dialog child that owns its own data. Then drive the real
+form/dialog with `fireEvent`, assert the mutation payload, and check rendered rows inside the
+table's `title` region. Keep the number of these interaction tests small: they cover wiring
+(submit payloads, refetch callbacks, filters), not financial math.
+
+`vitest.config.mts` measures `app/`, `features/`, `lib/`, and `components/`; the headline number
+is depressed by UI chrome and generated GraphQL types, so judge logic coverage separately with
+`--coverage.include='{features/**/lib/**,lib/calc/**,features/**/hooks/**,lib/hooks/**,features/**/providers/**}'`.
 
 ### Data Fetching (TanStack React Query)
 
-GraphQL queries are defined as string constants and called via Axios, then wrapped in React Query hooks:
+GraphQL documents are defined in the owning feature (for example, `features/expenses/`) or in
+`lib/services/queries/` for cross-cutting API slices, using the generated client's `graphql()` tag
+from `lib/gql/`. Hooks wrap these typed documents in React Query. Do not pass raw query strings or
+handwritten response generics to `request`.
 
 ```typescript
-// lib/services/queries/assets.ts — query definitions
-export const GET_ASSETS = `
-  query GetAssets($userId: ID!) {
-    assets(userId: $userId) {
-      id
-      name
-      assetType
-      currentValue
-      ...
-    }
-  }
-`;
+// lib/services/queries/assets.ts — typed documents (npm run codegen)
+import { graphql } from '@/lib/gql';
 
-// hooks/useAssets.ts — React Query wrapper
+export const ASSET_FIELDS = graphql(`
+  fragment AssetFields on Asset { id name assetType currentValue ... }
+`);
+
+export const GET_ASSETS = graphql(`
+  query GetAssets($userId: ID!) {
+    assets(userId: $userId) { ...AssetFields }
+  }
+`);
+
+// hooks/useAssets.ts — React Query wrapper; response type is inferred
+// from the generated document, no hand-written generics needed
 export function useAssets(userId: string) {
+  const { request } = useGraphql();
   return useQuery({
     queryKey: ['api-assets', userId],
     queryFn: () => request(GET_ASSETS, { userId }),
@@ -149,6 +200,22 @@ export function useAssets(userId: string) {
 }
 ```
 
+**Codegen workflow:** operations and fragments across the web TypeScript/TSX source are validated and typed against
+`breeze.api/graph/schema.graphqls`. `npm run typecheck` and `npm run build` regenerate
+before checking/building; run `npm run codegen` directly when you want to refresh after a
+schema or document edit. Output lives in `lib/gql/` (generated — never edit by hand).
+Pass generated documents directly to `request`; TypeScript infers both variables and response data.
+Use generated operation results for response-derived types and generated input types for mutation payloads,
+rather than maintaining parallel DTOs. A field that no longer exists in the schema fails codegen.
+
+**Bundle note:** the client preset's operation map (`lib/gql/gql.ts`) is not
+tree-shakeable, so all document strings ship in the client bundle. At the
+current app size this costs only a few KB gzipped, so we ship it as-is. The
+SWC optimizer (`@swc-contrib/plugin-graphql-codegen-client-preset` +
+`experimental.swcPlugins`) is the documented fix, but we measured negligible
+savings on Next 16/Turbopack — revisit if the document count grows enough to
+matter.
+
 **Stable query key convention:** `['api-<slice>', userId]` — always include the user ID.
 
 ### Mutation Pattern
@@ -156,6 +223,7 @@ export function useAssets(userId: string) {
 ```typescript
 export function useCreateAsset() {
   const queryClient = useQueryClient();
+  const { request } = useGraphql();
   return useMutation({
     mutationFn: (input: CreateAssetInput) => request(CREATE_ASSET, { input }),
     onSuccess: () => {
@@ -169,21 +237,33 @@ export function useCreateAsset() {
 
 ```
 breeze.web/
-├── app/                    # Next.js App Router pages
-│   ├── future/             # Future module (renamed from planner: accounts, projections, etc.)
-│   │   ├── components/     # Future-specific components
-│   │   ├── hooks/          # Domain-specific hooks (planner/ subdirectory holds model hooks)
-│   │   ├── lib/            # Future modules: tax.ts, projection.ts, rates.ts, plannerMath.ts (contributions/IRS), config, constants, typeMapping
-│   │   ├── providers/      # PlannerStateProvider — planner state (people, accounts, summary, targets)
-│   │   └── types/          # Future domain types
+├── app/                    # Next.js routes and route composition
+│   ├── budget/             # Budget route, layout, and component export barrel
+│   ├── future/             # /future route entry point
 │   ├── layout.tsx          # Root layout with Clerk + CurrentUserProvider
 │   └── page.tsx            # Dashboard
+├── features/               # Reusable domain features, independent of route ownership
+│   ├── expenses/           # Expense/transaction documents, hooks, and UI
+│   ├── income/              # Income documents, types, hooks, and UI
+│   ├── categories/          # Category documents, types, hooks, and UI
+│   ├── budget/              # Budget documents, hooks, types, and context
+│   ├── recurring/           # Recurring documents, hooks, and UI
+│   ├── goals/               # Goal documents, API hook, types, logic, and UI
+│   ├── assets/              # Asset/liability operations
+│   ├── connections/         # Plaid operations/hooks
+│   ├── debts/               # Debt payoff hook over liabilities
+│   ├── planning/            # Planner UI, state, types, calculations, hooks, and operations
+│   ├── mortgage/            # Mortgage calculations, hooks, and UI
+│   ├── retirement-access/   # Retirement-access operations/hook/UI
+│   ├── retirement-ladder/   # Retirement-ladder operation/hook/UI
+│   └── taxes/               # Tax operations, hooks, logic, and UI
 ├── components/             # Shared UI components (shadcn)
-│   └── ui/                 # Button, Card, Input, Select, etc.
+│   └── ui/
 ├── lib/
-│   ├── providers/          # Context providers (CurrentUserProvider)
-│   ├── hooks/              # Shared hooks (useAutoSave, useTabParam)
-│   └── services/           # Shared transport (useGraphql.ts, useHttp.ts) + GraphQL queries
+│   ├── calc/               # Pure, framework-free financial calculations
+│   ├── gql/                # Generated GraphQL documents and types (never edit by hand)
+│   ├── hooks/              # Shared hooks
+│   └── services/           # Shared GraphQL transport (useGraphql)
 └── package.json
 ```
 
@@ -191,7 +271,7 @@ breeze.web/
 
 ## Key Types
 
-Account and liability types are defined in `app/future/types/account.ts`:
+Account and liability types are defined in `features/planning/types/account.ts`:
 
 ```typescript
 export type AccountType =
@@ -206,7 +286,7 @@ export type AccountOwner = 'self' | 'spouse';
 ```
 
 Type mapping between frontend `AccountType` and API `ApiAssetType`/`ApiLiabilityType` lives in:
-`app/future/lib/typeMapping.ts`
+`features/planning/lib/typeMapping.ts`
 
 ---
 

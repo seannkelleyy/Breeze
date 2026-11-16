@@ -13,19 +13,21 @@ import {
 } from 'react';
 
 import useGraphql from '../services/useGraphql';
+import { graphql } from '@/lib/gql';
+import type { ReturnType as ApiReturnType, UpdateUserInput } from '@/lib/gql/graphql';
 
 import {
   PLANNER_DEFAULT_RETURN_DISPLAY_MODE,
   PLANNER_DEFAULT_INFLATION_RATE,
   PLANNER_DEFAULT_SAFE_WITHDRAWAL_RATE,
-} from '@/app/future/lib/constants';
+} from '@/features/planning/lib/constants';
 import { useUser } from '@clerk/clerk-react';
 
 const DEV_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
 const UUID_V4_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const CURRENT_USER_QUERY = `
+const CURRENT_USER_QUERY = graphql(`
   query CurrentUserPreferences {
     me {
       id
@@ -47,9 +49,9 @@ const CURRENT_USER_QUERY = `
       disclaimerAcceptedAt
     }
   }
-`;
+`);
 
-const UPDATE_USER_SETUP_MUTATION = `
+const UPDATE_USER_SETUP_MUTATION = graphql(`
   mutation UpdateUserSetup($input: UpdateUserSetupInput!) {
     updateUserSetup(input: $input) {
       id
@@ -60,23 +62,23 @@ const UPDATE_USER_SETUP_MUTATION = `
       disclaimerAcceptedAt
     }
   }
-`;
+`);
 
-const UPDATE_USER_MUTATION = `
+const UPDATE_USER_MUTATION = graphql(`
   mutation UpdateUserPreferences($input: UpdateUserInput!) {
     updateUser(input: $input) {
       id
     }
   }
-`;
+`);
 
-const CREATE_USER_MUTATION = `
+const CREATE_USER_MUTATION = graphql(`
   mutation CreateUserPreferences($input: CreateUserInput!) {
     createUser(input: $input) {
       id
     }
   }
-`;
+`);
 
 const getBackendUserID = (user: ReturnType<typeof useUser>['user']): string => {
   const metadataUserID = user?.publicMetadata?.userId;
@@ -186,11 +188,11 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       }
 
       try {
-        const input = {
+        const input: UpdateUserInput = {
           id: resolvedUserId,
           identityProviderId: backendUserID,
           email: user?.emailAddresses[0]?.emailAddress ?? '',
-          returnType: nextReturnDisplayMode === 'real' ? 'REAL' : 'NOMINAL',
+          returnType: (nextReturnDisplayMode === 'real' ? 'REAL' : 'NOMINAL') as ApiReturnType,
           safeWithdrawalRate: (nextSafeWithdrawalRate / 100).toFixed(4),
           currencyType: nextCurrencyCode,
           inflationRate: (nextInflationRate / 100).toFixed(4),
@@ -201,12 +203,9 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
           payoffStrategy: nextPayoffStrategy ?? payoffStrategy,
         };
 
-        await request<{ updateUser: { id: string } }, { input: typeof input }>(
-          UPDATE_USER_MUTATION,
-          {
-            input,
-          },
-        );
+        await request(UPDATE_USER_MUTATION, {
+          input,
+        });
       } catch {
         // Keep optimistic UI state and allow future writes.
       }
@@ -396,10 +395,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         setMonthlyExpenses(Number(input.monthlyExpenses));
       }
       try {
-        await request<{ updateUserSetup: { id: string } }, { input: Record<string, unknown> }>(
-          UPDATE_USER_SETUP_MUTATION,
-          { input: { id: resolvedUserId, ...input } },
-        );
+        await request(UPDATE_USER_SETUP_MUTATION, { input: { id: resolvedUserId, ...input } });
       } catch {
         // Keep optimistic UI state and allow future writes.
       }
@@ -446,27 +442,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
 
     const loadPreferences = async () => {
       try {
-        const response = await request<{
-          me: {
-            id: string;
-            identityProviderId: string;
-            email: string;
-            returnType: 'REAL' | 'NOMINAL';
-            safeWithdrawalRate: string;
-            currencyType: string;
-            inflationRate: string;
-            deductionType: 'STANDARD' | 'ITEMIZED';
-            deductionAmount: string | null;
-            maxTaxBracketId: string | null;
-            filingStatus: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH';
-            payoffStrategy: 'AVALANCHE' | 'SNOWBALL';
-            budgetEnabled: boolean;
-            monthlyExpenses: string | null;
-            setupCompleted: boolean;
-            disclaimerAccepted: boolean;
-            disclaimerAcceptedAt: string | null;
-          } | null;
-        }>(CURRENT_USER_QUERY);
+        const response = await request(CURRENT_USER_QUERY);
 
         if (isCancelled) {
           return;
@@ -503,10 +479,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         const identityProviderId = backendUserID;
         const email = user?.emailAddresses[0]?.emailAddress ?? '';
         if (identityProviderId && email) {
-          const createResp = await request<
-            { createUser: { id: string } },
-            { input: Record<string, unknown> }
-          >(CREATE_USER_MUTATION, {
+          const createResp = await request(CREATE_USER_MUTATION, {
             input: {
               identityProviderId,
               email,

@@ -1,1 +1,0 @@
-export const ME_QUERY = `query Me { me { id email identityProviderId inflationRate safeWithdrawalRate filingStatus returnType currencyType deductionType deductionAmount payoffStrategy maxTaxBracketId createdAt updatedAt } }`;

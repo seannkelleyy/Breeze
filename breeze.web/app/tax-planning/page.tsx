@@ -4,9 +4,9 @@ import { useState } from 'react';
 import {
   useTaxEstimate,
   type CalculateTaxEstimateInput,
-} from '@/lib/services/hooks/useTaxEstimate';
-import { TaxForm, TaxFormInputs } from './components/TaxForm';
-import { TaxResults } from './components/TaxResults';
+} from '@/features/taxes/hooks/useTaxEstimate';
+import { TaxForm, TaxFormInputs } from '@/features/taxes/components/TaxForm';
+import { TaxResults } from '@/features/taxes/components/TaxResults';
 
 const TaxPlanning = () => {
   const [formInputs, setFormInputs] = useState<CalculateTaxEstimateInput | null>(null);
@@ -16,7 +16,7 @@ const TaxPlanning = () => {
     // Convert form inputs to API format (numbers to strings)
     setFormInputs({
       year: inputs.year,
-      filingStatus: inputs.filingStatus,
+      filingStatus: inputs.filingStatus as CalculateTaxEstimateInput['filingStatus'],
       income: inputs.income.toString(),
       deduction: inputs.deductionAmount == null ? null : inputs.deductionAmount.toString(),
     });

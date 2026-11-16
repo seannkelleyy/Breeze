@@ -1,6 +1,6 @@
 'use client';
 import { useUser, useClerk } from '@clerk/clerk-react';
-import { Moon, Sun, Settings, LogOut, PcCase } from 'lucide-react';
+import { Moon, Sun, Settings, LogOut, PcCase, Link2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +27,8 @@ import {
 } from '@/components/ui/select';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
 import { Button } from '@/components/ui/button';
-import { PLANNER_RETURN_DISPLAY_MODE_OPTIONS } from '@/app/future/lib/constants';
+import { PLANNER_RETURN_DISPLAY_MODE_OPTIONS } from '@/features/planning/lib/constants';
+import { useConnectionsDialog } from '@/components/common/connections/ConnectionsDialogProvider';
 import { useState } from 'react';
 import Image from 'next/image';
 
@@ -35,6 +36,7 @@ export function UserMenu() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const { setTheme, theme } = useTheme();
+  const { openConnections } = useConnectionsDialog();
   const [showPreferences, setShowPreferences] = useState(false);
 
   const initials = user?.firstName?.[0] ?? user?.emailAddresses?.[0]?.emailAddress?.[0] ?? '?';
@@ -42,13 +44,13 @@ export function UserMenu() {
   const getThemeIcon = (theme: string) => {
     switch (theme) {
       case 'Light':
-        return <Sun className='mr-2 size-4'/>;
+        return <Sun className="mr-2 size-4" />;
       case 'Dark':
-        return <Moon className='mr-2 size-4'/>;
+        return <Moon className="mr-2 size-4" />;
       default:
-        return <PcCase className='mr-2 size-4'/>;
+        return <PcCase className="mr-2 size-4" />;
     }
-  }
+  };
 
   const getNextTheme = (currentTheme: string) => {
     switch (currentTheme) {
@@ -92,6 +94,10 @@ export function UserMenu() {
           <DropdownMenuItem onClick={() => setShowPreferences(true)}>
             <Settings className="mr-2 size-4" />
             Preferences
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={openConnections}>
+            <Link2 className="mr-2 size-4" />
+            Connections
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

@@ -6,8 +6,8 @@ import dayjs from 'dayjs';
 import Link from 'next/link';
 import { MoveLeft, MoveRight, RefreshCw, Loader2, Receipt } from 'lucide-react';
 
-import { useBudgetContext } from './providers/index';
-import { useRegenerateBudget } from './hooks/budget/index';
+import { useBudgetContext } from '../../features/budget/providers/index';
+import { useRegenerateBudget } from '../../features/budget/hooks/index';
 import { Button } from '@/components/ui/button';
 import {
   CategoriesTable,
@@ -17,12 +17,12 @@ import {
   IncomeTable,
 } from './components/index';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { isMoneyGreaterThanOrEqualWithTolerance } from '../future/lib/constants';
-import { getMonthPayrollIncomes } from '../future/lib/paycheck';
-import { usePlannerHydration } from '../future/hooks/usePlannerHydration';
-import { usePlannerState } from '../future/providers/PlannerStateProvider';
-import { usePaycheckDeductions } from '../future/hooks/planner/usePaycheckDeductions';
-import useTaxYear from '../future/hooks/planner/useTaxYear';
+import { isMoneyGreaterThanOrEqualWithTolerance } from '../../features/planning/lib/constants';
+import { getMonthPayrollIncomes } from '../../features/planning/lib/paycheck';
+import { usePlannerHydration } from '../../features/planning/hooks/usePlannerHydration';
+import { usePlannerState } from '../../features/planning/providers/PlannerStateProvider';
+import { usePaycheckDeductions } from '../../features/planning/hooks/planner/usePaycheckDeductions';
+import useTaxYear from '../../features/planning/hooks/planner/useTaxYear';
 import { useTabParam } from '@/lib/hooks/useTabParam';
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';

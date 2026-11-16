@@ -13,7 +13,7 @@ instead of reusing the first.
 
 | Function | File | Definition |
 |---|---|---|
-| `getPersonBaseAnnualIncome` | `breeze.web/app/future/lib/plannerMath.ts` | hourly: `hourlyRate × hours × 52`; else `annualSalary` |
+| `getPersonBaseAnnualIncome` | `breeze.web/features/planning/lib/plannerMath.ts` | hourly: `hourlyRate × hours × 52`; else `annualSalary` |
 | `getPersonBonusPerYear` | plannerMath.ts | dollars: `annualBonus` (yearly total); percent: `base × annualBonus × perYear / 100` |
 | `getTotalAnnualIncome` | plannerMath.ts | **CANONICAL household/person annual income** = `annualSalary + getPersonBonusPerYear` |
 | `getPersonTotalIncome` | plannerMath.ts | hourly-aware variant used by the People page |

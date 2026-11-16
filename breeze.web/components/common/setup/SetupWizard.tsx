@@ -15,10 +15,10 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { usePlannerUiState } from '@/app/future/hooks/usePlannerUiState';
-import { usePlannerHydration } from '@/app/future/hooks/usePlannerHydration';
-import AccountsCard from '@/app/future/components/AccountsCard';
-import PeopleCard from '@/app/future/components/PeopleCard';
+import { usePlannerUiState } from '@/features/planning/hooks/usePlannerUiState';
+import { usePlannerHydration } from '@/features/planning/hooks/usePlannerHydration';
+import AccountsCard from '@/features/planning/components/AccountsCard';
+import PeopleCard from '@/features/planning/components/PeopleCard';
 
 const STEPS = ['Welcome', 'People', 'Accounts', 'Expenses', 'Goals', 'Disclaimer'] as const;
 

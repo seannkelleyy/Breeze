@@ -3,11 +3,11 @@ import { Suspense, useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { usePlannerUiState } from '../future/hooks/usePlannerUiState';
-import { usePlaidConnections, useSyncPlaidConnection } from '@/lib/services/hooks/usePlaid';
+import { usePlannerUiState } from '../../features/planning/hooks/usePlannerUiState';
+import { usePlaidConnections, useSyncPlaidConnection } from '@/features/connections/hooks/usePlaid';
 
-import { usePlannerHydration } from '../future/hooks/usePlannerHydration';
-import AccountsCard from '../future/components/AccountsCard';
+import { usePlannerHydration } from '../../features/planning/hooks/usePlannerHydration';
+import AccountsCard from '../../features/planning/components/AccountsCard';
 
 export default function AccountsPage() {
   return (

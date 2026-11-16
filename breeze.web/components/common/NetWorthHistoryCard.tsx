@@ -18,7 +18,7 @@ import {
 import BreezeLineChart from '@/components/common/charts/BreezeLineChart';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
-import { useNetWorthSnapshots } from '@/lib/services/hooks/useNetWorthSnapshots';
+import { useNetWorthSnapshots } from '@/features/planning/hooks/useNetWorthSnapshots';
 import { cn } from '@/lib/utils';
 
 interface NetWorthAccountOption {

@@ -9,7 +9,6 @@ import {
   Receipt,
   Wallet,
   Calculator,
-  Link2,
   Percent,
   KeyRound,
   Mountain,
@@ -85,12 +84,6 @@ const mortgage: RouteNavItem = {
   icon: Calculator,
   isPublic: true,
 };
-const connections: RouteNavItem = {
-  label: 'Connections',
-  to: '/plaid-connections',
-  title: 'Plaid Connections',
-  icon: Link2,
-};
 const taxes: RouteNavItem = {
   label: 'Taxes',
   to: '/taxes',
@@ -138,7 +131,6 @@ export const routeNavItems: ReadonlyArray<RouteNavItem> = [
 export const secondaryNavItems: ReadonlyArray<RouteNavItem> = [
   budget,
   mortgage,
-  connections,
   taxes,
   retirementLadder,
 ];
@@ -152,9 +144,9 @@ export const standaloneNavItems: ReadonlyArray<RouteNavItem> = [dashboard, peopl
 export const navGroups: ReadonlyArray<NavGroup> = [
   {
     label: 'Money',
-    title: 'Accounts, spending, budgets, and bank connections',
+    title: 'Accounts, spending, and budgets',
     icon: Wallet,
-    items: [accounts, expenses, budget, connections, debts],
+    items: [accounts, expenses, budget, debts],
   },
   {
     label: 'Plan',
