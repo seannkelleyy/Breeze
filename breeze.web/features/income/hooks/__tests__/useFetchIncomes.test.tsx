@@ -47,10 +47,9 @@ describe('useFetchIncomes', () => {
   it('loads incomes for the budget', async () => {
     getIncomes.mockResolvedValue([income()]);
 
-    const { result } = renderHook(
-      () => useFetchIncomes({ budgetId: 'b1', enabled: true }),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => useFetchIncomes({ budgetId: 'b1', enabled: true }), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -59,10 +58,9 @@ describe('useFetchIncomes', () => {
   });
 
   it('skips the request when disabled', async () => {
-    const { result } = renderHook(
-      () => useFetchIncomes({ budgetId: 'b1', enabled: false }),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => useFetchIncomes({ budgetId: 'b1', enabled: false }), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => expect(result.current.fetchStatus).toBe('idle'));
 

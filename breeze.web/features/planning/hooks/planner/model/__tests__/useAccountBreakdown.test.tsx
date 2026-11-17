@@ -87,9 +87,7 @@ describe('useAccountBreakdown', () => {
       exceedsLimit: false,
       projectedValue: 123_456,
     });
-    expect(row.suggestedLimit).toBe(
-      getSuggestedAnnualLimit('401k', age, defaultIrsLimits, false),
-    );
+    expect(row.suggestedLimit).toBe(getSuggestedAnnualLimit('401k', age, defaultIrsLimits, false));
     expect(row.suggestedLimit).toBeGreaterThan(0);
   });
 

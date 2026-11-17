@@ -100,10 +100,7 @@ describe('useRetirementTargets', () => {
     const annualNeedAtRetirement = 60_000 * inflationFactor;
 
     expect(result.current.annualNeedAtRetirement).toBeCloseTo(annualNeedAtRetirement, 6);
-    expect(result.current.baseFinancialFreedomTarget).toBeCloseTo(
-      annualNeedAtRetirement / 0.04,
-      6,
-    );
+    expect(result.current.baseFinancialFreedomTarget).toBeCloseTo(annualNeedAtRetirement / 0.04, 6);
     expect(result.current.retirementHorizonYears).toBe(PLANNER_DEFAULT_LONGEVITY_AGE - 65);
     // 30-year horizon suggests a 4% withdrawal rate.
     expect(result.current.suggestedSafeWithdrawalRate).toBe(4);
@@ -152,9 +149,7 @@ describe('useRetirementTargets', () => {
   it('selects the financial freedom target for the fire method', () => {
     const { result } = renderTargets({ retirementMethod: 'fire' });
 
-    expect(result.current.selectedRetirementTarget).toBe(
-      result.current.financialFreedomTarget,
-    );
+    expect(result.current.selectedRetirementTarget).toBe(result.current.financialFreedomTarget);
     expect(result.current.selectedRetirementMethodLabel).toBe('FIRE Method');
   });
 
@@ -173,9 +168,7 @@ describe('useRetirementTargets', () => {
     const { result } = renderTargets({ retirementMethod: 'unknown-method' });
 
     expect(result.current.selectedRetirementMethodLabel).toBe('Selected Method');
-    expect(result.current.selectedRetirementTarget).toBe(
-      result.current.financialFreedomTarget,
-    );
+    expect(result.current.selectedRetirementTarget).toBe(result.current.financialFreedomTarget);
   });
 
   it('computes savings-rate and monthly gaps against the plan', () => {
@@ -183,14 +176,8 @@ describe('useRetirementTargets', () => {
 
     const monthlyNeeded = result.current.monthlyNeededForDesiredTarget;
     expect(monthlyNeeded).toBeGreaterThan(0);
-    expect(result.current.requiredSavingsRate).toBeCloseTo(
-      (monthlyNeeded * 12 * 100) / 100_000,
-      6,
-    );
-    expect(result.current.savingsRateGap).toBeCloseTo(
-      20 - result.current.requiredSavingsRate,
-      6,
-    );
+    expect(result.current.requiredSavingsRate).toBeCloseTo((monthlyNeeded * 12 * 100) / 100_000, 6);
+    expect(result.current.savingsRateGap).toBeCloseTo(20 - result.current.requiredSavingsRate, 6);
     expect(result.current.monthlyGap).toBeCloseTo(2_000 - monthlyNeeded, 6);
     expect(result.current.isMonthlyGapPositive).toBe(result.current.monthlyGap >= -1);
   });

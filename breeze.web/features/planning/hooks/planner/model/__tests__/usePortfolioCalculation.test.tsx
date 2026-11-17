@@ -81,7 +81,14 @@ const homeDetails = (overrides: Partial<AssetFinanceDetails> = {}): AssetFinance
 const scenarios = () => ({
   accounts: [
     account(),
-    account({ id: 'checking1', name: 'Checking', accountType: 'checking', startingBalance: 20_000, annualRate: 0, contributionValue: 0 }),
+    account({
+      id: 'checking1',
+      name: 'Checking',
+      accountType: 'checking',
+      startingBalance: 20_000,
+      annualRate: 0,
+      contributionValue: 0,
+    }),
     account({
       id: 'home1',
       name: 'Home',

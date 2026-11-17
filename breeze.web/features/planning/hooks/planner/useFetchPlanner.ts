@@ -4,11 +4,14 @@ import { GET_PLANNER_PEOPLE } from '@/features/planning/plannerPeople.operations
 import { ME_QUERY } from '@/features/planning/user.operations';
 import useGraphql from '@/lib/services/useGraphql';
 import { useQuery } from '@tanstack/react-query';
-import { PlannerAccount } from '../../../../features/planning/types/account';
-import type { ApiAssetType, ApiLiabilityType } from '../../../../features/planning/types/apiAsset';
-import { PayCadence, PlannerPerson } from '../../../../features/planning/types/person';
-import { apiAssetTypeToAccountType, apiLiabilityTypeToAccountType } from '../../../../features/planning/lib/typeMapping';
-import { resolveTaxTreatment } from '../../../../features/planning/lib/config';
+import { PlannerAccount } from '@/features/planning/types/account';
+import type { ApiAssetType, ApiLiabilityType } from '@/features/planning/types/apiAsset';
+import { PayCadence, PlannerPerson } from '@/features/planning/types/person';
+import {
+  apiAssetTypeToAccountType,
+  apiLiabilityTypeToAccountType,
+} from '@/features/planning/lib/typeMapping';
+import { resolveTaxTreatment } from '@/features/planning/lib/config';
 
 interface PlannerLoadResult {
   people: PlannerPerson[];

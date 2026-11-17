@@ -78,9 +78,9 @@ describe('getRecurringExpensesMonthlyTotal', () => {
   });
 
   it('treats unparseable amounts as zero', () => {
-    expect(getRecurringExpensesMonthlyTotal([{ amount: 'abc', recurrenceInterval: 'MONTHLY' }])).toBe(
-      0,
-    );
+    expect(
+      getRecurringExpensesMonthlyTotal([{ amount: 'abc', recurrenceInterval: 'MONTHLY' }]),
+    ).toBe(0);
   });
 });
 
@@ -132,9 +132,7 @@ describe('useRecurringTemplates', () => {
 
     const { result } = renderHook(() => useRecurringTemplates());
 
-    await expect(result.current.getRecurringIncomeTemplates()).resolves.toEqual([
-      incomeTemplate(),
-    ]);
+    await expect(result.current.getRecurringIncomeTemplates()).resolves.toEqual([incomeTemplate()]);
     await expect(result.current.getRecurringExpenseTemplates()).resolves.toEqual([
       expenseTemplate(),
     ]);

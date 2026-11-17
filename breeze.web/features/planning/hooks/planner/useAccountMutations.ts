@@ -10,9 +10,12 @@ import {
 } from '@/features/assets/asset.operations';
 import useGraphql from '@/lib/services/useGraphql';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { accountTypeToApiAssetType, accountTypeToApiLiabilityType } from '../../../../features/planning/lib/typeMapping';
-import { resolveTaxTreatment } from '../../../../features/planning/lib/config';
-import { AccountType, PlannerAccount } from '../../../../features/planning/types/account';
+import {
+  accountTypeToApiAssetType,
+  accountTypeToApiLiabilityType,
+} from '@/features/planning/lib/typeMapping';
+import { resolveTaxTreatment } from '@/features/planning/lib/config';
+import { AccountType, PlannerAccount } from '@/features/planning/types/account';
 import type { AssetType } from '@/lib/gql/graphql';
 
 interface UseAccountMutationsParams {

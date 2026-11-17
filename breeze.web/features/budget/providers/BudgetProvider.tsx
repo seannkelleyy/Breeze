@@ -4,10 +4,10 @@ import React, { useCallback, useState } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 
 import { BudgetContext } from './BudgetContext';
-import { useFetchBudget } from '../../../features/budget/hooks/index';
-import { useFetchIncomes } from '../../income/hooks/index';
-import { useFetchCategories } from '../../categories/hooks/index';
-import { useFetchExpensesForBudget } from '../../expenses/hooks/index';
+import { useFetchBudget } from '@/features/budget/hooks';
+import { useFetchIncomes } from '@/features/income/hooks';
+import { useFetchCategories } from '@/features/categories/hooks';
+import { useFetchExpensesForBudget } from '@/features/expenses/hooks';
 
 interface BudgetProviderProps {
   children: React.ReactNode;

@@ -238,7 +238,7 @@ export function useCreateAsset() {
 ```
 breeze.web/
 ├── app/                    # Next.js routes and route composition
-│   ├── budget/             # Budget route, layout, and component export barrel
+│   ├── budget/             # Budget route and layout
 │   ├── future/             # /future route entry point
 │   ├── layout.tsx          # Root layout with Clerk + CurrentUserProvider
 │   └── page.tsx            # Dashboard

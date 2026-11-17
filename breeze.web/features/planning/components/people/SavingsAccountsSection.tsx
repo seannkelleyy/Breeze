@@ -4,10 +4,10 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AccountListItem } from '../accounts/AccountListItem';
 import { AccountEditorProvider } from '../accounts/AccountEditorContext';
-import { usePlannerState } from '../../../../app/future/providers/PlannerStateProvider';
-import { PAYROLL_SAVINGS_ACCOUNT_TYPES } from '../../../../app/future/lib/config';
-import type { PlannerAccount } from '../../../../app/future/types/account';
-import type { PlannerPerson } from '../../../../app/future/types/person';
+import { usePlannerState } from '@/features/planning/providers/PlannerStateProvider';
+import { PAYROLL_SAVINGS_ACCOUNT_TYPES } from '@/features/planning/lib/config';
+import type { PlannerAccount } from '@/features/planning/types/account';
+import type { PlannerPerson } from '@/features/planning/types/person';
 
 interface SavingsAccountsSectionProps {
   /** Person being edited — new accounts default to them as owner. */

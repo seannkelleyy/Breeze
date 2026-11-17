@@ -30,7 +30,7 @@ The budget module owns month-based budgeting flows:
 - GraphQL operations: `breeze.web/features/budget/budget.operations.ts` (plus `features/categories/`, `features/income/`, `features/expenses/`, `features/recurring/` for their slices)
 - Domain hooks: `breeze.web/features/budget/hooks/` (and the sibling feature folders above)
 - Shared budget orchestration: `breeze.web/features/budget/providers/BudgetProvider.tsx`
-- Route UI: `breeze.web/app/budget/page.tsx` and `breeze.web/app/budget/components/` (export barrel over feature components)
+- Route UI: `breeze.web/app/budget/page.tsx` (imports feature components directly)
 
 ## Query Pattern
 

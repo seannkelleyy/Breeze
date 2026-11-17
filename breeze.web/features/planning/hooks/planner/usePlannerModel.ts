@@ -2,9 +2,9 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import * as plannerConfig from '../../../../features/planning/lib/config';
-import { getLiabilityPrincipalMonthly } from '../../../../features/planning/lib/plannerMath';
-import { usePlannerState } from '../../../../features/planning/providers/PlannerStateProvider';
+import * as plannerConfig from '@/features/planning/lib/config';
+import { getLiabilityPrincipalMonthly } from '@/features/planning/lib/plannerMath';
+import { usePlannerState } from '@/features/planning/providers/PlannerStateProvider';
 import {
   getRecurringExpensesMonthlyTotal,
   useRecurringExpenseTemplates,

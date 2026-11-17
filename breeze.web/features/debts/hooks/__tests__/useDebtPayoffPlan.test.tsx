@@ -5,7 +5,10 @@ import type { ReactNode } from 'react';
 
 const { requestMock, userState } = vi.hoisted(() => ({
   requestMock: vi.fn(),
-  userState: { userId: 'u1' as string | null, payoffStrategy: 'AVALANCHE' as 'AVALANCHE' | 'SNOWBALL' },
+  userState: {
+    userId: 'u1' as string | null,
+    payoffStrategy: 'AVALANCHE' as 'AVALANCHE' | 'SNOWBALL',
+  },
 }));
 
 vi.mock('@/lib/services/useGraphql', () => ({

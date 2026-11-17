@@ -1,8 +1,11 @@
 'use client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { UPSERT_PLANNER_PERSON, DELETE_PLANNER_PERSON } from '@/features/planning/plannerPeople.operations';
+import {
+  UPSERT_PLANNER_PERSON,
+  DELETE_PLANNER_PERSON,
+} from '@/features/planning/plannerPeople.operations';
 import useGraphql from '@/lib/services/useGraphql';
-import { PlannerPerson } from '../../../../features/planning/types/person';
+import { PlannerPerson } from '@/features/planning/types/person';
 
 export function usePersonMutations(userId: string) {
   const { request } = useGraphql();

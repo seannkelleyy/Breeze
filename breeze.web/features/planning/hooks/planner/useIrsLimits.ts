@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 
 import useGraphql from '@/lib/services/useGraphql';
 import { GET_CONTRIBUTION_LIMITS } from '@/features/planning/planning.operations';
-import { defaultIrsLimits } from '../../../../features/planning/lib/plannerMath';
-import type { IrsLimitConfig, IrsLimitKey } from '../../../../features/planning/types/irs';
+import { defaultIrsLimits } from '@/features/planning/lib/plannerMath';
+import type { IrsLimitConfig, IrsLimitKey } from '@/features/planning/types/irs';
 
 const API_TYPE_TO_KEY: Record<string, IrsLimitKey> = {
   ACCOUNT_401K: '401k',

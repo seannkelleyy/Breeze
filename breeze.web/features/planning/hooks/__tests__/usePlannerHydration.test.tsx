@@ -109,14 +109,16 @@ describe('usePlannerHydration', () => {
     fetchState.data = null;
     finance.assetDetails = {};
     Object.values(setters).forEach((mock) => mock.mockReset());
-    setters.setPlannerAssetFinanceDetailsByAccountId.mockImplementation(
-      (updater: unknown) => {
-        finance.assetDetails =
-          typeof updater === 'function'
-            ? (updater as (prev: Record<string, AssetFinanceDetails>) => Record<string, AssetFinanceDetails>)({})
-            : (updater as Record<string, AssetFinanceDetails>);
-      },
-    );
+    setters.setPlannerAssetFinanceDetailsByAccountId.mockImplementation((updater: unknown) => {
+      finance.assetDetails =
+        typeof updater === 'function'
+          ? (
+              updater as (
+                prev: Record<string, AssetFinanceDetails>,
+              ) => Record<string, AssetFinanceDetails>
+            )({})
+          : (updater as Record<string, AssetFinanceDetails>);
+    });
   });
 
   it('does nothing until planner data arrives', () => {

@@ -7,7 +7,7 @@ import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { formatCurrencyWithCode } from '@/lib/utils';
 import { AccountListItem } from './accounts/AccountListItem';
 import { AccountEditorProvider, useAccountEditor } from './accounts/AccountEditorContext';
-import type { PlannerAccount, AccountType } from '../../../app/future/types/account';
+import type { PlannerAccount, AccountType } from '@/features/planning/types/account';
 
 interface AccountsCardProps {
   collapsed: boolean;

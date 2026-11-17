@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { HouseholdPayStats, PaydayCalendar } from './people/HouseholdPayPanel';
-import { usePaycheckDeductions } from '../../../app/future/hooks/planner/usePaycheckDeductions';
+import { usePaycheckDeductions } from '@/features/planning/hooks/planner/usePaycheckDeductions';
 import { PersonFormModal } from './people/PersonFormModal';
 import { PersonSummaryCard } from './people/PersonSummaryCard';
-import { usePlannerState } from '../../../app/future/providers/PlannerStateProvider';
-import useTaxYear from '../../../app/future/hooks/planner/useTaxYear';
-import { usePlannerPeople, usePersonMutations } from '../../../app/future/hooks/planner/index';
-import { PlannerPerson } from '../../../app/future/types/person';
+import { usePlannerState } from '@/features/planning/providers/PlannerStateProvider';
+import useTaxYear from '@/features/planning/hooks/planner/useTaxYear';
+import { usePlannerPeople, usePersonMutations } from '@/features/planning/hooks/planner/index';
+import type { PlannerPerson } from '@/features/planning/types/person';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 

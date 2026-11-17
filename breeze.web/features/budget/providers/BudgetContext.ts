@@ -1,6 +1,6 @@
 'use client';
 import { createContext } from 'react';
-import { Budget } from '../../../features/budget/types';
+import { Budget } from '@/features/budget/types';
 import { Category } from '../../categories/types';
 import { Expense } from '@/features/expenses/types';
 import { Income } from '../../income/types';

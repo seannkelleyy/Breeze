@@ -77,9 +77,7 @@ describe('useProjections', () => {
 
   it('keeps target-age stats stable when the chart extends past retirement', () => {
     const h = household();
-    const base = renderHook(() =>
-      useProjections([account()], h, {}, defaultIrsLimits, 3, false),
-    );
+    const base = renderHook(() => useProjections([account()], h, {}, defaultIrsLimits, 3, false));
     const extended = renderHook(() =>
       useProjections([account()], h, {}, defaultIrsLimits, 3, false, 80),
     );
@@ -103,9 +101,7 @@ describe('useProjections', () => {
 
   it('returns an empty balance list for an empty portfolio', () => {
     const h = household();
-    const { result } = renderHook(() =>
-      useProjections([], h, {}, defaultIrsLimits, 3, false),
-    );
+    const { result } = renderHook(() => useProjections([], h, {}, defaultIrsLimits, 3, false));
 
     expect(result.current.finalBalances).toEqual([]);
     expect(result.current.projectedNetWorthAtTargetAge).toBe(0);

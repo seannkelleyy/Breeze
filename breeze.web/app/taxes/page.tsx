@@ -4,11 +4,11 @@ import { Loader2 } from 'lucide-react';
 
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import { usePlannerHydration } from '../../features/planning/hooks/usePlannerHydration';
-import { usePlannerState } from '../../features/planning/providers/PlannerStateProvider';
-import { usePaycheckDeductions } from '../../features/planning/hooks/planner/usePaycheckDeductions';
-import useTaxYear from '../../features/planning/hooks/planner/useTaxYear';
-import { computeHouseholdWaterfall } from '../../features/planning/lib/paycheck';
+import { usePlannerHydration } from '@/features/planning/hooks/usePlannerHydration';
+import { usePlannerState } from '@/features/planning/providers/PlannerStateProvider';
+import { usePaycheckDeductions } from '@/features/planning/hooks/planner/usePaycheckDeductions';
+import useTaxYear from '@/features/planning/hooks/planner/useTaxYear';
+import { computeHouseholdWaterfall } from '@/features/planning/lib/paycheck';
 import { computeTaxScenario, householdPretaxReductions } from '@/features/taxes/lib/taxScenario';
 import { ADDITIONAL_MEDICARE_THRESHOLDS } from '@/lib/calc/payrollWages';
 import { TaxScenarioColumns } from '@/features/taxes/components/TaxScenarioColumns';

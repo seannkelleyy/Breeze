@@ -6,23 +6,21 @@ import dayjs from 'dayjs';
 import Link from 'next/link';
 import { MoveLeft, MoveRight, RefreshCw, Loader2, Receipt } from 'lucide-react';
 
-import { useBudgetContext } from '../../features/budget/providers/index';
-import { useRegenerateBudget } from '../../features/budget/hooks/index';
+import { useBudgetContext } from '@/features/budget/providers';
+import { useRegenerateBudget } from '@/features/budget/hooks';
 import { Button } from '@/components/ui/button';
-import {
-  CategoriesTable,
-  CreateExpenseDialog,
-  CreateIncomeDialog,
-  ExpensesTable,
-  IncomeTable,
-} from './components/index';
+import { CategoriesTable } from '@/features/categories/components/CategoriesTable';
+import { CreateExpenseDialog } from '@/features/expenses/components/dialogs/CreateExpenseDialog';
+import { ExpensesTable } from '@/features/expenses/components/ExpenseTable';
+import { CreateIncomeDialog } from '@/features/income/components/dialogs/CreateIncomeDialog';
+import { IncomeTable } from '@/features/income/components/IncomeTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { isMoneyGreaterThanOrEqualWithTolerance } from '../../features/planning/lib/constants';
-import { getMonthPayrollIncomes } from '../../features/planning/lib/paycheck';
-import { usePlannerHydration } from '../../features/planning/hooks/usePlannerHydration';
-import { usePlannerState } from '../../features/planning/providers/PlannerStateProvider';
-import { usePaycheckDeductions } from '../../features/planning/hooks/planner/usePaycheckDeductions';
-import useTaxYear from '../../features/planning/hooks/planner/useTaxYear';
+import { isMoneyGreaterThanOrEqualWithTolerance } from '@/features/planning/lib/constants';
+import { getMonthPayrollIncomes } from '@/features/planning/lib/paycheck';
+import { usePlannerHydration } from '@/features/planning/hooks/usePlannerHydration';
+import { usePlannerState } from '@/features/planning/providers/PlannerStateProvider';
+import { usePaycheckDeductions } from '@/features/planning/hooks/planner/usePaycheckDeductions';
+import useTaxYear from '@/features/planning/hooks/planner/useTaxYear';
 import { useTabParam } from '@/lib/hooks/useTabParam';
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';

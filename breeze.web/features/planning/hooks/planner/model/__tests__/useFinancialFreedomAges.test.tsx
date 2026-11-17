@@ -2,10 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 
 import type { ProjectionRow } from '@/features/planning/types/projection';
-import {
-  useFinancialFreedomAge,
-  useFireAchievementAges,
-} from '../useFinancialFreedomAges';
+import { useFinancialFreedomAge, useFireAchievementAges } from '../useFinancialFreedomAges';
 
 const row = (age: number, totalBalance: number): ProjectionRow => ({
   age,

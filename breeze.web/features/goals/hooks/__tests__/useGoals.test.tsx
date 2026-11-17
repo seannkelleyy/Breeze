@@ -101,7 +101,9 @@ describe('useGoals', () => {
 
     await waitFor(() => expect(result.current.footSteps).toHaveLength(1));
     expect(result.current.footSteps[0].id).toBe('foo-1');
-    expect(requestMock.mock.calls.some(([doc]) => print(doc).includes('createFinancialOrderSteps'))).toBe(true);
+    expect(
+      requestMock.mock.calls.some(([doc]) => print(doc).includes('createFinancialOrderSteps')),
+    ).toBe(true);
   });
 
   it('auto-checks a step when planner data satisfies its criteria', async () => {

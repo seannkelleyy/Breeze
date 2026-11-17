@@ -2,10 +2,10 @@
 import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
-import { usePlannerUiState } from '../../features/planning/hooks/usePlannerUiState';
+import { usePlannerUiState } from '@/features/planning/hooks/usePlannerUiState';
 
-import PeopleCard from '../../features/planning/components/PeopleCard';
-import { usePlannerHydration } from '../../features/planning/hooks/usePlannerHydration';
+import PeopleCard from '@/features/planning/components/PeopleCard';
+import { usePlannerHydration } from '@/features/planning/hooks/usePlannerHydration';
 
 export default function PeoplePage() {
   return (

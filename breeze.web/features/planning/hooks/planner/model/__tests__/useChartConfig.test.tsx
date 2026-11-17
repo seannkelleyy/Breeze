@@ -114,18 +114,7 @@ describe('useFinancialMathSnapshot', () => {
 
   it('falls back to a 25x multiplier when the withdrawal rate is zero', () => {
     const { result } = renderHook(() =>
-      useFinancialMathSnapshot(
-        0,
-        household,
-        0,
-        portfolio,
-        null,
-        'STANDARD',
-        [],
-        [],
-        [],
-        'SINGLE',
-      ),
+      useFinancialMathSnapshot(0, household, 0, portfolio, null, 'STANDARD', [], [], [], 'SINGLE'),
     );
 
     expect(result.current.withdrawalMultiplier).toBe(25);

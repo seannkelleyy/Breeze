@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import useGraphql from '@/lib/services/useGraphql';
 import { GET_TAX_YEAR_DATA } from '@/features/taxes/tax.operations';
-import type { TaxYearTables } from '../../../../features/planning/types/tax';
+import type { TaxYearTables } from '@/features/planning/types/tax';
 import type { FilingStatus } from '@/lib/gql/graphql';
 
 /**
