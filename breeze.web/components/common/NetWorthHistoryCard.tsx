@@ -217,16 +217,13 @@ function AddSnapshotDialog({
     accounts.length > 0 ? 'breakdown' : 'totals',
   );
 
-  const initialItems: DraftItem[] = useMemo(
-    () =>
-      accounts.map((a) => ({
-        label: a.name || 'Unnamed',
-        amount: Math.max(0, a.value),
-        kind: a.kind,
-      })),
-    [accounts],
+  const [items, setItems] = useState<DraftItem[]>(() =>
+    accounts.map((a) => ({
+      label: a.name || 'Unnamed',
+      amount: Math.max(0, a.value),
+      kind: a.kind,
+    })),
   );
-  const [items, setItems] = useState<DraftItem[]>(initialItems);
   const [totalAssets, setTotalAssets] = useState(() =>
     Math.max(
       0,

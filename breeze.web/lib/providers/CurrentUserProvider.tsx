@@ -403,19 +403,39 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     [isLoaded, isSignedIn, resolvedUserId, request],
   );
 
+  // The flush below runs once per resolved user, so it reads the latest
+  // preference values from a ref rather than depending on them (which would
+  // re-persist preferences on every change).
+  const latestPreferencesRef = useRef({
+    currencyCode,
+    returnDisplayMode,
+    inflationRate,
+    safeWithdrawalRate,
+    persistPreferences,
+  });
+  useEffect(() => {
+    latestPreferencesRef.current = {
+      currencyCode,
+      returnDisplayMode,
+      inflationRate,
+      safeWithdrawalRate,
+      persistPreferences,
+    };
+  });
+
   useEffect(() => {
     if (!resolvedUserId) {
       return;
     }
     const pending = pendingPrefsRef.current;
     pendingPrefsRef.current = {};
-    void persistPreferences(
-      pending.currencyCode ?? currencyCode,
-      pending.returnDisplayMode ?? returnDisplayMode,
-      pending.inflationRate ?? inflationRate,
-      pending.safeWithdrawalRate ?? safeWithdrawalRate,
+    const latest = latestPreferencesRef.current;
+    void latest.persistPreferences(
+      pending.currencyCode ?? latest.currencyCode,
+      pending.returnDisplayMode ?? latest.returnDisplayMode,
+      pending.inflationRate ?? latest.inflationRate,
+      pending.safeWithdrawalRate ?? latest.safeWithdrawalRate,
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedUserId]);
 
   useEffect(() => {

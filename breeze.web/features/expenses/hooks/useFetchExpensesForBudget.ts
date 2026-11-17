@@ -1,5 +1,3 @@
-import { useCallback } from 'react';
-
 import { useQuery } from '@tanstack/react-query';
 
 import { Expense } from '@/features/expenses/types';
@@ -17,10 +15,10 @@ interface FetchExpensesForBudgetProps {
 const useFetchExpensesForBudget = ({ budgetId, enabled }: FetchExpensesForBudgetProps) => {
   const { getExpensesForBudget } = useExpenses();
 
-  const fetchExpenses = useCallback(() => {
+  const fetchExpenses = () => {
     if (!enabled) return [];
     return getExpensesForBudget(budgetId);
-  }, [getExpensesForBudget, budgetId, enabled]);
+  };
 
   return useQuery<Expense[], Error>({
     queryKey: ['expensesBudget', budgetId],

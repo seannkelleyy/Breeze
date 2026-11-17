@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Landmark, Trash2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,15 +58,9 @@ export function TransactionsCard({ userId, currencyCode }: TransactionsCardProps
     },
   });
 
-  const categorizedCount = useMemo(
-    () => transactions.filter((t) => t.expenseCategoryId).length,
-    [transactions],
-  );
+  const categorizedCount = transactions.filter((t) => t.expenseCategoryId).length;
 
-  const sorted = useMemo(
-    () => [...transactions].sort((a, b) => b.date.localeCompare(a.date)),
-    [transactions],
-  );
+  const sorted = [...transactions].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <Card>

@@ -1,5 +1,4 @@
 'use client';
-import { useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 
 import { RequireAuth } from '@/components/common/auth/RequireAuth';
@@ -45,7 +44,7 @@ function TaxesContent() {
 
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
 
-  const scenario = useMemo(() => {
+  const scenario = (() => {
     if (!taxTables || plannerPeople.length === 0) return null;
     const waterfall = computeHouseholdWaterfall(
       plannerPeople,
@@ -77,9 +76,9 @@ function TaxesContent() {
         ADDITIONAL_MEDICARE_THRESHOLDS[filingStatus] ?? Number.POSITIVE_INFINITY,
       ),
     };
-  }, [plannerPeople, plannerAccounts, withholdings, taxTables, deductionType, filingStatus]);
+  })();
   const { waterfall, baseline, current } = scenario ?? {};
-  const wealth = useMemo(() => getWealthByTaxTreatment(plannerAccounts), [plannerAccounts]);
+  const wealth = getWealthByTaxTreatment(plannerAccounts);
 
   const loading = !scenario || !waterfall || !taxTables;
 

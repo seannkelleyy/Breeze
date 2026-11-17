@@ -11,6 +11,7 @@
 | Auth | Clerk (`@clerk/clerk-react`) | Client-side SPA auth, CurrentUserProvider |
 | Forms | React Hook Form + Zod | Pairs with shadcn form components |
 | Charts | Recharts | Works with Tailwind, included in shadcn chart |
+| Memoization | React Compiler (build-time) | Auto-memoizes components/hooks; manual memos only for identity |
 | Package manager | npm | |
 
 ---
@@ -134,6 +135,25 @@ wage-base treatment and FICA (`payrollWages.ts`, `payrollTaxes.ts`). Components
 and hooks import from it; never re-derive these figures locally. Golden
 fixtures in `tests/fixtures/` (repo root) pin the federal bracket walk and
 payroll tax split, shared with the Go suite so implementations can't drift.
+
+### Memoization & React Compiler
+
+The React Compiler is enabled (`reactCompiler` in `next.config.ts`), so components and hooks are
+memoized at build time. Consequences for everyday code:
+
+- **New code** does not need `useMemo`/`useCallback` for render performance. Derive values inline and
+  define plain functions inside the component.
+- **Existing memos stay.** They are correct and cheap. Delete one only when you are already editing
+  that code and the value is trivially cheap.
+- **Keep a memo when identity is the point**, not the computation: context provider `value` objects,
+  callbacks used in effect dependency arrays, and arrays/objects handed to third-party hooks that
+  compare by identity (TanStack Table columns, Recharts `data`, React Query `queryKey`).
+- **Never disable a React rule.** The compiler skips any component or hook containing
+  `eslint-disable(-next-line) react-hooks/...`, and the build fails on that skip
+  (`panicThreshold: 'critical_errors'`). Fix the dependency array, or keep the latest value in a ref
+  when an effect must run once per key — see `lib/hooks/useAutoSave.ts` and the preference flush in
+  `lib/providers/CurrentUserProvider.tsx`.
+- `React.memo` is unnecessary for components the compiler can compile, but still valid for ones it skips.
 
 ### Testing Hooks That Call the API
 

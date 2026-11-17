@@ -31,6 +31,8 @@ export function useRecurringExpenseManager() {
   const [templates, setTemplates] = useState<RecurringExpenseTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Kept memoized: it is a dependency of the effect below, so a new identity
+  // per render would re-run the effect and refetch endlessly.
   const load = useCallback(async () => {
     // loading starts true; the first setState lands after the await so the
     // initial fetch doesn't cascade renders from the mount effect.
@@ -49,7 +51,7 @@ export function useRecurringExpenseManager() {
   const { regenerateBudgetMonth } = useRegenerateBudget();
   const queryClient = useQueryClient();
 
-  const syncCurrentMonthBudget = useCallback(async () => {
+  const syncCurrentMonthBudget = async () => {
     const now = new Date();
     try {
       await regenerateBudgetMonth(now.getFullYear(), now.getMonth() + 1);
@@ -57,34 +59,25 @@ export function useRecurringExpenseManager() {
     } catch {
       // Budget sync is best-effort; the budget page's Regenerate covers the rest.
     }
-  }, [regenerateBudgetMonth, queryClient]);
+  };
 
-  const createTemplate = useCallback(
-    async (template: NewRecurringExpenseTemplate) => {
-      const created = await postRecurringExpenseTemplate(template);
-      setTemplates((prev) => [created, ...prev]);
-      await syncCurrentMonthBudget();
-    },
-    [postRecurringExpenseTemplate, syncCurrentMonthBudget],
-  );
+  const createTemplate = async (template: NewRecurringExpenseTemplate) => {
+    const created = await postRecurringExpenseTemplate(template);
+    setTemplates((prev) => [created, ...prev]);
+    await syncCurrentMonthBudget();
+  };
 
-  const updateTemplate = useCallback(
-    async (template: RecurringExpenseTemplate) => {
-      const updated = await patchRecurringExpenseTemplate(template);
-      setTemplates((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
-      await syncCurrentMonthBudget();
-    },
-    [patchRecurringExpenseTemplate, syncCurrentMonthBudget],
-  );
+  const updateTemplate = async (template: RecurringExpenseTemplate) => {
+    const updated = await patchRecurringExpenseTemplate(template);
+    setTemplates((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+    await syncCurrentMonthBudget();
+  };
 
-  const deleteTemplate = useCallback(
-    async (id: string) => {
-      await deleteRecurringExpenseTemplate(id);
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
-      await syncCurrentMonthBudget();
-    },
-    [deleteRecurringExpenseTemplate, syncCurrentMonthBudget],
-  );
+  const deleteTemplate = async (id: string) => {
+    await deleteRecurringExpenseTemplate(id);
+    setTemplates((prev) => prev.filter((t) => t.id !== id));
+    await syncCurrentMonthBudget();
+  };
 
   return { templates, isLoading, createTemplate, updateTemplate, deleteTemplate };
 }

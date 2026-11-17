@@ -1,5 +1,3 @@
-import { useCallback } from 'react';
-
 import { useQuery } from '@tanstack/react-query';
 import { Category } from '../types';
 import { useCategories } from './index';
@@ -17,12 +15,12 @@ interface FetchCategoryProps {
 const useFetchCategories = ({ budgetId, enabled }: FetchCategoryProps) => {
   const { getCategories } = useCategories();
 
-  const fetchCategories = useCallback(() => {
+  const fetchCategories = () => {
     if (!enabled) {
       return [];
     }
     return getCategories(budgetId);
-  }, [getCategories, budgetId, enabled]);
+  };
 
   return useQuery<Category[], Error>({
     queryKey: ['categories', budgetId],

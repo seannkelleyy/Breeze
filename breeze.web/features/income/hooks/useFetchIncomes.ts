@@ -1,5 +1,3 @@
-import { useCallback } from 'react';
-
 import { useQuery } from '@tanstack/react-query';
 import { Income } from '../types';
 import { useIncomes } from './index';
@@ -17,12 +15,12 @@ interface FetchIncomesProps {
 const useFetchIncomes = ({ budgetId, enabled }: FetchIncomesProps) => {
   const { getIncomes } = useIncomes();
 
-  const fetchIncome = useCallback(() => {
+  const fetchIncome = () => {
     if (!enabled) {
       return [];
     }
     return getIncomes(budgetId);
-  }, [getIncomes, budgetId, enabled]);
+  };
 
   return useQuery<Income[], Error>({
     queryKey: ['income', budgetId],

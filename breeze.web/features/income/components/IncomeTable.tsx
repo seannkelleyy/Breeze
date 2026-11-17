@@ -44,8 +44,8 @@ export const IncomeTable = () => {
   const [rowSelection, setRowSelection] = React.useState({});
   const { incomes = [] } = useBudgetContext();
 
-  const columns = React.useMemo<ColumnDef<Income>[]>(() => {
-    return [
+  const columns = React.useMemo<ColumnDef<Income>[]>(
+    () => [
       {
         accessorKey: 'name',
         header: ({ column }) => {
@@ -114,13 +114,12 @@ export const IncomeTable = () => {
           return 'One-time';
         },
       },
-    ];
-  }, []);
+    ],
+    [],
+  );
 
   // Calculate total amount (convert string amounts to numbers)
-  const totalAmount = React.useMemo(() => {
-    return incomes.reduce((sum, income) => sum + (Number(income.amount) || 0), 0);
-  }, [incomes]);
+  const totalAmount = incomes.reduce((sum, income) => sum + (Number(income.amount) || 0), 0);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({

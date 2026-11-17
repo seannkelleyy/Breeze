@@ -70,7 +70,7 @@ const useIncomes = () => {
 
   return useMemo(
     () => ({ getIncomes, postIncome, patchIncome, deleteIncome }),
-    [deleteIncome, getIncomes, patchIncome, postIncome],
+    [getIncomes, postIncome, patchIncome, deleteIncome],
   );
 };
 

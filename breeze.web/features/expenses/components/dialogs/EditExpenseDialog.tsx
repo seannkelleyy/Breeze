@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -80,10 +80,7 @@ export const EditExpenseDialog = ({ existingExpense, children }: EditExpenseDial
 
   const dialogTrigger = <div className="hover:cursor-pointer">{children}</div>;
 
-  const categoryOptions = useMemo(
-    () => categories.map((c) => ({ value: c.id, label: c.name })),
-    [categories],
-  );
+  const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
 
   const inputFields = (
     <>

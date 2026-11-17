@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
 
 interface EntityMutationProps {
@@ -22,10 +21,7 @@ export function createMutationHook<TVars, TService>(
     props: EntityMutationProps = {},
   ): UseMutationResult<unknown, Error, TVars> {
     const service = useService();
-    const mutationFn = useCallback(
-      (variables: TVars) => toMutationFn(service)(variables),
-      [service],
-    );
+    const mutationFn = (variables: TVars) => toMutationFn(service)(variables);
 
     return useMutation({
       mutationFn,

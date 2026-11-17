@@ -1,5 +1,3 @@
-import { useCallback } from 'react';
-
 import { useQuery } from '@tanstack/react-query';
 import { Dayjs } from 'dayjs';
 import { Budget } from '../types';
@@ -19,9 +17,9 @@ export const useFetchBudget = ({ date }: FetchBudgetProps) => {
   const { getBudget } = useBudgets();
   const { regenerateBudgetMonth } = useRegenerateBudget();
 
-  const fetchBudget = useCallback(() => {
+  const fetchBudget = () => {
     return getBudget(date.year(), date.month() + 1);
-  }, [getBudget, date]);
+  };
 
   return useQuery<Budget | null, Error>({
     queryKey: ['budget', date.format('YYYY-MM')],

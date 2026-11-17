@@ -46,8 +46,8 @@ export const ExpensesTable = () => {
   const [nameFilter, setNameFilter] = React.useState('');
   const { categories, expenses } = useBudgetContext();
 
-  const columns = React.useMemo<ColumnDef<Expense>[]>(() => {
-    return [
+  const columns = React.useMemo<ColumnDef<Expense>[]>(
+    () => [
       {
         accessorKey: 'description',
         header: ({ column }) => {
@@ -143,19 +143,23 @@ export const ExpensesTable = () => {
           return <span className="text-muted-foreground text-sm">One-time</span>;
         },
       },
-    ];
-  }, [categories]);
+    ],
+    [categories],
+  );
 
-  const filteredExpenses = React.useMemo(() => {
-    if (!activeCategory) return expenses;
-    return expenses.filter((expense) => {
-      // Check if any split in this expense belongs to the active category
-      return expense.splits.some((split) => {
-        const category = categories.find((cat) => cat.id === split.categoryId);
-        return category?.name === activeCategory;
-      });
-    });
-  }, [activeCategory, expenses, categories]);
+  const filteredExpenses = React.useMemo(
+    () =>
+      activeCategory
+        ? expenses.filter((expense) => {
+            // Check if any split in this expense belongs to the active category
+            return expense.splits.some((split) => {
+              const category = categories.find((cat) => cat.id === split.categoryId);
+              return category?.name === activeCategory;
+            });
+          })
+        : expenses,
+    [activeCategory, expenses, categories],
+  );
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({

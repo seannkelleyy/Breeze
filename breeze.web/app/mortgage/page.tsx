@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useCallback, useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 
@@ -127,22 +127,19 @@ const MortgageTools = () => {
   const [homeValue, setHomeValue] = useState(625000);
   const [homeAnnualGrowthRate, setHomeAnnualGrowthRate] = useState(4);
 
-  const handleSelectPair = useCallback(
-    (id: string) => {
-      setSelectedId(id);
-      if (id === 'manual') return;
-      const pair = pairs?.find((p) => p.id === id);
-      if (!pair) return;
-      setMortgageBalance(pair.mortgageBalance);
-      setMortgageOriginalAmount(pair.originalLoanAmount);
-      setMortgageRate(pair.interestRate);
-      setMortgagePayment(pair.monthlyPayment);
-      setMortgageRemainingMonths(pair.remainingMonths);
-      setHomeValue(pair.homeValue);
-      setHomeAnnualGrowthRate(pair.homeAnnualGrowthRate);
-    },
-    [pairs],
-  );
+  const handleSelectPair = (id: string) => {
+    setSelectedId(id);
+    if (id === 'manual') return;
+    const pair = pairs?.find((p) => p.id === id);
+    if (!pair) return;
+    setMortgageBalance(pair.mortgageBalance);
+    setMortgageOriginalAmount(pair.originalLoanAmount);
+    setMortgageRate(pair.interestRate);
+    setMortgagePayment(pair.monthlyPayment);
+    setMortgageRemainingMonths(pair.remainingMonths);
+    setHomeValue(pair.homeValue);
+    setHomeAnnualGrowthRate(pair.homeAnnualGrowthRate);
+  };
 
   const homeLoan = {
     accountName:

@@ -65,7 +65,7 @@ function DebtsContent() {
   const [extraPayment, setExtraPayment] = useState(0);
   const { debts, plan, isLoading } = useDebtPayoffPlan(extraPayment);
 
-  const chartConfig = useMemo(() => {
+  const chartConfig = useMemo<ChartConfig>(() => {
     const config: ChartConfig = {};
     debts.forEach((debt, index) => {
       config[debt.id] = { label: debt.name, color: LINE_PALETTE[index % LINE_PALETTE.length] };
@@ -73,13 +73,13 @@ function DebtsContent() {
     return config;
   }, [debts]);
 
+  // Sample the timeline so long plans stay chartable.
   const chartData = useMemo(() => {
-    // Sample the timeline so long plans stay chartable.
-    const step = Math.max(1, Math.ceil(plan.timeline.length / 240));
-    return plan.timeline.filter((_, i) => i % step === 0 || i === plan.timeline.length - 1);
+    const chartStep = Math.max(1, Math.ceil(plan.timeline.length / 240));
+    return plan.timeline.filter((_, i) => i % chartStep === 0 || i === plan.timeline.length - 1);
   }, [plan.timeline]);
 
-  const nameById = useMemo(() => Object.fromEntries(debts.map((d) => [d.id, d.name])), [debts]);
+  const nameById = Object.fromEntries(debts.map((d) => [d.id, d.name]));
 
   if (isLoading) {
     return (

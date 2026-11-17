@@ -1,6 +1,5 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
@@ -12,20 +11,14 @@ export function useTabParam<T extends string>(defaultValue: T, validValues: read
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const tab = useMemo(() => {
-    const param = searchParams.get('tab') as T | null;
-    if (param && validValues.includes(param)) return param;
-    return defaultValue;
-  }, [searchParams, defaultValue, validValues]);
+  const param = searchParams.get('tab') as T | null;
+  const tab = param && validValues.includes(param) ? param : defaultValue;
 
-  const setTab = useCallback(
-    (value: T) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('tab', value);
-      router.replace(`?${params.toString()}`, { scroll: false });
-    },
-    [router, searchParams],
-  );
+  const setTab = (value: T) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', value);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
 
   return [tab, setTab] as const;
 }

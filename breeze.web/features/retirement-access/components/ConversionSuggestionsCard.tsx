@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -36,47 +36,34 @@ const ConversionSuggestionsCard = ({ conversions }: { conversions: RothConversio
 
   const [targetRate, setTargetRate] = useState(0.12);
 
-  const pretaxBalance = useMemo(
-    () =>
-      accounts
-        .filter((a) => ['traditional-ira', '401k', '403b', '457'].includes(a.accountType))
-        .reduce((sum, a) => sum + Math.max(0, a.startingBalance), 0),
-    [accounts],
-  );
+  const pretaxBalance = accounts
+    .filter((a) => ['traditional-ira', '401k', '403b', '457'].includes(a.accountType))
+    .reduce((sum, a) => sum + Math.max(0, a.startingBalance), 0);
 
-  const householdSalary = useMemo(
-    () => householdPeople.reduce((sum, p) => sum + Math.max(0, p.annualSalary), 0),
-    [householdPeople],
-  );
+  const householdSalary = householdPeople.reduce((sum, p) => sum + Math.max(0, p.annualSalary), 0);
 
-  const convertedByYear = useMemo(() => {
-    const totals = new Map<number, number>();
-    for (const conversion of conversions) {
-      const year = Number(conversion.convertedOn.slice(0, 4));
-      totals.set(year, (totals.get(year) ?? 0) + Number(conversion.amount));
-    }
-    return totals;
-  }, [conversions]);
+  const convertedByYear = new Map<number, number>();
+  for (const conversion of conversions) {
+    const year = Number(conversion.convertedOn.slice(0, 4));
+    convertedByYear.set(year, (convertedByYear.get(year) ?? 0) + Number(conversion.amount));
+  }
 
-  const rows = useMemo(() => {
-    if (!taxTables || currentAge <= 0) return [];
-    return buildConversionSuggestions({
-      currentYear: new Date().getFullYear(),
-      currentAge,
-      retirementAge: targetAge,
-      annualSalary: householdSalary,
-      brackets: taxTables.brackets,
-      standardDeduction: taxTables.standardDeduction,
-      pretaxBalance,
-      targetRate,
-      years: Math.min(30, Math.max(10, targetAge - currentAge + 11)),
-    });
-  }, [taxTables, currentAge, targetAge, householdSalary, pretaxBalance, targetRate]);
+  const rows =
+    !taxTables || currentAge <= 0
+      ? []
+      : buildConversionSuggestions({
+          currentYear: new Date().getFullYear(),
+          currentAge,
+          retirementAge: targetAge,
+          annualSalary: householdSalary,
+          brackets: taxTables.brackets,
+          standardDeduction: taxTables.standardDeduction,
+          pretaxBalance,
+          targetRate,
+          years: Math.min(30, Math.max(10, targetAge - currentAge + 11)),
+        });
 
-  const rates = useMemo(
-    () => [...new Set((taxTables?.brackets ?? []).map((b) => b.rate))].sort((a, b) => a - b),
-    [taxTables],
-  );
+  const rates = [...new Set((taxTables?.brackets ?? []).map((b) => b.rate))].sort((a, b) => a - b);
 
   if (!taxTables) {
     return null;

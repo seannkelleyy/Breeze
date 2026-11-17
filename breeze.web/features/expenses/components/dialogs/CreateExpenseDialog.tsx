@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -71,10 +71,7 @@ export const CreateExpenseDialog = () => {
 
   const dialogTrigger = <Button>Add Expense</Button>;
 
-  const categoryOptions = React.useMemo(
-    () => categories.map((c) => ({ value: c.id, label: c.name })),
-    [categories],
-  );
+  const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
 
   const inputFields = (
     <>

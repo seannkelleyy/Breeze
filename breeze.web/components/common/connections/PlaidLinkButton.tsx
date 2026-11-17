@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
 import { Button } from '@/components/ui/button';
 import { useExchangePlaidToken, useCreateLinkToken } from '@/features/connections/hooks/usePlaid';
@@ -37,20 +37,17 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
     });
   }, [userId, createLinkToken]);
 
-  const onPlaidSuccess = useCallback(
-    (publicToken: string | null) => {
-      if (!userId || !publicToken) return;
+  const onPlaidSuccess = (publicToken: string | null) => {
+    if (!userId || !publicToken) return;
 
-      exchangeToken(
-        { userId, publicToken },
-        {
-          onSuccess: () => onSuccessRef.current?.(),
-          onError: () => onErrorRef.current?.('Failed to connect account'),
-        },
-      );
-    },
-    [userId, exchangeToken],
-  );
+    exchangeToken(
+      { userId, publicToken },
+      {
+        onSuccess: () => onSuccessRef.current?.(),
+        onError: () => onErrorRef.current?.('Failed to connect account'),
+      },
+    );
+  };
 
   const { open, ready } = usePlaidLink({
     token: linkToken,

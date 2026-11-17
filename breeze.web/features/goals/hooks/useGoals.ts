@@ -60,8 +60,7 @@ export function useGoals() {
     if (isLoaded && userId && !isLoading && goals !== undefined && footSteps.length === 0) {
       createFinancialOrderSteps();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, userId, isLoading, goals]);
+  }, [isLoaded, userId, isLoading, goals, footSteps, createFinancialOrderSteps]);
 
   // Auto-check FOO steps based on planner data
   const completionStatus = useMemo(
@@ -98,8 +97,7 @@ export function useGoals() {
     if (stepsToCheck.length > 0) {
       autoCheckFooSteps(stepsToCheck);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [completionStatus, footSteps]);
+  }, [isLoading, footSteps, completionStatus, autoCheckFooSteps]);
 
   return {
     footSteps,

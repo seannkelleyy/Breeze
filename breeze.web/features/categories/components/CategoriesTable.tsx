@@ -121,10 +121,7 @@ export const CategoriesTable = () => {
     state: { sorting, columnFilters, columnVisibility },
   });
 
-  const totalAllocation = React.useMemo(
-    () => categories.reduce((s, c) => s + (Number(c.allocation) || 0), 0),
-    [categories],
-  );
+  const totalAllocation = categories.reduce((s, c) => s + (Number(c.allocation) || 0), 0);
 
   return (
     <section title="Budget Categories" className="w-full">
