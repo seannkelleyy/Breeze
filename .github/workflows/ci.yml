@@ -7,7 +7,7 @@ on:
 
 jobs:
   api:
-    name: API — lint & test
+    name: API — vet, lint, test & build
     runs-on: ubuntu-24.04
     services:
       postgres:
@@ -42,8 +42,12 @@ jobs:
         with:
           working-directory: breeze.api
           version: v2.14.0
+      - name: Vet
+        run: go vet ./...
       - name: Test
         run: go test ./... -count=1
+      - name: Build API
+        run: go build -o /tmp/breeze-api ./cmd/api/...
 
   web:
     name: Web — typecheck, lint, test, build
@@ -60,6 +64,8 @@ jobs:
           cache-dependency-path: breeze.web/package-lock.json
       - name: Install dependencies
         run: npm ci
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
       - name: Typecheck
         run: npm run typecheck
       - name: Lint

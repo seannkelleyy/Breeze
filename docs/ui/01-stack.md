@@ -186,6 +186,8 @@ table's `title` region. Keep the number of these interaction tests small: they c
 `vitest.config.mts` measures `app/`, `features/`, `lib/`, and `components/`; the headline number
 is depressed by UI chrome and generated GraphQL types, so judge logic coverage separately with
 `--coverage.include='{features/**/lib/**,lib/calc/**,features/**/hooks/**,lib/hooks/**,features/**/providers/**}'`.
+CI also runs `npm audit --omit=dev --audit-level=high` to block high-severity production
+dependency advisories.
 
 ### Data Fetching (TanStack React Query)
 

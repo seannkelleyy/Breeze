@@ -1,6 +1,6 @@
 # 04 — Development Workflow
 
-CI (GitHub Actions, `.github/workflows/ci.yml`) runs on every push and PR: API lint + full tests (against a Postgres service with migrations applied — integration tests included), and the web typecheck/lint/test/build gate.
+CI (GitHub Actions, `.github/workflows/ci.yml`) runs on every push and PR: API vet, lint, full tests (against a Postgres service with migrations applied — integration tests included), and a compiled API binary. The web job audits production dependencies, then runs typecheck, lint, tests, and a production build.
 
 ## The Core Loop
 
