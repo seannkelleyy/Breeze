@@ -26,7 +26,7 @@ func (p *fakeDatabasePinger) Ping(ctx context.Context) error {
 func TestHealthHandlerReturnsOKWhenDatabaseIsReachable(t *testing.T) {
 	pinger := &fakeDatabasePinger{}
 	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "/health", nil)
+	request := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 
 	NewHandler(pinger).ServeHTTP(recorder, request)
 
@@ -48,7 +48,7 @@ func TestHealthHandlerReturnsOKWhenDatabaseIsReachable(t *testing.T) {
 func TestHealthHandlerReturnsUnavailableWhenDatabasePingFails(t *testing.T) {
 	pinger := &fakeDatabasePinger{err: errors.New("private database details")}
 	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "/health", nil)
+	request := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 
 	NewHandler(pinger).ServeHTTP(recorder, request)
 
