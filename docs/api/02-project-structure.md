@@ -41,6 +41,10 @@ breeze.api/
 │   ├── dataloader/                  # DataLoaders — one per batched query
 │   │   └── loaders.go
 │   │
+│   ├── health/                      # HTTP health endpoint and database readiness check
+│   │   ├── handler.go
+│   │   └── handler_test.go
+│   │
 │   ├── jobs/                        # River workers (background jobs)
 │   │   └── ...
 │   │

@@ -85,6 +85,7 @@ API runs on Render's native Go runtime with a managed Render Postgres linked to 
 | Build Command | `CGO_ENABLED=0 go build -ldflags="-w -s" -o bin/api ./cmd/api` |
 | Pre-Deploy Command | `make migrate-deploy && go run ./cmd/seed` |
 | Start Command | `./bin/api` |
+| Health Check Path | `/health` (database ping; returns 503 if unavailable) |
 
 - `make migrate-deploy` downloads the atlas binary straight to `bin/atlas` and runs it — the official install script needs `sudo` (absent on Render), and `go run ariga.io/atlas/cmd/atlas@latest` resolves to a 2023 module version that doesn't compile on modern Go.
 - Pre-deploy runs once per deploy — a failed migration blocks the rollout instead of crash-looping the API.

@@ -20,6 +20,7 @@ import (
 	"breeze.api/internal/config"
 	"breeze.api/internal/db"
 	dbsqlc "breeze.api/internal/db/sqlc"
+	"breeze.api/internal/health"
 	"breeze.api/internal/middleware"
 	"breeze.api/internal/service"
 )
@@ -127,14 +128,8 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// Health check (public)
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		if _, err := fmt.Fprintln(w, "ok"); err != nil {
-			slog.Error("health check write error", "error", err)
-			sentry.CaptureException(err)
-		}
-	})
+	// Health check (public) verifies the database is reachable before reporting ready.
+	mux.HandleFunc("/health", health.NewHandler(pool))
 
 	mux.Handle("/graphql", playground.Handler("GraphQL", "/query"))
 
