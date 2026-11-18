@@ -1,17 +1,17 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 export function usePlannerUiState() {
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
     accountBreakdown: false,
   });
 
-  const toggleSection = useCallback((sectionId: string) => {
+  const toggleSection = (sectionId: string) => {
     setCollapsedSections((prev) => ({
       ...prev,
       [sectionId]: !prev[sectionId],
     }));
-  }, []);
+  };
 
   return { collapsedSections, toggleSection };
 }

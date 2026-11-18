@@ -143,11 +143,14 @@ memoized at build time. Consequences for everyday code:
 
 - **New code** does not need `useMemo`/`useCallback` for render performance. Derive values inline and
   define plain functions inside the component.
-- **Existing memos stay.** They are correct and cheap. Delete one only when you are already editing
-  that code and the value is trivially cheap.
+- **The repo has been swept.** Render-only memos were removed across `app/`, `features/`, `lib/`, and
+  `components/`. The handful that remain are deliberate; do not delete them without checking why.
 - **Keep a memo when identity is the point**, not the computation: context provider `value` objects,
   callbacks used in effect dependency arrays, and arrays/objects handed to third-party hooks that
   compare by identity (TanStack Table columns, Recharts `data`, React Query `queryKey`).
+- **Vitest does not run the compiler.** Never write a test that asserts a hook's return object is
+  `Object.is`-stable across rerenders — with the memo gone, identity is only stable in built output.
+  Assert behavior (results, request documents, cache contents) instead.
 - **Never disable a React rule.** The compiler skips any component or hook containing
   `eslint-disable(-next-line) react-hooks/...`, and the build fails on that skip
   (`panicThreshold: 'critical_errors'`). Fix the dependency array, or keep the latest value in a ref

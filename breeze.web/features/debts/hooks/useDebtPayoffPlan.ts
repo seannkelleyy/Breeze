@@ -1,5 +1,4 @@
 'use client';
-import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
@@ -26,30 +25,22 @@ export function useDebtPayoffPlan(extraPayment: number) {
     enabled: !!userId,
   });
 
-  const debts: DebtPayoffDebt[] = useMemo(
-    () =>
-      (liabilities ?? [])
-        .map((l) => ({
-          id: l.id,
-          name: l.name,
-          liabilityType: l.liabilityType,
-          balance: Number(l.currentBalance),
-          annualRatePercent: Number(l.interestRate) * 100,
-          minimumPayment: Number(l.minimumPayment),
-        }))
-        .filter((d) => d.balance > 0),
-    [liabilities],
-  );
+  const debts: DebtPayoffDebt[] = (liabilities ?? [])
+    .map((l) => ({
+      id: l.id,
+      name: l.name,
+      liabilityType: l.liabilityType,
+      balance: Number(l.currentBalance),
+      annualRatePercent: Number(l.interestRate) * 100,
+      minimumPayment: Number(l.minimumPayment),
+    }))
+    .filter((d) => d.balance > 0);
 
-  const plan = useMemo(
-    () =>
-      buildDebtPayoffPlan({
-        debts,
-        extraMonthlyPayment: extraPayment,
-        strategy: payoffStrategy,
-      }),
-    [debts, extraPayment, payoffStrategy],
-  );
+  const plan = buildDebtPayoffPlan({
+    debts,
+    extraMonthlyPayment: extraPayment,
+    strategy: payoffStrategy,
+  });
 
   return { debts, plan, isLoading };
 }

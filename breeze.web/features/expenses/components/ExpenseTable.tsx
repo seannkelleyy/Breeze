@@ -46,120 +46,113 @@ export const ExpensesTable = () => {
   const [nameFilter, setNameFilter] = React.useState('');
   const { categories, expenses } = useBudgetContext();
 
-  const columns = React.useMemo<ColumnDef<Expense>[]>(
-    () => [
-      {
-        accessorKey: 'description',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              className="flex items-center px-1 text-xs sm:text-sm"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Name
-              <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          );
-        },
+  const columns: ColumnDef<Expense>[] = [
+    {
+      accessorKey: 'description',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            className="flex items-center px-1 text-xs sm:text-sm"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Name
+            <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
+          </Button>
+        );
       },
-      {
-        accessorKey: 'amount',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              className="flex items-center px-1 text-xs sm:text-sm"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Amount
-              <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          );
-        },
-        cell: ({ row }) => {
-          const amount = row.getValue('amount') as number;
-          return formatCurrencyWithCode(amount, 'USD');
-        },
+    },
+    {
+      accessorKey: 'amount',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            className="flex items-center px-1 text-xs sm:text-sm"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Amount
+            <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
+          </Button>
+        );
       },
-      {
-        accessorKey: 'date',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              className="flex items-center px-1 text-xs sm:text-sm"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Date
-              <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          );
-        },
-        cell: ({ row }) => {
-          const date = row.getValue('date') as string | number | Date | null | undefined;
-          return dayjs(date).format('MMMM D, YYYY');
-        },
+      cell: ({ row }) => {
+        const amount = row.getValue('amount') as number;
+        return formatCurrencyWithCode(amount, 'USD');
       },
-      {
-        accessorKey: 'splits',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              className="flex items-center px-1 text-xs sm:text-sm"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Categories
-              <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          );
-        },
-        cell: ({ row }) => {
-          const splits = row.getValue('splits') as { categoryId: string }[] | undefined;
-          if (!splits || splits.length === 0) return 'None';
-          const categoryNames = splits
-            .map((split) => {
-              const category = categories.find((cat) => cat.id === split.categoryId);
-              return category?.name ?? 'Unknown';
-            })
-            .join(', ');
-          return categoryNames;
-        },
+    },
+    {
+      accessorKey: 'date',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            className="flex items-center px-1 text-xs sm:text-sm"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Date
+            <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
+          </Button>
+        );
       },
-      {
-        id: 'schedule',
-        header: 'Status',
-        cell: ({ row }) => {
-          const expense = row.original as Expense;
-          if (expense.sourceType === 'RECURRING_TEMPLATE') {
-            const expenseDate = dayjs(expense.date);
-            const today = dayjs().startOf('day');
-            if (expenseDate.isAfter(today)) {
-              return <Badge variant="outline">Upcoming</Badge>;
-            }
-            return <Badge variant="secondary">Recurring</Badge>;
-          }
-          return <span className="text-muted-foreground text-sm">One-time</span>;
-        },
+      cell: ({ row }) => {
+        const date = row.getValue('date') as string | number | Date | null | undefined;
+        return dayjs(date).format('MMMM D, YYYY');
       },
-    ],
-    [categories],
-  );
-
-  const filteredExpenses = React.useMemo(
-    () =>
-      activeCategory
-        ? expenses.filter((expense) => {
-            // Check if any split in this expense belongs to the active category
-            return expense.splits.some((split) => {
-              const category = categories.find((cat) => cat.id === split.categoryId);
-              return category?.name === activeCategory;
-            });
+    },
+    {
+      accessorKey: 'splits',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            className="flex items-center px-1 text-xs sm:text-sm"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Categories
+            <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
+          </Button>
+        );
+      },
+      cell: ({ row }) => {
+        const splits = row.getValue('splits') as { categoryId: string }[] | undefined;
+        if (!splits || splits.length === 0) return 'None';
+        const categoryNames = splits
+          .map((split) => {
+            const category = categories.find((cat) => cat.id === split.categoryId);
+            return category?.name ?? 'Unknown';
           })
-        : expenses,
-    [activeCategory, expenses, categories],
-  );
+          .join(', ');
+        return categoryNames;
+      },
+    },
+    {
+      id: 'schedule',
+      header: 'Status',
+      cell: ({ row }) => {
+        const expense = row.original as Expense;
+        if (expense.sourceType === 'RECURRING_TEMPLATE') {
+          const expenseDate = dayjs(expense.date);
+          const today = dayjs().startOf('day');
+          if (expenseDate.isAfter(today)) {
+            return <Badge variant="outline">Upcoming</Badge>;
+          }
+          return <Badge variant="secondary">Recurring</Badge>;
+        }
+        return <span className="text-muted-foreground text-sm">One-time</span>;
+      },
+    },
+  ];
+
+  const filteredExpenses = activeCategory
+    ? expenses.filter((expense) => {
+        // Check if any split in this expense belongs to the active category
+        return expense.splits.some((split) => {
+          const category = categories.find((cat) => cat.id === split.categoryId);
+          return category?.name === activeCategory;
+        });
+      })
+    : expenses;
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({

@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useMemo, useState } from 'react';
+import { Suspense, useState } from 'react';
 import { Line } from 'recharts';
 import { Loader2, TrendingDown } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,19 +65,16 @@ function DebtsContent() {
   const [extraPayment, setExtraPayment] = useState(0);
   const { debts, plan, isLoading } = useDebtPayoffPlan(extraPayment);
 
-  const chartConfig = useMemo<ChartConfig>(() => {
-    const config: ChartConfig = {};
-    debts.forEach((debt, index) => {
-      config[debt.id] = { label: debt.name, color: LINE_PALETTE[index % LINE_PALETTE.length] };
-    });
-    return config;
-  }, [debts]);
+  const chartConfig: ChartConfig = {};
+  debts.forEach((debt, index) => {
+    chartConfig[debt.id] = { label: debt.name, color: LINE_PALETTE[index % LINE_PALETTE.length] };
+  });
 
   // Sample the timeline so long plans stay chartable.
-  const chartData = useMemo(() => {
-    const chartStep = Math.max(1, Math.ceil(plan.timeline.length / 240));
-    return plan.timeline.filter((_, i) => i % chartStep === 0 || i === plan.timeline.length - 1);
-  }, [plan.timeline]);
+  const chartStep = Math.max(1, Math.ceil(plan.timeline.length / 240));
+  const chartData = plan.timeline.filter(
+    (_, i) => i % chartStep === 0 || i === plan.timeline.length - 1,
+  );
 
   const nameById = Object.fromEntries(debts.map((d) => [d.id, d.name]));
 

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import * as plannerConfig from '@/features/planning/lib/config';
@@ -49,16 +49,13 @@ const usePlannerModel = () => {
   // The retirement-access ledger (saved HSA receipts + conversion clocks) turns
   // the projection's drawdown from proportional into tax-ordered sequencing.
   const { data: retirementAccess } = useRetirementAccess(userId);
-  const withdrawalPlan = useMemo(
-    () => ({
-      hsaReceiptBalance: Number(retirementAccess?.hsaSummary.availableToReimburse ?? 0) || 0,
-      conversionBuckets: (retirementAccess?.rothBuckets ?? []).map((b) => ({
-        availableOn: b.availableOn,
-        amount: Number(b.amount),
-      })),
-    }),
-    [retirementAccess],
-  );
+  const withdrawalPlan = {
+    hsaReceiptBalance: Number(retirementAccess?.hsaSummary.availableToReimburse ?? 0) || 0,
+    conversionBuckets: (retirementAccess?.rothBuckets ?? []).map((b) => ({
+      availableOn: b.availableOn,
+      amount: Number(b.amount),
+    })),
+  };
   const { irsLimits } = useIrsLimits();
   const taxTables = useTaxYear(filingStatus);
   const { deductions: allWithholdings } = usePaycheckDeductions(null);
@@ -66,10 +63,7 @@ const usePlannerModel = () => {
   const useInflationAdjustedValues = returnDisplayMode === 'real';
 
   // Monthly expenses come from the Expenses tab's recurring expense templates
-  const monthlyExpenses = useMemo(
-    () => getRecurringExpensesMonthlyTotal(recurringExpenseTemplates ?? []),
-    [recurringExpenseTemplates],
-  );
+  const monthlyExpenses = getRecurringExpensesMonthlyTotal(recurringExpenseTemplates ?? []);
 
   const household = useHouseholdCalculation(plannerPeople);
 
@@ -80,28 +74,25 @@ const usePlannerModel = () => {
   // Market stress test: negative shift applied to every asset's projected
   // return (liabilities excluded) — a what-if for bad market sequences.
   const [marketAdjustment, setMarketAdjustment] = useState(0);
-  const effectiveHousehold = useMemo(
-    () => ({ ...household, targetAge: retirementAgeOverride ?? household.targetAge }),
-    [household, retirementAgeOverride],
-  );
+  const effectiveHousehold = {
+    ...household,
+    targetAge: retirementAgeOverride ?? household.targetAge,
+  };
 
   // Exclude linked liabilities from calculations — their data is already
   // incorporated into the parent asset's equity via getAssetFinanceSnapshot.
-  const { filteredAccounts, linkedDebtPrincipalMonthly } = useMemo(() => {
-    // Linked liabilities are excluded from the working set — their balance
-    // already rides in the parent asset's equity — but their principal
-    // paydown is reported separately so the savings rate still credits it.
-    const linkedIds = new Set(
-      plannerAccounts
-        .filter((a) => isCombinedAssetType(a.accountType) && a.linkedLiabilityId)
-        .map((a) => a.linkedLiabilityId!),
-    );
-    const filtered = plannerAccounts.filter((a) => !linkedIds.has(a.id));
-    const linkedPrincipal = plannerAccounts
-      .filter((a) => linkedIds.has(a.id))
-      .reduce((sum, a) => sum + getLiabilityPrincipalMonthly(a, plannerPeople), 0);
-    return { filteredAccounts: filtered, linkedDebtPrincipalMonthly: linkedPrincipal };
-  }, [plannerAccounts, plannerPeople]);
+  // Linked liabilities are excluded from the working set — their balance
+  // already rides in the parent asset's equity — but their principal paydown is
+  // reported separately so the savings rate still credits it.
+  const linkedIds = new Set(
+    plannerAccounts
+      .filter((a) => isCombinedAssetType(a.accountType) && a.linkedLiabilityId)
+      .map((a) => a.linkedLiabilityId!),
+  );
+  const filteredAccounts = plannerAccounts.filter((a) => !linkedIds.has(a.id));
+  const linkedDebtPrincipalMonthly = plannerAccounts
+    .filter((a) => linkedIds.has(a.id))
+    .reduce((sum, a) => sum + getLiabilityPrincipalMonthly(a, plannerPeople), 0);
   const portfolio = usePortfolioCalculation(
     filteredAccounts,
     plannerAssetFinanceDetailsByAccountId,
@@ -158,17 +149,16 @@ const usePlannerModel = () => {
   // Every goal worth tracking gets a milestone row: the five FIRE lifestyles
   // and income replacement, sorted by target so the table reads as a ladder.
   // Custom is always pinned last, regardless of its amount.
-  const milestoneTargets = useMemo(() => {
-    const sorted = [
-      ...targets.fireTargets.map((ft) => ({ label: ft.label, target: ft.target })),
-      { label: 'Income replacement', target: targets.incomeReplacementTarget },
-    ]
-      .filter((m) => m.target > 0)
-      .sort((a, b) => a.target - b.target);
-    return plannerDesiredInvestmentAmount > 0
-      ? [...sorted, { label: 'Custom', target: plannerDesiredInvestmentAmount }]
-      : sorted;
-  }, [targets.fireTargets, targets.incomeReplacementTarget, plannerDesiredInvestmentAmount]);
+  const sortedMilestoneTargets = [
+    ...targets.fireTargets.map((ft) => ({ label: ft.label, target: ft.target })),
+    { label: 'Income replacement', target: targets.incomeReplacementTarget },
+  ]
+    .filter((m) => m.target > 0)
+    .sort((a, b) => a.target - b.target);
+  const milestoneTargets =
+    plannerDesiredInvestmentAmount > 0
+      ? [...sortedMilestoneTargets, { label: 'Custom', target: plannerDesiredInvestmentAmount }]
+      : sortedMilestoneTargets;
   const milestones = useFireAchievementAges(projectionRows, milestoneTargets, household.currentAge);
   const accountBreakdownRows = useAccountBreakdown(
     filteredAccounts,

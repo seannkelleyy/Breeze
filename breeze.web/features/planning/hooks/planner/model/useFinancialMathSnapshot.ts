@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import { getFinancialMathSnapshot } from '../../../lib/tax';
 import { computeHouseholdWaterfall } from '../../../lib/paycheck';
 import type { PaycheckWithholding } from '../../../lib/paycheck';
@@ -20,40 +18,24 @@ export function useFinancialMathSnapshot(
   withholdings: PaycheckWithholding[],
   filingStatus: string,
 ) {
-  return useMemo(
-    () =>
-      getFinancialMathSnapshot(
-        {
-          monthlyExpenses,
-          selfSalary: household.annualHouseholdIncome,
-          spouseSalary: 0,
-          safeWithdrawalRate,
-          currentPortfolio: portfolio.totalStartingBalance,
-          emergencyFundBalance: portfolio.emergencyFundBalance,
-          deductionType,
-        },
-        taxTables,
-        computeHouseholdWaterfall(
-          people,
-          accounts,
-          withholdings,
-          taxTables,
-          deductionType,
-          filingStatus,
-        ),
-      ),
-    [
+  return getFinancialMathSnapshot(
+    {
       monthlyExpenses,
-      household.annualHouseholdIncome,
+      selfSalary: household.annualHouseholdIncome,
+      spouseSalary: 0,
       safeWithdrawalRate,
-      portfolio.totalStartingBalance,
-      portfolio.emergencyFundBalance,
-      taxTables,
+      currentPortfolio: portfolio.totalStartingBalance,
+      emergencyFundBalance: portfolio.emergencyFundBalance,
       deductionType,
+    },
+    taxTables,
+    computeHouseholdWaterfall(
       people,
       accounts,
       withholdings,
+      taxTables,
+      deductionType,
       filingStatus,
-    ],
+    ),
   );
 }

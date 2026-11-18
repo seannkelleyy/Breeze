@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import * as plannerConfig from '../../lib/config';
 import * as plannerConstants from '../../lib/constants';
 
@@ -48,20 +46,16 @@ const usePlannerAccounts = () => {
   getPlannerHouseholdSnapshot(people);
 
   // ─── Derived options ──────────────────────────────────────
-  const accountRateProfileOptions = useMemo(
-    () =>
-      plannerConfig.accountRateProfileOptions.map((option) => {
-        if (option.value === 'custom') return option;
-        if (option.value === 'none') return option;
-        const nominalRate = plannerConstants.PLANNER_ACCOUNT_RATE_PROFILE_RATES[option.value];
-        const displayRate = useInflationAdjustedValues
-          ? getRealAnnualRatePercent(nominalRate, inflationRate)
-          : nominalRate;
-        const labelPrefix = option.label.split(' (')[0];
-        return { ...option, label: `${labelPrefix} (${displayRate.toFixed(1)}%)` };
-      }),
-    [inflationRate, useInflationAdjustedValues],
-  );
+  const accountRateProfileOptions = plannerConfig.accountRateProfileOptions.map((option) => {
+    if (option.value === 'custom') return option;
+    if (option.value === 'none') return option;
+    const nominalRate = plannerConstants.PLANNER_ACCOUNT_RATE_PROFILE_RATES[option.value];
+    const displayRate = useInflationAdjustedValues
+      ? getRealAnnualRatePercent(nominalRate, inflationRate)
+      : nominalRate;
+    const labelPrefix = option.label.split(' (')[0];
+    return { ...option, label: `${labelPrefix} (${displayRate.toFixed(1)}%)` };
+  });
 
   // ─── Rate helpers ─────────────────────────────────────────
   const getDisplayedRateForAccount = (account: PlannerAccount) =>
@@ -89,10 +83,7 @@ const usePlannerAccounts = () => {
     totalPlannedMonthlyMatch,
     totalPlannedMonthlyDebtPrincipal,
     totalPlannedMonthlyInvestment: computedTotal,
-  } = useMemo(
-    () => getPlannerContributionTotals(plannerAccounts, people),
-    [plannerAccounts, people],
-  );
+  } = getPlannerContributionTotals(plannerAccounts, people);
   const totalPlannedMonthlyInvestment =
     plannerSummary?.totalPlannedMonthlyInvestment ?? computedTotal;
   const weightedAnnualRate = plannerSummary?.weightedAnnualRate ?? 0;

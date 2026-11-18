@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -65,7 +65,7 @@ const AccountsCardInner = ({ collapsed }: { collapsed: boolean }) => {
   const { getSuggestedAnnualLimitForAccount } = helpers;
   const { addAccount, addLiability } = editor;
 
-  const filteredAccounts = useMemo(() => {
+  const filteredAccounts = (() => {
     let accounts: PlannerAccount[];
     switch (accountFilter) {
       case 'assets':
@@ -93,14 +93,7 @@ const AccountsCardInner = ({ collapsed }: { collapsed: boolean }) => {
       const typeB = ACCOUNT_TYPE_ORDER[b.accountType] ?? 99;
       return typeA - typeB;
     });
-  }, [
-    accountFilter,
-    plannerAccounts,
-    assetFinanceDetailsByAccountId,
-    isLiabilityAccountType,
-    isCombinedAssetType,
-    getSuggestedAnnualLimitForAccount,
-  ]);
+  })();
 
   const filterButtons: { key: AccountFilter; label: string }[] = [
     { key: 'all', label: 'All' },

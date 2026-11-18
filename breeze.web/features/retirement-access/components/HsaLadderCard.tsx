@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Plus, Receipt, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,7 @@ export function HsaLadderCard({ receipts }: { receipts: HsaReceipt[] }) {
   const [error, setError] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<HsaReceipt | null>(null);
 
-  const byYear = useMemo(() => {
+  const byYear = (() => {
     const groups = new Map<number, HsaReceipt[]>();
     for (const receipt of receipts) {
       const year = Number(receipt.incurredOn.slice(0, 4));
@@ -36,7 +36,7 @@ export function HsaLadderCard({ receipts }: { receipts: HsaReceipt[] }) {
       groups.set(year, list);
     }
     return [...groups.entries()].sort((a, b) => b[0] - a[0]);
-  }, [receipts]);
+  })();
 
   const handleAdd = async () => {
     setError(null);

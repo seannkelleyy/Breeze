@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { PieChart, Plus, Trash2, TrendingUp } from 'lucide-react';
 import { Line } from 'recharts';
 import type { ChartConfig } from '@/components/ui/chart';
@@ -54,14 +54,10 @@ export function NetWorthHistoryCard({ userId, currencyCode, accounts }: NetWorth
   const [showAdd, setShowAdd] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const chartData = useMemo(
-    () =>
-      snapshots.map((s) => ({
-        date: s.snapshotDate.slice(0, 10),
-        netWorth: s.netWorth,
-      })),
-    [snapshots],
-  );
+  const chartData = snapshots.map((s) => ({
+    date: s.snapshotDate.slice(0, 10),
+    netWorth: s.netWorth,
+  }));
 
   const latest = snapshots[snapshots.length - 1];
   const previous = snapshots.length > 1 ? snapshots[snapshots.length - 2] : null;

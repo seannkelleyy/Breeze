@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePlannerState } from '../../providers/PlannerStateProvider';
 import { getAgeFromBirthday } from '../../lib/plannerMath';
 import { PlannerPerson } from '../../types/person';
@@ -43,7 +43,7 @@ const usePlannerPeople = () => {
     }
   }, [people, setPlannerPeople]);
 
-  const currentAge = useMemo(() => getAgeFromBirthday(people[0]?.birthday ?? ''), [people]);
+  const currentAge = getAgeFromBirthday(people[0]?.birthday ?? '');
 
   const updatePerson = (id: string, updater: (person: PlannerPerson) => PlannerPerson) => {
     setPlannerPeople((prev) => prev.map((person) => (person.id === id ? updater(person) : person)));

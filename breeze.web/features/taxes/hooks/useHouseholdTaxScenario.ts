@@ -1,5 +1,4 @@
 'use client';
-import { useMemo } from 'react';
 
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerHydration } from '@/features/planning/hooks/usePlannerHydration';
@@ -23,7 +22,7 @@ export function useHouseholdTaxScenario() {
   const { deductions: withholdings } = usePaycheckDeductions(null);
   const taxTables = useTaxYear(filingStatus);
 
-  const scenario = useMemo(() => {
+  const scenario = (() => {
     if (!taxTables || plannerPeople.length === 0) return null;
     const waterfall = computeHouseholdWaterfall(
       plannerPeople,
@@ -55,9 +54,9 @@ export function useHouseholdTaxScenario() {
         ADDITIONAL_MEDICARE_THRESHOLDS[filingStatus] ?? Number.POSITIVE_INFINITY,
       ),
     };
-  }, [plannerPeople, plannerAccounts, withholdings, taxTables, deductionType, filingStatus]);
+  })();
 
-  const wealth = useMemo(() => getWealthByTaxTreatment(plannerAccounts), [plannerAccounts]);
+  const wealth = getWealthByTaxTreatment(plannerAccounts);
 
   return {
     waterfall: scenario?.waterfall,

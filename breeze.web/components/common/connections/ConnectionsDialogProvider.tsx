@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, JSX, useCallback, useContext, useState } from 'react';
+import { createContext, JSX, useContext, useState } from 'react';
 import { ConnectionsDialog } from './ConnectionsDialog';
 
 type ConnectionsDialogContextValue = {
@@ -17,7 +17,7 @@ export const ConnectionsDialogProvider = ({
   children: React.ReactNode;
 }): JSX.Element => {
   const [open, setOpen] = useState(false);
-  const openConnections = useCallback(() => setOpen(true), []);
+  const openConnections = () => setOpen(true);
 
   return (
     <ConnectionsDialogContext.Provider value={{ openConnections }}>

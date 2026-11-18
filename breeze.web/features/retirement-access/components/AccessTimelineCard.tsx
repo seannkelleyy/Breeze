@@ -1,5 +1,4 @@
 'use client';
-import { useMemo } from 'react';
 import { Line } from 'recharts';
 import { Clock } from 'lucide-react';
 import type { ChartConfig } from '@/components/ui/chart';
@@ -24,7 +23,7 @@ export function AccessTimelineCard({
   hsaAvailable: number;
   fc: (v: number) => string;
 }) {
-  const chartData = useMemo(() => {
+  const chartData = (() => {
     const currentYear = new Date().getFullYear();
     const unlockYears = buckets.map((b) => Number(b.availableOn.slice(0, 4)));
     const lastYear = Math.max(currentYear, ...unlockYears);
@@ -37,7 +36,7 @@ export function AccessTimelineCard({
       rows.push({ year: String(year), roth, hsa: hsaAvailable });
     }
     return rows;
-  }, [buckets, hsaAvailable]);
+  })();
 
   return (
     <Card>

@@ -10,7 +10,7 @@
 - `slog` default handler is text; for Render log drains swap to `slog.NewJSONHandler` in the logger middleware + main. Access-log and panic-recovery middleware are already mounted.
 
 ## Database
-- Migrations apply via `make migrate-deploy` (atlas); reference data via `go run ./cmd/seed` in the build command. Backups: enable Render PITR.
+- Render Pre-Deploy Command: `make migrate-deploy && go run ./cmd/seed` (Atlas migrations, then idempotent reference data). Set `DATABASE_URL` to the service database URL. Backups: enable Render PITR.
 
 ## Security
 

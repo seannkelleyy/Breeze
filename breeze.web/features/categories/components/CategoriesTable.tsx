@@ -39,74 +39,71 @@ export const CategoriesTable = () => {
   const [nameFilter, setNameFilter] = React.useState('');
   const { categories } = useBudgetContext();
 
-  const columns = React.useMemo<ColumnDef<Category>[]>(
-    () => [
-      {
-        accessorKey: 'name',
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            className="flex items-center px-1 text-xs sm:text-sm"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            Name
-            <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
-          </Button>
-        ),
+  const columns: ColumnDef<Category>[] = [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="flex items-center px-1 text-xs sm:text-sm"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Name
+          <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
+        </Button>
+      ),
+    },
+    {
+      accessorKey: 'allocation',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="flex items-center px-1 text-xs sm:text-sm"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Allocation
+          <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const amount = Number(row.getValue('allocation')) || 0;
+        return formatCurrencyWithCode(amount, 'USD');
       },
-      {
-        accessorKey: 'allocation',
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            className="flex items-center px-1 text-xs sm:text-sm"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            Allocation
-            <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
-          </Button>
-        ),
-        cell: ({ row }) => {
-          const amount = Number(row.getValue('allocation')) || 0;
-          return formatCurrencyWithCode(amount, 'USD');
-        },
+    },
+    {
+      accessorKey: 'currentSpend',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="flex items-center px-1 text-xs sm:text-sm"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Spent
+          <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const amount = Number(row.getValue('currentSpend')) || 0;
+        const formatted = formatCurrencyWithCode(amount, 'USD');
+        const allocation = Number(row.original.allocation) || 0;
+        const overBudget = allocation > 0 && amount > allocation;
+        return (
+          <span className={overBudget ? 'text-destructive font-medium' : ''}>{formatted}</span>
+        );
       },
-      {
-        accessorKey: 'currentSpend',
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            className="flex items-center px-1 text-xs sm:text-sm"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            Spent
-            <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
-          </Button>
-        ),
-        cell: ({ row }) => {
-          const amount = Number(row.getValue('currentSpend')) || 0;
-          const formatted = formatCurrencyWithCode(amount, 'USD');
-          const allocation = Number(row.original.allocation) || 0;
-          const overBudget = allocation > 0 && amount > allocation;
-          return (
-            <span className={overBudget ? 'text-destructive font-medium' : ''}>{formatted}</span>
-          );
-        },
+    },
+    {
+      id: 'source',
+      header: 'Source',
+      cell: ({ row }) => {
+        const category = row.original as Category;
+        if (category.sourceType === 'RECURRING_TEMPLATE') {
+          return <Badge variant="secondary">Recurring</Badge>;
+        }
+        return <span className="text-muted-foreground text-sm">Manual</span>;
       },
-      {
-        id: 'source',
-        header: 'Source',
-        cell: ({ row }) => {
-          const category = row.original as Category;
-          if (category.sourceType === 'RECURRING_TEMPLATE') {
-            return <Badge variant="secondary">Recurring</Badge>;
-          }
-          return <span className="text-muted-foreground text-sm">Manual</span>;
-        },
-      },
-    ],
-    [],
-  );
+    },
+  ];
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({

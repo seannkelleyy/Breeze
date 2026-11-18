@@ -4,10 +4,8 @@ import {
   Dispatch,
   type ReactNode,
   SetStateAction,
-  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -171,237 +169,157 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [resolvedUserId, setResolvedUserId] = useState<string>('');
   const providerKey = isSignedIn ? (user?.id ?? 'signed-in') : 'signed-out';
-  const backendUserID = useMemo(() => getBackendUserID(user), [user]);
+  const backendUserID = getBackendUserID(user);
 
-  const persistPreferences = useCallback(
-    async (
-      nextCurrencyCode: string,
-      nextReturnDisplayMode: 'real' | 'nominal',
-      nextInflationRate: number,
-      nextSafeWithdrawalRate: number,
-      nextFilingStatus?: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH',
-      nextDeductionType?: 'STANDARD' | 'ITEMIZED',
-      nextPayoffStrategy?: 'AVALANCHE' | 'SNOWBALL',
-    ) => {
-      if (!isLoaded || !isSignedIn || !resolvedUserId) {
-        return;
-      }
+  const persistPreferences = async (
+    nextCurrencyCode: string,
+    nextReturnDisplayMode: 'real' | 'nominal',
+    nextInflationRate: number,
+    nextSafeWithdrawalRate: number,
+    nextFilingStatus?: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH',
+    nextDeductionType?: 'STANDARD' | 'ITEMIZED',
+    nextPayoffStrategy?: 'AVALANCHE' | 'SNOWBALL',
+  ) => {
+    if (!isLoaded || !isSignedIn || !resolvedUserId) {
+      return;
+    }
 
-      try {
-        const input: UpdateUserInput = {
-          id: resolvedUserId,
-          identityProviderId: backendUserID,
-          email: user?.emailAddresses[0]?.emailAddress ?? '',
-          returnType: (nextReturnDisplayMode === 'real' ? 'REAL' : 'NOMINAL') as ApiReturnType,
-          safeWithdrawalRate: (nextSafeWithdrawalRate / 100).toFixed(4),
-          currencyType: nextCurrencyCode,
-          inflationRate: (nextInflationRate / 100).toFixed(4),
-          deductionType: nextDeductionType ?? deductionType,
-          deductionAmount,
-          maxTaxBracketId,
-          filingStatus: nextFilingStatus ?? filingStatus,
-          payoffStrategy: nextPayoffStrategy ?? payoffStrategy,
-        };
+    try {
+      const input: UpdateUserInput = {
+        id: resolvedUserId,
+        identityProviderId: backendUserID,
+        email: user?.emailAddresses[0]?.emailAddress ?? '',
+        returnType: (nextReturnDisplayMode === 'real' ? 'REAL' : 'NOMINAL') as ApiReturnType,
+        safeWithdrawalRate: (nextSafeWithdrawalRate / 100).toFixed(4),
+        currencyType: nextCurrencyCode,
+        inflationRate: (nextInflationRate / 100).toFixed(4),
+        deductionType: nextDeductionType ?? deductionType,
+        deductionAmount,
+        maxTaxBracketId,
+        filingStatus: nextFilingStatus ?? filingStatus,
+        payoffStrategy: nextPayoffStrategy ?? payoffStrategy,
+      };
 
-        await request(UPDATE_USER_MUTATION, {
-          input,
-        });
-      } catch {
-        // Keep optimistic UI state and allow future writes.
-      }
-    },
-    [
-      isLoaded,
-      isSignedIn,
-      resolvedUserId,
-      backendUserID,
-      user,
-      request,
-      deductionType,
-      deductionAmount,
-      maxTaxBracketId,
-      filingStatus,
-      payoffStrategy,
-    ],
-  );
+      await request(UPDATE_USER_MUTATION, {
+        input,
+      });
+    } catch {
+      // Keep optimistic UI state and allow future writes.
+    }
+  };
 
-  const updateCurrencyCode = useCallback(
-    (nextCurrencyCode: string) => {
-      setCurrencyCode(nextCurrencyCode);
-      if (!resolvedUserId) {
-        pendingPrefsRef.current.currencyCode = nextCurrencyCode;
-        return;
-      }
-      void persistPreferences(
-        nextCurrencyCode,
-        returnDisplayMode,
-        inflationRate,
-        safeWithdrawalRate,
-      );
-    },
-    [persistPreferences, returnDisplayMode, inflationRate, safeWithdrawalRate, resolvedUserId],
-  );
+  const updateCurrencyCode = (nextCurrencyCode: string) => {
+    setCurrencyCode(nextCurrencyCode);
+    if (!resolvedUserId) {
+      pendingPrefsRef.current.currencyCode = nextCurrencyCode;
+      return;
+    }
+    void persistPreferences(nextCurrencyCode, returnDisplayMode, inflationRate, safeWithdrawalRate);
+  };
 
-  const updateReturnDisplayMode = useCallback(
-    (nextReturnDisplayMode: 'real' | 'nominal') => {
-      setReturnDisplayMode(nextReturnDisplayMode);
-      if (!resolvedUserId) {
-        pendingPrefsRef.current.returnDisplayMode = nextReturnDisplayMode;
-        return;
-      }
-      void persistPreferences(
-        currencyCode,
-        nextReturnDisplayMode,
-        inflationRate,
-        safeWithdrawalRate,
-      );
-    },
-    [persistPreferences, currencyCode, inflationRate, safeWithdrawalRate, resolvedUserId],
-  );
-  const hydrateReturnDisplayMode = useCallback((nextReturnDisplayMode: 'real' | 'nominal') => {
+  const updateReturnDisplayMode = (nextReturnDisplayMode: 'real' | 'nominal') => {
     setReturnDisplayMode(nextReturnDisplayMode);
-  }, []);
-  const hydrateCurrencyCode = useCallback((next: string) => setCurrencyCode(next), []);
-  const hydrateInflationRate = useCallback((next: number) => setInflationRate(next), []);
-  const hydrateSafeWithdrawalRate = useCallback((next: number) => setSafeWithdrawalRate(next), []);
+    if (!resolvedUserId) {
+      pendingPrefsRef.current.returnDisplayMode = nextReturnDisplayMode;
+      return;
+    }
+    void persistPreferences(currencyCode, nextReturnDisplayMode, inflationRate, safeWithdrawalRate);
+  };
+  const hydrateReturnDisplayMode = (nextReturnDisplayMode: 'real' | 'nominal') => {
+    setReturnDisplayMode(nextReturnDisplayMode);
+  };
+  const hydrateCurrencyCode = (next: string) => setCurrencyCode(next);
+  const hydrateInflationRate = (next: number) => setInflationRate(next);
+  const hydrateSafeWithdrawalRate = (next: number) => setSafeWithdrawalRate(next);
 
-  const updateInflationRate = useCallback(
-    (nextInflationRate: number) => {
-      setInflationRate(nextInflationRate);
-      if (!resolvedUserId) {
-        pendingPrefsRef.current.inflationRate = nextInflationRate;
-        return;
-      }
-      void persistPreferences(
-        currencyCode,
-        returnDisplayMode,
-        nextInflationRate,
-        safeWithdrawalRate,
-      );
-    },
-    [persistPreferences, currencyCode, returnDisplayMode, safeWithdrawalRate, resolvedUserId],
-  );
+  const updateInflationRate = (nextInflationRate: number) => {
+    setInflationRate(nextInflationRate);
+    if (!resolvedUserId) {
+      pendingPrefsRef.current.inflationRate = nextInflationRate;
+      return;
+    }
+    void persistPreferences(currencyCode, returnDisplayMode, nextInflationRate, safeWithdrawalRate);
+  };
 
-  const updateSafeWithdrawalRate = useCallback(
-    (nextSafeWithdrawalRate: number) => {
-      setSafeWithdrawalRate(nextSafeWithdrawalRate);
-      if (!resolvedUserId) {
-        pendingPrefsRef.current.safeWithdrawalRate = nextSafeWithdrawalRate;
-        return;
-      }
-      void persistPreferences(
-        currencyCode,
-        returnDisplayMode,
-        inflationRate,
-        nextSafeWithdrawalRate,
-      );
-    },
-    [persistPreferences, currencyCode, returnDisplayMode, inflationRate, resolvedUserId],
-  );
+  const updateSafeWithdrawalRate = (nextSafeWithdrawalRate: number) => {
+    setSafeWithdrawalRate(nextSafeWithdrawalRate);
+    if (!resolvedUserId) {
+      pendingPrefsRef.current.safeWithdrawalRate = nextSafeWithdrawalRate;
+      return;
+    }
+    void persistPreferences(currencyCode, returnDisplayMode, inflationRate, nextSafeWithdrawalRate);
+  };
 
-  const updateFilingStatus = useCallback(
-    (next: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH') => {
-      setFilingStatus(next);
-      if (!resolvedUserId) {
-        pendingPrefsRef.current.filingStatus = next;
-        return;
-      }
-      void persistPreferences(
-        currencyCode,
-        returnDisplayMode,
-        inflationRate,
-        safeWithdrawalRate,
-        next,
-      );
-    },
-    [
-      persistPreferences,
+  const updateFilingStatus = (next: 'SINGLE' | 'MFJ' | 'MFS' | 'HOH') => {
+    setFilingStatus(next);
+    if (!resolvedUserId) {
+      pendingPrefsRef.current.filingStatus = next;
+      return;
+    }
+    void persistPreferences(
       currencyCode,
       returnDisplayMode,
       inflationRate,
       safeWithdrawalRate,
-      resolvedUserId,
-    ],
-  );
+      next,
+    );
+  };
 
-  const updatePayoffStrategy = useCallback(
-    (next: 'AVALANCHE' | 'SNOWBALL') => {
-      setPayoffStrategy(next);
-      if (!resolvedUserId) {
-        pendingPrefsRef.current.payoffStrategy = next;
-        return;
-      }
-      void persistPreferences(
-        currencyCode,
-        returnDisplayMode,
-        inflationRate,
-        safeWithdrawalRate,
-        undefined,
-        undefined,
-        next,
-      );
-    },
-    [
-      persistPreferences,
+  const updatePayoffStrategy = (next: 'AVALANCHE' | 'SNOWBALL') => {
+    setPayoffStrategy(next);
+    if (!resolvedUserId) {
+      pendingPrefsRef.current.payoffStrategy = next;
+      return;
+    }
+    void persistPreferences(
       currencyCode,
       returnDisplayMode,
       inflationRate,
       safeWithdrawalRate,
-      resolvedUserId,
-    ],
-  );
+      undefined,
+      undefined,
+      next,
+    );
+  };
 
-  const updateDeductionType = useCallback(
-    (next: 'STANDARD' | 'ITEMIZED') => {
-      setDeductionType(next);
-      if (!resolvedUserId) {
-        pendingPrefsRef.current.deductionType = next;
-        return;
-      }
-      void persistPreferences(
-        currencyCode,
-        returnDisplayMode,
-        inflationRate,
-        safeWithdrawalRate,
-        undefined,
-        next,
-      );
-    },
-    [
-      persistPreferences,
+  const updateDeductionType = (next: 'STANDARD' | 'ITEMIZED') => {
+    setDeductionType(next);
+    if (!resolvedUserId) {
+      pendingPrefsRef.current.deductionType = next;
+      return;
+    }
+    void persistPreferences(
       currencyCode,
       returnDisplayMode,
       inflationRate,
       safeWithdrawalRate,
-      resolvedUserId,
-    ],
-  );
+      undefined,
+      next,
+    );
+  };
 
-  const updateUserSetup = useCallback(
-    async (input: {
-      budgetEnabled?: boolean;
-      monthlyExpenses?: string;
-      setupCompleted?: boolean;
-      disclaimerAccepted?: boolean;
-    }) => {
-      if (!isLoaded || !isSignedIn || !resolvedUserId) {
-        return;
-      }
-      // Optimistic local state; kept on failure so future writes are allowed.
-      if (input.budgetEnabled !== undefined) {
-        setBudgetEnabled(input.budgetEnabled);
-      }
-      if (input.monthlyExpenses !== undefined) {
-        setMonthlyExpenses(Number(input.monthlyExpenses));
-      }
-      try {
-        await request(UPDATE_USER_SETUP_MUTATION, { input: { id: resolvedUserId, ...input } });
-      } catch {
-        // Keep optimistic UI state and allow future writes.
-      }
-    },
-    [isLoaded, isSignedIn, resolvedUserId, request],
-  );
+  const updateUserSetup = async (input: {
+    budgetEnabled?: boolean;
+    monthlyExpenses?: string;
+    setupCompleted?: boolean;
+    disclaimerAccepted?: boolean;
+  }) => {
+    if (!isLoaded || !isSignedIn || !resolvedUserId) {
+      return;
+    }
+    // Optimistic local state; kept on failure so future writes are allowed.
+    if (input.budgetEnabled !== undefined) {
+      setBudgetEnabled(input.budgetEnabled);
+    }
+    if (input.monthlyExpenses !== undefined) {
+      setMonthlyExpenses(Number(input.monthlyExpenses));
+    }
+    try {
+      await request(UPDATE_USER_SETUP_MUTATION, { input: { id: resolvedUserId, ...input } });
+    } catch {
+      // Keep optimistic UI state and allow future writes.
+    }
+  };
 
   // The flush below runs once per resolved user, so it reads the latest
   // preference values from a ref rather than depending on them (which would

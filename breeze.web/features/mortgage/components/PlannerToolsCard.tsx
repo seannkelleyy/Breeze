@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig } from '@/components/ui/chart';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useTabParam } from '@/lib/hooks/useTabParam';
 import AmortizationTab from './tabs/AmortizationTab';
 import LoanCompareTab from './tabs/LoanCompareTab';
@@ -112,7 +112,7 @@ export const PlannerToolsCard = ({
       ? refiTermYears
       : Math.max(1, Math.round((homeLoan?.remainingMonths ?? 12) / 12));
 
-  const baseLoanSummary = useMemo(() => {
+  const baseLoanSummary = (() => {
     if (!homeLoan) {
       return null;
     }
@@ -123,9 +123,9 @@ export const PlannerToolsCard = ({
       homeLoan.monthlyPayment,
       new Date(),
     );
-  }, [homeLoan]);
+  })();
 
-  const amortizationChartData = useMemo(() => {
+  const amortizationChartData = (() => {
     if (!baseLoanSummary) {
       return [];
     }
@@ -164,9 +164,9 @@ export const PlannerToolsCard = ({
         interestSharePercent,
       };
     });
-  }, [baseLoanSummary]);
+  })();
 
-  const compareTerms = useMemo(() => {
+  const compareTerms = (() => {
     if (!homeLoan) {
       return [];
     }
@@ -192,18 +192,18 @@ export const PlannerToolsCard = ({
         payoffDate: summary.payoffDate,
       };
     });
-  }, [homeLoan]);
+  })();
 
-  const loanPaidDownPercent = useMemo(() => {
+  const loanPaidDownPercent = (() => {
     if (!homeLoan || !homeLoan.originalLoanAmount || homeLoan.originalLoanAmount <= 0) {
       return null;
     }
 
     const paidDown = Math.max(0, homeLoan.originalLoanAmount - homeLoan.currentBalance);
     return (paidDown / homeLoan.originalLoanAmount) * 100;
-  }, [homeLoan]);
+  })();
 
-  const refinanceSummary = useMemo(() => {
+  const refinanceSummary = (() => {
     if (!homeLoan || !baseLoanSummary) {
       return null;
     }
@@ -316,17 +316,9 @@ export const PlannerToolsCard = ({
       recommendationLabel,
       recommendationReasons,
     };
-  }, [
-    homeLoan,
-    baseLoanSummary,
-    refiClosingCosts,
-    refiCashOut,
-    effectiveRefiRate,
-    effectiveRefiTermYears,
-    refiDiscountRate,
-  ]);
+  })();
 
-  const extraPaymentSummary = useMemo(() => {
+  const extraPaymentSummary = (() => {
     if (!homeLoan || !baseLoanSummary) {
       return null;
     }
@@ -345,9 +337,9 @@ export const PlannerToolsCard = ({
       monthsSaved: Math.max(0, baseLoanSummary.monthsToPayoff - acceleratedSummary.monthsToPayoff),
       interestSaved: Math.max(0, baseLoanSummary.totalInterest - acceleratedSummary.totalInterest),
     };
-  }, [homeLoan, baseLoanSummary, extraOneTime, extraMonthly]);
+  })();
 
-  const amortizationComparisonData = useMemo(() => {
+  const amortizationComparisonData = (() => {
     if (!baseLoanSummary) {
       return [];
     }
@@ -384,7 +376,7 @@ export const PlannerToolsCard = ({
             : undefined,
       };
     });
-  }, [baseLoanSummary, amortizationChartData, extraPaymentSummary]);
+  })();
 
   const formatCompactAxisLabel = (value: number) => {
     if (value >= 1000000) {
@@ -401,7 +393,7 @@ export const PlannerToolsCard = ({
   const isBothMode = ratioChartDisplayMode === 'both';
   const ratioShareAxisId = 'ratio-share';
   const ratioAmountAxisId = 'ratio-amount';
-  const amountAxisMax = useMemo(() => {
+  const amountAxisMax = (() => {
     const maxAmount = amortizationComparisonData.reduce((max, row) => {
       return Math.max(
         max,
@@ -417,7 +409,7 @@ export const PlannerToolsCard = ({
     }
 
     return maxAmount * 1.05;
-  }, [amortizationComparisonData]);
+  })();
 
   return (
     <Card>

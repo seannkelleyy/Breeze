@@ -63,13 +63,4 @@ describe('useBudgets', () => {
 
     await expect(result.current.getBudget(2026, 5)).resolves.toBeNull();
   });
-
-  it('keeps the returned service stable across rerenders', () => {
-    const { result, rerender } = renderHook(() => useBudgets());
-    const first = result.current;
-
-    rerender();
-
-    expect(result.current).toBe(first);
-  });
 });

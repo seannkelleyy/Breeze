@@ -57,6 +57,8 @@ export const PlannerStateProvider = ({ children }: { children: ReactNode }) => {
     PLANNER_DEFAULT_RETIREMENT_METHOD,
   );
 
+  // Kept memoized: the context value is what consumers subscribe to, so a new
+  // object per render would re-render the whole planner tree on every render.
   const value = useMemo<PlannerStateContextValue>(
     () => ({
       plannerPeople,

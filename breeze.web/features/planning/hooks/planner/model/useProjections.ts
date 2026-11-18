@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import {
   getPortfolioAverageGrowthRate,
   getProjection,
@@ -23,39 +21,22 @@ export function useProjections(
   annualReturnAdjustmentPercent = 0,
   withdrawalPlan?: WithdrawalPlanInput,
 ) {
-  const { projectionRows, withdrawalRows } = useMemo(
-    () =>
-      getProjection(
-        accounts,
-        household.currentAge,
-        household.targetAge,
-        household.people,
-        assetFinanceDetailsByAccountId,
-        irsLimits,
-        // IRS limits are statutory nominal dollars — grow them at the user's
-        // inflation assumption instead of a hardcoded rate.
-        inflationRate,
-        inflationRate,
-        useInflationAdjustedValues,
-        projectionEndAge,
-        annualWithdrawal,
-        annualReturnAdjustmentPercent,
-        withdrawalPlan,
-      ),
-    [
-      accounts,
-      household.currentAge,
-      household.targetAge,
-      household.people,
-      assetFinanceDetailsByAccountId,
-      irsLimits,
-      inflationRate,
-      useInflationAdjustedValues,
-      projectionEndAge,
-      annualWithdrawal,
-      annualReturnAdjustmentPercent,
-      withdrawalPlan,
-    ],
+  const { projectionRows, withdrawalRows } = getProjection(
+    accounts,
+    household.currentAge,
+    household.targetAge,
+    household.people,
+    assetFinanceDetailsByAccountId,
+    irsLimits,
+    // IRS limits are statutory nominal dollars — grow them at the user's
+    // inflation assumption instead of a hardcoded rate.
+    inflationRate,
+    inflationRate,
+    useInflationAdjustedValues,
+    projectionEndAge,
+    annualWithdrawal,
+    annualReturnAdjustmentPercent,
+    withdrawalPlan,
   );
 
   const computeAverage = (scope: PortfolioRateScope) =>

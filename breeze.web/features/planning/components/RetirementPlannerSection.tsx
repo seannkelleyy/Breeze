@@ -1,5 +1,4 @@
 'use client';
-import { useMemo } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
@@ -48,33 +47,23 @@ export function RetirementPlannerSection({
 
   const yearsToGoal = Math.max(0, targetAge - currentAge);
 
-  const rows = useMemo(
-    () =>
-      milestones.map((m) => {
-        const requiredMonthly = getMonthlyContribution(
-          m.target,
-          investmentStartingBalance,
-          realWeightedAnnualRate,
-          yearsToGoal,
-        );
-        const requiredRate =
-          annualHouseholdIncome > 0 ? (requiredMonthly * 12 * 100) / annualHouseholdIncome : 0;
-        const progressPct = m.target > 0 ? (investmentStartingBalance / m.target) * 100 : 0;
-        return {
-          ...m,
-          requiredRate,
-          progressPct,
-          isEditable: m.label === 'Custom',
-        };
-      }),
-    [
-      milestones,
+  const rows = milestones.map((m) => {
+    const requiredMonthly = getMonthlyContribution(
+      m.target,
       investmentStartingBalance,
       realWeightedAnnualRate,
       yearsToGoal,
-      annualHouseholdIncome,
-    ],
-  );
+    );
+    const requiredRate =
+      annualHouseholdIncome > 0 ? (requiredMonthly * 12 * 100) / annualHouseholdIncome : 0;
+    const progressPct = m.target > 0 ? (investmentStartingBalance / m.target) * 100 : 0;
+    return {
+      ...m,
+      requiredRate,
+      progressPct,
+      isEditable: m.label === 'Custom',
+    };
+  });
 
   if (!plannerSummary) {
     return null;

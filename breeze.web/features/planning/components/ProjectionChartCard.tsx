@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { isCombinedAssetType, isLiabilityAccountType } from '../lib/config';
 import type { AccountType } from '../types/account';
@@ -60,7 +60,7 @@ const ProjectionChartCard = ({
   const formatCurrency = (value: number) => formatCurrencyWithCode(value, currencyCode);
 
   // Sort accounts by their final balance value (highest first) and remap data keys
-  const { sortedAccounts, remappedRows } = useMemo(() => {
+  const { sortedAccounts, remappedRows } = (() => {
     if (projectionRows.length === 0 || accounts.length === 0) {
       return { sortedAccounts: accounts, remappedRows: projectionRows };
     }
@@ -95,7 +95,7 @@ const ProjectionChartCard = ({
       return newRow;
     });
     return { sortedAccounts: sorted, remappedRows: remapped };
-  }, [accounts, projectionRows]);
+  })();
 
   // Series visibility: the three aggregates default on, individual account
   // lines default off (toggle with the chips under the sliders).

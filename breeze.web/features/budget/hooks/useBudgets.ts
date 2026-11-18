@@ -1,5 +1,3 @@
-import { useCallback, useMemo } from 'react';
-
 import { GET_BUDGET_BY_DATE } from '@/features/budget/budget.operations';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
@@ -9,20 +7,17 @@ const useBudgets = () => {
   const { request } = useGraphql();
   const { userId } = useCurrentUser();
 
-  const getBudget = useCallback(
-    async (year: number, month: number): Promise<Budget | null> => {
-      const date = new Date(year, month - 1, 1).toISOString();
+  const getBudget = async (year: number, month: number): Promise<Budget | null> => {
+    const date = new Date(year, month - 1, 1).toISOString();
 
-      const res = await request(GET_BUDGET_BY_DATE, {
-        userId,
-        date,
-      });
-      return res?.budgetByDate ?? null;
-    },
-    [request, userId],
-  );
+    const res = await request(GET_BUDGET_BY_DATE, {
+      userId,
+      date,
+    });
+    return res?.budgetByDate ?? null;
+  };
 
-  return useMemo(() => ({ getBudget }), [getBudget]);
+  return { getBudget };
 };
 
 export default useBudgets;

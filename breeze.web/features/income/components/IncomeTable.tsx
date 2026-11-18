@@ -44,79 +44,76 @@ export const IncomeTable = () => {
   const [rowSelection, setRowSelection] = React.useState({});
   const { incomes = [] } = useBudgetContext();
 
-  const columns = React.useMemo<ColumnDef<Income>[]>(
-    () => [
-      {
-        accessorKey: 'name',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Name
-              <ArrowUpDown />
-            </Button>
-          );
-        },
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <span>{row.original.name}</span>
-            {row.original.sourceType === 'RECURRING_TEMPLATE' ? (
-              <Badge variant="outline">Template</Badge>
-            ) : null}
-          </div>
-        ),
+  const columns: ColumnDef<Income>[] = [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Name
+            <ArrowUpDown />
+          </Button>
+        );
       },
-      {
-        accessorKey: 'amount',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Amount
-              <ArrowUpDown />
-            </Button>
-          );
-        },
-        cell: ({ row }) => {
-          const amount = parseFloat(row.getValue('amount'));
-          const formatted = formatCurrencyWithCode(amount, 'USD');
-          return <div className="text-left font-medium">{formatted}</div>;
-        },
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <span>{row.original.name}</span>
+          {row.original.sourceType === 'RECURRING_TEMPLATE' ? (
+            <Badge variant="outline">Template</Badge>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'amount',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Amount
+            <ArrowUpDown />
+          </Button>
+        );
       },
-      {
-        accessorKey: 'date',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Date
-              <ArrowUpDown />
-            </Button>
-          );
-        },
-        cell: ({ row }) => {
-          const date = row.getValue('date') as string | number | Date | null | undefined;
-          return dayjs(date).format('MMMM D, YYYY');
-        },
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue('amount'));
+        const formatted = formatCurrencyWithCode(amount, 'USD');
+        return <div className="text-left font-medium">{formatted}</div>;
       },
-      {
-        id: 'schedule',
-        header: 'Schedule',
-        cell: () => {
-          // Incomes are always one-time in the new schema
-          // Recurring income are managed through RecurringIncomeTemplate
-          return 'One-time';
-        },
+    },
+    {
+      accessorKey: 'date',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Date
+            <ArrowUpDown />
+          </Button>
+        );
       },
-    ],
-    [],
-  );
+      cell: ({ row }) => {
+        const date = row.getValue('date') as string | number | Date | null | undefined;
+        return dayjs(date).format('MMMM D, YYYY');
+      },
+    },
+    {
+      id: 'schedule',
+      header: 'Schedule',
+      cell: () => {
+        // Incomes are always one-time in the new schema
+        // Recurring income are managed through RecurringIncomeTemplate
+        return 'One-time';
+      },
+    },
+  ];
 
   // Calculate total amount (convert string amounts to numbers)
   const totalAmount = incomes.reduce((sum, income) => sum + (Number(income.amount) || 0), 0);

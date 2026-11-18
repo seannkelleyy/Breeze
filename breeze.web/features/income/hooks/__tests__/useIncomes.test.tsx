@@ -114,13 +114,4 @@ describe('useIncomes', () => {
     expect(print(requestMock.mock.calls[0][0])).toContain('deleteIncome');
     expect(requestMock.mock.calls[0][1]).toEqual({ id: 'i1' });
   });
-
-  it('keeps the returned service stable across rerenders', () => {
-    const { result, rerender } = renderHook(() => useIncomes());
-    const first = result.current;
-
-    rerender();
-
-    expect(result.current).toBe(first);
-  });
 });

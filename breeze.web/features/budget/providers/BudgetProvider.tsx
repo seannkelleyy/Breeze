@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 
 import dayjs, { Dayjs } from 'dayjs';
 
@@ -37,10 +37,10 @@ const BudgetDataProvider: React.FC<BudgetProviderProps> = ({ children }) => {
     enabled: !!budget?.id,
   });
 
-  const getBudgetForDate = useCallback(async (year: number, month: number) => {
+  const getBudgetForDate = async (year: number, month: number) => {
     setBudgetDate(dayjs().year(year).month(month));
     return { status: 200 };
-  }, []);
+  };
 
   return (
     <BudgetContext.Provider

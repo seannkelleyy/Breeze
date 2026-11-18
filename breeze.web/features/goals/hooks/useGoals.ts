@@ -53,7 +53,7 @@ export function useGoals() {
     [goals],
   );
 
-  const regularGoals = useMemo(() => (goals ?? []).filter((g) => !g.isFinancialOrderStep), [goals]);
+  const regularGoals = (goals ?? []).filter((g) => !g.isFinancialOrderStep);
 
   // Create FOO steps on first visit if none exist.
   useEffect(() => {

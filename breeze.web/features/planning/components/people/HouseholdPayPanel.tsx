@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,7 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
   const { filingStatus, deductionType } = useCurrentUser();
   const taxTables = useTaxYear(filingStatus);
 
-  const totals = useMemo(() => {
+  const totals = (() => {
     const wf = computeHouseholdWaterfall(
       people,
       accounts,
@@ -56,7 +56,7 @@ export function HouseholdPayStats({ people, accounts, withholdings, currencyCode
       withholdingsMonthly: wf.pretaxWithholdingsMonthly + wf.posttaxWithholdingsMonthly,
       takeHomeMonthly: wf.takeHomeMonthly,
     };
-  }, [people, accounts, withholdings, taxTables, deductionType, filingStatus]);
+  })();
 
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-5">
@@ -118,12 +118,9 @@ export function PaydayCalendar({ people, accounts, withholdings, currencyCode }:
   const [today] = useState(() => new Date(now.getFullYear(), now.getMonth(), now.getDate()));
   const [monthOffset, setMonthOffset] = useState(0);
 
-  const view = useMemo(
-    () => new Date(today.getFullYear(), today.getMonth() + monthOffset, 1),
-    [today, monthOffset],
-  );
+  const view = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
 
-  const calendar = useMemo(() => {
+  const calendar = (() => {
     const year = view.getFullYear();
     const month = view.getMonth();
     const lastDay = new Date(year, month + 1, 0).getDate();
@@ -140,7 +137,7 @@ export function PaydayCalendar({ people, accounts, withholdings, currencyCode }:
       }
     }
     return { year, month, lastDay, leadingBlanks, byDay };
-  }, [view, people, accounts, withholdings, taxTables, deductionType]);
+  })();
 
   return (
     <Card className="bg-muted/50">

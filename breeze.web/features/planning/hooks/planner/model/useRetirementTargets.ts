@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import * as plannerConstants from '../../../lib/constants';
 import { getAnnualIncomeWithGrowth, getMonthlyContribution } from '../../../lib/plannerMath';
 import { getSuggestedSafeWithdrawalRate } from '../../../lib/rates';
@@ -30,18 +28,14 @@ export function useRetirementTargets(
   );
   const suggestedSafeWithdrawalRate = getSuggestedSafeWithdrawalRate(retirementHorizonYears);
 
-  const fireTargets = useMemo(
-    () =>
-      plannerConstants.PLANNER_FIRE_LIFESTYLE_OPTIONS.map((o) => ({
-        label: o.label,
-        target: baseFinancialFreedomTarget * o.multiplier,
-        monthlySpendSupported:
-          safeWithdrawalRate > 0
-            ? (baseFinancialFreedomTarget * o.multiplier * (safeWithdrawalRate / 100)) / 12
-            : 0,
-      })),
-    [baseFinancialFreedomTarget, safeWithdrawalRate],
-  );
+  const fireTargets = plannerConstants.PLANNER_FIRE_LIFESTYLE_OPTIONS.map((o) => ({
+    label: o.label,
+    target: baseFinancialFreedomTarget * o.multiplier,
+    monthlySpendSupported:
+      safeWithdrawalRate > 0
+        ? (baseFinancialFreedomTarget * o.multiplier * (safeWithdrawalRate / 100)) / 12
+        : 0,
+  }));
 
   const financialFreedomTarget =
     fireTargets[plannerConstants.PLANNER_DEFAULT_FIRE_LIFESTYLE_INDEX]?.target ??
