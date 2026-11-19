@@ -50,7 +50,7 @@ breeze.api/
 │   │
 │   ├── middleware/
 │   │   ├── auth.go                  # Clerk JWT — ONLY file that imports Clerk SDK
-│   │   ├── logger.go                # injects slog.Logger into every request context
+│   │   ├── logger.go                # logger context helper (LoggerMiddleware is not mounted by cmd/api)
 │   │   └── ...
 │   │
 │   └── service/                     # ALL business logic lives here

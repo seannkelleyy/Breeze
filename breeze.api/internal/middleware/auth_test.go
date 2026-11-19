@@ -51,23 +51,6 @@ func TestRequireAuth_RejectsInvalidBearerToken(t *testing.T) {
 	}
 }
 
-func TestDevAuth_InjectsUserIDIntoContext(t *testing.T) {
-	var gotID string
-	h := DevAuth("user_dev123")(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotID = UserIDFromCtx(r.Context())
-		w.WriteHeader(http.StatusOK)
-	}))
-
-	req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
-	rec := httptest.NewRecorder()
-
-	h.ServeHTTP(rec, req)
-
-	if gotID != "user_dev123" {
-		t.Fatalf("expected dev user ID %q, got %q", "user_dev123", gotID)
-	}
-}
-
 func TestUserIDFromCtx_EmptyContextReturnsEmpty(t *testing.T) {
 	if got := UserIDFromCtx(context.Background()); got != "" {
 		t.Fatalf("expected empty user ID, got %q", got)

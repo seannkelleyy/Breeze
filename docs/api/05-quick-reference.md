@@ -143,27 +143,13 @@ if amount.Greater(decimal.Zero) { ... }
 
 ---
 
-## Context Helpers Pattern
+## Context Helpers
+
+`UserIDFromCtx` returns a string (empty when no identity is present); it reads the local dev identity or Clerk session claims. `LoggerFromCtx` returns the context logger when present and otherwise falls back to `slog.Default()`. `cmd/api` currently does not mount `LoggerMiddleware`.
 
 ```go
-// internal/middleware/auth.go
-type contextKey string
-const userIDKey contextKey = "userID"
-
-func UserIDFromCtx(ctx context.Context) uuid.UUID {
-    v, _ := ctx.Value(userIDKey).(uuid.UUID)
-    return v
-}
-
-// internal/middleware/logger.go
-const loggerKey contextKey = "logger"
-
-func LoggerFromCtx(ctx context.Context) *slog.Logger {
-    if l, ok := ctx.Value(loggerKey).(*slog.Logger); ok {
-        return l
-    }
-    return slog.Default()
-}
+userID := middleware.UserIDFromCtx(ctx)
+logger := middleware.LoggerFromCtx(ctx)
 ```
 
 ---

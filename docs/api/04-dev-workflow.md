@@ -27,6 +27,7 @@ make dev
 ```
 
 This runs the `dev` target which:
+
 1. Checks if PostgreSQL is running; starts it via `docker compose` if not
 2. Applies pending migrations with Atlas
 3. Regenerates sqlc + gqlgen code
@@ -38,37 +39,37 @@ This runs the `dev` target which:
 
 Authoritative source: the `Makefile` itself. Key targets:
 
-| Target | What it does |
-|---|---|
-| `make dev` | Start Postgres if needed → migrate → gen → run the API |
-| `make test` / `test-verbose` / `test-coverage` | Go test suite (plain / -v / coverage profile + HTML) |
-| `make gen` | sqlc generate, then gqlgen generate (order matters) |
-| `make migrate-diff MIGRATION_NAME=x` | Generate a migration from schema.hcl diffs |
-| `make migrate` | Apply pending migrations (Atlas, local env) |
-| `make migrate-deploy` | Apply migrations in deploy environments (Render/CI) |
-| `make migrate-lint` | Lint the latest migration (Atlas) |
-| `make migrate-clean` | Wipe the local database schema |
-| `make seed` | Apply `db/seed/seed.sql` via psql |
-| `make seed-deploy` | Apply seed data on deploy hosts (`go run ./cmd/seed`) |
-| `make run` / `make river` / `make build` | Run API / run River worker / build binary |
-| `make lint` / `make fmt` | golangci-lint / gofmt |
-| `make check` | fmt + tidy + gen, then vet, lint, test, build — full local CI gate |
-| `make tidy` / `make gen-tidy` | go mod tidy / codegen + tidy |
-| `make setup` | Install API tooling (golangci-lint, atlas) |
-| `make db-up` | Start the root `compose.yaml` Postgres |
+| Target                                         | What it does                                                       |
+| ---------------------------------------------- | ------------------------------------------------------------------ |
+| `make dev`                                     | Start Postgres if needed → migrate → gen → run the API             |
+| `make test` / `test-verbose` / `test-coverage` | Go test suite (plain / -v / coverage profile + HTML)               |
+| `make gen`                                     | sqlc generate, then gqlgen generate (order matters)                |
+| `make migrate-diff MIGRATION_NAME=x`           | Generate a migration from schema.hcl diffs                         |
+| `make migrate`                                 | Apply pending migrations (Atlas, local env)                        |
+| `make migrate-deploy`                          | Apply migrations in deploy environments (Render/CI)                |
+| `make migrate-lint`                            | Lint the latest migration (Atlas)                                  |
+| `make migrate-clean`                           | Wipe the local database schema                                     |
+| `make seed`                                    | Apply `db/seed/seed.sql` via psql                                  |
+| `make seed-deploy`                             | Apply seed data on deploy hosts (`go run ./cmd/seed`)              |
+| `make run` / `make river` / `make build`       | Run API / run River worker / build binary                          |
+| `make lint` / `make fmt`                       | golangci-lint / gofmt                                              |
+| `make check`                                   | fmt + tidy + gen, then vet, lint, test, build — full local CI gate |
+| `make tidy` / `make gen-tidy`                  | go mod tidy / codegen + tidy                                       |
+| `make setup`                                   | Install API tooling (golangci-lint, atlas)                         |
+| `make db-up`                                   | Start the root `compose.yaml` Postgres                             |
 
 ---
 
 ## Key Config Files
 
-| File | Purpose |
-|---|---|
-| `db/schema.hcl` | Atlas — single source of truth for entire DB schema |
-| `sqlc.yaml` | sqlc — reads schema from `./db/migrations`, generates to `internal/db/sqlc/` |
-| `gqlgen.yml` | gqlgen — maps GraphQL schema to resolver stubs and generated models |
-| `compose.yaml` (repo root) | Local dev Postgres only — never used in production |
-| `.env` | Local dev environment variables (DATABASE_URL, CLERK_SECRET_KEY, etc.) |
-| `atlas.hcl` | Atlas environment config |
+| File                       | Purpose                                                                                                                                                                                                                                                                                                                    |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/schema.hcl`            | Atlas — single source of truth for entire DB schema                                                                                                                                                                                                                                                                        |
+| `sqlc.yaml`                | sqlc — reads schema from `./db/migrations`, generates to `internal/db/sqlc/`                                                                                                                                                                                                                                               |
+| `gqlgen.yml`               | gqlgen — maps GraphQL schema to resolver stubs and generated models                                                                                                                                                                                                                                                        |
+| `compose.yaml` (repo root) | Local dev Postgres only — never used in production                                                                                                                                                                                                                                                                         |
+| `.env`                     | Set `ENV=local`, `DATABASE_URL`, and `CLERK_SECRET_KEY` (a Clerk development-instance secret key is required even locally). Optional `TRUSTED_PROXY_CIDRS` is a comma-separated list of trusted proxy CIDRs; `API_RATE_LIMIT_RPS` and `API_RATE_LIMIT_BURST` configure the non-local `/query` limit (defaults: 30 and 60). |
+| `atlas.hcl`                | Atlas environment config                                                                                                                                                                                                                                                                                                   |
 
 ---
 
@@ -79,12 +80,12 @@ version: "2"
 sql:
   - engine: "postgresql"
     queries: "./db/queries"
-    schema:  "./db/migrations"
+    schema: "./db/migrations"
     gen:
       go:
-        package:        "sqlc"
-        out:            "./internal/db/sqlc"
-        sql_package:    "pgx/v5"
+        package: "sqlc"
+        out: "./internal/db/sqlc"
+        sql_package: "pgx/v5"
         emit_json_tags: true
         emit_interface: true
         emit_pointers_for_null_types: true
@@ -92,15 +93,15 @@ sql:
           - db_type: "uuid"
             go_type:
               import: "github.com/google/uuid"
-              type:   "UUID"
+              type: "UUID"
           - db_type: "numeric"
             go_type:
               import: "github.com/govalues/decimal"
-              type:   "Decimal"
+              type: "Decimal"
           - db_type: "pg_catalog.numeric"
             go_type:
               import: "github.com/govalues/decimal"
-              type:   "Decimal"
+              type: "Decimal"
 ```
 
 ---
@@ -177,6 +178,7 @@ internal/service/
 2. **Integration tests** (`integration_test.go`) — run against a live Postgres via `DATABASE_URL`; they skip automatically when the variable is unset, so `make test` stays green without a database.
 
 Test patterns:
+
 - Mock the narrow querier interface for each test
 - Cover happy paths for Create, GetByID, List, Update, Delete
 - Cover not-found behavior (`ErrNotFound`) for read/update/delete paths

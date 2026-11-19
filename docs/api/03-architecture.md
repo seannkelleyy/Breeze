@@ -4,16 +4,19 @@
 
 ```
 HTTP request
-  → Auth middleware          Clerk JWT validation, extract userId
-  → RequestID middleware     Generate UUID, inject into context
-  → Logger middleware        Inject slog.Logger pre-loaded with requestId + userId
-  → Rate limiter             Per-user token bucket (golang.org/x/time/rate)
-  → gqlgen handler
-  → Resolver                 Thin — map input, call service, map output
-  → Service                  Business logic, validation, transactions
-  → sqlc DB layer            Generated type-safe query functions
-  → PostgreSQL (Neon)
+  → IP rate limiter          Outside local environments
+  → CORS
+  → Access-log middleware
+  → Panic-recovery middleware
+  → ServeMux
+      ├── /health             Public; checks database readiness
+      ├── /graphql            GraphQL playground
+      └── /query              rate limit outside local; Clerk auth in every environment
+                                → gqlgen
+                                → Resolver → Service → sqlc → PostgreSQL
 ```
+
+`ENV` and `CLERK_SECRET_KEY` are required at startup in every environment, including local development. Requests to `/query` without a valid Clerk authorization token are rejected; `/health` remains public.
 
 ---
 
@@ -25,6 +28,7 @@ HTTP request
 ### Layer 1 — Resolver (thin)
 
 The only things a resolver does:
+
 1. Extract authenticated user ID from context
 2. Map GraphQL input to a service input type
 3. Call the service

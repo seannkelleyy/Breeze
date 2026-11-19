@@ -310,8 +310,7 @@ func (r *mutationResolver) CreateGoal(ctx context.Context, input model.CreateGoa
 		return nil, r.mapErr(ctx, err)
 	}
 
-	// Resolve the user from the auth context first (production path).
-	// If that fails (local dev without Clerk), use the input userId directly.
+	// Use the authenticated user's internal ID when the identity is provisioned.
 	if userID, authErr := resolveUserIDFromCtx(ctx, r.UserService); authErr == nil {
 		svcInput.UserID = userID
 	}

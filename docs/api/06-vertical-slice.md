@@ -185,18 +185,14 @@ Test pattern:
 
 ### Step J: Keep Environment-Aware Middleware Behavior
 
-Current expected behavior:
+Current behavior in `cmd/api/main.go`:
 
-- Local-like env (`""`, `local`, `development`, `dev`): auth/rate-limit bypass for fast iteration.
-- Non-local env (`staging`, `production`, etc.): strict middleware chain.
+- `ENV` and `CLERK_SECRET_KEY` are mandatory at startup, including in local development. Set `ENV=local` and use the Clerk secret key from a development instance in the local `.env` file.
+- `/query` always uses Clerk auth; requests without a valid bearer token are rejected. There is no fixed-user development bypass.
+- The per-client rate limiter is enabled outside local environments and applies to `/query`; `/health` remains public and checks database readiness.
+- `TRUSTED_PROXY_CIDRS` is optional. Forwarded client IP headers are honored only when the immediate peer matches one of these configured CIDRs; otherwise the socket peer address is used. `API_RATE_LIMIT_RPS` and `API_RATE_LIMIT_BURST` configure the non-local `/query` limit.
 
-Strict chain should remain:
-
-- `CORS(RateLimit(RequireAuth(mux)))`
-
-Auth requirement:
-
-- `internal/middleware/auth.go` should enforce bearer token (not optional auth).
+When changing auth behavior, preserve the rule that all GraphQL traffic is authenticated in every environment, and verify the actual middleware wiring in `cmd/api/main.go`.
 
 ## 4. File Checklist by Layer
 
@@ -238,16 +234,16 @@ curl -i -X POST http://127.0.0.1:8081/query \
 
 Expected: 403 Forbidden.
 
-Local mode check (dev-friendly):
+Local mode uses the same Clerk authentication as deployed environments. Set `ENV=local` and `CLERK_SECRET_KEY` in `.env`, then send a valid Clerk session token:
 
 ```bash
-ENV=development make run
-curl -sS -X POST http://127.0.0.1:8080/query \
+curl -i -X POST http://127.0.0.1:8080/query \
+  -H "Authorization: Bearer <clerk-session-token>" \
   -H "Content-Type: application/json" \
   --data '{"query":"query { __typename }"}'
 ```
 
-Expected: normal GraphQL response.
+Without a valid token, expect `403 Forbidden`.
 
 ## 6. Smoke-Test GraphQL Flow (Generic)
 
@@ -286,9 +282,9 @@ make gen
 go test ./...
 make build
 
-# run local (open)
-ENV=development make run
+# run local (Clerk auth required; rate limit disabled)
+ENV=local make run
 
-# run strict (auth + rate limit)
+# run strict (Clerk auth + rate limit)
 ENV=production make run
 ```

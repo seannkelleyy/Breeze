@@ -17,20 +17,9 @@ func RequireAuth(next http.Handler) http.Handler {
 	return clerkhttp.RequireHeaderAuthorization()(next)
 }
 
-// WithDevUserID injects a dev identity into the context. Used by DevAuth and
-// by tests that exercise authenticated code paths without Clerk.
+// WithDevUserID injects a test identity into the context for resolver tests.
 func WithDevUserID(ctx context.Context, userID string) context.Context {
 	return context.WithValue(ctx, devUserIDKey, userID)
-}
-
-// DevAuth sets a default user ID in context for local development
-// when Clerk is not configured.
-func DevAuth(userID string) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(w, r.WithContext(WithDevUserID(r.Context(), userID)))
-		})
-	}
 }
 
 // UserIDFromCtx extracts the Clerk user ID from the request context.

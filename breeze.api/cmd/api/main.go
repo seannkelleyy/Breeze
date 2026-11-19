@@ -48,11 +48,8 @@ func main() {
 
 	slog.Info("starting server", "port", cfg.Port, "env", cfg.Env)
 
-	// Init Clerk for JWT validation (required in all environments for
-	// auth context resolution; CLERK_SECRET_KEY must be set locally too).
-	if cfg.ClerkSecretKey != "" {
-		clerk.SetKey(cfg.ClerkSecretKey)
-	}
+	// Clerk auth is required in every environment, including local development.
+	clerk.SetKey(cfg.ClerkSecretKey)
 
 	// Init DB
 	ctx := context.Background()
@@ -133,39 +130,30 @@ func main() {
 
 	mux.Handle("/graphql", playground.Handler("GraphQL", "/query"))
 
-	// Apply Clerk auth to the query endpoint when configured.
-	// In local mode without Clerk, use dev auth with a default user ID.
-	switch {
-	case cfg.ClerkSecretKey != "":
-		slog.Info("auth middleware enabled")
-		mux.Handle("/query", middleware.RequireAuth(srv))
-	case cfg.IsLocalEnv():
-		slog.Info("dev auth middleware enabled (no CLERK_SECRET_KEY)")
-		devUserID := "550e8400-e29b-41d4-a716-446655440000"
-		mux.Handle("/query", middleware.DevAuth(devUserID)(srv))
-	default:
-		slog.Info("auth middleware disabled (no CLERK_SECRET_KEY)")
-		mux.Handle("/query", srv)
-	}
-
 	port := cfg.Port
 	if port == "" {
 		port = "8080"
 	}
 
 	rateLimitCfg := middleware.RateLimiterConfig{
-		RequestsPerSecond: 30, // adjust as needed
-		Burst:             60,
+		RequestsPerSecond: cfg.RateLimitRPS,
+		Burst:             cfg.RateLimitBurst,
+		MaxClients:        10_000,
+		IdleTimeout:       10 * time.Minute,
+		TrustedProxies:    cfg.TrustedProxyCIDRs,
 	}
+
+	queryHandler := middleware.RequireAuth(srv)
+	if !cfg.IsLocalEnv() {
+		queryHandler = middleware.RateLimit(rateLimitCfg, queryHandler)
+	}
+	mux.Handle("/query", queryHandler)
 
 	// Outermost first: panic recovery guards every handler, access log counts
 	// every request including those rejected by CORS/rate limiting.
 	handler := middleware.RecoverMiddleware(mux)
 	handler = middleware.AccessLogMiddleware(handler)
 	handler = middleware.CORS(cfg.AllowedOrigin)(handler)
-	if !cfg.IsLocalEnv() {
-		handler = middleware.RateLimit(rateLimitCfg, handler)
-	}
 
 	slog.Info("server running", "port", port)
 	slog.Info("graphql playground", "url", fmt.Sprintf("http://localhost:%s/graphql", port))
