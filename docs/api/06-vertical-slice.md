@@ -158,7 +158,7 @@ Resolver rules:
 - Parse IDs and delegate to service.
 - Keep resolvers thin.
 - Return `null` for nullable not-found reads when contract allows.
-- Use DataLoaders for child fields on list results.
+- Avoid N+1 queries for child fields on list results. Prefer a batched/aggregate sqlc query; add and wire a request-scoped DataLoader only for a genuine N+1 case.
 
 ### Step H: Wire the Slice in Server Bootstrap
 

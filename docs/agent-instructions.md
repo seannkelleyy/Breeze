@@ -48,7 +48,7 @@ This is a **personal finance planner** monorepo with a Go API and Next.js web ap
 - **Never generate UUIDs in Go** — let Postgres `gen_random_uuid()` handle it.
 - **Never call `os.Getenv` in business logic** — use `internal/config/config.go`.
 - **Never import Clerk SDK outside `internal/middleware/auth.go`.**
-- **DataLoaders required** for any resolver field loading children of a list.
+- **Avoid GraphQL N+1 queries.** Prefer batched sqlc queries or aggregates; add a request-scoped DataLoader only when a resolver has a real N+1 use case.
 - **Always update `last_value_updated_at`** when changing `Asset.current_value`.
 - **Always update `last_balance_updated_at`** when changing `Liability.current_balance`.
 

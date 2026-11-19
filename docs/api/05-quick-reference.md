@@ -2,58 +2,41 @@
 
 ## Naming Conventions
 
-| Thing | Convention | Example |
-|---|---|---|
-| Go files | snake_case | `expense_service.go` |
-| Go types | PascalCase | `ExpenseService` |
-| Go exported functions | PascalCase | `CreateExpense` |
-| Go unexported functions | camelCase | `validateSplits` |
-| DB tables | snake_case plural | `expense_categories` |
-| DB columns | snake_case | `allocation_amount` |
-| GraphQL types | PascalCase | `ExpenseCategory` |
-| GraphQL fields | camelCase | `allocationAmount` |
-| GraphQL monetary fields | String (not Float) | `"350.00"` |
-| sqlc query names | PascalCase verb-noun | `GetCategoriesForBudget` |
-| Sentinel errors | ErrPascalCase | `ErrSplitMismatch` |
-| DataLoaders | PascalCase + Loader | `CategorySpentLoader` |
-| Service types | PascalCase + Service | `BudgetService` |
-| Middleware context keys | unexported type | `type contextKey string` |
+| Thing                   | Convention           | Example                                 |
+| ----------------------- | -------------------- | --------------------------------------- |
+| Go files                | snake_case           | `expense_service.go`                    |
+| Go types                | PascalCase           | `ExpenseService`                        |
+| Go exported functions   | PascalCase           | `CreateExpense`                         |
+| Go unexported functions | camelCase            | `validateSplits`                        |
+| DB tables               | snake_case plural    | `expense_categories`                    |
+| DB columns              | snake_case           | `allocation_amount`                     |
+| GraphQL types           | PascalCase           | `ExpenseCategory`                       |
+| GraphQL fields          | camelCase            | `allocationAmount`                      |
+| GraphQL monetary fields | String (not Float)   | `"350.00"`                              |
+| sqlc query names        | PascalCase verb-noun | `GetCategoriesForBudget`                |
+| Sentinel errors         | ErrPascalCase        | `ErrSplitMismatch`                      |
+| DataLoader (if needed)  | PascalCase + Loader  | Add only for a real GraphQL N+1 pattern |
+| Service types           | PascalCase + Service | `BudgetService`                         |
+| Middleware context keys | unexported type      | `type contextKey string`                |
 
 ---
 
-## Install Everything
+## Setup
+
+Use the repository setup scripts instead of installing Go packages by hand. They install the API tooling, start local Postgres when available, and run code generation/dependency setup:
 
 ```bash
-# Atlas
-curl -sSf https://atlasgo.sh | sh
+# From the repository root: full API + web + local DB setup
+./scripts/setup.sh
 
-# Go CLI tools
-go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-go install github.com/99designs/gqlgen@latest
+# API tools only (from the repository root)
+cd breeze.api && make setup
 
-# Core Go packages
-go get github.com/99designs/gqlgen
-go get github.com/vektah/gqlparser/v2
-go get github.com/jackc/pgx/v5
-go get github.com/jackc/pgx/v5/pgxpool
-go get github.com/govalues/decimal
-go get github.com/google/uuid
-go get github.com/caarlos0/env/v11
-go get github.com/graph-gophers/dataloader/v7
-go get github.com/clerkinc/clerk-sdk-go/clerk
-
-# Additional packages used in this repo
-go get github.com/riverqueue/river
-go get github.com/riverqueue/river/riverdriver/riverpgxv5
-go get github.com/testcontainers/testcontainers-go
-go get github.com/testcontainers/testcontainers-go/modules/postgres
-go get github.com/getsentry/sentry-go
-go get golang.org/x/time/rate
-
-# Optional storage package (for S3-compatible providers)
-go get github.com/aws/aws-sdk-go-v2/service/s3  # for Tigris / R2
-# Encryption uses stdlib crypto/aes + crypto/cipher — no extra package needed
+# Web dependencies only
+cd breeze.web && npm run setup
 ```
+
+Go dependencies are declared in `breeze.api/go.mod`; sqlc and gqlgen are run through `go run` by the Makefile. Do not use `go get` as a project setup checklist.
 
 ---
 

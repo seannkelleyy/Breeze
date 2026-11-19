@@ -6,46 +6,45 @@ Personal finance planner — track assets, liabilities, budgets, retirement proj
 
 ### API (`breeze.api/`)
 
-| Concern | Tool |
-|---|---|
-| Language | Go 1.26 |
-| GraphQL | gqlgen |
-| DB queries | sqlc + pgx/v5 |
-| Migrations | Atlas |
-| Database | PostgreSQL 16 |
-| Money math | govalues/decimal |
-| Auth | Clerk |
-| Background jobs | River |
-| Error tracking | Sentry |
-| DataLoaders | dataloadgen |
-| Testing | testify + pgxmock |
-| Linting | golangci-lint |
+| Concern         | Tool                                                  |
+| --------------- | ----------------------------------------------------- |
+| Language        | Go 1.26                                               |
+| GraphQL         | gqlgen                                                |
+| DB queries      | sqlc + pgx/v5                                         |
+| Migrations      | Atlas                                                 |
+| Database        | PostgreSQL 16                                         |
+| Money math      | govalues/decimal                                      |
+| Auth            | Clerk                                                 |
+| Background jobs | River                                                 |
+| Error tracking  | Sentry                                                |
+| Testing         | testify; SQL integration tests run against PostgreSQL |
+| Linting         | golangci-lint                                         |
 
 ### Web (`breeze.web/`)
 
-| Concern | Tool |
-|---|---|
-| Framework | Next.js 16 + React 19 |
-| Language | TypeScript |
-| Data fetching | TanStack Query |
-| Tables | TanStack Table |
-| UI components | shadcn/ui + Radix UI |
-| Styling | Tailwind CSS v4 |
-| Charts | Recharts |
-| Forms | React Hook Form + Zod |
-| HTTP client | Axios |
-| Auth | Clerk |
-| GraphQL codegen | graphql-codegen |
-| Testing | Vitest |
-| Linting | ESLint + Prettier |
+| Concern         | Tool                  |
+| --------------- | --------------------- |
+| Framework       | Next.js 16 + React 19 |
+| Language        | TypeScript            |
+| Data fetching   | TanStack Query        |
+| Tables          | TanStack Table        |
+| UI components   | shadcn/ui + Radix UI  |
+| Styling         | Tailwind CSS v4       |
+| Charts          | Recharts              |
+| Forms           | React Hook Form + Zod |
+| HTTP client     | Axios                 |
+| Auth            | Clerk                 |
+| GraphQL codegen | graphql-codegen       |
+| Testing         | Vitest                |
+| Linting         | ESLint + Prettier     |
 
 ### Infra
 
-| Concern | Tool |
-|---|---|
-| Database | PostgreSQL 16 |
+| Concern    | Tool           |
+| ---------- | -------------- |
+| Database   | PostgreSQL 16  |
 | Containers | Docker Compose |
-| Hosting | Render |
+| Hosting    | Render         |
 
 ## Quick Start
 

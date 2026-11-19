@@ -129,7 +129,7 @@ WHERE  id      = $1
   AND  deleted_at IS NULL;
 ```
 
-For DataLoader batch queries use `= ANY($1::uuid[])`:
+For a future DataLoader or other batch lookup, `= ANY($1::uuid[])` can fetch rows for a set of IDs in one query. This is a query pattern, not evidence that DataLoader is currently wired into the API:
 
 ```sql
 -- name: GetCategorySpentAmounts :many

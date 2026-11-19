@@ -36,6 +36,7 @@ Define the current, canonical stack for Breeze after the migration to Go + Graph
 - No business logic in resolvers.
 - Money/rates are never float64.
 - GraphQL wire format uses strings for money/rates.
+- Avoid GraphQL N+1 queries. Prefer batched/aggregate SQL queries; add a request-scoped DataLoader only when a real field-resolution pattern needs it. The current schema has no unbatched nested DB resolver.
 
 ## Verification Commands
 

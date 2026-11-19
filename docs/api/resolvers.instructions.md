@@ -72,57 +72,37 @@ func mapServiceError(err error) error {
 
 ## GraphQL Schema Conventions
 
+This is an illustrative shape for conventions, not the current API schema; `graph/schema.graphqls` is authoritative.
+
 ```graphql
 type ExpenseCategory {
-  id:                  ID!
-  budgetId:            ID!
-  description:         String!
-  allocationAmount:    String!    # decimal as string — never Float
-  rolloverAmount:      String!
-  parentCategoryId:    ID          # nullable — no !
-  effectiveAllocation: String!    # derived
-  totalSpent:          String!    # derived — DataLoader
-  remaining:           String!    # derived — DataLoader
-  percentUsed:         Float!     # derived — DataLoader
-  expenses:            [Expense!]!
+	id: ID!
+	budgetId: ID!
+	description: String!
+	allocationAmount: String! # decimal as string — never Float
+	rolloverAmount: String!
+	parentCategoryId: ID # nullable — no !
+	effectiveAllocation: String! # derived
+	totalSpent: String! # illustrative derived field
+	expenses: [Expense!]!
 }
 ```
 
 Rules:
+
 - All IDs are `ID!` (non-null)
 - All monetary amounts are `String!` — never `Float` — to avoid precision loss on the wire
 - Nullable fields have no `!`
 - Non-nullable fields have `!`
 - Lists are `[Type!]!` — non-null list of non-null items
 
-## DataLoader Pattern
+## Avoiding GraphQL N+1 Queries
 
-Every field that queries the DB for child records of a list of parents needs a DataLoader. Without it every item in the list fires a separate DB query (N+1).
+A resolver that queries once for each parent in a returned list can cause an N+1 query pattern. First see whether one aggregate/batched sqlc query can return the needed values. A request-scoped DataLoader is another option when the GraphQL field resolution pattern benefits from batching and per-request caching.
 
-```go
-// WRONG — N+1, DB called once per category in the list
-func (r *expenseCategoryResolver) TotalSpent(
-    ctx context.Context,
-    cat *model.ExpenseCategory,
-) (string, error) {
-    result, err := r.DB.SumSplitsForCategory(ctx, cat.ID) // fires N times
-    if err != nil { return "0", err }
-    return result.Round(2).String(), nil
-}
+There is no DataLoader currently wired into GraphQL, and the present schema has no nested database field resolver that needs one. Expense splits are fetched with one batched sqlc query for a list of expenses. Do not add a loader preemptively; implement the batch query, request-scoped loader, and resolver integration together if a real N+1 use case appears.
 
-// RIGHT — batched via DataLoader, single DB call for all categories
-func (r *expenseCategoryResolver) TotalSpent(
-    ctx context.Context,
-    cat *model.ExpenseCategory,
-) (string, error) {
-    thunk := r.Loaders.CategorySpent.Load(ctx, cat.ID)
-    result, err := thunk()
-    if err != nil { return "0", err }
-    return result.(decimal.Decimal).Round(2).String(), nil
-}
-```
-
-DataLoaders live in `internal/loader/`. One DataLoader per batched query pattern. Inject the loader bundle via context middleware.
+DataLoader calls should remain inside the resolver layer as a batching mechanism; batch functions should delegate to the service/DB query path rather than introducing SQL into resolvers.
 
 ## Mapping Functions
 
@@ -169,23 +149,9 @@ func parseDecimal(s string) (decimal.Decimal, error) {
 
 Never use `decimal.RequireFromString` for user input — it panics on invalid input. Use it only for hardcoded constants in tests.
 
-## Derived Fields — Simple vs DataLoader
+## Derived Fields
 
-Simple derived fields that require no DB access can be computed directly in the resolver:
-
-```go
-// No DB needed — just math on parent fields
-func (r *expenseCategoryResolver) EffectiveAllocation(
-    ctx context.Context,
-    cat *model.ExpenseCategory,
-) (string, error) {
-    allocation := decimal.RequireFromString(cat.AllocationAmount)
-    rollover   := decimal.RequireFromString(cat.RolloverAmount)
-    return allocation.Add(rollover).Round(2).String(), nil
-}
-```
-
-Derived fields that require DB access (TotalSpent, Remaining, Progress) must use a DataLoader.
+Fields derivable from data already on the parent can be mapped/computed without another DB query. For fields needing DB data, use the service layer and avoid one query per parent; choose an aggregate/batched sqlc query or wire a DataLoader if that is the cleanest fit. DataLoader is not mandatory, and no loader is currently wired into GraphQL.
 
 ## Generated Files — Never Edit
 

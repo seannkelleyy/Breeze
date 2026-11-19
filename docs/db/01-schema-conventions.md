@@ -928,7 +928,7 @@ WHERE  id      = $1
   AND  deleted_at IS NULL;
 ```
 
-For DataLoader batch queries use `= ANY($1::uuid[])`:
+For a future DataLoader or other batch lookup, `= ANY($1::uuid[])` can fetch rows for a set of IDs in one query. This is an illustrative query pattern; it is not currently wired to a GraphQL DataLoader:
 
 ```sql
 -- name: GetCategorySpentAmounts :many

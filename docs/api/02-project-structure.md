@@ -38,9 +38,6 @@ breeze.api/
 │   │       ├── retirement.sql.go
 │   │       └── ...
 │   │
-│   ├── dataloader/                  # DataLoaders — one per batched query
-│   │   └── loaders.go
-│   │
 │   ├── health/                      # HTTP health endpoint and database readiness check
 │   │   ├── handler.go
 │   │   └── handler_test.go
@@ -177,7 +174,6 @@ Run `make gen` from `breeze.api/` to regenerate sqlc + gqlgen in one step after 
 
 ```
 graph                     →  can import  →  internal/service
-graph                     →  can import  →  internal/dataloader
 internal/service         →  can import  →  internal/db
 internal/service         →  CANNOT import  →  graph
 internal/db              →  CANNOT import  →  internal/service

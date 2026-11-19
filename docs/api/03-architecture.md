@@ -122,25 +122,13 @@ Mutations that require transactions:
 
 ---
 
-## DataLoaders — Required for List Resolvers
+## DataLoaders and N+1 Queries
 
-Every field that loads child records for a list of parents must use a DataLoader. Calling the DB inside a loop is an N+1 bug.
+A DataLoader batches keyed lookups made while GraphQL resolves fields for multiple parent objects, and caches those results for the lifetime of a request. That can turn one query per parent into one batched query, avoiding an N+1 database pattern.
 
-```go
-// WRONG — N+1, called once per category in the list
-func (r *resolver) TotalSpent(ctx context.Context, cat *model.ExpenseCategory) (string, error) {
-    result, err := r.DB.SumSplitsForCategory(ctx, cat.ID) // fires N times
-    // ...
-}
+The current GraphQL schema has no nested field resolver that performs a database lookup per parent. `Expense.splits` is loaded with one batched `ListExpenseSplitsByExpenseIDs` query when listing expenses. A DataLoader is not currently needed.
 
-// RIGHT — batched via DataLoader, fires once for all categories
-func (r *resolver) TotalSpent(ctx context.Context, cat *model.ExpenseCategory) (string, error) {
-    thunk := r.Loaders.CategorySpent.Load(ctx, cat.ID)
-    result, err := thunk()
-    if err != nil { return "0", err }
-    return result.(decimal.Decimal).Round(2).String(), nil
-}
-```
+When a real N+1 use case appears, first consider whether an aggregate or batched sqlc query is simpler. If a DataLoader is the better fit, wire its batch function, request-scoped middleware, and resolver integration together. Do not issue SQL directly from the resolver.
 
 ---
 
