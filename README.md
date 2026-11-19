@@ -73,25 +73,25 @@ docs/          All project documentation
 
 ### API (`breeze.api/`)
 
-| Command | What it does |
-|---|---|
-| `make dev` | Start db → migrate → gen → run |
-| `make gen` | sqlc + gqlgen code generation |
-| `make migrate` | Apply pending migrations |
-| `make seed` | Seed tax brackets |
-| `make test` | Run tests |
-| `make lint` | golangci-lint |
-| `make check` | Full CI pipeline (fmt → tidy → gen → vet → lint → test → build) |
+| Command        | What it does                                                    |
+| -------------- | --------------------------------------------------------------- |
+| `make dev`     | Start db → migrate → gen → run                                  |
+| `make gen`     | sqlc + gqlgen code generation                                   |
+| `make migrate` | Apply pending migrations                                        |
+| `make seed`    | Seed tax brackets                                               |
+| `make test`    | Run tests                                                       |
+| `make lint`    | golangci-lint                                                   |
+| `make check`   | Full CI pipeline (fmt → tidy → gen → vet → lint → test → build) |
 
 ### Web (`breeze.web/`)
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | Start dev server |
-| `npm run build` | Production build |
-| `npm run lint` | ESLint |
+| Command             | What it does     |
+| ------------------- | ---------------- |
+| `npm run dev`       | Start dev server |
+| `npm run build`     | Production build |
+| `npm run lint`      | ESLint           |
 | `npm run typecheck` | TypeScript check |
-| `npm run test` | Vitest |
+| `npm run test`      | Vitest           |
 
 ## API Endpoints
 

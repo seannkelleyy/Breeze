@@ -44,6 +44,7 @@ If you are a person or an AI agent, start here first.
 ### Deployment
 
 - `deployment/01-hosting.md`
+- `deployment/production-checklist.md`
 
 ### Roadmap
 

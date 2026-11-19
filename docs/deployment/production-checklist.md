@@ -32,9 +32,9 @@ Optional hardening: squash public history to drop the pre-Go (.NET) era entirely
 
 ## Go version (Render)
 
-`breeze.api/go.mod` carries `go 1.26.1` + `toolchain go1.27.2`: local dev and
-CI build with the patched 1.27.2 stdlib (11 net/http/tls advisories), while
-Render's builder compiles with its supported 1.26.x — the `toolchain` line is
-ignored under `GOTOOLCHAIN=local`. When Render's Go runtime offers 1.27.2+,
-move the `go` directive up so production gets the patched stdlib too. Verify
-with `govulncheck ./...` after upgrading.
+`breeze.api/go.mod` currently declares `go 1.26.1` and `toolchain go1.27.2`.
+A recent Render build log selected Go 1.27.4; the builder version can change
+with Render's image/configuration, so verify the version in each service's build
+log rather than assuming it follows the `go` directive or `toolchain` line.
+After changing Go versions, run the API checks and `govulncheck ./...`, and
+confirm the deployed build uses the intended patched standard library.

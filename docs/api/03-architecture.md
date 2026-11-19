@@ -115,6 +115,7 @@ return &expense, tx.Commit(ctx)
 ```
 
 Mutations that require transactions:
+
 - CreateExpense — expense + splits
 - CreateBudget — budget + recurring income/expense generation
 - PlaidSync — multiple transaction upserts
@@ -150,14 +151,13 @@ return result.String(), nil  // "175.00"
 
 ---
 
-## Logger — Always From Context
+## Logging
 
-Middleware injects a `*slog.Logger` pre-loaded with `requestId` and `userId` into every request context. Never use a global logger.
+The API configures the global slog default as JSON in production and text otherwise. `LoggerMiddleware` and `LoggerFromCtx` helpers exist, but `cmd/api/main.go` does not currently mount `LoggerMiddleware`; `LoggerFromCtx` falls back to `slog.Default()`. Access-log middleware emits request method, path, status, and duration. There is no request-ID or user-ID logger enrichment in the current request chain.
 
 ```go
-logger := middleware.LoggerFromCtx(ctx)
+logger := middleware.LoggerFromCtx(ctx) // currently falls back to slog.Default() in API requests
 logger.Info("expense created", "expenseId", expense.ID, "amount", amount.String())
-logger.Error("split validation failed", "expected", total.String(), "got", splitSum.String())
 ```
 
 ---
@@ -252,27 +252,6 @@ Never call `os.Getenv` directly in business logic. Parse config once at startup 
 
 ## Background Jobs — riverqueue/river
 
-Three features require async work:
-- **Plaid webhook processing** — store webhook immediately, process asynchronously
-- **Recurring budget generation** — create Income/Expense rows from templates each month
-- **NetWorthSnapshot generation** — triggered monthly or on-demand
+River is configured in a separate process started by `cmd/river` (`make river`). The runner registers Plaid sync workers and schedules an hourly all-connections sync that also runs on startup. It uses the existing PostgreSQL database via `riverpgxv5`; no Redis is required.
 
-River uses your existing Postgres database — no Redis, no separate infrastructure:
-
-```go
-type GenerateBudgetArgs struct {
-    UserID uuid.UUID `json:"user_id"`
-    Month  time.Time `json:"month"`
-}
-
-func (GenerateBudgetArgs) Kind() string { return "generate_budget" }
-
-type GenerateBudgetWorker struct {
-    river.WorkerDefaults[GenerateBudgetArgs]
-    budgetService *service.BudgetService
-}
-
-func (w *GenerateBudgetWorker) Work(ctx context.Context, job *river.Job[GenerateBudgetArgs]) error {
-    return w.budgetService.GenerateFromRecurring(ctx, job.Args.UserID, job.Args.Month)
-}
-```
+The API process does not start this worker runner. Any deployed environment that needs background processing must run the River process separately. The current runner does not register recurring-budget generation or net-worth snapshot workers.

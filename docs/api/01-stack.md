@@ -12,22 +12,22 @@ Define the current, canonical stack for Breeze after the migration to Go + Graph
 
 ## Canonical Stack
 
-| Concern | Tool |
-|---|---|
-| API language | Go 1.26+ |
-| API transport | GraphQL (gqlgen) |
-| DB query layer | sqlc + pgx/v5 |
-| Schema + migrations | Atlas (`schema.hcl` + `db/migrations/`) |
-| Money/rates | govalues/decimal |
-| Auth | Clerk (API usage isolated to middleware) |
-| Logging | slog |
-| Jobs | riverqueue/river |
-| Web framework | Next.js 16 + React 19 |
-| Web data fetching | TanStack React Query |
-| Web HTTP client | Axios |
-| Web forms | React Hook Form + Zod |
-| Web UI | shadcn/ui + Radix + Tailwind v4 |
-| Database | PostgreSQL 16 |
+| Concern             | Tool                                     |
+| ------------------- | ---------------------------------------- |
+| API language        | Go 1.26+                                 |
+| API transport       | GraphQL (gqlgen)                         |
+| DB query layer      | sqlc + pgx/v5                            |
+| Schema + migrations | Atlas (`schema.hcl` + `db/migrations/`)  |
+| Money/rates         | govalues/decimal                         |
+| Auth                | Clerk (API usage isolated to middleware) |
+| Logging             | slog                                     |
+| Jobs                | riverqueue/river                         |
+| Web framework       | Next.js 16 + React 19                    |
+| Web data fetching   | TanStack React Query                     |
+| Web HTTP client     | Axios                                    |
+| Web forms           | React Hook Form + Zod                    |
+| Web UI              | shadcn/ui + Radix + Tailwind v4          |
+| Database            | PostgreSQL 16                            |
 
 ## Architecture Principles
 

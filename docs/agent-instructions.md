@@ -10,29 +10,29 @@ This is a **personal finance planner** monorepo with a Go API and Next.js web ap
 
 ## API Stack
 
-| Concern | Tool |
-|---|---|
-| Language | Go 1.26+ |
-| GraphQL | gqlgen |
-| DB queries | sqlc + pgx/v5 |
-| Schema/migrations | Atlas (`schema.hcl` → `db/migrations/`) |
-| Decimal math | govalues/decimal — never float64 for money |
-| Auth | Clerk (isolated to `internal/middleware/auth.go` only) |
-| Background jobs | riverqueue/river |
-| Logging | slog — always from context, never global |
+| Concern           | Tool                                                                         |
+| ----------------- | ---------------------------------------------------------------------------- |
+| Language          | Go 1.26+                                                                     |
+| GraphQL           | gqlgen                                                                       |
+| DB queries        | sqlc + pgx/v5                                                                |
+| Schema/migrations | Atlas (`schema.hcl` → `db/migrations/`)                                      |
+| Decimal math      | govalues/decimal — never float64 for money                                   |
+| Auth              | Clerk (isolated to `internal/middleware/auth.go` only)                       |
+| Background jobs   | riverqueue/river                                                             |
+| Logging           | slog; API uses the configured global default, with an unwired context helper |
 
 ## Web Stack
 
-| Concern | Tool |
-|---|---|
-| Framework | Next.js 16 + React 19 |
-| UI components | shadcn/ui + Radix + Tailwind v4 |
-| Data fetching | TanStack React Query |
-| HTTP client | Axios |
-| Auth | Clerk (`@clerk/clerk-react`) |
-| Forms | React Hook Form + Zod |
-| Charts | Recharts |
-| Package manager | npm |
+| Concern         | Tool                            |
+| --------------- | ------------------------------- |
+| Framework       | Next.js 16 + React 19           |
+| UI components   | shadcn/ui + Radix + Tailwind v4 |
+| Data fetching   | TanStack React Query            |
+| HTTP client     | Axios                           |
+| Auth            | Clerk (`@clerk/clerk-react`)    |
+| Forms           | React Hook Form + Zod           |
+| Charts          | Recharts                        |
+| Package manager | npm                             |
 
 ---
 
@@ -56,9 +56,9 @@ This is a **personal finance planner** monorepo with a Go API and Next.js web ap
 
 ## Generated Code — Never Edit
 
-| Directory | Tool | Regenerate |
-|---|---|---|
-| `breeze.api/internal/db/sqlc/` | sqlc | `make gen` |
-| `breeze.api/graph/generated/` | gqlgen | `make gen` |
-| `breeze.api/graph/model/models_gen.go` | gqlgen | `make gen` |
-| `breeze.api/db/migrations/` | Atlas | `make migrate-diff` |
+| Directory                              | Tool   | Regenerate          |
+| -------------------------------------- | ------ | ------------------- |
+| `breeze.api/internal/db/sqlc/`         | sqlc   | `make gen`          |
+| `breeze.api/graph/generated/`          | gqlgen | `make gen`          |
+| `breeze.api/graph/model/models_gen.go` | gqlgen | `make gen`          |
+| `breeze.api/db/migrations/`            | Atlas  | `make migrate-diff` |
