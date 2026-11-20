@@ -13,7 +13,7 @@ require (
 	github.com/getsentry/sentry-go v0.50.0
 	github.com/google/uuid v1.6.0
 	github.com/govalues/decimal v0.1.36
-	github.com/jackc/pgx/v5 v5.10.0
+	github.com/jackc/pgx/v5 v5.13.0
 	github.com/joho/godotenv v1.5.1
 	github.com/riverqueue/river v0.47.0
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.47.0
