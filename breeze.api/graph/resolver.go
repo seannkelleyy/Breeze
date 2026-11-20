@@ -36,16 +36,22 @@ type Resolver struct {
 	RetirementAccessService  *service.RetirementAccessService
 }
 
-// resolveUserIDFromCtx extracts the authenticated user's internal UUID from
-// the request context by looking up the Clerk identity provider ID.
+// resolveUserIDFromCtx returns the internal UUID of the authenticated caller.
+//
+// It fails closed. A request without an identity, or whose identity has no
+// provisioned account, yields ErrUnauthorized — never a client-supplied id.
+// Resolvers must treat the returned error as terminal.
 func resolveUserIDFromCtx(ctx context.Context, userService *service.UserService) (uuid.UUID, error) {
 	identityProviderID := middleware.UserIDFromCtx(ctx)
 	if identityProviderID == "" {
-		return uuid.Nil, fmt.Errorf("no authenticated user in context")
+		return uuid.Nil, service.ErrUnauthorized
 	}
 
 	user, err := userService.GetByIdentityProviderID(ctx, identityProviderID)
 	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return uuid.Nil, service.ErrUnauthorized
+		}
 		return uuid.Nil, fmt.Errorf("resolve authenticated user: %w", err)
 	}
 

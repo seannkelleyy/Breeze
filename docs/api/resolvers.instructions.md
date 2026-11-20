@@ -8,7 +8,7 @@ applyTo: "breeze.api/graph/**"
 
 Resolvers must do exactly five things and nothing else:
 
-1. Extract the authenticated user ID from context
+1. Resolve the authenticated user ID from context (fail closed)
 2. Map GraphQL input to a service input type
 3. Call the service
 4. Map the service result to a GraphQL model type
@@ -20,7 +20,11 @@ func (r *mutationResolver) AddExpense(
     ctx context.Context,
     input model.AddExpenseInput,
 ) (*model.Expense, error) {
-    userID := middleware.UserIDFromCtx(ctx)
+    userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+    if err != nil {
+        return nil, r.mapErr(ctx, err)
+    }
+
     expense, err := r.ExpenseService.CreateExpense(ctx,
         service.CreateExpenseInput{
             UserID:      userID,
@@ -31,13 +35,38 @@ func (r *mutationResolver) AddExpense(
             Splits:      mapSplitInputs(input.Splits),
         })
     if err != nil {
-        return nil, mapServiceError(err)
+        return nil, r.mapErr(ctx, err)
     }
     return mapExpense(expense), nil
 }
 ```
 
 No business logic. No validation. No SQL. No direct DB calls. If you are doing any of those things in a resolver, move it to the service layer.
+
+## Caller Identity — Fail Closed
+
+`resolveUserIDFromCtx(ctx, r.UserService)` maps the Clerk identity to Breeze's internal user row. It returns `service.ErrUnauthorized` when the request carries no identity **or** when the identity has no account yet (provisioning is client-driven, so this happens). Its error is terminal:
+
+```go
+userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+if err != nil {
+    return nil, r.mapErr(ctx, err)
+}
+```
+
+Never fall back to a client-supplied `userId` when resolution fails. A fallback turns an unprovisioned account or a transient lookup failure into cross-tenant reads and writes.
+
+User-scoped queries still take a `userId` argument for the current client, but the resolver ignores it — name the parameter `_` and use the authenticated user:
+
+```go
+func (r *queryResolver) Assets(ctx context.Context, _ string) ([]*model.Asset, error) {
+    userID, err := resolveUserIDFromCtx(ctx, r.UserService)
+    if err != nil {
+        return nil, r.mapErr(ctx, err)
+    }
+    // list by userID
+}
+```
 
 ## Error Mapping
 

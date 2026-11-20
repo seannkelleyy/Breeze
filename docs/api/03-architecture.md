@@ -207,7 +207,7 @@ func (r *queryResolver) Asset(ctx context.Context, id string) (*model.Asset, err
 }
 ```
 
-Do not trust client-supplied `userId`/`id` fields on mutations — always overwrite them with the resolved caller (`svcInput.UserID = userID` / `svcInput.ID = userID` in the resolver).
+Do not trust client-supplied `userId`/`id` fields. Resolve the caller with `resolveUserIDFromCtx` and overwrite the input (`svcInput.UserID = userID` / `svcInput.ID = userID`); if resolution fails, return `r.mapErr(ctx, err)` — never keep the client value as a fallback.
 
 ---
 
