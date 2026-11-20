@@ -1,17 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 
-const { requestMock, userState } = vi.hoisted(() => ({
+const { requestMock } = vi.hoisted(() => ({
   requestMock: vi.fn(),
-  userState: { userId: 'u1' as string | null },
 }));
 
 vi.mock('@/lib/services/useGraphql', () => ({
   default: () => ({ request: requestMock }),
-}));
-
-vi.mock('@/lib/providers/CurrentUserProvider', () => ({
-  useCurrentUser: () => userState,
 }));
 
 import useCategories from '../useCategories';
@@ -30,7 +25,6 @@ const category = {
 describe('useCategories', () => {
   beforeEach(() => {
     requestMock.mockReset();
-    userState.userId = 'u1';
   });
 
   it('lists categories for a budget', async () => {
@@ -52,7 +46,7 @@ describe('useCategories', () => {
     requestMock.mockResolvedValue({ createExpenseCategory: { id: 'new-id' } });
     const { result } = renderHook(() => useCategories());
 
-    const created = await result.current.postCategory('b1', 'ignored', {
+    const created = await result.current.postCategory('b1', {
       name: 'Travel',
       allocation: '250.00',
     });
@@ -60,7 +54,6 @@ describe('useCategories', () => {
     expect(created).toBe('new-id');
     expect(requestMock).toHaveBeenCalledWith(expect.anything(), {
       input: {
-        userId: 'u1',
         budgetId: 'b1',
         name: 'Travel',
         allocation: '250.00',

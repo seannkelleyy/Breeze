@@ -2,21 +2,16 @@
 
 ## Next Up
 
-1. **Debt payoff module** — the last unbuilt pillar. Avalanche/snowball strategy engine, payoff timeline, interest-saved comparison, page. Schema is ready: `liabilities.payoff_priority`, `liabilities.target_extra_payment`, and `users.payoff_strategy` exist unused.
-2. **Pre-launch switchovers** — see [production-checklist.md](deployment/production-checklist.md): Clerk production instance, Plaid production approval, and rotation of the exposed credentials (old Clerk `sk_test_` key + old Azure SQL password in public git history; Render DB password from chat).
-3. **Feature backlog** — saved retirement scenarios, employer match vesting (#27), recurring-expense detection (#29), FOO auto-derivation from financial state, partial Intl.NumberFormat sweep, conscious spending plan budgeting mode, tax filing-season checklist expansion, investment-income crossover milestone (from [Sean's notes](seans-notes.md); drawdown ordering and Roth/HSA planning are partially built — see Product #4/#7).
+1. **Production integrations** — configure the Clerk production instance and complete Plaid production approval/setup; see [production-checklist.md](deployment/production-checklist.md).
+2. **Feature backlog** — saved retirement scenarios, employer match vesting (#27), recurring-expense detection (#29), FOO auto-derivation from financial state, partial Intl.NumberFormat sweep, conscious spending plan budgeting mode, tax filing-season checklist expansion, investment-income crossover milestone (from [Sean's notes](seans-notes.md); drawdown ordering and Roth/HSA planning are partially built — see Product #4/#7).
 
 ## Deployment
 
-- [x] Deploy API to Render — live, deploys green (native Go runtime; `make migrate-deploy` + seed in the build command)
+- [x] Deploy API to Render — live, deploys green (native Go runtime; migrations and seed run in the pre-deploy command)
 - [x] Deploy frontend to Render
 - [x] Set up production PostgreSQL on Render — squashed baseline applied, reference data seeded
 - [ ] Configure Clerk production environment — dev instance (`pk_test_*`) still in use
 - [ ] Configure Plaid production environment — `PLAID_ENV=sandbox`; requires Plaid approval
-
-## CI Cleanup
-
-- [x] Update `docs/deployment/01-hosting.md` to reflect Render deployment — Render section describes the real setup; stale `golang:1.23` Dockerfile pin fixed 2026-09-28
 
 ## Dashboard
 
@@ -47,14 +42,6 @@
   baseline. **Income planner phase 2** (partial): suggested-vs-actual conversions in the
   bracket-fill table.
 
-## Recently Completed
-
-- **Debt payoff module** (October 2026): `/debts` — avalanche/snowball waterfall engine
-  (`lib/calc/debtPayoff.ts`), strategy persisted to `users.payoff_strategy`, extra-payment
-  control, payoff order + balance timeline, interest/months saved vs a rolled-minimums
-  baseline. **Income planner phase 2** (partial): suggested-vs-actual conversions in the
-  bracket-fill table.
-
 ## Recently Completed (September 2026 waves)
 
 Condensed changelog — details in git history.
@@ -69,47 +56,47 @@ Condensed changelog — details in git history.
 
 ### Tier 1 — Small Effort (< 30 min each)
 
-| # | Page | Task | Priority | Notes |
-|---|------|------|----------|-------|
-| 1 | Dashboard | ~~Remove redundant vertical scroll for blank space under cards~~ — DONE: signed-out hero was h-screen inside the padded layout, forcing overflow; now min-h-svh w-full | High | |
-| 2 | Accounts | ~~Hide the card header caret — same annoyance as People~~ — DONE: compact cards have no caret; pencil opens the editor | High | |
-| 3 | Accounts | Delete icon should have no red background, add confirmation dialog | High | Confirmation dialog done (ConfirmDialog); red `destructive` background still present |
-| 4 | Accounts | ~~Fix missing pointer cursor on buttons~~ — DONE: Button base has cursor-pointer; SelectTrigger added | Medium | |
-| 5 | Accounts | ~~Add info icons (tooltips) for fields~~ — DONE: `InfoTip` wired into the account editors (Contribution Type, Match %, Match Up To %, Tax Treatment) | Medium | |
-| 6 | Accounts | ~~Show purple badge for owners~~ — DONE: filled when selected, bordered when unselected | Low | |
-| 7 | Accounts | ~~Fix error messages on invalid input (chars in number fields)~~ — DONE: invalid drafts persist in `FormattedNumberInput` | High | |
-| 8 | Goals | ~~Connect goals to accounts to track progress~~ — DONE: `connectedAccountIDs` + progress bars from balances vs target | Medium | |
-| 9 | Goals | ~~FOO doesn't show real FOO for user~~ — DONE: 9 canonical FOO steps created per user and toggleable; auto-derivation from financial state is a separate backlog idea | High | |
-| 10 | Tools | ~~Remove Tools page entirely~~ — DONE: Tools page and dropdown removed; Budget, Mortgage, Connections are direct nav bar items; calculator lives at `/mortgage` | Medium | |
-| 11 | Tools | ~~Tool dropdown text + icon should flex space-between~~ — MOOT: Tools dropdown removed (see #10) | Low | |
-| 12 | Future | Projection chart account name keys should match chart line colors | Medium | |
-| 13 | People | ~~Better UI for People cards — use modal editing~~ — DONE: DataCard + PersonFormModal with tabbed sections | High | |
-| 14 | People | ~~Show last updated time on each People card~~ — DONE: updatedAt on DataCard | Medium | |
-| 15 | People | ~~Income growth from dropdown instead of manual number input~~ — DONE: inflation-anchored presets + custom input | Medium | |
-| 16 | People | ~~Confirm before removing person~~ — DONE: ConfirmDialog | High | |
+| #   | Page      | Task                                                                                                                                                                   | Priority | Notes                                                                                |
+| --- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------ |
+| 1   | Dashboard | ~~Remove redundant vertical scroll for blank space under cards~~ — DONE: signed-out hero was h-screen inside the padded layout, forcing overflow; now min-h-svh w-full | High     |                                                                                      |
+| 2   | Accounts  | ~~Hide the card header caret — same annoyance as People~~ — DONE: compact cards have no caret; pencil opens the editor                                                 | High     |                                                                                      |
+| 3   | Accounts  | Delete icon should have no red background, add confirmation dialog                                                                                                     | High     | Confirmation dialog done (ConfirmDialog); red `destructive` background still present |
+| 4   | Accounts  | ~~Fix missing pointer cursor on buttons~~ — DONE: Button base has cursor-pointer; SelectTrigger added                                                                  | Medium   |                                                                                      |
+| 5   | Accounts  | ~~Add info icons (tooltips) for fields~~ — DONE: `InfoTip` wired into the account editors (Contribution Type, Match %, Match Up To %, Tax Treatment)                   | Medium   |                                                                                      |
+| 6   | Accounts  | ~~Show purple badge for owners~~ — DONE: filled when selected, bordered when unselected                                                                                | Low      |                                                                                      |
+| 7   | Accounts  | ~~Fix error messages on invalid input (chars in number fields)~~ — DONE: invalid drafts persist in `FormattedNumberInput`                                              | High     |                                                                                      |
+| 8   | Goals     | ~~Connect goals to accounts to track progress~~ — DONE: `connectedAccountIDs` + progress bars from balances vs target                                                  | Medium   |                                                                                      |
+| 9   | Goals     | ~~FOO doesn't show real FOO for user~~ — DONE: 9 canonical FOO steps created per user and toggleable; auto-derivation from financial state is a separate backlog idea  | High     |                                                                                      |
+| 10  | Tools     | ~~Remove Tools page entirely~~ — DONE: Tools page and dropdown removed; Budget, Mortgage, Connections are direct nav bar items; calculator lives at `/mortgage`        | Medium   |                                                                                      |
+| 11  | Tools     | ~~Tool dropdown text + icon should flex space-between~~ — MOOT: Tools dropdown removed (see #10)                                                                       | Low      |                                                                                      |
+| 12  | Future    | Projection chart account name keys should match chart line colors                                                                                                      | Medium   |                                                                                      |
+| 13  | People    | ~~Better UI for People cards — use modal editing~~ — DONE: DataCard + PersonFormModal with tabbed sections                                                             | High     |                                                                                      |
+| 14  | People    | ~~Show last updated time on each People card~~ — DONE: updatedAt on DataCard                                                                                           | Medium   |                                                                                      |
+| 15  | People    | ~~Income growth from dropdown instead of manual number input~~ — DONE: inflation-anchored presets + custom input                                                       | Medium   |                                                                                      |
+| 16  | People    | ~~Confirm before removing person~~ — DONE: ConfirmDialog                                                                                                               | High     |                                                                                      |
 
 ### Tier 2 — Medium Effort (30 min – 2 hrs each)
 
-| # | Page | Task | Priority | Notes |
-|---|------|------|----------|-------|
-| 17 | People | ~~Edit/add via modal~~ — DONE: PersonFormModal | Medium | |
-| 18 | People | ~~Mobile view of cards needs improvement~~ — STALE: PeopleCard grid already collapses to one column on mobile | Medium | |
-| 19 | Accounts | ~~Weekly/biweekly contribution options~~ — DONE: contribution modes on assets | Medium | |
-| 20 | Accounts | ~~Show yearly total contributions~~ — DONE: Monthly total on ExpensesSummaryCard | Medium | |
-| 21 | Dashboard | Allow clicking assets/liabilities for quick view | Medium | |
-| 22 | Preferences | Combine profile picture + preferences + theme toggle into avatar dropdown | Medium | |
-| 23 | Future | Account contribution breakdown — sortable table | Medium | |
-| 24 | People | ~~Add savings deduction → creates real account (401k/HSA) via same mutation as Accounts page~~ — DONE: full account support lives in the edit-person modal (SavingsAccountsSection with the same AccountListItem editor + autosave as the Accounts page) | High | |
+| #   | Page        | Task                                                                                                                                                                                                                                                     | Priority | Notes |
+| --- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----- |
+| 17  | People      | ~~Edit/add via modal~~ — DONE: PersonFormModal                                                                                                                                                                                                           | Medium   |       |
+| 18  | People      | ~~Mobile view of cards needs improvement~~ — STALE: PeopleCard grid already collapses to one column on mobile                                                                                                                                            | Medium   |       |
+| 19  | Accounts    | ~~Weekly/biweekly contribution options~~ — DONE: contribution modes on assets                                                                                                                                                                            | Medium   |       |
+| 20  | Accounts    | ~~Show yearly total contributions~~ — DONE: Monthly total on ExpensesSummaryCard                                                                                                                                                                         | Medium   |       |
+| 21  | Dashboard   | Allow clicking assets/liabilities for quick view                                                                                                                                                                                                         | Medium   |       |
+| 22  | Preferences | Combine profile picture + preferences + theme toggle into avatar dropdown                                                                                                                                                                                | Medium   |       |
+| 23  | Future      | Account contribution breakdown — sortable table                                                                                                                                                                                                          | Medium   |       |
+| 24  | People      | ~~Add savings deduction → creates real account (401k/HSA) via same mutation as Accounts page~~ — DONE: full account support lives in the edit-person modal (SavingsAccountsSection with the same AccountListItem editor + autosave as the Accounts page) | High     |       |
 
 ### Tier 3 — Large Effort (2+ hrs each)
 
-| # | Page | Task | Priority | Notes |
-|---|------|------|----------|-------|
-| 25 | People | ~~Per-person IRS limit tracking — shared 401(k)+403(b) limit, separate 457, catch-up 50+, super catch-up 60–63~~ — DONE: drives the Maxed Out badge; limits seeded per year in `contribution_limits` | High | |
-| 26 | People | ~~Roth vs pre-tax on account cards + editor~~ — DONE: Tax Treatment select in account editor, Roth/Pre-tax badge on tax-advantaged cards | High | `assets.tax_treatment` column exists |
-| 27 | People | Employer match modeling (vesting, dollar cap) | Medium | Match rate + cap columns exist; vesting not modeled |
-| 28 | People | ~~HSA family vs individual limit awareness~~ — DONE: `contribution_limits.family_annual_limit` seeded and fetched by `useIrsLimits` | Medium | |
-| 29 | Accounts | Plaid integration — auto-sync transactions, detect recurring expenses | Medium | Auto-sync DONE (per-connection + hourly sync-all); recurring-expense detection remains |
+| #   | Page     | Task                                                                                                                                                                                                 | Priority | Notes                                                                                  |
+| --- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------- |
+| 25  | People   | ~~Per-person IRS limit tracking — shared 401(k)+403(b) limit, separate 457, catch-up 50+, super catch-up 60–63~~ — DONE: drives the Maxed Out badge; limits seeded per year in `contribution_limits` | High     |                                                                                        |
+| 26  | People   | ~~Roth vs pre-tax on account cards + editor~~ — DONE: Tax Treatment select in account editor, Roth/Pre-tax badge on tax-advantaged cards                                                             | High     | `assets.tax_treatment` column exists                                                   |
+| 27  | People   | Employer match modeling (vesting, dollar cap)                                                                                                                                                        | Medium   | Match rate + cap columns exist; vesting not modeled                                    |
+| 28  | People   | ~~HSA family vs individual limit awareness~~ — DONE: `contribution_limits.family_annual_limit` seeded and fetched by `useIrsLimits`                                                                  | Medium   |                                                                                        |
+| 29  | Accounts | Plaid integration — auto-sync transactions, detect recurring expenses                                                                                                                                | Medium   | Auto-sync DONE (per-connection + hourly sync-all); recurring-expense detection remains |
 
 ---
 

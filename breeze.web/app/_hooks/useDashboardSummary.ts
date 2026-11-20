@@ -47,8 +47,8 @@ export function useDashboardSummary() {
     queryKey: ['dashboard-summary', userId],
     queryFn: async (): Promise<DashboardSummary> => {
       const [assetsResp, liabilitiesResp, goalsResp] = await Promise.all([
-        request(GET_ASSETS_BY_USER, { userId }),
-        request(GET_LIABILITIES_BY_USER, { userId }),
+        request(GET_ASSETS_BY_USER),
+        request(GET_LIABILITIES_BY_USER),
         getGoals(),
       ]);
 

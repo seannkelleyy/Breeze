@@ -16,11 +16,6 @@ func upsertPlannerPersonInputFromModel(input *model.UpsertPlannerPersonInput) (s
 		return service.UpsertPlannerPersonInput{}, fmt.Errorf("invalid planner person id: %w", err)
 	}
 
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.UpsertPlannerPersonInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
-
 	annualSalary, err := decimal.Parse(input.AnnualSalary)
 	if err != nil {
 		return service.UpsertPlannerPersonInput{}, fmt.Errorf("invalid annual salary: %w", err)
@@ -47,8 +42,8 @@ func upsertPlannerPersonInputFromModel(input *model.UpsertPlannerPersonInput) (s
 	}
 
 	return service.UpsertPlannerPersonInput{
-		ID:                   id,
-		UserID:               userID,
+		ID: id,
+
 		Name:                 input.Name,
 		Birthday:             input.Birthday,
 		RetirementAge:        int32(input.RetirementAge),

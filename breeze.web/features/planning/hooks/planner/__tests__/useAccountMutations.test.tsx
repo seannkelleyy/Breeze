@@ -95,7 +95,6 @@ describe('useAccountMutations', () => {
 
     expect(requestMock).toHaveBeenCalledWith(expect.anything(), {
       input: {
-        userId: 'u1',
         name: 'Checking',
         assetType: 'CHECKING',
         currentValue: '10000',
@@ -144,7 +143,6 @@ describe('useAccountMutations', () => {
 
     expect(requestMock).toHaveBeenCalledWith(expect.anything(), {
       input: {
-        userId: 'u1',
         name: 'Student Loan',
         liabilityType: 'STUDENT_LOAN',
         currentBalance: '25000',

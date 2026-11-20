@@ -43,8 +43,8 @@ const LinkedPlannerAccounts = ({ plaidAccountId }: { plaidAccountId: string }) =
     queryKey: ['planner-accounts-for-plaid', userId],
     queryFn: async () => {
       const [assetsResp, liabilitiesResp] = await Promise.all([
-        request(GET_ASSETS_BY_USER, { userId }),
-        request(GET_LIABILITIES_BY_USER, { userId }),
+        request(GET_ASSETS_BY_USER),
+        request(GET_LIABILITIES_BY_USER),
       ]);
       return {
         assets: assetsResp?.assets ?? [],

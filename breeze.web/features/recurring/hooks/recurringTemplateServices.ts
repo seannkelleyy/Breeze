@@ -78,7 +78,7 @@ export const useRecurringExpenseTemplates = () => {
   return useQuery<RecurringExpenseTemplate[]>({
     queryKey: ['recurring-expense-templates', userId],
     queryFn: async () => {
-      const response = await graphqlRequest(GET_RECURRING_EXPENSES, { userId });
+      const response = await graphqlRequest(GET_RECURRING_EXPENSES);
       return response.recurringExpenses;
     },
     enabled: !!userId,
@@ -87,12 +87,9 @@ export const useRecurringExpenseTemplates = () => {
 
 export const useRecurringTemplates = () => {
   const { request: graphqlRequest } = useGraphql();
-  const { userId } = useCurrentUser();
 
   const getRecurringIncomeTemplates = async (): Promise<RecurringIncomeTemplate[]> => {
-    const response = await graphqlRequest(GET_RECURRING_INCOMES, {
-      userId,
-    });
+    const response = await graphqlRequest(GET_RECURRING_INCOMES);
     return response.recurringIncomes;
   };
 
@@ -100,7 +97,6 @@ export const useRecurringTemplates = () => {
     template: Omit<RecurringIncomeTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
   ): Promise<RecurringIncomeTemplate> => {
     const input = {
-      userId,
       name: template.name,
       amount: template.amount,
       recurrenceInterval: template.recurrenceInterval,
@@ -137,16 +133,15 @@ export const useRecurringTemplates = () => {
   const getRecurringExpenseTemplates = useCallback(async (): Promise<
     RecurringExpenseTemplate[]
   > => {
-    const response = await graphqlRequest(GET_RECURRING_EXPENSES, { userId });
+    const response = await graphqlRequest(GET_RECURRING_EXPENSES);
     return response.recurringExpenses;
-  }, [graphqlRequest, userId]);
+  }, [graphqlRequest]);
 
   const postRecurringExpenseTemplate = async (
     template: Omit<RecurringExpenseTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
   ): Promise<RecurringExpenseTemplate> => {
     const response = await graphqlRequest(CREATE_RECURRING_EXPENSE, {
       input: {
-        userId,
         name: template.name,
         amount: template.amount,
         recurrenceInterval: template.recurrenceInterval,

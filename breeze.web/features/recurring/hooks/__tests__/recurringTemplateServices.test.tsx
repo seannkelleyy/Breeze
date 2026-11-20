@@ -90,7 +90,7 @@ describe('useRecurringExpenseTemplates', () => {
     userState.userId = 'u1';
   });
 
-  it('loads the shared list for the current user', async () => {
+  it('loads the shared list for the authenticated user', async () => {
     requestMock.mockResolvedValue({ recurringExpenses: [expenseTemplate()] });
 
     const { result } = renderHook(() => useRecurringExpenseTemplates(), {
@@ -100,7 +100,7 @@ describe('useRecurringExpenseTemplates', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toEqual([expenseTemplate()]);
-    expect(requestMock.mock.calls[0][1]).toEqual({ userId: 'u1' });
+    expect(requestMock).toHaveBeenCalledWith(expect.anything());
   });
 
   it('does not fetch without a user', async () => {
@@ -138,7 +138,7 @@ describe('useRecurringTemplates', () => {
     ]);
   });
 
-  it('creates an income template scoped to the current user', async () => {
+  it('creates an income template without a client-supplied user id', async () => {
     requestMock.mockResolvedValue({ createRecurringIncome: incomeTemplate({ id: 'i2' }) });
 
     const { result } = renderHook(() => useRecurringTemplates());
@@ -154,7 +154,6 @@ describe('useRecurringTemplates', () => {
     expect(created.id).toBe('i2');
     expect(requestMock.mock.calls[0][1]).toEqual({
       input: {
-        userId: 'u1',
         name: 'Paycheck',
         amount: '2500.00',
         recurrenceInterval: 'BIWEEKLY',
@@ -189,7 +188,7 @@ describe('useRecurringTemplates', () => {
     });
   });
 
-  it('creates an expense template scoped to the current user', async () => {
+  it('creates an expense template without a client-supplied user id', async () => {
     requestMock.mockResolvedValue({ createRecurringExpense: expenseTemplate({ id: 'e2' }) });
 
     const { result } = renderHook(() => useRecurringTemplates());
@@ -203,7 +202,6 @@ describe('useRecurringTemplates', () => {
     expect(created.id).toBe('e2');
     expect(requestMock.mock.calls[0][1]).toEqual({
       input: {
-        userId: 'u1',
         name: 'Gym',
         amount: '45.00',
         recurrenceInterval: 'MONTHLY',

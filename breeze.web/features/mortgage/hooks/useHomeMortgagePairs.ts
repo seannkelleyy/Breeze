@@ -40,8 +40,8 @@ export const useHomeMortgagePairs = () => {
     queryKey: ['mortgage-pairs', userId],
     queryFn: async () => {
       const [assetsResp, liabilitiesResp] = await Promise.all([
-        request(GET_ASSETS_BY_USER, { userId }),
-        request(GET_LIABILITIES_BY_USER, { userId }),
+        request(GET_ASSETS_BY_USER),
+        request(GET_LIABILITIES_BY_USER),
       ]);
 
       const assets = (assetsResp?.assets ?? []).filter((a) => a.assetType === 'HOME');

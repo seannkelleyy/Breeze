@@ -37,9 +37,9 @@ const useFetchPlanner = () => {
     queryFn: async () => {
       const [meResp, plannerPeopleResp, assetsResp, liabilitiesResp] = await Promise.all([
         request(ME_QUERY),
-        request(GET_PLANNER_PEOPLE, { userId }),
-        request(GET_ASSETS_BY_USER, { userId }),
-        request(GET_LIABILITIES_BY_USER, { userId }),
+        request(GET_PLANNER_PEOPLE),
+        request(GET_ASSETS_BY_USER),
+        request(GET_LIABILITIES_BY_USER),
       ]);
 
       const me = meResp?.me;

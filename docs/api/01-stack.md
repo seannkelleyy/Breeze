@@ -50,7 +50,7 @@ make check
 From `breeze.web`:
 
 ```bash
-npm run check
+npm run verify
 ```
 
 ## Related Docs

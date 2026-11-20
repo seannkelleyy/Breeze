@@ -448,6 +448,45 @@ func TestUserService_Update(t *testing.T) {
 	})
 }
 
+func TestUserService_GetOrCreateDoesNotLinkAccountsByEmail(t *testing.T) {
+	userRow := testUserRow()
+	userRow.IdentityProviderID = "clerk-user-new"
+	createCalled := false
+	emailFallbackCalled := false
+
+	mock := &mockQuerier{
+		getUserByIdentityProviderIDFunc: func(context.Context, string) (sqlc.User, error) {
+			return sqlc.User{}, pgx.ErrNoRows
+		},
+		createUserFunc: func(_ context.Context, params sqlc.CreateUserParams) (sqlc.User, error) {
+			createCalled = true
+			assert.Equal(t, "clerk-user-new", params.IdentityProviderID)
+			return userRow, nil
+		},
+		getOrCreateUserByEmailFunc: func(context.Context, sqlc.GetOrCreateUserByEmailParams) (sqlc.User, error) {
+			emailFallbackCalled = true
+			return userRow, nil
+		},
+	}
+
+	user, err := NewUserService(mock).GetOrCreate(context.Background(), CreateUserInput{
+		IdentityProviderID: "clerk-user-new",
+		Email:              "test@example.com",
+		ReturnType:         sqlc.ReturnTypeREAL,
+		SafeWithdrawalRate: mustDecimal("0.0400"),
+		CurrencyType:       "USD",
+		InflationRate:      mustDecimal("0.0300"),
+		DeductionType:      sqlc.DeductionTypeSTANDARD,
+		FilingStatus:       sqlc.FilingStatusSINGLE,
+		PayoffStrategy:     sqlc.PayoffStrategyAVALANCHE,
+	})
+
+	assert.NoError(t, err)
+	assert.NotNil(t, user)
+	assert.True(t, createCalled)
+	assert.False(t, emailFallbackCalled, "an email match must not attach another account to this identity")
+}
+
 // Helper function
 func ptrDecimal(d decimal.Decimal) *decimal.Decimal {
 	return &d

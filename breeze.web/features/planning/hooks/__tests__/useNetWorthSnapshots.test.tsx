@@ -125,7 +125,6 @@ describe('useNetWorthSnapshots', () => {
 
     expect(requestMock).toHaveBeenCalledWith(expect.anything(), {
       input: {
-        userId: 'u1',
         snapshotDate: '2026-02-28',
         totalAssets: '120000',
         totalLiabilities: '20000',

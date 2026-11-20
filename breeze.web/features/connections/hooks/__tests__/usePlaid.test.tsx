@@ -44,11 +44,11 @@ describe('usePlaid', () => {
 
     let token: unknown;
     await act(async () => {
-      token = await result.current.mutateAsync('u1');
+      token = await result.current.mutateAsync();
     });
 
     expect(token).toEqual({ linkToken: 'link-1' });
-    expect(requestMock).toHaveBeenCalledWith(expect.anything(), { userId: 'u1' });
+    expect(requestMock).toHaveBeenCalledWith(expect.anything());
     expect(operationName(requestMock.mock.calls[0][0])).toContain('CreatePlaidLinkToken');
   });
 
@@ -58,13 +58,10 @@ describe('usePlaid', () => {
     const { result } = renderHook(() => useExchangePlaidToken(), { wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ userId: 'u1', publicToken: 'public-1' });
+      await result.current.mutateAsync({ publicToken: 'public-1' });
     });
 
-    expect(requestMock).toHaveBeenCalledWith(expect.anything(), {
-      userId: 'u1',
-      publicToken: 'public-1',
-    });
+    expect(requestMock).toHaveBeenCalledWith(expect.anything(), { publicToken: 'public-1' });
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['plaidConnections'] });
   });
 
@@ -103,7 +100,7 @@ describe('usePlaid', () => {
 
     const enabled = renderHook(() => usePlaidConnections('u1'), { wrapper });
     await waitFor(() => expect(enabled.result.current.data).toEqual([{ id: 'c1' }]));
-    expect(requestMock).toHaveBeenCalledWith(expect.anything(), { userId: 'u1' });
+    expect(requestMock).toHaveBeenCalledWith(expect.anything());
   });
 
   it('loads accounts only when a connection id is present', async () => {

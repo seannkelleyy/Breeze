@@ -1,5 +1,5 @@
 import { CREATE_INCOME, DELETE_INCOME, UPDATE_INCOME } from '@/features/income/income.mutations';
-import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+
 import useGraphql from '@/lib/services/useGraphql';
 import { Income, IncomeInput } from '../types';
 import { GET_INCOMES_BY_BUDGET } from '@/features/income/income.queries';
@@ -9,7 +9,6 @@ import { GET_INCOMES_BY_BUDGET } from '@/features/income/income.queries';
  */
 const useIncomes = () => {
   const { request } = useGraphql();
-  const { userId } = useCurrentUser();
 
   const getIncomes = async (budgetId: string): Promise<Income[]> => {
     const resp = await request(GET_INCOMES_BY_BUDGET, {
@@ -18,13 +17,8 @@ const useIncomes = () => {
     return resp?.incomes ?? [];
   };
 
-  const postIncome = async (
-    budgetId: string,
-    _userId: string,
-    income: IncomeInput,
-  ): Promise<string> => {
+  const postIncome = async (budgetId: string, income: IncomeInput): Promise<string> => {
     const input = {
-      userId,
       budgetId,
       name: income.name,
       amount: income.amount,

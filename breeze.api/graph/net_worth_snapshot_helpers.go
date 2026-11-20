@@ -85,10 +85,6 @@ func mapSnapshotItemInputs(inputs []*model.NetWorthSnapshotItemInput) ([]service
 }
 
 func mapCreateNetWorthSnapshotInput(input *model.CreateNetWorthSnapshotInput) (service.CreateNetWorthSnapshotInput, error) {
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.CreateNetWorthSnapshotInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
 
 	snapshotDate, err := parseDate(input.SnapshotDate)
 	if err != nil {
@@ -116,7 +112,7 @@ func mapCreateNetWorthSnapshotInput(input *model.CreateNetWorthSnapshotInput) (s
 	}
 
 	return service.CreateNetWorthSnapshotInput{
-		UserID:           userID,
+
 		SnapshotDate:     snapshotDate,
 		TotalAssets:      totalAssets,
 		TotalLiabilities: totalLiabilities,

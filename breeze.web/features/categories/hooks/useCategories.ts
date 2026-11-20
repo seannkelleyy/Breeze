@@ -3,7 +3,7 @@ import {
   DELETE_EXPENSE_CATEGORY,
   UPDATE_EXPENSE_CATEGORY,
 } from '@/features/categories/category.mutations';
-import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+
 import useGraphql from '@/lib/services/useGraphql';
 import { Category, CategoryInput } from '../types';
 import { GET_CATEGORIES } from '@/features/categories/category.queries';
@@ -13,20 +13,14 @@ import { GET_CATEGORIES } from '@/features/categories/category.queries';
  */
 const useCategories = () => {
   const { request } = useGraphql();
-  const { userId } = useCurrentUser();
 
   const getCategories = async (budgetId: string): Promise<Category[]> => {
     const resp = await request(GET_CATEGORIES, { budgetId });
     return resp?.expenseCategories ?? [];
   };
 
-  const postCategory = async (
-    budgetId: string,
-    _userId: string,
-    category: CategoryInput,
-  ): Promise<string> => {
+  const postCategory = async (budgetId: string, category: CategoryInput): Promise<string> => {
     const input = {
-      userId,
       budgetId,
       name: category.name,
       allocation: category.allocation,

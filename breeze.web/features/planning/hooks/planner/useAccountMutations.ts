@@ -28,9 +28,8 @@ function mapAccountTypeToApiType(accountType: string): AssetType {
   return (accountTypeToApiAssetType(accountType as AccountType) ?? 'OTHER') as AssetType;
 }
 
-function buildLiabilityInput(account: PlannerAccount, liabilityUserId: string) {
+function buildLiabilityInput(account: PlannerAccount) {
   return {
-    userId: liabilityUserId,
     name: account.name,
     liabilityType: accountTypeToApiLiabilityType(account.accountType),
     currentBalance: account.startingBalance.toString(),
@@ -59,7 +58,6 @@ export function useAccountMutations({
     mutationFn: async (account: PlannerAccount) => {
       const response = await request(CREATE_ASSET, {
         input: {
-          userId,
           name: account.name,
           assetType: mapAccountTypeToApiType(account.accountType),
           currentValue: account.startingBalance.toString(),
@@ -130,7 +128,7 @@ export function useAccountMutations({
   const createLiabilityMutation = useMutation({
     mutationFn: async (account: PlannerAccount) => {
       const response = await request(CREATE_LIABILITY, {
-        input: buildLiabilityInput(account, userId),
+        input: buildLiabilityInput(account),
       });
       updateAccount(account.id, (current) => ({
         ...current,
@@ -142,10 +140,8 @@ export function useAccountMutations({
 
   const updateLiabilityMutation = useMutation({
     mutationFn: async (account: PlannerAccount) => {
-      const input = buildLiabilityInput(account, userId);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { userId: _drop, ...fields } = input;
-      await request(UPDATE_LIABILITY, { input: { id: account.id, ...fields } });
+      const input = buildLiabilityInput(account);
+      await request(UPDATE_LIABILITY, { input: { id: account.id, ...input } });
     },
   });
 

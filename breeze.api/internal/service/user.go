@@ -68,7 +68,7 @@ type userQuerier interface {
 	CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (sqlc.User, error)
 	GetUserByIdentityProviderID(ctx context.Context, identityProviderID string) (sqlc.User, error)
-	GetOrCreateUserByEmail(ctx context.Context, arg sqlc.GetOrCreateUserByEmailParams) (sqlc.User, error)
+
 	ListUsers(ctx context.Context) ([]sqlc.User, error)
 	UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.User, error)
 	UpdateUserSetup(ctx context.Context, arg sqlc.UpdateUserSetupParams) (sqlc.User, error)
@@ -133,12 +133,9 @@ func (s *UserService) Create(ctx context.Context, input CreateUserInput) (*User,
 	return user, nil
 }
 
-// GetOrCreate retrieves an existing user by identity provider ID.
-// If the user doesn't exist by ID but a user with the same email exists, it updates that user with the new identity provider ID.
-// If no user exists, it creates a new one with the provided input.
-// This handles the case where a user re-authenticates with a different Clerk account but the same email.
+// GetOrCreate retrieves or creates an account using the authenticated identity
+// provider ID. It never links accounts based on a client-supplied email address.
 func (s *UserService) GetOrCreate(ctx context.Context, input CreateUserInput) (*User, error) {
-	// First, try to get by identity provider ID (typical case for returning users)
 	existing, err := s.GetByIdentityProviderID(ctx, input.IdentityProviderID)
 	if err == nil {
 		return existing, nil
@@ -147,55 +144,7 @@ func (s *UserService) GetOrCreate(ctx context.Context, input CreateUserInput) (*
 		return nil, fmt.Errorf("check existing user: %w", err)
 	}
 
-	// User not found by identity provider ID, use get-or-create by email
-	deductionAmount, err := decimalToPGNumeric(input.DeductionAmount)
-	if err != nil {
-		return nil, fmt.Errorf("encode deduction amount: %w", err)
-	}
-
-	row, err := s.queries.GetOrCreateUserByEmail(ctx, sqlc.GetOrCreateUserByEmailParams{
-		Email:              input.Email,
-		IdentityProviderID: input.IdentityProviderID,
-		ReturnType:         input.ReturnType,
-		SafeWithdrawalRate: input.SafeWithdrawalRate,
-		CurrencyType:       input.CurrencyType,
-		InflationRate:      input.InflationRate,
-		DeductionType:      input.DeductionType,
-		DeductionAmount:    deductionAmount,
-		MaxTaxBracketID:    uuidToPG(input.MaxTaxBracketID),
-		FilingStatus:       input.FilingStatus,
-		PayoffStrategy:     input.PayoffStrategy,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("get or create user: %w", err)
-	}
-
-	user, err := mapUserRecord(
-		row.ID,
-		row.IdentityProviderID,
-		row.Email,
-		row.ReturnType,
-		row.SafeWithdrawalRate,
-		row.CurrencyType,
-		row.InflationRate,
-		row.DeductionType,
-		row.DeductionAmount,
-		row.MaxTaxBracketID,
-		row.FilingStatus,
-		row.PayoffStrategy,
-		row.BudgetEnabled,
-		row.MonthlyExpenses,
-		row.SetupCompleted,
-		row.DisclaimerAccepted,
-		row.DisclaimerAcceptedAt,
-		row.CreatedAt,
-		row.UpdatedAt,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("map get-or-create user: %w", err)
-	}
-
-	return user, nil
+	return s.Create(ctx, input)
 }
 
 func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (*User, error) {

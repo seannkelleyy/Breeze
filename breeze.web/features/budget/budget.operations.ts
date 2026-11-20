@@ -1,8 +1,8 @@
 import { graphql } from '@/lib/gql';
 
 export const GET_BUDGET_BY_DATE = graphql(`
-  query GetBudgetByDate($userId: ID!, $date: String!) {
-    budgetByDate(userId: $userId, date: $date) {
+  query GetBudgetByDate($date: String!) {
+    budgetByDate(date: $date) {
       id
       userId
       date

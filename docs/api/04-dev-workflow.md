@@ -39,24 +39,24 @@ This runs the `dev` target which:
 
 Authoritative source: the `Makefile` itself. Key targets:
 
-| Target                                         | What it does                                                       |
-| ---------------------------------------------- | ------------------------------------------------------------------ |
-| `make dev`                                     | Start Postgres if needed → migrate → gen → run the API             |
-| `make test` / `test-verbose` / `test-coverage` | Go test suite (plain / -v / coverage profile + HTML)               |
-| `make gen`                                     | sqlc generate, then gqlgen generate (order matters)                |
-| `make migrate-diff MIGRATION_NAME=x`           | Generate a migration from schema.hcl diffs                         |
-| `make migrate`                                 | Apply pending migrations (Atlas, local env)                        |
-| `make migrate-deploy`                          | Apply migrations in deploy environments (Render/CI)                |
-| `make migrate-lint`                            | Lint the latest migration (Atlas)                                  |
-| `make migrate-clean`                           | Wipe the local database schema                                     |
-| `make seed`                                    | Apply `db/seed/seed.sql` via psql                                  |
-| `make seed-deploy`                             | Apply seed data on deploy hosts (`go run ./cmd/seed`)              |
-| `make run` / `make river` / `make build`       | Run API / run River worker / build binary                          |
-| `make lint` / `make fmt`                       | golangci-lint / gofmt                                              |
-| `make check`                                   | fmt + tidy + gen, then vet, lint, test, build — full local CI gate |
-| `make tidy` / `make gen-tidy`                  | go mod tidy / codegen + tidy                                       |
-| `make setup`                                   | Install API tooling (golangci-lint, atlas)                         |
-| `make db-up`                                   | Start the root `compose.yaml` Postgres                             |
+| Target                                         | What it does                                                          |
+| ---------------------------------------------- | --------------------------------------------------------------------- |
+| `make dev`                                     | Start Postgres if needed → migrate → gen → run the API                |
+| `make test` / `test-verbose` / `test-coverage` | Go test suite (plain / -v / coverage profile + HTML)                  |
+| `make gen`                                     | sqlc generate, then gqlgen generate (order matters)                   |
+| `make migrate-diff MIGRATION_NAME=x`           | Generate a migration from schema.hcl diffs                            |
+| `make migrate`                                 | Apply pending migrations (Atlas, local env)                           |
+| `make migrate-deploy`                          | Apply migrations in deploy environments (Render/CI)                   |
+| `make migrate-lint`                            | Lint the latest migration (Atlas)                                     |
+| `make migrate-clean`                           | Wipe the local database schema                                        |
+| `make seed`                                    | Apply `db/seed/seed.sql` via psql                                     |
+| `make seed-deploy`                             | Apply seed data on deploy hosts (`go run ./cmd/seed`)                 |
+| `make run` / `make river` / `make build`       | Run API / run River worker / build binary                             |
+| `make lint` / `make fmt`                       | golangci-lint / gofmt                                                 |
+| `make check`                                   | Runs fmt + tidy + gen (may modify files), then vet, lint, test, build |
+| `make tidy` / `make gen-tidy`                  | go mod tidy / codegen + tidy                                          |
+| `make setup`                                   | Install API tooling (golangci-lint, atlas)                            |
+| `make db-up`                                   | Start the root `compose.yaml` Postgres                                |
 
 ---
 

@@ -11,7 +11,7 @@ import (
 	"github.com/govalues/decimal"
 )
 
-func createUserInputFromModel(input *model.CreateUserInput) (service.CreateUserInput, error) {
+func createUserInputFromModel(input *model.CreateUserInput, identityProviderID string) (service.CreateUserInput, error) {
 	safeWithdrawalRate, err := decimal.Parse(input.SafeWithdrawalRate)
 	if err != nil {
 		return service.CreateUserInput{}, fmt.Errorf("invalid safe withdrawal rate: %w", err)
@@ -41,7 +41,7 @@ func createUserInputFromModel(input *model.CreateUserInput) (service.CreateUserI
 	}
 
 	return service.CreateUserInput{
-		IdentityProviderID: input.IdentityProviderID,
+		IdentityProviderID: identityProviderID,
 		Email:              input.Email,
 		ReturnType:         sqlc.ReturnType(input.ReturnType),
 		SafeWithdrawalRate: safeWithdrawalRate,
@@ -56,14 +56,7 @@ func createUserInputFromModel(input *model.CreateUserInput) (service.CreateUserI
 }
 
 func updateUserInputFromModel(input *model.UpdateUserInput) (service.UpdateUserInput, error) {
-	id, err := uuid.Parse(input.ID)
-	if err != nil {
-		return service.UpdateUserInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
-
 	createInput, err := createUserInputFromModel(&model.CreateUserInput{
-		IdentityProviderID: input.IdentityProviderID,
-		Email:              input.Email,
 		ReturnType:         input.ReturnType,
 		SafeWithdrawalRate: input.SafeWithdrawalRate,
 		CurrencyType:       input.CurrencyType,
@@ -73,15 +66,12 @@ func updateUserInputFromModel(input *model.UpdateUserInput) (service.UpdateUserI
 		MaxTaxBracketID:    input.MaxTaxBracketID,
 		FilingStatus:       input.FilingStatus,
 		PayoffStrategy:     input.PayoffStrategy,
-	})
+	}, "")
 	if err != nil {
 		return service.UpdateUserInput{}, err
 	}
 
 	return service.UpdateUserInput{
-		ID:                 id,
-		IdentityProviderID: createInput.IdentityProviderID,
-		Email:              createInput.Email,
 		ReturnType:         createInput.ReturnType,
 		SafeWithdrawalRate: createInput.SafeWithdrawalRate,
 		CurrencyType:       createInput.CurrencyType,

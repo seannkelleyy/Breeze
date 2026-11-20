@@ -259,7 +259,7 @@ type ComplexityRoot struct {
 		DeleteRothConversion            func(childComplexity int, id string) int
 		DeleteTaxBracket                func(childComplexity int, id string) int
 		DeleteTransaction               func(childComplexity int, id string) int
-		ExchangePlaidPublicToken        func(childComplexity int, userID string, publicToken string) int
+		ExchangePlaidPublicToken        func(childComplexity int, publicToken string) int
 		LinkAssetToPlaidAccount         func(childComplexity int, assetID string, plaidAccountID string) int
 		LinkLiabilityToPlaidAccount     func(childComplexity int, liabilityID string, plaidAccountID string) int
 		SyncPlaidConnection             func(childComplexity int, id string) int
@@ -365,45 +365,43 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Asset                     func(childComplexity int, id string) int
-		Assets                    func(childComplexity int, userID string) int
+		Assets                    func(childComplexity int) int
 		Budget                    func(childComplexity int, id string) int
-		BudgetByDate              func(childComplexity int, userID string, date string) int
-		Budgets                   func(childComplexity int, userID string) int
+		BudgetByDate              func(childComplexity int, date string) int
+		Budgets                   func(childComplexity int) int
 		CalculateRetirementLadder func(childComplexity int, initialBalance string, annualExpenses string, currentAge int, firstWithdrawalAge int, isRoth bool, year int, filingStatus model.FilingStatus, yearsToProject *int) int
 		ContributionLimits        func(childComplexity int, taxYear int) int
-		CreatePlaidLinkToken      func(childComplexity int, userID string) int
+		CreatePlaidLinkToken      func(childComplexity int) int
 		EstimateTaxesForYear      func(childComplexity int, year int, filingStatus model.FilingStatus, income string, deduction *string) int
 		Expense                   func(childComplexity int, id string) int
 		ExpenseCategories         func(childComplexity int, budgetID string) int
 		Expenses                  func(childComplexity int, budgetID string) int
 		Goal                      func(childComplexity int, id string) int
-		Goals                     func(childComplexity int, userID string) int
+		Goals                     func(childComplexity int) int
 		Health                    func(childComplexity int) int
 		Income                    func(childComplexity int, id string) int
 		Incomes                   func(childComplexity int, budgetID string) int
-		Liabilities               func(childComplexity int, userID string) int
+		Liabilities               func(childComplexity int) int
 		Liability                 func(childComplexity int, id string) int
 		Me                        func(childComplexity int) int
 		NetWorthSnapshot          func(childComplexity int, id string) int
-		NetWorthSnapshotByDate    func(childComplexity int, userID string, date string) int
-		NetWorthSnapshots         func(childComplexity int, userID string) int
+		NetWorthSnapshotByDate    func(childComplexity int, date string) int
+		NetWorthSnapshots         func(childComplexity int) int
 		PaycheckDeductions        func(childComplexity int, personID string) int
-		PaycheckDeductionsByUser  func(childComplexity int, userID string) int
+		PaycheckDeductionsByUser  func(childComplexity int) int
 		PlaidAccounts             func(childComplexity int, connectionID string) int
 		PlaidConnection           func(childComplexity int, id string) int
-		PlaidConnections          func(childComplexity int, userID string) int
-		PlannerPeople             func(childComplexity int, userID string) int
+		PlaidConnections          func(childComplexity int) int
+		PlannerPeople             func(childComplexity int) int
 		RecurringExpense          func(childComplexity int, id string) int
-		RecurringExpenses         func(childComplexity int, userID string) int
+		RecurringExpenses         func(childComplexity int) int
 		RecurringIncome           func(childComplexity int, id string) int
-		RecurringIncomes          func(childComplexity int, userID string) int
-		RetirementAccess          func(childComplexity int, userID string) int
+		RecurringIncomes          func(childComplexity int) int
+		RetirementAccess          func(childComplexity int) int
 		TaxBracket                func(childComplexity int, id string) int
 		TaxBrackets               func(childComplexity int, year int, filingStatus model.FilingStatus) int
 		TaxYearData               func(childComplexity int, year *int, filingStatus model.FilingStatus) int
-		Transactions              func(childComplexity int, userID string, fromDate *string, toDate *string) int
-		User                      func(childComplexity int, id string) int
-		Users                     func(childComplexity int) int
+		Transactions              func(childComplexity int, fromDate *string, toDate *string) int
 	}
 
 	RecurringExpense struct {
@@ -581,7 +579,7 @@ type MutationResolver interface {
 	CreateNetWorthSnapshot(ctx context.Context, input model.CreateNetWorthSnapshotInput) (*model.NetWorthSnapshot, error)
 	UpdateNetWorthSnapshot(ctx context.Context, input model.UpdateNetWorthSnapshotInput) (*model.NetWorthSnapshot, error)
 	DeleteNetWorthSnapshot(ctx context.Context, id string) (bool, error)
-	ExchangePlaidPublicToken(ctx context.Context, userID string, publicToken string) (*model.PlaidConnection, error)
+	ExchangePlaidPublicToken(ctx context.Context, publicToken string) (*model.PlaidConnection, error)
 	SyncPlaidConnection(ctx context.Context, id string) (bool, error)
 	DeletePlaidConnection(ctx context.Context, id string) (bool, error)
 	LinkAssetToPlaidAccount(ctx context.Context, assetID string, plaidAccountID string) (bool, error)
@@ -599,45 +597,43 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (*model.Health, error)
-	User(ctx context.Context, id string) (*model.User, error)
 	Me(ctx context.Context) (*model.User, error)
-	Users(ctx context.Context) ([]*model.User, error)
 	Asset(ctx context.Context, id string) (*model.Asset, error)
-	Assets(ctx context.Context, userID string) ([]*model.Asset, error)
+	Assets(ctx context.Context) ([]*model.Asset, error)
 	Liability(ctx context.Context, id string) (*model.Liability, error)
-	Liabilities(ctx context.Context, userID string) ([]*model.Liability, error)
+	Liabilities(ctx context.Context) ([]*model.Liability, error)
 	Budget(ctx context.Context, id string) (*model.Budget, error)
-	BudgetByDate(ctx context.Context, userID string, date string) (*model.Budget, error)
-	Budgets(ctx context.Context, userID string) ([]*model.Budget, error)
+	BudgetByDate(ctx context.Context, date string) (*model.Budget, error)
+	Budgets(ctx context.Context) ([]*model.Budget, error)
 	Goal(ctx context.Context, id string) (*model.Goal, error)
-	Goals(ctx context.Context, userID string) ([]*model.Goal, error)
+	Goals(ctx context.Context) ([]*model.Goal, error)
 	PlaidConnection(ctx context.Context, id string) (*model.PlaidConnection, error)
-	PlaidConnections(ctx context.Context, userID string) ([]*model.PlaidConnection, error)
+	PlaidConnections(ctx context.Context) ([]*model.PlaidConnection, error)
 	PlaidAccounts(ctx context.Context, connectionID string) ([]*model.PlaidAccount, error)
-	CreatePlaidLinkToken(ctx context.Context, userID string) (string, error)
+	CreatePlaidLinkToken(ctx context.Context) (string, error)
 	ContributionLimits(ctx context.Context, taxYear int) ([]*model.ContributionLimit, error)
 	ExpenseCategories(ctx context.Context, budgetID string) ([]*model.ExpenseCategory, error)
-	Transactions(ctx context.Context, userID string, fromDate *string, toDate *string) ([]*model.Transaction, error)
+	Transactions(ctx context.Context, fromDate *string, toDate *string) ([]*model.Transaction, error)
 	Expense(ctx context.Context, id string) (*model.Expense, error)
 	Expenses(ctx context.Context, budgetID string) ([]*model.Expense, error)
 	Income(ctx context.Context, id string) (*model.Income, error)
 	Incomes(ctx context.Context, budgetID string) ([]*model.Income, error)
 	RecurringIncome(ctx context.Context, id string) (*model.RecurringIncome, error)
-	RecurringIncomes(ctx context.Context, userID string) ([]*model.RecurringIncome, error)
+	RecurringIncomes(ctx context.Context) ([]*model.RecurringIncome, error)
 	RecurringExpense(ctx context.Context, id string) (*model.RecurringExpense, error)
-	RecurringExpenses(ctx context.Context, userID string) ([]*model.RecurringExpense, error)
-	PlannerPeople(ctx context.Context, userID string) ([]*model.PlannerPerson, error)
+	RecurringExpenses(ctx context.Context) ([]*model.RecurringExpense, error)
+	PlannerPeople(ctx context.Context) ([]*model.PlannerPerson, error)
 	PaycheckDeductions(ctx context.Context, personID string) ([]*model.PaycheckDeduction, error)
-	PaycheckDeductionsByUser(ctx context.Context, userID string) ([]*model.PaycheckDeduction, error)
+	PaycheckDeductionsByUser(ctx context.Context) ([]*model.PaycheckDeduction, error)
 	TaxBracket(ctx context.Context, id string) (*model.TaxBracket, error)
 	TaxBrackets(ctx context.Context, year int, filingStatus model.FilingStatus) ([]*model.TaxBracket, error)
 	TaxYearData(ctx context.Context, year *int, filingStatus model.FilingStatus) (*model.TaxYearData, error)
 	EstimateTaxesForYear(ctx context.Context, year int, filingStatus model.FilingStatus, income string, deduction *string) (*model.TaxEstimate, error)
 	CalculateRetirementLadder(ctx context.Context, initialBalance string, annualExpenses string, currentAge int, firstWithdrawalAge int, isRoth bool, year int, filingStatus model.FilingStatus, yearsToProject *int) (*model.RetirementLadderProjection, error)
 	NetWorthSnapshot(ctx context.Context, id string) (*model.NetWorthSnapshot, error)
-	NetWorthSnapshotByDate(ctx context.Context, userID string, date string) (*model.NetWorthSnapshot, error)
-	NetWorthSnapshots(ctx context.Context, userID string) ([]*model.NetWorthSnapshot, error)
-	RetirementAccess(ctx context.Context, userID string) (*model.RetirementAccess, error)
+	NetWorthSnapshotByDate(ctx context.Context, date string) (*model.NetWorthSnapshot, error)
+	NetWorthSnapshots(ctx context.Context) ([]*model.NetWorthSnapshot, error)
+	RetirementAccess(ctx context.Context) (*model.RetirementAccess, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -1937,7 +1933,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.ExchangePlaidPublicToken(childComplexity, args["userId"].(string), args["publicToken"].(string)), true
+		return e.ComplexityRoot.Mutation.ExchangePlaidPublicToken(childComplexity, args["publicToken"].(string)), true
 	case "Mutation.linkAssetToPlaidAccount":
 		if e.ComplexityRoot.Mutation.LinkAssetToPlaidAccount == nil {
 			break
@@ -2559,12 +2555,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_assets_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.Assets(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.Assets(childComplexity), true
 	case "Query.budget":
 		if e.ComplexityRoot.Query.Budget == nil {
 			break
@@ -2586,18 +2577,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.BudgetByDate(childComplexity, args["userId"].(string), args["date"].(string)), true
+		return e.ComplexityRoot.Query.BudgetByDate(childComplexity, args["date"].(string)), true
 	case "Query.budgets":
 		if e.ComplexityRoot.Query.Budgets == nil {
 			break
 		}
 
-		args, err := ec.field_Query_budgets_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.Budgets(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.Budgets(childComplexity), true
 	case "Query.calculateRetirementLadder":
 		if e.ComplexityRoot.Query.CalculateRetirementLadder == nil {
 			break
@@ -2625,12 +2611,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_createPlaidLinkToken_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.CreatePlaidLinkToken(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.CreatePlaidLinkToken(childComplexity), true
 	case "Query.estimateTaxesForYear":
 		if e.ComplexityRoot.Query.EstimateTaxesForYear == nil {
 			break
@@ -2691,12 +2672,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_goals_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.Goals(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.Goals(childComplexity), true
 	case "Query.health":
 		if e.ComplexityRoot.Query.Health == nil {
 			break
@@ -2731,12 +2707,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_liabilities_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.Liabilities(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.Liabilities(childComplexity), true
 	case "Query.liability":
 		if e.ComplexityRoot.Query.Liability == nil {
 			break
@@ -2775,18 +2746,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.NetWorthSnapshotByDate(childComplexity, args["userId"].(string), args["date"].(string)), true
+		return e.ComplexityRoot.Query.NetWorthSnapshotByDate(childComplexity, args["date"].(string)), true
 	case "Query.netWorthSnapshots":
 		if e.ComplexityRoot.Query.NetWorthSnapshots == nil {
 			break
 		}
 
-		args, err := ec.field_Query_netWorthSnapshots_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.NetWorthSnapshots(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.NetWorthSnapshots(childComplexity), true
 	case "Query.paycheckDeductions":
 		if e.ComplexityRoot.Query.PaycheckDeductions == nil {
 			break
@@ -2803,12 +2769,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_paycheckDeductionsByUser_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.PaycheckDeductionsByUser(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.PaycheckDeductionsByUser(childComplexity), true
 	case "Query.plaidAccounts":
 		if e.ComplexityRoot.Query.PlaidAccounts == nil {
 			break
@@ -2836,23 +2797,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_plaidConnections_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.PlaidConnections(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.PlaidConnections(childComplexity), true
 	case "Query.plannerPeople":
 		if e.ComplexityRoot.Query.PlannerPeople == nil {
 			break
 		}
 
-		args, err := ec.field_Query_plannerPeople_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.PlannerPeople(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.PlannerPeople(childComplexity), true
 	case "Query.recurringExpense":
 		if e.ComplexityRoot.Query.RecurringExpense == nil {
 			break
@@ -2869,12 +2820,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_recurringExpenses_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.RecurringExpenses(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.RecurringExpenses(childComplexity), true
 	case "Query.recurringIncome":
 		if e.ComplexityRoot.Query.RecurringIncome == nil {
 			break
@@ -2891,23 +2837,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_recurringIncomes_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.RecurringIncomes(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.RecurringIncomes(childComplexity), true
 	case "Query.retirementAccess":
 		if e.ComplexityRoot.Query.RetirementAccess == nil {
 			break
 		}
 
-		args, err := ec.field_Query_retirementAccess_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.RetirementAccess(childComplexity, args["userId"].(string)), true
+		return e.ComplexityRoot.Query.RetirementAccess(childComplexity), true
 	case "Query.taxBracket":
 		if e.ComplexityRoot.Query.TaxBracket == nil {
 			break
@@ -2951,24 +2887,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.Transactions(childComplexity, args["userId"].(string), args["fromDate"].(*string), args["toDate"].(*string)), true
-	case "Query.user":
-		if e.ComplexityRoot.Query.User == nil {
-			break
-		}
-
-		args, err := ec.field_Query_user_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.User(childComplexity, args["id"].(string)), true
-	case "Query.users":
-		if e.ComplexityRoot.Query.Users == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Query.Users(childComplexity), true
+		return e.ComplexityRoot.Query.Transactions(childComplexity, args["fromDate"].(*string), args["toDate"].(*string)), true
 
 	case "RecurringExpense.amount":
 		if e.ComplexityRoot.RecurringExpense.Amount == nil {
@@ -3666,45 +3585,43 @@ func newExecutionContext(
 var sources = []*ast.Source{
 	{Name: "../schema.graphqls", Input: `type Query {
   health: Health!
-  user(id: ID!): User
   me: User
-  users: [User!]!
   asset(id: ID!): Asset
-  assets(userId: ID!): [Asset!]!
+  assets: [Asset!]!
   liability(id: ID!): Liability
-  liabilities(userId: ID!): [Liability!]!
+  liabilities: [Liability!]!
   budget(id: ID!): Budget
-  budgetByDate(userId: ID!, date: String!): Budget
-  budgets(userId: ID!): [Budget!]!
+  budgetByDate(date: String!): Budget
+  budgets: [Budget!]!
   goal(id: ID!): Goal
-  goals(userId: ID!): [Goal!]!
+  goals: [Goal!]!
   plaidConnection(id: ID!): PlaidConnection
-  plaidConnections(userId: ID!): [PlaidConnection!]!
+  plaidConnections: [PlaidConnection!]!
   plaidAccounts(connectionId: ID!): [PlaidAccount!]!
-  createPlaidLinkToken(userId: ID!): String!
+  createPlaidLinkToken: String!
   contributionLimits(taxYear: Int!): [ContributionLimit!]!
   expenseCategories(budgetId: ID!): [ExpenseCategory!]!
-  transactions(userId: ID!, fromDate: String, toDate: String): [Transaction!]!
+  transactions(fromDate: String, toDate: String): [Transaction!]!
   expense(id: ID!): Expense
   expenses(budgetId: ID!): [Expense!]!
   income(id: ID!): Income
   incomes(budgetId: ID!): [Income!]!
   recurringIncome(id: ID!): RecurringIncome
-  recurringIncomes(userId: ID!): [RecurringIncome!]!
+  recurringIncomes: [RecurringIncome!]!
   recurringExpense(id: ID!): RecurringExpense
-  recurringExpenses(userId: ID!): [RecurringExpense!]!
-  plannerPeople(userId: ID!): [PlannerPerson!]!
+  recurringExpenses: [RecurringExpense!]!
+  plannerPeople: [PlannerPerson!]!
   paycheckDeductions(personId: ID!): [PaycheckDeduction!]!
-  paycheckDeductionsByUser(userId: ID!): [PaycheckDeduction!]!
+  paycheckDeductionsByUser: [PaycheckDeduction!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
   taxYearData(year: Int, filingStatus: FilingStatus!): TaxYearData!
   estimateTaxesForYear(year: Int!, filingStatus: FilingStatus!, income: String!, deduction: String): TaxEstimate
   calculateRetirementLadder(initialBalance: String!, annualExpenses: String!, currentAge: Int!, firstWithdrawalAge: Int!, isRoth: Boolean!, year: Int!, filingStatus: FilingStatus!, yearsToProject: Int): RetirementLadderProjection
   netWorthSnapshot(id: ID!): NetWorthSnapshot
-  netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
-  netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
-  retirementAccess(userId: ID!): RetirementAccess!
+  netWorthSnapshotByDate(date: String!): NetWorthSnapshot
+  netWorthSnapshots: [NetWorthSnapshot!]!
+  retirementAccess: RetirementAccess!
 }
 
 type Mutation {
@@ -3750,7 +3667,7 @@ type Mutation {
   createNetWorthSnapshot(input: CreateNetWorthSnapshotInput!): NetWorthSnapshot!
   updateNetWorthSnapshot(input: UpdateNetWorthSnapshotInput!): NetWorthSnapshot!
   deleteNetWorthSnapshot(id: ID!): Boolean!
-  exchangePlaidPublicToken(userId: ID!, publicToken: String!): PlaidConnection!
+  exchangePlaidPublicToken(publicToken: String!): PlaidConnection!
   syncPlaidConnection(id: ID!): Boolean!
   deletePlaidConnection(id: ID!): Boolean!
   linkAssetToPlaidAccount(assetId: ID!, plaidAccountId: ID!): Boolean!
@@ -3883,7 +3800,6 @@ type User {
 }
 
 input CreateUserInput {
-  identityProviderId: String!
   email: String!
   returnType: ReturnType!
   safeWithdrawalRate: String!
@@ -3897,9 +3813,6 @@ input CreateUserInput {
 }
 
 input UpdateUserInput {
-  id: ID!
-  identityProviderId: String!
-  email: String!
   returnType: ReturnType!
   safeWithdrawalRate: String!
   currencyType: String!
@@ -3912,7 +3825,6 @@ input UpdateUserInput {
 }
 
 input UpdateUserSetupInput {
-  id: ID!
   budgetEnabled: Boolean
   monthlyExpenses: String
   setupCompleted: Boolean
@@ -4113,7 +4025,6 @@ type PaycheckDeduction {
 
 input UpsertPaycheckDeductionInput {
   id: ID!
-  userId: ID!
   personId: ID!
   name: String!
   amount: String!
@@ -4148,7 +4059,6 @@ type PlaidAccount {
 }
 
 input CreateLiabilityInput {
-  userId: ID!
   name: String!
   liabilityType: LiabilityType!
   currentBalance: String!
@@ -4178,7 +4088,6 @@ input UpdateLiabilityInput {
 }
 
 input CreateBudgetInput {
-  userId: ID!
   date: String!
   monthlyIncome: String!
   monthlyExpenses: String!
@@ -4199,7 +4108,6 @@ input UpdateBudgetInput {
 }
 
 input CreateGoalInput {
-  userId: ID!
   description: String!
   isCompleted: Boolean!
   targetAmount: String
@@ -4229,7 +4137,6 @@ input UpdateGoalInput {
 }
 
 input CreateExpenseCategoryInput {
-  userId: ID!
   budgetId: ID!
   name: String!
   allocation: String!
@@ -4244,7 +4151,6 @@ input UpdateExpenseCategoryInput {
 }
 
 input CreateExpenseInput {
-  userId: ID!
   budgetId: ID!
   amount: String!
   date: String!
@@ -4269,7 +4175,6 @@ input ExpenseSplitInput {
 }
 
 input CreateIncomeInput {
-  userId: ID!
   budgetId: ID!
   name: String!
   amount: String!
@@ -4294,7 +4199,6 @@ input UpdateIncomeInput {
 }
 
 input CreateRecurringIncomeInput {
-  userId: ID!
   name: String!
   amount: String!
   recurrenceInterval: RecurrenceInterval!
@@ -4316,7 +4220,6 @@ input UpdateRecurringIncomeInput {
 }
 
 input CreateRecurringExpenseInput {
-  userId: ID!
   name: String!
   amount: String!
   recurrenceInterval: RecurrenceInterval!
@@ -4339,7 +4242,6 @@ input UpdateRecurringExpenseInput {
 
 input UpsertPlannerPersonInput {
   id: ID!
-  userId: ID!
   name: String!
   birthday: String!
   retirementAge: Int!
@@ -4398,7 +4300,6 @@ input UpdateTaxBracketInput {
 }
 
 input CreateAssetInput {
-  userId: ID!
   name: String!
   assetType: AssetType!
   currentValue: String!
@@ -4574,7 +4475,6 @@ type NetWorthSnapshot {
 }
 
 input CreateNetWorthSnapshotInput {
-  userId: ID!
   snapshotDate: String!
   totalAssets: String!
   totalLiabilities: String!
@@ -6025,22 +5925,14 @@ func (ec *executionContext) field_Mutation_deleteTransaction_args(ctx context.Co
 func (ec *executionContext) field_Mutation_exchangePlaidPublicToken_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "publicToken",
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "publicToken",
 		func(ctx context.Context, v any) (string, error) {
 			return ec.unmarshalNString2string(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["publicToken"] = arg1
+	args["publicToken"] = arg0
 	return args, nil
 }
 
@@ -6368,39 +6260,17 @@ func (ec *executionContext) field_Query_asset_args(ctx context.Context, rawArgs 
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_assets_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_budgetByDate_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "date",
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "date",
 		func(ctx context.Context, v any) (string, error) {
 			return ec.unmarshalNString2string(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["date"] = arg1
+	args["date"] = arg0
 	return args, nil
 }
 
@@ -6415,20 +6285,6 @@ func (ec *executionContext) field_Query_budget_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_budgets_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
 	return args, nil
 }
 
@@ -6513,20 +6369,6 @@ func (ec *executionContext) field_Query_contributionLimits_args(ctx context.Cont
 		return nil, err
 	}
 	args["taxYear"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_createPlaidLinkToken_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
 	return args, nil
 }
 
@@ -6624,20 +6466,6 @@ func (ec *executionContext) field_Query_goal_args(ctx context.Context, rawArgs m
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_goals_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_income_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -6666,20 +6494,6 @@ func (ec *executionContext) field_Query_incomes_args(ctx context.Context, rawArg
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_liabilities_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_liability_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -6697,22 +6511,14 @@ func (ec *executionContext) field_Query_liability_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_netWorthSnapshotByDate_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "date",
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "date",
 		func(ctx context.Context, v any) (string, error) {
 			return ec.unmarshalNString2string(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["date"] = arg1
+	args["date"] = arg0
 	return args, nil
 }
 
@@ -6727,34 +6533,6 @@ func (ec *executionContext) field_Query_netWorthSnapshot_args(ctx context.Contex
 		return nil, err
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_netWorthSnapshots_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_paycheckDeductionsByUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
 	return args, nil
 }
 
@@ -6800,34 +6578,6 @@ func (ec *executionContext) field_Query_plaidConnection_args(ctx context.Context
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_plaidConnections_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_plannerPeople_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_recurringExpense_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -6842,20 +6592,6 @@ func (ec *executionContext) field_Query_recurringExpense_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_recurringExpenses_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_recurringIncome_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -6867,34 +6603,6 @@ func (ec *executionContext) field_Query_recurringIncome_args(ctx context.Context
 		return nil, err
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_recurringIncomes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_retirementAccess_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
 	return args, nil
 }
 
@@ -6959,44 +6667,22 @@ func (ec *executionContext) field_Query_taxYearData_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_transactions_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["userId"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "fromDate",
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "fromDate",
 		func(ctx context.Context, v any) (*string, error) {
 			return ec.unmarshalOString2ᚖstring(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["fromDate"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "toDate",
+	args["fromDate"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "toDate",
 		func(ctx context.Context, v any) (*string, error) {
 			return ec.unmarshalOString2ᚖstring(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["toDate"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["id"] = arg0
+	args["toDate"] = arg1
 	return args, nil
 }
 
@@ -12253,7 +11939,7 @@ func (ec *executionContext) _Mutation_exchangePlaidPublicToken(ctx context.Conte
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().ExchangePlaidPublicToken(ctx, fc.Args["userId"].(string), fc.Args["publicToken"].(string))
+			return ec.Resolvers.Mutation().ExchangePlaidPublicToken(ctx, fc.Args["publicToken"].(string))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *model.PlaidConnection) graphql.Marshaler {
@@ -14381,50 +14067,6 @@ func (ec *executionContext) fieldContext_Query_health(_ context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_user(ctx, field)
-		},
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().User(ctx, fc.Args["id"].(string))
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v *model.User) graphql.Marshaler {
-			return ec.marshalOUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser(ctx, selections, v)
-		},
-		true,
-		false,
-	)
-}
-func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_User(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -14445,38 +14087,6 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 	)
 }
 func (ec *executionContext) fieldContext_Query_me(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_User(ctx, field)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_users(ctx, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Query().Users(ctx)
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v []*model.User) graphql.Marshaler {
-			return ec.marshalNUser2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐUserᚄ(ctx, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func (ec *executionContext) fieldContext_Query_users(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -14542,8 +14152,7 @@ func (ec *executionContext) _Query_assets(ctx context.Context, field graphql.Col
 			return ec.fieldContext_Query_assets(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().Assets(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().Assets(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.Asset) graphql.Marshaler {
@@ -14553,7 +14162,7 @@ func (ec *executionContext) _Query_assets(ctx context.Context, field graphql.Col
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_assets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_assets(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -14562,17 +14171,6 @@ func (ec *executionContext) fieldContext_Query_assets(ctx context.Context, field
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_Asset(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_assets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -14630,8 +14228,7 @@ func (ec *executionContext) _Query_liabilities(ctx context.Context, field graphq
 			return ec.fieldContext_Query_liabilities(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().Liabilities(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().Liabilities(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.Liability) graphql.Marshaler {
@@ -14641,7 +14238,7 @@ func (ec *executionContext) _Query_liabilities(ctx context.Context, field graphq
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_liabilities(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_liabilities(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -14650,17 +14247,6 @@ func (ec *executionContext) fieldContext_Query_liabilities(ctx context.Context, 
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_Liability(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_liabilities_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -14719,7 +14305,7 @@ func (ec *executionContext) _Query_budgetByDate(ctx context.Context, field graph
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().BudgetByDate(ctx, fc.Args["userId"].(string), fc.Args["date"].(string))
+			return ec.Resolvers.Query().BudgetByDate(ctx, fc.Args["date"].(string))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *model.Budget) graphql.Marshaler {
@@ -14762,8 +14348,7 @@ func (ec *executionContext) _Query_budgets(ctx context.Context, field graphql.Co
 			return ec.fieldContext_Query_budgets(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().Budgets(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().Budgets(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.Budget) graphql.Marshaler {
@@ -14773,7 +14358,7 @@ func (ec *executionContext) _Query_budgets(ctx context.Context, field graphql.Co
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_budgets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_budgets(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -14782,17 +14367,6 @@ func (ec *executionContext) fieldContext_Query_budgets(ctx context.Context, fiel
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_Budget(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_budgets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -14850,8 +14424,7 @@ func (ec *executionContext) _Query_goals(ctx context.Context, field graphql.Coll
 			return ec.fieldContext_Query_goals(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().Goals(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().Goals(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.Goal) graphql.Marshaler {
@@ -14861,7 +14434,7 @@ func (ec *executionContext) _Query_goals(ctx context.Context, field graphql.Coll
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_goals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_goals(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -14870,17 +14443,6 @@ func (ec *executionContext) fieldContext_Query_goals(ctx context.Context, field 
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_Goal(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_goals_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -14938,8 +14500,7 @@ func (ec *executionContext) _Query_plaidConnections(ctx context.Context, field g
 			return ec.fieldContext_Query_plaidConnections(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().PlaidConnections(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().PlaidConnections(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.PlaidConnection) graphql.Marshaler {
@@ -14949,7 +14510,7 @@ func (ec *executionContext) _Query_plaidConnections(ctx context.Context, field g
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_plaidConnections(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_plaidConnections(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -14958,17 +14519,6 @@ func (ec *executionContext) fieldContext_Query_plaidConnections(ctx context.Cont
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_PlaidConnection(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_plaidConnections_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -15026,8 +14576,7 @@ func (ec *executionContext) _Query_createPlaidLinkToken(ctx context.Context, fie
 			return ec.fieldContext_Query_createPlaidLinkToken(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().CreatePlaidLinkToken(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().CreatePlaidLinkToken(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
@@ -15037,28 +14586,8 @@ func (ec *executionContext) _Query_createPlaidLinkToken(ctx context.Context, fie
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_createPlaidLinkToken(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_createPlaidLinkToken_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
+func (ec *executionContext) fieldContext_Query_createPlaidLinkToken(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
 }
 
 func (ec *executionContext) _Query_contributionLimits(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -15159,7 +14688,7 @@ func (ec *executionContext) _Query_transactions(ctx context.Context, field graph
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().Transactions(ctx, fc.Args["userId"].(string), fc.Args["fromDate"].(*string), fc.Args["toDate"].(*string))
+			return ec.Resolvers.Query().Transactions(ctx, fc.Args["fromDate"].(*string), fc.Args["toDate"].(*string))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.Transaction) graphql.Marshaler {
@@ -15422,8 +14951,7 @@ func (ec *executionContext) _Query_recurringIncomes(ctx context.Context, field g
 			return ec.fieldContext_Query_recurringIncomes(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().RecurringIncomes(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().RecurringIncomes(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.RecurringIncome) graphql.Marshaler {
@@ -15433,7 +14961,7 @@ func (ec *executionContext) _Query_recurringIncomes(ctx context.Context, field g
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_recurringIncomes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_recurringIncomes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -15442,17 +14970,6 @@ func (ec *executionContext) fieldContext_Query_recurringIncomes(ctx context.Cont
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_RecurringIncome(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_recurringIncomes_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -15510,8 +15027,7 @@ func (ec *executionContext) _Query_recurringExpenses(ctx context.Context, field 
 			return ec.fieldContext_Query_recurringExpenses(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().RecurringExpenses(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().RecurringExpenses(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.RecurringExpense) graphql.Marshaler {
@@ -15521,7 +15037,7 @@ func (ec *executionContext) _Query_recurringExpenses(ctx context.Context, field 
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_recurringExpenses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_recurringExpenses(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -15530,17 +15046,6 @@ func (ec *executionContext) fieldContext_Query_recurringExpenses(ctx context.Con
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_RecurringExpense(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_recurringExpenses_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -15554,8 +15059,7 @@ func (ec *executionContext) _Query_plannerPeople(ctx context.Context, field grap
 			return ec.fieldContext_Query_plannerPeople(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().PlannerPeople(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().PlannerPeople(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.PlannerPerson) graphql.Marshaler {
@@ -15565,7 +15069,7 @@ func (ec *executionContext) _Query_plannerPeople(ctx context.Context, field grap
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_plannerPeople(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_plannerPeople(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -15574,17 +15078,6 @@ func (ec *executionContext) fieldContext_Query_plannerPeople(ctx context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_PlannerPerson(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_plannerPeople_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -15642,8 +15135,7 @@ func (ec *executionContext) _Query_paycheckDeductionsByUser(ctx context.Context,
 			return ec.fieldContext_Query_paycheckDeductionsByUser(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().PaycheckDeductionsByUser(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().PaycheckDeductionsByUser(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.PaycheckDeduction) graphql.Marshaler {
@@ -15653,7 +15145,7 @@ func (ec *executionContext) _Query_paycheckDeductionsByUser(ctx context.Context,
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_paycheckDeductionsByUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_paycheckDeductionsByUser(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -15662,17 +15154,6 @@ func (ec *executionContext) fieldContext_Query_paycheckDeductionsByUser(ctx cont
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_PaycheckDeduction(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_paycheckDeductionsByUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -15951,7 +15432,7 @@ func (ec *executionContext) _Query_netWorthSnapshotByDate(ctx context.Context, f
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().NetWorthSnapshotByDate(ctx, fc.Args["userId"].(string), fc.Args["date"].(string))
+			return ec.Resolvers.Query().NetWorthSnapshotByDate(ctx, fc.Args["date"].(string))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *model.NetWorthSnapshot) graphql.Marshaler {
@@ -15994,8 +15475,7 @@ func (ec *executionContext) _Query_netWorthSnapshots(ctx context.Context, field 
 			return ec.fieldContext_Query_netWorthSnapshots(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().NetWorthSnapshots(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().NetWorthSnapshots(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*model.NetWorthSnapshot) graphql.Marshaler {
@@ -16005,7 +15485,7 @@ func (ec *executionContext) _Query_netWorthSnapshots(ctx context.Context, field 
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_netWorthSnapshots(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_netWorthSnapshots(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -16014,17 +15494,6 @@ func (ec *executionContext) fieldContext_Query_netWorthSnapshots(ctx context.Con
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_NetWorthSnapshot(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_netWorthSnapshots_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -16038,8 +15507,7 @@ func (ec *executionContext) _Query_retirementAccess(ctx context.Context, field g
 			return ec.fieldContext_Query_retirementAccess(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().RetirementAccess(ctx, fc.Args["userId"].(string))
+			return ec.Resolvers.Query().RetirementAccess(ctx)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *model.RetirementAccess) graphql.Marshaler {
@@ -16049,7 +15517,7 @@ func (ec *executionContext) _Query_retirementAccess(ctx context.Context, field g
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_retirementAccess(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_retirementAccess(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -16058,17 +15526,6 @@ func (ec *executionContext) fieldContext_Query_retirementAccess(ctx context.Cont
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_RetirementAccess(ctx, field)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_retirementAccess_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -19458,20 +18915,13 @@ func (ec *executionContext) unmarshalInputCreateAssetInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "name", "assetType", "currentValue", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate", "returnProfile", "taxTreatment", "pretaxSharePercent", "purchaseDate", "purchasePrice", "homeGrowthProfile", "vehicleDepreciationProfile", "annualChangeRate", "linkedLiabilityId", "personIds"}
+	fieldsInOrder := [...]string{"name", "assetType", "currentValue", "contributionMode", "contributionValue", "employerMatchRate", "employerMatchMaxPercentOfSalary", "annualRate", "returnProfile", "taxTreatment", "pretaxSharePercent", "purchaseDate", "purchasePrice", "homeGrowthProfile", "vehicleDepreciationProfile", "annualChangeRate", "linkedLiabilityId", "personIds"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "name":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -19626,20 +19076,13 @@ func (ec *executionContext) unmarshalInputCreateBudgetInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "date", "monthlyIncome", "monthlyExpenses", "payrollIncomes"}
+	fieldsInOrder := [...]string{"date", "monthlyIncome", "monthlyExpenses", "payrollIncomes"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "date":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -19696,20 +19139,13 @@ func (ec *executionContext) unmarshalInputCreateExpenseCategoryInput(ctx context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "budgetId", "name", "allocation", "currentSpend"}
+	fieldsInOrder := [...]string{"budgetId", "name", "allocation", "currentSpend"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "budgetId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("budgetId"))
 			data, err := ec.unmarshalNID2string(ctx, v)
@@ -19766,20 +19202,13 @@ func (ec *executionContext) unmarshalInputCreateExpenseInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "budgetId", "amount", "date", "description", "splits", "personId"}
+	fieldsInOrder := [...]string{"budgetId", "amount", "date", "description", "splits", "personId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "budgetId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("budgetId"))
 			data, err := ec.unmarshalNID2string(ctx, v)
@@ -19850,20 +19279,13 @@ func (ec *executionContext) unmarshalInputCreateGoalInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "description", "isCompleted", "targetAmount", "targetDate", "category", "customCategory", "priority", "notes", "connectedAccountIds", "isFinancialOrderStep", "financialOrderStep"}
+	fieldsInOrder := [...]string{"description", "isCompleted", "targetAmount", "targetDate", "category", "customCategory", "priority", "notes", "connectedAccountIds", "isFinancialOrderStep", "financialOrderStep"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "description":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -20081,20 +19503,13 @@ func (ec *executionContext) unmarshalInputCreateIncomeInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "budgetId", "name", "amount", "date", "sourceType", "sourceTemplateId", "sourceOccurrenceDate", "generationMonth", "personId"}
+	fieldsInOrder := [...]string{"budgetId", "name", "amount", "date", "sourceType", "sourceTemplateId", "sourceOccurrenceDate", "generationMonth", "personId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "budgetId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("budgetId"))
 			data, err := ec.unmarshalNID2string(ctx, v)
@@ -20186,20 +19601,13 @@ func (ec *executionContext) unmarshalInputCreateLiabilityInput(ctx context.Conte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "name", "liabilityType", "currentBalance", "originalLoanAmount", "interestRate", "minimumPayment", "targetExtraPayment", "payoffPriority", "contributionMode", "contributionValue", "personIds"}
+	fieldsInOrder := [...]string{"name", "liabilityType", "currentBalance", "originalLoanAmount", "interestRate", "minimumPayment", "targetExtraPayment", "payoffPriority", "contributionMode", "contributionValue", "personIds"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "name":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -20305,20 +19713,13 @@ func (ec *executionContext) unmarshalInputCreateNetWorthSnapshotInput(ctx contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "snapshotDate", "totalAssets", "totalLiabilities", "netWorth", "items"}
+	fieldsInOrder := [...]string{"snapshotDate", "totalAssets", "totalLiabilities", "netWorth", "items"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "snapshotDate":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("snapshotDate"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -20382,20 +19783,13 @@ func (ec *executionContext) unmarshalInputCreateRecurringExpenseInput(ctx contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "name", "amount", "recurrenceInterval", "paydayDayOfMonth", "startDate", "endDate", "personId"}
+	fieldsInOrder := [...]string{"name", "amount", "recurrenceInterval", "paydayDayOfMonth", "startDate", "endDate", "personId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "name":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -20473,20 +19867,13 @@ func (ec *executionContext) unmarshalInputCreateRecurringIncomeInput(ctx context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "name", "amount", "recurrenceInterval", "paydayDayOfMonth", "startDate", "endDate", "personId"}
+	fieldsInOrder := [...]string{"name", "amount", "recurrenceInterval", "paydayDayOfMonth", "startDate", "endDate", "personId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "name":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -20767,20 +20154,13 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"identityProviderId", "email", "returnType", "safeWithdrawalRate", "currencyType", "inflationRate", "deductionType", "deductionAmount", "maxTaxBracketId", "filingStatus", "payoffStrategy"}
+	fieldsInOrder := [...]string{"email", "returnType", "safeWithdrawalRate", "currencyType", "inflationRate", "deductionType", "deductionAmount", "maxTaxBracketId", "filingStatus", "payoffStrategy"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "identityProviderId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("identityProviderId"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.IdentityProviderID = data
 		case "email":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -22090,34 +21470,13 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "identityProviderId", "email", "returnType", "safeWithdrawalRate", "currencyType", "inflationRate", "deductionType", "deductionAmount", "maxTaxBracketId", "filingStatus", "payoffStrategy"}
+	fieldsInOrder := [...]string{"returnType", "safeWithdrawalRate", "currencyType", "inflationRate", "deductionType", "deductionAmount", "maxTaxBracketId", "filingStatus", "payoffStrategy"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "id":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		case "identityProviderId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("identityProviderId"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.IdentityProviderID = data
-		case "email":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Email = data
 		case "returnType":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("returnType"))
 			data, err := ec.unmarshalNReturnType2breezeᚗapiᚋgraphᚋmodelᚐReturnType(ctx, v)
@@ -22209,20 +21568,13 @@ func (ec *executionContext) unmarshalInputUpdateUserSetupInput(ctx context.Conte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "budgetEnabled", "monthlyExpenses", "setupCompleted", "disclaimerAccepted", "disclaimerAcceptedAt"}
+	fieldsInOrder := [...]string{"budgetEnabled", "monthlyExpenses", "setupCompleted", "disclaimerAccepted", "disclaimerAcceptedAt"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "id":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
 		case "budgetEnabled":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("budgetEnabled"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
@@ -22286,7 +21638,7 @@ func (ec *executionContext) unmarshalInputUpsertPaycheckDeductionInput(ctx conte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "userId", "personId", "name", "amount", "pretax", "kind", "linkedAccountId"}
+	fieldsInOrder := [...]string{"id", "personId", "name", "amount", "pretax", "kind", "linkedAccountId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -22300,13 +21652,6 @@ func (ec *executionContext) unmarshalInputUpsertPaycheckDeductionInput(ctx conte
 				return it, err
 			}
 			it.ID = data
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "personId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("personId"))
 			data, err := ec.unmarshalNID2string(ctx, v)
@@ -22377,7 +21722,7 @@ func (ec *executionContext) unmarshalInputUpsertPlannerPersonInput(ctx context.C
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "userId", "name", "birthday", "retirementAge", "annualSalary", "bonusMode", "bonusFrequency", "annualBonus", "incomeGrowthRate", "payType", "payDay", "payCadence", "hourlyRate", "expectedHoursPerWeek"}
+	fieldsInOrder := [...]string{"id", "name", "birthday", "retirementAge", "annualSalary", "bonusMode", "bonusFrequency", "annualBonus", "incomeGrowthRate", "payType", "payDay", "payCadence", "hourlyRate", "expectedHoursPerWeek"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -22391,13 +21736,6 @@ func (ec *executionContext) unmarshalInputUpsertPlannerPersonInput(ctx context.C
 				return it, err
 			}
 			it.ID = data
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "name":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -24569,23 +23907,11 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_health(ctx, field)
 				})
-		case "user":
-			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
-				true, false,
-				func(ctx context.Context) graphql.Marshaler {
-					return ec._Query_user(ctx, field)
-				})
 		case "me":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, false,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_me(ctx, field)
-				})
-		case "users":
-			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
-				true, true,
-				func(ctx context.Context) graphql.Marshaler {
-					return ec._Query_users(ctx, field)
 				})
 		case "asset":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
@@ -26949,22 +26275,6 @@ func (ec *executionContext) unmarshalNUpsertPaycheckDeductionInput2breezeᚗapi�
 func (ec *executionContext) unmarshalNUpsertPlannerPersonInput2breezeᚗapiᚋgraphᚋmodelᚐUpsertPlannerPersonInput(ctx context.Context, v any) (model.UpsertPlannerPersonInput, error) {
 	res, err := ec.unmarshalInputUpsertPlannerPersonInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNUser2ᚕᚖbreezeᚗapiᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
-	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
-		fc := graphql.GetFieldContext(ctx)
-		fc.Result = &v[i]
-		return ec.marshalNUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
-	})
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalNUser2ᚖbreezeᚗapiᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {

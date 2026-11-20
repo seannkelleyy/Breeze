@@ -16,7 +16,6 @@ export function usePersonMutations(userId: string) {
       const response = await request(UPSERT_PLANNER_PERSON, {
         input: {
           id: person.id,
-          userId: userId,
           name: person.name,
           birthday: person.birthday,
           retirementAge: person.retirementAge,

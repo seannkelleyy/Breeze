@@ -20,8 +20,8 @@ export const useCreateLinkToken = () => {
   const { request } = useGraphql();
 
   return useMutation({
-    mutationFn: async (userId: string) => {
-      const resp = await request(CREATE_PLAID_LINK_TOKEN, { userId });
+    mutationFn: async () => {
+      const resp = await request(CREATE_PLAID_LINK_TOKEN);
       return resp.createPlaidLinkToken;
     },
   });
@@ -32,8 +32,8 @@ export const useExchangePlaidToken = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ userId, publicToken }: { userId: string; publicToken: string }) => {
-      return request(EXCHANGE_PLAID_PUBLIC_TOKEN, { userId, publicToken });
+    mutationFn: async ({ publicToken }: { publicToken: string }) => {
+      return request(EXCHANGE_PLAID_PUBLIC_TOKEN, { publicToken });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plaidConnections'] });
@@ -76,7 +76,7 @@ export const usePlaidConnections = (userId: string | null, enabled: boolean = tr
     queryKey: ['plaidConnections', userId],
     queryFn: async () => {
       if (!userId) return null;
-      const resp = await request(PLAID_CONNECTIONS, { userId });
+      const resp = await request(PLAID_CONNECTIONS);
       return resp.plaidConnections;
     },
     enabled: enabled && !!userId,

@@ -1,11 +1,10 @@
-package graph
+package service
 
 import (
 	"testing"
 	"time"
 
 	"breeze.api/internal/db/sqlc"
-	"breeze.api/internal/service"
 )
 
 // ─── firstOccurrence ────────────────────────────────────
@@ -62,7 +61,7 @@ func TestFirstOccurrence(t *testing.T) {
 
 func TestRecurringOccurrencesWeekly(t *testing.T) {
 	t.Run("single occurrence in month", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 6, 3, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalWEEKLY,
 		}
@@ -82,7 +81,7 @@ func TestRecurringOccurrencesWeekly(t *testing.T) {
 	})
 
 	t.Run("no occurrences when start after month", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalWEEKLY,
 		}
@@ -96,7 +95,7 @@ func TestRecurringOccurrencesWeekly(t *testing.T) {
 
 	t.Run("end date clips occurrences", func(t *testing.T) {
 		endDate := time.Date(2024, 6, 14, 0, 0, 0, 0, time.UTC)
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 6, 3, 0, 0, 0, 0, time.UTC),
 			EndDate:            &endDate,
 			RecurrenceInterval: sqlc.RecurrenceIntervalWEEKLY,
@@ -115,7 +114,7 @@ func TestRecurringOccurrencesWeekly(t *testing.T) {
 
 func TestRecurringOccurrencesBiweekly(t *testing.T) {
 	t.Run("three occurrences in month", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalBIWEEKLY,
 		}
@@ -139,7 +138,7 @@ func TestRecurringOccurrencesBiweekly(t *testing.T) {
 func TestRecurringOccurrencesMonthly(t *testing.T) {
 	t.Run("with payday day of month", func(t *testing.T) {
 		payday := int32(15)
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalMONTHLY,
 			PaydayDayOfMonth:   &payday,
@@ -156,7 +155,7 @@ func TestRecurringOccurrencesMonthly(t *testing.T) {
 	})
 
 	t.Run("without payday defaults to day 1", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalMONTHLY,
 		}
@@ -173,7 +172,7 @@ func TestRecurringOccurrencesMonthly(t *testing.T) {
 
 	t.Run("day 31 in 30-day month returns no occurrences", func(t *testing.T) {
 		payday := int32(31)
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalMONTHLY,
 			PaydayDayOfMonth:   &payday,
@@ -188,7 +187,7 @@ func TestRecurringOccurrencesMonthly(t *testing.T) {
 
 	t.Run("start date after payday day returns no occurrences", func(t *testing.T) {
 		payday := int32(10)
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalMONTHLY,
 			PaydayDayOfMonth:   &payday,
@@ -206,7 +205,7 @@ func TestRecurringOccurrencesMonthly(t *testing.T) {
 
 func TestRecurringOccurrencesQuarterly(t *testing.T) {
 	t.Run("Q1 month (January)", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalQUARTERLY,
 		}
@@ -219,7 +218,7 @@ func TestRecurringOccurrencesQuarterly(t *testing.T) {
 	})
 
 	t.Run("non-Q1 month (February) returns none", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalQUARTERLY,
 		}
@@ -232,7 +231,7 @@ func TestRecurringOccurrencesQuarterly(t *testing.T) {
 	})
 
 	t.Run("Q2 month (April)", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalQUARTERLY,
 		}
@@ -249,7 +248,7 @@ func TestRecurringOccurrencesQuarterly(t *testing.T) {
 
 func TestRecurringOccurrencesYearly(t *testing.T) {
 	t.Run("occurrence in correct month", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2020, 6, 15, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalYEARLY,
 		}
@@ -268,7 +267,7 @@ func TestRecurringOccurrencesYearly(t *testing.T) {
 	})
 
 	t.Run("wrong month returns none", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2020, 6, 15, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalYEARLY,
 		}
@@ -285,7 +284,7 @@ func TestRecurringOccurrencesYearly(t *testing.T) {
 
 func TestRecurringOccurrencesNone(t *testing.T) {
 	t.Run("start date within month", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalNONE,
 		}
@@ -298,7 +297,7 @@ func TestRecurringOccurrencesNone(t *testing.T) {
 	})
 
 	t.Run("start date before month returns none", func(t *testing.T) {
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 5, 15, 0, 0, 0, 0, time.UTC),
 			RecurrenceInterval: sqlc.RecurrenceIntervalNONE,
 		}
@@ -316,7 +315,7 @@ func TestRecurringOccurrencesNone(t *testing.T) {
 func TestRecurringOccurrencesEndClipping(t *testing.T) {
 	t.Run("end date before month start skips template", func(t *testing.T) {
 		endDate := time.Date(2024, 5, 1, 0, 0, 0, 0, time.UTC)
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 			EndDate:            &endDate,
 			RecurrenceInterval: sqlc.RecurrenceIntervalMONTHLY,
@@ -331,7 +330,7 @@ func TestRecurringOccurrencesEndClipping(t *testing.T) {
 
 	t.Run("end date mid-month clips to end date", func(t *testing.T) {
 		endDate := time.Date(2024, 6, 10, 0, 0, 0, 0, time.UTC)
-		tmpl := service.RecurringIncome{
+		tmpl := RecurringIncome{
 			StartDate:          time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC),
 			EndDate:            &endDate,
 			RecurrenceInterval: sqlc.RecurrenceIntervalWEEKLY,

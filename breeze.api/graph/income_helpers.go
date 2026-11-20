@@ -12,10 +12,6 @@ import (
 )
 
 func createIncomeInputFromModel(input *model.CreateIncomeInput) (service.CreateIncomeInput, error) {
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.CreateIncomeInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
 
 	budgetID, err := uuid.Parse(input.BudgetID)
 	if err != nil {
@@ -53,7 +49,7 @@ func createIncomeInputFromModel(input *model.CreateIncomeInput) (service.CreateI
 	}
 
 	return service.CreateIncomeInput{
-		UserID:               userID,
+
 		BudgetID:             budgetID,
 		Name:                 input.Name,
 		Amount:               amount,
@@ -116,10 +112,6 @@ func updateIncomeInputFromModel(input *model.UpdateIncomeInput) (service.UpdateI
 }
 
 func createRecurringIncomeInputFromModel(input *model.CreateRecurringIncomeInput) (service.CreateRecurringIncomeInput, error) {
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.CreateRecurringIncomeInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
 
 	amount, err := decimal.Parse(input.Amount)
 	if err != nil {
@@ -144,7 +136,7 @@ func createRecurringIncomeInputFromModel(input *model.CreateRecurringIncomeInput
 	}
 
 	return service.CreateRecurringIncomeInput{
-		UserID:             userID,
+
 		Name:               input.Name,
 		Amount:             amount,
 		RecurrenceInterval: sqlc.RecurrenceInterval(input.RecurrenceInterval),

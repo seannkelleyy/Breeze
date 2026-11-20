@@ -61,7 +61,7 @@ describe('useTransactions', () => {
     expect(transactions[0].expenseCategoryId).toBeNull();
   });
 
-  it('passes the user and date range to the query', async () => {
+  it('passes the date range without a client-supplied user id', async () => {
     requestMock.mockResolvedValue({ transactions: [] });
 
     const { result } = renderHook(() => useTransactions('u1', 3), { wrapper: createWrapper() });
@@ -70,7 +70,7 @@ describe('useTransactions', () => {
 
     const [query, variables] = requestMock.mock.calls[0];
     expect(print(query)).toContain('transactions');
-    expect(variables.userId).toBe('u1');
+    expect(variables).not.toHaveProperty('userId');
     expect(variables.fromDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(variables.toDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });

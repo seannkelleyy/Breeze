@@ -31,7 +31,7 @@ export const useRetirementAccess = (userId?: string) => {
     queryKey: [...RETIREMENT_ACCESS_KEY, userId],
     queryFn: async () => {
       if (!userId) throw new Error('A user is required to load retirement access');
-      const resp = await request(RETIREMENT_ACCESS, { userId });
+      const resp = await request(RETIREMENT_ACCESS);
       return resp.retirementAccess;
     },
     enabled: !!userId,

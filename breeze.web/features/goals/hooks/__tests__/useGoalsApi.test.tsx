@@ -48,7 +48,7 @@ describe('useGoalsApi', () => {
     const { result } = renderHook(() => useGoalsApi());
 
     await expect(result.current.getGoals()).resolves.toEqual([goal]);
-    expect(requestMock).toHaveBeenCalledWith(expect.anything(), { userId: 'u1' });
+    expect(requestMock).toHaveBeenCalledWith(expect.anything());
 
     await expect(result.current.getGoals()).resolves.toEqual([]);
   });
@@ -63,7 +63,6 @@ describe('useGoalsApi', () => {
 
     expect(requestMock).toHaveBeenCalledWith(expect.anything(), {
       input: {
-        userId: 'u1',
         description: 'Save for a home',
         isCompleted: false,
         targetAmount: null,

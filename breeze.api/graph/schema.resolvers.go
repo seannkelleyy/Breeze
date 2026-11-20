@@ -9,7 +9,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"breeze.api/graph/generated"
@@ -24,7 +23,12 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
-	svcInput, err := createUserInputFromModel(&input)
+	identityProviderID, err := identityProviderIDFromCtx(ctx)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
+	svcInput, err := createUserInputFromModel(&input, identityProviderID)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -44,13 +48,17 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		return nil, r.mapErr(ctx, err)
 	}
 
-	// The authenticated caller may only update their own row; a client-supplied
-	// id is never trusted.
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
+	currentUser, err := r.UserService.GetByID(ctx, userID)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
 	svcInput.ID = userID
+	svcInput.IdentityProviderID = currentUser.IdentityProviderID
+	svcInput.Email = currentUser.Email
 
 	user, err := r.UserService.Update(ctx, svcInput)
 	if err != nil {
@@ -186,7 +194,7 @@ func (r *mutationResolver) DeleteLiability(ctx context.Context, id string) (bool
 
 // CreateBudget is the resolver for the createBudget field.
 func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateBudgetInput) (*model.Budget, error) {
-	svcInput, err := createBudgetInputFromModel(&input)
+	svcInput, err := budgetMonthInputFromModel(&input)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
@@ -197,71 +205,11 @@ func (r *mutationResolver) CreateBudget(ctx context.Context, input model.CreateB
 	}
 	svcInput.UserID = userID
 
-	// If a budget already exists for this user + month, update it instead.
-	existing, lookupErr := r.BudgetService.GetByDate(ctx, svcInput.UserID, svcInput.Date)
-	if lookupErr == nil {
-		slog.Info("CreateBudget: updating existing budget", "budgetId", existing.ID.String(), "existingIncome", existing.MonthlyIncome.String())
-		budget, updateErr := r.BudgetService.Update(ctx, svcInput.UserID, &service.UpdateBudgetInput{
-			ID:              existing.ID,
-			MonthlyIncome:   svcInput.MonthlyIncome,
-			MonthlyExpenses: svcInput.MonthlyExpenses,
-		})
-		if updateErr != nil {
-			return nil, r.mapErr(ctx, updateErr)
-		}
-		slog.Info("CreateBudget: after initial update", "monthlyIncome", budget.MonthlyIncome.String())
-
-		// Remove old recurring-generated incomes so regeneration is idempotent.
-		_ = removeRecurringIncomesForBudget(ctx, r.IncomeService, svcInput.UserID, budget.ID)
-		if genErr := generateIncomesForBudget(ctx, r.RecurringIncomeService, r.IncomeService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
-			slog.Warn("failed to generate recurring incomes for budget", "error", genErr)
-		}
-
-		// Replace people-payroll incomes (per-person payday net amounts).
-		// Omitted input leaves existing payroll rows untouched.
-		if input.PayrollIncomes != nil {
-			if replaceErr := replacePayrollIncomesForBudget(ctx, r.IncomeService, svcInput.UserID, budget.ID, svcInput.Date, input.PayrollIncomes); replaceErr != nil {
-				slog.Warn("failed to replace payroll incomes for budget", "error", replaceErr)
-			}
-		}
-
-		// Remove old recurring-generated expense categories so regeneration is idempotent.
-		_ = removeRecurringExpenseCategoriesForBudget(ctx, r.ExpenseCategoryService, r.ExpenseService, svcInput.UserID, budget.ID)
-		if genErr := generateExpenseCategoriesForBudget(ctx, r.RecurringExpenseService, r.ExpenseCategoryService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
-			slog.Warn("failed to generate recurring expense categories for budget", "error", genErr)
-		}
-
-		budget = recalculateBudgetIncome(ctx, r.IncomeService, r.BudgetService, svcInput.UserID, budget)
-		budget = recalculateBudgetExpenses(ctx, r.ExpenseCategoryService, r.BudgetService, svcInput.UserID, budget)
-		slog.Info("CreateBudget: final response", "monthlyIncome", budget.MonthlyIncome.String(), "monthlyExpenses", budget.MonthlyExpenses.String())
-		return mapBudgetToModel(budget), nil
-	}
-
-	budget, err := r.BudgetService.Create(ctx, &svcInput)
+	budget, err := r.BudgetMonthService.CreateOrUpdate(ctx, &svcInput)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
 	}
 
-	// Generate incomes from recurring templates for the new budget month.
-	if genErr := generateIncomesForBudget(ctx, r.RecurringIncomeService, r.IncomeService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
-		slog.Warn("failed to generate recurring incomes for new budget", "error", genErr)
-	}
-
-	// Replace people-payroll incomes (per-person payday net amounts).
-	// Omitted input leaves existing payroll rows untouched.
-	if input.PayrollIncomes != nil {
-		if replaceErr := replacePayrollIncomesForBudget(ctx, r.IncomeService, svcInput.UserID, budget.ID, svcInput.Date, input.PayrollIncomes); replaceErr != nil {
-			slog.Warn("failed to replace payroll incomes for new budget", "error", replaceErr)
-		}
-	}
-
-	// Generate expense categories from recurring templates for the new budget month.
-	if genErr := generateExpenseCategoriesForBudget(ctx, r.RecurringExpenseService, r.ExpenseCategoryService, svcInput.UserID, budget.ID, svcInput.Date); genErr != nil {
-		slog.Warn("failed to generate recurring expense categories for new budget", "error", genErr)
-	}
-
-	budget = recalculateBudgetIncome(ctx, r.IncomeService, r.BudgetService, svcInput.UserID, budget)
-	budget = recalculateBudgetExpenses(ctx, r.ExpenseCategoryService, r.BudgetService, svcInput.UserID, budget)
 	return mapBudgetToModel(budget), nil
 }
 
@@ -970,7 +918,7 @@ func (r *mutationResolver) DeleteNetWorthSnapshot(ctx context.Context, id string
 }
 
 // ExchangePlaidPublicToken exchanges a Link public token and creates a PlaidConnection.
-func (r *mutationResolver) ExchangePlaidPublicToken(ctx context.Context, _ string, publicToken string) (*model.PlaidConnection, error) {
+func (r *mutationResolver) ExchangePlaidPublicToken(ctx context.Context, publicToken string) (*model.PlaidConnection, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1128,18 +1076,8 @@ func (r *mutationResolver) UpdateUserSetup(ctx context.Context, input model.Upda
 		return nil, r.mapErr(ctx, err)
 	}
 
-	parsedID, err := uuid.Parse(input.ID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user id: %w", err)
-	}
-
-	// Ensure user can only update their own setup
-	if userID != parsedID {
-		return nil, fmt.Errorf("unauthorized: cannot update another user's setup")
-	}
-
 	setupInput := service.UpdateSetupInput{
-		ID: parsedID,
+		ID: userID,
 	}
 
 	if input.BudgetEnabled != nil {
@@ -1376,29 +1314,11 @@ func (r *queryResolver) Health(ctx context.Context) (*model.Health, error) {
 	}, nil
 }
 
-// User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	parsedID, err := uuid.Parse(id)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user id: %w", err)
-	}
-
-	user, err := r.UserService.GetByID(ctx, parsedID)
-	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
-			return nil, nil
-		}
-		return nil, r.mapErr(ctx, err)
-	}
-
-	return mapUserToModel(user), nil
-}
-
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	identityProviderID := middleware.UserIDFromCtx(ctx)
-	if identityProviderID == "" {
-		return nil, nil
+	identityProviderID, err := identityProviderIDFromCtx(ctx)
+	if err != nil {
+		return nil, r.mapErr(ctx, err)
 	}
 
 	user, err := r.UserService.GetByIdentityProviderID(ctx, identityProviderID)
@@ -1410,23 +1330,6 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	}
 
 	return mapUserToModel(user), nil
-}
-
-// Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	users, err := r.UserService.List(ctx)
-	if err != nil {
-		return nil, r.mapErr(ctx, err)
-	}
-
-	out := make([]*model.User, 0, len(users))
-	for i := range users {
-		user := users[i]
-		mapped := mapUserToModel(&user)
-		out = append(out, mapped)
-	}
-
-	return out, nil
 }
 
 // Asset is the resolver for the asset field.
@@ -1451,7 +1354,7 @@ func (r *queryResolver) Asset(ctx context.Context, id string) (*model.Asset, err
 }
 
 // Assets is the resolver for the assets field.
-func (r *queryResolver) Assets(ctx context.Context, _ string) ([]*model.Asset, error) {
+func (r *queryResolver) Assets(ctx context.Context) ([]*model.Asset, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1493,7 +1396,7 @@ func (r *queryResolver) Liability(ctx context.Context, id string) (*model.Liabil
 }
 
 // Liabilities is the resolver for the liabilities field.
-func (r *queryResolver) Liabilities(ctx context.Context, _ string) ([]*model.Liability, error) {
+func (r *queryResolver) Liabilities(ctx context.Context) ([]*model.Liability, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1528,11 +1431,15 @@ func (r *queryResolver) Budget(ctx context.Context, id string) (*model.Budget, e
 		return nil, r.mapErr(ctx, err)
 	}
 
+	if err := r.ensureOwned(ctx, budget.UserID); err != nil {
+		return nil, r.mapErr(ctx, err)
+	}
+
 	return mapBudgetToModel(budget), nil
 }
 
 // BudgetByDate is the resolver for the budgetByDate field.
-func (r *queryResolver) BudgetByDate(ctx context.Context, _ string, date string) (*model.Budget, error) {
+func (r *queryResolver) BudgetByDate(ctx context.Context, date string) (*model.Budget, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1549,20 +1456,13 @@ func (r *queryResolver) BudgetByDate(ctx context.Context, _ string, date string)
 			return nil, r.mapErr(ctx, err)
 		}
 
-		// Auto-create a budget for this month when none exists.
-		budget, err = r.BudgetService.Create(ctx, &service.CreateBudgetInput{
-			UserID:          userID,
-			Date:            budgetDate,
-			MonthlyIncome:   decimalZero(),
-			MonthlyExpenses: decimalZero(),
+		// First visit to a month: materialize it from recurring templates.
+		budget, err = r.BudgetMonthService.CreateOrUpdate(ctx, &service.BudgetMonthInput{
+			UserID: userID,
+			Date:   budgetDate,
 		})
 		if err != nil {
 			return nil, r.mapErr(ctx, err)
-		}
-
-		// Generate incomes from recurring templates for the new budget month.
-		if genErr := generateIncomesForBudget(ctx, r.RecurringIncomeService, r.IncomeService, userID, budget.ID, budgetDate); genErr != nil {
-			slog.Warn("failed to generate recurring incomes for new budget", "error", genErr)
 		}
 	}
 
@@ -1570,7 +1470,7 @@ func (r *queryResolver) BudgetByDate(ctx context.Context, _ string, date string)
 }
 
 // Budgets is the resolver for the budgets field.
-func (r *queryResolver) Budgets(ctx context.Context, _ string) ([]*model.Budget, error) {
+func (r *queryResolver) Budgets(ctx context.Context) ([]*model.Budget, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1612,7 +1512,7 @@ func (r *queryResolver) Goal(ctx context.Context, id string) (*model.Goal, error
 }
 
 // Goals is the resolver for the goals field.
-func (r *queryResolver) Goals(ctx context.Context, _ string) ([]*model.Goal, error) {
+func (r *queryResolver) Goals(ctx context.Context) ([]*model.Goal, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1653,7 +1553,7 @@ func (r *queryResolver) PlaidConnection(ctx context.Context, id string) (*model.
 }
 
 // PlaidConnections is the resolver for the plaidConnections field.
-func (r *queryResolver) PlaidConnections(ctx context.Context, _ string) ([]*model.PlaidConnection, error) {
+func (r *queryResolver) PlaidConnections(ctx context.Context) ([]*model.PlaidConnection, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1696,7 +1596,7 @@ func (r *queryResolver) PlaidAccounts(ctx context.Context, connectionID string) 
 }
 
 // CreatePlaidLinkToken is the resolver for the createPlaidLinkToken field.
-func (r *queryResolver) CreatePlaidLinkToken(ctx context.Context, _ string) (string, error) {
+func (r *queryResolver) CreatePlaidLinkToken(ctx context.Context) (string, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return "", r.mapErr(ctx, err)
@@ -1753,7 +1653,7 @@ func (r *queryResolver) ExpenseCategories(ctx context.Context, budgetID string) 
 }
 
 // Transactions is the resolver for the transactions field.
-func (r *queryResolver) Transactions(ctx context.Context, _ string, fromDate *string, toDate *string) ([]*model.Transaction, error) {
+func (r *queryResolver) Transactions(ctx context.Context, fromDate *string, toDate *string) ([]*model.Transaction, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1907,7 +1807,7 @@ func (r *queryResolver) RecurringIncome(ctx context.Context, id string) (*model.
 }
 
 // RecurringIncomes is the resolver for the recurringIncomes field.
-func (r *queryResolver) RecurringIncomes(ctx context.Context, _ string) ([]*model.RecurringIncome, error) {
+func (r *queryResolver) RecurringIncomes(ctx context.Context) ([]*model.RecurringIncome, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1949,7 +1849,7 @@ func (r *queryResolver) RecurringExpense(ctx context.Context, id string) (*model
 }
 
 // RecurringExpenses is the resolver for the recurringExpenses field.
-func (r *queryResolver) RecurringExpenses(ctx context.Context, _ string) ([]*model.RecurringExpense, error) {
+func (r *queryResolver) RecurringExpenses(ctx context.Context) ([]*model.RecurringExpense, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -1970,7 +1870,7 @@ func (r *queryResolver) RecurringExpenses(ctx context.Context, _ string) ([]*mod
 }
 
 // PlannerPeople is the resolver for the plannerPeople field.
-func (r *queryResolver) PlannerPeople(ctx context.Context, _ string) ([]*model.PlannerPerson, error) {
+func (r *queryResolver) PlannerPeople(ctx context.Context) ([]*model.PlannerPerson, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -2015,7 +1915,7 @@ func (r *queryResolver) PaycheckDeductions(ctx context.Context, personID string)
 }
 
 // PaycheckDeductionsByUser is the resolver for the paycheckDeductionsByUser field.
-func (r *queryResolver) PaycheckDeductionsByUser(ctx context.Context, _ string) ([]*model.PaycheckDeduction, error) {
+func (r *queryResolver) PaycheckDeductionsByUser(ctx context.Context) ([]*model.PaycheckDeduction, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -2181,7 +2081,7 @@ func (r *queryResolver) NetWorthSnapshot(ctx context.Context, id string) (*model
 }
 
 // NetWorthSnapshotByDate is the resolver for the netWorthSnapshotByDate field.
-func (r *queryResolver) NetWorthSnapshotByDate(ctx context.Context, _ string, date string) (*model.NetWorthSnapshot, error) {
+func (r *queryResolver) NetWorthSnapshotByDate(ctx context.Context, date string) (*model.NetWorthSnapshot, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -2204,7 +2104,7 @@ func (r *queryResolver) NetWorthSnapshotByDate(ctx context.Context, _ string, da
 }
 
 // NetWorthSnapshots is the resolver for the netWorthSnapshots field.
-func (r *queryResolver) NetWorthSnapshots(ctx context.Context, _ string) ([]*model.NetWorthSnapshot, error) {
+func (r *queryResolver) NetWorthSnapshots(ctx context.Context) ([]*model.NetWorthSnapshot, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)
@@ -2225,7 +2125,7 @@ func (r *queryResolver) NetWorthSnapshots(ctx context.Context, _ string) ([]*mod
 }
 
 // RetirementAccess is the resolver for the retirementAccess field.
-func (r *queryResolver) RetirementAccess(ctx context.Context, _ string) (*model.RetirementAccess, error) {
+func (r *queryResolver) RetirementAccess(ctx context.Context) (*model.RetirementAccess, error) {
 	userID, err := resolveUserIDFromCtx(ctx, r.UserService)
 	if err != nil {
 		return nil, r.mapErr(ctx, err)

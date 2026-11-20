@@ -72,7 +72,7 @@ describe('usePaycheckDeductions', () => {
 
     await waitFor(() => expect(result.current.deductions).toHaveLength(2));
     expect(result.current.deductions[1].amount).toBe(0);
-    expect(requestMock).toHaveBeenCalledWith(expect.anything(), { userId: 'u1' });
+    expect(requestMock).toHaveBeenCalledWith(expect.anything());
     expect(operationName(requestMock.mock.calls[0][0])).toContain('PaycheckDeductionsByUser');
   });
 
@@ -117,7 +117,6 @@ describe('usePaycheckDeductions', () => {
     expect(requestMock).toHaveBeenCalledWith(expect.anything(), {
       input: {
         id: 'd1',
-        userId: 'u1',
         personId: 'p1',
         name: '401k',
         amount: '650',

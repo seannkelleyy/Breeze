@@ -18,8 +18,8 @@ export const GET_CONTRIBUTION_LIMITS = graphql(`
 `);
 
 export const GET_NET_WORTH_SNAPSHOTS = graphql(`
-  query NetWorthSnapshots($userId: ID!) {
-    netWorthSnapshots(userId: $userId) {
+  query NetWorthSnapshots {
+    netWorthSnapshots {
       id
       userId
       snapshotDate
@@ -70,8 +70,8 @@ export const DELETE_NET_WORTH_SNAPSHOT = graphql(`
 `);
 
 export const GET_TRANSACTIONS = graphql(`
-  query Transactions($userId: ID!, $fromDate: String, $toDate: String) {
-    transactions(userId: $userId, fromDate: $fromDate, toDate: $toDate) {
+  query Transactions($fromDate: String, $toDate: String) {
+    transactions(fromDate: $fromDate, toDate: $toDate) {
       id
       userId
       plaidAccountId

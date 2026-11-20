@@ -17,6 +17,7 @@ type Resolver struct {
 	AssetService             *service.AssetService
 	LiabilityService         *service.LiabilityService
 	BudgetService            *service.BudgetService
+	BudgetMonthService       *service.BudgetMonthService
 	GoalService              *service.GoalService
 	ContributionLimitService *service.ContributionLimitService
 	PlaidService             *service.PlaidService
@@ -36,15 +37,23 @@ type Resolver struct {
 	RetirementAccessService  *service.RetirementAccessService
 }
 
+func identityProviderIDFromCtx(ctx context.Context) (string, error) {
+	identityProviderID := middleware.UserIDFromCtx(ctx)
+	if identityProviderID == "" {
+		return "", service.ErrUnauthorized
+	}
+	return identityProviderID, nil
+}
+
 // resolveUserIDFromCtx returns the internal UUID of the authenticated caller.
 //
 // It fails closed. A request without an identity, or whose identity has no
 // provisioned account, yields ErrUnauthorized — never a client-supplied id.
 // Resolvers must treat the returned error as terminal.
 func resolveUserIDFromCtx(ctx context.Context, userService *service.UserService) (uuid.UUID, error) {
-	identityProviderID := middleware.UserIDFromCtx(ctx)
-	if identityProviderID == "" {
-		return uuid.Nil, service.ErrUnauthorized
+	identityProviderID, err := identityProviderIDFromCtx(ctx)
+	if err != nil {
+		return uuid.Nil, err
 	}
 
 	user, err := userService.GetByIdentityProviderID(ctx, identityProviderID)

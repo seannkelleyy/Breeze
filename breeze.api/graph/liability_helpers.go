@@ -12,10 +12,6 @@ import (
 )
 
 func createLiabilityInputFromModel(input *model.CreateLiabilityInput) (service.CreateLiabilityInput, error) {
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.CreateLiabilityInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
 
 	currentBalance, err := decimal.Parse(input.CurrentBalance)
 	if err != nil {
@@ -58,7 +54,7 @@ func createLiabilityInputFromModel(input *model.CreateLiabilityInput) (service.C
 	}
 
 	return service.CreateLiabilityInput{
-		UserID:             userID,
+
 		Name:               input.Name,
 		LiabilityType:      sqlc.LiabilityType(input.LiabilityType),
 		CurrentBalance:     currentBalance,

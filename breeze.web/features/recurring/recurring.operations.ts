@@ -1,8 +1,8 @@
 import { graphql } from '@/lib/gql';
 
 export const GET_RECURRING_EXPENSES = graphql(`
-  query GetRecurringExpenses($userId: ID!) {
-    recurringExpenses(userId: $userId) {
+  query GetRecurringExpenses {
+    recurringExpenses {
       id
       userId
       name
@@ -19,8 +19,8 @@ export const GET_RECURRING_EXPENSES = graphql(`
 `);
 
 export const GET_RECURRING_INCOMES = graphql(`
-  query GetRecurringIncomes($userId: ID!) {
-    recurringIncomes(userId: $userId) {
+  query GetRecurringIncomes {
+    recurringIncomes {
       id
       userId
       name

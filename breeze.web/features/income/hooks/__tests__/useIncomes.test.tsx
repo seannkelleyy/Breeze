@@ -62,17 +62,16 @@ describe('useIncomes', () => {
     await expect(result.current.getIncomes('b1')).resolves.toEqual([]);
   });
 
-  it('creates a manual income for the current user and returns its id', async () => {
+  it('creates a manual income without a client-supplied user id and returns its id', async () => {
     requestMock.mockResolvedValue({ createIncome: income({ id: 'i2' }) });
 
     const { result } = renderHook(() => useIncomes());
-    const id = await result.current.postIncome('b1', 'ignored-user', input);
+    const id = await result.current.postIncome('b1', input);
 
     expect(id).toBe('i2');
     expect(print(requestMock.mock.calls[0][0])).toContain('createIncome');
     expect(requestMock.mock.calls[0][1]).toEqual({
       input: {
-        userId: 'u1',
         budgetId: 'b1',
         name: 'Bonus',
         amount: '1200.00',

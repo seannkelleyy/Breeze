@@ -17,9 +17,7 @@ export function useDebtPayoffPlan(extraPayment: number) {
   const { data: liabilities, isLoading } = useQuery({
     queryKey: ['debts-payoff', userId],
     queryFn: async () => {
-      const resp = await request(GET_LIABILITIES_BY_USER, {
-        userId,
-      });
+      const resp = await request(GET_LIABILITIES_BY_USER);
       return resp.liabilities ?? [];
     },
     enabled: !!userId,

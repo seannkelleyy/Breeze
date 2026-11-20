@@ -61,7 +61,7 @@ describe('useRetirementAccess', () => {
     const { result } = renderHook(() => useRetirementAccess('u1'), { wrapper });
 
     await waitFor(() => expect(result.current.data).toEqual(access));
-    expect(requestMock).toHaveBeenCalledWith(expect.anything(), { userId: 'u1' });
+    expect(requestMock).toHaveBeenCalledWith(expect.anything());
     expect(operationName(requestMock.mock.calls[0][0])).toContain('RetirementAccess');
   });
 

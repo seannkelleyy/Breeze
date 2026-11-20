@@ -33,7 +33,7 @@ describe('useBudgets', () => {
     userState.userId = 'u1';
   });
 
-  it('fetches the budget for a month using the user and first-of-month ISO date', async () => {
+  it('fetches the budget for a month using the first-of-month ISO date', async () => {
     requestMock.mockResolvedValue({ budgetByDate: budget });
 
     const { result } = renderHook(() => useBudgets());
@@ -42,10 +42,7 @@ describe('useBudgets', () => {
 
     expect(fetched).toEqual(budget);
     expect(print(requestMock.mock.calls[0][0])).toContain('budgetByDate');
-    expect(requestMock.mock.calls[0][1]).toEqual({
-      userId: 'u1',
-      date: new Date(2026, 2, 1).toISOString(),
-    });
+    expect(requestMock.mock.calls[0][1]).toEqual({ date: new Date(2026, 2, 1).toISOString() });
   });
 
   it('returns null when the month has no budget yet', async () => {

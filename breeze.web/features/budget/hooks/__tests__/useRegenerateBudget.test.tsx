@@ -33,7 +33,6 @@ describe('useRegenerateBudget', () => {
     expect(print(requestMock.mock.calls[0][0])).toContain('createBudget');
     expect(requestMock.mock.calls[0][1]).toEqual({
       input: {
-        userId: 'u1',
         date: new Date(2026, 6, 1).toISOString(),
         monthlyIncome: '0',
         monthlyExpenses: '0',
@@ -56,7 +55,6 @@ describe('useRegenerateBudget', () => {
 
     expect(requestMock.mock.calls[0][1]).toEqual({
       input: {
-        userId: 'u1',
         date: new Date(2026, 6, 1).toISOString(),
         monthlyIncome: '0',
         monthlyExpenses: '0',

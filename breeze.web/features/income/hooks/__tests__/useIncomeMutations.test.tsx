@@ -57,7 +57,7 @@ describe('income mutation hooks', () => {
     service.deleteIncome.mockReset().mockResolvedValue(true);
   });
 
-  it('usePostIncome forwards the budget, user, and input', async () => {
+  it('usePostIncome forwards the budget and input', async () => {
     const onSettled = vi.fn();
     const { result } = renderHook(() => usePostIncome({ onSettled }), {
       wrapper: createWrapper(),
@@ -65,11 +65,11 @@ describe('income mutation hooks', () => {
 
     let created: unknown;
     await act(async () => {
-      created = await result.current.mutateAsync({ budgetId: 'b1', userId: 'u1', income: input });
+      created = await result.current.mutateAsync({ budgetId: 'b1', income: input });
     });
 
     expect(created).toBe('new-id');
-    expect(service.postIncome).toHaveBeenCalledWith('b1', 'u1', input);
+    expect(service.postIncome).toHaveBeenCalledWith('b1', input);
     await waitFor(() => expect(onSettled).toHaveBeenCalledTimes(1));
   });
 
@@ -103,9 +103,9 @@ describe('income mutation hooks', () => {
     const { result } = renderHook(() => usePostIncome(), { wrapper: createWrapper() });
 
     await act(async () => {
-      await expect(
-        result.current.mutateAsync({ budgetId: 'b1', userId: 'u1', income: input }),
-      ).rejects.toThrow('budget closed');
+      await expect(result.current.mutateAsync({ budgetId: 'b1', income: input })).rejects.toThrow(
+        'budget closed',
+      );
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));

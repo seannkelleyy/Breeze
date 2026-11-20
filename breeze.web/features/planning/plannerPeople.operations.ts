@@ -31,8 +31,8 @@ export const DELETE_PLANNER_PERSON = graphql(`
 `);
 
 export const GET_PLANNER_PEOPLE = graphql(`
-  query PlannerPeople($userId: ID!) {
-    plannerPeople(userId: $userId) {
+  query PlannerPeople {
+    plannerPeople {
       id
       userId
       name

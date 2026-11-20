@@ -51,11 +51,7 @@ export const useTransactions = (userId?: string | null, months = 6) => {
     queryKey,
     enabled: Boolean(userId),
     queryFn: async () => {
-      const response = await request(GET_TRANSACTIONS, {
-        userId: userId as string,
-        fromDate,
-        toDate,
-      });
+      const response = await request(GET_TRANSACTIONS, { fromDate, toDate });
       return (response.transactions ?? []).map(mapTransaction);
     },
   });

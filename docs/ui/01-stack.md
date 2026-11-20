@@ -2,17 +2,17 @@
 
 ## Stack
 
-| Layer | Choice | Why |
-|---|---|---|
-| Framework | Next.js 16 + React 19 | App Router, server/client components |
-| UI components | shadcn/ui + Radix + Tailwind v4 | Owned in repo, not node_modules |
-| Data fetching | TanStack React Query v5 | Stable cache keys, mutations, invalidation |
-| HTTP client | Axios | Direct HTTP calls to GraphQL endpoint |
-| Auth | Clerk (`@clerk/clerk-react`) | Client-side SPA auth, CurrentUserProvider |
-| Forms | React Hook Form + Zod | Pairs with shadcn form components |
-| Charts | Recharts | Works with Tailwind, included in shadcn chart |
-| Memoization | React Compiler (build-time) | Auto-memoizes components/hooks; manual memos only for identity |
-| Package manager | npm | |
+| Layer           | Choice                          | Why                                                            |
+| --------------- | ------------------------------- | -------------------------------------------------------------- |
+| Framework       | Next.js 16 + React 19           | App Router, server/client components                           |
+| UI components   | shadcn/ui + Radix + Tailwind v4 | Owned in repo, not node_modules                                |
+| Data fetching   | TanStack React Query v5         | Stable cache keys, mutations, invalidation                     |
+| HTTP client     | Axios                           | Direct HTTP calls to GraphQL endpoint                          |
+| Auth            | Clerk (`@clerk/clerk-react`)    | Client-side SPA auth, CurrentUserProvider                      |
+| Forms           | React Hook Form + Zod           | Pairs with shadcn form components                              |
+| Charts          | Recharts                        | Works with Tailwind, included in shadcn chart                  |
+| Memoization     | React Compiler (build-time)     | Auto-memoizes components/hooks; manual memos only for identity |
+| Package manager | npm                             |                                                                |
 
 ---
 
@@ -35,8 +35,9 @@ npm run dev        # start dev server
 npm run build      # static export to out/
 npm run lint       # ESLint check
 npm run typecheck  # TypeScript check
-npm run check      # typecheck + lint + build
-npm run test       # Vitest
+npm run check      # typecheck + lint + build (no tests)
+npm run test       # Vitest only
+npm run verify     # lint + typecheck + tests + build
 ```
 
 ### Navigation
@@ -98,7 +99,7 @@ The authenticated user is available via the `CurrentUserProvider` context wrappe
 
 ```typescript
 // lib/providers/CurrentUserProvider.tsx
-const { user, userId } = useCurrentUser();  // access anywhere in tree
+const { user, userId } = useCurrentUser(); // access anywhere in tree
 ```
 
 Pages that read or write user data wrap their content in the `RequireAuth` guard
@@ -111,7 +112,7 @@ nav mirrors this: routes opt into signed-out visibility with `isPublic` in
 
 ```tsx
 <RequireAuth>
-  <AccountsContent />
+	<AccountsContent />
 </RequireAuth>
 ```
 
@@ -201,27 +202,29 @@ handwritten response generics to `request`.
 
 ```typescript
 // lib/services/queries/assets.ts — typed documents (npm run codegen)
-import { graphql } from '@/lib/gql';
+import { graphql } from "@/lib/gql";
 
 export const ASSET_FIELDS = graphql(`
   fragment AssetFields on Asset { id name assetType currentValue ... }
 `);
 
 export const GET_ASSETS = graphql(`
-  query GetAssets($userId: ID!) {
-    assets(userId: $userId) { ...AssetFields }
-  }
+	query GetAssets($userId: ID!) {
+		assets(userId: $userId) {
+			...AssetFields
+		}
+	}
 `);
 
 // hooks/useAssets.ts — React Query wrapper; response type is inferred
 // from the generated document, no hand-written generics needed
 export function useAssets(userId: string) {
-  const { request } = useGraphql();
-  return useQuery({
-    queryKey: ['api-assets', userId],
-    queryFn: () => request(GET_ASSETS, { userId }),
-    enabled: !!userId,
-  });
+	const { request } = useGraphql();
+	return useQuery({
+		queryKey: ["api-assets", userId],
+		queryFn: () => request(GET_ASSETS, { userId }),
+		enabled: !!userId,
+	});
 }
 ```
 
@@ -247,14 +250,14 @@ matter.
 
 ```typescript
 export function useCreateAsset() {
-  const queryClient = useQueryClient();
-  const { request } = useGraphql();
-  return useMutation({
-    mutationFn: (input: CreateAssetInput) => request(CREATE_ASSET, { input }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['api-assets'] });
-    },
-  });
+	const queryClient = useQueryClient();
+	const { request } = useGraphql();
+	return useMutation({
+		mutationFn: (input: CreateAssetInput) => request(CREATE_ASSET, { input }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["api-assets"] });
+		},
+	});
 }
 ```
 
@@ -300,14 +303,26 @@ Account and liability types are defined in `features/planning/types/account.ts`:
 
 ```typescript
 export type AccountType =
-  | 'checking' | 'emergency-fund' | 'brokerage'
-  | '401k' | '403b' | '457' | 'roth-ira' | 'traditional-ira' | 'hsa'
-  | 'home' | 'vehicle'
-  | 'student-loan' | 'credit-card' | 'personal-loan' | 'auto-loan' | 'mortgage'
-  | 'other';
+	| "checking"
+	| "emergency-fund"
+	| "brokerage"
+	| "401k"
+	| "403b"
+	| "457"
+	| "roth-ira"
+	| "traditional-ira"
+	| "hsa"
+	| "home"
+	| "vehicle"
+	| "student-loan"
+	| "credit-card"
+	| "personal-loan"
+	| "auto-loan"
+	| "mortgage"
+	| "other";
 
-export type ContributionMode = 'monthly' | 'yearly' | 'salary-percent';
-export type AccountOwner = 'self' | 'spouse';
+export type ContributionMode = "monthly" | "yearly" | "salary-percent";
+export type AccountOwner = "self" | "spouse";
 ```
 
 Type mapping between frontend `AccountType` and API `ApiAssetType`/`ApiLiabilityType` lives in:
@@ -326,16 +341,16 @@ Type mapping between frontend `AccountType` and API `ApiAssetType`/`ApiLiability
 
 ## Key shadcn Components in Use
 
-| Component | Used For |
-|---|---|
-| `Select` | Account type, owner, contribution mode dropdowns |
-| `Input` | Name, balance, rate fields |
-| `Card` | Account cards, budget overview, net worth summary |
-| `Button` | Add/delete/save actions |
-| `Badge` | Account type labels, tags |
-| `Chart` (Recharts) | Net worth history, account projections |
-| `Dialog` | Add account, confirm delete |
-| `Progress` | Category spending, FI number progress |
+| Component          | Used For                                          |
+| ------------------ | ------------------------------------------------- |
+| `Select`           | Account type, owner, contribution mode dropdowns  |
+| `Input`            | Name, balance, rate fields                        |
+| `Card`             | Account cards, budget overview, net worth summary |
+| `Button`           | Add/delete/save actions                           |
+| `Badge`            | Account type labels, tags                         |
+| `Chart` (Recharts) | Net worth history, account projections            |
+| `Dialog`           | Add account, confirm delete                       |
+| `Progress`         | Category spending, FI number progress             |
 
 ---
 

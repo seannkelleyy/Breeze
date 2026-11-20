@@ -213,7 +213,7 @@ Do not trust client-supplied `userId`/`id` fields. Resolve the caller with `reso
 
 ## Graceful Shutdown
 
-Required for Fly.io (sends SIGTERM before killing) and Kubernetes:
+Required when the host or orchestrator sends `SIGTERM` before stopping a process:
 
 ```go
 ctx, stop := signal.NotifyContext(context.Background(),

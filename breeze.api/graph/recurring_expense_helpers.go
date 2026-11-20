@@ -12,10 +12,6 @@ import (
 )
 
 func createRecurringExpenseInputFromModel(input *model.CreateRecurringExpenseInput) (service.CreateRecurringExpenseInput, error) {
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.CreateRecurringExpenseInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
 
 	amount, err := decimal.Parse(input.Amount)
 	if err != nil {
@@ -40,7 +36,7 @@ func createRecurringExpenseInputFromModel(input *model.CreateRecurringExpenseInp
 	}
 
 	return service.CreateRecurringExpenseInput{
-		UserID:             userID,
+
 		Name:               input.Name,
 		Amount:             amount,
 		RecurrenceInterval: sqlc.RecurrenceInterval(input.RecurrenceInterval),

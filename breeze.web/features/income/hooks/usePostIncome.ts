@@ -4,7 +4,6 @@ import { IncomeInput } from '../types';
 
 interface PostIncomeMutationProps {
   budgetId: string;
-  userId: string;
   income: IncomeInput;
 }
 
@@ -15,8 +14,8 @@ interface PostIncomeMutationProps {
 const usePostIncome = createMutationHook(
   useIncomes,
   ({ postIncome }) =>
-    ({ budgetId, userId, income }: PostIncomeMutationProps) =>
-      postIncome(budgetId, userId, income),
+    ({ budgetId, income }: PostIncomeMutationProps) =>
+      postIncome(budgetId, income),
 );
 
 export default usePostIncome;

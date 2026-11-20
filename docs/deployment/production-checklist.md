@@ -1,28 +1,38 @@
 # Production Checklist
 
+## Web (Render static site)
+
+- Build with `npm run build` from `breeze.web/`; `breeze.web/next.config.ts` sets `output: 'export'`, so publish the generated `breeze.web/out/` directory.
+- Render settings are dashboard-managed; no `render.yaml` is checked in.
+- `breeze.web/Dockerfile.web` is for local development (`npm run dev`), not production hosting.
+
 ## Auth (Clerk)
+
 - Dev instance (`pk_test_*`/`sk_test_*`) is in use. Create a production instance, then set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (web) and `CLERK_SECRET_KEY` (api) to the prod values. Configure the prod allowed origins (web + api URLs) in Clerk.
 
 ## Plaid
+
 - `PLAID_ENV` is `sandbox`; production requires Plaid approval → set `production` + production credentials. Link flow, account sync, and the hourly transaction river worker all use the same client.
 
 ## Logging
+
 - `slog` default handler is text; for Render log drains swap to `slog.NewJSONHandler` in the logger middleware + main. Access-log and panic-recovery middleware are already mounted.
 
 ## Database
+
 - Render Pre-Deploy Command: `make migrate-deploy && go run ./cmd/seed` (Atlas migrations, then idempotent reference data). Set `DATABASE_URL` to the service database URL. Backups: enable Render PITR.
 
 ## Security
 
 Credential-exposure audit (2026-09-28, full git-history forensics — repo is **public**):
 
-| Credential | In public history? | Action |
-|---|---|---|
-| Plaid `PLAID_SECRET` / `PLAID_CLIENT_ID` (current) | **No** — never committed | None required |
-| Render DB password | No (chat-only exposure) | Rotate: Render dashboard → database → reset password → update `DATABASE_URL` env var on the api service → redeploy |
-| Clerk **test** secret key (`sk_test_*`) | **Yes** — .NET-era `Breeze.Web/.env` (removed mid-2026, retained in history) | Rotate in the Clerk **dev instance**: dashboard → API keys → roll secret. The `pk_test_*` publishable key is public by design — no action |
-| Azure SQL admin password (`breezeadmin`, .NET-era `appsettings.json`) | **Yes** | Old stack — delete the `breeze-sql` / `breeze-sql-server` Azure resources if they still exist, otherwise rotate |
-| Localhost `DATABASE_URL` (commit 048ed82) | Yes | Harmless — local dev only |
+| Credential                                                            | In public history?                                                           | Action                                                                                                                                    |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Plaid `PLAID_SECRET` / `PLAID_CLIENT_ID` (current)                    | **No** — never committed                                                     | None required                                                                                                                             |
+| Render DB password                                                    | No (chat-only exposure)                                                      | Rotate: Render dashboard → database → reset password → update `DATABASE_URL` env var on the api service → redeploy                        |
+| Clerk **test** secret key (`sk_test_*`)                               | **Yes** — .NET-era `Breeze.Web/.env` (removed mid-2026, retained in history) | Rotate in the Clerk **dev instance**: dashboard → API keys → roll secret. The `pk_test_*` publishable key is public by design — no action |
+| Azure SQL admin password (`breezeadmin`, .NET-era `appsettings.json`) | **Yes**                                                                      | Old stack — delete the `breeze-sql` / `breeze-sql-server` Azure resources if they still exist, otherwise rotate                           |
+| Localhost `DATABASE_URL` (commit 048ed82)                             | Yes                                                                          | Harmless — local dev only                                                                                                                 |
 
 Before real users: create the Clerk production instance and get Plaid production approval (sections above). Test/dev credentials grant no access to production.
 

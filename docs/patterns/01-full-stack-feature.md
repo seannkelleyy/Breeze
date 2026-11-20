@@ -71,7 +71,7 @@ make check
 
 # Web
 cd ../breeze.web
-npm run check
+npm run verify
 ```
 
 ### Step 6: Documentation

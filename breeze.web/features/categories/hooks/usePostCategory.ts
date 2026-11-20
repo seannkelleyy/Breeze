@@ -4,7 +4,6 @@ import { CategoryInput } from '../types';
 
 interface PostCategoryMutationProps {
   budgetId: string;
-  userId: string;
   category: CategoryInput;
 }
 
@@ -15,8 +14,8 @@ interface PostCategoryMutationProps {
 const usePostCategory = createMutationHook(
   useCategories,
   ({ postCategory }) =>
-    ({ budgetId, userId, category }: PostCategoryMutationProps) =>
-      postCategory(budgetId, userId, category),
+    ({ budgetId, category }: PostCategoryMutationProps) =>
+      postCategory(budgetId, category),
 );
 
 export default usePostCategory;

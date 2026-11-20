@@ -74,17 +74,19 @@ Clone the repo, then run:
 ```
 
 This installs:
+
 - `golangci-lint` and `atlas` via Homebrew (API linting + migrations)
 - Starts Postgres via Docker Compose
 - Runs database migrations and codegen (sqlc + gqlgen)
 - Runs `npm install` (web dependencies)
 
 Individual setup scripts are also available:
-| Script | Scope |
-|---|---|
-| `./scripts/setup.sh` | Full setup (API + Web + DB) |
-| `cd breeze.api && make setup` | API tools only (golangci-lint, atlas) |
-| `cd breeze.web && npm run setup` | Web dependencies only (npm install) |
+
+| Script                           | Scope                                 |
+| -------------------------------- | ------------------------------------- |
+| `./scripts/setup.sh`             | Full setup (API + Web + DB)           |
+| `cd breeze.api && make setup`    | API tools only (golangci-lint, atlas) |
+| `cd breeze.web && npm run setup` | Web dependencies only (npm install)   |
 
 After setup, use `./scripts/dev.sh` to run everything.
 
@@ -97,7 +99,7 @@ After setup, use `./scripts/dev.sh` to run everything.
 5. Implement service logic in `breeze.api/internal/service/`
 6. Update GraphQL schema and resolvers in `breeze.api/graph/`
 7. Add/extend frontend queries/hooks/components in `breeze.web/app/...`
-8. Validate: `cd breeze.api && make check`, `cd breeze.web && npm run check`
+8. Validate: `cd breeze.api && make check` (runs format/tidy/codegen and may modify files), then `cd breeze.web && npm run verify` (includes tests)
 
 Use `api/06-vertical-slice.md` and `ui/ui-slice-api-checklist.md` together.
 
@@ -109,7 +111,7 @@ For a concise implementation flow, use `patterns/01-full-stack-feature.md`.
 2. Add focused hooks in route-level domain hooks
 3. Wire page/provider/component state
 4. Keep money/rates as string over API
-5. Validate with `npm run check`
+5. Validate with `npm run verify` (includes web tests)
 
 ### 3. Update Existing DB Fields
 

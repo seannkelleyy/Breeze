@@ -77,7 +77,7 @@ export const useNetWorthSnapshots = (userId?: string | null) => {
     queryKey,
     enabled: Boolean(userId),
     queryFn: async () => {
-      const response = await request(GET_NET_WORTH_SNAPSHOTS, { userId: userId as string });
+      const response = await request(GET_NET_WORTH_SNAPSHOTS);
       return (response.netWorthSnapshots ?? []).map(mapSnapshot);
     },
   });
@@ -92,7 +92,6 @@ export const useNetWorthSnapshots = (userId?: string | null) => {
       }));
       const response = await request(CREATE_NET_WORTH_SNAPSHOT, {
         input: {
-          userId: userId as string,
           snapshotDate: input.snapshotDate,
           totalAssets: String(input.totalAssets),
           totalLiabilities: String(input.totalLiabilities),

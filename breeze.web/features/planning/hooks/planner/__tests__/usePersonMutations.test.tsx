@@ -65,7 +65,6 @@ describe('usePersonMutations', () => {
     expect(requestMock).toHaveBeenCalledWith(expect.anything(), {
       input: {
         id: 'p1',
-        userId: 'u1',
         name: 'Alex',
         birthday: '1986-01-01',
         retirementAge: 65,

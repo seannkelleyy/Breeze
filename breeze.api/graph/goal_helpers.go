@@ -11,10 +11,6 @@ import (
 )
 
 func createGoalInputFromModel(input *model.CreateGoalInput) (service.CreateGoalInput, error) {
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.CreateGoalInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
 
 	var targetAmount *decimal.Decimal
 	if input.TargetAmount != nil {
@@ -44,7 +40,7 @@ func createGoalInputFromModel(input *model.CreateGoalInput) (service.CreateGoalI
 	}
 
 	return service.CreateGoalInput{
-		UserID:               userID,
+
 		Description:          input.Description,
 		IsCompleted:          input.IsCompleted,
 		TargetAmount:         targetAmount,

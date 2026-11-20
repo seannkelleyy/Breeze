@@ -43,7 +43,6 @@ export const CreateIncomeDialog = () => {
     };
     await postMutation.mutateAsync({
       budgetId: budget!.id,
-      userId,
       income,
     });
   };

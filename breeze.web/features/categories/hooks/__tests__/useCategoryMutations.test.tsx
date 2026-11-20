@@ -55,17 +55,17 @@ describe('category mutation hooks', () => {
     service.deleteCategory.mockReset().mockResolvedValue(true);
   });
 
-  it('usePostCategory forwards the budget, user, and input', async () => {
+  it('usePostCategory forwards the budget and input', async () => {
     const onSettled = vi.fn();
     const { result } = renderHook(() => usePostCategory({ onSettled }), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      await result.current.mutateAsync({ budgetId: 'b1', userId: 'u1', category: input });
+      await result.current.mutateAsync({ budgetId: 'b1', category: input });
     });
 
-    expect(service.postCategory).toHaveBeenCalledWith('b1', 'u1', input);
+    expect(service.postCategory).toHaveBeenCalledWith('b1', input);
     await waitFor(() => expect(onSettled).toHaveBeenCalledTimes(1));
   });
 
@@ -99,9 +99,9 @@ describe('category mutation hooks', () => {
     const { result } = renderHook(() => usePostCategory(), { wrapper: createWrapper() });
 
     await act(async () => {
-      await expect(
-        result.current.mutateAsync({ budgetId: 'b1', userId: 'u1', category: input }),
-      ).rejects.toThrow('read-only budget');
+      await expect(result.current.mutateAsync({ budgetId: 'b1', category: input })).rejects.toThrow(
+        'read-only budget',
+      );
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));

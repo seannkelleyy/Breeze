@@ -85,13 +85,13 @@ describe('useDebtPayoffPlan', () => {
     expect(plan.order).toEqual(['cc1']);
   });
 
-  it('passes the user to the liabilities query', async () => {
+  it('queries the authenticated user’s liabilities without a client-supplied id', async () => {
     requestMock.mockResolvedValue({ liabilities: [] });
 
     const { result } = renderHook(() => useDebtPayoffPlan(0), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(requestMock.mock.calls[0][1]).toEqual({ userId: 'u1' });
+    expect(requestMock).toHaveBeenCalledWith(expect.anything());
   });
 
   it('does not fetch without a user', () => {

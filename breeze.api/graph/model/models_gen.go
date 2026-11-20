@@ -59,7 +59,6 @@ type ContributionLimit struct {
 }
 
 type CreateAssetInput struct {
-	UserID                          string    `json:"userId"`
 	Name                            string    `json:"name"`
 	AssetType                       AssetType `json:"assetType"`
 	CurrentValue                    string    `json:"currentValue"`
@@ -81,7 +80,6 @@ type CreateAssetInput struct {
 }
 
 type CreateBudgetInput struct {
-	UserID          string                `json:"userId"`
 	Date            string                `json:"date"`
 	MonthlyIncome   string                `json:"monthlyIncome"`
 	MonthlyExpenses string                `json:"monthlyExpenses"`
@@ -89,7 +87,6 @@ type CreateBudgetInput struct {
 }
 
 type CreateExpenseCategoryInput struct {
-	UserID       string `json:"userId"`
 	BudgetID     string `json:"budgetId"`
 	Name         string `json:"name"`
 	Allocation   string `json:"allocation"`
@@ -97,7 +94,6 @@ type CreateExpenseCategoryInput struct {
 }
 
 type CreateExpenseInput struct {
-	UserID      string               `json:"userId"`
 	BudgetID    string               `json:"budgetId"`
 	Amount      string               `json:"amount"`
 	Date        string               `json:"date"`
@@ -107,7 +103,6 @@ type CreateExpenseInput struct {
 }
 
 type CreateGoalInput struct {
-	UserID               string   `json:"userId"`
 	Description          string   `json:"description"`
 	IsCompleted          bool     `json:"isCompleted"`
 	TargetAmount         *string  `json:"targetAmount,omitempty"`
@@ -134,7 +129,6 @@ type CreateHsaReimbursementInput struct {
 }
 
 type CreateIncomeInput struct {
-	UserID               string           `json:"userId"`
 	BudgetID             string           `json:"budgetId"`
 	Name                 string           `json:"name"`
 	Amount               string           `json:"amount"`
@@ -147,7 +141,6 @@ type CreateIncomeInput struct {
 }
 
 type CreateLiabilityInput struct {
-	UserID             string        `json:"userId"`
 	Name               string        `json:"name"`
 	LiabilityType      LiabilityType `json:"liabilityType"`
 	CurrentBalance     string        `json:"currentBalance"`
@@ -162,7 +155,6 @@ type CreateLiabilityInput struct {
 }
 
 type CreateNetWorthSnapshotInput struct {
-	UserID           string                       `json:"userId"`
 	SnapshotDate     string                       `json:"snapshotDate"`
 	TotalAssets      string                       `json:"totalAssets"`
 	TotalLiabilities string                       `json:"totalLiabilities"`
@@ -171,7 +163,6 @@ type CreateNetWorthSnapshotInput struct {
 }
 
 type CreateRecurringExpenseInput struct {
-	UserID             string             `json:"userId"`
 	Name               string             `json:"name"`
 	Amount             string             `json:"amount"`
 	RecurrenceInterval RecurrenceInterval `json:"recurrenceInterval"`
@@ -182,7 +173,6 @@ type CreateRecurringExpenseInput struct {
 }
 
 type CreateRecurringIncomeInput struct {
-	UserID             string             `json:"userId"`
 	Name               string             `json:"name"`
 	Amount             string             `json:"amount"`
 	RecurrenceInterval RecurrenceInterval `json:"recurrenceInterval"`
@@ -216,7 +206,6 @@ type CreateTransactionInput struct {
 }
 
 type CreateUserInput struct {
-	IdentityProviderID string         `json:"identityProviderId"`
 	Email              string         `json:"email"`
 	ReturnType         ReturnType     `json:"returnType"`
 	SafeWithdrawalRate string         `json:"safeWithdrawalRate"`
@@ -704,9 +693,6 @@ type UpdateTaxBracketInput struct {
 }
 
 type UpdateUserInput struct {
-	ID                 string         `json:"id"`
-	IdentityProviderID string         `json:"identityProviderId"`
-	Email              string         `json:"email"`
 	ReturnType         ReturnType     `json:"returnType"`
 	SafeWithdrawalRate string         `json:"safeWithdrawalRate"`
 	CurrencyType       string         `json:"currencyType"`
@@ -719,7 +705,6 @@ type UpdateUserInput struct {
 }
 
 type UpdateUserSetupInput struct {
-	ID                   string  `json:"id"`
 	BudgetEnabled        *bool   `json:"budgetEnabled,omitempty"`
 	MonthlyExpenses      *string `json:"monthlyExpenses,omitempty"`
 	SetupCompleted       *bool   `json:"setupCompleted,omitempty"`
@@ -729,7 +714,6 @@ type UpdateUserSetupInput struct {
 
 type UpsertPaycheckDeductionInput struct {
 	ID              string  `json:"id"`
-	UserID          string  `json:"userId"`
 	PersonID        string  `json:"personId"`
 	Name            string  `json:"name"`
 	Amount          string  `json:"amount"`
@@ -740,7 +724,6 @@ type UpsertPaycheckDeductionInput struct {
 
 type UpsertPlannerPersonInput struct {
 	ID                   string `json:"id"`
-	UserID               string `json:"userId"`
 	Name                 string `json:"name"`
 	Birthday             string `json:"birthday"`
 	RetirementAge        int    `json:"retirementAge"`

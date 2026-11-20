@@ -4,7 +4,7 @@ import {
   UPDATE_EXPENSE,
 } from '@/features/expenses/expense.mutations';
 import { GET_EXPENSES_BY_BUDGET } from '@/features/expenses/expense.queries';
-import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+
 import useGraphql from '@/lib/services/useGraphql';
 import { Expense, ExpenseInput } from '@/features/expenses/types';
 
@@ -13,7 +13,6 @@ import { Expense, ExpenseInput } from '@/features/expenses/types';
  */
 const useExpenses = () => {
   const { request } = useGraphql();
-  const { userId } = useCurrentUser();
 
   const getExpensesForBudget = async (budgetId: string): Promise<Expense[]> => {
     const resp = await request(GET_EXPENSES_BY_BUDGET, {
@@ -22,13 +21,8 @@ const useExpenses = () => {
     return resp?.expenses ?? [];
   };
 
-  const postExpense = async (
-    budgetId: string,
-    _userId: string,
-    expense: ExpenseInput,
-  ): Promise<string> => {
+  const postExpense = async (budgetId: string, expense: ExpenseInput): Promise<string> => {
     const input = {
-      userId,
       budgetId,
       amount: expense.amount,
       date: expense.date,

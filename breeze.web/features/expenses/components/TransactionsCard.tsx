@@ -50,7 +50,7 @@ export function TransactionsCard({ userId, currencyCode }: TransactionsCardProps
     queryFn: async () => {
       const now = new Date();
       const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-      const budgetResp = await request(GET_BUDGET_BY_DATE, { userId: userId as string, date });
+      const budgetResp = await request(GET_BUDGET_BY_DATE, { date });
       const budgetId = budgetResp.budgetByDate?.id;
       if (!budgetId) return [];
       const catResp = await request(GET_CATEGORIES, { budgetId });

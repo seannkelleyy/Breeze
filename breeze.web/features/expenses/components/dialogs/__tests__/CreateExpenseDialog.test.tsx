@@ -105,7 +105,6 @@ describe('CreateExpenseDialog', () => {
     await waitFor(() =>
       expect(postState.mutateAsync).toHaveBeenCalledWith({
         budgetId: 'b1',
-        userId: 'u1',
         expense: {
           amount: '42.50',
           date: '2026-03-15',

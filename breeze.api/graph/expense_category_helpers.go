@@ -12,10 +12,6 @@ import (
 )
 
 func createExpenseCategoryInputFromModel(input *model.CreateExpenseCategoryInput) (service.CreateExpenseCategoryInput, error) {
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.CreateExpenseCategoryInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
 
 	budgetID, err := uuid.Parse(input.BudgetID)
 	if err != nil {
@@ -33,7 +29,7 @@ func createExpenseCategoryInputFromModel(input *model.CreateExpenseCategoryInput
 	}
 
 	return service.CreateExpenseCategoryInput{
-		UserID:       userID,
+
 		BudgetID:     budgetID,
 		Name:         input.Name,
 		Allocation:   allocation,

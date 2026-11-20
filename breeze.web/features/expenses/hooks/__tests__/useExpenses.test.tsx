@@ -53,11 +53,11 @@ describe('useExpenses', () => {
     await expect(result.current.getExpensesForBudget('b1')).resolves.toEqual([]);
   });
 
-  it('creates an expense with the signed-in user and mapped splits', async () => {
+  it('creates an expense with mapped splits without a client-supplied user id', async () => {
     requestMock.mockResolvedValue({ createExpense: { id: 'new-id' } });
     const { result } = renderHook(() => useExpenses());
 
-    const created = await result.current.postExpense('b1', 'ignored', {
+    const created = await result.current.postExpense('b1', {
       amount: '25.00',
       date: '2026-04-01',
       description: 'Groceries',
@@ -67,7 +67,6 @@ describe('useExpenses', () => {
     expect(created).toBe('new-id');
     expect(requestMock).toHaveBeenCalledWith(expect.anything(), {
       input: {
-        userId: 'u1',
         budgetId: 'b1',
         amount: '25.00',
         date: '2026-04-01',

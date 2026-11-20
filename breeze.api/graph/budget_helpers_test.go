@@ -8,93 +8,144 @@ import (
 	"breeze.api/internal/service"
 	"github.com/google/uuid"
 	"github.com/govalues/decimal"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// ─── decimalZero ────────────────────────────────────────
+// ─── budgetMonthInputFromModel ─────────────────────────
 
-func TestDecimalZero(t *testing.T) {
-	z := decimalZero()
-	if !z.IsZero() {
-		t.Fatal("expected zero decimal")
-	}
-}
+func TestBudgetMonthInputFromModel(t *testing.T) {
+	t.Parallel()
 
-// ─── createBudgetInputFromModel ────────────────────────
-
-func TestCreateBudgetInputFromModel(t *testing.T) {
 	t.Run("valid input", func(t *testing.T) {
-		userID := uuid.New().String()
+		t.Parallel()
 		input := model.CreateBudgetInput{
-			UserID:          userID,
 			Date:            "2024-06-15T00:00:00Z",
 			MonthlyIncome:   "5000.00",
 			MonthlyExpenses: "3000.00",
 		}
-		result, err := createBudgetInputFromModel(&input)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		if result.UserID.String() != userID {
-			t.Fatal("userID mismatch")
-		}
-		if result.MonthlyIncome.String() != "5000.00" {
-			t.Fatalf("income mismatch: %s", result.MonthlyIncome)
-		}
-		if result.MonthlyExpenses.String() != "3000.00" {
-			t.Fatalf("expenses mismatch: %s", result.MonthlyExpenses)
-		}
+
+		result, err := budgetMonthInputFromModel(&input)
+
+		require.NoError(t, err)
+		assert.Equal(t, time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC), result.Date)
+		assert.Equal(t, "5000.00", result.MonthlyIncome.String())
+		assert.Equal(t, "3000.00", result.MonthlyExpenses.String())
+		assert.Nil(t, result.PayrollIncomes, "omitted payroll incomes stay nil")
 	})
 
-	t.Run("invalid user ID", func(t *testing.T) {
+	t.Run("empty payroll list is preserved as a request to clear", func(t *testing.T) {
+		t.Parallel()
 		input := model.CreateBudgetInput{
-			UserID:          "not-a-uuid",
 			Date:            "2024-06-15T00:00:00Z",
-			MonthlyIncome:   "5000",
-			MonthlyExpenses: "3000",
+			MonthlyIncome:   "5000.00",
+			MonthlyExpenses: "3000.00",
+			PayrollIncomes:  []*model.PayrollIncomeInput{},
 		}
-		_, err := createBudgetInputFromModel(&input)
-		if err == nil {
-			t.Fatal("expected error for invalid user ID")
-		}
+
+		result, err := budgetMonthInputFromModel(&input)
+
+		require.NoError(t, err)
+		require.NotNil(t, result.PayrollIncomes)
+		assert.Empty(t, result.PayrollIncomes)
 	})
 
 	t.Run("invalid date", func(t *testing.T) {
+		t.Parallel()
 		input := model.CreateBudgetInput{
-			UserID:          uuid.New().String(),
 			Date:            "not-a-date",
 			MonthlyIncome:   "5000",
 			MonthlyExpenses: "3000",
 		}
-		_, err := createBudgetInputFromModel(&input)
-		if err == nil {
-			t.Fatal("expected error for invalid date")
-		}
+
+		_, err := budgetMonthInputFromModel(&input)
+
+		require.Error(t, err)
 	})
 
 	t.Run("invalid monthly income", func(t *testing.T) {
+		t.Parallel()
 		input := model.CreateBudgetInput{
-			UserID:          uuid.New().String(),
 			Date:            "2024-06-15T00:00:00Z",
 			MonthlyIncome:   "not-a-number",
 			MonthlyExpenses: "3000",
 		}
-		_, err := createBudgetInputFromModel(&input)
-		if err == nil {
-			t.Fatal("expected error for invalid income")
-		}
+
+		_, err := budgetMonthInputFromModel(&input)
+
+		require.Error(t, err)
 	})
 
 	t.Run("invalid monthly expenses", func(t *testing.T) {
+		t.Parallel()
 		input := model.CreateBudgetInput{
-			UserID:          uuid.New().String(),
 			Date:            "2024-06-15T00:00:00Z",
 			MonthlyIncome:   "5000",
 			MonthlyExpenses: "not-a-number",
 		}
-		_, err := createBudgetInputFromModel(&input)
-		if err == nil {
-			t.Fatal("expected error for invalid expenses")
-		}
+
+		_, err := budgetMonthInputFromModel(&input)
+
+		require.Error(t, err)
+	})
+}
+
+func TestPayrollIncomesFromModel(t *testing.T) {
+	t.Parallel()
+
+	t.Run("maps person, amount, and date", func(t *testing.T) {
+		t.Parallel()
+		personID := uuid.New()
+
+		result, err := payrollIncomesFromModel([]*model.PayrollIncomeInput{{
+			PersonID: personID.String(),
+			Name:     "Ada",
+			Amount:   "1234.56",
+			Date:     "2024-06-15T00:00:00Z",
+		}})
+
+		require.NoError(t, err)
+		require.Len(t, result, 1)
+		assert.Equal(t, personID, result[0].PersonID)
+		assert.Equal(t, "Ada", result[0].Name)
+		assert.Equal(t, "1234.56", result[0].Amount.String())
+		assert.Equal(t, time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC), result[0].Date)
+	})
+
+	t.Run("invalid person id", func(t *testing.T) {
+		t.Parallel()
+		_, err := payrollIncomesFromModel([]*model.PayrollIncomeInput{{
+			PersonID: "not-a-uuid",
+			Name:     "Ada",
+			Amount:   "1.00",
+			Date:     "2024-06-15T00:00:00Z",
+		}})
+
+		require.Error(t, err)
+	})
+
+	t.Run("invalid amount", func(t *testing.T) {
+		t.Parallel()
+		_, err := payrollIncomesFromModel([]*model.PayrollIncomeInput{{
+			PersonID: uuid.New().String(),
+			Name:     "Ada",
+			Amount:   "not-a-number",
+			Date:     "2024-06-15T00:00:00Z",
+		}})
+
+		require.Error(t, err)
+	})
+
+	t.Run("invalid date", func(t *testing.T) {
+		t.Parallel()
+		_, err := payrollIncomesFromModel([]*model.PayrollIncomeInput{{
+			PersonID: uuid.New().String(),
+			Name:     "Ada",
+			Amount:   "1.00",
+			Date:     "not-a-date",
+		}})
+
+		require.Error(t, err)
 	})
 }
 

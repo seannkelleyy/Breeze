@@ -95,24 +95,23 @@ func TestUserScopedQueriesRejectUnauthenticatedCallers(t *testing.T) {
 	resolver := &Resolver{UserService: service.NewUserService(&graphUserQuerierMock{})}
 	query := resolver.Query()
 
-	_, err := query.Assets(context.Background(), uuid.New().String())
+	_, err := query.Assets(context.Background())
 	require.ErrorContains(t, err, errCodeUnauthorized)
 
-	_, err = query.Budgets(context.Background(), uuid.New().String())
+	_, err = query.Budgets(context.Background())
 	require.ErrorContains(t, err, errCodeUnauthorized)
 
-	_, err = query.Transactions(context.Background(), uuid.New().String(), nil, nil)
+	_, err = query.Transactions(context.Background(), nil, nil)
 	require.ErrorContains(t, err, errCodeUnauthorized)
 
-	_, err = query.PlaidConnections(context.Background(), uuid.New().String())
+	_, err = query.PlaidConnections(context.Background())
 	require.ErrorContains(t, err, errCodeUnauthorized)
 }
 
-func TestAssetsReadsAuthenticatedUserNotArgument(t *testing.T) {
+func TestAssetsReadsAuthenticatedUser(t *testing.T) {
 	t.Parallel()
 
 	authUserID := uuid.New()
-	requestedUserID := uuid.New()
 	var queriedFor uuid.UUID
 
 	resolver := &Resolver{
@@ -123,8 +122,8 @@ func TestAssetsReadsAuthenticatedUserNotArgument(t *testing.T) {
 	}
 	ctx := middleware.WithDevUserID(context.Background(), "clerk-user-1")
 
-	_, err := resolver.Query().Assets(ctx, requestedUserID.String())
+	_, err := resolver.Query().Assets(ctx)
 
 	require.NoError(t, err)
-	assert.Equal(t, authUserID, queriedFor, "resolver must ignore the client-supplied user id")
+	assert.Equal(t, authUserID, queriedFor)
 }

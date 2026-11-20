@@ -1,8 +1,8 @@
 import { graphql } from '@/lib/gql';
 
 export const EXCHANGE_PLAID_PUBLIC_TOKEN = graphql(`
-  mutation ExchangePlaidPublicToken($userId: ID!, $publicToken: String!) {
-    exchangePlaidPublicToken(userId: $userId, publicToken: $publicToken) {
+  mutation ExchangePlaidPublicToken($publicToken: String!) {
+    exchangePlaidPublicToken(publicToken: $publicToken) {
       id
       userId
       environment
@@ -28,8 +28,8 @@ export const DELETE_PLAID_CONNECTION = graphql(`
 `);
 
 export const PLAID_CONNECTIONS = graphql(`
-  query PlaidConnections($userId: ID!) {
-    plaidConnections(userId: $userId) {
+  query PlaidConnections {
+    plaidConnections {
       id
       userId
       environment
@@ -61,7 +61,7 @@ export const PLAID_ACCOUNTS = graphql(`
 `);
 
 export const CREATE_PLAID_LINK_TOKEN = graphql(`
-  query CreatePlaidLinkToken($userId: ID!) {
-    createPlaidLinkToken(userId: $userId)
+  query CreatePlaidLinkToken {
+    createPlaidLinkToken
   }
 `);

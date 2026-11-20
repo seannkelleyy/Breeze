@@ -1,5 +1,5 @@
 import { CREATE_BUDGET } from '@/features/budget/budget.operations';
-import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
+
 import useGraphql from '@/lib/services/useGraphql';
 import { Budget } from '../types';
 import type { PayrollIncomeItem } from '../../planning/lib/paycheck';
@@ -15,7 +15,6 @@ import type { PayrollIncomeItem } from '../../planning/lib/paycheck';
  */
 export const useRegenerateBudget = () => {
   const { request } = useGraphql();
-  const { userId } = useCurrentUser();
 
   const regenerateBudgetMonth = async (
     year: number,
@@ -26,7 +25,6 @@ export const useRegenerateBudget = () => {
 
     const res = await request(CREATE_BUDGET, {
       input: {
-        userId,
         date,
         monthlyIncome: '0',
         monthlyExpenses: '0',

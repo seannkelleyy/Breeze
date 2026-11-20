@@ -4,7 +4,6 @@ import { ExpenseInput } from '@/features/expenses/types';
 
 interface PostExpenseMutationProps {
   budgetId: string;
-  userId: string;
   expense: ExpenseInput;
 }
 
@@ -15,8 +14,8 @@ interface PostExpenseMutationProps {
 const usePostExpense = createMutationHook(
   useExpenses,
   ({ postExpense }) =>
-    ({ budgetId, userId, expense }: PostExpenseMutationProps) =>
-      postExpense(budgetId, userId, expense),
+    ({ budgetId, expense }: PostExpenseMutationProps) =>
+      postExpense(budgetId, expense),
 );
 
 export default usePostExpense;

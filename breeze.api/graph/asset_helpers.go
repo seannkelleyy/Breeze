@@ -12,10 +12,6 @@ import (
 )
 
 func createAssetInputFromModel(input *model.CreateAssetInput) (service.CreateAssetInput, error) {
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.CreateAssetInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
 
 	currentValue, err := decimal.Parse(input.CurrentValue)
 	if err != nil {
@@ -66,7 +62,7 @@ func createAssetInputFromModel(input *model.CreateAssetInput) (service.CreateAss
 	}
 
 	return service.CreateAssetInput{
-		UserID:                          userID,
+
 		Name:                            input.Name,
 		AssetType:                       sqlc.AssetType(input.AssetType),
 		CurrentValue:                    currentValue,

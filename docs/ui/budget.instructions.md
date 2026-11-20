@@ -36,9 +36,9 @@ The budget module owns month-based budgeting flows:
 
 ```tsx
 return useQuery({
-  queryKey: ['budget-expenses', budgetId],
-  queryFn: () => getExpensesForBudget(budgetId),
-  enabled: !!budgetId,
+	queryKey: ["budget-expenses", budgetId],
+	queryFn: () => getExpensesForBudget(budgetId),
+	enabled: !!budgetId,
 });
 ```
 
@@ -46,10 +46,14 @@ return useQuery({
 
 ```tsx
 const mutation = useMutation({
-  mutationFn: postExpense,
-  onSuccess: async () => {
-    await Promise.all([refetchBudget(), refetchExpenses(), refetchCategories()]);
-  },
+	mutationFn: postExpense,
+	onSuccess: async () => {
+		await Promise.all([
+			refetchBudget(),
+			refetchExpenses(),
+			refetchCategories(),
+		]);
+	},
 });
 ```
 
@@ -75,7 +79,7 @@ Keep conversion at boundaries:
 - [ ] `enabled` guard exists for required IDs
 - [ ] Mutation success behavior refreshes dependent data
 - [ ] Loading/error/success states are visible in UI
-- [ ] `npm run check` passes in `breeze.web`
+- [ ] `npm run verify` passes in `breeze.web` (includes tests)
 
 ## Known Gaps
 

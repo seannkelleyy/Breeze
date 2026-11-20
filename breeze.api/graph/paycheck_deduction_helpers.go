@@ -16,11 +16,6 @@ func upsertPaycheckDeductionInputFromModel(input *model.UpsertPaycheckDeductionI
 		return service.UpsertPaycheckDeductionInput{}, fmt.Errorf("invalid paycheck deduction id: %w", err)
 	}
 
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.UpsertPaycheckDeductionInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
-
 	personID, err := uuid.Parse(input.PersonID)
 	if err != nil {
 		return service.UpsertPaycheckDeductionInput{}, fmt.Errorf("invalid person id: %w", err)
@@ -41,8 +36,8 @@ func upsertPaycheckDeductionInputFromModel(input *model.UpsertPaycheckDeductionI
 	}
 
 	return service.UpsertPaycheckDeductionInput{
-		ID:              id,
-		UserID:          userID,
+		ID: id,
+
 		PersonID:        personID,
 		Name:            input.Name,
 		Amount:          amount,

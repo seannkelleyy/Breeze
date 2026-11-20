@@ -1,8 +1,8 @@
 import { graphql } from '@/lib/gql';
 
 export const GET_GOALS = graphql(`
-  query GetGoals($userId: ID!) {
-    goals(userId: $userId) {
+  query GetGoals {
+    goals {
       id
       userId
       description

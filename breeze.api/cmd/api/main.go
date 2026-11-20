@@ -67,6 +67,7 @@ func main() {
 	assetService := service.NewAssetService(queries)
 	liabilityService := service.NewLiabilityService(queries)
 	budgetService := service.NewBudgetService(queries)
+	budgetMonthService := service.NewBudgetMonthService(queries, pool)
 	goalService := service.NewGoalService(queries)
 	contributionLimitService := service.NewContributionLimitService(queries)
 	expenseCategoryService := service.NewExpenseCategoryService(queries)
@@ -103,6 +104,7 @@ func main() {
 		AssetService:             assetService,
 		LiabilityService:         liabilityService,
 		BudgetService:            budgetService,
+		BudgetMonthService:       budgetMonthService,
 		GoalService:              goalService,
 		ContributionLimitService: contributionLimitService,
 		PlaidService:             plaidService,

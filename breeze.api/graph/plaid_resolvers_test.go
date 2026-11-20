@@ -226,7 +226,7 @@ func TestPlaidMutationExchangeAndQueryResolvers(t *testing.T) {
 	svc := service.NewPlaidService(connMock, nil, service.NewDevPlaidClient())
 	resolver := &Resolver{PlaidService: svc, UserService: service.NewUserService(userMock)}
 
-	created, err := resolver.Mutation().ExchangePlaidPublicToken(ctx, userID.String(), "public_tok")
+	created, err := resolver.Mutation().ExchangePlaidPublicToken(ctx, "public_tok")
 	assert.NoError(t, err)
 	if assert.NotNil(t, created) {
 		assert.Equal(t, userID.String(), created.UserID)
@@ -254,7 +254,7 @@ func TestPlaidMutationExchangeAndQueryResolvers(t *testing.T) {
 		assert.Equal(t, connectionID.String(), gotConnection.ID)
 	}
 
-	connections, err := resolver.Query().PlaidConnections(ctx, userID.String())
+	connections, err := resolver.Query().PlaidConnections(ctx)
 	assert.NoError(t, err)
 	if assert.Len(t, connections, 1) {
 		assert.Equal(t, connectionID.String(), connections[0].ID)

@@ -39,7 +39,7 @@ export function RothConversionsCard({
   const { data: assets } = useQuery({
     queryKey: ['retirement-access-accounts', userId],
     queryFn: async () => {
-      const resp = await request(GET_ASSETS_BY_USER, { userId });
+      const resp = await request(GET_ASSETS_BY_USER);
       return resp.assets ?? [];
     },
     enabled: !!userId,

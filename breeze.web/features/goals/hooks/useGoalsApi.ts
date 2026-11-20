@@ -1,4 +1,3 @@
-import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import {
   CREATE_FINANCIAL_ORDER_STEPS,
@@ -11,12 +10,9 @@ import { Goal } from '../types';
 
 const useGoalsApi = () => {
   const { request } = useGraphql();
-  const { userId } = useCurrentUser();
 
   const getGoals = (): Promise<Goal[]> => {
-    return request(GET_GOALS, {
-      userId,
-    }).then((resp) => resp?.goals ?? []);
+    return request(GET_GOALS).then((resp) => resp?.goals ?? []);
   };
 
   const createGoal = async (
@@ -24,7 +20,6 @@ const useGoalsApi = () => {
   ): Promise<Goal> => {
     const resp = await request(CREATE_GOAL, {
       input: {
-        userId,
         description: input.description,
         isCompleted: input.isCompleted ?? false,
         targetAmount: input.targetAmount ?? null,

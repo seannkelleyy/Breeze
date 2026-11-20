@@ -12,10 +12,6 @@ import (
 )
 
 func createExpenseInputFromModel(input *model.CreateExpenseInput) (service.CreateExpenseInput, error) {
-	userID, err := uuid.Parse(input.UserID)
-	if err != nil {
-		return service.CreateExpenseInput{}, fmt.Errorf("invalid user id: %w", err)
-	}
 
 	budgetID, err := uuid.Parse(input.BudgetID)
 	if err != nil {
@@ -43,7 +39,7 @@ func createExpenseInputFromModel(input *model.CreateExpenseInput) (service.Creat
 	}
 
 	return service.CreateExpenseInput{
-		UserID:      userID,
+
 		BudgetID:    budgetID,
 		Amount:      amount,
 		Date:        expenseDate,

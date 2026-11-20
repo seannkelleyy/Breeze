@@ -35,8 +35,8 @@ export const UPSERT_PAYCHECK_DEDUCTION = graphql(`
 `);
 
 export const GET_PAYCHECK_DEDUCTIONS_BY_USER = graphql(`
-  query PaycheckDeductionsByUser($userId: ID!) {
-    paycheckDeductionsByUser(userId: $userId) {
+  query PaycheckDeductionsByUser {
+    paycheckDeductionsByUser {
       id
       userId
       personId

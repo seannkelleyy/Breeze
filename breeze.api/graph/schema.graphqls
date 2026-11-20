@@ -1,44 +1,42 @@
 type Query {
   health: Health!
-  user(id: ID!): User
   me: User
-  users: [User!]!
   asset(id: ID!): Asset
-  assets(userId: ID!): [Asset!]!
+  assets: [Asset!]!
   liability(id: ID!): Liability
-  liabilities(userId: ID!): [Liability!]!
+  liabilities: [Liability!]!
   budget(id: ID!): Budget
-  budgetByDate(userId: ID!, date: String!): Budget
-  budgets(userId: ID!): [Budget!]!
+  budgetByDate(date: String!): Budget
+  budgets: [Budget!]!
   goal(id: ID!): Goal
-  goals(userId: ID!): [Goal!]!
+  goals: [Goal!]!
   plaidConnection(id: ID!): PlaidConnection
-  plaidConnections(userId: ID!): [PlaidConnection!]!
+  plaidConnections: [PlaidConnection!]!
   plaidAccounts(connectionId: ID!): [PlaidAccount!]!
-  createPlaidLinkToken(userId: ID!): String!
+  createPlaidLinkToken: String!
   contributionLimits(taxYear: Int!): [ContributionLimit!]!
   expenseCategories(budgetId: ID!): [ExpenseCategory!]!
-  transactions(userId: ID!, fromDate: String, toDate: String): [Transaction!]!
+  transactions(fromDate: String, toDate: String): [Transaction!]!
   expense(id: ID!): Expense
   expenses(budgetId: ID!): [Expense!]!
   income(id: ID!): Income
   incomes(budgetId: ID!): [Income!]!
   recurringIncome(id: ID!): RecurringIncome
-  recurringIncomes(userId: ID!): [RecurringIncome!]!
+  recurringIncomes: [RecurringIncome!]!
   recurringExpense(id: ID!): RecurringExpense
-  recurringExpenses(userId: ID!): [RecurringExpense!]!
-  plannerPeople(userId: ID!): [PlannerPerson!]!
+  recurringExpenses: [RecurringExpense!]!
+  plannerPeople: [PlannerPerson!]!
   paycheckDeductions(personId: ID!): [PaycheckDeduction!]!
-  paycheckDeductionsByUser(userId: ID!): [PaycheckDeduction!]!
+  paycheckDeductionsByUser: [PaycheckDeduction!]!
   taxBracket(id: ID!): TaxBracket
   taxBrackets(year: Int!, filingStatus: FilingStatus!): [TaxBracket!]!
   taxYearData(year: Int, filingStatus: FilingStatus!): TaxYearData!
   estimateTaxesForYear(year: Int!, filingStatus: FilingStatus!, income: String!, deduction: String): TaxEstimate
   calculateRetirementLadder(initialBalance: String!, annualExpenses: String!, currentAge: Int!, firstWithdrawalAge: Int!, isRoth: Boolean!, year: Int!, filingStatus: FilingStatus!, yearsToProject: Int): RetirementLadderProjection
   netWorthSnapshot(id: ID!): NetWorthSnapshot
-  netWorthSnapshotByDate(userId: ID!, date: String!): NetWorthSnapshot
-  netWorthSnapshots(userId: ID!): [NetWorthSnapshot!]!
-  retirementAccess(userId: ID!): RetirementAccess!
+  netWorthSnapshotByDate(date: String!): NetWorthSnapshot
+  netWorthSnapshots: [NetWorthSnapshot!]!
+  retirementAccess: RetirementAccess!
 }
 
 type Mutation {
@@ -84,7 +82,7 @@ type Mutation {
   createNetWorthSnapshot(input: CreateNetWorthSnapshotInput!): NetWorthSnapshot!
   updateNetWorthSnapshot(input: UpdateNetWorthSnapshotInput!): NetWorthSnapshot!
   deleteNetWorthSnapshot(id: ID!): Boolean!
-  exchangePlaidPublicToken(userId: ID!, publicToken: String!): PlaidConnection!
+  exchangePlaidPublicToken(publicToken: String!): PlaidConnection!
   syncPlaidConnection(id: ID!): Boolean!
   deletePlaidConnection(id: ID!): Boolean!
   linkAssetToPlaidAccount(assetId: ID!, plaidAccountId: ID!): Boolean!
@@ -217,7 +215,6 @@ type User {
 }
 
 input CreateUserInput {
-  identityProviderId: String!
   email: String!
   returnType: ReturnType!
   safeWithdrawalRate: String!
@@ -231,9 +228,6 @@ input CreateUserInput {
 }
 
 input UpdateUserInput {
-  id: ID!
-  identityProviderId: String!
-  email: String!
   returnType: ReturnType!
   safeWithdrawalRate: String!
   currencyType: String!
@@ -246,7 +240,6 @@ input UpdateUserInput {
 }
 
 input UpdateUserSetupInput {
-  id: ID!
   budgetEnabled: Boolean
   monthlyExpenses: String
   setupCompleted: Boolean
@@ -447,7 +440,6 @@ type PaycheckDeduction {
 
 input UpsertPaycheckDeductionInput {
   id: ID!
-  userId: ID!
   personId: ID!
   name: String!
   amount: String!
@@ -482,7 +474,6 @@ type PlaidAccount {
 }
 
 input CreateLiabilityInput {
-  userId: ID!
   name: String!
   liabilityType: LiabilityType!
   currentBalance: String!
@@ -512,7 +503,6 @@ input UpdateLiabilityInput {
 }
 
 input CreateBudgetInput {
-  userId: ID!
   date: String!
   monthlyIncome: String!
   monthlyExpenses: String!
@@ -533,7 +523,6 @@ input UpdateBudgetInput {
 }
 
 input CreateGoalInput {
-  userId: ID!
   description: String!
   isCompleted: Boolean!
   targetAmount: String
@@ -563,7 +552,6 @@ input UpdateGoalInput {
 }
 
 input CreateExpenseCategoryInput {
-  userId: ID!
   budgetId: ID!
   name: String!
   allocation: String!
@@ -578,7 +566,6 @@ input UpdateExpenseCategoryInput {
 }
 
 input CreateExpenseInput {
-  userId: ID!
   budgetId: ID!
   amount: String!
   date: String!
@@ -603,7 +590,6 @@ input ExpenseSplitInput {
 }
 
 input CreateIncomeInput {
-  userId: ID!
   budgetId: ID!
   name: String!
   amount: String!
@@ -628,7 +614,6 @@ input UpdateIncomeInput {
 }
 
 input CreateRecurringIncomeInput {
-  userId: ID!
   name: String!
   amount: String!
   recurrenceInterval: RecurrenceInterval!
@@ -650,7 +635,6 @@ input UpdateRecurringIncomeInput {
 }
 
 input CreateRecurringExpenseInput {
-  userId: ID!
   name: String!
   amount: String!
   recurrenceInterval: RecurrenceInterval!
@@ -673,7 +657,6 @@ input UpdateRecurringExpenseInput {
 
 input UpsertPlannerPersonInput {
   id: ID!
-  userId: ID!
   name: String!
   birthday: String!
   retirementAge: Int!
@@ -732,7 +715,6 @@ input UpdateTaxBracketInput {
 }
 
 input CreateAssetInput {
-  userId: ID!
   name: String!
   assetType: AssetType!
   currentValue: String!
@@ -908,7 +890,6 @@ type NetWorthSnapshot {
 }
 
 input CreateNetWorthSnapshotInput {
-  userId: ID!
   snapshotDate: String!
   totalAssets: String!
   totalLiabilities: String!

@@ -29,7 +29,7 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
   useEffect(() => {
     if (!userId) return;
 
-    createLinkToken(userId, {
+    createLinkToken(undefined, {
       onSuccess: (token) => setLinkToken(token),
       onError: () => {
         onErrorRef.current?.('Failed to create link token');
@@ -41,7 +41,7 @@ export const PlaidLinkButton = ({ onSuccess, onError }: PlaidLinkButtonProps) =>
     if (!userId || !publicToken) return;
 
     exchangeToken(
-      { userId, publicToken },
+      { publicToken },
       {
         onSuccess: () => onSuccessRef.current?.(),
         onError: () => onErrorRef.current?.('Failed to connect account'),

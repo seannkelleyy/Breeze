@@ -587,6 +587,96 @@ func TestIntegration_BudgetExpenseLifecycle(t *testing.T) {
 	})
 }
 
+func TestIntegration_BudgetMonthRollbackOnPayrollFailure(t *testing.T) {
+	pool := getTestPool(t)
+	q := dbsqlc.New(pool)
+	ctx := context.Background()
+
+	userRow := createTestUser(t, q)
+	defer cleanupUser(t, pool, userRow.ID)
+
+	budgetDate := time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
+	monthStart := budgetDate
+	payday := int32(15)
+	budgetSvc := NewBudgetService(q)
+	budget, err := budgetSvc.Create(ctx, &CreateBudgetInput{
+		UserID:          userRow.ID,
+		Date:            budgetDate,
+		MonthlyIncome:   mustDecimal("4500.00"),
+		MonthlyExpenses: mustDecimal("2000.00"),
+	})
+	require.NoError(t, err)
+
+	recurringIncomeSvc := NewRecurringIncomeService(q)
+	template, err := recurringIncomeSvc.Create(ctx, CreateRecurringIncomeInput{
+		UserID:             userRow.ID,
+		Name:               "Recurring rent",
+		Amount:             mustDecimal("1000.00"),
+		RecurrenceInterval: dbsqlc.RecurrenceIntervalMONTHLY,
+		PaydayDayOfMonth:   &payday,
+		StartDate:          budgetDate.AddDate(0, -1, 0),
+	})
+	require.NoError(t, err)
+
+	incomeSvc := NewIncomeService(q)
+	oldOccurrence := time.Date(2026, 6, 15, 0, 0, 0, 0, time.UTC)
+	oldGenerated, err := incomeSvc.Create(ctx, &CreateIncomeInput{
+		UserID:               userRow.ID,
+		BudgetID:             budget.ID,
+		Name:                 "Old generated rent",
+		Amount:               mustDecimal("900.00"),
+		Date:                 oldOccurrence,
+		SourceType:           dbsqlc.IncomeSourceTypeRECURRINGTEMPLATE,
+		SourceTemplateID:     &template.ID,
+		SourceOccurrenceDate: &oldOccurrence,
+		GenerationMonth:      &monthStart,
+	})
+	require.NoError(t, err)
+
+	oldPayroll, err := incomeSvc.Create(ctx, &CreateIncomeInput{
+		UserID:     userRow.ID,
+		BudgetID:   budget.ID,
+		Name:       "Existing payroll",
+		Amount:     mustDecimal("3000.00"),
+		Date:       oldOccurrence,
+		SourceType: dbsqlc.IncomeSourceTypePEOPLEPAYROLL,
+	})
+	require.NoError(t, err)
+
+	beforeBudget, err := budgetSvc.GetByID(ctx, budget.ID)
+	require.NoError(t, err)
+	beforeIncomes, err := incomeSvc.ListByBudgetID(ctx, budget.ID)
+	require.NoError(t, err)
+
+	_, err = NewBudgetMonthService(dbsqlc.New(pool), pool).CreateOrUpdate(ctx, &BudgetMonthInput{
+		UserID:          userRow.ID,
+		Date:            budgetDate,
+		MonthlyIncome:   mustDecimal("9999.00"),
+		MonthlyExpenses: mustDecimal("8888.00"),
+		PayrollIncomes: []PayrollIncome{{
+			PersonID: uuid.New(),
+			Name:     "Replacement payroll",
+			Amount:   mustDecimal("4000.00"),
+			Date:     oldOccurrence,
+		}},
+	})
+	require.Error(t, err, "a payroll row referencing a nonexistent person must fail")
+
+	afterBudget, err := budgetSvc.GetByID(ctx, budget.ID)
+	require.NoError(t, err)
+	assert.Equal(t, beforeBudget.MonthlyIncome.String(), afterBudget.MonthlyIncome.String())
+	assert.Equal(t, beforeBudget.MonthlyExpenses.String(), afterBudget.MonthlyExpenses.String())
+
+	afterIncomes, err := incomeSvc.ListByBudgetID(ctx, budget.ID)
+	require.NoError(t, err)
+	require.Len(t, afterIncomes, len(beforeIncomes))
+	assert.ElementsMatch(t,
+		[]uuid.UUID{oldGenerated.ID, oldPayroll.ID},
+		[]uuid.UUID{afterIncomes[0].ID, afterIncomes[1].ID},
+		"the old generated and payroll rows remain, and no replacement row commits",
+	)
+}
+
 func TestIntegration_GoalWithConnectedAccounts(t *testing.T) {
 	pool := getTestPool(t)
 	q := dbsqlc.New(pool)

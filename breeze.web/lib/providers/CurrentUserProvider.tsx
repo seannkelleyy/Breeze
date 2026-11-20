@@ -21,10 +21,6 @@ import {
 } from '@/features/planning/lib/constants';
 import { useUser } from '@clerk/clerk-react';
 
-const DEV_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
-const UUID_V4_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 const CURRENT_USER_QUERY = graphql(`
   query CurrentUserPreferences {
     me {
@@ -77,20 +73,6 @@ const CREATE_USER_MUTATION = graphql(`
     }
   }
 `);
-
-const getBackendUserID = (user: ReturnType<typeof useUser>['user']): string => {
-  const metadataUserID = user?.publicMetadata?.userId;
-  if (typeof metadataUserID === 'string' && UUID_V4_PATTERN.test(metadataUserID)) {
-    return metadataUserID;
-  }
-
-  const clerkUserID = user?.id;
-  if (typeof clerkUserID === 'string' && UUID_V4_PATTERN.test(clerkUserID)) {
-    return clerkUserID;
-  }
-
-  return DEV_USER_ID;
-};
 
 interface CurrentUserContextValue {
   user: ReturnType<typeof useUser>['user'];
@@ -169,7 +151,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [resolvedUserId, setResolvedUserId] = useState<string>('');
   const providerKey = isSignedIn ? (user?.id ?? 'signed-in') : 'signed-out';
-  const backendUserID = getBackendUserID(user);
+  const clerkIdentityId = user?.id ?? '';
 
   const persistPreferences = async (
     nextCurrencyCode: string,
@@ -186,9 +168,6 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
 
     try {
       const input: UpdateUserInput = {
-        id: resolvedUserId,
-        identityProviderId: backendUserID,
-        email: user?.emailAddresses[0]?.emailAddress ?? '',
         returnType: (nextReturnDisplayMode === 'real' ? 'REAL' : 'NOMINAL') as ApiReturnType,
         safeWithdrawalRate: (nextSafeWithdrawalRate / 100).toFixed(4),
         currencyType: nextCurrencyCode,
@@ -315,7 +294,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       setMonthlyExpenses(Number(input.monthlyExpenses));
     }
     try {
-      await request(UPDATE_USER_SETUP_MUTATION, { input: { id: resolvedUserId, ...input } });
+      await request(UPDATE_USER_SETUP_MUTATION, { input });
     } catch {
       // Keep optimistic UI state and allow future writes.
     }
@@ -365,16 +344,15 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       return;
     }
 
-    const userId = backendUserID;
-    if (!userId) {
+    if (!clerkIdentityId) {
       return;
     }
 
-    if (loadedPreferencesForUserRef.current === userId) {
+    if (loadedPreferencesForUserRef.current === clerkIdentityId) {
       return;
     }
 
-    loadedPreferencesForUserRef.current = userId;
+    loadedPreferencesForUserRef.current = clerkIdentityId;
 
     let isCancelled = false;
 
@@ -410,16 +388,14 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
           );
           setSetupCompleted(response.me.setupCompleted);
           setDisclaimerAccepted(response.me.disclaimerAccepted);
-          loadedPreferencesForUserRef.current = backendUserID;
+          loadedPreferencesForUserRef.current = clerkIdentityId;
           return;
         }
 
-        const identityProviderId = backendUserID;
         const email = user?.emailAddresses[0]?.emailAddress ?? '';
-        if (identityProviderId && email) {
+        if (email) {
           const createResp = await request(CREATE_USER_MUTATION, {
             input: {
-              identityProviderId,
               email,
               returnType: returnDisplayMode === 'real' ? 'REAL' : 'NOMINAL',
               safeWithdrawalRate: (safeWithdrawalRate / 100).toFixed(4),
@@ -440,7 +416,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
         }
 
         loadedPreferencesForUserRef.current = null;
-        setResolvedUserId(backendUserID);
+        setResolvedUserId('');
         setCurrencyCode('USD');
         setReturnDisplayMode(PLANNER_DEFAULT_RETURN_DISPLAY_MODE);
         setInflationRate(PLANNER_DEFAULT_INFLATION_RATE);
@@ -459,7 +435,7 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
       isCancelled = true;
     };
   }, [
-    backendUserID,
+    clerkIdentityId,
     currencyCode,
     deductionAmount,
     deductionType,
@@ -474,7 +450,6 @@ export const CurrentUserProvider = ({ children }: CurrentUserProviderProps) => {
     safeWithdrawalRate,
     user?.emailAddresses,
     user?.id,
-    user?.publicMetadata,
   ]);
 
   const value: CurrentUserContextValue = {

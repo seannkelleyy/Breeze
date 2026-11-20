@@ -63,16 +63,16 @@ export const LIABILITY_FIELDS = graphql(`
 `);
 
 export const GET_ASSETS_BY_USER = graphql(`
-  query GetAssetsByUser($userId: ID!) {
-    assets(userId: $userId) {
+  query GetAssetsByUser {
+    assets {
       ...AssetFields
     }
   }
 `);
 
 export const GET_LIABILITIES_BY_USER = graphql(`
-  query GetLiabilitiesByUser($userId: ID!) {
-    liabilities(userId: $userId) {
+  query GetLiabilitiesByUser {
+    liabilities {
       ...LiabilityFields
     }
   }

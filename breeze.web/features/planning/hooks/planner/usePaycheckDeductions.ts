@@ -52,7 +52,7 @@ export const usePaycheckDeductions = (personId?: string | null) => {
           amount: Number(d.amount) || 0,
         }));
       }
-      const response = await request(GET_PAYCHECK_DEDUCTIONS_BY_USER, { userId: userId as string });
+      const response = await request(GET_PAYCHECK_DEDUCTIONS_BY_USER);
       return (response.paycheckDeductionsByUser ?? []).map((d) => ({
         ...d,
         amount: Number(d.amount) || 0,
@@ -65,7 +65,6 @@ export const usePaycheckDeductions = (personId?: string | null) => {
       const response = await request(UPSERT_PAYCHECK_DEDUCTION, {
         input: {
           id: input.id,
-          userId: userId as string,
           personId: input.personId,
           name: input.name,
           amount: String(input.amount),

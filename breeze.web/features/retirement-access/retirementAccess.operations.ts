@@ -1,8 +1,8 @@
 import { graphql } from '@/lib/gql';
 
 export const RETIREMENT_ACCESS = graphql(`
-  query RetirementAccess($userId: ID!) {
-    retirementAccess(userId: $userId) {
+  query RetirementAccess {
+    retirementAccess {
       hsaReceipts {
         id
         userId

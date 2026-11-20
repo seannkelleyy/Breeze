@@ -13,6 +13,7 @@ coverage/
 next-env.d.ts
 
 # GO
+/breeze.api/api
 /breeze.api/bin/
 /breeze.api/obj/
 /breeze.api/.vscode/

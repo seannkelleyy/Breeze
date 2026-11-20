@@ -9,8 +9,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-API_DIR="$ROOT/Breeze.Api"
-WEB_DIR="$ROOT/Breeze.Web"
+API_DIR="$ROOT/breeze.api"
+WEB_DIR="$ROOT/breeze.web"
 
 # ─── Colours ─────────────────────────────────────────────────────
 CYAN='\033[36m'
@@ -90,7 +90,10 @@ fi
 cd "$API_DIR"
 
 info "api" "Applying migrations..."
-export $(cat .env | xargs) && atlas migrate apply --env local 2>&1 | while IFS= read -r line; do printf "${DIM}"; tag "migrate"; printf "%s${RESET}\n" "$line"; done
+set -a
+. ./.env
+set +a
+atlas migrate apply --env local 2>&1 | while IFS= read -r line; do printf "${DIM}"; tag "migrate"; printf "%s${RESET}\n" "$line"; done
 ok "api" "Migrations applied."
 
 info "api" "Generating code (sqlc + gqlgen)..."
