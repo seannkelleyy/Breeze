@@ -50,17 +50,18 @@ Rules:
 
 ### Step 4: UI Layer
 
-1. Add/extend GraphQL operation in `breeze.web/lib/services/queries/`.
-2. Add/extend domain hooks under route module (`breeze.web/app/<route>/hooks/`).
-3. Add/extend route components/pages and provider orchestration.
-4. Ensure loading/error/success states are explicit.
+1. Add/extend typed GraphQL documents in the owning feature under `breeze.web/features/<domain>/`.
+2. Put requests and React Query orchestration in feature hooks; use `useGraphql()` and `CurrentUserProvider` rather than duplicating transport or user bootstrap.
+3. Include the current user in cache keys for user-owned data, followed by resource IDs or filters; the authenticated server request supplies caller identity, so do not pass `userId` solely to identify the signed-in user.
+4. Add/extend route components/pages under `breeze.web/app/` and feature UI under `breeze.web/features/`.
+5. Ensure loading/error/success states are explicit.
 
 Rules:
 
 - Keep API money/rate fields as string payloads.
-- Use stable query keys.
-- Use `enabled` guards for ID-dependent queries.
-- On mutation success, invalidate/refetch affected query state.
+- Components consume hooks or props; they do not call the GraphQL transport directly.
+- Use `enabled` guards until required identity or resource IDs are available.
+- On mutation success, invalidate every affected query key, scoped to the relevant user where appropriate.
 
 ### Step 5: Validation
 

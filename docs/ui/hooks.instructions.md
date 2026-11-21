@@ -8,39 +8,42 @@ This file provides patterns for TanStack React Query hooks used in Breeze's plan
 
 ## Query Convention
 
-Every query hook follows this pattern:
+User-owned query hooks read identity from `CurrentUserProvider`, include it in the cache key, and wait until it is available before fetching:
 
 ```tsx
-export function useAssets(userId: string) {
+export function useAssets() {
+  const { userId } = useCurrentUser();
+  const { request } = useGraphql();
+
   return useQuery({
-    queryKey: ['api-assets', userId],
-    queryFn: () => request(GET_ASSETS, { userId }),
-    enabled: !!userId,
+    queryKey: ['assets', userId],
+    queryFn: async () => {
+      const response = await request(GET_ASSETS_BY_USER);
+      return response.assets ?? [];
+    },
+    enabled: Boolean(userId),
   });
 }
 ```
 
-**Stable query key convention:** `['api-<slice>', userId]` — always include the user ID to scope per user.
+Use stable domain-first keys; append resource IDs and filters after `userId` when needed (for example, `['budget', userId, month]`). The authenticated GraphQL transport supplies the caller identity, so do not send `userId` just to identify the signed-in user.
 
 ## Mutation Convention
 
-Every mutation hook follows this pattern:
+Mutation hooks own requests and cache updates. Invalidate affected keys after success, scoped to the current user where appropriate:
 
 ```tsx
-export function useCreateAsset() {
+export function useCreateGoal() {
+  const { userId } = useCurrentUser();
   const queryClient = useQueryClient();
+  const queryKey = goalQueryKeys.byUser(userId);
+
   return useMutation({
-    mutationFn: (input: CreateAssetInput) => request(CREATE_ASSET, { input }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['api-assets'] });
-      queryClient.invalidateQueries({ queryKey: ['api-asset-liabilities'] });
-    },
+    mutationFn: (input: CreateGoalInput) => api.createGoal(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   });
 }
 ```
-
-- Invalidate all affected query keys in `onSuccess`.
-- Do not invalidate inside `onSettled` — only on success.
 
 ## Domain Hooks Pattern
 
@@ -48,9 +51,8 @@ Domain hooks that combine multiple queries and provide derived state follow this
 
 ```tsx
 export function usePlannerAccounts() {
-  const { userId } = useCurrentUser();
-  const { data: assets, isLoading: assetsLoading } = useAssets(userId);
-  const { data: liabilities, isLoading: liabilitiesLoading } = useLiabilities(userId);
+  const { data: assets, isLoading: assetsLoading } = useAssets();
+  const { data: liabilities, isLoading: liabilitiesLoading } = useLiabilities();
 
   const plannerAccounts = useMemo(() => {
     // merge assets + liabilities into PlannerAccount[]
@@ -94,9 +96,9 @@ features/planning/hooks/
 
 ## Key Conventions
 
-- **Query keys** are always arrays starting with `'api-<name>'`.
+- **Query keys** use a stable domain-first hierarchy; user-owned data includes `userId` before resource IDs or filters.
 - **Domain hooks** return a consistent shape: `{ data, options, typeGuards, helpers, actions }`.
 - **Options** are pre-computed `useMemo` arrays — never recomputed per render.
 - **Type guards** are stable function references — never recreated per render.
-- **API calls** go through `useGraphql()` or direct Axios calls using `request()` from `lib/services/`.
+- **API calls** go through `useGraphql()` inside feature hooks; components do not own transport or React Query orchestration.
 - **User bootstrap** is handled once by `CurrentUserProvider` — never duplicated in domain hooks.

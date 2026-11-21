@@ -1,6 +1,7 @@
 'use client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import useGraphql from '@/lib/services/useGraphql';
 import {
   ASSIGN_TRANSACTION_CATEGORY,
@@ -36,7 +37,8 @@ const mapTransaction = (t: TransactionDto): BankTransaction => ({
   pending: t.pending,
 });
 
-export const useTransactions = (userId?: string | null, months = 6) => {
+export const useTransactions = (months = 6) => {
+  const { userId } = useCurrentUser();
   const { request } = useGraphql();
   const queryClient = useQueryClient();
   const queryKey = ['transactions', userId, months];

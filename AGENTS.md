@@ -191,6 +191,7 @@ Primary index: [`docs/README.md`](docs/README.md)
 | # | File | What it covers |
 |---|---|---|
 | 1 | [`ui/01-stack.md`](docs/ui/01-stack.md) | Next.js, TanStack Query, shadcn — stack and patterns |
+| 2 | [`ui/ui-slice-api-checklist.md`](docs/ui/ui-slice-api-checklist.md) | UI API-slice workflow and architecture checklist |
 
 ### Product (`docs/product/`)
 | # | File | What it covers |
@@ -221,7 +222,7 @@ Primary index: [`docs/README.md`](docs/README.md)
 |---|---|
 | **Add a field to an existing table** | `schema.hcl` → `make migrate-diff` → `db/queries/*.sql` → `make gen` → service struct → GraphQL schema → resolver helper → frontend types → frontend component → `node scripts/gen-erd.mjs` |
 | **Add a new enum value** | `schema.hcl` → migration (RENAME + CREATE NEW + MIGRATE + DROP OLD) → `make migrate` → `make gen` → frontend `typeMapping.ts` → frontend component → `node scripts/gen-erd.mjs` |
-| **Add a new GraphQL query** | `graph/schema.graphqls` → `make gen` → implement resolver stub in `graph/schema.resolvers.go` → helper in `graph/*_helpers.go` → frontend document in `lib/services/queries/*.ts` + `npm run codegen` → TanStack Query hook |
+| **Add a new GraphQL query** | `graph/schema.graphqls` → `make gen` → implement resolver stub in `graph/schema.resolvers.go` → helper in `graph/*_helpers.go` → typed frontend document in `breeze.web/features/<domain>/` + `npm run codegen` → domain hook → UI |
 | **Add a new GraphQL mutation** | `graph/schema.graphqls` → `make gen` → implement resolver stub → service method → sqlc query (if needed) → frontend mutation hook → UI save flow |
 | **Add a new table (full slice)** | Follow the [vertical slice playbook](docs/api/06-vertical-slice.md) |
 | **Fix an Atlas checksum error** | `cd breeze.api && export $(cat .env \| xargs) && atlas migrate hash --env local` |

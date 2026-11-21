@@ -10,39 +10,39 @@ Goal:
 
 ## Architecture Pattern
 
-1. Shared transport layer
-- Use lib/services/useGraphql.ts for authenticated GraphQL transport and request/response handling.
+1. Feature-owned GraphQL operations
+- Put typed GraphQL documents beside the feature that owns them (for example, `features/assets/asset.operations.ts`).
+- Use the generated `graphql()` tag from `lib/gql/`; do not maintain raw query strings or handwritten response generics.
 
-2. Shared API-user bootstrap
-- Use `lib/providers/CurrentUserProvider.tsx` as the source of authenticated user context.
-- Do not duplicate user bootstrap logic inside domain hooks.
+2. Shared authenticated transport and user context
+- Send requests through `lib/services/useGraphql.ts` from hooks.
+- Use `lib/providers/CurrentUserProvider.tsx` for the current user; do not duplicate user bootstrap.
+- The server derives the caller from authenticated transport. Pass `userId` as a GraphQL variable only if an operation explicitly needs it for resource selection, not to identify the signed-in caller.
 
-3. Domain API service hook
-- Create features/<domain>/hooks/use<Domain>Api.ts.
-- Keep only domain operations in this file (queries/mutations for that domain).
+3. Domain hooks as the data boundary
+- Keep queries, mutations, cache updates, and invalidation in feature hooks.
+- Components use domain hooks or receive data and callbacks through props; they do not import GraphQL documents or call `useGraphql()` directly.
+- A separate API wrapper hook is optional: use it when it meaningfully centralizes domain operations, not as a required file per slice.
 
-4. React Query hooks
-- Add useFetch<Domain>.ts, useCreate<Domain>.ts, useUpdate<Domain>.ts, useDelete<Domain>.ts.
-- Use stable query keys like ['api-<domain>', userId].
-- Invalidate that key on successful mutations.
+4. Query and mutation cache behavior
+- Use stable domain-first query keys. Include `userId` for user-owned data, followed by resource IDs and filters as needed (for example, `['goals', userId]` or `['budget', userId, month]`).
+- Gate user-owned queries until the current user is available.
+- Mutations invalidate every affected cache key on success; scope invalidation to the active user's key when appropriate.
 
-5. Domain types
-- Add API wire types in features/<domain>/types.ts.
-- Keep money/rate fields as string in API types.
-
-6. UI integration
-- Add a focused card/page component for the slice.
-- Keep form state local to the component.
-- Show loading/error status from query and mutation hooks.
+5. Domain types and UI
+- Keep money/rate fields as strings at the GraphQL boundary.
+- Keep form/interaction state in components and query/mutation state in hooks.
+- Surface loading, error, and pending states from the hooks.
 
 ## Implementation Checklist
 
 - [ ] Confirm backend GraphQL operations exist and are reachable via POST /query
 - [ ] Add or reuse types in features/<domain>/types.ts
-- [ ] Add/extend use<Slice>Api.ts with slice-only operations
-- [ ] Add fetch hook with useQuery and stable queryKey
-- [ ] Add mutation hooks with useMutation and query invalidation
-- [ ] Resolve authenticated user context via CurrentUserProvider where user_id is required
+- [ ] Add/extend typed GraphQL documents in the owning feature
+- [ ] Add a domain hook for reads with a stable, user-scoped query key and signed-out gate
+- [ ] Add mutation hooks with success invalidation for all affected query keys
+- [ ] Use CurrentUserProvider for current-user identity; do not pass it as a GraphQL variable unless the operation requires it
+- [ ] Keep components on the hook/props boundary rather than calling the transport directly
 - [ ] Add UI component for list/create/update/delete flow
 - [ ] Gate behavior for signed-out state
 - [ ] Validate decimal string input formatting before mutation calls
@@ -50,15 +50,11 @@ Goal:
 - [ ] Add user-friendly error surface in UI
 - [ ] Run npm run build and resolve all type/build errors
 
-## Naming Conventions
+## Organization
 
-- use<Domain>Api.ts: domain API service
-- useFetch<Domain>.ts: read/list query hook
-- useCreate<Domain>.ts: create mutation hook
-- useUpdate<Domain>.ts: update mutation hook
-- useDelete<Domain>.ts: delete mutation hook
-- <domain>.operations.ts / <domain>.queries.ts / <domain>.mutations.ts: GraphQL documents
-- types.ts in features/<domain>: wire contracts
+Follow the owning feature's established naming and grouping. Keep operation documents in the feature
+folder; group related reads and mutations into focused hooks. Do not create a pass-through API hook
+or one hook file per CRUD operation unless that split clarifies the domain boundary.
 
 ## Example (Planning)
 

@@ -106,6 +106,7 @@ components/
 
 ## Key Conventions
 
+- **Data access boundary:** keep GraphQL requests, React Query setup, and cache invalidation in feature hooks. Components consume those hooks or receive data and callbacks through props; they do not import GraphQL documents or call `useGraphql()` directly.
 - **Type guards** come from `usePlannerAccounts()` — `isLiabilityAccountType`, `isCombinedAssetType`, etc.
 - **Options** come from `usePlannerAccounts()` — `accountTypeOptions`, `accountOwnerOptions`, etc.
 - **Account updates** go through `onUpdateAccount` callback (functional updater pattern).

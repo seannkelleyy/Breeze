@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Target, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +10,7 @@ import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { usePlannerState } from '@/features/planning/providers/PlannerStateProvider';
 import { isLiabilityAccountType } from '@/features/planning/lib/config';
 import { formatCurrencyWithCode } from '@/lib/utils';
-import useGoalsApi from '../hooks/useGoalsApi';
-import { GOALS_QUERY_KEY } from '../hooks/useGoals';
+import { useGoalMutations } from '../hooks/useGoalMutations';
 import { Goal, GOAL_CATEGORIES } from '../types';
 import type { PlannerAccount } from '@/features/planning/types/account';
 import { GoalForm } from './GoalForm';
@@ -81,47 +79,14 @@ function GoalInlineEdit({
 }
 
 export function GoalsList({ goals }: { goals: Goal[] }) {
-  const queryClient = useQueryClient();
-  const api = useGoalsApi();
   const { plannerAccounts } = usePlannerState();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  const invalidateGoals = () => void queryClient.invalidateQueries({ queryKey: GOALS_QUERY_KEY });
-
-  const { mutate: toggleCompletion } = useMutation({
-    mutationFn: (goal: Goal & { isCompleted: boolean }) =>
-      api.updateGoal({
-        id: goal.id,
-        description: goal.description,
-        priority: goal.priority,
-        isCompleted: goal.isCompleted,
-        connectedAccountIds: goal.connectedAccountIds ?? [],
-        isFinancialOrderStep: goal.isFinancialOrderStep,
-      }),
-    onSuccess: invalidateGoals,
+  const { updateGoal, deleteGoal } = useGoalMutations({
+    onUpdateSuccess: () => setEditingId(null),
   });
-
-  const { mutate: updateGoal } = useMutation({
-    mutationFn: (goal: Goal) =>
-      api.updateGoal({
-        id: goal.id,
-        description: goal.description,
-        priority: goal.priority,
-        isCompleted: goal.isCompleted,
-        connectedAccountIds: goal.connectedAccountIds ?? [],
-        isFinancialOrderStep: goal.isFinancialOrderStep,
-      }),
-    onSuccess: () => {
-      setEditingId(null);
-      invalidateGoals();
-    },
-  });
-
-  const { mutate: deleteGoal } = useMutation({
-    mutationFn: (id: string) => api.deleteGoal(id),
-    onSuccess: invalidateGoals,
-  });
+  const update = (goal: Goal) => updateGoal.mutate(goal);
+  const remove = (id: string) => deleteGoal.mutate(id);
 
   if (goals.length === 0) {
     return (
@@ -166,17 +131,13 @@ export function GoalsList({ goals }: { goals: Goal[] }) {
                 aria-label={`Mark ${goal.description} complete`}
               />
               <div className="flex-1">
-                <GoalInlineEdit
-                  goal={goal}
-                  onSave={(updated: Goal) => updateGoal(updated)}
-                  onCancel={() => setEditingId(null)}
-                />
+                <GoalInlineEdit goal={goal} onSave={update} onCancel={() => setEditingId(null)} />
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-destructive"
-                onClick={() => deleteGoal(goal.id)}
+                onClick={() => remove(goal.id)}
               >
                 Remove
               </Button>
@@ -188,16 +149,12 @@ export function GoalsList({ goals }: { goals: Goal[] }) {
             >
               <Checkbox
                 checked={goal.isCompleted}
-                onCheckedChange={(checked) => toggleCompletion({ ...goal, isCompleted: !!checked })}
+                onCheckedChange={(checked) => update({ ...goal, isCompleted: !!checked })}
                 aria-label={`Mark ${goal.description} complete`}
               />
               <div className="flex-1">
                 {editingId === goal.id ? (
-                  <GoalInlineEdit
-                    goal={goal}
-                    onSave={(updated) => updateGoal(updated)}
-                    onCancel={() => setEditingId(null)}
-                  />
+                  <GoalInlineEdit goal={goal} onSave={update} onCancel={() => setEditingId(null)} />
                 ) : (
                   <>
                     <p
@@ -221,7 +178,7 @@ export function GoalsList({ goals }: { goals: Goal[] }) {
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-destructive"
-                onClick={() => deleteGoal(goal.id)}
+                onClick={() => remove(goal.id)}
               >
                 Remove
               </Button>

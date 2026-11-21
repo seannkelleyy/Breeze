@@ -38,8 +38,8 @@ export const usePaycheckDeductions = (personId?: string | null) => {
   const { userId } = useCurrentUser();
   const queryClient = useQueryClient();
   const queryKey = personId
-    ? (['paycheckDeductions', personId] as const)
-    : (['paycheckDeductions', 'all'] as const);
+    ? (['paycheckDeductions', userId, personId] as const)
+    : (['paycheckDeductions', userId, 'all'] as const);
 
   const { data, isLoading, isError } = useQuery<PaycheckDeduction[]>({
     queryKey,

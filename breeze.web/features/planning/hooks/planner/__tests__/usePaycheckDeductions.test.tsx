@@ -125,7 +125,7 @@ describe('usePaycheckDeductions', () => {
         linkedAccountId: null,
       },
     });
-    expect(queryClient.getQueryData(['paycheckDeductions', 'all'])).toMatchObject([
+    expect(queryClient.getQueryData(['paycheckDeductions', 'u1', 'all'])).toMatchObject([
       { id: 'd1', amount: 650 },
     ]);
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['paycheckDeductions'] });
@@ -150,7 +150,7 @@ describe('usePaycheckDeductions', () => {
     });
 
     expect(requestMock).toHaveBeenCalledWith(expect.anything(), { id: 'd1' });
-    expect(queryClient.getQueryData(['paycheckDeductions', 'all'])).toEqual([]);
+    expect(queryClient.getQueryData(['paycheckDeductions', 'u1', 'all'])).toEqual([]);
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['paycheckDeductions'] });
   });
 });

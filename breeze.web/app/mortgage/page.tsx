@@ -1,7 +1,6 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
@@ -18,9 +17,7 @@ import {
 import { PlannerToolsCard } from '@/features/mortgage/components/PlannerToolsCard';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import useGraphql from '@/lib/services/useGraphql';
-import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/features/assets/asset.operations';
-import { PLANNER_HOME_GROWTH_PROFILE_RATES } from '@/features/planning/lib/constants';
+import { useHomeMortgagePairs } from '@/features/mortgage/hooks/useHomeMortgagePairs';
 import { Home } from 'lucide-react';
 
 const clamp = (value: number, min = 0) => (Number.isFinite(value) ? Math.max(min, value) : min);
@@ -32,89 +29,9 @@ const makeCurrencyFormatter = (currency: string) =>
     maximumFractionDigits: 0,
   }).format;
 
-interface HomeMortgagePair {
-  id: string;
-  label: string;
-  mortgageBalance: number;
-  originalLoanAmount: number;
-  interestRate: number;
-  monthlyPayment: number;
-  remainingMonths: number;
-  homeValue: number;
-  homeAnnualGrowthRate: number;
-}
-
-function calculateRemainingMonths(
-  balance: number,
-  annualRatePercent: number,
-  monthlyPayment: number,
-): number {
-  const monthlyRate = annualRatePercent / 100 / 12;
-  if (monthlyRate === 0) {
-    return monthlyPayment > 0 ? Math.ceil(balance / monthlyPayment) : 0;
-  }
-  const numerator = Math.log(1 - (monthlyRate * balance) / monthlyPayment);
-  const denominator = Math.log(1 + monthlyRate);
-  if (denominator === 0 || !Number.isFinite(numerator)) return 0;
-  const months = -numerator / denominator;
-  return Math.max(1, Math.round(months));
-}
-
-function resolveGrowthRate(profile: string | null): number {
-  if (profile && profile in PLANNER_HOME_GROWTH_PROFILE_RATES) {
-    return PLANNER_HOME_GROWTH_PROFILE_RATES[
-      profile as keyof typeof PLANNER_HOME_GROWTH_PROFILE_RATES
-    ];
-  }
-  return PLANNER_HOME_GROWTH_PROFILE_RATES.medium;
-}
-
 const MortgageTools = () => {
-  const { userId, currencyCode } = useCurrentUser();
-  const { request } = useGraphql();
-
-  const { data: pairs } = useQuery({
-    queryKey: ['mortgage-pairs', userId],
-    queryFn: async () => {
-      const [assetsResp, liabilitiesResp] = await Promise.all([
-        request(GET_ASSETS_BY_USER),
-        request(GET_LIABILITIES_BY_USER),
-      ]);
-
-      const assets = (assetsResp?.assets ?? []).filter((a) => a.assetType === 'HOME');
-      const liabilities = liabilitiesResp?.liabilities ?? [];
-      const liabilityById = new Map(liabilities.map((l) => [l.id, l]));
-
-      const result: HomeMortgagePair[] = [];
-      for (const asset of assets) {
-        if (!asset.linkedLiabilityId) continue;
-        const liability = liabilityById.get(asset.linkedLiabilityId);
-        if (!liability || liability.liabilityType !== 'MORTGAGE') continue;
-
-        const balance = Number(liability.currentBalance) || 0;
-        const rate = Number(liability.interestRate) * 100 || 0;
-        const payment = Number(liability.minimumPayment) || 0;
-        const original = Number(liability.originalLoanAmount) || 0;
-        const homeVal = Number(asset.currentValue) || 0;
-
-        result.push({
-          id: asset.id,
-          label: asset.name,
-          mortgageBalance: balance,
-          originalLoanAmount: original,
-          interestRate: rate,
-          monthlyPayment: payment,
-          remainingMonths: calculateRemainingMonths(balance, rate, payment),
-          homeValue: homeVal,
-          homeAnnualGrowthRate: resolveGrowthRate(asset.homeGrowthProfile),
-        });
-      }
-
-      return result;
-    },
-    enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { currencyCode } = useCurrentUser();
+  const { data: pairs } = useHomeMortgagePairs();
 
   const [selectedId, setSelectedId] = useState<string>('manual');
   const [isToolsCollapsed, setIsToolsCollapsed] = useState(false);

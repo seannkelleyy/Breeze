@@ -17,7 +17,7 @@ export default function ExpensesPage() {
 }
 
 function ExpensesContent() {
-  const { userId, currencyCode } = useCurrentUser();
+  const { currencyCode } = useCurrentUser();
   const { templates, isLoading, createTemplate, updateTemplate, deleteTemplate } =
     useRecurringExpenseManager();
 
@@ -34,7 +34,7 @@ function ExpensesContent() {
       ) : (
         <>
           <ExpensesSummaryCard templates={templates} currencyCode={currencyCode} />
-          <TransactionsCard userId={userId} currencyCode={currencyCode} />
+          <TransactionsCard currencyCode={currencyCode} />
           <RecurringExpenseList
             templates={templates}
             currencyCode={currencyCode}

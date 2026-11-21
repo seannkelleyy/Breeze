@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Landmark, Trash2 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,18 +15,11 @@ import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { useConnectionsDialog } from '@/components/common/connections/ConnectionsDialogProvider';
 import { useTransactions } from '@/features/expenses/hooks/useTransactions';
-import { GET_BUDGET_BY_DATE } from '@/features/budget/budget.operations';
-import { GET_CATEGORIES } from '@/features/categories/category.queries';
-import useGraphql from '@/lib/services/useGraphql';
-import { cn, formatCurrencyWithCode } from '@/lib/utils';
 
-interface CategoryOption {
-  id: string;
-  name: string;
-}
+import { cn, formatCurrencyWithCode } from '@/lib/utils';
+import { useTransactionCategories } from '@/features/expenses/hooks/useTransactionCategories';
 
 interface TransactionsCardProps {
-  userId?: string | null;
   currencyCode: string;
 }
 
@@ -35,28 +28,12 @@ interface TransactionsCardProps {
  * budget's spending categories — the classic budget-app flow of pulling
  * transactions from accounts and filing them under monthly spending.
  */
-export function TransactionsCard({ userId, currencyCode }: TransactionsCardProps) {
+export function TransactionsCard({ currencyCode }: TransactionsCardProps) {
   const fc = (v: number) => formatCurrencyWithCode(v, currencyCode);
-  const { request } = useGraphql();
-  const { transactions, isLoading, assignCategory, removeTransaction } = useTransactions(userId);
+  const { transactions, isLoading, assignCategory, removeTransaction } = useTransactions();
+  const { data: categories } = useTransactionCategories();
   const { openConnections } = useConnectionsDialog();
   const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  // Current month's budget drives the category list assignments write into.
-  const { data: categories } = useQuery<CategoryOption[]>({
-    queryKey: ['transactionCategories', userId],
-    enabled: Boolean(userId),
-    staleTime: 5 * 60 * 1000,
-    queryFn: async () => {
-      const now = new Date();
-      const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-      const budgetResp = await request(GET_BUDGET_BY_DATE, { date });
-      const budgetId = budgetResp.budgetByDate?.id;
-      if (!budgetId) return [];
-      const catResp = await request(GET_CATEGORIES, { budgetId });
-      return catResp.expenseCategories ?? [];
-    },
-  });
 
   const categorizedCount = transactions.filter((t) => t.expenseCategoryId).length;
 

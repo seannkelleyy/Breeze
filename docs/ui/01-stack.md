@@ -195,38 +195,33 @@ dependency advisories.
 
 ### Data Fetching (TanStack React Query)
 
-GraphQL documents are defined in the owning feature (for example, `features/expenses/`) or in
-`lib/services/queries/` for cross-cutting API slices, using the generated client's `graphql()` tag
-from `lib/gql/`. Hooks wrap these typed documents in React Query. Do not pass raw query strings or
-handwritten response generics to `request`.
+GraphQL documents live with the feature that owns the operation (for example,
+`features/assets/asset.operations.ts`). Use the generated client's `graphql()` tag from `lib/gql/`.
+Feature hooks own `useGraphql()` requests and React Query state; components consume those hooks or
+receive data through props. Do not pass raw query strings or handwritten response generics to
+`request`, and do not make authenticated GraphQL requests directly from components.
 
 ```typescript
-// lib/services/queries/assets.ts — typed documents (npm run codegen)
-import { graphql } from "@/lib/gql";
-
-export const ASSET_FIELDS = graphql(`
-  fragment AssetFields on Asset { id name assetType currentValue ... }
-`);
-
-export const GET_ASSETS = graphql(`
-	query GetAssets($userId: ID!) {
-		assets(userId: $userId) {
-			...AssetFields
-		}
-	}
-`);
-
-// hooks/useAssets.ts — React Query wrapper; response type is inferred
-// from the generated document, no hand-written generics needed
-export function useAssets(userId: string) {
+// features/assets/hooks/useFinancialAccounts.ts
+export function useAssets() {
+	const { userId } = useCurrentUser();
 	const { request } = useGraphql();
+
 	return useQuery({
-		queryKey: ["api-assets", userId],
-		queryFn: () => request(GET_ASSETS, { userId }),
-		enabled: !!userId,
+		queryKey: ["assets", userId],
+		queryFn: async () => {
+			const response = await request(GET_ASSETS_BY_USER);
+			return response.assets ?? [];
+		},
+		enabled: Boolean(userId),
 	});
 }
 ```
+
+The authenticated GraphQL transport supplies the caller identity. Do not add a `userId` GraphQL
+variable just to identify the signed-in user; pass domain/resource IDs only when the operation
+requires them. Still include the current user in cache keys for user-owned data, followed by
+resource IDs or filters as needed (for example, `['budget', userId, month]`).
 
 **Codegen workflow:** operations and fragments across the web TypeScript/TSX source are validated and typed against
 `breeze.api/graph/schema.graphqls`. `npm run typecheck` and `npm run build` regenerate
@@ -244,21 +239,23 @@ SWC optimizer (`@swc-contrib/plugin-graphql-codegen-client-preset` +
 savings on Next 16/Turbopack — revisit if the document count grows enough to
 matter.
 
-**Stable query key convention:** `['api-<slice>', userId]` — always include the user ID.
+Use a stable domain-first query key hierarchy, with user identity on user-owned data:
+`['<domain>', userId, ...resourceIdsOrFilters]`. This matches existing keys such as
+`['goals', userId]`, `['assets', userId]`, and `['budget', userId, month]`. For queries scoped by a
+parent resource (such as categories by budget ID), include that resource ID. Use a shared key
+factory when multiple hooks read or invalidate the same cache.
 
 ### Mutation Pattern
 
+Mutation hooks own the request and invalidate the affected query key after success. Keep invalidation
+scoped to the current user's cache when the data is user-owned:
+
 ```typescript
-export function useCreateAsset() {
-	const queryClient = useQueryClient();
-	const { request } = useGraphql();
-	return useMutation({
-		mutationFn: (input: CreateAssetInput) => request(CREATE_ASSET, { input }),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["api-assets"] });
-		},
-	});
-}
+const queryKey = goalQueryKeys.byUser(userId);
+return useMutation({
+	mutationFn: (input: CreateGoalInput) => api.createGoal(input),
+	onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+});
 ```
 
 ### Monorepo Layout

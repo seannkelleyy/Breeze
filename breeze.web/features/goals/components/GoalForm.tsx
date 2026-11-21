@@ -1,25 +1,21 @@
 'use client';
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import useGoalsApi from '../hooks/useGoalsApi';
-import { GOALS_QUERY_KEY } from '../hooks/useGoals';
+import { useGoalMutations } from '../hooks/useGoalMutations';
 
 export function GoalForm({ onCancel }: { onCancel: () => void }) {
-  const queryClient = useQueryClient();
-  const api = useGoalsApi();
   const [description, setDescription] = useState('');
-
-  const { mutate: createGoal, isPending } = useMutation({
-    mutationFn: () => api.createGoal({ description, priority: 99 }),
-    onSuccess: () => {
+  const { createGoal } = useGoalMutations({
+    onCreateSuccess: () => {
       setDescription('');
-      void queryClient.invalidateQueries({ queryKey: GOALS_QUERY_KEY });
       onCancel();
     },
   });
+  const { mutate: create, isPending } = createGoal;
+  const submit = () => create({ description, priority: 99 });
 
   return (
     <div className="bg-accent/50 space-y-3 rounded-md p-3">
@@ -31,7 +27,7 @@ export function GoalForm({ onCancel }: { onCancel: () => void }) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && description.trim()) createGoal();
+            if (e.key === 'Enter' && description.trim()) submit();
           }}
         />
       </div>
@@ -39,7 +35,7 @@ export function GoalForm({ onCancel }: { onCancel: () => void }) {
         <Button variant="ghost" size="sm" onClick={onCancel}>
           Cancel
         </Button>
-        <Button size="sm" disabled={!description.trim() || isPending} onClick={() => createGoal()}>
+        <Button size="sm" disabled={!description.trim() || isPending} onClick={submit}>
           Save Goal
         </Button>
       </div>

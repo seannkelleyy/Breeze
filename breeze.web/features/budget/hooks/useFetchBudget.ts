@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
+
+import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
 import { Dayjs } from 'dayjs';
 import { Budget } from '../types';
 import { useBudgets } from './index';
@@ -14,6 +16,7 @@ type FetchBudgetProps = {
  * @param month. The month of the budget.
  */
 export const useFetchBudget = ({ date }: FetchBudgetProps) => {
+  const { userId } = useCurrentUser();
   const { getBudget } = useBudgets();
   const { regenerateBudgetMonth } = useRegenerateBudget();
 
@@ -22,10 +25,11 @@ export const useFetchBudget = ({ date }: FetchBudgetProps) => {
   };
 
   return useQuery<Budget | null, Error>({
-    queryKey: ['budget', date.format('YYYY-MM')],
+    queryKey: ['budget', userId, date.format('YYYY-MM')],
     refetchInterval: 180 * 1000,
     retryDelay: 1 * 1000,
     retry: 3,
+    enabled: Boolean(userId),
     // First visit to a month materializes it from the user's recurring
     // templates (server-side), so budgets always reflect tracked expenses.
     queryFn: async () => {

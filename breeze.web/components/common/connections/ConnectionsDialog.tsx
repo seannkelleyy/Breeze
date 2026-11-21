@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,8 +15,7 @@ import {
 import { CheckCircle2, LinkIcon, RotateCw, Trash2, Loader2 } from 'lucide-react';
 import { PlaidLinkButton } from './PlaidLinkButton';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import useGraphql from '@/lib/services/useGraphql';
-import { GET_ASSETS_BY_USER, GET_LIABILITIES_BY_USER } from '@/features/assets/asset.operations';
+import { useAssets, useLiabilities } from '@/features/assets/hooks';
 import {
   usePlaidConnections,
   usePlaidAccounts,
@@ -36,29 +35,11 @@ const formatBalance = (balance: string | null, currency: string | null) => {
 };
 
 const LinkedPlannerAccounts = ({ plaidAccountId }: { plaidAccountId: string }) => {
-  const { userId } = useCurrentUser();
-  const { request } = useGraphql();
+  const { data: assets = [] } = useAssets();
+  const { data: liabilities = [] } = useLiabilities();
 
-  const { data } = useQuery({
-    queryKey: ['planner-accounts-for-plaid', userId],
-    queryFn: async () => {
-      const [assetsResp, liabilitiesResp] = await Promise.all([
-        request(GET_ASSETS_BY_USER),
-        request(GET_LIABILITIES_BY_USER),
-      ]);
-      return {
-        assets: assetsResp?.assets ?? [],
-        liabilities: liabilitiesResp?.liabilities ?? [],
-      };
-    },
-    enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  if (!data) return null;
-
-  const linkedAssets = data.assets.filter((a) => a.plaidAccountId === plaidAccountId);
-  const linkedLiabilities = data.liabilities.filter((l) => l.plaidAccountId === plaidAccountId);
+  const linkedAssets = assets.filter((a) => a.plaidAccountId === plaidAccountId);
+  const linkedLiabilities = liabilities.filter((l) => l.plaidAccountId === plaidAccountId);
 
   if (linkedAssets.length === 0 && linkedLiabilities.length === 0) {
     return null;

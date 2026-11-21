@@ -8,8 +8,7 @@ import { usePlannerHydration } from '@/features/planning/hooks/usePlannerHydrati
 import useGoalsApi from './useGoalsApi';
 import { Goal } from '../types';
 import { computeFooStepCompletion } from '../lib/fooCompletion';
-
-export const GOALS_QUERY_KEY = ['goals'];
+import { goalQueryKeys } from './goalQueryKeys';
 
 /**
  * Loads goals, bootstraps the Financial Order of Operations steps on first
@@ -22,6 +21,7 @@ export function useGoals() {
   const { plannerAccounts, plannerSummary } = usePlannerState();
   const queryClient = useQueryClient();
   const api = useGoalsApi();
+  const queryKey = goalQueryKeys.byUser(userId);
 
   usePlannerHydration();
 
@@ -30,7 +30,7 @@ export function useGoals() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: GOALS_QUERY_KEY,
+    queryKey,
     queryFn: () => api.getGoals(),
     enabled: isLoaded && !!userId,
   });
@@ -38,7 +38,7 @@ export function useGoals() {
   const { mutate: createFinancialOrderSteps, isPending: isCreatingSteps } = useMutation({
     mutationFn: () => api.createFinancialOrderSteps(),
     onSuccess: (created) => {
-      queryClient.setQueryData<Goal[]>(GOALS_QUERY_KEY, (existing) => {
+      queryClient.setQueryData<Goal[]>(queryKey, (existing) => {
         const others = (existing ?? []).filter((g) => !g.isFinancialOrderStep);
         return [...others, ...created];
       });
@@ -81,7 +81,7 @@ export function useGoals() {
         });
       }
     },
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: GOALS_QUERY_KEY }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey }),
   });
 
   useEffect(() => {

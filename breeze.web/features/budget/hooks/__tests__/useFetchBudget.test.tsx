@@ -17,6 +17,10 @@ vi.mock('@/features/budget/hooks/useRegenerateBudget', () => ({
   useRegenerateBudget: () => ({ regenerateBudgetMonth }),
 }));
 
+vi.mock('@/lib/providers/CurrentUserProvider', () => ({
+  useCurrentUser: () => ({ userId: 'u1' }),
+}));
+
 import { useFetchBudget } from '../useFetchBudget';
 
 const budget = {

@@ -4,10 +4,17 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { print } from 'graphql';
 import type { ReactNode } from 'react';
 
-const { requestMock } = vi.hoisted(() => ({ requestMock: vi.fn() }));
+const { requestMock, userState } = vi.hoisted(() => ({
+  requestMock: vi.fn(),
+  userState: { userId: 'u1' as string | null },
+}));
 
 vi.mock('@/lib/services/useGraphql', () => ({
   default: () => ({ request: requestMock }),
+}));
+
+vi.mock('@/lib/providers/CurrentUserProvider', () => ({
+  useCurrentUser: () => userState,
 }));
 
 import { useTransactions, type BankTransaction } from '../useTransactions';
@@ -37,6 +44,7 @@ const createWrapper = () => {
 describe('useTransactions', () => {
   beforeEach(() => {
     requestMock.mockReset();
+    userState.userId = 'u1';
   });
 
   it('maps DTOs: amount string becomes a number, invalid amounts become 0', async () => {
@@ -48,7 +56,7 @@ describe('useTransactions', () => {
       ],
     });
 
-    const { result } = renderHook(() => useTransactions('u1'), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -64,7 +72,7 @@ describe('useTransactions', () => {
   it('passes the date range without a client-supplied user id', async () => {
     requestMock.mockResolvedValue({ transactions: [] });
 
-    const { result } = renderHook(() => useTransactions('u1', 3), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useTransactions(3), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -76,7 +84,8 @@ describe('useTransactions', () => {
   });
 
   it('does not fetch without a user', () => {
-    const { result } = renderHook(() => useTransactions(null), { wrapper: createWrapper() });
+    userState.userId = null;
+    const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() });
 
     expect(result.current.transactions).toEqual([]);
     expect(requestMock).not.toHaveBeenCalled();
@@ -87,7 +96,7 @@ describe('useTransactions', () => {
       assignTransactionCategory: { id: 't1', expenseCategoryId: 'cat9' },
     });
 
-    const { result } = renderHook(() => useTransactions('u1'), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.transactions).toHaveLength(1));
 
     act(() => result.current.assignCategory.mutate({ id: 't1', categoryId: 'cat9' }));
@@ -100,7 +109,7 @@ describe('useTransactions', () => {
       .mockResolvedValueOnce({ transactions: [transactionDto({ expenseCategoryId: 'cat1' })] })
       .mockResolvedValueOnce({ assignTransactionCategory: { id: 't1', expenseCategoryId: null } });
 
-    const { result } = renderHook(() => useTransactions('u1'), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.transactions[0].expenseCategoryId).toBe('cat1'));
 
     act(() => result.current.assignCategory.mutate({ id: 't1', categoryId: null }));
@@ -115,7 +124,7 @@ describe('useTransactions', () => {
       })
       .mockResolvedValueOnce({ deleteTransaction: true });
 
-    const { result } = renderHook(() => useTransactions('u1'), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.transactions).toHaveLength(2));
 
     act(() => result.current.removeTransaction.mutate('t1'));
@@ -127,7 +136,7 @@ describe('useTransactions', () => {
   it('surfaces a failed query as isError with an empty list', async () => {
     requestMock.mockRejectedValue(new Error('boom'));
 
-    const { result } = renderHook(() => useTransactions('u1'), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.transactions).toEqual([] as BankTransaction[]);

@@ -98,7 +98,7 @@ After setup, use `./scripts/dev.sh` to run everything.
 4. Run `make gen`
 5. Implement service logic in `breeze.api/internal/service/`
 6. Update GraphQL schema and resolvers in `breeze.api/graph/`
-7. Add/extend frontend queries/hooks/components in `breeze.web/app/...`
+7. Add/extend feature-owned GraphQL operations, hooks, and UI under `breeze.web/features/` (wire pages under `app/`)
 8. Validate: `cd breeze.api && make check` (runs format/tidy/codegen and may modify files), then `cd breeze.web && npm run verify` (includes tests)
 
 Use `api/06-vertical-slice.md` and `ui/ui-slice-api-checklist.md` together.
@@ -107,11 +107,11 @@ For a concise implementation flow, use `patterns/01-full-stack-feature.md`.
 
 ### 2. Add a UI Feature Using Existing API
 
-1. Add GraphQL operation in `breeze.web/lib/services/queries/`
-2. Add focused hooks in route-level domain hooks
-3. Wire page/provider/component state
-4. Keep money/rates as string over API
-5. Validate with `npm run verify` (includes web tests)
+1. Add the typed GraphQL operation beside its owning feature under `breeze.web/features/<domain>/` (use `lib/services/queries/` only for genuinely cross-cutting operations).
+2. Put requests, React Query keys, and cache invalidation in feature hooks; use `CurrentUserProvider` for user identity and include it in user-owned cache keys.
+3. Keep components focused on presentation and interaction; consume domain hooks or receive data/callbacks through props.
+4. Keep money/rates as strings over the API.
+5. Validate with `npm run verify` (includes web tests).
 
 ### 3. Update Existing DB Fields
 

@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { ArrowLeftRight, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,8 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormattedNumberInput } from '@/components/common/form/FormattedNumberInput';
 import { useCurrentUser } from '@/lib/providers/CurrentUserProvider';
-import useGraphql from '@/lib/services/useGraphql';
-import { GET_ASSETS_BY_USER } from '@/features/assets/asset.operations';
+import { useAssets } from '@/features/assets/hooks';
 import {
   useCreateRothConversion,
   useDeleteRothConversion,
@@ -31,19 +29,11 @@ export function RothConversionsCard({
   conversions: RothConversion[];
   buckets: RothConversionBucket[];
 }) {
-  const { userId, currencyCode } = useCurrentUser();
-  const { request } = useGraphql();
+  const { currencyCode } = useCurrentUser();
   const { mutateAsync: createConversion, isPending: isCreating } = useCreateRothConversion();
   const { mutateAsync: deleteConversion } = useDeleteRothConversion();
 
-  const { data: assets } = useQuery({
-    queryKey: ['retirement-access-accounts', userId],
-    queryFn: async () => {
-      const resp = await request(GET_ASSETS_BY_USER);
-      return resp.assets ?? [];
-    },
-    enabled: !!userId,
-  });
+  const { data: assets } = useAssets();
 
   const fromAccounts = (assets ?? []).filter((a) => CONVERSION_FROM_TYPES.has(a.assetType));
   const toAccounts = (assets ?? []).filter((a) => CONVERSION_TO_TYPES.has(a.assetType));
